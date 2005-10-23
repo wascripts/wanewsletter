@@ -1,0 +1,502 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<head>
+
+    <!-- 
+        This program is free software; you can redistribute it and/or 
+        modify it under the terms of the GNU General Public License as 
+        published by the Free Software Foundation; either version 2 of 
+        the License, or (at your option) any later version.
+        
+        http://www.gnu.org/copyleft/gpl.html (english)
+        http://www.april.org/gnu/gpl_french.html (french)
+    -->
+    
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    
+    <title>FAQ - WAnewsletter</title>
+    
+    <meta name="Author" content="Bobe" />
+    <meta name="Editor" content="jEdit" />
+    <meta name="Copyright" content="phpCodeur (c) 2002-2005" />
+    
+    <link rel="contents" href="#top" title="Table des matières" />
+    <link rel="chapter" href="#p1" title="Comment afficher le nombre d'inscrits sur mon site&#8201;?" />
+    <link rel="chapter" href="#p2" title="WAnewsletter, un script multilingue&#8201;?" />
+    <link rel="chapter" href="#p3" title="Comment être prévenu de la sortie d'une nouvelle version&#8201;?" />
+    <link rel="chapter" href="#p4" title="Comment fonctionne l'importation d'emails&#8201;?" />
+    <link rel="chapter" href="#p5" title="Comment gérer le script à plusieurs&#8201;?" />
+    <link rel="chapter" href="#p6" title="Mais où se trouve le formulaire d'inscription&#8201;?" />
+    <link rel="chapter" href="#p7" title="Pourquoi y a-t-il deux moteurs d'envoi&#8201;?" />
+    <link rel="chapter" href="#p8" title="Dossier temporaire du script, safe mode et open_basedir" />
+    <link rel="chapter" href="#p9" title="Impossible de joindre des fichiers à mes newsletter&#8201;!" />
+    <link rel="chapter" href="#p10" title="Utilisation d'un serveur smtp pour les envois d'emails" />
+    <link rel="chapter" href="#p11" title="Appeller le formulaire d'inscription via une popup" />
+    <link rel="chapter" href="#p12" title="Méthodes de validation des adresses emails" />
+    <link rel="chapter" href="#p13" title="Changement du nom du dossier des statistiques" />
+    <link rel="chapter" href="#p14" title="Envoi des newsletters avec cron" />
+    <link rel="chapter" href="#p15" title="Utilisation de tags personnalisés" />
+    <link rel="chapter" href="#p16" title="Définir une langue selon le formulaire" />
+    <link rel="copyright" href="http://www.gnu.org/copyleft/gpl.html" hreflang="en" title="Copyleft" />
+    
+    <link rel="stylesheet" type="text/css" href="./wadoc.css" media="screen" title="Thème Wadoc" />
+
+</head>
+<body>
+
+<h1>FAQ - WAnewsletter</h1>
+
+<div id="page">
+
+    <p id="preface">Voici une liste des questions les plus fréquemment posées, et les 
+    explications correspondantes.</p>
+    
+    <div class="bloc">
+    <h2>Sommaire</h2>
+    
+    <ol>
+        <li> <a href="#p1">Comment afficher le nombre d'inscrits sur mon site&#8201;?</a> </li>
+        <li> <a href="#p2">WAnewsletter, un script multilingue&#8201;?</a> </li>
+        <li> <a href="#p3">Comment être prévenu de la sortie d'une nouvelle version&#8201;?</a> </li>
+        <li> <a href="#p4">Comment fonctionne l'importation d'emails&#8201;?</a> </li>
+        <li> <a href="#p5">Comment gérer le script à plusieurs&#8201;?</a> </li>
+        <li> <a href="#p6">Mais où se trouve le formulaire d'inscription&#8201;?</a> </li>
+        <li> <a href="#p7">Pourquoi y a-t-il deux moteurs d'envoi&#8201;?</a> </li>
+        <li> <a href="#p8">Dossier temporaire du script, safe mode et open_basedir</a> </li>
+        <li> <a href="#p9">Impossible de joindre des fichiers à mes newsletter&#8201;!</a> </li>
+        <li> <a href="#p10">Utilisation d'un serveur smtp pour les envois d'emails</a> </li>
+        <li> <a href="#p11">Appeller le formulaire d'inscription via une popup</a> </li>
+        <li> <a href="#p12">Méthodes de validation des adresses emails</a> </li>
+        <li> <a href="#p13">Changement du nom du dossier des statistiques</a> </li>
+        <li> <a href="#p14">Envoi des newsletters avec cron</a> </li>
+        <li> <a href="#p15">Utilisation de tags personnalisés</a> </li>
+        <li> <a href="#p16">Définir une langue selon le formulaire</a> </li>
+    </ol>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p1">I. Comment afficher le nombre d'inscrits sur mon site&#8201;?</h2>
+    
+    <p>Pour cela, insérez simplement cette ligne de code à l'endroit où vous voulez 
+    afficher le nombre d'inscrits (prenez soin de mettre la bonne adresse vers le 
+    fichier <samp>extra.php</samp>)&#160;:</p>
+    
+    <pre><code>&lt;script type="text/javascript" src="http://www.yourdomaine.com/rep/options/extra.php?liste=[ID]"&gt;&lt;/script&gt;</code></pre>
+    
+    <p>Vous devez remplacer <code class="constant">[ID]</code> par le numéro identifiant 
+    de la liste de diffusion dont vous voulez afficher le nombre d'inscrits.</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p2">II. WAnewsletter, un script multilingue&#8201;?</h2>
+    
+    <p>Notre but étant de rendre WAnewsletter disponible au plus grand nombre, le script 
+    gère donc différentes langues. Si vous avez des connaissances dans une langue dans 
+    laquelle n'est pas traduit le script, et que vous souhaitez aider à promouvoir WAnewsletter, 
+    c'est très simple. Récupérez le package de votre choix, puis effectuez la traduction et 
+    envoyez là à <a href="mailto:%77%61%73%63%72%69%70%74%73%40%70%68%70%63%6F%64%65%75%72%2E%6E%65%74">
+    cette adresse</a>. La nouvelle langue sera alors mise à disposition en téléchargement, 
+    après vérification.</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p3">III. Comment être prévenu de la sortie d'une nouvelle version&#8201;?</h2>
+    
+    <p>Pour être prévenu de la sortie d'une nouvelle version, ou de la découverte 
+    (improbable&#8201;? :) ) d'une faille de sécurité, passez de temps en temps sur 
+    le site phpCodeur, ou plus simplement, inscrivez vous à la 
+    <a href="http://phpcodeur.net/wascripts/wanewsletter/mailing" hreflang="fr">mailing 
+    liste de WAnewsletter</a>.</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p4">IV. Comment fonctionne l'importation d'emails&#8201;?</h2>
+    
+    <p>Un utilitaire d'importation est disponible dans la rubrique "importation". 
+    Il vous permettra, si vous avez les droits suffisants, d'importer des emails 
+    d'abonnés directement via un champ texte, en spécifiant l'adresse du 
+    fichier sur le serveur, ou via l'upload du fichier qui contient les emails, 
+    si votre hébergeur autorise l'upload de fichiers.</p>
+    
+    <p>L'utilitaire d'importation a été testé avec des importations de masse allant 
+    jusqu'à 2500 emails (Ce nombre devrait être suffisant). Au pire, vous pouvez 
+    toujours découper l'importation en plusieurs fois pour assurer le succés de l'opération. 
+    Une autre solution pour importer plus de 2500 emails en une importation consiste à 
+    modifier la valeur de la constante <code class="constant">MAX_IMPORT</code> dans le 
+    fichier <samp>constantes.php</samp> mais c'est à vos risques et périls&#8201;!</p>
+    
+    <p>Le script se charge de vérifier chacun des emails, ainsi que d'éliminer les 
+    éventuels doublons. Si des emails sont refusés, le script tentera d'écrire un fichier 
+    explicatif dans le dossier temporaire du script, que vous pourrez ensuite télécharger.</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p5">V. Comment gérer le script à plusieurs&#8201;?</h2>
+    
+    <p>WAnewsletter peut être géré par plusieurs utilisateurs. Vous pouvez modifier 
+    les permissions des utilisateurs via le profil de l'utilisateur en question.</p>
+    
+    <p>Il y a deux niveaux généraux : administrateur et utilisateur. Les administateurs 
+    ont automatiquement tous les droits, quelques soient les réglages sur les droits 
+    individuels. Un utilisateur pourra faire tout ce qui lui aura été permis (voir, 
+    editer, supprimer, envoyer des newsletter, importer, exporter, bannir, et joindre 
+    des fichiers) et ce, pour chaque liste.</p>
+    
+    <p>Pour ajouter un utilisateur, rendez vous dans la section "Utilisateurs" 
+    puis "ajouter un utilisateur"</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p6">VI. Mais où se trouve le formulaire d'inscription&#8201;?</h2>
+    
+    <p>Vous disposez d'un formulaire par défaut, le fichier <samp>subscribe.php</samp> 
+    (note aux possesseurs de versions 2.0.x ou 2.1.x, le nom a changé et n'est plus 
+    <samp>suscribe.php</samp>, dont l'orthographe n'était pas correcte, pensez à 
+    changer vos éventuels liens pointant sur ce fichier). Le fichier 
+    <samp>subscribe.php</samp> affiche un formulaire classique, et une liste de 
+    sélection affichant les noms de toutes les listes de diffusion créées.</p>
+    
+    <p>Le script dispose également d'un générateur de formulaire dans la section 
+    "outils". Celui ci vous permettra, pour une liste donnée, de générer le formulaire 
+    adéquat. Il ne vous restera qu'à placer ce formulaire où vous voulez sur le site, 
+    de placer le code d'inclusion de <samp>newsletter.php</samp> (code également fourni 
+    par le form. generator) et d'indiquer dans les réglages de la liste de diffusion 
+    en question l'adresse du formulaire.</p>
+    
+    <p>Une dernière solution (disponible à partir de la version 2.2-RC1) consiste pour 
+    le visiteur à envoyer un email à l'adresse email d'une liste, avec comme sujet de 
+    l'email "Inscription" (insensible à la casse). Dans ce cas, vous devez avoir accés à 
+    cron (serveurs unix et équivalents) ou faire appel aux services gratuits de 
+    <a href="http://www.webcron.org/" hreflang="fr" title="Webcron: Service de tâches automatisées">webcron.org</a> 
+    pour automatiser l'appel au fichier <samp>cron.php</samp> qui se trouve dans le 
+    dossier <samp>options/</samp> du script. Ce script se chargera d'effectuer les tâches 
+    nécessaires (inscription, désinscription, changement de format, confirmation d'inscription..) 
+    selon les emails reçus.</p>
+    
+    <p>Pour une désinscription, l'abonné devra envoyer un email avec pour sujet "Desinscription" 
+    (sans accents&#8201;!), il recevra alors un email lui demandant de renvoyer un autre 
+    email avec le meme sujet, et le code son compte, qui lui aura été fourni (par sécurité). 
+    Pour la confirmation d'inscription (si la liste le demande), ce devra être un email avec 
+    pour sujet "confirmation", et pour le changement de format, le sujet devra être "setformat".</p>
+    
+    <p>Si plusieurs de vos listes de diffusion utilisent la même adresse email, il risque 
+    d'y avoir conflit, le script ne sachant pas à quelle liste seront adressés les emails 
+    du compte <acronym title="Post Office Protocol" xml:lang="en" lang="en">pop</acronym>. 
+    Dans ce cas, il vous faudra créer un alias de l'adresse en question avec le panneau de 
+    gestion de votre hébergement, si vous en avez la possibilité (cela exclut les hébergeurs 
+    gratuits). Exemple&#160;:</p>
+    
+    <p>Vous avez deux listes utilisant l'adresse email mailing@domaine.com. Il vous faudra 
+    créer deux alias renvoyant sur mailing@domaine.com et indiquer ces alias dans les 
+    réglages des listes concernées. Par exemple&#160;: mailing-1@domaine.com et 
+    mailing-2@domaine.com</p>
+    
+    <p>Dans le cas de l'option "cron", vous devrez indiquer les paramètres d'accés au 
+    compte <acronym>pop</acronym> de l'adresse email de la liste en question, et 
+    indiquer l'utilisation de l'option "cron" avec le bouton radio adéquat (section 
+    "listes" de l'administration).</p>
+    
+    <p>Enfin, cron devra appeller une adresse de ce type&#160;:<br />
+    <kbd>http://www.yourdomain.com/rep/newsletter/options/cron.php?mode=validate&amp;liste=<code class="constant">[ID_de_la_liste]</code></kbd>
+    </p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p7">VII. Pourquoi y a-t-il deux méthodes d'envoi&#8201;?</h2>
+    
+    <p>WAnewsletter dispose de deux méthodes d'envoi pour pouvoir être utilisé par 
+    le plus grand nombre. En effet, certains hébergeurs limitent le nombre d'emails 
+    envoyés par jour (ex: multimania/lycos), ou n'acceptent qu'un destinataire par 
+    email (ex: online).</p>
+    
+    <p>Utiliser la premiere méthode d'envoi (emails en copie cachée) peut faire plus 
+    professionnel (c'est mon avis personnel). D'un autre coté, en utilisant la deuxième 
+    méthode d'envoi, les destinataires verront leur adresse email en destinataire principal. 
+    De plus, l'adresse de désinscription pointera avec les bons paramètres, au lieu 
+    de simplement ramener sur le formulaire.</p>
+    
+    <p>En définitive, c'est à vous de choisir ce qui vous conviendra le mieux&#160;;-)</p>
+    
+    <div class="note">
+    <p><strong>Note&#160;:</strong>
+    Les personnes étant hébergées sur Online <strong>doivent</strong> utiliser la deuxième méthode 
+    d'envoi (un abonné = un email)
+    </p>
+    </div>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p8">VIII. Dossier temporaire du script, safe mode et open_basedir</h2>
+    
+    <p>Le dossier temporaire du script, <samp>tmp/</samp> par défaut, peut être 
+    utilisé par le script dans certains cas précis&#160;:</p>
+    
+    <ul>
+        <li> Si le <code class="setting">safe mode</code> est activé sur votre serveur 
+        ou qu'il y a une restriction au niveau de <code class="setting">open_basedir</code>, 
+        le script doit déplacé certains fichiers uploadés dans le dossier <samp>tmp/</samp> 
+        avant de pouvoir les lire </li>
+        <li> Si vous stockez les fichiers joints sur un serveur 
+        <abbr title="File Transfert Protocol" xml:lang="en" lang="en">FTP</abbr>, 
+        le script doit rapatrier dans le dossier <samp>tmp/</samp> les fichiers sur le 
+        serveur le temps de l'envoi </li>
+        <li> Lors de l'export de fichiers joints ou de la sauvegarde des tables, si vous 
+        choisissez l'option 'stocker le fichier sur le serveur', le script créé le fichier 
+        dans le dossier <samp>tmp/</samp> </li>
+        <li> Lors de l'importation d'emails, si des emails sont refusés, le script crééra 
+        le fichier explicatif dans le dossier <samp>tmp/</samp> </li>
+    </ul>
+    
+    <p>Si vous êtes dans l'un de ces cas (e.g&#160;: <code class="setting">open_basedir</code>) 
+    ou que vous souhaitez utiliser les possibilités du script (e.g&#160;: stockage fichier 
+    d'export sur le serveur), alors le dossier <samp>tmp/</samp> est nécessaire et doit 
+    être accessible en écriture.</p>
+    
+    <p>Le nom du dossier <samp>tmp/</samp> peut être modifié, sous réserve de l'indiquer 
+    dans le fichier <samp>admin/pagestart.php</samp> (cherchez la ligne 
+    <code>$tmp_name = 'tmp';</code> ).</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p9">IX. Impossible de joindre des fichiers à mes newsletter&#8201;!</h2>
+    
+    <p>Dans le cas où l'upload de fichier est autorisé sur votre serveur, cela peut 
+    être dù au fait que le script n'a pas les droits en écriture sur le dossier de 
+    stockage des fichiers joints ou que les paramètres d'accés au serveur 
+    <abbr title="File Transfert Protocol" xml:lang="en" lang="en">FTP</abbr> 
+    ne sont pas corrects (si option choisie). Vérifiez donc le chmod ou les attributs 
+    de ce dossier ou vérifiez les paramètres d'accés au <abbr>ftp</abbr>.</p>
+    
+    <p>Si l'upload n'est pas autorisé, le script n'ajoute le fichier à la liste des 
+    fichiers joints que si celui ci est déja présent sur le serveur, dans le dossier 
+    de stockage des fichiers joints. Uploadez vos fichiers joints avec votre client 
+    <abbr>ftp</abbr> avant d'ajouter vos fichiers joints via le formulaire.</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p10">X. Utilisation d'un serveur smtp pour les envois d'emails</h2>
+    
+    <p>Malheureusement, utiliser l'option 
+    <abbr title="Simple Mail Transfert Protocol" xml:lang="en" lang="en">SMTP</abbr> 
+    de WAnewsletter ne permet pas d'envoyer des emails à d'autres personnes qu'au domaine du serveur 
+    <abbr xml:lang="en" lang="en">smtp</abbr> choisi si vous n'êtes pas vous-même identifié 
+    comme faisant partie de ce domaine (C'est une restriction du serveur 
+    <abbr xml:lang="en" lang="en">smtp</abbr> (refus du relayage), non de WAnewsletter).</p>
+    
+    <p><em>Exemple&#160;:</em><br />
+    <br />
+    Vous mettez <samp>smtp.wanadoo.fr</samp> comme serveur <abbr xml:lang="en" lang="en">smtp</abbr> 
+    dans la configuration de WAnewsletter. Si le serveur <abbr xml:lang="en" lang="en">smtp</abbr> 
+    ne vous identifie pas comme faisant partie du domaine wanadoo, vous ne pourrez envoyer 
+    d'emails qu'à des adresse de type <samp>blablabla@wanadoo.fr</samp>.</p>
+    
+    <p>L'alternative est que le serveur <abbr xml:lang="en" lang="en">SMTP</abbr> 
+    que vous voulez utiliser gère l'authentification, c'est à dire, reconnaisse la 
+    commande <kbd>AUTH LOGIN</kbd> (cf&#160;: <a href="ftp://ftp.rfc-editor.org/in-notes/rfc2554.txt" 
+    hreflang="en">la <abbr title="Request For Comments" xml:lang="en" lang="en">RFC</abbr> 
+    2554</a>). Dans ce cas précis, vous pourrez spécifier dans la configuration de la 
+    newsletter le login et le mot de passe d'accés au serveur.</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p11">XI. Appeller le formulaire d'inscription via une popup</h2>
+    
+    <p>Intégrer le formulaire d'inscription sur votre site, en l'appellant tout 
+    simplement à l'aide d'une popup, est très simple. Le code est le suivant&#160;:</p>
+    
+    <pre><code>&lt;a href="chemin_vers_dossier/subscribe.php" 
+  onclick="window.open(this.href, 'mailing', 'width=400, height=300, topmargin=2, left=100, top=100, toolbar=0, location=0, directories=0, status=0, scrollbars=1, resizable=1, copyhistory=0, menuBar=0'); return false;"&gt;
+  Newsletter
+&lt;/a&gt;</code></pre>
+    
+    <p>Et vous devez comme url absolu vers le formulaire, pour les listes concernées, 
+    l'url absolue vers le fichier <samp>subscribe.php</samp> (<kbd>http://yourdomaine.com/rep/subscribe.php</kbd>).
+    Attention cependant, lorsque le nouvel inscrit cliquera pour confirmer son inscription, 
+    ou s'il se désinscrit via le lien présent dans la newsletter, <samp>subscribe.php</samp> 
+    apparaitra en pleine page.</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p12">XII. Méthodes de validation des adresses email</h2>
+    
+    <p style="color: red;">Cette fonctionnalité n'est pas disponible dans la 
+    version 2.2.5 et dans les prochaines versions mineures.</p>
+    
+    <p>Pour vérifier la validité des adresses emails fournies à l'inscription, le 
+    script vérifie leur validité syntaxique. Certains caractères ne peuvent être 
+    présent et l'email doit contenir le signe arobase et au moins un point.</p>
+    
+    <p>Vous pouvez régler le script pour qu'une vérification approfondie soit effectuée 
+    (voir configuration). La validation approfondie extrait le nom de domaine de l'email, 
+    puis effectue une recherche dessus pour vérifier que ce domaine dispose bien d'un 
+    enregistrement <abbr title="Mail eXchanger" xml:lang="en" lang="en">MX</abbr>.</p>
+    
+    <p>Si c'est le cas, le script tente de se connecter au serveur 
+    <abbr title="Simple Mail Transfert Protocol" xml:lang="en" lang="en">SMTP</abbr> 
+    (si la connexion échoue, le script testera sur le serveur smtp suivant, etc&#160;) puis 
+    envoie les commandes pour simuler un envoi. Si le serveur <abbr xml:lang="en" lang="en">smtp</abbr> 
+    accepte de réaliser l'envoi (rien n'est envoyé, le script ne terminera pas avec 
+    la commande adéquat), l'email fait bien partie de son domaine.</p>
+    
+    <p>Cette dernière vérification n'est toutefois pas non plus sûre à 100%. Les serveurs 
+    <abbr xml:lang="en" lang="en">SMTP</abbr> refusent en général une demande d'une entité 
+    extérieure (le script en l'occurrence) à leur domaine pour l'envoi d'un email à une 
+    adresse extérieure à son domaine, mais ce n'est pas toujours le cas. (On parle dans ce 
+    cas de serveur smtp acceptant le relayage). La meilleure validation reste d'envoyer 
+    un email de demande de confirmation.</p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p13">XIII. Changement du nom du dossier des statistiques</h2>
+    
+    <p>
+    Pour changer le nom du dossier <code>stats/</code>, c'est simple, éditez le fichier functions.stats.php et 
+    cherchez la ligne suivante&#160;:
+    </p>
+    
+    <pre><code>define('WA_STATS_PATH'      , $waroot . 'stats/', true); </code></pre>
+    
+    <p>
+    Remplacez "stats" par le nom de votre choix.
+    </p>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p14">XIV. Envoi des newsletters avec cron</h2>
+    
+    <p>
+    Le script donne la possibilité de réaliser vos envois de newsletters avec cron.<br />
+    C'est très simple, il suffit d'appeler l'adresse suivante : <kbd>http://www.yourdomaine.com/rep/options/cron.php?mode=send&amp;liste=<code class="constant">[ID]</code></kbd><br />
+    La partie du domaine et du chemin d'installation est à régler par vos soins. 
+    Vous devez là aussi remplacer <code class="constant">[ID]</code> par l'identifiant de la liste concernée.
+    </p>
+    
+    <div class="note">
+    <p><strong>Note&#160;:</strong></p>
+    <ul>
+        <li> Vous pouvez très bien changer le nom du fichier cron.php (conseillé) </li>
+        <li> C'est à vous de régler cron pour qu'il réalise l'appel au script (si cron n'est pas disponible 
+           sur votre serveur, vous pouvez utiliser par exemple les services gratuits 
+           de <a href="http://www.webcron.org/" hreflang="fr" 
+           title="Webcron: Service de tâches automatisées">webcron.org</a>
+        </li>
+    </ul>
+    </div>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p15">XV. Utilisation de tags personnalisés</h2>
+    
+    <p>
+    Pour utiliser les tags personnalisés (à l'instar de &#123;LINKS&#125; ou &#123;NAME&#125; ), éditez le fichier 
+    tags.inc.php avec un simple éditeur de texte. Vous devriez trouver ceci au début du fichier&#160;:
+    </p>
+    
+    <pre><code><span class="hl-comment">//$other_tags&#91;$t&#93;&#91;'column_name'&#93; = '';
+//$other_tags&#91;$t&#93;&#91;'tag_name'&#93;    = '';
+//$t++;
+</span></code></pre>
+    
+    <p>
+    Wanewsletter ne gère pas automatiquement les tags personnalisés. C'est à dire que c'est à vous de rajouter le 
+    champs voulu dans la table <samp>prefixe_abonnes</samp>, puis de spécifier le tag dans tags.inc.php pour que 
+    le script effectue le remplacement du tag par sa valeur lors de l'envoi.
+    </p>
+    
+    <p>
+    Exemple&#160;:<br />
+    Vous souhaitez pouvoir mettre un tag &#123;ADDRESS&#125; dans vos newsletters, lequel sera remplacé par l'adresse 
+    de l'abonné. Après avoir ajouté un champs nommé par exemple abo_address dans la table <samp>prefixe_abonnes</samp>, 
+    vous placerez les données du tag dans tags.inc.php (en ayant décommenté les lignes que j'ai donné plus haut), 
+    comme ci dessous&#160;:
+    </p>
+    
+    <pre><code><span class="hl-html"><span class="hl-default">$other_tags</span><span class="hl-keyword">&#91;</span><span class="hl-default">0</span><span class="hl-keyword">&#93;&#91;</span><span class="hl-string">'column_name'</span><span class="hl-keyword">&#93; = </span><span class="hl-string">'abo_address'</span><span class="hl-keyword">;
+</span><span class="hl-default">$other_tags</span><span class="hl-keyword">&#91;</span><span class="hl-default">0</span><span class="hl-keyword">&#93;&#91;</span><span class="hl-string">'tag_name'</span><span class="hl-keyword">&#93;    = </span><span class="hl-string">'ADDRESS'</span><span class="hl-keyword">; 
+</span><span class="hl-default">$t</span><span class="hl-keyword">++;</span></span></code></pre>
+    
+    <p>
+    Vous souhaitez maintenant ajouter un autre tag&#8201;? Reproduisez simplement la même opération.
+    </p>
+    
+    <p>
+    Pour que vos abonnés puissent ajouter ces données dans leur profil, le panneau de gestion de profil doit être 
+    activé (voir configuration générale). Vous devez modifier le template editprofile_body.tpl présent dasn le dossier 
+    templates/ du script.<br />
+    Ajoutez les champs text nécessaires en prenant soin de leur donner le nom de la colonne à laquelle il se rapporte.<br />
+    Exemple en se basant sur les tags des exemples précédents&#160;:
+    </p>
+    
+    <pre><code>&lt;table class="content"&gt;
+    &lt;tr&gt;
+        &lt;td class="row1"&gt; &lt;label&gt;&#123;L_EMAIL&#125; :&lt;/label&gt; &lt;/td&gt;
+        &lt;td class="row2"&gt; &lt;span class="texte"&gt;&#123;EMAIL&#125;&lt;/span&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td class="row1"&gt; &lt;label for="pseudo"&gt;&#123;L_PSEUDO&#125; :&lt;/label&gt; &lt;/td&gt;
+        &lt;td class="row2"&gt; &lt;input type="text" id="pseudo" name="pseudo" value="&#123;PSEUDO&#125;" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    <span class="hl-html">&lt;tr&gt;
+        &lt;td class="row1"&gt; &lt;label for="abo_address"&gt;Votre adresse :&lt;/label&gt; &lt;/td&gt;
+        &lt;td class="row2"&gt; &lt;textarea id="abo_address" name="abo_address" rows="4" cols="50" class="text"&gt;&#123;ADDRESS&#125;&lt;/textarea&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td class="row1"&gt; &lt;label for="abo_birthday"&gt;Anniversaire :&lt;/label&gt; &lt;/td&gt;
+        &lt;td class="row2"&gt; &lt;input type="text" id="abo_birthday" name="abo_birthday" value="&#123;BIRTHDAY&#125;" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
+    &lt;/tr&gt;</span>
+    &lt;tr&gt;
+        &lt;td class="row1"&gt; &lt;label for="language"&gt;&#123;L_LANG&#125; :&lt;/label&gt; &lt;/td&gt;
+        &lt;td class="row2"&gt; &#123;LANG_BOX&#125; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;!-- BEGIN password --&gt;
+    &lt;tr&gt;
+        &lt;td class="row1"&gt; &lt;label for="current_pass"&gt;&#123;password.L_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
+        &lt;td class="row2"&gt; &lt;input type="password" id="current_pass" name="current_pass" size="30" maxlength="32" class="text" /&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;!-- END password --&gt;
+    &lt;tr&gt;
+        &lt;td class="row1"&gt; &lt;label for="new_pass"&gt;&#123;L_NEW_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
+        &lt;td class="row2"&gt; &lt;input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td class="row1"&gt; &lt;label for="confirm_pass"&gt;&#123;L_CONFIRM_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
+        &lt;td class="row2"&gt; &lt;input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;</code></pre>
+    
+    <div class="note">
+    <p><strong>Note&#160;:</strong>
+    Vous ne pouvez pas utiliser les tags personnalisés avec le moteur d'envoi en copie cachée
+    </p>
+    </div>
+    </div>
+    
+    <div class="bloc">
+    <h2 id="p16">XVI. Définir une langue selon le formulaire</h2>
+    
+    <p>
+    Cette fonctionnalité était demandée par plusieurs utilisateurs de Wanewsletter.<br />
+    Pour définir une langue à utiliser avec le formulaire (sous réserve que cette langue soit installée 
+    dans Wanewsletter), il vous suffit d'ajouter la ligne suivante dans le code d'inclusion de newsletter.php qui 
+    est fourni par le générateur de formulaire&#160;: <code>$language = 'francais'; </code>
+    </p>
+    
+    <div class="note">
+    <p><strong>Note&#160;:</strong>
+    Ce code doit être ajouté <em>avant</em> l'inclusion du fichier newsletter.php (avant <code>include()</code> )
+    </p>
+    </div>
+    </div>
+</div>
+
+<hr />
+
+<address id="footer">
+Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
+phpCodeur</a> © 2002-2005 | WAnewsletter 2.2.7<br />
+Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
+licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
+</address>
+
+</body>
+</html>

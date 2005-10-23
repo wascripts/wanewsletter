@@ -1,0 +1,12 @@
+Hi %PSEUDO%,
+
+Here is your new password : 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%PASSWORD%
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Please keep it in a safe place !
+
+%SIG%
