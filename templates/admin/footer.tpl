@@ -11,7 +11,7 @@ licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acr
 
 <!-- BEGIN dev_infos -->
 <div id="dev">
-    [ Time total&#160;: {dev_infos.TIME_TOTAL}&#160;s | php&#160;: {dev_infos.TIME_PHP}&#160;s | SQL&#160;: {dev_infos.TIME_SQL}&#160;s | Queries&#160;: {dev_infos.QUERIES} ]
+	[ Time total&#160;: {dev_infos.TIME_TOTAL}&#160;s | php&#160;: {dev_infos.TIME_PHP}&#160;s | SQL&#160;: {dev_infos.TIME_SQL}&#160;s | Queries&#160;: {dev_infos.QUERIES} ]
 </div>
 <!-- END dev_infos -->
 

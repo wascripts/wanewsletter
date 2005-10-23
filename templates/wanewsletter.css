@@ -6,28 +6,27 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
- * @package Thème Wanewsletter
+ * @package Wanewsletter
  * @author  Bobe <wascripts@phpcodeur.net>
- * @see     http://phpcodeur.net/wascripts/wanewsletter/
+ * @link    http://phpcodeur.net/wascripts/wanewsletter/
+ * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @version $Id$
  */
 
-html, body {
-    background-color: #003B78;
-    color: white;
-}
-
+html,
+body { background-color: #003B78; color: white; }
 body {
-    margin: 0;
-    border: none;
-    padding: 0;
-    font-family: Verdana, Arial, Helvetica, sans-serif;
+	margin: 0;
+	border: none;
+	padding: 0;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 a img { border: none; }
@@ -36,224 +35,224 @@ hr    { display: none; }
 /* Structure des pages */
 
 #header {
-    height: 72px;
-    background: #003B78 url("images/background_header.gif") top left repeat-y;
-    margin: 0;
-    padding: 5px;
-    color: black;
-    voice-family: "\"}\"";
-    voice-family: inherit;
-    height: 62px;
+	height: 72px;
+	background: #003B78 url("images/background_header.gif") top left repeat-y;
+	margin: 0;
+	padding: 5px;
+	color: black;
+	voice-family: "\"}\"";
+	voice-family: inherit;
+	height: 62px;
 }
 
 body>#header {
-    height: 62px;
+	height: 62px;
 }
 
 #header p {
-    display: inline;
-    background-color: transparent;
-    color: black;
+	display: inline;
+	background-color: transparent;
+	color: black;
 }
 
 #header h1 {
-    position: absolute;
-    top: 10px;
-    right: 200px;
-    background-color: transparent;
-    font-weight: bold;
-    font-size: 1em;
-    text-align: center;
-    color: white;
+	position: absolute;
+	top: 10px;
+	right: 200px;
+	background-color: transparent;
+	font-weight: bold;
+	font-size: 1em;
+	text-align: center;
+	color: white;
 }
 
 #menu {
-    height: 16px;
-    background: #FAFAFA url("images/bande.gif") repeat-x;
-    margin: 0;
-    border-width: 1px 0;
-    border-color: black;
-    border-style: solid;
-    padding-top: 4px;
-    font-size: 0.7em;
-    font-style: normal;
-    text-align: center;
-    color: black;
+	height: 16px;
+	background: #FAFAFA url("images/bande.gif") repeat-x;
+	margin: 0;
+	border-width: 1px 0;
+	border-color: black;
+	border-style: solid;
+	padding-top: 4px;
+	font-size: 0.7em;
+	font-style: normal;
+	text-align: center;
+	color: black;
 }
 
 div#smallheader, div#global, address#footer {
-    background-color: #DDD;
-    margin: 20px;
-    border: 1px solid black;
-    padding: 0;
-    text-align: center;
-    color: black;
+	background-color: #DDD;
+	margin: 20px;
+	border: 1px solid black;
+	padding: 0;
+	text-align: center;
+	color: black;
 }
 
 div#smallheader h1 {
-    background-color: inherit;
-    margin: 0.4em;
-    white-space: nowrap;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1em;
-    color: black;
+	background-color: inherit;
+	margin: 0.4em;
+	white-space: nowrap;
+	text-align: center;
+	font-weight: bold;
+	font-size: 1em;
+	color: black;
 }
 
 address#footer {
-    padding: 0.3em;
-    font-style: normal;
-    font-weight: bold;
-    font-size: 0.6em;
+	padding: 0.3em;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 0.6em;
 }
 
 div#dev {
-    background-color: inherit;
-    margin: 20px;
-    text-align: center;
-    font-size: 0.6em;
-    font-weight: bold;
-    color: #DBDBDB;
+	background-color: inherit;
+	margin: 20px;
+	text-align: center;
+	font-size: 0.6em;
+	font-weight: bold;
+	color: #DBDBDB;
 }
 
 p#explain {
-    background-color: transparent;
-    margin: 1.5% 2.6% 1%;
-    border-width: 0 1px;
-    border-style: solid;
-    border-color: black;
-    padding: 0 0.8%;
-    line-height: 1.35em;
-    font-weight: normal;
-    font-size: 0.6em;
-    text-align: justify;
-    color: black;
+	background-color: transparent;
+	margin: 1.5% 2.6% 1%;
+	border-width: 0 1px;
+	border-style: solid;
+	border-color: black;
+	padding: 0 0.8%;
+	line-height: 1.35em;
+	font-weight: normal;
+	font-size: 0.6em;
+	text-align: justify;
+	color: black;
 }
 
 ul#errorbox {
-    background-color: #DDD;
-    margin: 20px;
-    border: 1px solid black;
-    padding: 0.5em 2em;
-    list-style-type: square;
-    text-align: left;
-    color: black;
+	background-color: #DDD;
+	margin: 20px;
+	border: 1px solid black;
+	padding: 0.5em 2em;
+	list-style-type: square;
+	text-align: left;
+	color: black;
 }
 
 ul#errorbox li {
-    background-color: inherit;
-    font-weight: normal;
-    font-size: 0.7em;
-    color: black;
+	background-color: inherit;
+	font-weight: normal;
+	font-size: 0.7em;
+	color: black;
 }
 
 #iframe {
-    width: 100%;
-    height: 400px;
-    background-color: white;
-    border: 1px solid black;
+	width: 100%;
+	height: 400px;
+	background-color: white;
+	border: 1px solid black;
 }
 
 #nav-top {
-    margin-top: 1em;
-    margin-bottom: -0.9em;
-    margin-left: 2.7%;
-    margin-right: 2.7%;
+	margin-top: 1em;
+	margin-bottom: -0.9em;
+	margin-left: 2.7%;
+	margin-right: 2.7%;
 }
 
 #nav-bottom {
-    margin-top: -0.9em;
-    margin-bottom: 1em;
-    margin-left: 2.7%;
-    margin-right: 2.7%;
+	margin-top: -0.9em;
+	margin-bottom: 1em;
+	margin-left: 2.7%;
+	margin-right: 2.7%;
 }
 
 #nav-top div.left, #nav-bottom div.left {
-    float: left;
-    text-align: left;
+	float: left;
+	text-align: left;
 }
 
 #nav-top div.right, #nav-bottom div.right {
-    text-align: right;
+	text-align: right;
 }
 
 div.left p, div.right p {
-    display: inline;
-    background-color: inherit;
-    font-weight: normal;
+	display: inline;
+	background-color: inherit;
+	font-weight: normal;
 	font-size: .7em;
-    color: black;
+	color: black;
 }
 
 /* Classes diverses */
 
 .bloc, .smallbloc {
-    background-color: #DDD;
-    border: 1px solid #084A6B;
-    padding: 0;
-    color: black;
+	background-color: #DDD;
+	border: 1px solid #084A6B;
+	padding: 0;
+	color: black;
 }
 
 .bloc      { margin: 1em 2.5%; }
 .smallbloc { margin: 1em 8%; }
 
 .bloc h2, .smallbloc h2 {
-    background: #003B78 url("images/head.gif") top repeat-x;
-    margin: 0;
-    padding-top: 5px;
-    height: 27px;
-    white-space: nowrap;
-    font-size: .8em;
-    color: #FAFAFA;
-    
-    voice-family: "\"}\"";
-    voice-family:inherit;
-    height: 22px;
+	background: #003B78 url("images/head.gif") top repeat-x;
+	margin: 0;
+	padding-top: 5px;
+	height: 27px;
+	white-space: nowrap;
+	font-size: .8em;
+	color: #FAFAFA;
+	
+	voice-family: "\"}\"";
+	voice-family:inherit;
+	height: 22px;
 }
 
 .bloc > h2, .smallbloc > h2 {
-    height: 22px;
+	height: 22px;
 }
 
 .bloc p, .smallbloc p {
-    background-color: transparent;
-    margin: 0;
-    padding: 1em;
-    font-weight: normal; font-size: .7em; line-height: 1.2em;
-    text-align: justify;
+	background-color: transparent;
+	margin: 0;
+	padding: 1em;
+	font-weight: normal; font-size: .7em; line-height: 1.2em;
+	text-align: justify;
 }
 
 .bloc p.message, .smallbloc p.message {
-    padding: 2em !important;
-    font-size: .8em !important;
-    text-align: center !important;
+	padding: 2em !important;
+	font-size: .8em !important;
+	text-align: center !important;
 }
 
 .bottom {
-    background: #BBB url("images/bottom.gif") bottom repeat-x;
-    margin: 0;
-    padding-top: 3px;
-    height: 27px;
-    color: black;
-    
-    voice-family: "\"}\"";
-    voice-family:inherit;
-    height: 24px;
+	background: #BBB url("images/bottom.gif") bottom repeat-x;
+	margin: 0;
+	padding-top: 3px;
+	height: 27px;
+	color: black;
+	
+	voice-family: "\"}\"";
+	voice-family:inherit;
+	height: 24px;
 }
 
 .bloc > .bottom, .smallbloc > .bottom {
-    height: 24px;
+	height: 24px;
 }
 
 ul.links         { margin: 0 2.5% -0.9em; padding: 0; text-align: left; }
 ul.links.special { margin: 0 8% -0.9em; }
 
 ul.links li {
-    display: inline;
-    background-color: transparent;
-    padding-right: .6em;
-    font-size: .7em;
-    color: black;
+	display: inline;
+	background-color: transparent;
+	padding-right: .6em;
+	font-size: .7em;
+	color: black;
 }
 
 ul.links>li { padding-right: 0; }
@@ -261,16 +260,16 @@ ul.links li:before { content: "["; }
 ul.links li:after  { content: "]"; }
 
 .area {
-    background-color: white;
-    border: 1px solid black;
-    margin-left: auto; margin-right: auto;
-    width: 420px;
-    height: 120px;
-    overflow: auto;
-    font-size: .7em;
-    font-weight: normal;
-    color: black;
-    text-align: left;
+	background-color: white;
+	border: 1px solid black;
+	margin-left: auto; margin-right: auto;
+	width: 420px;
+	height: 120px;
+	overflow: auto;
+	font-size: .7em;
+	font-weight: normal;
+	color: black;
+	text-align: left;
 }
 
 .stats       { margin: 1.5em auto 0; text-align: center; }
@@ -283,8 +282,8 @@ a, a:link, a:visited { background-color: transparent; font-size: inherit; color:
 a:hover              { background-color: transparent; font-size: inherit; color: #F52 !important; text-decoration: none; }
 
 .texte, .m-texte, .s-texte {
-    background-color: transparent;
-    font-weight: normal; color: black;
+	background-color: transparent;
+	font-weight: normal; color: black;
 }
 
 .texte   { font-size: .8em; }
@@ -295,59 +294,59 @@ code, samp, var { font-family: "Courier new", Courier, Monospace; font-size: 1em
 
 /* abbr n'est pas compris par IE, nous utiliserons donc acronym */
 acronym {
-    background-color: transparent;
-    border-bottom: 1px dotted;
-    text-transform: uppercase;
-    cursor: help;
+	background-color: transparent;
+	border-bottom: 1px dotted;
+	text-transform: uppercase;
+	cursor: help;
 }
 
 
 /* Formulaires, champs et boutons */
 
 label[for] {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 form#smallbox {
-    background-color: inherit;
-    margin: 1em 2.5%;
-    padding: 0;
-    color: black;
-    text-align: right;
+	background-color: inherit;
+	margin: 1em 2.5%;
+	padding: 0;
+	color: black;
+	text-align: right;
 }
 
 form#smallbox label {
-    font-size: .6em; font-weight: normal;
+	font-size: .6em; font-weight: normal;
 }
 
 input.pbutton, input.button {
-    font-size: .7em; font-weight: normal;
-    color: black;
+	font-size: .7em; font-weight: normal;
+	color: black;
 }
 
 input.pbutton { font-weight: bold !important; }
 
 input[type="submit"]:hover, input[type="reset"]:hover, input[type="button"]:hover {
-    color: #FA5;
+	color: #FA5;
 }
 
 input[type="text"][disabled], input[type="password"][disabled] {
-    background-color: #D6D8DA;
+	background-color: #D6D8DA;
 }
 
 input.text, textarea, select {
-    font-size: 0.7em;
-    font-weight: normal;
-    color: black;
+	font-size: 0.7em;
+	font-weight: normal;
+	color: black;
 }
 
 input[type="file"]  { font-size: .7em; font-weight: normal; color: black; }
 input[type="radio"] { vertical-align: sub; }
 
 /*
-  Malgré la propriété font-family dans body, textarea n'en tient pas compte, 
+  Malgrï¿½ la propriï¿½tï¿½ font-family dans body, textarea n'en tient pas compte, 
   que ce soit dans un navigateur gecko ou IE... :/
-  On redéclare...
+  On redï¿½clare...
  */
 textarea   { font-family: Verdana, Arial, Helvetica, sans-serif; }
 input.text { text-indent: 2px; }
@@ -358,73 +357,73 @@ input.text:focus, textarea:focus { background-color: white; border-style: solid;
 /* tables */
 
 table.content {
-    background-color: #FAFAFA;
-    border-spacing: 1px;
-    
-    /* Les bordures externes sont parfois mangées sous les navigateurs gecko si width est à 100% */
-    w\idth: 99.9%;
+	background-color: #FAFAFA;
+	border-spacing: 1px;
+	
+	/* Les bordures externes sont parfois mangï¿½es sous les navigateurs gecko si width est ï¿½ 100% */
+	w\idth: 99.9%;
 }
 
 th {
-    background-color: #C6C8CA;
-    padding: .3em .4em;
-    white-space: nowrap;
-    font-weight: bold;
+	background-color: #C6C8CA;
+	padding: .3em .4em;
+	white-space: nowrap;
+	font-weight: bold;
 	font-size: .8em;
-    color: black;
-    text-align: center;
+	color: black;
+	text-align: center;
 }
 
 td.explain {
-    background-color: #C6C8CA;
-    padding: .3em .4em;
-    font-weight: normal;
+	background-color: #C6C8CA;
+	padding: .3em .4em;
+	font-weight: normal;
 	font-size: .6em;
 	line-height: 1.3em;
-    text-align: justify;
-    color: black;
+	text-align: justify;
+	color: black;
 }
 
 td.row1, td.row2, td.medrow1, td.medrow2, td.smallrow1, td.smallrow2, td.minirow {
-    padding: .1em .2em;
-    empty-cells: show;
-    vertical-align: top;
+	padding: .1em .2em;
+	empty-cells: show;
+	vertical-align: top;
 }
 
 td.row1, td.row2 {
-    text-align: justify;
+	text-align: justify;
 }
 
 td.row1 { width: 50%; }
 
 td.medrow1, td.medrow2 {
-    text-align: justify;
+	text-align: justify;
 }
 
 td.medrow1 { width: 33%; }
 
 td.smallrow1, td.smallrow2 {
-    text-align: center;
+	text-align: center;
 }
 
 td.minirow {
-    width: 20px;
-    text-align: center;
+	width: 20px;
+	text-align: center;
 }
 
 td.row-full {
-    background-color: #D6D8DA;
-    padding: 1em .2em;
-    width: 100%;
-    text-align: center;
-    vertical-align: middle;
+	background-color: #D6D8DA;
+	padding: 1em .2em;
+	width: 100%;
+	text-align: center;
+	vertical-align: middle;
 }
 
 td.row1, td.medrow1, td.smallrow1             { background-color: #EAEAEA; }
 td.row2, td.medrow2, td.smallrow2, td.minirow { background-color: #D6D8DA; }
 
 td.row1 label, td.medrow1 label, td.smallrow1 label, td.row-full label {
-    font-weight: normal;
+	font-weight: normal;
 	font-size: .8em;
-    color: black;
+	color: black;
 }

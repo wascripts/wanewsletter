@@ -6,38 +6,37 @@
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
- * @package Thème Wanewsletter
+ * @package Wanewsletter
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
+ * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @version $Id$
  */
 
-html, body {
-    background-color: #003B78;
-    color: white;
-}
-
+html,
+body { background-color: #003B78; color: white; }
 body {
-    margin: 0;
-    border: none;
-    padding: 0;
-    font-family: Verdana, Arial, Helvetica, sans-serif;
+	margin: 0;
+	border: none;
+	padding: 0;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 a img { border: none; }
 hr    { display: none; }
 
 h1, div#page, address#footer {
-    background-color: #DDD;
-    margin: 20px;
-    border: 1px solid black;
-    color: black;
+	background-color: #DDD;
+	margin: 20px;
+	border: 1px solid black;
+	color: black;
 }
 
 h1, address#footer { padding: 0.3em; text-align: center; }
@@ -50,43 +49,43 @@ address#footer { font-weight: bold; font-style: normal; font-size: 0.6em; }
 .bloc           { border: 1px solid #084A6B; }
 
 .bloc h2 {
-    height: 22px;
-    background: #003B78 url("../templates/images/head.gif") repeat-x top;
-    margin: 0;
-    padding-top: 5px;
-    text-align: center;
-    font-size: 0.8em;
-    color: #FAFAFA;
+	height: 22px;
+	background: #003B78 url("../templates/images/head.gif") repeat-x top;
+	margin: 0;
+	padding-top: 5px;
+	text-align: center;
+	font-size: 0.8em;
+	color: #FAFAFA;
 }
 
 .bloc h3 {
-    background-color: transparent;
-    margin: 0;
-    padding: 1.5em 1.4em 0.5em;
-    text-align: left;
-    font-weight: normal;
-    font-size: 0.8em;
-    color: #25F;
+	background-color: transparent;
+	margin: 0;
+	padding: 1.5em 1.4em 0.5em;
+	text-align: left;
+	font-weight: normal;
+	font-size: 0.8em;
+	color: #25F;
 }
 
 .bloc p {
-    margin: 1em 1.6em;
-    padding: 0;
-    text-align: justify;
-    font-size: 0.8em;
-    line-height: 1.5em;
+	margin: 1em 1.6em;
+	padding: 0;
+	text-align: justify;
+	font-size: 0.8em;
+	line-height: 1.5em;
 }
 
 .bloc p.date {
-    padding: 1em 1.5em;
+	padding: 1em 1.5em;
 }
 
 ul, ol {
-    margin: 20px;
-    padding: 0 2em;
-    text-align: left;
-    font-size: 0.8em;
-    line-height: 1.4em;
+	margin: 20px;
+	padding: 0 2em;
+	text-align: left;
+	font-size: 0.8em;
+	line-height: 1.4em;
 }
 
 ul ul { font-size: 1em; }
@@ -97,21 +96,21 @@ ol { list-style-type: upper-roman; }
 a { text-decoration: none; }
 
 a, a:link, a:visited {
-    background-color: transparent; 
-    color: #25F;
+	background-color: transparent; 
+	color: #25F;
 }
 
 a:hover {
-    background-color: transparent;
-    color: #F52;
+	background-color: transparent;
+	color: #F52;
 }
 
 abbr[title], acronym[title] {
-    border-bottom: 1px dotted;
+	border-bottom: 1px dotted;
 }
 
 abbr[title]:hover, acronym[title]:hover {
-    cursor: help;
+	cursor: help;
 }
 
 code, kbd, samp { font-family: "Courier New", Courier, monospace; font-size: 1em; }
@@ -119,18 +118,18 @@ code, kbd, samp { font-family: "Courier New", Courier, monospace; font-size: 1em
 code { color: green; }
 
 pre {
-    overflow: auto;
-    background-color: #FAFAFA;
-    border: 1px dashed #A4A6A8;
-    margin: 0.4em 1em;
-    padding: 0.4em;
-    text-align: left;
-    font-weight: normal; font-size: 0.8em; line-height: 1.2em;
-    font-family: Courier, "Courier New", monospace !important;
+	overflow: auto;
+	background-color: #FAFAFA;
+	border: 1px dashed #A4A6A8;
+	margin: 0.4em 1em;
+	padding: 0.4em;
+	text-align: left;
+	font-weight: normal; font-size: 0.8em; line-height: 1.2em;
+	font-family: Courier, "Courier New", monospace !important;
 }
 
 /*
-    Couleurs du code php colorisé
+	Couleurs du code php colorisï¿½
 */
 span.hl-bg      { background-color: inherit; color: white; }
 span.hl-comment { background-color: inherit; color: #F90; }

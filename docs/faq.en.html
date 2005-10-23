@@ -1,46 +1,49 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License 
+	as published by the Free Software Foundation; either version 2 
+	of the License, or (at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+-->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-
-    <!-- 
-        This program is free software; you can redistribute it and/or 
-        modify it under the terms of the GNU General Public License as 
-        published by the Free Software Foundation; either version 2 of 
-        the License, or (at your option) any later version.
-        
-        http://www.gnu.org/copyleft/gpl.html (english)
-        http://www.april.org/gnu/gpl_french.html (french)
-    -->
-    
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    
-    <title>FAQ - WAnewsletter</title>
-    
-    <meta name="Author" content="Bobe" />
-    <meta name="Editor" content="jEdit" />
-    <meta name="Copyright" content="phpCodeur (c) 2002-2005" />
-    
-    <link rel="contents" href="#top" title="Table of contents" />
-    <link rel="chapter" href="#p1" title="How to display the number of subscribers on my site&#8201;?" />
-    <link rel="chapter" href="#p2" title="WAnewsletter, a multilingual script&#8201;?" />
-    <link rel="chapter" href="#p3" title="How to be informed of a new version release&#8201;?" />
-    <link rel="chapter" href="#p4" title="How to import emails&#8201;?" />
-    <link rel="chapter" href="#p5" title="How to have multiple users manage the script&#8201;?" />
-    <link rel="chapter" href="#p6" title="But where is the subscription form&#8201;?" />
-    <link rel="chapter" href="#p7" title="Why are there two send engines&#8201;?" />
-    <link rel="chapter" href="#p8" title="Script's temporary folder, safe mode and open_basedir" />
-    <link rel="chapter" href="#p9" title="Cannot attach files to my newsletters&#8201;!" />
-    <link rel="chapter" href="#p10" title="Using a smtp server to send emails" />
-    <link rel="chapter" href="#p11" title="Calling the subscription form via a popup window" />
-    <link rel="chapter" href="#p12" title="Methods for email addresses  validation" />
-    <link rel="chapter" href="#p13" title="Statistics directory name change" />
-    <link rel="chapter" href="#p14" title="Send newsletters with cron" />
-    <link rel="chapter" href="#p15" title="Use of personnalised tags" />
-    <link rel="chapter" href="#p16" title="Define a language according to the form" />
-    <link rel="copyright" href="http://www.gnu.org/copyleft/gpl.html" hreflang="en" title="Copyleft" />
-    
-    <link rel="stylesheet" type="text/css" href="./wadoc.css" media="screen" title="Thème Wadoc" />
-
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	
+	<title>FAQ - WAnewsletter</title>
+	
+	<meta name="Author" content="Bobe" />
+	<meta name="Editor" content="jEdit" />
+	<meta name="Copyright" content="phpCodeur (c) 2002-2005" />
+	
+	<link rel="contents" href="#top" title="Table of contents" />
+	<link rel="chapter" href="#p1" title="How to display the number of subscribers on my site&#8201;?" />
+	<link rel="chapter" href="#p2" title="WAnewsletter, a multilingual script&#8201;?" />
+	<link rel="chapter" href="#p3" title="How to be informed of a new version release&#8201;?" />
+	<link rel="chapter" href="#p4" title="How to import emails&#8201;?" />
+	<link rel="chapter" href="#p5" title="How to have multiple users manage the script&#8201;?" />
+	<link rel="chapter" href="#p6" title="But where is the subscription form&#8201;?" />
+	<link rel="chapter" href="#p7" title="Why are there two send engines&#8201;?" />
+	<link rel="chapter" href="#p8" title="Script's temporary folder, safe mode and open_basedir" />
+	<link rel="chapter" href="#p9" title="Cannot attach files to my newsletters&#8201;!" />
+	<link rel="chapter" href="#p10" title="Using a smtp server to send emails" />
+	<link rel="chapter" href="#p11" title="Calling the subscription form via a popup window" />
+	<link rel="chapter" href="#p12" title="Methods for email addresses	validation" />
+	<link rel="chapter" href="#p13" title="Statistics directory name change" />
+	<link rel="chapter" href="#p14" title="Send newsletters with cron" />
+	<link rel="chapter" href="#p15" title="Use of personnalised tags" />
+	<link rel="chapter" href="#p16" title="Define a language according to the form" />
+	<link rel="copyright" href="http://www.gnu.org/copyleft/gpl.html" hreflang="en" title="Copyleft" />
+	
+	<link rel="stylesheet" type="text/css" href="./wadoc.css" media="screen" title="Thème Wadoc" />
 </head>
 <body>
 
@@ -48,455 +51,455 @@
 
 <div id="page">
 
-    <p id="preface">Here is a list of the most frequently asked questions, and corresponding explanations.</p>
-    
-    <div class="bloc">
-    <h2>Sommaire</h2>
-    
-    <ol>
-        <li> <a href="#p1">How to display the number of subscribers on my site&#8201;?</a> </li>
-        <li> <a href="#p2">WAnewsletter, a multilingual script&#8201;?</a> </li>
-        <li> <a href="#p3">How to be informed of a new version release&#8201;?</a></li>
-        <li> <a href="#p4">How to import emails&#8201;?</a> </li>
-        <li> <a href="#p5">How to have multiple users manage the script&#8201;?</a> </li>
-        <li> <a href="#p6">Where is the subscription form located&#8201;?</a> </li>
-        <li> <a href="#p7">Why are there two send engines&#8201;?</a> </li>
-        <li> <a href="#p8">Script's temporary folder, safe mode and open_basedir</a> </li>
-        <li> <a href="#p9">Cannot attach files to my newsletters&#8201;!</a> </li>
-        <li> <a href="#p10">Using a smtp server to send emails</a> </li>
-        <li> <a href="#p11">Calling the subscription form via a popup window</a> </li>
-        <li> <a href="#p12">Methods for addresses email validation</a> </li>
-        <li> <a href="#p13">Statistics directory name change</a> </li>
-        <li> <a href="#p14">Send newsletters with cron</a> </li>
-        <li> <a href="#p15">Use personnalised tags</a> </li>
-        <li> <a href="#p16">Define a language according to the form</a> </li>
-    </ol>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p1">I. How to display the number of subscribers on my site&#8201;?</h2>
-    
-    <p>To do this, simply insert the following code where you want to display the 
-    number of subscribers (be carefull to put the right link to the <samp>extra.php</samp> 
-    file)&#160;:</p>
-    
-    <pre><code>&lt;script type="text/javascript" src="http://www.yourdomaine.com/rep/options/extra.php?liste=[ID]"&gt;&lt;/script&gt;</code></pre>
-    
-    <p>Replace <code class="constant">[ID]</code> by the ID number of the list of which you 
-    want to display the number of subscribers.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p2">II. WAnewsletter, a multilingual script&#8201;?</h2>
-    
-    <p>Since our goal is to make WAnewsletter available to the largest audience,
-    the script manages different languages. If you are fluent in a language in 
-    which the script has not already been translated, and if you want to promote 
-    WAnewsletter, simply download the package of your choice, translate it and send 
-    it to  <a href="mailto:%77%61%73%63%72%69%70%74%73%40%70%68%70%63%6F%64%65%75%72%2E%6E%65%74">
-    this email address</a>. The new language version will be made available for 
-    downloading, after verification.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p3">III. How to be informed of a new version release&#8201;?</h2>
-    
-    <p>To be informed of a new version release, or newly found security failures 
-    (possible&#8201;? :) ), visit the phpCodeur site every now and then, or 
-    simply subscribe to the WAnewsletter mailing list 
-    <a href="http://www.phpcodeur.net/wascripts/wanewsletter/mailing" hreflang="fr">here</a>.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p4">IV. How to import emails&#8201;?</h2>
-    
-    <p>An import utility is available  under the "Tools" header of the administration menu. 
-    This utility will allow you, if you have proper rights, to import subscribers' 
-    emails directly either through a text field, by specifying the address of the 
-    emails file on the server, or by uploading a file  containing 
-    the emails, providing your host allows file uploading.</p>
-    
-    <p>The import utility has been tested with mass imports of up to 2500 email 
-    addresses (This should be sufficient). If not, you can divide to import 
-    operation in as many smaller parts as necessary to make sure it works. Another 
-    way to import more than 2500 email addresses in one shot consists 
-    in modifying the value of the <code class="constant">MAX_IMPORT</code> constant 
-    in the <samp>constantes.php</samp> files, but this is at your own risks&#8201;!</p>
-    
-    <p>The script will check each email address, and will remove  doubles. If emails 
-    are rejected, the script will attempt to write a report file in its temporary 
-    folder, which you then may download.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p5">V. How to have multiple users manage the script&#8201;?</h2>
-    
-    <p>WAnewsletter can be managed by multiple users. You can change the users' 
-    permissions through each user's profile.</p>
-    
-    <p>There are two general levels&#160;: administrator and user. Administrators 
-    have all rights automatically, whatever the settings on individual rights. 
-    A user will be limited to granted rights (view, edit, delete, send, import,
-    export, ban, and attach files) for each list.</p>
-    
-    <p>To add a user, go to the "Users" section and click on the "Add a user" button.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p6">VI. But where is the subscription form&#8201;?</h2>
-    
-    <p>There already is a default subscription form, the <samp>subscribe.php</samp> 
-    file (users of versions 2.0.x or 2.1.x, please note that the name of that file 
-    has changed because of its wrong spelling and  is therefore no longer 
-    <samp>suscribe.php</samp>, so do not forget to change any links pointing to that file).
-    The <samp>subscribe.php</samp> file displays a standard form, and a selection 
-    list showing names of all created lists.</p>
-    
-    <p>The script also has a form generator in the tools section. This will allow
-    you to generate an adequate form for any given list. You will then have to 
-    place this generated form code where you want on your site, to place the 
-    <samp>newsletter.php</samp> inclusion code (also created by the Form
-    Generator) and to indicate in the list's settings the form's absolute address.</p>
-    
-    <p>One last solution (available from versions 2.2-RC1 and up) consists in having
-    the visitor send an email to a list's address, with the word "Subscribe"
-    (case   insensitive) on the subject line. In this case, you must have access to 
-    cron (Unix servers or equivalent) or use the free services of 
-    <a href="http://www.webcron.org/" hreflang="fr" title="Webcron: the automated task service">webcron.org</a> 
-    to automate the call to the <samp>cron.php</samp> file located in the script's 
-    <samp>options/</samp> folder. The script will undertake all necessary tasks 
-    (subscription, unsubscription, format change, subscription confirmation, etc.) 
-    according to received emails.</p>
-    
-    <p>To unsubscribe, the subscriber will have to send an email to the list's address
-    with the word "Unsubscribe" on the subject line. He will then receive an email 
-    asking for a reply with the same subject, his account code, which he will already 
-    have. To confirm subscription (if the list is set to require it), the subscriber
-    will have to send an email to the list with the word "confirmation" on the subject 
-    line. To request a newsletter format change, the subject line will have to read 
-    "setformat".</p>
-    
-    <p>If many of your distibution lists use the same email address, there is a
-    risk of conflict, since the script will not be able to identify to which list 
-    the <acronym title="Post Office Protocol">pop</acronym> account emails are 
-    addressed. If such is the case, you will have to create an email alias on 
-    your host's administration panel, if available (this excludes free hosting 
-    servers). <em>Example&#160;:</em></p>
-    
-    <p>You have two lists using mailing@domain.com as email address.
-    You will have to create two aliases forwarded to mailing@domain.com and specify
-    these aliases in the settings of the lists, eg&#160;: mailing-1@domain.com and
-    mailing-2@domain.com</p>
-    
-    <p>In the case of the "cron" option, you will have to specify the access parameters
-    to the list's email adress's <acronym>pop</acronym> account and specify the use of the "cron" 
-    option by clicking on the proper radio button, in the admin <b>Lists</b> section.</p>
-    
-    <p>Finally, cron will have to call an address of this type&#160;: 
-    <kbd>http://www.yourdomain.com/rep/newsletter/options/cron.php?mode=validate&amp;liste=<code class="constant">[list_ID]</code></kbd>
-    </p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p7">VII. Why are there two send engines&#8201;?</h2>
-    
-    <p>In order to be  accessible to the largest number of users, WAnewsletter
-    has two send engines. Some hosting services limit the number of emails sent 
-    daily (ex: multimania/lycos), or only accept one recipient by email (ex: online).</p>
-    
-    <p>Using the fist engine (emails in hidden copy) gives a more  professionnal impression 
-    (in my personal opinion). On the other hand, by using the second engine, 
-    recipients will see ther email address in the "To" field. Also, the unsubscribe 
-    address will contain the correct parameters, instead of simply pointing back 
-    to the subscription/unsubscription form.</p>
-    
-    <p>In the end, it is up to you to choose the engine that suits you best&#160;;-)</p>
-    
-    <div class="note">
-    <p><strong>Note&#160;:</strong>
-    People hosted on "Online" <strong>must</strong> use the second engine (one subscriber
-    = one email)
-    </p>
-    </div>
-    P.S: 
-    </p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p8">VIII. Script's temporary folder, safe mode and open_basedir</h2>
-    
-    <p>The script's temporary folder, tmp/ by default, can be used by the script
-    in some specific cases&#160;:</p>
-    
-    <ul>
-        <li> If <code class="setting">safe mode</code> in activated on your server, 
-        or if there is some restriction at the <code class="setting">open_basedir</code> 
-        level, the script must move certain uploaded files in the <samp>tmp/</samp> 
-        folder before reading them </li>
-        <li> If you store attached files on a <abbr title="File Transfert Protocol">FTP</abbr> 
-        server, the script must put them in the <samp>tmp/</samp> folder during 
-        the sending process </li>
-        <li> When exporting  attached files, or backing up tables, if you
-        choose the "store the file on the server" option, the script will create
-        the file in the <samp>tmp/</samp> folder </li>
-        <li>When importing email addresses, if some are rejected, the script will
-        create the report file in the <samp>tmp/</samp> folder </li>
-    </ul>
-    
-    <p>If one of theses cases applies to your situation (eg&#160;: <code class="setting">open_basedir</code>) 
-    or you want to use some of the script's possibilities  (eg&#160;: storing the export
-    file on the server), then the <samp>tmp/</samp> folder is necessary and must be writeable.</p>
-    
-    <p>The <samp>tmp/</samp> folder's name can be modified, provided you specify its new name
-    in the <samp>admin/pagestart.php</samp> file (find the line&#160;: 
-    <code>$tmp_name    = 'tmp';</code> ).</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p9">IX. Cannot attach files to my newsletters&#8201;!</h2>
-    
-    <p>If file upload is authorized by your host, it might be caused by the script
-    not having writing permissions on the attached files storage folder, or
-    because the <abbr title="File Transfert Protocol">FTP</abbr> 
-    server's access parameters are not properly set (if this option was chosen).
-    Check the folder's chmod and/or attributes, or check the <abbr>FTP</abbr>'s 
-    access parameters.</p>
-    
-    <p>If file upload is not authorized, the script adds the file to the list of
-    attached files only if it is already on the server, in the attached files
-    storage folder. Upload your attached files with your <abbr>ftp</abbr> client, 
-    before adding them using the form.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p10">X. Using a smtp server to send emails</h2>
-    
-    <p>Unfortunately, using WAnewsletter's <abbr title="Simple Mail Transfert Protocol">SMTP</abbr> 
-    option does not permit to send emails to recipients other than those whose 
-    address is of the same domain as the <abbr>smtp</abbr> server's if you are 
-    not identified as part of this domain. This is a <abbr>smtp</abbr> server 
-    restriction (relay denial), not WAnewsletter.</p>
-    
-    <p><em>Example&#160;:</em><br />
-    <br />
-    You set <samp>smtp.wanadoo.fr</samp> as <abbr>smtp</abbr> server in the Wanewsletter 
-    settings. If the <abbr>smtp</abbr> server does not identify you as being part 
-    of the wanadoo domain, you will only be able to send emails to 
-    <samp>blablabla@wanadoo.fr</samp> type addresses.</p>
-    
-    <p>The workaround is to have the <abbr>smtp</abbr> server that you want to use 
-    manage the authentification, or in other words, that it recognizes the <kbd>AUTH LOGIN</kbd> 
-    command (See the <a href="ftp://ftp.rfc-editor.org/in-notes/rfc2554.txt" 
-    hreflang="en"><abbr title="Request For Comments">RFC</abbr> 
-    2554</a>). In this case, you can specify the server access login and password in the
-    newsletter settings.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p11">XI. Calling the subscription form via a popup window</h2>
-    
-    <p>Integrating the subscription form to your site by calling it with a popup
-    window is very simple. Here is the code&#160;:</p>
-    
-    <pre><code>&lt;a href="chemin_vers_dossier/subscribe.php" 
+	<p id="preface">Here is a list of the most frequently asked questions, and corresponding explanations.</p>
+	
+	<div class="bloc">
+	<h2>Sommaire</h2>
+	
+	<ol>
+		<li> <a href="#p1">How to display the number of subscribers on my site&#8201;?</a> </li>
+		<li> <a href="#p2">WAnewsletter, a multilingual script&#8201;?</a> </li>
+		<li> <a href="#p3">How to be informed of a new version release&#8201;?</a></li>
+		<li> <a href="#p4">How to import emails&#8201;?</a> </li>
+		<li> <a href="#p5">How to have multiple users manage the script&#8201;?</a> </li>
+		<li> <a href="#p6">Where is the subscription form located&#8201;?</a> </li>
+		<li> <a href="#p7">Why are there two send engines&#8201;?</a> </li>
+		<li> <a href="#p8">Script's temporary folder, safe mode and open_basedir</a> </li>
+		<li> <a href="#p9">Cannot attach files to my newsletters&#8201;!</a> </li>
+		<li> <a href="#p10">Using a smtp server to send emails</a> </li>
+		<li> <a href="#p11">Calling the subscription form via a popup window</a> </li>
+		<li> <a href="#p12">Methods for addresses email validation</a> </li>
+		<li> <a href="#p13">Statistics directory name change</a> </li>
+		<li> <a href="#p14">Send newsletters with cron</a> </li>
+		<li> <a href="#p15">Use personnalised tags</a> </li>
+		<li> <a href="#p16">Define a language according to the form</a> </li>
+	</ol>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p1">I. How to display the number of subscribers on my site&#8201;?</h2>
+	
+	<p>To do this, simply insert the following code where you want to display the 
+	number of subscribers (be carefull to put the right link to the <samp>extra.php</samp> 
+	file)&#160;:</p>
+	
+	<pre><code>&lt;script type="text/javascript" src="http://www.yourdomaine.com/rep/options/extra.php?liste=[ID]"&gt;&lt;/script&gt;</code></pre>
+	
+	<p>Replace <code class="constant">[ID]</code> by the ID number of the list of which you 
+	want to display the number of subscribers.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p2">II. WAnewsletter, a multilingual script&#8201;?</h2>
+	
+	<p>Since our goal is to make WAnewsletter available to the largest audience,
+	the script manages different languages. If you are fluent in a language in 
+	which the script has not already been translated, and if you want to promote 
+	WAnewsletter, simply download the package of your choice, translate it and send 
+	it to  <a href="mailto:%77%61%73%63%72%69%70%74%73%40%70%68%70%63%6F%64%65%75%72%2E%6E%65%74">
+	this email address</a>. The new language version will be made available for 
+	downloading, after verification.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p3">III. How to be informed of a new version release&#8201;?</h2>
+	
+	<p>To be informed of a new version release, or newly found security failures 
+	(possible&#8201;? :) ), visit the phpCodeur site every now and then, or 
+	simply subscribe to the WAnewsletter mailing list 
+	<a href="http://www.phpcodeur.net/wascripts/wanewsletter/mailing" hreflang="fr">here</a>.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p4">IV. How to import emails&#8201;?</h2>
+	
+	<p>An import utility is available  under the "Tools" header of the administration menu. 
+	This utility will allow you, if you have proper rights, to import subscribers' 
+	emails directly either through a text field, by specifying the address of the 
+	emails file on the server, or by uploading a file  containing 
+	the emails, providing your host allows file uploading.</p>
+	
+	<p>The import utility has been tested with mass imports of up to 2500 email 
+	addresses (This should be sufficient). If not, you can divide to import 
+	operation in as many smaller parts as necessary to make sure it works. Another 
+	way to import more than 2500 email addresses in one shot consists 
+	in modifying the value of the <code class="constant">MAX_IMPORT</code> constant 
+	in the <samp>constantes.php</samp> files, but this is at your own risks&#8201;!</p>
+	
+	<p>The script will check each email address, and will remove  doubles. If emails 
+	are rejected, the script will attempt to write a report file in its temporary 
+	folder, which you then may download.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p5">V. How to have multiple users manage the script&#8201;?</h2>
+	
+	<p>WAnewsletter can be managed by multiple users. You can change the users' 
+	permissions through each user's profile.</p>
+	
+	<p>There are two general levels&#160;: administrator and user. Administrators 
+	have all rights automatically, whatever the settings on individual rights. 
+	A user will be limited to granted rights (view, edit, delete, send, import,
+	export, ban, and attach files) for each list.</p>
+	
+	<p>To add a user, go to the "Users" section and click on the "Add a user" button.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p6">VI. But where is the subscription form&#8201;?</h2>
+	
+	<p>There already is a default subscription form, the <samp>subscribe.php</samp> 
+	file (users of versions 2.0.x or 2.1.x, please note that the name of that file 
+	has changed because of its wrong spelling and  is therefore no longer 
+	<samp>suscribe.php</samp>, so do not forget to change any links pointing to that file).
+	The <samp>subscribe.php</samp> file displays a standard form, and a selection 
+	list showing names of all created lists.</p>
+	
+	<p>The script also has a form generator in the tools section. This will allow
+	you to generate an adequate form for any given list. You will then have to 
+	place this generated form code where you want on your site, to place the 
+	<samp>newsletter.php</samp> inclusion code (also created by the Form
+	Generator) and to indicate in the list's settings the form's absolute address.</p>
+	
+	<p>One last solution (available from versions 2.2-RC1 and up) consists in having
+	the visitor send an email to a list's address, with the word "Subscribe"
+	(case	insensitive) on the subject line. In this case, you must have access to 
+	cron (Unix servers or equivalent) or use the free services of 
+	<a href="http://www.webcron.org/" hreflang="fr" title="Webcron: the automated task service">webcron.org</a> 
+	to automate the call to the <samp>cron.php</samp> file located in the script's 
+	<samp>options/</samp> folder. The script will undertake all necessary tasks 
+	(subscription, unsubscription, format change, subscription confirmation, etc.) 
+	according to received emails.</p>
+	
+	<p>To unsubscribe, the subscriber will have to send an email to the list's address
+	with the word "Unsubscribe" on the subject line. He will then receive an email 
+	asking for a reply with the same subject, his account code, which he will already 
+	have. To confirm subscription (if the list is set to require it), the subscriber
+	will have to send an email to the list with the word "confirmation" on the subject 
+	line. To request a newsletter format change, the subject line will have to read 
+	"setformat".</p>
+	
+	<p>If many of your distibution lists use the same email address, there is a
+	risk of conflict, since the script will not be able to identify to which list 
+	the <acronym title="Post Office Protocol">pop</acronym> account emails are 
+	addressed. If such is the case, you will have to create an email alias on 
+	your host's administration panel, if available (this excludes free hosting 
+	servers). <em>Example&#160;:</em></p>
+	
+	<p>You have two lists using mailing@domain.com as email address.
+	You will have to create two aliases forwarded to mailing@domain.com and specify
+	these aliases in the settings of the lists, eg&#160;: mailing-1@domain.com and
+	mailing-2@domain.com</p>
+	
+	<p>In the case of the "cron" option, you will have to specify the access parameters
+	to the list's email adress's <acronym>pop</acronym> account and specify the use of the "cron" 
+	option by clicking on the proper radio button, in the admin <b>Lists</b> section.</p>
+	
+	<p>Finally, cron will have to call an address of this type&#160;: 
+	<kbd>http://www.yourdomain.com/rep/newsletter/options/cron.php?mode=validate&amp;liste=<code class="constant">[list_ID]</code></kbd>
+	</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p7">VII. Why are there two send engines&#8201;?</h2>
+	
+	<p>In order to be  accessible to the largest number of users, WAnewsletter
+	has two send engines. Some hosting services limit the number of emails sent 
+	daily (ex: multimania/lycos), or only accept one recipient by email (ex: online).</p>
+	
+	<p>Using the fist engine (emails in hidden copy) gives a more  professionnal impression 
+	(in my personal opinion). On the other hand, by using the second engine, 
+	recipients will see ther email address in the "To" field. Also, the unsubscribe 
+	address will contain the correct parameters, instead of simply pointing back 
+	to the subscription/unsubscription form.</p>
+	
+	<p>In the end, it is up to you to choose the engine that suits you best&#160;;-)</p>
+	
+	<div class="note">
+	<p><strong>Note&#160;:</strong>
+	People hosted on "Online" <strong>must</strong> use the second engine (one subscriber
+	= one email)
+	</p>
+	</div>
+	P.S: 
+	</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p8">VIII. Script's temporary folder, safe mode and open_basedir</h2>
+	
+	<p>The script's temporary folder, tmp/ by default, can be used by the script
+	in some specific cases&#160;:</p>
+	
+	<ul>
+		<li> If <code class="setting">safe mode</code> in activated on your server, 
+		or if there is some restriction at the <code class="setting">open_basedir</code> 
+		level, the script must move certain uploaded files in the <samp>tmp/</samp> 
+		folder before reading them </li>
+		<li> If you store attached files on a <abbr title="File Transfert Protocol">FTP</abbr> 
+		server, the script must put them in the <samp>tmp/</samp> folder during 
+		the sending process </li>
+		<li> When exporting	 attached files, or backing up tables, if you
+		choose the "store the file on the server" option, the script will create
+		the file in the <samp>tmp/</samp> folder </li>
+		<li>When importing email addresses, if some are rejected, the script will
+		create the report file in the <samp>tmp/</samp> folder </li>
+	</ul>
+	
+	<p>If one of theses cases applies to your situation (eg&#160;: <code class="setting">open_basedir</code>) 
+	or you want to use some of the script's possibilities  (eg&#160;: storing the export
+	file on the server), then the <samp>tmp/</samp> folder is necessary and must be writeable.</p>
+	
+	<p>The <samp>tmp/</samp> folder's name can be modified, provided you specify its new name
+	in the <samp>admin/pagestart.php</samp> file (find the line&#160;: 
+	<code>$tmp_name	   = 'tmp';</code> ).</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p9">IX. Cannot attach files to my newsletters&#8201;!</h2>
+	
+	<p>If file upload is authorized by your host, it might be caused by the script
+	not having writing permissions on the attached files storage folder, or
+	because the <abbr title="File Transfert Protocol">FTP</abbr> 
+	server's access parameters are not properly set (if this option was chosen).
+	Check the folder's chmod and/or attributes, or check the <abbr>FTP</abbr>'s 
+	access parameters.</p>
+	
+	<p>If file upload is not authorized, the script adds the file to the list of
+	attached files only if it is already on the server, in the attached files
+	storage folder. Upload your attached files with your <abbr>ftp</abbr> client, 
+	before adding them using the form.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p10">X. Using a smtp server to send emails</h2>
+	
+	<p>Unfortunately, using WAnewsletter's <abbr title="Simple Mail Transfert Protocol">SMTP</abbr> 
+	option does not permit to send emails to recipients other than those whose 
+	address is of the same domain as the <abbr>smtp</abbr> server's if you are 
+	not identified as part of this domain. This is a <abbr>smtp</abbr> server 
+	restriction (relay denial), not WAnewsletter.</p>
+	
+	<p><em>Example&#160;:</em><br />
+	<br />
+	You set <samp>smtp.wanadoo.fr</samp> as <abbr>smtp</abbr> server in the Wanewsletter 
+	settings. If the <abbr>smtp</abbr> server does not identify you as being part 
+	of the wanadoo domain, you will only be able to send emails to 
+	<samp>blablabla@wanadoo.fr</samp> type addresses.</p>
+	
+	<p>The workaround is to have the <abbr>smtp</abbr> server that you want to use 
+	manage the authentification, or in other words, that it recognizes the <kbd>AUTH LOGIN</kbd> 
+	command (See the <a href="ftp://ftp.rfc-editor.org/in-notes/rfc2554.txt" 
+	hreflang="en"><abbr title="Request For Comments">RFC</abbr> 
+	2554</a>). In this case, you can specify the server access login and password in the
+	newsletter settings.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p11">XI. Calling the subscription form via a popup window</h2>
+	
+	<p>Integrating the subscription form to your site by calling it with a popup
+	window is very simple. Here is the code&#160;:</p>
+	
+	<pre><code>&lt;a href="chemin_vers_dossier/subscribe.php" 
   onclick="window.open(this.href, 'mailing', 'width=400, height=300, topmargin=2, left=100, top=100, toolbar=0, location=0, directories=0, status=0, scrollbars=1, resizable=1, copyhistory=0, menuBar=0'); return false;"&gt;
   Newsletter
 &lt;/a&gt;</code></pre>
-    
-    <p>In each of the newsletter's settings, you must enter the absolute url to
-    the form (eg&#160;: (http://yourdomain.com/rep/subscribe.php). However, 
-    when a new subscriber clicks to confirm his subscription, or if
-    he unsubscribes using the provided link in the newsletter, <samp>subscribe.php</samp>
-    will appear on a full page.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p12">XII. Methods for email addresses  validation</h2>
-    
-    <p style="color: red;">This feature is unavailable in the version 2.2.5 and 
-    next minor releases.</p>
-    
-    <p>
-    To verify the validity of email addresses  provided for each subscription,
-    the script verifies their syntactic validity.<br />
-    Some characters cannot be present and email must contain the @ sign  and
-    a single dot for the domain name.<br />
-    <br />
-    You can adjust the script so that a more elaborate verification is done.
-    (see    configuration)<br />
-    <br />
-    The more elaborate validation extracts the email's domain name,
-    and then does   a   search  on it to verify that this domain does havel a <b>M</b>ail
-    e<strong>X</strong>changer. <br />
-    If it is the case, the script attempts to connect to the smtp server  (if
-    the connection fails, the script will test the following smtp server...)
-    then    sends   orders to simulate a sending.<br />
-    If the smtp server accepts to achieve the sending (nothing is sent, the
-    script won't end with the adequate order), the email belongs to its domain.<br />
-    <br />
-    This last verification is not however guaranteed at 100%.<br />
-    Smtp Servers generally refuse an outside request    (the    script's    in
-    this    case) to their domain for  sending  an email to an 
-    address outside their domain, but this is not always
-    the case.   (We speak
-    in this
-    case of a smtp server accepting the relaying). <br />
-    <br />
-    The best validation procedure remains the sending of an email to confirm
-    the demand.
-    </p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p13">XIII. Statistics directory name change</h2>
-    
-    <p>
-    Changing the  tstats/ directory name is easy. Edit the functions.stats.php
-    file and    find  the following line : <br />
-    </p>
-    
-    <pre><code>define('WA_STATS_PATH'      , $waroot . 'stats/', true); </code></pre>
-    
-    <p>
-    Replace"stats" by the a name of your choice.
-    </p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p14">XIV. Send newsletters with cron</h2>
-    
-    <p>
-    The script allows you to send your newsletters with cron.<br />
-    It's very simploe, just call the following address : <b>http://www.yourdomain.com/rep/</b>options/cron.php?mode=send&amp;liste=[ID] <br />
-    <br />
-    The part not put in bold is to be adjusted
-    by  you.<br />
-    Here also you must   replace [ID] by the appropriate list id.<br />
-    <br />
-    Note: 
-    </p>
-    <ul>
-        <li> You can very well hange the name of the cron.php file. (recommended) </li>
-        <li> It is up to you to adjust cron so that it achieves to calling to the
-        script (if cron is not available on your server, you can use the
-        free services  of<a href="http://www.webcron.org/" hreflang="fr" 
-        title="Webcron: the automated task service"> webcron.org</a> )</li>
-    </ul>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p15">XV. Use personnalised tags</h2>
-    
-    <p>
-    Pour utiliser les tags personnalisés (à l'instar de {LINKS} ou {NAME}), éditez le fichier tags.inc.php avec 
-    un simple éditeur de texte. Vous devriez trouver ceci au début du fichier&#160;:
-    </p>
-    
-    <pre><code><span class="hl-comment">//$other_tags&#91;$t&#93;&#91;'column_name'&#93; = '';
-//$other_tags&#91;$t&#93;&#91;'tag_name'&#93;    = '';
+	
+	<p>In each of the newsletter's settings, you must enter the absolute url to
+	the form (eg&#160;: (http://yourdomain.com/rep/subscribe.php). However, 
+	when a new subscriber clicks to confirm his subscription, or if
+	he unsubscribes using the provided link in the newsletter, <samp>subscribe.php</samp>
+	will appear on a full page.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p12">XII. Methods for email addresses  validation</h2>
+	
+	<p style="color: red;">This feature is unavailable in the version 2.2.5 and 
+	next minor releases.</p>
+	
+	<p>
+	To verify the validity of email addresses  provided for each subscription,
+	the script verifies their syntactic validity.<br />
+	Some characters cannot be present and email must contain the @ sign	 and
+	a single dot for the domain name.<br />
+	<br />
+	You can adjust the script so that a more elaborate verification is done.
+	(see	configuration)<br />
+	<br />
+	The more elaborate validation extracts the email's domain name,
+	and then does	a	search	on it to verify that this domain does havel a <b>M</b>ail
+	e<strong>X</strong>changer. <br />
+	If it is the case, the script attempts to connect to the smtp server  (if
+	the connection fails, the script will test the following smtp server...)
+	then	sends	orders to simulate a sending.<br />
+	If the smtp server accepts to achieve the sending (nothing is sent, the
+	script won't end with the adequate order), the email belongs to its domain.<br />
+	<br />
+	This last verification is not however guaranteed at 100%.<br />
+	Smtp Servers generally refuse an outside request	(the	script's	in
+	this	case) to their domain for  sending	an email to an 
+	address outside their domain, but this is not always
+	the case.	(We speak
+	in this
+	case of a smtp server accepting the relaying). <br />
+	<br />
+	The best validation procedure remains the sending of an email to confirm
+	the demand.
+	</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p13">XIII. Statistics directory name change</h2>
+	
+	<p>
+	Changing the  tstats/ directory name is easy. Edit the functions.stats.php
+	file and	find  the following line : <br />
+	</p>
+	
+	<pre><code>define('WA_STATS_PATH'	   , $waroot . 'stats/', true); </code></pre>
+	
+	<p>
+	Replace"stats" by the a name of your choice.
+	</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p14">XIV. Send newsletters with cron</h2>
+	
+	<p>
+	The script allows you to send your newsletters with cron.<br />
+	It's very simploe, just call the following address : <b>http://www.yourdomain.com/rep/</b>options/cron.php?mode=send&amp;liste=[ID] <br />
+	<br />
+	The part not put in bold is to be adjusted
+	by	you.<br />
+	Here also you must	 replace [ID] by the appropriate list id.<br />
+	<br />
+	Note: 
+	</p>
+	<ul>
+		<li> You can very well hange the name of the cron.php file. (recommended) </li>
+		<li> It is up to you to adjust cron so that it achieves to calling to the
+		script (if cron is not available on your server, you can use the
+		free services  of<a href="http://www.webcron.org/" hreflang="fr" 
+		title="Webcron: the automated task service"> webcron.org</a> )</li>
+	</ul>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p15">XV. Use personnalised tags</h2>
+	
+	<p>
+	Pour utiliser les tags personnalisés (à l'instar de {LINKS} ou {NAME}), éditez le fichier tags.inc.php avec 
+	un simple éditeur de texte. Vous devriez trouver ceci au début du fichier&#160;:
+	</p>
+	
+	<pre><code><span class="hl-comment">//$other_tags&#91;$t&#93;&#91;'column_name'&#93; = '';
+//$other_tags&#91;$t&#93;&#91;'tag_name'&#93;	 = '';
 //$t++;
 </span></code></pre>
-    
-    <p>
-    Wanewsletter ne gère pas automatiquement les tags personnalisés. C'est à dire que c'est à vous de rajouter le 
-    champs voulu dans la table <em>prefixe_</em>abonnes, puis de spécifier le tag dans tags.inc.php pour que 
-    le script effectue le remplacement du tag par sa valeur lors de l'envoi.<br />
-    <br />
-    <em>Exemple&#160;:</em><br />
-    <br />
-    Vous souhaitez pouvoir mettre un tag {ADDRESS} dans vos newsletters, lequel sera remplacé par l'adresse de l'abonné. 
-    Après avoir ajouté un champs nommé par exemple abo_address dans la table <em>prefixe_</em>abonnes, vous placerez 
-    les données du tag dans tags.inc.php (en ayant décommenté les lignes que j'ai donné plus haut), comme ci dessous :
-    </p>
-    
-    <pre><code><span class="hl-html"><span class="hl-default">$other_tags</span><span class="hl-keyword">&#91;</span><span class="hl-default">0</span><span class="hl-keyword">&#93;&#91;</span><span class="hl-string">'column_name'</span><span class="hl-keyword">&#93; = </span><span class="hl-string">'abo_address'</span><span class="hl-keyword">;
-</span><span class="hl-default">$other_tags</span><span class="hl-keyword">&#91;</span><span class="hl-default">0</span><span class="hl-keyword">&#93;&#91;</span><span class="hl-string">'tag_name'</span><span class="hl-keyword">&#93;    = </span><span class="hl-string">'ADDRESS'</span><span class="hl-keyword">; 
+	
+	<p>
+	Wanewsletter ne gère pas automatiquement les tags personnalisés. C'est à dire que c'est à vous de rajouter le 
+	champs voulu dans la table <em>prefixe_</em>abonnes, puis de spécifier le tag dans tags.inc.php pour que 
+	le script effectue le remplacement du tag par sa valeur lors de l'envoi.<br />
+	<br />
+	<em>Exemple&#160;:</em><br />
+	<br />
+	Vous souhaitez pouvoir mettre un tag {ADDRESS} dans vos newsletters, lequel sera remplacé par l'adresse de l'abonné. 
+	Après avoir ajouté un champs nommé par exemple abo_address dans la table <em>prefixe_</em>abonnes, vous placerez 
+	les données du tag dans tags.inc.php (en ayant décommenté les lignes que j'ai donné plus haut), comme ci dessous :
+	</p>
+	
+	<pre><code><span class="hl-html"><span class="hl-default">$other_tags</span><span class="hl-keyword">&#91;</span><span class="hl-default">0</span><span class="hl-keyword">&#93;&#91;</span><span class="hl-string">'column_name'</span><span class="hl-keyword">&#93; = </span><span class="hl-string">'abo_address'</span><span class="hl-keyword">;
+</span><span class="hl-default">$other_tags</span><span class="hl-keyword">&#91;</span><span class="hl-default">0</span><span class="hl-keyword">&#93;&#91;</span><span class="hl-string">'tag_name'</span><span class="hl-keyword">&#93;	 = </span><span class="hl-string">'ADDRESS'</span><span class="hl-keyword">; 
 </span><span class="hl-default">$t</span><span class="hl-keyword">++;</span></span></code></pre>
-    
-    <p>
-    Vous souhaitez maintenant ajouter un autre tag&#8201;? Reproduisez simplement la même opération.
-    </p>
-    
-    <p>
-    Pour que vos abonnés puissent ajouter ces données dans leur profil, le panneau de gestion de profil doit être 
-    activé (voir configuration générale). Vous devez modifier le template editprofile_body.tpl présent dasn le dossier 
-    templates/ du script.<br />
-    Ajoutez les champs text nécessaires en prenant soin de leur donner le nom de la colonne à laquelle il se rapporte.<br />
-    <br />
-    <em>Exemple en se basant sur les tags des exemples précédents :</em>
-    </p>
-    
-    <pre><code>&lt;table class="content"&gt;
-    &lt;tr&gt;
-        &lt;td class="row1"&gt; &lt;label&gt;&#123;L_EMAIL&#125; :&lt;/label&gt; &lt;/td&gt;
-        &lt;td class="row2"&gt; &lt;span class="texte"&gt;&#123;EMAIL&#125;&lt;/span&gt; &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;td class="row1"&gt; &lt;label for="pseudo"&gt;&#123;L_PSEUDO&#125; :&lt;/label&gt; &lt;/td&gt;
-        &lt;td class="row2"&gt; &lt;input type="text" id="pseudo" name="pseudo" value="&#123;PSEUDO&#125;" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
-    &lt;/tr&gt;
-    <span class="hl-html">&lt;tr&gt;
-        &lt;td class="row1"&gt; &lt;label for="abo_address"&gt;Votre adresse :&lt;/label&gt; &lt;/td&gt;
-        &lt;td class="row2"&gt; &lt;textarea id="abo_address" name="abo_address" rows="4" cols="50" class="text"&gt;&#123;ADDRESS&#125;&lt;/textarea&gt; &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;td class="row1"&gt; &lt;label for="abo_birthday"&gt;Anniversaire :&lt;/label&gt; &lt;/td&gt;
-        &lt;td class="row2"&gt; &lt;input type="text" id="abo_birthday" name="abo_birthday" value="&#123;BIRTHDAY&#125;" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
-    &lt;/tr&gt;</span>
-    &lt;tr&gt;
-        &lt;td class="row1"&gt; &lt;label for="language"&gt;&#123;L_LANG&#125; :&lt;/label&gt; &lt;/td&gt;
-        &lt;td class="row2"&gt; &#123;LANG_BOX&#125; &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;!-- BEGIN password --&gt;
-    &lt;tr&gt;
-        &lt;td class="row1"&gt; &lt;label for="current_pass"&gt;&#123;password.L_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
-        &lt;td class="row2"&gt; &lt;input type="password" id="current_pass" name="current_pass" size="30" maxlength="32" class="text" /&gt; &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;!-- END password --&gt;
-    &lt;tr&gt;
-        &lt;td class="row1"&gt; &lt;label for="new_pass"&gt;&#123;L_NEW_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
-        &lt;td class="row2"&gt; &lt;input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;td class="row1"&gt; &lt;label for="confirm_pass"&gt;&#123;L_CONFIRM_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
-        &lt;td class="row2"&gt; &lt;input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
-    &lt;/tr&gt;
+	
+	<p>
+	Vous souhaitez maintenant ajouter un autre tag&#8201;? Reproduisez simplement la même opération.
+	</p>
+	
+	<p>
+	Pour que vos abonnés puissent ajouter ces données dans leur profil, le panneau de gestion de profil doit être 
+	activé (voir configuration générale). Vous devez modifier le template editprofile_body.tpl présent dasn le dossier 
+	templates/ du script.<br />
+	Ajoutez les champs text nécessaires en prenant soin de leur donner le nom de la colonne à laquelle il se rapporte.<br />
+	<br />
+	<em>Exemple en se basant sur les tags des exemples précédents :</em>
+	</p>
+	
+	<pre><code>&lt;table class="content"&gt;
+	&lt;tr&gt;
+		&lt;td class="row1"&gt; &lt;label&gt;&#123;L_EMAIL&#125; :&lt;/label&gt; &lt;/td&gt;
+		&lt;td class="row2"&gt; &lt;span class="texte"&gt;&#123;EMAIL&#125;&lt;/span&gt; &lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td class="row1"&gt; &lt;label for="pseudo"&gt;&#123;L_PSEUDO&#125; :&lt;/label&gt; &lt;/td&gt;
+		&lt;td class="row2"&gt; &lt;input type="text" id="pseudo" name="pseudo" value="&#123;PSEUDO&#125;" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
+	&lt;/tr&gt;
+	<span class="hl-html">&lt;tr&gt;
+		&lt;td class="row1"&gt; &lt;label for="abo_address"&gt;Votre adresse :&lt;/label&gt; &lt;/td&gt;
+		&lt;td class="row2"&gt; &lt;textarea id="abo_address" name="abo_address" rows="4" cols="50" class="text"&gt;&#123;ADDRESS&#125;&lt;/textarea&gt; &lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td class="row1"&gt; &lt;label for="abo_birthday"&gt;Anniversaire :&lt;/label&gt; &lt;/td&gt;
+		&lt;td class="row2"&gt; &lt;input type="text" id="abo_birthday" name="abo_birthday" value="&#123;BIRTHDAY&#125;" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
+	&lt;/tr&gt;</span>
+	&lt;tr&gt;
+		&lt;td class="row1"&gt; &lt;label for="language"&gt;&#123;L_LANG&#125; :&lt;/label&gt; &lt;/td&gt;
+		&lt;td class="row2"&gt; &#123;LANG_BOX&#125; &lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;!-- BEGIN password --&gt;
+	&lt;tr&gt;
+		&lt;td class="row1"&gt; &lt;label for="current_pass"&gt;&#123;password.L_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
+		&lt;td class="row2"&gt; &lt;input type="password" id="current_pass" name="current_pass" size="30" maxlength="32" class="text" /&gt; &lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;!-- END password --&gt;
+	&lt;tr&gt;
+		&lt;td class="row1"&gt; &lt;label for="new_pass"&gt;&#123;L_NEW_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
+		&lt;td class="row2"&gt; &lt;input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td class="row1"&gt; &lt;label for="confirm_pass"&gt;&#123;L_CONFIRM_PASS&#125; :&lt;/label&gt; &lt;/td&gt;
+		&lt;td class="row2"&gt; &lt;input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" class="text" /&gt; &lt;/td&gt;
+	&lt;/tr&gt;
 &lt;/table&gt;</code></pre>
-    
-    <div class="note">
-    <p><strong>Note&#160;:</strong>
-    Vous ne pouvez pas utiliser les tags personnalisés avec le moteur d'envoi en copie cachée
-    </p>
-    </div>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="p16">XVI. Define a language according to the form</h2>
-    
-    <p>
-    This feature was asked by several users of Wanewsletter. <br />
-    To define a language with the form (under reserve that this language is installed in Wanewsletter), 
-    you just have to add the following line in the code of inclusion of newsletter.php which is supplied 
-    by the generator of form&#160;:
-    </p>
-    
-    <pre><code>
+	
+	<div class="note">
+	<p><strong>Note&#160;:</strong>
+	Vous ne pouvez pas utiliser les tags personnalisés avec le moteur d'envoi en copie cachée
+	</p>
+	</div>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="p16">XVI. Define a language according to the form</h2>
+	
+	<p>
+	This feature was asked by several users of Wanewsletter. <br />
+	To define a language with the form (under reserve that this language is installed in Wanewsletter), 
+	you just have to add the following line in the code of inclusion of newsletter.php which is supplied 
+	by the generator of form&#160;:
+	</p>
+	
+	<pre><code>
 <span style="color: #0000BB;">$language </span><span style="color: #007700;">= </span><span style="color: #DD0000;">'francais'</span><span style="color: #007700;">;</span>
-    </code></pre>
-    
-    <p>Note&#160;:</p>
-    
-    <ul>
-      <li> This code <strong>must</strong> be added before the inclusion of file newsletter.php (before <code>include()</code> ) </li>
-    </ul>
-    </div>
+	</code></pre>
+	
+	<p>Note&#160;:</p>
+	
+	<ul>
+	  <li> This code <strong>must</strong> be added before the inclusion of file newsletter.php (before <code>include()</code> ) </li>
+	</ul>
+	</div>
 </div>
 
 <hr />
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
-phpCodeur</a> © 2002-2005 | WAnewsletter 2.2.7<br />
+phpCodeur</a> © 2002-2005 | WAnewsletter 2.3-dev<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
 </address>

@@ -1,38 +1,41 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License 
+	as published by the Free Software Foundation; either version 2 
+	of the License, or (at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+-->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
-
-    <!-- 
-        This program is free software; you can redistribute it and/or 
-        modify it under the terms of the GNU General Public License as 
-        published by the Free Software Foundation; either version 2 of 
-        the License, or (at your option) any later version.
-        
-        http://www.gnu.org/copyleft/gpl.html (english)
-        http://www.april.org/gnu/gpl_french.html (french)
-    -->
-    
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    
-    <title>Fichier lisez-moi - WAnewsletter</title>
-    
-    <meta name="Author" content="Bobe" />
-    <meta name="Editor" content="jEdit" />
-    <meta name="Copyright" content="phpCodeur (c) 2002-2005" />
-    
-    <link rel="contents" href="#top" title="Table des matières" />
-    <link rel="chapter" href="#config" title="Configuration requise" />
-    <link rel="chapter" href="#quickinstall" title="Installation&#160;: Explications rapides" />
-    <link rel="chapter" href="#install" title="Installation : Explications détaillées" />
-    <link rel="chapter" href="#update2.2" title="Mise à jour d'une version 2.2.x" />
-    <link rel="chapter" href="#update2.0-1" title="Mise à jour d'une version 2.1.x ou 2.0.x" />
-    <link rel="chapter" href="#upgrade1.1" title="Mise à jour d'une version 1.1" />
-    <link rel="chapter" href="#problem" title="Hébergeurs posant problème" />
-    <link rel="chapter" href="#author" title="Notes de l'auteur" />
-    <link rel="copyright" href="http://www.gnu.org/copyleft/gpl.html" hreflang="en" title="Copyleft" />
-    
-    <link rel="stylesheet" type="text/css" href="./wadoc.css" media="screen" title="Thème Wadoc" />
-
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	
+	<title>Fichier lisez-moi - WAnewsletter</title>
+	
+	<meta name="Author" content="Bobe" />
+	<meta name="Editor" content="jEdit" />
+	<meta name="Copyright" content="phpCodeur (c) 2002-2005" />
+	
+	<link rel="contents" href="#top" title="Table des matières" />
+	<link rel="chapter" href="#config" title="Configuration requise" />
+	<link rel="chapter" href="#quickinstall" title="Installation&#160;: Explications rapides" />
+	<link rel="chapter" href="#install" title="Installation : Explications détaillées" />
+	<link rel="chapter" href="#update2.2" title="Mise à jour d'une version 2.2.x" />
+	<link rel="chapter" href="#update2.0-1" title="Mise à jour d'une version 2.1.x ou 2.0.x" />
+	<link rel="chapter" href="#upgrade1.1" title="Mise à jour d'une version 1.1" />
+	<link rel="chapter" href="#problem" title="Hébergeurs posant problème" />
+	<link rel="chapter" href="#author" title="Notes de l'auteur" />
+	<link rel="copyright" href="http://www.gnu.org/copyleft/gpl.html" hreflang="en" title="Copyleft" />
+	
+	<link rel="stylesheet" type="text/css" href="./wadoc.css" media="screen" title="Thème Wadoc" />
 </head>
 <body>
 
@@ -40,196 +43,196 @@
 
 <div id="page">
 
-    <p id="preface">Prenez le temps de lire ce fichier attentivement, il contient des informations utiles.</p>
-    
-    <div class="bloc">
-    <h2>Sommaire</h2>
-    
-    <ol>
-        <li> <a href="#config">Configuration requise</a> </li>
-        <li> <a href="#quickinstall">Installation&#160;: Explications rapides</a> </li>
-        <li> <a href="#install">Installation&#160;: Explications détaillées</a> </li>
-        <li> <a href="#update2.2">Mise à jour d'une version 2.2.x</a> </li>
-        <li> <a href="#update2.0-1">Mise à jour d'une version 2.0.x/2.1.x</a> </li>
-        <li> <a href="#upgrade1.1">Mise à jour d'une version 1.1</a> </li>
-        <li> <a href="#problem">Hébergeurs posant problème</a> </li>
-        <li> <a href="#author">Notes de l'auteur</a> </li>
-    </ol>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="config">I. Configuration requise</h2>
-    
-    <p>WAnewsletter requiert une version de 
-    <abbr title="PHP: Hypertext Preprocessor" xml:lang="en" lang="en">PHP</abbr> 
-    &gt;= 4.1.0 ainsi qu'une base de données de type MySQL ou PostgreSQL.</p>
-    
-    <p>Certaines fonctionnalités secondaires peuvent ne pas être disponibles selon la 
-    configuration de votre serveur et les librairies <abbr xml:lang="en" lang="en">PHP</abbr> 
-    installées. Par exemple, le module de statistiques demande que la librairie GD soit installée.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="quickinstall">II. Installation&#160;: Explications rapides</h2>
-    
-    <p>WAnewsletter dispose d'un script d'installation simplifié au maximum, afin 
-    de permettre aux néophytes de pouvoir utiliser le script rapidement. Voici 
-    brièvement les différentes étapes nécessaires à l'installation du script&#160;:</p>
-    
-    <ul>
-        <li> Uploadez les fichiers contenus dans l'archive sur votre 
-        <abbr title="File Transfert Protocol" xml:lang="en" lang="en">FTP</abbr> 
-        (respectez bien la structure des répertoires) </li>
-        <li> Donnez les droits en écriture sur les dossiers <samp>includes/</samp>, 
-        <samp>upload/</samp> et sur le fichier <samp>config.inc.php</samp> présent 
-        dans le dossier <samp>includes/</samp> </li>
-        <li> Rendez-vous à l'adresse où se trouve le fichier <samp>install.php</samp> 
-        (ex: <samp>http://www.votredomaine.com/newsletter/setup/install.php</samp> si 
-        le script est installé dans le dossier <samp>newsletter/</samp> à la racine du site) </li>
-        <li> Remplissez le formulaire qui s'affiche et cliquez sur le bouton de validation </li>
-        <li> Une fois le script installé, retirez les droits en écriture sur le dossier 
-        <samp>includes/</samp> </li>
-        <li> Pour finir, supprimez le dossier <samp>setup/</samp> de votre ftp afin 
-        d'éviter une réinstallation </li>
-    </ul>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="install">III. Installation&#160;: Explications détaillées</h2>
-    
-    <p>Pour installer correctement WAnewsletter, vous devez commencer par uploader les 
-    fichiers du script sur votre <abbr title="File Transfert Protocol" xml:lang="en" lang="en">ftp</abbr>.
-    Tous les fichiers doivent être uploadés en mode <var>ASCII</var>, hormis les quelques 
-    images utilisées par le script qui se trouvent dans les dossiers <samp>images/</samp> 
-    et <samp>templates/images/</samp>. Les images doivent être uploadées en mode binaire.</p>
-    
-    <p>Toujours dans votre client <abbr xml:lang="en" lang="en">ftp</abbr> favori, donnez 
-    les droits en écriture sur les dossiers <samp>upload/</samp>, <samp>tmp/</samp>, 
-    <samp>stats/</samp> et <samp>includes/</samp> ainsi que sur le fichier <samp>config.inc.php</samp> 
-    qui se trouve dans le dossier <samp>includes/</samp>.</p>
-    
-    <p><em>Explications&#160;:</em><br />
-    <br />
-    Le dossier <samp>upload/</samp> contiendra les divers fichiers que vous joindrez 
-    éventuellement à vos envois. Pour que le script puisse ajouter correctement ces fichiers 
-    dans le dossier <samp>upload/</samp>, celui ci doit être accessible en écriture. Le script 
-    propose une option permettant de stocker les fichiers joints sur un serveur 
-    <abbr xml:lang="en" lang="en">ftp</abbr> distant. Dans ce cas, vous pouvez supprimer le 
-    dossier <samp>upload/</samp>.</p>
-    
-    <p>À propos du dossier <samp>tmp/</samp>, veuillez voir la section correspondante 
-    dans la faq du script.</p>
-    
-    <p>Le dossier <samp>stats/</samp> contiendra les fichiers nécessaires au module 
-    de statistiques. Ce dossier est inutile si la librairie GD n'est pas disponible sur votre serveur.</p>
-    
-    <p>Lors de l'installation, le script créé le fichier de configuration et le place 
-    dans le dossier <samp>includes/</samp>. Ce dossier doit donc également accessible 
-    en écriture, mais seulement le temps de l'installation&#8201;! Une fois celle ci 
-    terminée, retirez les droits en écriture sur ce dossier.</p>
-    
-    <p>Une fois les fichiers en place sur le serveur et les droits en écriture attribués, 
-    rendez vous à l'adresse où se trouve le fichier <samp>install.php</samp>.</p>
-    
-    <p>Vous arrivez maintenant sur le formulaire d'installation. Notez que si vous changez 
-    de langue avant de cliquer sur le bouton de validation, vous retomberez sur la même 
-    page, mais dans la langue choisie.</p>
-    
-    <p>Le nom du serveur de base de données, la plupart du temps, est <var>localhost</var> 
-    mais cela peut etre autre chose. Si vous n'avez pas connaissance du nom de votre base 
-    de données et/ou des paramètres d'accés nécessaires, renseignez vous auprès de votre 
-    hébergeur (note: le mot de passe d'accés n'est pas nécessaire pour la validation du 
-    formulaire; pratique pour les tests en local).</p>
-    
-    <p>Il vous est également demandé un prefixe pour les tables, ceci afin d'éviter 
-    d'éventuels conflits avec d'autre tables déja présentes, et qui auraient le même 
-    nom qu'une des tables de WAnewsletter.</p>
-    
-    <p>Vous devez ensuite entrer des paramètres pour l'administration du script, son accés 
-    étant protégé. Vous pourrez ultérieurement ajouter d'autres utilisateurs avec des 
-    droits d'accés personnalisés. Une fois que le script est installé, retirez bien les 
-    droits en écriture sur le dossier <samp>includes/</samp> et sur le fichier 
-    <samp>config.inc.php</samp>, et supprimez le dossier <samp>setup/</samp> de votre 
-    <abbr xml:lang="en" lang="en">ftp</abbr>.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="update2.2">IV. Mise à jour d'une version 2.2.x</h2>
-    
-    <p>Pour mettre votre version 2.2.x à jour, téléchargez la nouvelle version, remplacez 
-    les fichiers de votre version par ceux de la nouvelle (gardez le fichier 
-    <samp>config.inc.php</samp>, ainsi que le contenu des dossiers <samp>upload/</samp> 
-    et <samp>stats/</samp> s'il y a lieu), puis tapez l'adresse vers le fichier 
-    <samp>install.php</samp> du script. Saisissez dans le formulaire qui s'affiche 
-    votre pseudo et mot de passe d'administrateur et laissez faire le script.</p>
-    
-    <p>Une fois la mise à jour terminée, supprimez le dossier <samp>setup/</samp>.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="update2.0-1">V. Mise à jour d'une version 2.1.x ou 2.0.x</h2>
-    
-    <p>Pour mettre votre version 2.0.x ou 2.1.x à jour, téléchargez la nouvelle version, 
-    remplacez les fichiers de votre version par ceux de la nouvelle (gardez le fichier 
-    config.inc.php, ainsi que le contenu des dossiers <samp>admin/upload/</samp> et <samp>stats/</samp>).
-    Il vous est fortement conseillé de faire une sauvegarde des tables du script avant 
-    de lancer la mise à jour&#8201;!</p>
-    
-    <p>Donnez les droits en écriture sur le dossier <samp>includes/</samp> le temps de 
-    la mise à jour, puis tapez l'adresse vers le fichier <samp>update.php</samp> du 
-    script. Saisissez ensuite dans le formulaire qui s'affiche votre pseudo et mot de 
-    passe d'administrateur et laissez faire le script.</p>
-    
-    <p>Une fois la mise à jour terminée, supprimez le dossier <samp>setup/</samp> et 
-    retirez les droits en écriture sur le dossier <samp>includes/</samp>.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="upgrade1.1">VI. Mise à jour d'une version 1.1</h2>
-    
-    <p>Aucun script de mise à jour à partir d'une version 1.1 n'est fourni à partir des 
-    versions 2.2.x. Vous pouvez contourner le problème en mettant à jour vers une version 
-    2.1.x puis de là, mettre à jour vers une version 2.2.x.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="problem">VII. Hébergeurs posant problème</h2>
-    
-    <ul>
-        <li> Sur free.fr, le nombre total d'emails que vous pouvez envoyer est de 1000 par semaine </li>
-        <li> Sur multimania/lycos, les envois d'emails (en nombre de destinataires) sont limités 
-        à 150 par jour</li>
-    </ul>
-    
-    <p>Si le safe mode est activé sur votre serveur, le script exige quelques légers aménagements, 
-    reportez vous à la <a href="./faq.fr.html#8" hreflang="fr"
-    title="Dossier temporaire du script, safe mode et open_basedir">FAQ du script</a>.</p>
-    </div>
-    
-    <div class="bloc">
-    <h2 id="author">VIII. Notes de l'auteur</h2>
-    
-    <p>Ce script est diffusé sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">licence 
-    <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>. Concrètement, 
-    cela signifie que vous pouvez l'utiliser ou le modifier comme bon vous semble, du moment 
-    que les copyright et mentions d'auteur restent tels quels. Lisez attentivement la 
-    <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">licence 
-    <abbr xml:lang="en" lang="en">GPL</abbr></a> pour plus de détails.</p>
-    
-    <p>Ce script ne contient aucune forme de publicité dans les emails (mentions en bas 
-    des emails ou autre). Mais vous pouvez, si vous le désirez et êtes satisfait de ce script, 
-    mettre un lien vers le site phpCodeur quelque part sur votre site (en bas du formulaire 
-    d'inscription par exemple). Un bouton 88x31 de WAnewsletter est également disponible 
-    dans le dossier <samp>images/</samp> pour ceux qui le désirent.</p>
-    </div>
-    
+	<p id="preface">Prenez le temps de lire ce fichier attentivement, il contient des informations utiles.</p>
+	
+	<div class="bloc">
+	<h2>Sommaire</h2>
+	
+	<ol>
+		<li> <a href="#config">Configuration requise</a> </li>
+		<li> <a href="#quickinstall">Installation&#160;: Explications rapides</a> </li>
+		<li> <a href="#install">Installation&#160;: Explications détaillées</a> </li>
+		<li> <a href="#update2.2">Mise à jour d'une version 2.2.x</a> </li>
+		<li> <a href="#update2.0-1">Mise à jour d'une version 2.0.x/2.1.x</a> </li>
+		<li> <a href="#upgrade1.1">Mise à jour d'une version 1.1</a> </li>
+		<li> <a href="#problem">Hébergeurs posant problème</a> </li>
+		<li> <a href="#author">Notes de l'auteur</a> </li>
+	</ol>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="config">I. Configuration requise</h2>
+	
+	<p>WAnewsletter requiert une version de 
+	<abbr title="PHP: Hypertext Preprocessor" xml:lang="en" lang="en">PHP</abbr> 
+	&gt;= 4.1.0 ainsi qu'une base de données de type MySQL ou PostgreSQL.</p>
+	
+	<p>Certaines fonctionnalités secondaires peuvent ne pas être disponibles selon la 
+	configuration de votre serveur et les librairies <abbr xml:lang="en" lang="en">PHP</abbr> 
+	installées. Par exemple, le module de statistiques demande que la librairie GD soit installée.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="quickinstall">II. Installation&#160;: Explications rapides</h2>
+	
+	<p>WAnewsletter dispose d'un script d'installation simplifié au maximum, afin 
+	de permettre aux néophytes de pouvoir utiliser le script rapidement. Voici 
+	brièvement les différentes étapes nécessaires à l'installation du script&#160;:</p>
+	
+	<ul>
+		<li> Uploadez les fichiers contenus dans l'archive sur votre 
+		<abbr title="File Transfert Protocol" xml:lang="en" lang="en">FTP</abbr> 
+		(respectez bien la structure des répertoires) </li>
+		<li> Donnez les droits en écriture sur les dossiers <samp>includes/</samp>, 
+		<samp>upload/</samp> et sur le fichier <samp>config.inc.php</samp> présent 
+		dans le dossier <samp>includes/</samp> </li>
+		<li> Rendez-vous à l'adresse où se trouve le fichier <samp>install.php</samp> 
+		(ex: <samp>http://www.votredomaine.com/newsletter/setup/install.php</samp> si 
+		le script est installé dans le dossier <samp>newsletter/</samp> à la racine du site) </li>
+		<li> Remplissez le formulaire qui s'affiche et cliquez sur le bouton de validation </li>
+		<li> Une fois le script installé, retirez les droits en écriture sur le dossier 
+		<samp>includes/</samp> </li>
+		<li> Pour finir, supprimez le dossier <samp>setup/</samp> de votre ftp afin 
+		d'éviter une réinstallation </li>
+	</ul>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="install">III. Installation&#160;: Explications détaillées</h2>
+	
+	<p>Pour installer correctement WAnewsletter, vous devez commencer par uploader les 
+	fichiers du script sur votre <abbr title="File Transfert Protocol" xml:lang="en" lang="en">ftp</abbr>.
+	Tous les fichiers doivent être uploadés en mode <var>ASCII</var>, hormis les quelques 
+	images utilisées par le script qui se trouvent dans les dossiers <samp>images/</samp> 
+	et <samp>templates/images/</samp>. Les images doivent être uploadées en mode binaire.</p>
+	
+	<p>Toujours dans votre client <abbr xml:lang="en" lang="en">ftp</abbr> favori, donnez 
+	les droits en écriture sur les dossiers <samp>upload/</samp>, <samp>tmp/</samp>, 
+	<samp>stats/</samp> et <samp>includes/</samp> ainsi que sur le fichier <samp>config.inc.php</samp> 
+	qui se trouve dans le dossier <samp>includes/</samp>.</p>
+	
+	<p><em>Explications&#160;:</em><br />
+	<br />
+	Le dossier <samp>upload/</samp> contiendra les divers fichiers que vous joindrez 
+	éventuellement à vos envois. Pour que le script puisse ajouter correctement ces fichiers 
+	dans le dossier <samp>upload/</samp>, celui ci doit être accessible en écriture. Le script 
+	propose une option permettant de stocker les fichiers joints sur un serveur 
+	<abbr xml:lang="en" lang="en">ftp</abbr> distant. Dans ce cas, vous pouvez supprimer le 
+	dossier <samp>upload/</samp>.</p>
+	
+	<p>À propos du dossier <samp>tmp/</samp>, veuillez voir la section correspondante 
+	dans la faq du script.</p>
+	
+	<p>Le dossier <samp>stats/</samp> contiendra les fichiers nécessaires au module 
+	de statistiques. Ce dossier est inutile si la librairie GD n'est pas disponible sur votre serveur.</p>
+	
+	<p>Lors de l'installation, le script créé le fichier de configuration et le place 
+	dans le dossier <samp>includes/</samp>. Ce dossier doit donc également accessible 
+	en écriture, mais seulement le temps de l'installation&#8201;! Une fois celle ci 
+	terminée, retirez les droits en écriture sur ce dossier.</p>
+	
+	<p>Une fois les fichiers en place sur le serveur et les droits en écriture attribués, 
+	rendez vous à l'adresse où se trouve le fichier <samp>install.php</samp>.</p>
+	
+	<p>Vous arrivez maintenant sur le formulaire d'installation. Notez que si vous changez 
+	de langue avant de cliquer sur le bouton de validation, vous retomberez sur la même 
+	page, mais dans la langue choisie.</p>
+	
+	<p>Le nom du serveur de base de données, la plupart du temps, est <var>localhost</var> 
+	mais cela peut etre autre chose. Si vous n'avez pas connaissance du nom de votre base 
+	de données et/ou des paramètres d'accés nécessaires, renseignez vous auprès de votre 
+	hébergeur (note: le mot de passe d'accés n'est pas nécessaire pour la validation du 
+	formulaire; pratique pour les tests en local).</p>
+	
+	<p>Il vous est également demandé un prefixe pour les tables, ceci afin d'éviter 
+	d'éventuels conflits avec d'autre tables déja présentes, et qui auraient le même 
+	nom qu'une des tables de WAnewsletter.</p>
+	
+	<p>Vous devez ensuite entrer des paramètres pour l'administration du script, son accés 
+	étant protégé. Vous pourrez ultérieurement ajouter d'autres utilisateurs avec des 
+	droits d'accés personnalisés. Une fois que le script est installé, retirez bien les 
+	droits en écriture sur le dossier <samp>includes/</samp> et sur le fichier 
+	<samp>config.inc.php</samp>, et supprimez le dossier <samp>setup/</samp> de votre 
+	<abbr xml:lang="en" lang="en">ftp</abbr>.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="update2.2">IV. Mise à jour d'une version 2.2.x</h2>
+	
+	<p>Pour mettre votre version 2.2.x à jour, téléchargez la nouvelle version, remplacez 
+	les fichiers de votre version par ceux de la nouvelle (gardez le fichier 
+	<samp>config.inc.php</samp>, ainsi que le contenu des dossiers <samp>upload/</samp> 
+	et <samp>stats/</samp> s'il y a lieu), puis tapez l'adresse vers le fichier 
+	<samp>install.php</samp> du script. Saisissez dans le formulaire qui s'affiche 
+	votre pseudo et mot de passe d'administrateur et laissez faire le script.</p>
+	
+	<p>Une fois la mise à jour terminée, supprimez le dossier <samp>setup/</samp>.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="update2.0-1">V. Mise à jour d'une version 2.1.x ou 2.0.x</h2>
+	
+	<p>Pour mettre votre version 2.0.x ou 2.1.x à jour, téléchargez la nouvelle version, 
+	remplacez les fichiers de votre version par ceux de la nouvelle (gardez le fichier 
+	config.inc.php, ainsi que le contenu des dossiers <samp>admin/upload/</samp> et <samp>stats/</samp>).
+	Il vous est fortement conseillé de faire une sauvegarde des tables du script avant 
+	de lancer la mise à jour&#8201;!</p>
+	
+	<p>Donnez les droits en écriture sur le dossier <samp>includes/</samp> le temps de 
+	la mise à jour, puis tapez l'adresse vers le fichier <samp>update.php</samp> du 
+	script. Saisissez ensuite dans le formulaire qui s'affiche votre pseudo et mot de 
+	passe d'administrateur et laissez faire le script.</p>
+	
+	<p>Une fois la mise à jour terminée, supprimez le dossier <samp>setup/</samp> et 
+	retirez les droits en écriture sur le dossier <samp>includes/</samp>.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="upgrade1.1">VI. Mise à jour d'une version 1.1</h2>
+	
+	<p>Aucun script de mise à jour à partir d'une version 1.1 n'est fourni à partir des 
+	versions 2.2.x. Vous pouvez contourner le problème en mettant à jour vers une version 
+	2.1.x puis de là, mettre à jour vers une version 2.2.x.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="problem">VII. Hébergeurs posant problème</h2>
+	
+	<ul>
+		<li> Sur free.fr, le nombre total d'emails que vous pouvez envoyer est de 1000 par semaine </li>
+		<li> Sur multimania/lycos, les envois d'emails (en nombre de destinataires) sont limités 
+		à 150 par jour</li>
+	</ul>
+	
+	<p>Si le safe mode est activé sur votre serveur, le script exige quelques légers aménagements, 
+	reportez vous à la <a href="./faq.fr.html#8" hreflang="fr"
+	title="Dossier temporaire du script, safe mode et open_basedir">FAQ du script</a>.</p>
+	</div>
+	
+	<div class="bloc">
+	<h2 id="author">VIII. Notes de l'auteur</h2>
+	
+	<p>Ce script est diffusé sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">licence 
+	<abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>. Concrètement, 
+	cela signifie que vous pouvez l'utiliser ou le modifier comme bon vous semble, du moment 
+	que les copyright et mentions d'auteur restent tels quels. Lisez attentivement la 
+	<a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">licence 
+	<abbr xml:lang="en" lang="en">GPL</abbr></a> pour plus de détails.</p>
+	
+	<p>Ce script ne contient aucune forme de publicité dans les emails (mentions en bas 
+	des emails ou autre). Mais vous pouvez, si vous le désirez et êtes satisfait de ce script, 
+	mettre un lien vers le site phpCodeur quelque part sur votre site (en bas du formulaire 
+	d'inscription par exemple). Un bouton 88x31 de WAnewsletter est également disponible 
+	dans le dossier <samp>images/</samp> pour ceux qui le désirent.</p>
+	</div>
+	
 </div>
 
 <hr />
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
-phpCodeur</a> © 2002-2005 | WAnewsletter 2.2.7<br />
+phpCodeur</a> © 2002-2005 | WAnewsletter 2.3-dev<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
 </address>

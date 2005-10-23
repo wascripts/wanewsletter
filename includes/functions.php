@@ -201,7 +201,7 @@ function load_settings($admindata = array())
 	$template_path = $waroot . 'templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
 	
 	$output = new output($template_path);
-	$output->addScript($waroot . 'templates/compatible.js');
+	$output->addScript($waroot . 'templates/DOM-Compat/DOM-Compat.js');
 	
 	if( defined('IN_ADMIN') )
 	{

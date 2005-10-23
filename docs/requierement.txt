@@ -21,4 +21,4 @@ version_compare()       => 4.1.0
 
 Script WAnewsletter fonctionnel sur des versions de php >= 4.1.0
 
-MySQL 3.x, MySQL 4.x, SQL Server ou PostgreSQL 7
+MySQL 3.x, MySQL 4.x ou PostgreSQL 7
