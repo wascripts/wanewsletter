@@ -767,5 +767,4 @@ class output extends Template {
 	}
 }
 
-}
 ?>
