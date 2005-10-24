@@ -218,7 +218,7 @@ class mysql_backup {
 	var $show_create = FALSE;
 	var $crlf        = '';
 	
-	/*
+	/**
 	 * Protection des noms de table et de colonnes avec un quote inversé ( ` )
 	 * 
 	 * @access public
@@ -229,7 +229,10 @@ class mysql_backup {
 	{
 		$this->crlf = $crlf;
 		
-		if( DATABASE == 'mysql4' || preg_match('/^3\.2[3-9]\.[2-9][1-9]/', mysql_get_client_info()) )
+		//
+		// La requète 'SHOW CREATE TABLE' est disponible à partir de MySQL 3.23.20
+		//
+		if( DATABASE == 'mysql4' || version_compare(mysql_get_client_info(), '3.23.20', '>=') == true )
 		{
 			$this->show_create = TRUE;
 		}
