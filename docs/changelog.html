@@ -104,6 +104,7 @@
 <ul>
 	<li> Modifications pour rendre Wanewsletter compatible avec PHP5 </li>
 	<li> Retrait du support de MsSQL </li>
+	<li> Passage en mode <code>magic_quotes_gpc</code> à <code>Off</code> </li>
 </ul>
 
 <h3 id="version-2.2.7">Version 2.2.7</h3>
@@ -119,6 +120,8 @@
 	<li> Bug fix&#160;: Suppression de plusieurs appels inutiles à <code>stripslashes()</code> dans <samp>admin/view.php</samp> </li>
 	<li> Security fix&#160;: Faille potentielle dans le fichier <samp>includes/class.attach.php</samp> 
 	(injection <abbr title="Structured Query Language" xml:lang="en" lang="en">SQL</abbr>) </li>
+	<li> Bug fix&#160;: Caractère <samp>`&lt;`</samp> spécial en <abbr title="HyperText Markup Language" xml:lang="en" 
+	lang="en">HTML</abbr> interprété dans la fenêtre de prévisualisation des newsletters au format texte </li>
 </ul>
 
 <h3 id="version-2.2.6">Version 2.2.6</h3>
