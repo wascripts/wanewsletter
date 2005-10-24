@@ -467,16 +467,21 @@ class output extends Template {
 		$charset = ( !empty($lang['CHARSET']) ) ? $lang['CHARSET'] : 'ISO-8859-1';
 		
 		$this->send_headers();
-		
-		echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n";
-		echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"{$lg}\" lang=\"{$lg}\" dir=\"{$dir}\">\n";
-		echo "<head>\n" . $this->meta_redirect;
-		echo "<title>$page_title</title>\n";
-		echo "<style type=\"text/css\" media=\"screen\">\n";
-		echo 'body { margin: 10px; text-align: left; }' . "\n";
-		echo "</style>\n</head>\n<body>\n\n<div>\n";
-		echo $content;
-		echo "\n</div>\n\n</body>\n</html>\n";
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $lg; ?>" lang="<?php echo $lg; ?>" dir="<?php echo $dir; ?>">
+<head>
+	<?php echo $this->meta_redirect; ?>
+	<title><?php echo $page_title; ?></title>
+	<style type="text/css" media="screen">
+	body { margin: 10px; text-align: left; }
+	</style>
+</head>
+<body>
+	<div><?php echo $content; ?></div>
+</body>
+</html>
+<?php
 		
 		exit;
 	}
