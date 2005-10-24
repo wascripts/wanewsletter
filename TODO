@@ -7,7 +7,6 @@
 - Enregistrement de l'IP lors d'une inscription ? (et checker pour empécher le spam de DB)
 - revoir la partie newsletter.php/class.form.php pour permettre les inscriptions à plusieurs listes en même temps
   ainsi que fournir une API utilisable dans d'autres applis PHP (phpBB, SPIP, ...)
-- Suppression du support de MSsql
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/
 - Pas de mention du code de compte si panneau de gestion de compte est désactivé (?)
 - email envoyé à admin lors de nouvel inscription: Limiter aux inscriptions confirmées si liste demande confirmation ?

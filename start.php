@@ -31,6 +31,11 @@ error_reporting(E_ALL);
 $starttime = array_sum(explode(' ', microtime()));
 
 //
+// Initialisation du chemin d'inclusion
+//
+set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__));
+
+//
 // Intialisation des variables pour éviter toute injection malveillante de code 
 //
 $simple_header = $error = FALSE;
@@ -38,7 +43,7 @@ $nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = arr
 $output = NULL;
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = $prefixe = '';
 
-include $waroot . 'includes/config.inc.php';
+include 'includes/config.inc.php';
 
 if( !defined('NL_INSTALLED') )
 {
@@ -55,11 +60,11 @@ if( !defined('NL_INSTALLED') )
 	exit;
 }
 
-require_once $waroot . 'includes/functions.php';
-require_once $waroot . 'includes/constantes.php';
-require_once $waroot . 'includes/template.php';
-require_once $waroot . 'includes/class.output.php';
-require_once $waroot . 'sql/db_type.php';
+require_once 'includes/functions.php';
+require_once 'includes/constantes.php';
+require_once 'includes/template.php';
+require_once 'includes/class.output.php';
+require_once 'sql/db_type.php';
 
 //
 // Désactivation de magic_quotes_runtime + 
