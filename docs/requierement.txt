@@ -3,21 +3,25 @@
 ////////////////////////////////
 
 trigger_error()          => 4.0.1
-array_diff()             => 4.0.1 (inutilisable en 4.0.4) (view.php)
-array_unique()           => 4.0.1 (inutilisable en 4.0.4) (tools.php)
+array_diff()             => 4.0.1 (inutilisable en 4.0.4) (admin/view.php)
+array_unique()           => 4.0.1 (inutilisable en 4.0.4) (admin/tools.php)
 set_error_handler()      => 4.0.1
 is_uploaded_file()       => 4.0.3
 move_uploaded_file()     => 4.0.3
 pathinfo()               => 4.0.3
 array_sum()              => 4.0.4
-preg_split()             => 4.0.5 (avec PREG_SPLIT_DELIM_CAPTURE) (functions.php)
-mysql_get_client_info()  => 4.0.5 (tools.php)
+preg_split()             => 4.0.5 (avec PREG_SPLIT_DELIM_CAPTURE) (includes/functions.php)
+mysql_get_client_info()  => 4.0.5 (admin/tools.php)
 array_map()              => 4.0.6
 $_REQUEST                => 4.1.0
 $_GET, $_POST ..etc ..   => 4.1.0 plus besoin de transvaser les tab $HTTP_*_VARS
 version_compare()        => 4.1.0
-mysql_real_escape_string => 4.3.0 mysql.php et mysql4.php
-pg_escape_string()       => 4.2.0 postgre.php (et nécessite également PostgreSQL >= 7.2
+mysql_real_escape_string => 4.3.0 sql/mysql.php et sql/mysql4.php
+pg_escape_string()       => 4.2.0 sql/postgre.php (et nécessite également PostgreSQL >= 7.2
+constante PATH_SEPARATOR => 4.3.0-RC2 start.php
+constantes UPLOAD_ERR_*  => 4.3.0 Utilisée dans includes/class.attach.php et admin/envoi.php
+set_include_path()       => 4.3.0 start.php
+get_include_path()       => 4.3.0 start.php
 
 ////////////////////////////////
 
