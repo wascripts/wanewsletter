@@ -120,7 +120,7 @@ $supported_db = array(
 		'delimiter2'   => ';'
 	),
 	'postgre' => array(
-		'Name'         => 'Postgre SQL',
+		'Name'         => 'Postgre SQL >= 7.2',
 		'prefixe_file' => 'postgre',
 		'extension'    => 'pgsql',
 		'delimiter'    => ';',
@@ -143,15 +143,13 @@ $sql_drop[] = "DROP TABLE wa_log_files";
 $sql_drop[] = "DROP TABLE wa_session";
 
 //
-// On ne peut pas utiliser ici la fonction version_compare() pour comparer la version de php avec 
-// la version demandée. (car si php < 4.1.0, la version_compare n'existe pas)
-// On va donc vérifier si la version_compare() existe tout simplement :)
+// Vérification de la version de PHP disponible. Il nous faut la version 4.3.0 minimum
 //
-if( !function_exists('version_compare') )
+if( !function_exists('version_compare') || version_compare(phpversion(), '4.3.0', '>=') == false )
 {
-	header('Content-Type: text/plain; charset=ISO-8859-15');
+	header('Content-Type: text/plain; charset=ISO-8859-1');
 	
-	echo 'Désolé mais WAnewsletter ' . $new_version . ' requiert une version de PHP supérieure ou égale à la version 4.1.0';
+	echo "Désolé mais WAnewsletter $new_version requiert une version de PHP supérieure ou égale à la version 4.3.0";
 	exit;
 }
 
@@ -163,12 +161,12 @@ require $waroot . 'includes/functions.php';
 //
 set_magic_quotes_runtime(0);
 
-if( !get_magic_quotes_gpc() )
+if( get_magic_quotes_gpc() )
 {
-	emul_magic_quotes_gpc($_GET);
-	emul_magic_quotes_gpc($_POST);
-	emul_magic_quotes_gpc($_COOKIE);
-	emul_magic_quotes_gpc($_REQUEST);
+	strip_magic_quotes_gpc($_GET);
+	strip_magic_quotes_gpc($_POST);
+	strip_magic_quotes_gpc($_COOKIE);
+	strip_magic_quotes_gpc($_REQUEST);
 }
 
 $vararray = array('dbtype', 'dbhost', 'dbuser', 'dbpassword', 'dbname', 'prefixe');

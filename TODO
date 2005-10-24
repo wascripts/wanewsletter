@@ -14,6 +14,10 @@
 - confirmation à chaque demande d'inscription, pas seulement la première
 - Permettre l'envoi d'emails multipart (text/html) ?
 - répertoire tmp/ absent par défaut ?
+- Mettre à jour le module de statistiques (notamment le graphique à barre, voir /home/web/devel-zone/PHP/GD/barres.php)
+- Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
+- Petit module pour gérer la config, plutôt que de balader une variable $nl_config un peu partout, ce qui est assez crade
+- voir pour refaire marcher includes/functions.php[is_available_extension()]
 
 
 Coding

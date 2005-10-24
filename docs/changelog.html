@@ -116,6 +116,9 @@
 	<li> Bug fix&#160;: Wanewsletter et compatibilité avec PHP5 (l’appel de n’importe quelle page affichait une page blanche) </li>
 	<li> Bug fix&#160;: <samp>Notice&#160;: Trying to get property of non-object in class.output.php on line 323</samp> 
 	lors de la déconnexion de l’administration (avec le mode de débuggage activé) </li>
+	<li> Bug fix&#160;: Suppression de plusieurs appels inutiles à <code>stripslashes()</code> dans <samp>admin/view.php</samp> </li>
+	<li> Security fix&#160;: Faille potentielle dans le fichier <samp>includes/class.attach.php</samp> 
+	(injection <abbr title="Structured Query Language" xml:lang="en" lang="en">SQL</abbr>) </li>
 </ul>
 
 <h3 id="version-2.2.6">Version 2.2.6</h3>

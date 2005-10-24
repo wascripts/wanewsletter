@@ -81,11 +81,11 @@ class Auth {
 	{
 		global $db, $admindata;
 		
-		$sql = "SELECT li.*, aa.auth_view, aa.auth_edit, aa.auth_del, aa.auth_send, 
-				aa.auth_import, aa.auth_export, aa.auth_ban, aa.auth_attach 
-			FROM " . LISTE_TABLE . " AS li 
-			LEFT JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = " . $admin_id . " 
-				AND aa.liste_id = li.liste_id 
+		$sql = "SELECT li.*, aa.auth_view, aa.auth_edit, aa.auth_del, aa.auth_send,
+				aa.auth_import, aa.auth_export, aa.auth_ban, aa.auth_attach
+			FROM " . LISTE_TABLE . " AS li
+			LEFT JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = $admin_id
+				AND aa.liste_id = li.liste_id
 			ORDER BY li.liste_name ASC";
 		if( !($result = $db->query($sql)) )
 		{

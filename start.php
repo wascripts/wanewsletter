@@ -67,13 +67,13 @@ require_once $waroot . 'sql/db_type.php';
 //
 set_magic_quotes_runtime(0);
 
-if( !get_magic_quotes_gpc() )
+if( get_magic_quotes_gpc() )
 {
-	emul_magic_quotes_gpc($_GET);
-	emul_magic_quotes_gpc($_POST);
-	emul_magic_quotes_gpc($_COOKIE);
-	emul_magic_quotes_gpc($_FILES);
-	emul_magic_quotes_gpc($_REQUEST);
+	strip_magic_quotes_gpc($_GET);
+	strip_magic_quotes_gpc($_POST);
+	strip_magic_quotes_gpc($_COOKIE);
+	strip_magic_quotes_gpc($_FILES);
+	strip_magic_quotes_gpc($_REQUEST);
 }
 
 //

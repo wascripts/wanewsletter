@@ -229,7 +229,7 @@ class Session {
 		if( !empty($_COOKIE[$this->cfg_cookie['cookie_name'] . '_sessid']) || !empty($_COOKIE[$this->cfg_cookie['cookie_name'] . '_data']) )
 		{
 			$this->session_id = ( !empty($_COOKIE[$this->cfg_cookie['cookie_name'] . '_sessid']) ) ? $_COOKIE[$this->cfg_cookie['cookie_name'] . '_sessid'] : '';
-			$sessiondata = ( !empty($_COOKIE[$this->cfg_cookie['cookie_name'] . '_data']) ) ? unserialize(stripslashes($_COOKIE[$this->cfg_cookie['cookie_name'] . '_data'])) : '';
+			$sessiondata = ( !empty($_COOKIE[$this->cfg_cookie['cookie_name'] . '_data']) ) ? unserialize($_COOKIE[$this->cfg_cookie['cookie_name'] . '_data']) : '';
 		}
 		else
 		{
@@ -251,8 +251,8 @@ class Session {
 			// Récupération des infos sur la session et l'utilisateur 
 			//
 			$sql = "SELECT a.*, s.* 
-				FROM " . ADMIN_TABLE . " AS a, " . SESSIONS_TABLE . " AS s 
-				WHERE s.session_id = '" . $this->session_id . "' 
+				FROM " . ADMIN_TABLE . " AS a, " . SESSIONS_TABLE . " AS s
+				WHERE s.session_id = '{$this->session_id}'
 					AND a.admin_id = s.admin_id";
 			if( !($result = $db->query($sql)) )
 			{
@@ -280,8 +280,8 @@ class Session {
 					{
 						$sql = "UPDATE " . SESSIONS_TABLE . " 
 							SET session_time = $current_time, 
-								session_liste = " . $row['session_liste'] . " 
-							WHERE session_id = '" . $this->session_id . "'";
+								session_liste = $row[session_liste]
+							WHERE session_id = '{$this->session_id}'";
 						if( !$db->query($sql) )
 						{
 							trigger_error('Impossible de mettre à jour la session en cours', CRITICAL_ERROR);
@@ -302,7 +302,7 @@ class Session {
 						
 						$sql = "DELETE FROM " . SESSIONS_TABLE . " 
 							WHERE session_time < $expiry_time 
-								AND session_id <> '" . $this->session_id . "'";
+								AND session_id <> '{$this->session_id}'";
 						if( !$db->query($sql) )
 						{
 							trigger_error('Impossible de supprimer les sessions périmées', CRITICAL_ERROR);
@@ -352,7 +352,7 @@ class Session {
 		if( $this->session_id != '' )
 		{
 			$sql = "DELETE FROM " . SESSIONS_TABLE . " 
-				WHERE session_id = '" . $this->session_id . "' 
+				WHERE session_id = '{$this->session_id}' 
 					AND admin_id = " . $admin_id;
 			if( !$db->query($sql) )
 			{
@@ -429,7 +429,7 @@ class Session {
 	 * Encodage des IP pour stockage et comparaisons plus simples 
 	 * Importé de phpBB et modifié 
 	 * 
-	 * @param string $dotquat_ip    Ip 
+	 * @param string $dotquat_ip
 	 * 
 	 * @return string
 	 */

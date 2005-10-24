@@ -27,7 +27,7 @@ class sql {
 
 	var $connect_id   = ''; 
 	var $query_result = ''; 
-	var $trc_started  = 0; 
+	var $trc_started  = 0;
 	var $sql_error    = array('errno' => '', 'message' => '', 'query' => ''); 
 	
 	var $queries      = 0; 
@@ -370,7 +370,7 @@ class sql {
 	
 	function escape($str)
 	{
-		return $str; 
+		return pg_escape_string($str); 
 	}
 	
 	function close_connexion()

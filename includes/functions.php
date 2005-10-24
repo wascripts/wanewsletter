@@ -617,16 +617,16 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 }
 
 /**
- * emul_magic_quotes_gpc()
+ * strip_magic_quotes_gpc()
  * 
- * Simulation de la configuration magic_quotes_gpc à on
+ * Annule l'effet produit par l'option de configuration magic_quotes_gpc à On
  * Fonction récursive
  * 
  * @param array $data    Tableau des données
  * 
  * @return void
  */
-function emul_magic_quotes_gpc(&$data)
+function strip_magic_quotes_gpc(&$data)
 {
 	if( is_array($data) )
 	{
@@ -634,11 +634,11 @@ function emul_magic_quotes_gpc(&$data)
 		{
 			if( is_array($val) )
 			{
-				emul_magic_quotes_gpc($val);
+				strip_magic_quotes_gpc($val);
 			}
 			else if( is_string($val) )
 			{
-				$data[$key] = addslashes($val);
+				$data[$key] = stripslashes($val);
 			}
 		}
 	}

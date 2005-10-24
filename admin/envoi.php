@@ -325,7 +325,7 @@ switch( $mode )
 						}
 					}
 					
-					$total_cid = preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', stripslashes($logdata['log_body_html']), $matches);
+					$total_cid = preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $logdata['log_body_html'], $matches);
 					
 					for( $i = 0; $i < $total_cid; $i++ )
 					{
@@ -492,10 +492,10 @@ switch( $mode )
 		//
 		if( $mode == 'attach' && !empty($logdata['log_id']) && $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 		{
-			$tmp_filename = ( !empty($_FILES['join_file']['tmp_name']) && $_FILES['join_file']['tmp_name'] != 'none' ) ? str_replace('\\\\', '\\', $_FILES['join_file']['tmp_name']) : ( ( !empty($_POST['join_file']) ) ? trim(stripslashes($_POST['join_file'])) : '' );
-			$filename     = ( !empty($_FILES['join_file']['name']) ) ? stripslashes($_FILES['join_file']['name']) : '';
+			$tmp_filename = ( !empty($_FILES['join_file']['tmp_name']) && $_FILES['join_file']['tmp_name'] != 'none' ) ? str_replace('\\\\', '\\', $_FILES['join_file']['tmp_name']) : ( ( !empty($_POST['join_file']) ) ? trim($_POST['join_file']) : '' );
+			$filename     = ( !empty($_FILES['join_file']['name']) ) ? $_FILES['join_file']['name'] : '';
 			$filesize     = ( !empty($_FILES['join_file']['size']) ) ? intval($_FILES['join_file']['size']) : 0;
-			$filetype     = ( !empty($_FILES['join_file']['type']) ) ? stripslashes($_FILES['join_file']['type']) : '';
+			$filetype     = ( !empty($_FILES['join_file']['type']) ) ? $_FILES['join_file']['type'] : '';
 			$errno_code   = ( !empty($_FILES['join_file']['error']) ) ? intval($_FILES['join_file']['error']) : UPLOAD_ERR_OK;
 			$file_id      = ( !empty($_POST['fid']) ) ? intval($_POST['fid']) : 0;
 			
@@ -718,7 +718,7 @@ $output->assign_vars(array(
 	'L_ADDLINK_BUTTON'        => str_replace('\'', '\\\'', $lang['Button']['links']),
 	
 	'S_DEST'                  => $listdata['liste_name'],
-	'S_SUBJECT'               => htmlspecialchars(stripslashes($logdata['log_subject'])),
+	'S_SUBJECT'               => htmlspecialchars($logdata['log_subject']),
 	'S_STATUS'                => ( $logdata['log_status'] == STATUS_WRITING ) ? $lang['Status_writing'] : $lang['Status_handle'],
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
 	'SELECTED_STATUS_HANDLE'  => ( $logdata['log_status'] == STATUS_HANDLE ) ? ' selected="selected"' : '',
@@ -734,7 +734,7 @@ if( $listdata['liste_format'] != FORMAT_HTML )
 		'L_EXPLAIN_BODY'  => nl2br($lang['Explain']['text']),
 		
 		'S_TEXTAREA_NAME' => 'body_text',
-		'S_BODY'          => htmlspecialchars(stripslashes($logdata['log_body_text'])),
+		'S_BODY'          => htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES),
 		'S_FORMAT'        => FORMAT_TEXTE
 	));
 }
@@ -746,7 +746,7 @@ if( $listdata['liste_format'] != FORMAT_TEXTE )
 		'L_EXPLAIN_BODY'  => nl2br($lang['Explain']['html']),
 		
 		'S_TEXTAREA_NAME' => 'body_html',
-		'S_BODY'          => htmlspecialchars(stripslashes($logdata['log_body_html'])),
+		'S_BODY'          => htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES),
 		'S_FORMAT'        => FORMAT_HTML
 	));
 }

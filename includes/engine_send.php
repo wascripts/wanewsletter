@@ -48,11 +48,11 @@ function launch_sending($listdata, $logdata)
 	//
 	// On traite les données de la newsletter à envoyer
 	//
-	$mailer->set_subject(stripslashes($logdata['log_subject']));
+	$mailer->set_subject($logdata['log_subject']);
 	
 	$body = array(
-		FORMAT_TEXTE => stripslashes($logdata['log_body_text']),
-		FORMAT_HTML  => stripslashes($logdata['log_body_html'])
+		FORMAT_TEXTE => $logdata['log_body_text'],
+		FORMAT_HTML  => $logdata['log_body_html']
 	);
 	
 	//
@@ -136,11 +136,11 @@ function launch_sending($listdata, $logdata)
 	//
 	// On récupère les infos sur les abonnés destinataires
 	//
-	$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, a.abo_register_key, al.format 
-		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-		WHERE al.liste_id = " . $listdata['liste_id'] . " 
-			AND a.abo_id = al.abo_id 
-			AND al.send = 0 
+	$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, a.abo_register_key, al.format
+		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
+		WHERE al.liste_id = $listdata[liste_id]
+			AND a.abo_id = al.abo_id
+			AND al.send = 0
 			AND a.abo_status = " . ABO_ACTIF;
 	if( !($result = $db->query($sql, 0, $nl_config['emails_sended'])) )
 	{
@@ -389,7 +389,7 @@ function launch_sending($listdata, $logdata)
 		{
 			if( !empty($_GET['step']) && $_GET['step'] == 'auto' )
 			{
-				Location('envoi.php?resend=true&id=' . $logdata['log_id'] . '&step=auto');
+				Location("envoi.php?resend=true&id=$logdata[log_id]&step=auto");
 			}
 			
 			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], '<a href="' . sessid('./envoi.php?resend=true&amp;id=' . $logdata['log_id'] . '&amp;step=auto') . '">', '</a>');

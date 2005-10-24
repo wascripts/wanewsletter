@@ -222,13 +222,7 @@ if( $img == 'camenbert' )
 	$listes = array();
 	foreach( $liste_id_ary AS $liste_id )
 	{
-		$liste_name = unhtmlspecialchars($auth->listdata[$liste_id]['liste_name']);
-		if( strlen($liste_name) > 30 )
-		{
-			$liste_name = substr($liste_name, 0, 30);
-			$liste_name = substr($liste_name, 0, strrpos($liste_name, ' ')) . '...';
-		}
-		
+		$liste_name   = cut_str(unhtmlspecialchars($auth->listdata[$liste_id]['liste_name']), 30);
 		$num_inscrits = ( !empty($tmpdata[$liste_id]) ) ? $tmpdata[$liste_id] : 0;
 		
 		$listes[] = array('name' => htmlspecialchars($liste_name), 'num' => $num_inscrits);

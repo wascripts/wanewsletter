@@ -429,7 +429,7 @@ class mysql_backup {
 					}
 					else if( !is_numeric($value) )
 					{
-						$row[$key] = '\'' . addslashes($value) . '\'';
+						$row[$key] = '\'' . $db->escape($value) . '\'';
 					}
 				}
 				
@@ -760,7 +760,7 @@ class postgre_backup {
 					}
 					else if( !is_numeric($value) )
 					{
-						$row[$key] = '\'' . addslashes($value) . '\'';
+						$row[$key] = '\'' . $db->escape($value) . '\'';
 					}
 				}
 				
@@ -957,9 +957,7 @@ if( !isset($_POST['submit']) )
 	
 	if( $admindata['admin_level'] == ADMIN )
 	{
-		$tools_ary[] = 'attach';
-		$tools_ary[] = 'backup';
-		$tools_ary[] = 'restore';
+		array_push($tools_ary, 'attach', 'backup', 'restore');
 	}
 	
 	$tools_box = '<select id="mode" name="mode">';
@@ -1035,9 +1033,9 @@ switch( $mode )
 			$glue = ( $glue != '' ) ? $glue : $crlf;
 			
 			$sql = "SELECT a.abo_email 
-				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-				WHERE al.liste_id = " . $listdata['liste_id'] . " 
-					AND a.abo_id = al.abo_id 
+				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
+				WHERE al.liste_id = $listdata[liste_id]
+					AND a.abo_id = al.abo_id
 					AND a.abo_status = " . ABO_ACTIF;
 			$sql .= ( $listdata['liste_format'] == FORMAT_MULTIPLE ) ? ' AND al.format = ' . $format : '';
 			if( !($result = $db->query($sql)) )
@@ -1146,7 +1144,7 @@ switch( $mode )
 				
 				if( !empty($file_local) )
 				{
-					$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
+					//$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
 					
 					$tmp_filename = wa_realpath($waroot . str_replace('\\', '/', $file_local));
 					$filename     = $file_local;
@@ -1162,8 +1160,8 @@ switch( $mode )
 				}
 				else
 				{
-					$tmp_filename = str_replace('\\\\', '\\', $file_upload['tmp_name']);
-					$filename     = stripslashes($file_upload['name']);
+					$tmp_filename = $file_upload['tmp_name'];//str_replace('\\\\', '\\', $file_upload['tmp_name']);
+					$filename     = $file_upload['name'];
 					
 					if( !is_uploaded_file($tmp_filename) )
 					{
@@ -1179,7 +1177,7 @@ switch( $mode )
 						$unlink = true;
 						$tmp_filename = wa_realpath(wa_tmp_path . '/' . $filename);
 						
-						move_uploaded_file(str_replace('\\\\', '\\', $file_upload['tmp_name']), $tmp_filename);
+						move_uploaded_file($file_upload['tmp_name'], $tmp_filename);
 					}
 				}
 				
@@ -1195,7 +1193,7 @@ switch( $mode )
 					trigger_error('Compress_unsupported', MESSAGE);
 				}
 				
-				$list_tmp = addslashes(decompress_filedata($tmp_filename, $file_ext));
+				$list_tmp = decompress_filedata($tmp_filename, $file_ext);
 				
 				//
 				// S'il y a une restriction d'accés par l'open_basedir, et que c'est un fichier uploadé, 
@@ -1283,7 +1281,7 @@ switch( $mode )
 					}
 					
 					$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format) 
-						VALUES($abo_id, " . $listdata['liste_id'] . ", $format)";
+						VALUES($abo_id, $listdata[liste_id], $format)";
 					if( !$db->query($sql) )
 					{
 						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
@@ -1293,7 +1291,7 @@ switch( $mode )
 				}
 				else
 				{
-					$tmp_report .= $email . ' : ' . $resultat['message'] . $crlf;
+					$tmp_report .= sprintf('%s : %s%s', $email, $resultat['message'], $crlf);
 				}
 				
 				fake_header(true);
@@ -1394,12 +1392,12 @@ switch( $mode )
 					{
 						case 'mysql':
 						case 'mysql4':
-							$sql_values[] = '(' . $listdata['liste_id'] . ', \'' . $pattern . '\')';
+							array_push($sql_values, "($listdata[liste_id], '" . $db->escape($pattern) . "')");
 							break;
 						
 						default:
 							$sql = "INSERT INTO " . BANLIST_TABLE . " (liste_id, ban_email) 
-								VALUES(" . $listdata['liste_id'] . ", '$pattern')";
+								VALUES($listdata[liste_id], '" . $db->escape($pattern) . "')";
 							if( !$db->query($sql) )
 							{
 								trigger_error('Impossible de mettre à jour la table des bannis', ERROR);
@@ -1508,12 +1506,12 @@ switch( $mode )
 						{
 							case 'mysql':
 							case 'mysql4':
-								$sql_values[] = '(' . $listdata['liste_id'] . ', \'' . $ext . '\')';
+								array_push($sql_values, "($listdata[liste_id], '$ext')");
 								break;
 							
 							default:
 								$sql = "INSERT INTO " . FORBIDDEN_EXT_TABLE . " (liste_id, fe_ext) 
-									VALUES(" . $listdata['liste_id'] . ", '$ext')";
+									VALUES($listdata[liste_id], '$ext')";
 								if( !$db->query($sql) )
 								{
 									trigger_error('Impossible de mettre à jour la table des extensions interdites', ERROR);
@@ -1783,7 +1781,7 @@ switch( $mode )
 				
 				if( !empty($file_local) )
 				{
-					$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
+					//$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
 					
 					$tmp_filename = wa_realpath($waroot . str_replace('\\', '/', $file_local));
 					$filename     = $file_local;
@@ -1799,8 +1797,8 @@ switch( $mode )
 				}
 				else
 				{
-					$tmp_filename = str_replace('\\\\', '\\', $file_upload['tmp_name']);
-					$filename     = stripslashes($file_upload['name']);
+					$tmp_filename = $file_upload['tmp_name'];//str_replace('\\\\', '\\', $file_upload['tmp_name']);
+					$filename     = $file_upload['name'];
 					
 					if( !is_uploaded_file($tmp_filename) )
 					{
@@ -1816,7 +1814,7 @@ switch( $mode )
 						$unlink = true;
 						$tmp_filename = wa_realpath(wa_tmp_path . '/' . $filename);
 						
-						move_uploaded_file(str_replace('\\\\', '\\', $file_upload['tmp_name']), $tmp_filename);
+						move_uploaded_file($file_upload['tmp_name'], $tmp_filename);
 					}
 				}
 				
@@ -1924,14 +1922,14 @@ switch( $mode )
 			}
 			else
 			{
-				$code_html .= "<input type=\"hidden\" name=\"format\" value=\"" . $listdata['liste_format'] . "\" />\n";
+				$code_html .= "<input type=\"hidden\" name=\"format\" value=\"$listdata[liste_format]\" />\n";
 			}
 			
-			$code_html .= "<input type=\"hidden\" name=\"liste\" value=\"" . $listdata['liste_id'] . "\" />\n";
+			$code_html .= "<input type=\"hidden\" name=\"liste\" value=\"$listdata[liste_id]\" />\n";
 			$code_html .= "<br />\n";
-			$code_html .= "<input type=\"radio\" name=\"action\" value=\"inscription\" checked=\"checked\" /> " . $lang['Subscribe'] . " <br />\n";
-			$code_html .= ( $listdata['liste_format'] == FORMAT_MULTIPLE ) ? "<input type=\"radio\" name=\"action\" value=\"setformat\" /> " . $lang['Setformat'] . " <br />\n" : "";
-			$code_html .= "<input type=\"radio\" name=\"action\" value=\"desinscription\" /> " . $lang['Unsubscribe'] . " <br />\n";
+			$code_html .= "<input type=\"radio\" name=\"action\" value=\"inscription\" checked=\"checked\" /> $lang[Subscribe] <br />\n";
+			$code_html .= ( $listdata['liste_format'] == FORMAT_MULTIPLE ) ? "<input type=\"radio\" name=\"action\" value=\"setformat\" /> $lang[Setformat] <br />\n" : "";
+			$code_html .= "<input type=\"radio\" name=\"action\" value=\"desinscription\" /> $lang[Unsubscribe] <br />\n";
 			$code_html .= "<input type=\"submit\" name=\"wanewsletter\" value=\"" . $lang['Button']['valid'] . "\" />\n";
 			$code_html .= "</form>";
 			
@@ -1952,8 +1950,8 @@ switch( $mode )
 				'L_EXPLAIN_CODE_HTML' => nl2br($lang['Explain']['code_html']),
 				'L_EXPLAIN_CODE_PHP'  => nl2br($lang['Explain']['code_php']),
 				
-				'CODE_HTML' => nl2br(htmlentities($code_html)),
-				'CODE_PHP'  => nl2br(htmlentities($code_php))
+				'CODE_HTML' => nl2br(htmlspecialchars($code_html, ENT_NOQUOTES)),
+				'CODE_PHP'  => nl2br(htmlspecialchars($code_php, ENT_NOQUOTES))
 			));
 		}
 		else

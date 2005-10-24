@@ -88,9 +88,9 @@ if( $listdata = $db->fetch_array($result) )
 	{
 		include $waroot . 'includes/engine_send.php';
 		
-		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status 
-			FROM " . LOG_TABLE . " 
-			WHERE liste_id = " . $listdata['liste_id'] . " 
+		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
+			FROM " . LOG_TABLE . "
+			WHERE liste_id = $listdata[liste_id]
 				AND log_status = " . STATUS_STANDBY;
 		if( !($result = $db->query($sql, 0, 1)) ) // on récupère le dernier log en statut d'envoi
 		{
@@ -106,12 +106,12 @@ if( $listdata = $db->fetch_array($result) )
 			trigger_error('No_log_to_send', MESSAGE);
 		}
 		
-		$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
-			FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l 
-			WHERE l.log_id = " . $logdata['log_id'] . " 
-				AND lf.log_id = l.log_id 
-				AND jf.file_id = lf.file_id 
-				AND l.liste_id = " . $listdata['liste_id'] . " 
+		$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+			FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
+			WHERE l.log_id = $logdata[log_id]
+				AND lf.log_id = l.log_id
+				AND jf.file_id = lf.file_id
+				AND l.liste_id = $listdata[liste_id]
 			ORDER BY jf.file_real_name ASC";
 		if( !($result = $db->query($sql)) )
 		{
@@ -152,8 +152,8 @@ if( $listdata = $db->fetch_array($result) )
 				continue;
 			}
 			
-			$pseudo = ( isset($match[1]) ) ? addslashes(strip_tags(trim($match[1]))) : '';
-			$email  = addslashes(trim($match[2]));
+			$pseudo = ( isset($match[1]) ) ? strip_tags(trim($match[1])) : '';
+			$email  = trim($match[2]);
 			
 			if( !isset($headers['to']) || !stristr($headers['to'], $wan->liste_email) )
 			{
@@ -190,7 +190,7 @@ if( $listdata = $db->fetch_array($result) )
 					break;
 			}
 			
-			$code = addslashes($pop->contents[$mail_id]['message']);
+			$code = $pop->contents[$mail_id]['message'];
 			if( $action != 'inscription' && strlen($code) != 32 )
 			{
 				continue;

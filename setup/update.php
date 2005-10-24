@@ -232,7 +232,7 @@ if( !$startdate )
 }
 
 $sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (sitename, urlsite, path, hebergeur, date_format, session_length, language, cookie_name, cookie_path, upload_path, max_filesize, engine_send, emails_sended, use_smtp, smtp_host, smtp_port, smtp_user, smtp_pass, gd_img_type, mailing_startdate) 
-	VALUES('" . $db->escape(addslashes($old_config['sitename'])) . "', '" . $old_config['urlsite'] . "', '" . $old_config['path'] . "', '" . $old_config['hebergeur'] . "', '" . $db->escape(addslashes($old_config['date_format'])) . "', " . $old_config['session_duree'] . ", '" . $old_config['language'] . "', 'wanewsletter', '/', 'admin/upload/', 80000, " . $old_config['engine_send'] . ", " . $old_config['emails_sended'] . ", " . $old_config['use_smtp'] . ", '" . $old_config['smtp_host'] . "', '" . $old_config['smtp_port'] . "', '" . $old_config['smtp_user'] . "', '" . $old_config['smtp_pass'] . "', 'png', $startdate)";
+	VALUES('" . $db->escape($old_config['sitename']) . "', '" . $db->escape($old_config['urlsite']) . "', '" . $db->escape($old_config['path']) . "', '" . $old_config['hebergeur'] . "', '" . $db->escape($old_config['date_format']) . "', " . $old_config['session_duree'] . ", '" . $old_config['language'] . "', 'wanewsletter', '/', 'admin/upload/', 80000, " . $old_config['engine_send'] . ", " . $old_config['emails_sended'] . ", " . $old_config['use_smtp'] . ", '" . $db->escape($old_config['smtp_host']) . "', '" . $old_config['smtp_port'] . "', '" . $db->escape($old_config['smtp_user']) . "', '" . $db->escape($old_config['smtp_pass']) . "', 'png', $startdate)";
 
 exec_queries($sql_update, true);
 
@@ -411,7 +411,7 @@ switch( DATABASE )
 
 $sql_update[] = "UPDATE " . ADMIN_TABLE . " 
 	SET admin_lang = '" . $old_config['language'] . "', 
-	admin_dateformat = '" . $db->escape(addslashes($old_config['date_format'])) . "', 
+	admin_dateformat = '" . $db->escape($old_config['date_format']) . "', 
 	email_new_inscrit = 0";
 
 if( $branch == '2.0' )
@@ -510,10 +510,10 @@ while( $row = $db->fetch_array($result) )
 	$numlogs = ( !empty($num_logs_ary[$row['liste_id']]) ) ? $num_logs_ary[$row['liste_id']] : 0;
 	
 	$sql_update[] = "UPDATE " . LISTE_TABLE . " 
-		SET liste_name = '" . $db->escape(addslashes(htmlspecialchars($row['liste_name']))) . "', 
+		SET liste_name = '" . $db->escape(htmlspecialchars($row['liste_name'])) . "', 
 			sender_email = '" . $old_config['sender_email'] . "', 
 			return_email = '" . $old_config['return_email'] . "', 
-			liste_sig = '" . $db->escape(addslashes($old_config['signature'])) . "', 
+			liste_sig = '" . $db->escape($old_config['signature']) . "', 
 			auto_purge = '" . $old_config['auto_purge'] . "', 
 			purge_freq = '" . $old_config['purge_freq'] . "', 
 			purge_next = '" . $old_config['purge_next'] . "', 
@@ -601,7 +601,7 @@ for( $i = 0; $i < $total_log; $i++ )
 		}
 		
 		$sql = "INSERT INTO " . JOINED_FILES_TABLE . " (file_real_name, file_physical_name, file_size, file_mimetype) 
-			VALUES('" . $db->escape(addslashes($files[$j])) . "', '" . $db->escape(addslashes($files[$j])) . "', " . intval($filesize) . ", '$mime_type')";
+			VALUES('" . $db->escape($files[$j]) . "', '" . $db->escape($files[$j]) . "', " . intval($filesize) . ", '" . $db->escape($mime_type) . "')";
 		if( $db->query($sql) )
 		{
 			$file_id = $db->next_id();
@@ -669,7 +669,7 @@ for( $i = 0; $i < $total_abo; $i++ )
 foreach( $abo_ary AS $email => $data )
 {
 	$sql = "INSERT INTO " . ABONNES_TABLE . " (abo_email, abo_lang, abo_register_key, abo_register_date, abo_status) 
-		VALUES('$email', '$language', '" . $data['code'] . "', " . $data['date'] . ", " . $data['status'] . ")";
+		VALUES('" . $db->escape($email) . "', '$language', '" . $db->escape($data['code']) . "', " . $data['date'] . ", " . $data['status'] . ")";
 	exec_queries($sql, true);
 	
 	$abo_id = $db->next_id();
@@ -678,7 +678,7 @@ foreach( $abo_ary AS $email => $data )
 	foreach( $data['listes'] AS $liste_id => $listdata )
 	{
 		$sql_update[] = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, send) 
-			VALUES($abo_id, " . $liste_id . ", " . $listdata['format'] . ", " . $listdata['send'] . ")";
+			VALUES($abo_id, $liste_id, $listdata[format], $listdata[send])";
 	}
 	
 	exec_queries($sql_update, true);
@@ -714,8 +714,8 @@ if( !($result = $db->query($sql)) )
 
 while( $row = $db->fetch_array($result) )
 {
-	$sql_update[] = "UPDATE " . LOG_TABLE . " 
-		SET log_numdest = " . $row['num_dest'] . " 
+	$sql_update[] = "UPDATE " . LOG_TABLE . "
+		SET log_numdest = $row[num_dest]
 		WHERE liste_id = " . $row['liste_id'];
 }
 

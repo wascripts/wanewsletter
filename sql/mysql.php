@@ -240,7 +240,7 @@ class sql {
 			return @mysql_result($result, $row);
 		}
 	}
-	
+
 	function next_id()
 	{
 		return ( $this->connect_id ) ? @mysql_insert_id($this->connect_id) : false;
@@ -255,13 +255,13 @@ class sql {
 		
 		if( is_resource($result) )
 		{
-			@mysql_free_result($result); 
+			@mysql_free_result($result);
 		}
 	}
 	
 	function escape($str)
 	{
-		return $str; 
+		return mysql_real_escape_string($str);
 	}
 	
 	function close_connexion()

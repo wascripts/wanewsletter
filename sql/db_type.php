@@ -30,7 +30,6 @@ switch( $dbtype )
 {
 	case 'mysql':
 	case 'mysql4':
-	case 'mssql':
 	case 'postgre':
 		require $waroot . 'sql/' . $dbtype . '.php';
 		break;

@@ -282,8 +282,8 @@ else
 			$sql_data = make_sql_ary(fread($fp, filesize($sql_file)), $supported_db[$dbtype]['delimiter2'], $prefixe);
 			fclose($fp);
 			
-			$sql_data[] = "UPDATE " . ADMIN_TABLE . " SET admin_login = '" . $db->escape($admin_login) . "', admin_pwd = '" . md5($admin_pass) . "', admin_email = '$admin_email', admin_lang = '$language' WHERE admin_id = 1";
-			$sql_data[] = "UPDATE " . CONFIG_TABLE . " SET urlsite = '$urlsite', path = '$urlscript', language = '$language', mailing_startdate = " . time() . ", version = '$new_version'";
+			$sql_data[] = "UPDATE " . ADMIN_TABLE . " SET admin_login = '" . $db->escape($admin_login) . "', admin_pwd = '" . md5($admin_pass) . "', admin_email = '" . $db->escape($admin_email) . "', admin_lang = '$language' WHERE admin_id = 1";
+			$sql_data[] = "UPDATE " . CONFIG_TABLE . " SET urlsite = '" . $db->escape($urlsite) . "', path = '" . $db->escape($urlscript) . "', language = '$language', mailing_startdate = " . time() . ", version = '$new_version'";
 			$sql_data[] = "UPDATE " . LISTE_TABLE . " SET liste_startdate = " . time() . " WHERE liste_id = 1";
 			
 			exec_queries($sql_data, true);
@@ -587,6 +587,7 @@ else
 					$sql_update[] = "UPDATE " . CONFIG_TABLE . " SET check_email_mx = 0";
 				case '2.2.5':
 				case '2.2.6':
+				case '2.2.7':
 					break;
 				
 				default:
@@ -708,14 +709,14 @@ else
 		'L_BUTTON_START'    => $lang['Start_install'],
 		
 		'DB_BOX'    => $db_box,
-		'DBHOST'    => htmlspecialchars(stripslashes($dbhost)),
-		'DBNAME'    => htmlspecialchars(stripslashes($dbname)),
-		'DBUSER'    => htmlspecialchars(stripslashes($dbuser)),
-		'PREFIXE'   => htmlspecialchars(stripslashes($prefixe)),
-		'LOGIN'     => htmlspecialchars(stripslashes($admin_login)),
-		'EMAIL'     => htmlspecialchars(stripslashes($admin_email)),
-		'URLSITE'   => htmlspecialchars(stripslashes($urlsite)),
-		'URLSCRIPT' => htmlspecialchars(stripslashes($urlscript)),
+		'DBHOST'    => htmlspecialchars($dbhost),
+		'DBNAME'    => htmlspecialchars($dbname),
+		'DBUSER'    => htmlspecialchars($dbuser),
+		'PREFIXE'   => htmlspecialchars($prefixe),
+		'LOGIN'     => htmlspecialchars($admin_login),
+		'EMAIL'     => htmlspecialchars($admin_email),
+		'URLSITE'   => htmlspecialchars($urlsite),
+		'URLSCRIPT' => htmlspecialchars($urlscript),
 		'LANG_BOX'  => $lang_box,
 		
 		'S_HIDDEN_FIELD' => $output->getHiddenFields()

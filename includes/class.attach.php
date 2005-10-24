@@ -245,8 +245,8 @@ class Attach {
 	 * @param integer $filesize       Taille du fichier
 	 * @param string  $filetype       Type mime du fichier
 	 * @param string  $errno_code     Code erreur éventuel de l'upload http
-	 * @param boolean $error	         True si une erreur survient
-	 * @param array	  $msg_error     Tableau des messages d'erreur
+	 * @param boolean $error          True si une erreur survient
+	 * @param array   $msg_error      Tableau des messages d'erreur
 	 * 
 	 * @return void
 	 */
@@ -536,8 +536,8 @@ class Attach {
 			// Tout s'est bien passé, on entre les nouvelles données dans la base de données
 			//
 			$filedata = array(
-				'file_real_name'     => addslashes($filename),
-				'file_physical_name' => ( $upload_mode == 'local' ) ? addslashes($tmp_filename) : $physical_filename,
+				'file_real_name'     => $filename,
+				'file_physical_name' => ( $upload_mode == 'local' ) ? $tmp_filename : $physical_filename,
 				'file_size'          => $filesize,
 				'file_mimetype'      => $filetype
 			);
@@ -659,7 +659,7 @@ class Attach {
 		
 		$sql = "SELECT COUNT(fe_id) AS test_extension 
 			FROM " . FORBIDDEN_EXT_TABLE . " 
-			WHERE fe_ext = '$extension' 
+			WHERE fe_ext = '" . $db->escape($extension) . "' 
 				AND liste_id = " . $listdata['liste_id'];
 		if( !($result = $db->query($sql)) )
 		{
@@ -670,7 +670,7 @@ class Attach {
 	}
 	
 	/**
-	 * Attach::check_extension()
+	 * Attach::check_maxsize()
 	 * 
 	 * Vérification de la taille du fichier par rapport à la taille du log et la taille maximale
 	 * 
@@ -791,7 +791,7 @@ class Attach {
 	 */
 	function get_mode($mime_type)
 	{
-		return ( preg_match('/text|html|xml/i', $mime_type) ) ? FTP_ASCII : FTP_BINARY;
+		return ( preg_match('/text|html|xml/i', $mime_type) ) ? FTP_ASCII : FTP_BINARY;// TODO
 	}
 	
 	/**
@@ -925,12 +925,12 @@ class Attach {
 		return false;
 	}
 	
-	/*
+	/**
 	 * Attach::remove_file()
 	 * 
 	 * Suppression d'un fichier du serveur
 	 * 
-	 * @param string $filename	: Nom du fichier sur le serveur
+	 * @param string $filename    Nom du fichier sur le serveur
 	 * 
 	 * @return void
 	 */
@@ -941,19 +941,19 @@ class Attach {
 		
 		if( file_exists($filename) )
 		{
-			@system('del ' . str_replace('/', '\\', $filename));
+			@system('del ' . str_replace('/', '\\', $filename));// TODO
 		}
 	}
 	
-	/*
+	/**
 	 * Attach::send_file()
 	 * 
 	 * Fonction d'envois des entêtes nécessaires au téléchargement et 
 	 * des données du fichier à télécharger
 	 * 
-	 * @param string  $filename		: Nom réel du fichier
-	 * @param string  $mime_type	: Mime type du fichier
-	 * @param string  $filedata		: Contenu du fichier
+	 * @param string $filename     Nom réel du fichier
+	 * @param string $mime_type    Mime type du fichier
+	 * @param string $filedata     Contenu du fichier
 	 * 
 	 * @return void
 	 */
@@ -992,7 +992,7 @@ class Attach {
 		exit;
 	}
 	
-	/*
+	/**
 	 * Attach::quit()
 	 * 
 	 * Fermeture de la connexion au serveur ftp
@@ -1003,7 +1003,7 @@ class Attach {
 	{
 		if( $this->use_ftp )
 		{
-			$quit = ( version_compare(PHP_VERSION, '4.2.0', '>=') ) ? 'ftp_close' : 'ftp_quit';
+			$quit = ( version_compare(phpversion(), '4.2.0', '>=') == true ) ? 'ftp_close' : 'ftp_quit';
 			
 			@$quit($this->connect_id);
 		}

@@ -312,7 +312,7 @@ class sql {
 	
 	function escape($str)
 	{
-		return $str; 
+		return mysql_real_escape_string($str);
 	}
 	
 	function close_connexion()

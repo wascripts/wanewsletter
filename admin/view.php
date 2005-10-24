@@ -115,8 +115,6 @@ else if( $mode == 'iframe' )
 		{
 			if( $format == FORMAT_HTML )
 			{
-				$body = stripslashes($body);
-				
 				$body = preg_replace(
 					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/i',
 					'<\\1"' . $waroot . 'options/show.php?file=\\2&amp;sessid=' . $session->session_id . '"\\3>',
@@ -125,7 +123,7 @@ else if( $mode == 'iframe' )
 			}
 			else
 			{
-				$body = nl2br(active_urls(htmlspecialchars(stripslashes(trim($body)))));
+				$body = nl2br(active_urls(htmlspecialchars(trim($body))));
 				$body = preg_replace('/(\*\w+\*)/', '<strong>\\1</strong>', $body);
 				$body = preg_replace('/(\/\w+\/)/', '<em>\\1</em>', $body);
 				$body = preg_replace('/(_\w+_)/', '<u>\\1</u>', $body);
@@ -191,7 +189,7 @@ else if( $mode == 'abonnes' )
 	{
 		if( strlen($search_keyword) > 1 )
 		{
-			$get_string .= '&amp;keyword=' . urlencode(stripslashes($search_keyword));
+			$get_string .= '&amp;keyword=' . urlencode($search_keyword);
 			$sql_search .= ' AND a.abo_email LIKE \'' . $db->escape(str_replace('*', '%', urldecode($search_keyword))) . '\' ';
 		}
 		
@@ -341,7 +339,6 @@ else if( $mode == 'abonnes' )
 			
 			switch( DATABASE )
 			{
-				case 'mssql':
 				case 'postgre':
 					$sql = "DELETE FROM " . ABONNES_TABLE . " 
 						WHERE abo_id IN(
@@ -435,7 +432,7 @@ else if( $mode == 'abonnes' )
 				
 				$sql = "SELECT a.abo_id 
 					FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-					WHERE al.liste_id = " . $listdata['liste_id'] . " 
+					WHERE al.liste_id = $listdata[liste_id]
 						AND a.abo_id = al.abo_id 
 						AND a.abo_email IN($sql_list)";
 				if( !($result = $db->query($sql)) )
@@ -488,10 +485,10 @@ else if( $mode == 'abonnes' )
 	$abo_per_page = 40;
 	$start        = (($page_id - 1) * $abo_per_page);
 	
-	$sql = "SELECT COUNT(a.abo_id) AS total_abo 
-		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-		WHERE al.liste_id = " . $listdata['liste_id'] . " 
-			AND a.abo_id = al.abo_id 
+	$sql = "SELECT COUNT(a.abo_id) AS total_abo
+		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
+		WHERE al.liste_id = $listdata[liste_id]
+			AND a.abo_id = al.abo_id
 			AND a.abo_status = " . $abo_status . $sql_search;
 	if( !($result = $db->query($sql)) )
 	{
@@ -502,12 +499,12 @@ else if( $mode == 'abonnes' )
 	
 	if( $total_abo > 0 )
 	{
-		$sql = "SELECT a.abo_id, a.abo_email, a.abo_register_date, al.format 
-			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-			WHERE al.liste_id = " . $listdata['liste_id'] . " 
-				AND a.abo_id = al.abo_id 
-				AND a.abo_status = $abo_status 
-				$sql_search 
+		$sql = "SELECT a.abo_id, a.abo_email, a.abo_register_date, al.format
+			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
+			WHERE al.liste_id = $listdata[liste_id]
+				AND a.abo_id = al.abo_id
+				AND a.abo_status = $abo_status
+				$sql_search
 			ORDER BY $sql_type " . $sql_order;
 		if( !($result = $db->query($sql, $start, $abo_per_page)) )
 		{
@@ -591,7 +588,7 @@ else if( $mode == 'abonnes' )
 		'L_EMAIL'          => $lang['Email_address'],
 		'L_DATE'           => $lang['Susbcribed_date'],
 		
-		'KEYWORD'              => htmlspecialchars(stripslashes($search_keyword)),
+		'KEYWORD'              => htmlspecialchars($search_keyword),
 		'SEARCH_DAYS_BOX'      => $search_days_box,
 		'SELECTED_TYPE_EMAIL'  => ( $sql_type == 'abo_email' ) ? ' selected="selected"' : '',
 		'SELECTED_TYPE_DATE'   => ( $sql_type == 'abo_register_date' ) ? ' selected="selected"' : '',
@@ -851,7 +848,7 @@ else if( $mode == 'liste' )
 					
 					$sql = "UPDATE " . SESSIONS_TABLE . " 
 						SET session_liste = $new_liste_id 
-						WHERE session_id = '" . $session->session_id . "' 
+						WHERE session_id = '{$session->session_id}' 
 							AND admin_id = " . $admindata['admin_id'];
 					if( !$db->query($sql) )
 					{
@@ -921,12 +918,12 @@ else if( $mode == 'liste' )
 			'L_RESET_BUTTON'       => $lang['Button']['reset'],
 			'L_CANCEL_BUTTON'      => $lang['Button']['cancel'],
 			
-			'LISTE_NAME'           => htmlspecialchars(stripslashes($liste_name)),
+			'LISTE_NAME'           => htmlspecialchars($liste_name),
 			'FORMAT_BOX'           => format_box('liste_format', $liste_format, false, true),
-			'SENDER_EMAIL'         => htmlspecialchars(stripslashes($sender_email)),
-			'RETURN_EMAIL'         => htmlspecialchars(stripslashes($return_email)),			
-			'FORM_URL'             => htmlspecialchars(stripslashes($form_url)),
-			'SIG_EMAIL'            => htmlspecialchars(stripslashes($liste_sig)),
+			'SENDER_EMAIL'         => htmlspecialchars($sender_email),
+			'RETURN_EMAIL'         => htmlspecialchars($return_email),			
+			'FORM_URL'             => htmlspecialchars($form_url),
+			'SIG_EMAIL'            => htmlspecialchars($liste_sig),
 			'LIMITEVALIDATE'       => intval($limitevalidate),
 			'PURGE_FREQ'           => intval($purge_freq),
 			'CHECK_CONFIRM_YES'    => ( $confirm_subscribe ) ? ' checked="checked"' : '',
@@ -937,11 +934,11 @@ else if( $mode == 'liste' )
 			'CHECKED_USE_CRON_OFF' => ( !$use_cron ) ? ' checked="checked"' : '',
 			'DISABLED_CRON'        => ( is_disabled_func('fsockopen') ) ? ' disabled="disabled"' : '',
 			'WARNING_CRON'         => ( is_disabled_func('fsockopen') ) ? ' <span style="color: red;">[not available]</span>' : '',
-			'POP_HOST'             => htmlspecialchars(stripslashes($pop_host)),
+			'POP_HOST'             => htmlspecialchars($pop_host),
 			'POP_PORT'             => intval($pop_port),
-			'POP_USER'             => htmlspecialchars(stripslashes($pop_user)),
-			'POP_PASS'             => htmlspecialchars(stripslashes($pop_pass)),
-			'LISTE_ALIAS'          => htmlspecialchars(stripslashes($liste_alias)),
+			'POP_USER'             => htmlspecialchars($pop_user),
+			'POP_PASS'             => htmlspecialchars($pop_pass),
+			'LISTE_ALIAS'          => htmlspecialchars($liste_alias),
 			
 			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
 		));
@@ -969,18 +966,17 @@ else if( $mode == 'liste' )
 			{
 				switch( DATABASE )
 				{
-					case 'mssql':
 					case 'postgre':
-						$sql = "DELETE FROM " . ABONNES_TABLE . " 
+						$sql = "DELETE FROM " . ABONNES_TABLE . "
 							WHERE abo_id IN(
-								SELECT abo_id 
-								FROM " . ABO_LISTE_TABLE . " 
+								SELECT abo_id
+								FROM " . ABO_LISTE_TABLE . "
 								WHERE abo_id IN(
-									SELECT abo_id 
-									FROM " . ABO_LISTE_TABLE . " AS al 
-									WHERE liste_id = " . $listdata['liste_id'] . " 
-								) 
-								GROUP BY abo_id 
+									SELECT abo_id
+									FROM " . ABO_LISTE_TABLE . " AS al
+									WHERE liste_id = $listdata[liste_id]
+								)
+								GROUP BY abo_id
 								HAVING COUNT(abo_id) = 1
 							)";
 						if( !$db->query($sql) )
@@ -1084,33 +1080,32 @@ else if( $mode == 'liste' )
 				
 				switch( DATABASE )
 				{
-					case 'mssql':
 					case 'postgre':
-						$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
+						$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
 							WHERE abo_id IN(
-								SELECT abo_id 
-								FROM " . ABO_LISTE_TABLE . " 
+								SELECT abo_id
+								FROM " . ABO_LISTE_TABLE . "
 								WHERE abo_id IN(
-									SELECT abo_id 
-									FROM " . ABO_LISTE_TABLE . " 
-									WHERE liste_id = " . $listdata['liste_id'] .  " 
-								) AND liste_id = $liste_id 
+									SELECT abo_id
+									FROM " . ABO_LISTE_TABLE . "
+									WHERE liste_id = $listdata[liste_id]
+								) AND liste_id = $liste_id
 							) AND liste_id = " . $listdata['liste_id'];
 						if( !$db->query($sql) )
 						{
 							trigger_error('Impossible de supprimer les entrées inutiles de la table abo_liste', ERROR);
 						}
 						
-						$sql = "UPDATE " . ABO_LISTE_TABLE . " 
-							SET liste_id = $liste_id 
+						$sql = "UPDATE " . ABO_LISTE_TABLE . "
+							SET liste_id = $liste_id
 							WHERE abo_id IN(
-								SELECT abo_id 
-								FROM " . ABO_LISTE_TABLE . " 
+								SELECT abo_id
+								FROM " . ABO_LISTE_TABLE . "
 								WHERE abo_id IN(
-									SELECT abo_id 
-									FROM " . ABO_LISTE_TABLE . " 
-									WHERE liste_id = " . $listdata['liste_id'] .  " 
-								) AND liste_id <> $liste_id 
+									SELECT abo_id
+									FROM " . ABO_LISTE_TABLE . "
+									WHERE liste_id = $listdata[liste_id]
+								) AND liste_id <> $liste_id
 							) AND liste_id = " . $listdata['liste_id'];
 						if( !$db->query($sql) )
 						{
@@ -1528,7 +1523,7 @@ else if( $mode == 'log' )
 		$sql = "SELECT log_id, log_subject, log_date, log_body_text, log_body_html, log_numdest 
 			FROM " . LOG_TABLE . " 
 			WHERE log_status = " . STATUS_SENDED . " 
-				AND liste_id = " . $listdata['liste_id'] . " 
+				AND liste_id = $listdata[liste_id]
 			ORDER BY $sql_type " . $sql_order;
 		if( !($result = $db->query($sql, $start, $log_per_page)) )
 		{
@@ -1546,11 +1541,11 @@ else if( $mode == 'log' )
 			$logrow[] = $row;
 		}
 		
-		$sql = "SELECT COUNT(jf.file_id) as num_files, l.log_id 
-			FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l 
-			WHERE lf.log_id = l.log_id 
-				AND jf.file_id = lf.file_id 
-				AND l.liste_id = " . $listdata['liste_id'] . " 
+		$sql = "SELECT COUNT(jf.file_id) as num_files, l.log_id
+			FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
+			WHERE lf.log_id = l.log_id
+				AND jf.file_id = lf.file_id
+				AND l.liste_id = $listdata[liste_id]
 			GROUP BY l.log_id";
 		if( !($result = $db->query($sql)) )
 		{
@@ -1596,12 +1591,12 @@ else if( $mode == 'log' )
 		
 		if( is_array($logdata) && !empty($files_count[$log_id]) )
 		{
-			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
-				FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l 
-				WHERE l.log_id = $log_id 
-					AND lf.log_id = l.log_id 
-					AND jf.file_id = lf.file_id 
-					AND l.liste_id = " . $listdata['liste_id'] . " 
+			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+				FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
+				WHERE l.log_id = $log_id
+					AND lf.log_id = l.log_id
+					AND jf.file_id = lf.file_id
+					AND l.liste_id = $listdata[liste_id]
 				ORDER BY jf.file_real_name ASC";
 			if( !($result = $db->query($sql)) )
 			{
@@ -1690,7 +1685,7 @@ else if( $mode == 'log' )
 			$output->assign_block_vars('logrow', array(
 				'TD_CLASS'    => ( !($i % 2) ) ? 'row1' : 'row2',
 				'ITEM_CLIP'   => $s_clip,
-				'LOG_SUBJECT' => htmlspecialchars(cut_str(stripslashes($logrow[$i]['log_subject']), 60)),
+				'LOG_SUBJECT' => htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60)),
 				'LOG_DATE'    => convert_time($nl_config['date_format'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sessid('./view.php?mode=log&amp;action=view&amp;id=' . $logrow[$i]['log_id'] . $get_string)
 			));
@@ -1715,7 +1710,7 @@ else if( $mode == 'log' )
 				'L_SUBJECT'  => $lang['Log_subject'],
 				'L_NUMDEST'  => $lang['Log_numdest'],
 				
-				'SUBJECT'    => htmlspecialchars(stripslashes($logdata['log_subject'])),
+				'SUBJECT'    => htmlspecialchars($logdata['log_subject']),
 				'S_NUMDEST'  => $logdata['log_numdest'],
 				'S_CODEBASE' => $nl_config['urlsite'] . $nl_config['path'] . 'admin/',
 				'U_FRAME'    => sessid('./view.php?mode=iframe&amp;id=' . $log_id . '&amp;format=' . $format)
