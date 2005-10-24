@@ -88,6 +88,7 @@ function preview(evt)
 	{
 		var texte = document.forms['send-form'].elements['body_text'].value;
 		texte = texte.replace(rex_link, "http://www.example.org");
+		texte = texte.replace('<', '&lt;');
 		var boldSpan = new RegExp("(\\*\\w+\\*)", "g");
 		var italicSpan = new RegExp("(/\\w+/)", "g");
 		var underlineSpan = new RegExp("(_\\w+_)", "g");
