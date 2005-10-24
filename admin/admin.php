@@ -68,13 +68,13 @@ if( $mode == 'adduser' )
 		{
 			$sql = "SELECT COUNT(*) AS login_test 
 				FROM " . ADMIN_TABLE . " 
-				WHERE LOWER(admin_login) = '" . $db->escape(strtolower($new_login)) . "'";
+				WHERE admin_login = '" . $db->escape($new_login) . "'";
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible de tester le login', ERROR);
 			}
 			
-			if( $db->result($result, 0, 'login_test') )
+			if( $db->result($result, 0, 'login_test') > 0 )
 			{
 				$error = TRUE;
 				$msg_error[] = $lang['Message']['Double_login'];
@@ -131,7 +131,7 @@ if( $mode == 'adduser' )
 			$mailer->set_subject(sprintf($lang['Subject_email']['New_admin'], $nl_config['sitename']));
 			
 			$mailer->use_template('new_admin', array(
-				'PSEUDO'     => stripslashes($new_login),
+				'PSEUDO'     => $new_login,
 				'SITENAME'   => $nl_config['sitename'],
 				'PASSWORD'   => $new_pass,
 				'LINK_ADMIN' => make_script_url('admin/index.php')
@@ -169,8 +169,8 @@ if( $mode == 'adduser' )
 		'L_VALID_BUTTON'  => $lang['Button']['valid'],
 		'L_CANCEL_BUTTON' => $lang['Button']['cancel'],
 		
-		'LOGIN' => htmlspecialchars(stripslashes($new_login)),
-		'EMAIL' => htmlspecialchars(stripslashes($new_email)),
+		'LOGIN' => htmlspecialchars($new_login),
+		'EMAIL' => htmlspecialchars($new_email),
 		
 		'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 	));
