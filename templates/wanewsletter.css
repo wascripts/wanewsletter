@@ -25,13 +25,8 @@
  */
 
 html,
-body { background-color: #003B78; color: white; }
-body {
-	margin: 0;
-	border: none;
-	padding: 0;
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-}
+body { background-color: #003B78; font-family: Verdana, Arial, Helvetica, sans-serif; color: white; }
+body { margin: 0; padding: 0; }
 
 a img { border: none; }
 hr    { display: none; }
@@ -39,25 +34,26 @@ hr    { display: none; }
 /* Structure des pages */
 
 #header {
-	height: 72px;
-	background: #003B78 url("images/background_header.gif") top left repeat-y;
+	height: 70px;
+	background-color: #003B78;
+	background-image: url("images/background_header.gif");
+	background-repeat: repeat-y;
 	margin: 0;
 	padding: 5px;
 	color: black;
 	voice-family: "\"}\"";
 	voice-family: inherit;
-	height: 62px;
+	height: 60px;
 }
-
-body>#header {
-	height: 62px;
-}
+body>#header { height: 60px; }
 
 #header p {
-	display: inline;
 	background-color: transparent;
+	margin: 0;
 	color: black;
 }
+#header p a,
+#header p img { display: block; position: absolute; }
 
 #header h1 {
 	position: absolute;
@@ -72,13 +68,15 @@ body>#header {
 
 #menu {
 	height: 16px;
-	background: #FAFAFA url("images/bande.gif") repeat-x;
+	background-color: #FAFAFA;
+	background-image: url("images/bande.gif");
+	background-repeat: repeat-x;
 	margin: 0;
 	border-width: 1px 0;
 	border-color: black;
 	border-style: solid;
 	padding-top: 4px;
-	font-size: 0.7em;
+	font-size: .7em;
 	font-style: normal;
 	text-align: center;
 	color: black;
@@ -95,7 +93,7 @@ div#smallheader, div#global, address#footer {
 
 div#smallheader h1 {
 	background-color: inherit;
-	margin: 0.4em;
+	margin: .4em;
 	white-space: nowrap;
 	text-align: center;
 	font-weight: bold;
@@ -104,17 +102,17 @@ div#smallheader h1 {
 }
 
 address#footer {
-	padding: 0.3em;
+	padding: .3em;
 	font-style: normal;
 	font-weight: bold;
-	font-size: 0.6em;
+	font-size: .6em;
 }
 
 div#dev {
 	background-color: inherit;
 	margin: 20px;
 	text-align: center;
-	font-size: 0.6em;
+	font-size: .6em;
 	font-weight: bold;
 	color: #DBDBDB;
 }
@@ -125,10 +123,10 @@ p#explain {
 	border-width: 0 1px;
 	border-style: solid;
 	border-color: black;
-	padding: 0 0.8%;
+	padding: 0 .8%;
 	line-height: 1.35em;
 	font-weight: normal;
-	font-size: 0.6em;
+	font-size: .6em;
 	text-align: justify;
 	color: black;
 }
@@ -137,7 +135,7 @@ ul#errorbox {
 	background-color: #DDD;
 	margin: 20px;
 	border: 1px solid black;
-	padding: 0.5em 2em;
+	padding: .5em 2em;
 	list-style-type: square;
 	text-align: left;
 	color: black;
@@ -146,7 +144,7 @@ ul#errorbox {
 ul#errorbox li {
 	background-color: inherit;
 	font-weight: normal;
-	font-size: 0.7em;
+	font-size: .7em;
 	color: black;
 }
 
@@ -159,13 +157,13 @@ ul#errorbox li {
 
 #nav-top {
 	margin-top: 1em;
-	margin-bottom: -0.9em;
+	margin-bottom: -.9em;
 	margin-left: 2.7%;
 	margin-right: 2.7%;
 }
 
 #nav-bottom {
-	margin-top: -0.9em;
+	margin-top: -.9em;
 	margin-bottom: 1em;
 	margin-left: 2.7%;
 	margin-right: 2.7%;
@@ -201,7 +199,9 @@ div.left p, div.right p {
 .smallbloc { margin: 1em 8%; }
 
 .bloc h2, .smallbloc h2 {
-	background: #003B78 url("images/head.gif") top repeat-x;
+	background-color: #003B78;
+	background-image: url("images/head.gif");
+	background-repeat: repeat-x;
 	margin: 0;
 	padding-top: 5px;
 	height: 27px;
@@ -233,12 +233,11 @@ div.left p, div.right p {
 }
 
 .bottom {
-	background: #BBB url("images/bottom.gif") bottom repeat-x;
+	background: #BBB url("images/bottom.gif") repeat-x bottom;
 	margin: 0;
 	padding-top: 3px;
 	height: 27px;
 	color: black;
-	
 	voice-family: "\"}\"";
 	voice-family:inherit;
 	height: 24px;
@@ -248,8 +247,8 @@ div.left p, div.right p {
 	height: 24px;
 }
 
-ul.links         { margin: 0 2.5% -0.9em; padding: 0; text-align: left; }
-ul.links.special { margin: 0 8% -0.9em; }
+ul.links         { margin: 0 2.5% -.9em; padding: 0; text-align: left; }
+ul.links.special { margin: 0 8% -.9em; }
 
 ul.links li {
 	display: inline;
@@ -339,7 +338,7 @@ input[type="text"][disabled], input[type="password"][disabled] {
 }
 
 input.text, textarea, select {
-	font-size: 0.7em;
+	font-size: .7em;
 	font-weight: normal;
 	color: black;
 }
@@ -348,14 +347,14 @@ input[type="file"]  { font-size: .7em; font-weight: normal; color: black; }
 input[type="radio"] { vertical-align: sub; }
 
 /*
-  Malgrï¿½ la propriï¿½tï¿½ font-family dans body, textarea n'en tient pas compte, 
+  Malgrï¿½ la propriété font-family dans body, textarea n'en tient pas compte, 
   que ce soit dans un navigateur gecko ou IE... :/
-  On redï¿½clare...
+  On redéclare...
  */
 textarea   { font-family: Verdana, Arial, Helvetica, sans-serif; }
 input.text { text-indent: 2px; }
 
-input.text, textarea             { background-color: #FAFAFA; border: 1px inset black; }
+input.text, textarea, select     { background-color: #FAFAFA; border: 1px inset black; }
 input.text:focus, textarea:focus { background-color: white; border-style: solid; }
 
 /* tables */
@@ -364,7 +363,7 @@ table.content {
 	background-color: #FAFAFA;
 	border-spacing: 1px;
 	
-	/* Les bordures externes sont parfois mangï¿½es sous les navigateurs gecko si width est ï¿½ 100% */
+	/* Les bordures externes sont parfois mangées sous les navigateurs gecko si width est à 100% */
 	w\idth: 99.9%;
 }
 
@@ -431,3 +430,4 @@ td.row1 label, td.medrow1 label, td.smallrow1 label, td.row-full label {
 	font-size: .8em;
 	color: black;
 }
+
