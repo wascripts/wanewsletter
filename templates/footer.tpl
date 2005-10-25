@@ -4,7 +4,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
-phpCodeur</a> &copy; 2002-2005 | WAnewsletter {VERSION} {TRANSLATE}<br />
+phpCodeur</a> &copy; 2002-2006 | WAnewsletter {VERSION} {TRANSLATE}<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
 </address>

@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -21,7 +25,7 @@
  * @version $Id$
  */
 
-define('WA_STATS_PATH'		, $waroot . 'stats/', true);
+define('WA_STATS_PATH'		, WA_PATH . 'stats/', true);
 
 @chmod(wa_stats_path, 0777);
 
@@ -179,7 +183,7 @@ function update_stats($listdata)
  */
 function remove_stats($liste_from, $liste_to = false)
 {
-	global $nl_config, $waroot;
+	global $nl_config;
 	
 	if( $nl_config['disable_stats'] || !is_available_extension('gd') )
 	{
@@ -190,7 +194,7 @@ function remove_stats($liste_from, $liste_to = false)
 	
 	if( $res = @opendir(wa_stats_path) )
 	{
-		include $waroot . 'includes/class.attach.php';
+		include WA_PATH . 'includes/class.attach.php';
 		
 		$old_stats = array();
 		

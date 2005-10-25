@@ -18,10 +18,8 @@ $_GET, $_POST ..etc ..   => 4.1.0 plus besoin de transvaser les tab $HTTP_*_VARS
 version_compare()        => 4.1.0
 mysql_real_escape_string => 4.3.0 sql/mysql.php et sql/mysql4.php
 pg_escape_string()       => 4.2.0 sql/postgre.php (et nécessite également PostgreSQL >= 7.2
-constante PATH_SEPARATOR => 4.3.0-RC2 start.php
 constantes UPLOAD_ERR_*  => 4.3.0 Utilisée dans includes/class.attach.php et admin/envoi.php
-set_include_path()       => 4.3.0 start.php
-get_include_path()       => 4.3.0 start.php
+
 
 ////////////////////////////////
 

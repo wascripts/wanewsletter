@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -23,9 +27,9 @@
 
 define('IN_NEWSLETTER', true);
 define('IN_CRON',       true);
+define('WA_PATH',      '../');
 
-$waroot = '../';
-require $waroot . 'start.php';
+require WA_PATH . 'start.php';
 
 load_settings();
 
@@ -61,16 +65,16 @@ if( $listdata = $db->fetch_array($result) )
 		@set_time_limit(1200);
 	}
 	
-	include $waroot . 'includes/class.mailer.php';
+	include WA_PATH . 'includes/class.mailer.php';
 	
 	//
 	// Initialisation de la classe mailer
 	//
-	$mailer = new Mailer($waroot . 'language/email_' . $nl_config['language'] . '/');
+	$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
 	
 	if( $nl_config['use_smtp'] )
 	{
-		$mailer->smtp_path = $waroot . 'includes/';
+		$mailer->smtp_path = WA_PATH . 'includes/';
 		$mailer->use_smtp(
 			$nl_config['smtp_host'],
 			$nl_config['smtp_port'],
@@ -86,7 +90,7 @@ if( $listdata = $db->fetch_array($result) )
 	
 	if( $mode == 'send' )
 	{
-		include $waroot . 'includes/engine_send.php';
+		include WA_PATH . 'includes/engine_send.php';
 		
 		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 			FROM " . LOG_TABLE . "
@@ -131,10 +135,10 @@ if( $listdata = $db->fetch_array($result) )
 		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel 
 		$mailer->set_format(FORMAT_TEXTE);
 		
-		include $waroot . 'includes/class.form.php';
-		include $waroot . 'includes/class.pop.php';
-		include $waroot . 'includes/functions.validate.php';
-		include $waroot . 'includes/functions.stats.php';
+		include WA_PATH . 'includes/class.form.php';
+		include WA_PATH . 'includes/class.pop.php';
+		include WA_PATH . 'includes/functions.validate.php';
+		include WA_PATH . 'includes/functions.stats.php';
 		
 		$wan = new Wanewsletter($listdata);
 		$pop = new Pop();

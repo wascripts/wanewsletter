@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -242,7 +246,7 @@ class output extends Template {
 	 */
 	function page_header($use_template = true, $page_title = '')
 	{
-		global $waroot, $nl_config, $lang, $template, $admindata, $auth;
+		global $nl_config, $lang, $template, $admindata, $auth;
 		global $meta, $simple_header, $error, $msg_error;
 		
 		define('HEADER_INC', true);
@@ -275,8 +279,8 @@ class output extends Template {
 			
 			$this->addLink('chapter',   './admin.php', $lang['Module']['users']);
 			$this->addLink('chapter',   './stats.php', $lang['Title']['stats']);
-			$this->addLink('help',      $waroot . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
-			$this->addLink('author',    $waroot . 'docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
+			$this->addLink('help',      WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
+			$this->addLink('author',    WA_PATH . 'docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
 			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Copyleft');
 			
 			$page_title = sprintf($lang['General_title'], htmlspecialchars($nl_config['sitename']));
@@ -518,7 +522,7 @@ class output extends Template {
 	 */
 	function files_list($logdata, $format = 0)
 	{
-		global $waroot, $lang;
+		global $lang;
 		
 		$page_envoi  = ( strstr(server_info('SCRIPT_NAME'), 'envoi.php') ) ? true : false;
 		$body_size   = (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
@@ -597,7 +601,7 @@ class output extends Template {
 			$u_download = './view.php?mode=download&amp;fid=%d';
 		}
 		
-		$u_show = $waroot . 'options/show.php?fid=%d';
+		$u_show = WA_PATH . 'options/show.php?fid=%d';
 		
 		for( $i = 0; $i < $num_files; $i++ )
 		{
@@ -635,7 +639,7 @@ class output extends Template {
 			if( ereg('^image/', $mime_type) )
 			{
 				$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '">';
-				$s_show .= '<img src="' . $waroot . 'images/icon_loupe.gif" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
+				$s_show .= '<img src="' . WA_PATH . 'images/icon_loupe.gif" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
 				$s_show .= '</a>';
 			}
 			else

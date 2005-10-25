@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -34,11 +38,11 @@
  */
 function check_email($email, $liste = 0, $action = '', $disable_check_mx = false)
 {
-	global $waroot, $db, $nl_config, $lang;
+	global $db, $nl_config, $lang;
 	
 	if( !class_exists('Mailer') )
 	{
-		include $waroot . 'includes/class.mailer.php';
+		include WA_PATH . 'includes/class.mailer.php';
 	}
 	
 	//
@@ -141,7 +145,7 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 		// pour une adresse email extérieure à ce réseau)
 		//
 		$mailer = new Mailer();
-		$mailer->smtp_path = $waroot . 'includes/';
+		$mailer->smtp_path = WA_PATH . 'includes/';
 		$result = $mailer->validate_email_mx($email);
 		
 		if( !$result )
@@ -165,9 +169,7 @@ function validate_pass($password)
 
 function validate_lang($language)
 {
-	global $waroot;
-	
-	return preg_match('/^[\w_-]+$/', $language) && file_exists($waroot . 'language/lang_' . $language . '.php');
+	return preg_match('/^[\w_-]+$/', $language) && file_exists(WA_PATH . 'language/lang_' . $language . '.php');
 }
 
 ?>

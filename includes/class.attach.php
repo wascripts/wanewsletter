@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -66,9 +70,9 @@ class Attach {
 	 */
 	function Attach()
 	{
-		global $nl_config, $waroot;
+		global $nl_config;
 		
-		$this->upload_path = $waroot . $nl_config['upload_path'];
+		$this->upload_path = WA_PATH . $nl_config['upload_path'];
 		$this->use_ftp     = $nl_config['use_ftp'];
 		
 		if( $this->use_ftp )
@@ -252,7 +256,7 @@ class Attach {
 	 */
 	function upload_file($upload_mode, $log_id, $filename, $tmp_filename, $filesize, $filetype, $errno_code, &$error, &$msg_error)
 	{
-		global $waroot, $db, $lang, $nl_config;
+		global $db, $lang, $nl_config;
 		
 		$extension = substr($filename, (strrpos($filename, '.') + 1));
 		
@@ -439,7 +443,7 @@ class Attach {
 					}
 					ftp_quit($cid);
 					
-					include $waroot . 'includes/class.mailer.php';
+					include WA_PATH . 'includes/class.mailer.php';
 					
 					$filetype = Mailer::mime_type(substr($filename, (strrpos($filename, '.') + 1)));
 				}
@@ -452,7 +456,7 @@ class Attach {
 			//
 			else if( $upload_mode == 'local' )
 			{
-				include $waroot . 'includes/class.mailer.php';
+				include WA_PATH . 'includes/class.mailer.php';
 				
 				$filetype = Mailer::mime_type($extension);
 				
@@ -708,7 +712,7 @@ class Attach {
 	 */
 	function download_file($file_id)
 	{
-		global $waroot, $db, $listdata, $lang;
+		global $db, $listdata, $lang;
 		
 		$sql = "SELECT f.file_real_name, f.file_physical_name, f.file_size, f.file_mimetype 
 			FROM " . JOINED_FILES_TABLE . " AS f, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l 

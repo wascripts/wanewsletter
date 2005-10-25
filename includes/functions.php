@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -196,16 +200,16 @@ function get_data($liste_id_mixed)
  */
 function load_settings($admindata = array())
 {
-	global $waroot, $nl_config, $db, $lang, $datetime, $output;
+	global $nl_config, $db, $lang, $datetime, $output;
 	
-	$template_path = $waroot . 'templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
+	$template_path = WA_PATH . 'templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
 	
 	$output = new output($template_path);
-	$output->addScript($waroot . 'templates/DOM-Compat/DOM-Compat.js');
+	$output->addScript(WA_PATH . 'templates/DOM-Compat/DOM-Compat.js');
 	
 	if( defined('IN_ADMIN') )
 	{
-		$output->addScript($waroot . 'templates/admin/admin.js');
+		$output->addScript(WA_PATH . 'templates/admin/admin.js');
 	}
 	
 	if( !is_array($admindata) )
@@ -223,12 +227,12 @@ function load_settings($admindata = array())
 		$nl_config['date_format'] = $admindata['admin_dateformat'];
 	}
 	
-	$language_path = wa_realpath($waroot . 'language/lang_' . $nl_config['language'] . '.php');
+	$language_path = wa_realpath(WA_PATH . 'language/lang_' . $nl_config['language'] . '.php');
 	
 	if( !file_exists($language_path) )
 	{
 		$nl_config['language'] = 'francais';
-		$language_path = wa_realpath($waroot . 'language/lang_' . $nl_config['language'] . '.php');
+		$language_path = wa_realpath(WA_PATH . 'language/lang_' . $nl_config['language'] . '.php');
 		
 		if( !file_exists($language_path) )
 		{
@@ -253,7 +257,7 @@ function load_settings($admindata = array())
  */
 function wanewsletter_handler($errno, $errstr, $errfile, $errline)
 {
-	global $waroot, $db, $output, $lang, $message, $php_errormsg;
+	global $db, $output, $lang, $message, $php_errormsg;
 	
 	$debug_text = '';
 	
@@ -655,9 +659,7 @@ function strip_magic_quotes_gpc(&$data)
  */
 function wa_realpath($relative_path)
 {
-	global $waroot;
-	
-	if( !@function_exists('realpath') || !@realpath($waroot . 'includes/functions.php') )
+	if( !@function_exists('realpath') || !@realpath(WA_PATH . 'includes/functions.php') )
 	{
 		return $relative_path;
 	}

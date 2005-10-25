@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -34,7 +38,7 @@ $admin_pass  = ( !empty($_POST['admin_pass']) ) ? trim($_POST['admin_pass']) : '
 
 if( isset($supported_db[$dbtype]) )
 {
-	include $waroot . 'sql/' . $dbtype . '.php';
+	include WA_PATH . 'sql/' . $dbtype . '.php';
 }
 else
 {
@@ -76,7 +80,7 @@ while( $row = $db->fetch_array($result) )
 }
 
 $language = $old_config['language'];
-require $waroot . 'language/lang_' . $language . '.php';
+require WA_PATH . 'language/lang_' . $language . '.php';
 
 $output->send_headers();
 
@@ -130,7 +134,7 @@ if( isset($_POST['start_update']) )
 		$msg_error[] = $lang['Message']['Error_login'];
 	}
 	
-	if( !is_writable($waroot . 'includes/config.inc.php') )
+	if( !is_writable(WA_PATH . 'includes/config.inc.php') )
 	{
 		$error = TRUE;
 		$msg_error[] = $lang['File_config_unwritable'];
@@ -577,7 +581,7 @@ $sql_update[] = "ALTER TABLE " . LOG_TABLE . " DROP COLUMN attach";
 
 exec_queries($sql_update, true);
 
-include $waroot . 'includes/class.mailer.php';
+include WA_PATH . 'includes/class.mailer.php';
 
 $total_log = count($logrow);
 for( $i = 0; $i < $total_log; $i++ )
@@ -595,9 +599,9 @@ for( $i = 0; $i < $total_log; $i++ )
 		$mime_type = Mailer::mime_type(substr($files[$j], (strrpos($files[$j], '.') + 1)));
 		
 		$filesize = 0;
-		if( file_exists($waroot . 'admin/upload/' . $files[$j]) )
+		if( file_exists(WA_PATH . 'admin/upload/' . $files[$j]) )
 		{
-			$filesize = filesize($waroot . 'admin/upload/' . $files[$j]);
+			$filesize = filesize(WA_PATH . 'admin/upload/' . $files[$j]);
 		}
 		
 		$sql = "INSERT INTO " . JOINED_FILES_TABLE . " (file_real_name, file_physical_name, file_size, file_mimetype) 
@@ -730,21 +734,21 @@ exec_queries($sql, true);
 // Modification fichier de configuration + 
 // Affichage message de résultat
 //
-@chmod($waroot . 'includes', 0777);
+@chmod(WA_PATH . 'includes', 0777);
 
-if( $fw = @fopen($waroot . 'includes/config.inc.php', 'w') )
+if( $fw = @fopen(WA_PATH . 'includes/config.inc.php', 'w') )
 {
 	fwrite($fw, $config_file);
 	fclose($fw);
 	
-	@chmod($waroot . 'includes', 0755);
+	@chmod(WA_PATH . 'includes', 0755);
 	
-	$message = sprintf($lang['Success_update'], '<a href="' . $waroot . 'admin/login.php">', '</a>');
+	$message = sprintf($lang['Success_update'], '<a href="' . WA_PATH . 'admin/login.php">', '</a>');
 	msg_result($message);
 }
 else
 {
-	@chmod($waroot . 'includes', 0755);
+	@chmod(WA_PATH . 'includes', 0755);
 	
 	$message = sprintf($lang['Success_whithout_config2'], htmlspecialchars($config_file));
 	msg_result($message);

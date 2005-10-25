@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -31,8 +35,8 @@ define('IN_NEWSLETTER', true);
 $default_magic_quotes_runtime = get_magic_quotes_runtime();
 $default_error_reporting      = error_reporting(E_ALL);
 
-require $waroot . 'start.php';
-require $waroot . 'includes/functions.validate.php';
+require WA_PATH . 'start.php';
+require WA_PATH . 'includes/functions.validate.php';
 
 if( !empty($language) && validate_lang($language) )
 {
@@ -69,15 +73,15 @@ if( $action != '' )
 		//
 		purge_liste();
 		
-		require $waroot . 'includes/class.form.php';
-		require $waroot . 'includes/class.mailer.php';
-		include $waroot . 'includes/functions.stats.php';
+		require WA_PATH . 'includes/class.form.php';
+		require WA_PATH . 'includes/class.mailer.php';
+		include WA_PATH . 'includes/functions.stats.php';
 		
-		$mailer = new Mailer($waroot . 'language/email_' . $nl_config['language'] . '/');
+		$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
 		
 		if( $nl_config['use_smtp'] )
 		{
-			$mailer->smtp_path = $waroot . 'includes/';
+			$mailer->smtp_path = WA_PATH . 'includes/';
 			$mailer->use_smtp(
 				$nl_config['smtp_host'],
 				$nl_config['smtp_port'],

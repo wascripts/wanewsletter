@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -22,11 +26,11 @@
  */
 
 define('IN_NEWSLETTER', true);
+define('WA_PATH',       './');
 
-$waroot = './';
-require $waroot . 'start.php';
-require $waroot . 'includes/functions.validate.php';
-include $waroot . 'includes/tags.inc.php';
+require WA_PATH . 'start.php';
+require WA_PATH . 'includes/functions.validate.php';
+include WA_PATH . 'includes/tags.inc.php';
 
 if( !$nl_config['enable_profil_cp'] )
 {
@@ -37,7 +41,7 @@ if( !$nl_config['enable_profil_cp'] )
 //
 // Instanciation d'une session
 //
-include $waroot . 'includes/class.sessions.php';
+include WA_PATH . 'includes/class.sessions.php';
 $session = new Session();
 
 function check_login($email, $regkey = '', $passwd = '')
@@ -195,7 +199,7 @@ switch( $mode )
 	case 'sendkey':
 		if( isset($_POST['submit']) )
 		{
-			require $waroot . 'includes/functions.validate.php';
+			require WA_PATH . 'includes/functions.validate.php';
 			
 			$result = check_email($email, -1, '', true);
 			
@@ -205,13 +209,13 @@ switch( $mode )
 				{
 					list($liste_id, $listdata) = each($abodata['listes']);
 					
-					require $waroot . 'includes/class.mailer.php';
+					require WA_PATH . 'includes/class.mailer.php';
 					
-					$mailer = new Mailer($waroot . 'language/email_' . $nl_config['language'] . '/');
+					$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
 					
 					if( $nl_config['use_smtp'] )
 					{
-						$mailer->smtp_path = $waroot . 'includes/';
+						$mailer->smtp_path = WA_PATH . 'includes/';
 						$mailer->use_smtp(
 							$nl_config['smtp_host'],
 							$nl_config['smtp_port'],
@@ -350,7 +354,7 @@ switch( $mode )
 			}
 		}
 		
-		require $waroot . 'includes/functions.box.php';
+		require WA_PATH . 'includes/functions.box.php';
 		
 		$output->page_header();
 		
@@ -432,17 +436,17 @@ switch( $mode )
 				trigger_error('Impossible de récupérer la liste des archives', ERROR);
 			}
 			
-			require $waroot . 'includes/class.mailer.php';
-			require $waroot . 'includes/engine_send.php';
+			require WA_PATH . 'includes/class.mailer.php';
+			require WA_PATH . 'includes/engine_send.php';
 			
 			//
 			// Initialisation de la classe mailer
 			//
-			$mailer = new Mailer($waroot . 'language/email_' . $nl_config['language'] . '/');
+			$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
 			
 			if( $nl_config['use_smtp'] )
 			{
-				$mailer->smtp_path = $waroot . 'includes/';
+				$mailer->smtp_path = WA_PATH . 'includes/';
 				$mailer->use_smtp(
 					$nl_config['smtp_host'],
 					$nl_config['smtp_port'],
@@ -533,7 +537,7 @@ switch( $mode )
 					$total_files = count($files[$row['log_id']]);
 					$tmp_files	 = array();
 					
-					require $waroot . 'includes/class.attach.php';
+					require WA_PATH . 'includes/class.attach.php';
 					$attach = new Attach();
 					
 					preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $body, $matches);
@@ -562,7 +566,7 @@ switch( $mode )
 						}
 						else
 						{
-							$file_path = $waroot . $nl_config['upload_path'] . $physical_name;
+							$file_path = WA_PATH . $nl_config['upload_path'] . $physical_name;
 						}
 						
 						if( is_array($matches) && in_array($real_name, $matches[1]) )

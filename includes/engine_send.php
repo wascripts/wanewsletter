@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -26,7 +30,7 @@ if( !defined('IN_NEWSLETTER') )
 	exit('<b>No hacking</b>');
 }
 
-include $waroot . 'includes/tags.inc.php';
+include WA_PATH . 'includes/tags.inc.php';
 
 /**
  * launch_sending()
@@ -43,7 +47,7 @@ include $waroot . 'includes/tags.inc.php';
  */
 function launch_sending($listdata, $logdata)
 {
-	global $waroot, $nl_config, $db, $dbhost, $dbuser, $dbpassword, $dbname, $lang, $mailer, $other_tags;
+	global $nl_config, $db, $dbhost, $dbuser, $dbpassword, $dbname, $lang, $mailer, $other_tags;
 	
 	//
 	// On traite les données de la newsletter à envoyer
@@ -73,7 +77,7 @@ function launch_sending($listdata, $logdata)
 	$total_files = count($logdata['joined_files']);
 	$tmp_files   = array();
 	
-	include $waroot . 'includes/class.attach.php';
+	include WA_PATH . 'includes/class.attach.php';
 	$attach = new Attach();
 	
 	preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $body[FORMAT_HTML], $matches);
@@ -102,7 +106,7 @@ function launch_sending($listdata, $logdata)
 		}
 		else
 		{
-			$file_path = $waroot . $nl_config['upload_path'] . $physical_name;
+			$file_path = WA_PATH . $nl_config['upload_path'] . $physical_name;
 		}
 		
 		if( is_array($matches) && in_array($real_name, $matches[1]) )

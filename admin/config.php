@@ -1,17 +1,21 @@
 <?php 
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -45,8 +49,8 @@ $move_files = false;
 
 if( isset($_POST['submit']) )
 {
-	require $waroot . 'includes/class.attach.php';
-	require $waroot . 'includes/functions.validate.php';
+	require WA_PATH . 'includes/class.attach.php';
+	require WA_PATH . 'includes/functions.validate.php';
 	
 	$new_config = array();
 	foreach( $old_config AS $name => $value )
@@ -135,7 +139,7 @@ if( isset($_POST['submit']) )
 	{
 		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $new_config['urlsite'], $match);
 		
-		require $waroot . 'includes/class.smtp.php';
+		require WA_PATH . 'includes/class.smtp.php';
 		
 		$smtp = new Smtp();
 		
@@ -164,7 +168,7 @@ if( isset($_POST['submit']) )
 	
 	if( !$new_config['disable_stats'] && is_available_extension('gd') )
 	{
-		require $waroot . 'includes/functions.stats.php';
+		require WA_PATH . 'includes/functions.stats.php';
 		
 		if( !is_writable(wa_stats_path) )
 		{
@@ -231,7 +235,7 @@ for( $i = 1; $i < 3; $i++ )
 }
 $host_box .= '</select>';
 
-require $waroot . 'includes/functions.box.php';
+require WA_PATH . 'includes/functions.box.php';
 
 $output->page_header();
 
@@ -249,7 +253,7 @@ $output->assign_vars( array(
 	'L_EXPLAIN'                 => nl2br($lang['Explain']['config']),
 	'L_EXPLAIN_COOKIES'         => nl2br($lang['Explain']['config_cookies']),
 	'L_EXPLAIN_JOINED_FILES'    => nl2br($lang['Explain']['config_files']),
-	'L_EXPLAIN_EMAIL'           => nl2br(sprintf($lang['Explain']['config_email'], '<a href="' . $waroot . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#10">', '</a>')),
+	'L_EXPLAIN_EMAIL'           => nl2br(sprintf($lang['Explain']['config_email'], '<a href="' . WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#10">', '</a>')),
 	
 	'L_DEFAULT_LANG'            => $lang['Default_lang'],
 	'L_SITENAME'                => $lang['Sitename'],
@@ -269,7 +273,7 @@ $output->assign_vars( array(
 	'L_MAX_FILESIZE_NOTE'       => nl2br($lang['Max_filesize_note']),
 	'L_OCTETS'                  => $lang['Octets'],
 	'L_CHECK_EMAIL'             => $lang['Check_email'],
-	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . $waroot . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#12">', '</a>')),
+	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#12">', '</a>')),
 	'L_ENGINE_SEND'             => $lang['Choice_engine_send'],
 	'L_ENGINE_BCC'              => $lang['With_engine_bcc'],
 	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],

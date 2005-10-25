@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -48,7 +52,7 @@ $language     = ( $language != '' ) ? $language : $default_lang;
 
 if( isset($supported_db[$dbtype]) )
 {
-	include $waroot . 'sql/' . $dbtype . '.php';
+	include WA_PATH . 'sql/' . $dbtype . '.php';
 }
 else
 {
@@ -78,7 +82,7 @@ if( $type != 'reinstall' && $type != 'update' )
 		{
 			$accept_lang = strtolower(substr($accept_lang, 0, 2));
 			
-			if( isset($supported_lang[$accept_lang]) && file_exists($waroot . 'language/lang_' . $supported_lang[$accept_lang] . '.php') )
+			if( isset($supported_lang[$accept_lang]) && file_exists(WA_PATH . 'language/lang_' . $supported_lang[$accept_lang] . '.php') )
 			{
 				$language = $supported_lang[$accept_lang];
 				break;
@@ -110,7 +114,7 @@ if( defined('NL_INSTALLED') )
 	$language    = $old_config['language'];
 	$hebergeur   = $old_config['hebergeur'];
 	
-	require $waroot . 'language/lang_' . $language . '.php';
+	require WA_PATH . 'language/lang_' . $language . '.php';
 	
 	$login = FALSE;
 	
@@ -152,14 +156,14 @@ else
 			$msg_error[] = '<b>Impossible de se connecter à la base de données</b>';
 		}
 		
-		if( !is_writable($waroot . 'includes/config.inc.php') )
+		if( !is_writable(WA_PATH . 'includes/config.inc.php') )
 		{
 			$error = TRUE;
 			$msg_error[] = 'Le fichier de configuration n\'est pas accessible en écriture';
 		}
 	}
 	
-	include $waroot . 'language/lang_' . $language . '.php';
+	include WA_PATH . 'language/lang_' . $language . '.php';
 }
 
 $output->send_headers();
@@ -195,7 +199,7 @@ if( defined('NL_INSTALLED') && ( !$start || $error ) )
 
 if( $send_file )
 {
-	include $waroot . 'includes/class.attach.php';
+	include WA_PATH . 'includes/class.attach.php';
 	
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
 	exit;
@@ -204,7 +208,7 @@ else
 {
 	if( $start )
 	{
-		include $waroot . 'includes/functions.validate.php';
+		include WA_PATH . 'includes/functions.validate.php';
 		
 		if( $dbhost == '' || $dbname == '' || $dbuser == '' || $prefixe == '' || $admin_login == '' )
 		{
@@ -615,9 +619,9 @@ else
 			
 			if( $type == 'install' )
 			{
-				@chmod($waroot . 'includes/config.inc.php', 0666);
+				@chmod(WA_PATH . 'includes/config.inc.php', 0666);
 				
-				if( !($fw = @fopen($waroot . 'includes/config.inc.php', 'w')) )
+				if( !($fw = @fopen(WA_PATH . 'includes/config.inc.php', 'w')) )
 				{
 					$output->addHiddenField('dbtype',     $dbtype);
 					$output->addHiddenField('dbhost',     $dbhost);
@@ -641,7 +645,7 @@ else
 				fwrite($fw, $config_file);
 				fclose($fw);
 				
-				@chmod($waroot . 'includes/config.inc.php', 0644);
+				@chmod(WA_PATH . 'includes/config.inc.php', 0644);
 			}
 			
 			if( $type == 'install' || $type == 'reinstall' )
@@ -655,7 +659,7 @@ else
 			
 			$output->assign_block_vars('result', array(
 				'L_TITLE'    => $l_title,
-				'MSG_RESULT' => nl2br(sprintf($msg_result, '<a href="' . $waroot . 'admin/login.php">', '</a>'))
+				'MSG_RESULT' => nl2br(sprintf($msg_result, '<a href="' . WA_PATH . 'admin/login.php">', '</a>'))
 			));
 			
 			$output->pparse('body');
@@ -663,7 +667,7 @@ else
 		}
 	}
 	
-	include $waroot . 'includes/functions.box.php';
+	include WA_PATH . 'includes/functions.box.php';
 	$lang_box = lang_box($language);
 	
 	$db_box = '<select id="dbtype" name="dbtype">';
@@ -687,7 +691,7 @@ else
 	$output->addHiddenField('prev_language', $language);
 	
 	$output->assign_block_vars('welcome', array(
-		'L_WELCOME'         => nl2br( sprintf($lang['Welcome_in_install'], '<a href="' . $waroot . 'docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>')),
+		'L_WELCOME'         => nl2br( sprintf($lang['Welcome_in_install'], '<a href="' . WA_PATH . 'docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>')),
 		'TITLE_DATABASE'    => $lang['Title']['database'],
 		'TITLE_ADMIN'       => $lang['Title']['admin'],
 		'TITLE_DIVERS'      => $lang['Title']['config_divers'],

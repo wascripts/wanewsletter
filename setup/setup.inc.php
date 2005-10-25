@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -25,6 +29,8 @@ if( !defined('IN_INSTALL') && !defined('IN_UPDATE') )
 {
 	exit('<b>No hacking</b>');
 }
+
+define('WA_PATH', '../');
 
 function msg_result($str, $is_query = false)
 {
@@ -94,10 +100,9 @@ function exec_queries($sql_ary, $return_error = false)
 
 error_reporting(E_ALL);
 
-$waroot       = '../';
 $new_version  = '2.3-dev';
 $default_lang = 'francais';
-$schemas_dir  = $waroot . 'setup/schemas/';
+$schemas_dir  = WA_PATH . 'setup/schemas/';
 
 $supported_lang = array(
 	'fr' => 'francais',
@@ -153,7 +158,7 @@ if( !function_exists('version_compare') || version_compare(phpversion(), '4.3.0'
 	exit;
 }
 
-require $waroot . 'includes/functions.php';
+require WA_PATH . 'includes/functions.php';
 
 //
 // Désactivation de magic_quotes_runtime + 
@@ -185,9 +190,9 @@ if( $prefixe == '' )
 	$prefixe = 'wa_';
 }
 
-if( file_exists($waroot . 'includes/config.inc.php') )
+if( file_exists(WA_PATH . 'includes/config.inc.php') )
 {
-	include $waroot . 'includes/config.inc.php';
+	include WA_PATH . 'includes/config.inc.php';
 }
 
 if( defined('IN_UPDATE') && ( $dbhost == '' || $dbname == '' || $dbuser == '' ) )
@@ -195,7 +200,7 @@ if( defined('IN_UPDATE') && ( $dbhost == '' || $dbname == '' || $dbuser == '' ) 
 	plain_error('Aucune version de WAnewsletter ne semble présente, le fichier de configuration est vide');
 }
 
-require $waroot . 'includes/constantes.php';
+require WA_PATH . 'includes/constantes.php';
 
 foreach( $supported_db AS $db_name => $db_infos )
 {
@@ -210,8 +215,8 @@ if( count($supported_db) == 0 )
 	plain_error('Désolé mais WAnewsletter ' . $new_version . ' requiert une base de données MySQL 3.23.x/4.x ou PostgreSQL 7');
 }
 
-require $waroot . 'includes/template.php';
-require $waroot . 'includes/class.output.php';
+require WA_PATH . 'includes/template.php';
+require WA_PATH . 'includes/class.output.php';
 
 $config_file  = '<' . "?php\n\n";
 $config_file .= "//\n";
@@ -227,6 +232,6 @@ $config_file .= "\$dbname  = '$dbname';\n\n";
 $config_file .= "\$prefixe = '$prefixe';\n\n";
 $config_file .= '?' . '>';
 
-$output = new output($waroot . 'templates/');
+$output = new output(WA_PATH . 'templates/');
 
 ?>

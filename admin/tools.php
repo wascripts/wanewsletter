@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -1061,7 +1065,7 @@ switch( $mode )
 			
 			if( $action == 'download' )
 			{
-				include $waroot . 'includes/class.attach.php';
+				include WA_PATH . 'includes/class.attach.php';
 				
 				Attach::send_file($filename, $mime_type, $contents);
 			}
@@ -1118,7 +1122,7 @@ switch( $mode )
 		
 		if( $listdata['liste_format'] == FORMAT_MULTIPLE )
 		{
-			include $waroot . 'includes/functions.box.php';
+			include WA_PATH . 'includes/functions.box.php';
 			
 			$output->assign_block_vars('format_box', array(
 				'L_FORMAT'	 => $lang['Format_to_export'],
@@ -1146,7 +1150,7 @@ switch( $mode )
 				{
 					//$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
 					
-					$tmp_filename = wa_realpath($waroot . str_replace('\\', '/', $file_local));
+					$tmp_filename = wa_realpath(WA_PATH . str_replace('\\', '/', $file_local));
 					$filename     = $file_local;
 					
 					if( !file_exists($tmp_filename) )
@@ -1201,7 +1205,7 @@ switch( $mode )
 				//
 				if( $unlink )
 				{
-					include $waroot . 'includes/class.attach.php';
+					include WA_PATH . 'includes/class.attach.php';
 					
 					Attach::remove_file($tmp_filename);
 				}
@@ -1227,7 +1231,7 @@ switch( $mode )
 				trigger_error($message, MESSAGE);
 			}
 			
-			include $waroot . 'includes/functions.validate.php'; 
+			include WA_PATH . 'includes/functions.validate.php'; 
 			
 			if( $glue == '' )
 			{
@@ -1341,7 +1345,7 @@ switch( $mode )
 		
 		$output->assign_vars(array(
 			'L_TITLE_IMPORT'   => $lang['Title']['import'],
-			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'], MAX_IMPORT, '<a href="' . $waroot . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#4">', '</a>')),
+			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'], MAX_IMPORT, '<a href="' . WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#4">', '</a>')),
 			'L_GLUE'           => $lang['Char_glue'],
 			'L_FILE_LOCAL'     => $lang['File_local'],
 			'L_VALID_BUTTON'   => $lang['Button']['valid'],
@@ -1353,7 +1357,7 @@ switch( $mode )
 		
 		if( $listdata['liste_format'] == FORMAT_MULTIPLE )
 		{
-			include $waroot . 'includes/functions.box.php';
+			include WA_PATH . 'includes/functions.box.php';
 			
 			$output->assign_block_vars('format_box', array(
 				'L_FORMAT'   => $lang['Format_to_import'],
@@ -1673,7 +1677,7 @@ switch( $mode )
 			
 			if( $action == 'download' )
 			{
-				include $waroot . 'includes/class.attach.php';
+				include WA_PATH . 'includes/class.attach.php';
 				
 				Attach::send_file($filename, $mime_type, $contents);
 			}
@@ -1783,7 +1787,7 @@ switch( $mode )
 				{
 					//$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
 					
-					$tmp_filename = wa_realpath($waroot . str_replace('\\', '/', $file_local));
+					$tmp_filename = wa_realpath(WA_PATH . str_replace('\\', '/', $file_local));
 					$filename     = $file_local;
 					
 					if( !file_exists($tmp_filename) )
@@ -1838,7 +1842,7 @@ switch( $mode )
 				//
 				if( $unlink )
 				{
-					include $waroot . 'includes/class.attach.php';
+					include WA_PATH . 'includes/class.attach.php';
 					
 					Attach::remove_file($tmp_filename);
 				}
@@ -1933,12 +1937,13 @@ switch( $mode )
 			$code_html .= "<input type=\"submit\" name=\"wanewsletter\" value=\"" . $lang['Button']['valid'] . "\" />\n";
 			$code_html .= "</form>";
 			
-			$path = wa_realpath($waroot . 'newsletter.php');
+			$path = wa_realpath(WA_PATH . 'newsletter.php');
 			
 			$code_php  = '<' . "?php\n";
 			$code_php .= "define('IN_WA_FORM', true);\n";
-			$code_php .= "\$waroot = '" . substr($path, 0, (strrpos($path, '/') + 1)) . "';\n";
-			$code_php .= "include \$waroot . 'newsletter.php';\n";
+			$code_php .= "define('WA_PATH', '" . substr($path, 0, (strrpos($path, '/') + 1)) . "');\n";
+			$code_php .= "\n";
+			$code_php .= "include WA_PATH . 'newsletter.php';\n";
 			$code_php .= '?' . '>';
 			
 			$output->set_filenames(array(

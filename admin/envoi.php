@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -82,7 +86,7 @@ switch( $mode )
 	// Téléchargement d'un fichier joint
 	//
 	case 'download':
-		include $waroot . 'includes/class.attach.php';
+		include WA_PATH . 'includes/class.attach.php';
 		
 		$file_id = ( !empty($_GET['fid']) ) ? intval($_GET['fid']) : 0;
 		$attach  = new Attach();
@@ -219,7 +223,7 @@ switch( $mode )
 				trigger_error('Impossible de supprimer le log', ERROR);
 			}
 			
-			include $waroot . 'includes/class.attach.php';
+			include WA_PATH . 'includes/class.attach.php';
 			
 			$attach = new Attach();
 			$attach->delete_joined_files(true, $logdata['log_id']);
@@ -499,7 +503,7 @@ switch( $mode )
 			$errno_code   = ( !empty($_FILES['join_file']['error']) ) ? intval($_FILES['join_file']['error']) : UPLOAD_ERR_OK;
 			$file_id      = ( !empty($_POST['fid']) ) ? intval($_POST['fid']) : 0;
 			
-			include $waroot . 'includes/class.attach.php';
+			include WA_PATH . 'includes/class.attach.php';
 			
 			$attach = new Attach();
 			
@@ -554,7 +558,7 @@ switch( $mode )
 			//
 			// Suppression du fichier joint spécifié
 			//
-			include $waroot . 'includes/class.attach.php';
+			include WA_PATH . 'includes/class.attach.php';
 			
 			$attach = new Attach();
 			$attach->delete_joined_files(false, $logdata['log_id'], $file_ids);
@@ -637,8 +641,8 @@ if( $mode == 'resend' )
 		trigger_error('Not_auth_send', MESSAGE);
 	}
 	
-	include $waroot . 'includes/class.mailer.php';
-	include $waroot . 'includes/engine_send.php';
+	include WA_PATH . 'includes/class.mailer.php';
+	include WA_PATH . 'includes/engine_send.php';
 	
 	//
 	// On règle le script pour ignorer une déconnexion du client et 
@@ -663,11 +667,11 @@ if( $mode == 'resend' )
 	//
 	// Initialisation de la classe mailer
 	//
-	$mailer = new Mailer($waroot . 'language/email_' . $nl_config['language'] . '/');
+	$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
 	
 	if( $nl_config['use_smtp'] )
 	{
-		$mailer->smtp_path = $waroot . 'includes/';
+		$mailer->smtp_path = WA_PATH . 'includes/';
 		$mailer->use_smtp(
 			$nl_config['smtp_host'],
 			$nl_config['smtp_port'],
@@ -690,7 +694,7 @@ if( $mode == 'resend' )
 
 $output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('section', './envoi.php?mode=resend', $lang['Resend_log']);
-$output->addScript($waroot . 'templates/admin/editor.js');
+$output->addScript(WA_PATH . 'templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $logdata['log_status']);

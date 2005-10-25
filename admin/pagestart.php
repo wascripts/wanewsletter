@@ -1,17 +1,21 @@
 <?php
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -27,13 +31,14 @@ if( !defined('IN_NEWSLETTER') )
 }
 
 define('IN_ADMIN', true);
+define('WA_PATH', '../');
 
 $secure = TRUE;
-$waroot = '../';
-require $waroot . 'start.php';
 
-include $waroot . 'includes/class.sessions.php';
-include $waroot . 'includes/class.auth.php';
+require WA_PATH . 'start.php';
+
+include WA_PATH . 'includes/class.sessions.php';
+include WA_PATH . 'includes/class.auth.php';
 
 $liste = ( !empty($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 
@@ -93,11 +98,11 @@ if( !defined('IN_LOGIN') )
 //
 $tmp_name = preg_replace('/\/?(.*?)\/?/', '\\1', $tmp_name);
 
-if( OPEN_BASEDIR_RESTRICTION && !is_writable($waroot . $tmp_name) )
+if( OPEN_BASEDIR_RESTRICTION && !is_writable(WA_PATH . $tmp_name) )
 {
 	trigger_error('tmp_dir_not_writable', MESSAGE);
 }
 
-define('WA_TMP_PATH', $waroot . $tmp_name, true);
+define('WA_TMP_PATH', WA_PATH . $tmp_name, true);
 
 ?>
