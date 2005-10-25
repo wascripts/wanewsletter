@@ -17,6 +17,8 @@
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Petit module pour gérer la config, plutôt que de balader une variable $nl_config un peu partout, ce qui est assez crade
 - voir pour refaire marcher includes/functions.php[is_available_extension()]
+- Annuler un envoi
+- Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)
 
 
 Coding
@@ -27,5 +29,6 @@ Coding
 - Utiliser foreach plutôt que for( $i ...) quand c'est possible (plus logique si on a pas besoin d'un compteur)
 - Vérifier réglages de mode lorsqu'on ouvre des fichiers
 - true, false, null toujours en minuscules, autres constantes prédéfinies, en majuscules, de même que les constantes définies
-
+- Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
+- se renseigner sur "rails" (sorte de framework apparamment)
 
