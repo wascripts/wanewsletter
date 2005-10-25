@@ -374,19 +374,18 @@ function wanewsletter_handler($errno, $errstr, $errfile, $errline)
 /**
  * plain_error()
  * 
- * @param string  $str     Message à afficher
+ * @param mixed   $var     Variable à afficher
  * @param boolean $exit    True pour terminer l'exécution du script
  * 
  * @return void
  */
-function plain_error($str, $exit = true)
+function plain_error($var, $exit = true)
 {
 	header('Content-Type: text/plain; charset=ISO-8859-15');
 	
-	echo $str;
+	var_dump($var);
 	
-	if( $exit )
-	{
+	if( $exit ) {
 		exit;
 	}
 }
