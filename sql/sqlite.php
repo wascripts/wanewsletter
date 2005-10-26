@@ -49,6 +49,11 @@ class sql {
 		$sql_connect = ( $persistent ) ? 'sqlite_popen' : 'sqlite_open';
 		
 		$this->connect_id = @$sql_connect($dbpath, 0666);
+		
+		if( is_resource($this->connect_id) )
+		{
+			$this->query('PRAGMA short_column_names = 1');
+		}
 	}
 	
 	function prepare_value($value)
@@ -114,8 +119,6 @@ class sql {
 		{
 			$query .= ' LIMIT ' . $start . ', ' . $limit;
 		}
-		
-		$query = preg_replace('/DISTINCT\s*\((.+?)\)/i', 'DISTINCT \\1', $query);// (TODO) temporaire
 		
 		$curtime = explode(' ', microtime());
 		$curtime = $curtime[0] + $curtime[1] - $starttime;
@@ -238,23 +241,7 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		if( is_resource($result) && ($row = @sqlite_fetch_array($result, SQLITE_ASSOC)) )
-		{
-			foreach( $row AS $name => $value )
-			{
-				if( $pos = strpos($name, '.') )
-				{
-					unset($row[$name]);
-					$row[substr($name, $pos+1)] = $value;
-				}
-			}
-			
-			return $row;
-		}
-		else
-		{
-			return false;
-		}
+		return ( is_resource($result) ) ? @sqlite_fetch_array($result, SQLITE_ASSOC) : false;
 	}
 	
 	function fetch_rowset($result = false)
@@ -264,13 +251,7 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		$rowset = array();
-		while( $row = $this->fetch_array($result) )
-		{
-			$rowset[] = $row;
-		}
-		
-		return $rowset;
+		return ( is_resource($result) ) ? @sqlite_fetch_all($result, SQLITE_ASSOC) : false;
 	}
 	
 	function num_fields($result = false)
