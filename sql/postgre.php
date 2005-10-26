@@ -382,11 +382,7 @@ class sql {
 		if( $this->connect_id )
 		{
 			$this->free_result($this->query_result);
-			
-			if( $this->trc_started )
-			{
-				@pg_exec('COMMIT', $this->connect_id); 
-			}
+			$this->transaction(END_TRC);
 			
 			return @pg_close($this->connect_id); 
 		}

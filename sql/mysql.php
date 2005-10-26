@@ -41,7 +41,7 @@ class sql {
 	{
 		$sql_connect = ( $persistent ) ? 'mysql_pconnect' : 'mysql_connect'; 
 		
-		$this->connect_id = @$sql_connect($dbhost, $dbuser, $dbpwd); 
+		$this->connect_id = @$sql_connect($dbhost, $dbuser, $dbpwd);
 		
 		if( $this->connect_id )
 		{

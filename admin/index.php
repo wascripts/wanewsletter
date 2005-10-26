@@ -47,58 +47,48 @@ if( count($liste_id_ary) > 0 )
 // Poids des tables du script 
 // (excepté la table des sessions)
 //
-if( ereg('^mysql', DATABASE) )
+switch( DATABASE )
 {
-	$sql = 'SHOW TABLE STATUS FROM ' . $dbname;
-	if( $result = $db->query($sql) )
-	{
-		$dbsize = 0;
-		while( $row = $db->fetch_array($result) )
+	case 'mysql':
+	case 'mysql4':
+		$sql = 'SHOW TABLE STATUS FROM ' . $dbname;
+		if( $result = $db->query($sql) )
 		{
-			$add = false;
-			if( $prefixe != '' )
+			$dbsize = 0;
+			while( $row = $db->fetch_array($result) )
 			{
-				if( $row['Name'] != SESSIONS_TABLE && preg_match('/^' . $prefixe . '/', $row['Name']) )
+				$add = false;
+				if( $prefixe != '' )
+				{
+					if( $row['Name'] != SESSIONS_TABLE && preg_match('/^' . $prefixe . '/', $row['Name']) )
+					{
+						$add = true;
+					}
+				}
+				else
 				{
 					$add = true;
 				}
+				
+				if( $add )
+				{
+					$dbsize += ($row['Data_length'] + $row['Index_length']);
+				}
 			}
-			else
-			{
-				$add = true;
-			}
-			
-			if( $add )
-			{
-				$dbsize += ($row['Data_length'] + $row['Index_length']);
-			}
-		}
-		
-		if( $dbsize >= 1048576 )
-		{
-			$lang_size = $lang['MO'];
-			$dbsize /= 1048576;
-		}
-		else if( $dbsize > 1024 )
-		{
-			$lang_size = $lang['KO'];
-			$dbsize /= 1024;
 		}
 		else
 		{
-			$lang_size = $lang['Octets'];
+			$dbsize = $lang['Not_available'];
 		}
-		
-		$dbsize = sprintf('%.2f ' . $lang_size, $dbsize);
-	}
-	else
-	{
+		break;
+	
+	case 'sqlite':
+		$dbsize = filesize($dbhost);
+		break;
+	
+	default:
 		$dbsize = $lang['Not_available'];
-	}
-}
-else
-{
-	$dbsize = $lang['Not_available'];
+		break;
 }
 
 if( !($days	 = round(( time() - $nl_config['mailing_startdate'] ) / 86400)) )
@@ -154,6 +144,26 @@ if( $num_logs > 0 )
 else
 {
 	$l_num_logs = $lang['No_newsletter_sended'];
+}
+
+if( is_numeric($dbsize) )
+{
+	if( $dbsize >= 1048576 )
+	{
+		$lang_size = $lang['MO'];
+		$dbsize /= 1048576;
+	}
+	else if( $dbsize > 1024 )
+	{
+		$lang_size = $lang['KO'];
+		$dbsize /= 1024;
+	}
+	else
+	{
+		$lang_size = $lang['Octets'];
+	}
+	
+	$dbsize = sprintf('%.2f ' . $lang_size, $dbsize);
 }
 
 $output->assign_vars( array(

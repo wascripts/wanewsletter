@@ -12,13 +12,15 @@
 - email envoyé à admin lors de nouvel inscription: Limiter aux inscriptions confirmées si liste demande confirmation ?
 - confirmation à chaque demande d'inscription, pas seulement la première
 - Permettre l'envoi d'emails multipart (text/html) ?
-- répertoire tmp/ absent par défaut ?
+- répertoire tmp/ absent par défaut
 - Mettre à jour le module de statistiques (notamment le graphique à barre, voir /home/web/devel-zone/PHP/GD/barres.php)
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Petit module pour gérer la config, plutôt que de balader une variable $nl_config un peu partout, ce qui est assez crade
 - voir pour refaire marcher includes/functions.php[is_available_extension()]
 - Annuler un envoi
 - Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)
+- Supprimer variable de configuration 'hébergeur' et détecter présence de la fonction email() ou bien si on est sur Online
+- Support de SQLite ?
 
 
 Coding
@@ -31,4 +33,9 @@ Coding
 - true, false, null toujours en minuscules, autres constantes prédéfinies, en majuscules, de même que les constantes définies
 - Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
 - se renseigner sur "rails" (sorte de framework apparamment)
+- Passer par INNER JOIN plutôt que jointure barbare via WHERE
+
+Passer de SQLite 2.x à SQLite 3.x :
+	$ sqlite-old old.db .dump | sqlite-new new.db
+
 

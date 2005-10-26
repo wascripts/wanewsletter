@@ -28,13 +28,14 @@
 if( !defined('IN_NEWSLETTER') )
 {
 	exit('<b>No hacking</b>');
-} 
+}
 
 switch( $dbtype )
 {
 	case 'mysql':
 	case 'mysql4':
 	case 'postgre':
+	case 'sqlite':
 		require WA_PATH . 'sql/' . $dbtype . '.php';
 		break;
 	

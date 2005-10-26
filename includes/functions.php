@@ -139,7 +139,7 @@ function get_data($liste_id_mixed)
 	
 	$data = array('num_inscrits' => 0, 'num_temp' => 0, 'num_logs' => 0, 'last_log' => 0);
 	
-	$sql = "SELECT COUNT(DISTINCT(a.abo_id)) AS num_abo, a.abo_status 
+	$sql = "SELECT DISTINCT(a.abo_id) AS num_abo, a.abo_status 
 		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
 		WHERE al.liste_id $sql_where AND a.abo_id = al.abo_id 
 		GROUP BY a.abo_status";

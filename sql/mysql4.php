@@ -324,11 +324,7 @@ class sql {
 		if( $this->connect_id )
 		{
 			$this->free_result($this->query_result);
-			
-			if( $this->trc_started )
-			{
-				$this->transaction('COMMIT'); 
-			}			
+			$this->transaction(END_TRC);
 			
 			return @mysql_close($this->connect_id);
 		}
