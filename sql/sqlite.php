@@ -115,6 +115,8 @@ class sql {
 			$query .= ' LIMIT ' . $start . ', ' . $limit;
 		}
 		
+		$query = preg_replace('/DISTINCT\s*\((.+?)\)/i', 'DISTINCT \\1', $query);// (TODO) temporaire
+		
 		$curtime = explode(' ', microtime());
 		$curtime = $curtime[0] + $curtime[1] - $starttime;
 		
@@ -262,7 +264,13 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		return ( is_resource($result) ) ? @sqlite_fetch_all($result, SQLITE_ASSOC) : false;
+		$rowset = array();
+		while( $row = $this->fetch_array($result) )
+		{
+			$rowset[] = $row;
+		}
+		
+		return $rowset;
 	}
 	
 	function num_fields($result = false)
@@ -287,8 +295,7 @@ class sql {
 	
 	function result($result, $row, $field = '')
 	{
-		$i = sqlite_key();
-		sqlite_seek($row);
+		sqlite_seek($result, $row);
 		
 		if( $field != '' )
 		{
@@ -297,9 +304,9 @@ class sql {
 		else
 		{
 			$r = sqlite_current($result);
+			$r = $r[0];
 		}
 		
-		sqlite_seek($i);
 		return $r;
 	}
 	
