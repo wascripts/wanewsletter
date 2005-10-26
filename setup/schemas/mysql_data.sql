@@ -1,8 +1,7 @@
 #
-# Données de base de WAnewsletter 2.2.x
-# MySQL 3.x et MySQL 4.x
+# Données de base de WAnewsletter 2.3.x pour MySQL
 #
-# 10 octobre 2003 - Bobe
+# $Id$
 #
 
 

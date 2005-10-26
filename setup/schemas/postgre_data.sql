@@ -1,8 +1,7 @@
 /*
-  Données de base de WAnewsletter 2.2.x
-  PostgreSQL
+  Données de base de WAnewsletter 2.3.x pour PostgreSQL
   
-  10 octobre 2003 - Bobe
+  $Id$
 */
 
 
