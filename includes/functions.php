@@ -139,24 +139,41 @@ function get_data($liste_id_mixed)
 	
 	$data = array('num_inscrits' => 0, 'num_temp' => 0, 'num_logs' => 0, 'last_log' => 0);
 	
-	$sql = "SELECT DISTINCT(a.abo_id) AS num_abo, a.abo_status 
-		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-		WHERE al.liste_id $sql_where AND a.abo_id = al.abo_id 
-		GROUP BY a.abo_status";
+	$sql = "SELECT DISTINCT(abo_id)
+		FROM " . ABO_LISTE_TABLE . "
+		WHERE liste_id " . $sql_where;
 	if( !($result = $db->query($sql)) )
 	{
 		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
 	}
 	
-	while( $row = $db->fetch_array($result) )
+	if( $db->num_rows() > 0 )
 	{
-		if( $row['abo_status'] == ABO_ACTIF )
+		$abo_ids = array();
+		while( $row = $db->fetch_array($result) )
 		{
-			$data['num_inscrits'] = $row['num_abo'];
+			array_push($abo_ids, $row['abo_id']);
 		}
-		else
+		
+		$sql = "SELECT COUNT(abo_id) AS num_abo, abo_status
+			FROM " . ABONNES_TABLE . "
+			WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
+			GROUP BY abo_status";
+		if( !($result = $db->query($sql)) )
 		{
-			$data['num_temp'] = $row['num_abo'];
+			trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
+		}
+		
+		while( $row = $db->fetch_array($result) )
+		{
+			if( $row['abo_status'] == ABO_ACTIF )
+			{
+				$data['num_inscrits'] = $row['num_abo'];
+			}
+			else
+			{
+				$data['num_temp'] = $row['num_abo'];
+			}
 		}
 	}
 	
