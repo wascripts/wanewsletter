@@ -156,6 +156,9 @@ $lang['Message']['Success_purge']           = "La purge a été effectuée avec suc
 $lang['Message']['Success_send']            = "L'envoi partiel a été effectué avec succés à <b>%d</b> abonnés.\nLa lettre de diffusion a été envoyée jusqu'à présent à <b>%d</b> abonnés sur un total de <b>%d</b>";
 $lang['Message']['Success_send_finish']     = "Envoi terminé avec succés.\nCette lettre de diffusion a été envoyée à un total de <b>%d</b> abonnés";
 $lang['Message']['Success_operation']       = "L'opération a été effectuée avec succés";
+$lang['Message']['SQLite_backup']           = "Pour faire une sauvegarde de votre base de données SQLite, il vous suffit de récupérer via FTP le fichier <samp>%s</samp>";
+$lang['Message']['SQLite_restore']          = "Pour restaurer votre base de données SQLite, il vous suffit simplement de replacer le fichier de données à l'emplacement suivant: <samp>%s</samp>";
+
 
 $lang['Message']['Profile_updated']         = "Le profil a été mis à jour avec succés"; 
 $lang['Message']['Admin_added']             = "L'utilisateur a été ajouté avec succés, il va recevoir par email ses identifiants de connexion"; 

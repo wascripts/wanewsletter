@@ -901,7 +901,15 @@ switch( $mode )
 		break;
 	
 	case 'backup':
+		if( DATABASE == 'sqlite' )
+		{
+			trigger_error(sprintf($lang['Message']['SQLite_backup'], wa_realpath($dbhost)), MESSAGE);
+		}
 	case 'restore':
+		if( DATABASE == 'sqlite' )
+		{
+			trigger_error(sprintf($lang['Message']['SQLite_restore'], wa_realpath($dbhost)), MESSAGE);
+		}
 		//
 		// Les modules de sauvegarde et restauration 
 		// supportent actuellement MySQL 3.x ou 4.x, et PostgreSQL
