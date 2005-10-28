@@ -44,7 +44,7 @@ class sql {
 	var $queries      = 0;
 	var $sql_time     = 0;
 	
-	function sql($dbpath, $dbuser, $dbpwd, $dbname, $persistent = false)
+	function sql($dbpath, $dbuser = null, $dbpwd = null, $dbname = null, $persistent = false)
 	{
 		$sql_connect = ( $persistent ) ? 'sqlite_popen' : 'sqlite_open';
 		
