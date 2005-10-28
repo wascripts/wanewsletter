@@ -5,8 +5,8 @@
  * This file is part of Wanewsletter.
  * 
  * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
  * 
  * Wanewsletter is distributed in the hope that it will be useful,
@@ -25,28 +25,28 @@
  * @version $Id$
  */
 
-define('DATABASE', 'mysql'); 
+define('DATABASE', 'mysql4');
 
 class sql {
 	
-	var $connect_id   = ''; 
-	var $query_result = ''; 
+	var $connect_id   = '';
+	var $query_result = '';
+	var $trc_started  = 0;
+	var $sql_error    = array('errno' => '', 'message' => '', 'query' => '');
 	
-	var $sql_error    = array('errno' => '', 'message' => '', 'query' => ''); 
-	
-	var $queries      = 0; 
-	var $sql_time     = 0; 
+	var $queries      = 0;
+	var $sql_time     = 0;
 	
 	function sql($dbhost, $dbuser, $dbpwd, $dbname, $persistent = false)
 	{
-		$sql_connect = ( $persistent ) ? 'mysql_pconnect' : 'mysql_connect'; 
+		$sql_connect = ( $persistent ) ? 'mysql_pconnect' : 'mysql_connect';
 		
 		$this->connect_id = @$sql_connect($dbhost, $dbuser, $dbpwd);
 		
 		if( $this->connect_id )
 		{
-			$select_db = @mysql_select_db($dbname, $this->connect_id); 
-		
+			$select_db = @mysql_select_db($dbname, $this->connect_id);
+			
 			if( !$select_db )
 			{
 				@mysql_close($this->connect_id);
@@ -70,96 +70,147 @@ class sql {
 	
 	function query_build($query_type, $table, $query_data, $sql_where = '')
 	{
-		$fields = $values = array(); 
+		$fields = $values = array();
 		
 		foreach( $query_data AS $field => $value )
 		{
-			$fields[] = $field; 
-			$values[] = $this->prepare_value($value);
+			array_push($fields, $field);
+			array_push($values, $this->prepare_value($value));
 		}
 		
 		if( $query_type == 'INSERT' )
 		{
-			$query_string  = 'INSERT INTO ' . $table . ' '; 
-			$query_string .= '(' . implode(', ', $fields) . ') VALUES(' . implode(', ', $values) . ')'; 
+			$query_string  = 'INSERT INTO ' . $table . ' ';
+			$query_string .= '(' . implode(', ', $fields) . ') VALUES(' . implode(', ', $values) . ')';
 		}
 		else if( $query_type == 'UPDATE' )
 		{
-			$query_string  = 'UPDATE ' . $table . ' SET '; 
+			$query_string  = 'UPDATE ' . $table . ' SET ';
 			for( $i = 0; $i < count($fields); $i++ )
 			{
-				$query_string .= ( $i > 0 ) ? ', ' : ''; 
-				$query_string .= $fields[$i] . ' = ' . $values[$i]; 
+				$query_string .= ( $i > 0 ) ? ', ' : '';
+				$query_string .= $fields[$i] . ' = ' . $values[$i];
 			}
 			
 			if( is_array($sql_where) && count($sql_where) )
 			{
-				$ary = array(); 
+				$ary = array();
 				foreach( $sql_where AS $field => $value )
 				{
 					$ary[] = $field . ' = ' . $this->prepare_value($value);
 				}
 				
-				$query_string .= ' WHERE ' . implode(' AND ', $ary); 
+				$query_string .= ' WHERE ' . implode(' AND ', $ary);
 			}
 		}
 		
-		return $this->query($query_string); 
+		return $this->query($query_string);
 	}
 	
 	function query($query, $start = null, $limit = null)
 	{
-		global $starttime; 
+		global $starttime;
 		
-		unset($this->query_result); 
+		unset($this->query_result);
 		
 		if( isset($start) && !empty($limit) )
 		{
-			$query .= ' LIMIT ' . $start . ', ' . $limit; 
+			$query .= ' LIMIT ' . $start . ', ' . $limit;
 		}
 		
-		$curtime = explode(' ', microtime()); 
-		$curtime = $curtime[0] + $curtime[1] - $starttime; 
+		$curtime = explode(' ', microtime());
+		$curtime = $curtime[0] + $curtime[1] - $starttime;
 		
-		$this->query_result = @mysql_query($query, $this->connect_id); 
+		$this->query_result = @mysql_query($query, $this->connect_id);
 		
-		$endtime = explode(' ', microtime()); 
-		$endtime = $endtime[0] + $endtime[1] - $starttime; 
+		$endtime = explode(' ', microtime());
+		$endtime = $endtime[0] + $endtime[1] - $starttime;
 		
-		$this->sql_time += ($endtime - $curtime); 
-		$this->queries++; 
+		$this->sql_time += ($endtime - $curtime);
+		$this->queries++;
 		
 		if( !$this->query_result )
 		{
-			$this->sql_error['errno']   = @mysql_errno($this->connect_id); 
-			$this->sql_error['message'] = @mysql_error($this->connect_id); 
-			$this->sql_error['query']   = $query; 
+			$this->sql_error['errno']   = @mysql_errno($this->connect_id);
+			$this->sql_error['message'] = @mysql_error($this->connect_id);
+			$this->sql_error['query']   = $query;
+			
+			if( $this->trc_started )
+			{
+				$this->transaction('ROLLBACK');
+			}
 		}
 		else
 		{
-			$this->sql_error = array('errno' => '', 'message' => '', 'query' => ''); 
+			$this->sql_error = array('errno' => '', 'message' => '', 'query' => '');
 		}
-		
-		return $this->query_result;
 	}
 	
 	function transaction($transaction)
 	{
-		return true; 
+		switch($transaction)
+		{
+			case START_TRC:
+				if( !$this->trc_started )
+				{
+					$this->trc_started = true;
+					@mysql_query('SET AUTOCOMMIT=0', $this->connect_id);
+					$result = @mysql_query('BEGIN', $this->connect_id);
+				}
+				else
+				{
+					$result = true;
+				}
+				break;
+				
+			case END_TRC:
+				if( $this->trc_started )
+				{
+					$this->trc_started = false;
+					
+					if( !($result = @mysql_query('COMMIT', $this->connect_id)) )
+					{
+						@mysql_query('ROLLBACK', $this->connect_id);
+						$result = false;
+					}
+					
+					@mysql_query('SET AUTOCOMMIT=1', $this->connect_id);
+				}
+				else
+				{
+					$result = true;
+				}
+				break;
+				
+			case 'ROLLBACK':
+				if( $this->trc_started )
+				{
+					$this->trc_started = false;
+					$result = @mysql_query('ROLLBACK', $this->connect_id);
+					@mysql_query('SET AUTOCOMMIT=1', $this->connect_id);
+				}
+				else
+				{
+					$result = true;
+				}
+				break;
+		}
+		
+		return $result;
 	}
 	
 	function check($tables)
 	{
 		if( !is_array($tables) )
 		{
-			$tables = array($tables); 
+			$tables = array($tables);
 		}
 		
-		$tables_list = implode(', ', $tables); 
+		$tables_list = implode(', ', $tables);
 		
-		@mysql_query('OPTIMIZE TABLE ' . $tables_list, $this->connect_id); 
+		@mysql_query('OPTIMIZE TABLE ' . $tables_list, $this->connect_id);
 		
-		return true; 
+		return true;
 	}
 	
 	function num_rows($result = false)
@@ -169,12 +220,12 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		return ( $result ) ? @mysql_num_rows($result) : false;
+		return ( is_resource($result) ) ? @mysql_num_rows($result) : false;
 	}
 	
 	function affected_rows()
 	{
-		return ( $this->connect_id ) ? @mysql_affected_rows($this->connect_id) : false;
+		return ( is_resource($this->connect_id) ) ? @mysql_affected_rows($this->connect_id) : false;
 	}
 	
 	function fetch_row($result = false)
@@ -184,7 +235,7 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		return ( $result ) ? @mysql_fetch_row($result) : false;
+		return ( is_resource($result) ) ? @mysql_fetch_row($result) : false;
 	}
 	
 	function fetch_array($result = false)
@@ -194,23 +245,23 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		return ( $result ) ? @mysql_fetch_array($result, MYSQL_ASSOC) : false;
+		return ( is_resource($result) ) ? @mysql_fetch_array($result, MYSQL_ASSOC) : false;
 	}
 	
 	function fetch_rowset($result = false)
 	{
 		if( !$result )
 		{
-			$result = $this->query_result; 
+			$result = $this->query_result;
 		}
 		
-		$rowset = array(); 
+		$rowset = array();
 		while( $row = @mysql_fetch_array($result, MYSQL_ASSOC) )
 		{
 			$rowset[] = $row;
 		}
 		
-		return $rowset; 
+		return $rowset;
 	}
 	
 	function num_fields($result = false)
@@ -220,7 +271,7 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		return ( $result ) ? @mysql_num_fields($result) : false; 
+		return ( is_resource($result) ) ? @mysql_num_fields($result) : false;
 	}
 	
 	function field_name($offset, $result = false)
@@ -230,7 +281,7 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		return ( $result ) ? @mysql_field_name($result, $offset) : false; 
+		return ( is_resource($result) ) ? @mysql_field_name($result, $offset) : false;
 	}
 	
 	function result($result, $row, $field = '')
@@ -244,10 +295,10 @@ class sql {
 			return @mysql_result($result, $row);
 		}
 	}
-
+	
 	function next_id()
 	{
-		return ( $this->connect_id ) ? @mysql_insert_id($this->connect_id) : false;
+		return ( is_resource($this->connect_id) ) ? @mysql_insert_id($this->connect_id) : false;
 	}
 	
 	function free_result($result = false)
@@ -265,14 +316,15 @@ class sql {
 	
 	function escape($str)
 	{
-		return mysql_real_escape_string($str);
+		return mysql_escape_string($str);
 	}
 	
 	function close_connexion()
 	{
-		if( $this->connect_id )
+		if( is_resource($this->connect_id) )
 		{
 			$this->free_result($this->query_result);
+			$this->transaction(END_TRC);
 			
 			return @mysql_close($this->connect_id);
 		}
