@@ -25,7 +25,7 @@
  * @version $Id$
  */
 
-define('DATABASE', 'mysql4');
+define('DATABASE', 'mysql');
 
 class sql {
 	

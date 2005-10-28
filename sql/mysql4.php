@@ -25,7 +25,7 @@
  * @version $Id$
  */
 
-define('DATABASE', 'mysql');
+define('DATABASE', 'mysql4');
 
 class sql {
 	
@@ -331,6 +331,7 @@ class sql {
 		if( $this->connect_id )
 		{
 			$this->free_result($this->query_result);
+			$this->transaction(END_TRC);
 			
 			return @mysqli_close($this->connect_id);
 		}
