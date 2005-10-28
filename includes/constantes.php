@@ -113,6 +113,20 @@ define('ENGINE_BCC',  1);
 define('ENGINE_UNIQ', 2);
 
 //
+// Codes d'erreur lors de l'upload 
+//
+// Ces constantes ne sont définies en natif qu'à partir de php >= 4.3.0
+//
+if( version_compare(phpversion(), '4.3.0', '<') )
+{
+    define('UPLOAD_ERR_OK'       , 0);
+    define('UPLOAD_ERR_INI_SIZE' , 1);
+    define('UPLOAD_ERR_FORM_SIZE', 2);
+    define('UPLOAD_ERR_PARTIAL'  , 3);
+    define('UPLOAD_ERR_NO_FILE'  , 4);
+}
+
+//
 // Si nous un accés restreint à cause de open_basedir, certains fichiers uploadés 
 // devront être déplacés vers le dossier des fichiers temporaires du script pour être 
 // accessible en lecture
