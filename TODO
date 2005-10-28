@@ -18,7 +18,6 @@
 - Mettre à jour le module de statistiques (notamment le graphique à barre, voir /home/web/devel-zone/PHP/GD/barres.php)
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Petit module pour gérer la config, plutôt que de balader une variable $nl_config un peu partout, ce qui est assez crade
-- voir pour refaire marcher includes/functions.php[is_available_extension()]
 - Annuler un envoi
 - Permettre l’utilisation de tags dans le sujet de la newsletter
 - Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)

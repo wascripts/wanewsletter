@@ -140,19 +140,20 @@ $supported_db = array(
 	)
 );
 
-$sql_drop   = array();
-$sql_drop[] = "DROP TABLE wa_abo_liste";
-$sql_drop[] = "DROP TABLE wa_abonnes";
-$sql_drop[] = "DROP TABLE wa_admin";
-$sql_drop[] = "DROP TABLE wa_auth_admin";
-$sql_drop[] = "DROP TABLE wa_ban_list";
-$sql_drop[] = "DROP TABLE wa_config";
-$sql_drop[] = "DROP TABLE wa_joined_files";
-$sql_drop[] = "DROP TABLE wa_forbidden_ext";
-$sql_drop[] = "DROP TABLE wa_liste";
-$sql_drop[] = "DROP TABLE wa_log";
-$sql_drop[] = "DROP TABLE wa_log_files";
-$sql_drop[] = "DROP TABLE wa_session";
+$sql_drop   = array(
+	'DROP TABLE wa_abo_liste',
+	'DROP TABLE wa_abonnes',
+	'DROP TABLE wa_admin',
+	'DROP TABLE wa_auth_admin',
+	'DROP TABLE wa_ban_list',
+	'DROP TABLE wa_config',
+	'DROP TABLE wa_joined_files',
+	'DROP TABLE wa_forbidden_ext',
+	'DROP TABLE wa_liste',
+	'DROP TABLE wa_log',
+	'DROP TABLE wa_log_files',
+	'DROP TABLE wa_session'
+);
 
 //
 // Vérification de la version de PHP disponible. Il nous faut la version 4.3.0 minimum
@@ -202,7 +203,7 @@ if( file_exists(WA_PATH . 'includes/config.inc.php') )
 	include WA_PATH . 'includes/config.inc.php';
 }
 
-if( defined('IN_UPDATE') && ( $dbhost == '' || $dbname == '' || $dbuser == '' ) )
+if( defined('IN_UPDATE') && $dbhost == '' )
 {
 	plain_error('Aucune version de WAnewsletter ne semble présente, le fichier de configuration est vide');
 }
@@ -232,7 +233,7 @@ $config_file .= "// Ne pas modifier !\n";
 $config_file .= "//\n";
 $config_file .= "define('NL_INSTALLED', true);\n\n";
 $config_file .= "\$dbtype  = '$dbtype';\n\n";
-$config_file .= "\$dbhost  = '$dbhost';\n";
+$config_file .= "\$dbhost  = " .  (($dbtype == 'sqlite') ? "WA_PATH . 'sql/wanewsletter.db'" : "'$dbhost'") . ";\n";
 $config_file .= "\$dbuser  = '$dbuser';\n";
 $config_file .= "\$dbpassword = '$dbpassword';\n";
 $config_file .= "\$dbname  = '$dbname';\n\n";
