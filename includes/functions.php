@@ -759,18 +759,17 @@ function active_urls($str)
  * 
  * @return boolean
  */
-function is_available_extension($module)
+function is_available_extension($module, $use_dl = false)
 {
-/*	$module_file = ( stristr(PHP_OS, 'WIN') ) ? 'php_' . $module . '.dll' : $module . '.so';
+	$module_file = ( stristr(PHP_OS, 'WIN') ) ? 'php_' . $module . '.dll' : $module . '.so';
 	
-	if( extension_loaded($module) || ( !config_status('safe_mode') && config_status('enable_dl') && @dl($module_file) ) )
+	if( extension_loaded($module) || ($use_dl == true && !config_status('safe_mode') && config_status('enable_dl') && @dl($module_file)) )
 	{
 		return true;
 	}
 	
 	return false;
-	
-*/	return extension_loaded($module);
+//	return extension_loaded($module);
 }
 
 /**
