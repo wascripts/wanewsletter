@@ -111,7 +111,7 @@ $supported_lang = array(
 
 $supported_db = array(
 	'mysql' => array(
-		'Name'         => 'MySQL 3.x/4.0.x',
+		'Name'         => 'MySQL 3.23.x/4.0.x',
 		'prefixe_file' => 'mysql',
 		'extension'    => 'mysql',
 		'delimiter'    => ';',
@@ -125,9 +125,16 @@ $supported_db = array(
 		'delimiter2'   => ';'
 	),
 	'postgre' => array(
-		'Name'         => 'Postgre SQL >= 7.2',
+		'Name'         => 'PostgreSQL 7.x/8.x',
 		'prefixe_file' => 'postgre',
 		'extension'    => 'pgsql',
+		'delimiter'    => ';',
+		'delimiter2'   => ';'
+	),
+	'sqlite' => array(
+		'Name'         => 'SQLite 2.8.x',
+		'prefixe_file' => 'sqlite',
+		'extension'    => 'sqlite',
 		'delimiter'    => ';',
 		'delimiter2'   => ';'
 	)
@@ -150,11 +157,11 @@ $sql_drop[] = "DROP TABLE wa_session";
 //
 // Vérification de la version de PHP disponible. Il nous faut la version 4.3.0 minimum
 //
-if( !function_exists('version_compare') || version_compare(phpversion(), '4.3.0', '>=') == false )
+if( !function_exists('version_compare') )
 {
 	header('Content-Type: text/plain; charset=ISO-8859-1');
 	
-	echo "Désolé mais WAnewsletter $new_version requiert une version de PHP supérieure ou égale à la version 4.3.0";
+	echo "Désolé mais WAnewsletter $new_version requiert une version de PHP supérieure ou égale à la version 4.1.0";
 	exit;
 }
 
@@ -212,7 +219,7 @@ foreach( $supported_db AS $db_name => $db_infos )
 
 if( count($supported_db) == 0 )
 {
-	plain_error('Désolé mais WAnewsletter ' . $new_version . ' requiert une base de données MySQL 3.23.x/4.x ou PostgreSQL 7');
+	plain_error('Désolé mais WAnewsletter ' . $new_version . ' requiert une base de données MySQL 3.23.x/4.x, PostgreSQL 7.x/8.x et supérieur ou SQLite 2.8.x');
 }
 
 require WA_PATH . 'includes/template.php';

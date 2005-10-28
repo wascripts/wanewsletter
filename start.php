@@ -55,7 +55,7 @@ if( !defined('NL_INSTALLED') )
 		$header_location = 'Location: ';
 	}
 	
-	header($header_location . $waroot . 'setup/install.php');
+	header($header_location . WA_PATH . 'setup/install.php');
 	exit;
 }
 
@@ -76,7 +76,6 @@ if( get_magic_quotes_gpc() )
 	strip_magic_quotes_gpc($_GET);
 	strip_magic_quotes_gpc($_POST);
 	strip_magic_quotes_gpc($_COOKIE);
-	strip_magic_quotes_gpc($_FILES);
 	strip_magic_quotes_gpc($_REQUEST);
 }
 

@@ -18,10 +18,12 @@
 - Petit module pour gérer la config, plutôt que de balader une variable $nl_config un peu partout, ce qui est assez crade
 - voir pour refaire marcher includes/functions.php[is_available_extension()]
 - Annuler un envoi
+- Permettre l’utilisation de tags dans le sujet de la newsletter
 - Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)
+  pouvoir passer des paramètres pour que chaque abonné reçoive une newsletter personnalisée (par exemple en passant {WA_EMAIL} dans l’url)
 - Supprimer variable de configuration 'hébergeur' et détecter présence de la fonction email() ou bien si on est sur Online
-- Support de SQLite ?
-- Support de Firebird ?
+- Support de SQLite
+- Ajouter support de MySQL via l’extension mysqli (facile à faire)
 
 
 Coding
@@ -35,6 +37,8 @@ Coding
 - Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
 - se renseigner sur "rails" (sorte de framework apparamment)
 - Passer par INNER JOIN plutôt que jointure barbare via WHERE
+- Mettre à jour make_sql_ary() pour supporter les commentaires avec -- au lieu de # ou /**/
+- stats.php, ligne 125, si taille fichier = 0, warning php
 
 Passer de SQLite 2.x à SQLite 3.x :
 	$ sqlite-old old.db .dump | sqlite-new new.db
