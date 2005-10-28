@@ -3,6 +3,9 @@
 ------------------
 
 - Compatibilité assurée avec PHP5
+- Support de SQLite
+- Ajouter support de MySQL via l’extension mysqli (facile à faire)
+
 - Nouveaux formats possibles pour l'export d'emails
 - Enregistrement de l'IP lors d'une inscription ? (et checker pour empécher le spam de DB)
 - revoir la partie newsletter.php/class.form.php pour permettre les inscriptions à plusieurs listes en même temps
@@ -12,7 +15,6 @@
 - email envoyé à admin lors de nouvel inscription: Limiter aux inscriptions confirmées si liste demande confirmation ?
 - confirmation à chaque demande d'inscription, pas seulement la première
 - Permettre l'envoi d'emails multipart (text/html) ?
-- répertoire tmp/ absent par défaut
 - Mettre à jour le module de statistiques (notamment le graphique à barre, voir /home/web/devel-zone/PHP/GD/barres.php)
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Petit module pour gérer la config, plutôt que de balader une variable $nl_config un peu partout, ce qui est assez crade
@@ -20,10 +22,8 @@
 - Annuler un envoi
 - Permettre l’utilisation de tags dans le sujet de la newsletter
 - Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)
-  pouvoir passer des paramètres pour que chaque abonné reçoive une newsletter personnalisée (par exemple en passant {WA_EMAIL} dans l’url)
 - Supprimer variable de configuration 'hébergeur' et détecter présence de la fonction email() ou bien si on est sur Online
-- Support de SQLite
-- Ajouter support de MySQL via l’extension mysqli (facile à faire)
+- Ajouter une partie dans faq.fr.html pour SQLite ?
 
 
 Coding
@@ -39,6 +39,7 @@ Coding
 - Passer par INNER JOIN plutôt que jointure barbare via WHERE
 - Mettre à jour make_sql_ary() pour supporter les commentaires avec -- au lieu de # ou /**/
 - stats.php, ligne 125, si taille fichier = 0, warning php
+- remplacer mysql_get_client_info() dans tools.php, ligne 239
 
 Passer de SQLite 2.x à SQLite 3.x :
 	$ sqlite-old old.db .dump | sqlite-new new.db
