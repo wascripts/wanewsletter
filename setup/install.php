@@ -30,7 +30,7 @@ define('IN_INSTALL', true);
 require './setup.inc.php';
 
 $lang  = $datetime = $msg_error = array();
-$error = FALSE;
+$error = false;
 
 $vararray = array('start', 'confirm', 'send_file');
 foreach( $vararray AS $varname )
@@ -71,7 +71,7 @@ if( $type != 'reinstall' && $type != 'update' )
 	{
 		if( $language != $prev_language )
 		{
-			$start = FALSE;
+			$start = false;
 		}
 	}
 	else if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
@@ -116,7 +116,7 @@ if( defined('NL_INSTALLED') )
 	
 	require WA_PATH . 'language/lang_' . $language . '.php';
 	
-	$login = FALSE;
+	$login = false;
 	
 	if( $confirm )
 	{
@@ -129,8 +129,8 @@ if( defined('NL_INSTALLED') )
 			{
 				if( md5($admin_pass) == $row['admin_pwd'] && $row['admin_level'] == ADMIN )
 				{
-					$login        = TRUE;
-					$start        = TRUE;
+					$login        = true;
+					$start        = true;
 					$admin_email  = $row['admin_email'];
 					$confirm_pass = $row['admin_pwd'];
 				}
@@ -139,7 +139,7 @@ if( defined('NL_INSTALLED') )
 		
 		if( !$login )
 		{
-			$error = TRUE;
+			$error = true;
 			$msg_error[] = $lang['Message']['Error_login'];
 		}
 	}
@@ -148,18 +148,35 @@ else
 {
 	if( $start )
 	{
-		$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
-		
-		if( !$db->connect_id )
+		if( $dbtype == 'sqlite' )
 		{
-			$error = TRUE;
-			$msg_error[] = '<b>Impossible de se connecter à la base de données</b>';
+			if( is_writable(WA_PATH . 'sql')
+				&& is_readable(WA_PATH . 'sql/wanewsletter.db')
+				&& is_writable(WA_PATH . 'sql/wanewsletter.db') )
+			{
+				$db = new sql(WA_PATH . 'sql/wanewsletter.db');
+			}
+			else
+			{
+				$error = true;
+				$msg_error[] = 'Pour utiliser une base de données SQLite, vous devez rendre accessible en lecture et écriture le répertoire sql/ du script ainsi que le fichier wanewsletter.db qui s\'y trouve';
+			}
+		}
+		else
+		{
+			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+		}
+		
+		if( $error == false && !is_resource($db->connect_id) )
+		{
+			$error = true;
+			$msg_error[] = '<b>Impossible de se connecter à la base de données/Unable to connect to database</b>';
 		}
 		
 		if( !is_writable(WA_PATH . 'includes/config.inc.php') )
 		{
-			$error = TRUE;
-			$msg_error[] = 'Le fichier de configuration n\'est pas accessible en écriture';
+			$error = true;
+			$msg_error[] = 'Le fichier de configuration n\'est pas accessible en écriture/config file isn\'t writable';
 		}
 	}
 	
@@ -212,18 +229,18 @@ else
 		
 		if( $dbhost == '' || $dbname == '' || $dbuser == '' || $prefixe == '' || $admin_login == '' )
 		{
-			$error = TRUE;
+			$error = true;
 			$msg_error[] = $lang['Message']['fields_empty'];
 		}
 		
 		if( !validate_pass($admin_pass) )
 		{
-			$error = TRUE;
+			$error = true;
 			$msg_error[] = $lang['Message']['Alphanum_pass'];
 		}
 		else if( md5($admin_pass) != $confirm_pass )
 		{
-			$error = TRUE;
+			$error = true;
 			$msg_error[] = $lang['Message']['Bad_confirm_pass'];
 		}
 		
@@ -231,7 +248,7 @@ else
 		
 		if( $result['error'] )
 		{
-			$error = TRUE;
+			$error = true;
 			$msg_error[] = $result['message'];
 		}
 		
@@ -604,7 +621,10 @@ else
 			exec_queries($sql_update, true);
 		}// end if update
 		
-		$db->close_connexion();
+		if( is_object($db) )
+		{
+			$db->close_connexion();
+		}
 		
 		if( !$error )
 		{
@@ -670,13 +690,12 @@ else
 	include WA_PATH . 'includes/functions.box.php';
 	$lang_box = lang_box($language);
 	
-	$db_box = '<select id="dbtype" name="dbtype">';
+	$db_box = '';
 	foreach( $supported_db AS $db_name => $db_infos )
 	{
 		$selected = ( $dbtype == $db_name ) ? ' selected="selected"' : '';
 		$db_box .= '<option value="' . $db_name . '"' . $selected . '> - ' . $db_infos['Name'] . ' - </option>';
 	}
-	$db_box .= '</select>';
 	
 	if( $urlsite == '' )
 	{

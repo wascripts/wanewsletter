@@ -3,8 +3,8 @@
 	Copyright (c) 2002-2006 Aurélien Maille
 	
 	Wanewsletter is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License 
-	as published by the Free Software Foundation; either version 2 
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
 	of the License, or (at your option) any later version.
 	
 	Wanewsletter is distributed in the hope that it will be useful,
@@ -26,6 +26,43 @@
 	<meta name="Robots" content="noindex, nofollow, none" />
 	
 	<link rel="stylesheet" type="text/css" href="../templates/wanewsletter.css" media="screen" title="Wanewsletter thème" />
+	
+	<script type="text/javascript">
+	<!--
+	var lang = [];
+	lang['unused'] = 'Unused';
+	
+	function specialSQLite(db_box)
+	{
+		var disable = null, value = null;
+		if( db_box.options[db_box.selectedIndex].value == 'sqlite' )
+		{
+			disable = true;
+			value   = lang['unused'];
+			db_box.form.elements['dbpassword'].type = 'text';
+		}
+		else
+		{
+			disable = false;
+			value   = '';
+			db_box.form.elements['dbpassword'].type = 'password';
+		}
+		
+		db_box.form.elements['dbhost'].disabled = disable;
+		db_box.form.elements['dbhost'].value    = value;
+		db_box.form.elements['dbname'].disabled = disable;
+		db_box.form.elements['dbname'].value    = value;
+		db_box.form.elements['dbuser'].disabled = disable;
+		db_box.form.elements['dbuser'].value    = value;
+		db_box.form.elements['dbpassword'].disabled = disable;
+		db_box.form.elements['dbpassword'].value = value;
+	}
+	
+	window.onload = function() {
+		specialSQLite(document.getElementById('dbtype'));
+	};
+	//-->
+	</script>
 </head>
 <body>
 
@@ -48,28 +85,28 @@
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"> <label for="dbtype">{welcome.L_DBTYPE}&#160;:</label> </td>
-			<td class="medrow2"> {welcome.DB_BOX} </td>
+			<td class="medrow1"><label for="dbtype">{welcome.L_DBTYPE}&#160;:</label></td>
+			<td class="medrow2"><select id="dbtype" name="dbtype" onchange="specialSQLite(this);">{welcome.DB_BOX}</select></td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="dbhost">{welcome.L_DBHOST}&#160;:</label> </td>
-			<td class="medrow2"> <input type="text" id="dbhost" name="dbhost" size="30" value="{welcome.DBHOST}" class="text" /> </td>
+			<td class="medrow1"><label for="dbhost">{welcome.L_DBHOST}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="dbhost" name="dbhost" size="30" value="{welcome.DBHOST}" class="text" /> </td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="dbname">{welcome.L_DBNAME}&#160;:</label> </td>
-			<td class="medrow2"> <input type="text" id="dbname" name="dbname" size="30" value="{welcome.DBNAME}" class="text" /> </td>
+			<td class="medrow1"><label for="dbname">{welcome.L_DBNAME}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="dbname" name="dbname" size="30" value="{welcome.DBNAME}" class="text" /> </td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="dbuser">{welcome.L_DBUSER}&#160;:</label> </td>
-			<td class="medrow2"> <input type="text" id="dbuser" name="dbuser" size="30" value="{welcome.DBUSER}" class="text" /> </td>
+			<td class="medrow1"><label for="dbuser">{welcome.L_DBUSER}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="dbuser" name="dbuser" size="30" value="{welcome.DBUSER}" class="text" /> </td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="dbpassword">{welcome.L_DBPWD}&#160;:</label> </td>
-			<td class="medrow2"> <input type="password" id="dbpassword" name="dbpassword" size="30" class="text" /> </td>
+			<td class="medrow1"><label for="dbpassword">{welcome.L_DBPWD}&#160;:</label></td>
+			<td class="medrow2"><input type="password" id="dbpassword" name="dbpassword" size="30" class="text" /> </td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="prefixe">{welcome.L_PREFIXE}&#160;:</label> </td>
-			<td class="medrow2"> <input type="text" id="prefixe" name="prefixe" size="10" value="{welcome.PREFIXE}" class="text" /> </td>
+			<td class="medrow1"><label for="prefixe">{welcome.L_PREFIXE}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="prefixe" name="prefixe" size="10" value="{welcome.PREFIXE}" class="text" /></td>
 		</tr>
 	</table>
 	
