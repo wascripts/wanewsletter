@@ -4,7 +4,6 @@
 
 - Compatibilité assurée avec PHP5
 - Support de SQLite
-- Ajouter support de MySQL via l’extension mysqli (facile à faire)
 
 - Nouveaux formats possibles pour l'export d'emails
 - Enregistrement de l'IP lors d'une inscription ? (et checker pour empécher le spam de DB)

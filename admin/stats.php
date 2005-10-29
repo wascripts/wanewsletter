@@ -127,9 +127,9 @@ if( $img == 'graph' )
 		create_stats($listdata, $month, $year);
 	}
 	
-	if( $fp = @fopen(wa_stats_path . $filename, 'r') )
+	if( ($filesize = filesize(wa_stats_path . $filename)) > 0 && $fp = @fopen(wa_stats_path . $filename, 'r') )
 	{
-		$contents = fread($fp, filesize(wa_stats_path . $filename));
+		$contents = fread($fp, $filesize);
 		$stats    = clean_stats($contents);
 		
 		for( $day = 1, $i = 0, $int = 0; $day <= 31; $day++, $i++, $int += 16 )
