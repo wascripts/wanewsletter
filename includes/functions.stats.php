@@ -39,7 +39,7 @@ define('WA_STATS_PATH', WA_PATH . 'stats/', true);
 function convertToRGB($hexColor)
 {
 	$parts    = array();
-	$hexColor = strtoupper(ltrim($hexColor, '#'));
+	$hexColor = strtoupper($hexColor);
 	
 	if( strlen($hexColor) == 6 )
 	{
