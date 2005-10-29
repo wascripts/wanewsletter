@@ -1,19 +1,4 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!--
-	This program is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License 
-	as published by the Free Software Foundation; either version 2 
-	of the License, or (at your option) any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU General Public License for more details.
-	
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
--->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -132,7 +117,7 @@
 	terminée, retirez les droits en écriture sur ce dossier.</p>
 	
 	<p>Une fois les fichiers en place sur le serveur et les droits en écriture attribués, 
-	rendez vous à l'adresse où se trouve le fichier <samp>install.php</samp>.</p>
+	rendez vous à l'adresse où se trouve le fichier <samp>setup/install.php</samp>.</p>
 	
 	<p>Vous arrivez maintenant sur le formulaire d'installation. Notez que si vous changez 
 	de langue avant de cliquer sur le bouton de validation, vous retomberez sur la même 
@@ -152,7 +137,7 @@
 	étant protégé. Vous pourrez ultérieurement ajouter d'autres utilisateurs avec des 
 	droits d'accés personnalisés. Une fois que le script est installé, retirez bien les 
 	droits en écriture sur le dossier <samp>includes/</samp> et sur le fichier 
-	<samp>config.inc.php</samp>, et supprimez le dossier <samp>setup/</samp> de votre 
+	<samp>includes/config.inc.php</samp>, et supprimez le dossier <samp>setup/</samp> de votre 
 	<abbr xml:lang="en" lang="en">ftp</abbr>.</p>
 	</div>
 	
@@ -161,7 +146,7 @@
 	
 	<p>Pour mettre votre version 2.2.x à jour, téléchargez la nouvelle version, remplacez 
 	les fichiers de votre version par ceux de la nouvelle (gardez le fichier 
-	<samp>config.inc.php</samp>, ainsi que le contenu des dossiers <samp>upload/</samp> 
+	<samp>includes/config.inc.php</samp>, ainsi que le contenu des dossiers <samp>upload/</samp> 
 	et <samp>stats/</samp> s'il y a lieu), puis tapez l'adresse vers le fichier 
 	<samp>install.php</samp> du script. Saisissez dans le formulaire qui s'affiche 
 	votre pseudo et mot de passe d'administrateur et laissez faire le script.</p>
@@ -174,12 +159,12 @@
 	
 	<p>Pour mettre votre version 2.0.x ou 2.1.x à jour, téléchargez la nouvelle version, 
 	remplacez les fichiers de votre version par ceux de la nouvelle (gardez le fichier 
-	config.inc.php, ainsi que le contenu des dossiers <samp>admin/upload/</samp> et <samp>stats/</samp>).
-	Il vous est fortement conseillé de faire une sauvegarde des tables du script avant 
-	de lancer la mise à jour&#8201;!</p>
+	includes/config.inc.php, ainsi que le contenu des dossiers <samp>admin/upload/</samp> 
+	et <samp>stats/</samp>). Il vous est fortement conseillé de faire une sauvegarde des 
+	tables du script avant de lancer la mise à jour&#8201;!</p>
 	
 	<p>Donnez les droits en écriture sur le dossier <samp>includes/</samp> le temps de 
-	la mise à jour, puis tapez l'adresse vers le fichier <samp>update.php</samp> du 
+	la mise à jour, puis tapez l'adresse vers le fichier <samp>setup/update.php</samp> du 
 	script. Saisissez ensuite dans le formulaire qui s'affiche votre pseudo et mot de 
 	passe d'administrateur et laissez faire le script.</p>
 	
@@ -232,7 +217,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
-phpCodeur</a> © 2002-2005 | WAnewsletter 2.3-dev<br />
+phpCodeur</a> © 2002-2005 | WAnewsletter 2.2.7<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
 </address>

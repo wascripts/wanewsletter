@@ -1,19 +1,4 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!--
-	This program is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License 
-	as published by the Free Software Foundation; either version 2 
-	of the License, or (at your option) any later version.
-	
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU General Public License for more details.
-	
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
--->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -84,12 +69,12 @@
 		<li> Set writing permissions on the <samp>includes/</samp> and <samp>upload/</samp> 
 		directories and on the <samp>config.inc.php</samp> files which is into the 
 		<samp>includes/</samp> directory.</li>
-		<li> Point your web browser to the <samp>install.php</samp>
+		<li> Point your web browser to the <samp>setup/install.php</samp>
 		file in its proper location and open it (eg: http://www.yourdomain.com/newsletter/setup/install.php
 		if the script is installed in the <samp>newsletter/</samp> folder in the site's root) </li>
 		<li> Fill out the displayed form and click on the validation button.</li>
 		<li> Once the script is installed, remove writing permissions on the <samp>includes/</samp>
-		directory and <samp>config.inc.php</samp> file</li>
+		directory and <samp>includes/config.inc.php</samp> file</li>
 		<li> After installation, remove the <samp>setup/</samp> directory from your server 
 		or hosting account in order to prevent from reinstallation.</li>
 	</ul>
@@ -106,7 +91,7 @@
 	
 	<p>With your favorite <abbr>FTP</abbr> client, set writing permissions on the 
 	<samp>upload/</samp>, <samp>tmp/</samp>, <samp>stats/</samp> and <samp>includes/</samp> 
-	directories and on <samp>config.inc.php</samp> file which is into <samp>includes/</samp> 
+	directories and on <samp>includes/config.inc.php</samp> file which is into <samp>includes/</samp> 
 	directory.</p>
 	
 	<p><em>Explanations&#160;:</em> <br />
@@ -125,10 +110,10 @@
 	<p>During the installation, the script creates a configuration file and puts it in the 
 	<samp>includes/</samp> folder. This folder must also have writing permissions, but only 
 	during the installation phase&#8201;! Once the installation has completed, remove writing 
-	permissions on the folder and on <samp>config.inc.php</samp> file.</p>
+	permissions on the folder and on <samp>includes/config.inc.php</samp> file.</p>
 	
 	<p>Once all files are on the server, and proper writing permissions are set, using your favorite browser, 
-	go to the location where this <samp>install.php</samp> file is placed.</p>
+	go to the location where this <samp>setup/install.php</samp> file is placed.</p>
 	
 	<p>You have now reached the installation form. Please take note that if you change the 
 	language item before clicking the validation button, the same page will reload, but this 
@@ -152,9 +137,9 @@
 	<h2 id="update2.2">IV. Updating from version 2.2.x</h2>
 	
 	<p>To update from version 2.2.x, download the new version and replace files from the 
-	old version with those from the new one (keep the <samp>config.inc.php</samp> file, 
+	old version with those from the new one (keep the <samp>includes/config.inc.php</samp> file, 
 	and any content located in the <samp>upload/</samp> and <samp>stats/</samp> folders). 
-	Point your web browser to the <samp>install.php</samp> file in its proper location and 
+	Point your web browser to the <samp>setup/install.php</samp> file in its proper location and 
 	open it. Fill in your administrator username and password and let the script finish 
 	the installation.</p>
 	
@@ -165,13 +150,13 @@
 	<h2 id="update2.0-1">V. Updating from 2.1.x or 2.0.x</h2>
 	
 	<p>To update from version 2.0.x or 2.1.x, download the new version and replace 
-	files from the old version with those from the new one (keep the <samp>config.inc.php</samp> 
+	files from the old version with those from the new one (keep the <samp>includes/config.inc.php</samp> 
 	file, and any content located in the <samp>upload/</samp> and <samp>stats/</samp> folders).
 	It is strongly advisable to make a backup of your script's database tables before 
 	proceeding with the update&#8201;!</p>
 	
 	<p>Set writing permissions to the <samp>includes/</samp> folder for the time you 
-	proceed with the update. Point your web browser to the <samp>update.php</samp> file 
+	proceed with the update. Point your web browser to the <samp>setup/update.php</samp> file 
 	in its proper location and open it. Fill in your administrator username and password 
 	and let the script finish the update procedure.</p>
 	
@@ -222,7 +207,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
-phpCodeur</a> © 2002-2005 | WAnewsletter 2.3-dev<br />
+phpCodeur</a> © 2002-2005 | WAnewsletter 2.2.7<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
 </address>
