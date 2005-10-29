@@ -303,7 +303,7 @@ class output extends Template {
 			'CHARSET'      => $lang['CHARSET'],
 			'L_LOG'        => $lang['Module']['log'],
 			
-			'L_LOGOUT'     => $lang['Module']['logout'],
+			'L_LOGOUT'     => sprintf($lang['Module']['logout'], htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)),
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts()
 		));
