@@ -225,16 +225,6 @@ else
 	$new_config = $old_config;
 }
 
-$hebergeurs = array(1 => $lang['Other'], 2 => 'Online');
-
-$host_box  = '<select id="hebergeur" name="hebergeur">';
-for( $i = 1; $i < 3; $i++ )
-{
-	$selected  = ( $new_config['hebergeur'] == $i ) ? ' selected="selected"' : '';
-	$host_box .= '<option value="' . $i . '"' . $selected . '> - ' . $hebergeurs[$i] . ' - </option>';
-}
-$host_box .= '</select>';
-
 require WA_PATH . 'includes/functions.box.php';
 
 $output->page_header();
@@ -279,7 +269,6 @@ $output->assign_vars( array(
 	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],
 	'L_EMAILS_SENDED'           => $lang['Emails_paquet'],
 	'L_EMAILS_SENDED_NOTE'      => nl2br($lang['Emails_paquet_note']),
-	'L_HEBERGEUR'               => $lang['Host'],
 	'L_USE_SMTP'                => $lang['Use_smtp'],
 	'L_USE_SMTP_NOTE'           => nl2br($lang['Use_smtp_note']),
 	'L_YES'                     => $lang['Yes'],
@@ -310,7 +299,6 @@ $output->assign_vars( array(
 	'CHECKED_ENGINE_BCC'        => ( $new_config['engine_send'] == ENGINE_BCC ) ? ' checked="checked"' : '',
 	'CHECKED_ENGINE_UNIQ'       => ( $new_config['engine_send'] == ENGINE_UNIQ ) ? ' checked="checked"' : '',
 	'EMAILS_SENDED'             => $new_config['emails_sended'],
-	'HOST_BOX'                  => $host_box,
 	'CHECKED_USE_SMTP_ON'       => ( $new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'CHECKED_USE_SMTP_OFF'      => ( !$new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'DISABLED_SMTP'             => ( is_disabled_func('fsockopen') ) ? ' disabled="disabled"' : '',

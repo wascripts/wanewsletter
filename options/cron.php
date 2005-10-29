@@ -65,7 +65,7 @@ if( $listdata = $db->fetch_array($result) )
 		@set_time_limit(1200);
 	}
 	
-	include WA_PATH . 'includes/class.mailer.php';
+	include WA_PATH . 'includes/wamailer/class.mailer.php';
 	
 	//
 	// Initialisation de la classe mailer
@@ -74,7 +74,7 @@ if( $listdata = $db->fetch_array($result) )
 	
 	if( $nl_config['use_smtp'] )
 	{
-		$mailer->smtp_path = WA_PATH . 'includes/';
+		$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
 		$mailer->use_smtp(
 			$nl_config['smtp_host'],
 			$nl_config['smtp_port'],
@@ -84,7 +84,6 @@ if( $listdata = $db->fetch_array($result) )
 	}
 	
 	$mailer->correctRpath = !is_disabled_func('ini_set');
-	$mailer->hebergeur    = $nl_config['hebergeur'];
 	$mailer->set_charset($lang['CHARSET']);
 	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
 	

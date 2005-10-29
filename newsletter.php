@@ -67,21 +67,21 @@ if( $action != '' )
 	else if( $listdata = $db->fetch_array($result) )
 	{
 		//
-		// Purge des éventuelles inscriptions dépassées 
-		// pour parer au cas d'une réinscription 
+		// Purge des éventuelles inscriptions dépassées
+		// pour parer au cas d'une réinscription
 		// (Moyen de faire autrement pour éviter cette requète - voir plus tard)
 		//
 		purge_liste();
 		
 		require WA_PATH . 'includes/class.form.php';
-		require WA_PATH . 'includes/class.mailer.php';
+		require WA_PATH . 'includes/wamailer/class.mailer.php';
 		include WA_PATH . 'includes/functions.stats.php';
 		
 		$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
 		
 		if( $nl_config['use_smtp'] )
 		{
-			$mailer->smtp_path = WA_PATH . 'includes/';
+			$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
 			$mailer->use_smtp(
 				$nl_config['smtp_host'],
 				$nl_config['smtp_port'],
@@ -91,7 +91,6 @@ if( $action != '' )
 		}
 		
 		$mailer->correctRpath = !is_disabled_func('ini_set');
-		$mailer->hebergeur    = $nl_config['hebergeur'];
 		
 		$mailer->set_charset($lang['CHARSET']);
 		$mailer->set_format(FORMAT_TEXTE);

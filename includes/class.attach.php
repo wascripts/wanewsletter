@@ -443,7 +443,7 @@ class Attach {
 					}
 					ftp_quit($cid);
 					
-					include WA_PATH . 'includes/class.mailer.php';
+					include WA_PATH . 'includes/wamailer/class.mailer.php';
 					
 					$filetype = Mailer::mime_type(substr($filename, (strrpos($filename, '.') + 1)));
 				}
@@ -456,7 +456,7 @@ class Attach {
 			//
 			else if( $upload_mode == 'local' )
 			{
-				include WA_PATH . 'includes/class.mailer.php';
+				include WA_PATH . 'includes/wamailer/class.mailer.php';
 				
 				$filetype = Mailer::mime_type($extension);
 				

@@ -121,10 +121,6 @@
 			<td class="row2"> <input type="text" id="emails_sended" name="emails_sended" value="{EMAILS_SENDED}" size="5" maxlength="5" class="text" style="width:30px" /> </td>
 		</tr>
 		<tr>
-			<td class="row1"> <label for="hebergeur">{L_HEBERGEUR}&#160;:</label> </td>
-			<td class="row2"> {HOST_BOX} </td>
-		</tr>
-		<tr>
 			<td class="row1"> <label>{L_USE_SMTP}&#160;:{WARNING_SMTP}</label><br /><span class="m-texte">{L_USE_SMTP_NOTE}</span> </td>
 			<td class="row2"> <input type="radio" id="use_smtp_on" name="use_smtp" value="1"{CHECKED_USE_SMTP_ON}{DISABLED_SMTP} /> <label for="use_smtp_on" class="m-texte">{L_YES}</label> &#160; <input type="radio" id="use_smtp_off" name="use_smtp" value="0"{CHECKED_USE_SMTP_OFF} /> <label for="use_smtp_off" class="m-texte">{L_NO}</label> </td>
 		</tr>

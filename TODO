@@ -29,7 +29,6 @@ Coding
 ------------------
 
 - Trouver une solution pour ne plus avoir besoin de $waroot
-- Privilégier array_push($var, ...) plutôt que $var[] = ...
 - Utiliser foreach plutôt que for( $i ...) quand c'est possible (plus logique si on a pas besoin d'un compteur)
 - Vérifier réglages de mode lorsqu'on ouvre des fichiers
 - true, false, null toujours en minuscules, autres constantes prédéfinies, en majuscules, de même que les constantes définies

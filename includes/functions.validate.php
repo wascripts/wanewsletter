@@ -42,7 +42,7 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 	
 	if( !class_exists('Mailer') )
 	{
-		include WA_PATH . 'includes/class.mailer.php';
+		include WA_PATH . 'includes/wamailer/class.mailer.php';
 	}
 	
 	//

@@ -581,7 +581,7 @@ $sql_update[] = "ALTER TABLE " . LOG_TABLE . " DROP COLUMN attach";
 
 exec_queries($sql_update, true);
 
-include WA_PATH . 'includes/class.mailer.php';
+require WA_PATH . 'includes/wamailer/class.mailer.php';
 
 $total_log = count($logrow);
 for( $i = 0; $i < $total_log; $i++ )

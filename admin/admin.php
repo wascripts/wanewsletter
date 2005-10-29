@@ -110,13 +110,13 @@ if( $mode == 'adduser' )
 				trigger_error('Impossible d\'ajouter le nouvel administrateur', ERROR);
 			}
 			
-			require WA_PATH . 'includes/class.mailer.php';
+			require WA_PATH . 'includes/wamailer/class.mailer.php';
 			
 			$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
 			
 			if( $nl_config['use_smtp'] )
 			{
-				$mailer->smtp_path = WA_PATH . 'includes/';
+				$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
 				$mailer->use_smtp(
 					$nl_config['smtp_host'],
 					$nl_config['smtp_port'],
@@ -126,7 +126,6 @@ if( $mode == 'adduser' )
 			}
 			
 			$mailer->correctRpath = !is_disabled_func('ini_set');
-			$mailer->hebergeur    = $nl_config['hebergeur'];
 			
 			$mailer->set_charset($lang['CHARSET']);
 			$mailer->set_format(FORMAT_TEXTE);
@@ -388,13 +387,13 @@ if( isset($_POST['submit']) )
 			
 			$pseudo = $db->result($result, 0, 0);
 			
-			require WA_PATH . 'includes/class.mailer.php';
+			require WA_PATH . 'includes/wamailer/class.mailer.php';
 			
 			$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
 			
 			if( $nl_config['use_smtp'] )
 			{
-				$mailer->smtp_path = WA_PATH . 'includes/';
+				$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
 				$mailer->use_smtp(
 					$nl_config['smtp_host'],
 					$nl_config['smtp_port'],
@@ -404,7 +403,6 @@ if( isset($_POST['submit']) )
 			}
 			
 			$mailer->correctRpath = !is_disabled_func('ini_set');
-			$mailer->hebergeur    = $nl_config['hebergeur'];
 			
 			$mailer->set_charset($lang['CHARSET']);
 			$mailer->set_format(FORMAT_TEXTE);

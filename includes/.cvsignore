@@ -1,5 +1,3 @@
 .cvsignore 
-class.mailer.php 
-class.smtp.php 
-class.pop.php 
+wamailer 
 config.inc.php 
