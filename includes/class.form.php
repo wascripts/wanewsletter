@@ -159,6 +159,43 @@ class Wanewsletter {
 		{
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'welcome_cron1' : 'welcome_form1';
 			$link_action = 'desinscription';
+			
+			$sql = "SELECT a.admin_login, a.admin_email 
+				FROM " . ADMIN_TABLE . " AS a, " . AUTH_ADMIN_TABLE . " AS aa 
+				WHERE a.admin_id = aa.admin_id 
+					AND aa.liste_id = " . $this->listdata['liste_id'] . " 
+					AND a.email_new_inscrit = " . SUBSCRIBE_NOTIFY_YES . " 
+					AND ( a.admin_level = " . ADMIN . " OR aa.auth_view = " . TRUE . " )";
+			if( $result = $db->query($sql) )
+			{
+				if( $row = $db->fetch_array($result) )
+				{
+					$mailer->clear_all();
+					
+					$mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+					$mailer->set_subject($lang['Subject_email']['New_subscriber']);
+					
+					$mailer->use_template('admin_new_subscribe', array(
+						'EMAIL'   => $this->email,
+						'LISTE'   => unhtmlspecialchars($this->listdata['liste_name']),
+						'URLSITE' => $nl_config['urlsite'],
+						'SIG'     => $this->listdata['liste_sig']
+					));
+					
+					do
+					{
+						$mailer->clear_address();
+						$mailer->set_address($row['admin_email'], $row['admin_login']);
+						
+						$mailer->assign_tags(array(
+							'USER' => $row['admin_login']
+						));
+						
+						$mailer->send(); // envoi
+					}
+					while( $row = $db->fetch_array($result) );
+				}
+			}
 		}
 		
 		$mailer->use_template($email_tpl, array(
@@ -195,43 +232,6 @@ class Wanewsletter {
 			return false;
 		}
 		
-		$sql = "SELECT a.admin_login, a.admin_email 
-			FROM " . ADMIN_TABLE . " AS a, " . AUTH_ADMIN_TABLE . " AS aa 
-			WHERE a.admin_id = aa.admin_id 
-				AND aa.liste_id = " . $this->listdata['liste_id'] . " 
-				AND a.email_new_inscrit = " . SUBSCRIBE_NOTIFY_YES . " 
-				AND ( a.admin_level = " . ADMIN . " OR aa.auth_view = " . TRUE . " )";
-		if( $result = $db->query($sql) )
-		{
-			if( $row = $db->fetch_array($result) )
-			{
-				$mailer->clear_all();
-				
-				$mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
-				$mailer->set_subject($lang['Subject_email']['New_subscriber']);
-				
-				$mailer->use_template('admin_new_subscribe', array(
-					'EMAIL'   => $this->email,
-					'LISTE'   => unhtmlspecialchars($this->listdata['liste_name']),
-					'URLSITE' => $nl_config['urlsite'],
-					'SIG'     => $this->listdata['liste_sig']
-				));
-				
-				do
-				{
-					$mailer->clear_address();
-					$mailer->set_address($row['admin_email'], $row['admin_login']);
-					
-					$mailer->assign_tags(array(
-						'USER' => $row['admin_login']
-					));
-					
-					$mailer->send(); // envoi
-				}
-				while( $row = $db->fetch_array($result) );
-			}
-		}
-		
 		if( !$this->listdata['confirm_subscribe'] )
 		{
 			if( $this->new_subscribe )
@@ -253,7 +253,7 @@ class Wanewsletter {
 	
 	function confirm($time = 0)
 	{
-		global $db, $lang;
+		global $db, $nl_config, $lang, $mailer;
 		
 		if( $this->code == $this->account['code'] )
 		{
@@ -274,6 +274,43 @@ class Wanewsletter {
 				}
 				
 				$this->message = $lang['Message']['Confirm_ok'];
+				
+				$sql = "SELECT a.admin_login, a.admin_email 
+					FROM " . ADMIN_TABLE . " AS a, " . AUTH_ADMIN_TABLE . " AS aa 
+					WHERE a.admin_id = aa.admin_id 
+						AND aa.liste_id = " . $this->listdata['liste_id'] . " 
+						AND a.email_new_inscrit = " . SUBSCRIBE_NOTIFY_YES . " 
+						AND ( a.admin_level = " . ADMIN . " OR aa.auth_view = " . TRUE . " )";
+				if( $result = $db->query($sql) )
+				{
+					if( $row = $db->fetch_array($result) )
+					{
+						$mailer->clear_all();
+						
+						$mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+						$mailer->set_subject($lang['Subject_email']['New_subscriber']);
+						
+						$mailer->use_template('admin_new_subscribe', array(
+							'EMAIL'   => $this->email,
+							'LISTE'   => unhtmlspecialchars($this->listdata['liste_name']),
+							'URLSITE' => $nl_config['urlsite'],
+							'SIG'     => $this->listdata['liste_sig']
+						));
+						
+						do
+						{
+							$mailer->clear_address();
+							$mailer->set_address($row['admin_email'], $row['admin_login']);
+							
+							$mailer->assign_tags(array(
+								'USER' => $row['admin_login']
+							));
+							
+							$mailer->send(); // envoi
+						}
+						while( $row = $db->fetch_array($result) );
+					}
+				}
 				
 				return true;
 			}
