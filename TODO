@@ -21,7 +21,6 @@
 - Annuler un envoi
 - Permettre l’utilisation de tags dans le sujet de la newsletter
 - Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)
-- Supprimer variable de configuration 'hébergeur' et détecter présence de la fonction email() ou bien si on est sur Online
 - Ajouter une partie dans faq.fr.html pour SQLite ?
 
 
@@ -29,13 +28,8 @@ Coding
 ------------------
 
 - Trouver une solution pour ne plus avoir besoin de $waroot
-- Utiliser foreach plutôt que for( $i ...) quand c'est possible (plus logique si on a pas besoin d'un compteur)
 - Vérifier réglages de mode lorsqu'on ouvre des fichiers
-- true, false, null toujours en minuscules, autres constantes prédéfinies, en majuscules, de même que les constantes définies
 - Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
-- se renseigner sur "rails" (sorte de framework apparamment)
-- Passer par INNER JOIN plutôt que jointure barbare via WHERE
-- Mettre à jour make_sql_ary() pour supporter les commentaires avec -- au lieu de # ou /**/
 - stats.php, ligne 125, si taille fichier = 0, warning php
 - remplacer mysql_get_client_info() dans tools.php, ligne 239
 

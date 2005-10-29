@@ -79,40 +79,47 @@ if( $img == 'graph' )
 	//
 	// Dimensions de l'image 
 	//
-	$width_img	= 510;
-	$height_img = 250;
+	$width_img  = 560;
+	$height_img = 260;
 	
 	$im = imagecreate($width_img, $height_img);
 	
-	$black   = rvb_color($im, '000000');
-	$border  = rvb_color($im, 'FFFFFF');
-	$back_1  = rvb_color($im, '003366');
-	$back_2  = rvb_color($im, 'EAEAEA');
-	$color[] = rvb_color($im, 'FF8800');
-	$color[] = rvb_color($im, '0022FF');
+	$black	= imagecolorallocate($im, 0, 0, 0);
+	$gray	= imagecolorallocate($im, 200, 200, 200);
+	$back_2 = imagecolorallocate($im, 240, 240, 240);
+	$white	= imagecolorallocate($im, 255, 255, 255);
+	$back_1 = convertToRGB('036');
+	$back_1 = imagecolorallocate($im, $back_1->red, $back_1->green, $back_1->blue);
+	$color1 = convertToRGB('F80');
+	$color1 = imagecolorallocate($im, $color1->red, $color1->green, $color1->blue);
+	$color2 = convertToRGB('02F');
+	$color2 = imagecolorallocate($im, $color2->red, $color2->green, $color2->blue);
 	
 	imagefill($im, 0, 0, $black);
 	
 	//
 	// contours 
 	//
-	imagefilledrectangle($im, 1, 1, ($width_img - 2), ($height_img - 2), $back_1);
-	imagefilledrectangle($im, 17, 20, ($width_img - 27), ($height_img - 19), $border);
-	imagefilledrectangle($im, 18, 21, ($width_img - 28), ($height_img - 20), $back_2);
+	imagefilledrectangle($im, 1, 1, ($width_img - 2), ($height_img - 2), $back_2);
+	imagefilledrectangle($im, 24, 24, ($width_img - 25), ($height_img - 24), $black);
+	imagefilledrectangle($im, 25, 25, ($width_img - 26), ($height_img - 25), $back_2);
 	
 	//
 	// titre du graphe 
 	//
+	$title_px = 3;
 	$title  = unhtmlspecialchars($auth->listdata[$listdata['liste_id']]['liste_name']);
 	$title .= ' : ' . $lang['Subscribe_per_day'] . ' - ' . $datetime[$str_month] . ' ' . $year;
 	
-	$start = (($width_img - (imagefontwidth(3) * strlen($title))) / 2);
-	imagestring($im, 3, $start, 4, $title, $color[0]);
+	$start = (($width_img - (imagefontwidth($title_px) * strlen($title))) / 2);
+	imagestring($im, $title_px, $start, 5, $title, $black);
 	
 	//
 	// Echelle horizontale et lecture du fichier des stats 
 	//
-	$max_value = 0;
+	$max_value	= 0;
+	$default_px = 2;
+	
 	$filename  = $year . '_' . $str_month . '_list' . $listdata['liste_id'] . '.txt';
 	
 	if( !file_exists(wa_stats_path . $filename) )
@@ -125,11 +132,12 @@ if( $img == 'graph' )
 		$contents = fread($fp, filesize(wa_stats_path . $filename));
 		$stats    = clean_stats($contents);
 		
-		for( $day = 1, $i = 0, $int = 0; $day <= 31; $day++, $i++, $int += 15 )
+		for( $day = 1, $i = 0, $int = 0; $day <= 31; $day++, $i++, $int += 16 )
 		{
 			if( checkdate($month, $day, $year) )
 			{
-				imagestring($im, 1, (20 + $int), 234, sprintf('%02d', $day), $border);
+				$t = date('w', mktime(12, 0, 0, $month, $day, $year));
+				imagestring($im, $default_px, (34 + $int), 240, sprintf('%02d', $day), (($t == 0 || $t == 6) ? $gray : $black));
 				
 				$num_per_day[$day] = ( isset($stats[$i]) ) ? $stats[$i] : 0;
 				
@@ -154,43 +162,51 @@ if( $img == 'graph' )
 	}
 	
 	$top_value = $max_value;
-	while( ($top_value % 10) != 0 )
+	while( ($top_value % 10) != 0 /*|| ( $top_value > 10 && (($top_value/10) % 5) != 0 )*/ )
 	{
 		$top_value++;
 	}
 	
-	$interval = (198 / $top_value);
+	$num	  = ($top_value / 5);
+	$interval = (200 / $top_value);
 	
-	$num = ($top_value / 5);
-	for( $i = 0, $int = 0; $i < 5; $i++, $int += 40, $top_value -= $num )
+	for( $i = 0, $int = 0; $i < 10; $i++, $int += 20 )
 	{
-		imagestring($im, 1, 5, (29 + $int), $top_value, $border);
-		imageline($im, 18, (32 + $int), 482, (32 + $int), $black);
+		if( ($int%40) == 0 )
+		{
+			imagestring($im, $default_px, 7, (29 + $int), $top_value, $black);
+			imagesetstyle($im, array($gray, $gray, $gray, $gray, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT));
+			imageline($im, 32, (37 + $int), ($width_img - 33), (37 + $int), IMG_COLOR_STYLED);
+			imageline($im, 25, (37 + $int), 28, (37 + $int), $black);
+			imageline($im, ($width_img - 29), (37 + $int), ($width_img - 26), (37 + $int), $black);
+			$top_value -= $num;
+		}
+		else
+		{
+			imageline($im, 25, (37 + $int), 26, (37 + $int), $black);
+			imageline($im, ($width_img - 27), (37 + $int), ($width_img - 26), (37 + $int), $black);
+		}
 	}
 	
 	$fct_imagecreatefrom = 'imagecreatefrom' . $img_type;
-	$src = @$fct_imagecreatefrom(WA_PATH . 'images/barre.' . $img_type);
-	if( !$src )
-	{
-		return;
-	}
+	$src = $fct_imagecreatefrom(WA_PATH . 'images/barre.' . $img_type);
 	
 	//
 	// Affichage des résultats 
 	//
-	for( $day = 1, $int = 0; $day <= 31; $day++, $int += 15 )
+	for( $day = 1, $int = 0; $day <= 31; $day++, $int += 16 )
 	{
 		if( checkdate($month, $day, $year) && $num_per_day[$day] )
 		{
 			$val = ($interval * $num_per_day[$day]);
-			$height = (232 - $val);
+			$height = (237 - $val);
 			
-			imagefilledrectangle($im, (19 + $int), $height, (31 + $int), 230, $black);
-			imagecopyresized($im, $src, (20 + $int), ($height + 1), 0, 0, 11, ($val - 1), 10, 1);
+			imagefilledrectangle($im, (33 + $int), $height, (45 + $int), 235, $black);
+			imagecopyresized($im, $src, (34 + $int), $height+1, 0, 0, 11, ceil($val)-2, 10, 1);
 			
-			$start = (26 + $int - ((imagefontwidth(1) * strlen($num_per_day[$day])) / 2));
-			$color_value = ( $num_per_day[$day] == $max_value ) ? $color[1] : $black;
-			imagestring($im, 1, $start, ($height - 10), $num_per_day[$day], $color_value);
+			$start = (40 + $int - ((imagefontwidth($default_px) * strlen($num_per_day[$day])) / 2));
+			$color_value = ( $num_per_day[$day] == $max_value ) ? $color2 : $black;
+			imagestring($im, $default_px, $start, ($height - 13), $num_per_day[$day], $color_value);
 		}
 	}
 	
@@ -238,7 +254,7 @@ if( $img == 'camenbert' )
 	//
 	// Taille de base de l'image (varie s'il y a beaucoup de listes)
 	//
-	$width_img  = 510;
+	$width_img  = 560;
 	$height_img = 170;
 	
 	if( $total_listes > 3 )
@@ -251,15 +267,22 @@ if( $img == 'camenbert' )
 	//
 	// Allocation des couleurs
 	//
-	$black   = rvb_color($im, '000000');
-	$back_1  = rvb_color($im, '003366');
-	$back_2  = rvb_color($im, 'EAEAEA');
-	$color[] = rvb_color($im, 'FF8800');
-	$color[] = rvb_color($im, '66BB00');
-	$color[] = rvb_color($im, '00BBCC');
-	$color[] = rvb_color($im, '3300CC');
-	$color[] = rvb_color($im, '660088');
-	$color[] = rvb_color($im, 'CC0033');
+	$black   = imagecolorallocate($im, 0, 0, 0);
+	$back_1  = convertToRGB('036');
+	$back_1  = imagecolorallocate($im, $back_1->red, $back_1->green, $back_1->blue);
+	$back_2  = imagecolorallocate($im, 240, 240, 240);
+	$tmp     = convertToRGB('F80');
+	$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
+	$tmp     = convertToRGB('6B0');
+	$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
+	$tmp     = convertToRGB('0BC');
+	$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
+	$tmp     = convertToRGB('30C');
+	$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
+	$tmp     = convertToRGB('608');
+	$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
+	$tmp     = convertToRGB('C03');
+	$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
 	
 	//
 	// Création du contour noir 

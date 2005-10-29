@@ -276,7 +276,6 @@ ul.links li:after  { content: "]"; }
 }
 
 .stats       { margin: 1.5em auto 0; text-align: center; }
-.stats img   { border: 2px outset #003B78; }
 img[alt="@"] { vertical-align: middle; }
 
 /* Textes et liens */

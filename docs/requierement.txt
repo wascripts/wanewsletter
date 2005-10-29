@@ -17,6 +17,7 @@ $_REQUEST                => 4.1.0
 $_GET, $_POST ..etc ..   => 4.1.0 plus besoin de transvaser les tab $HTTP_*_VARS
 version_compare()        => 4.1.0
 mysql_escape_string()    => 4.0.3 sql/mysql.php
+imagesetstyle()          => 4.0.6 admin/stats.php
 
 
 ////////////////////////////////

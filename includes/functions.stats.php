@@ -25,25 +25,44 @@
  * @version $Id$
  */
 
-define('WA_STATS_PATH'		, WA_PATH . 'stats/', true);
+define('WA_STATS_PATH', WA_PATH . 'stats/', true);
 
 @chmod(wa_stats_path, 0777);
 
 /**
- * rvb_color()
+ * convertToRGB()
  * 
- * Conversation de couleur hexadécimale à couleur rvb
+ * @param string $hexColor
  * 
- * @param resource $im       Id de ressource de l'image
- * @param string   $color    Couleur en hexadécimal
- * 
- * @return integer
+ * @return object
  */
-function rvb_color($im, $color)
+function convertToRGB($hexColor)
 {
-	preg_match('/^([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})$/', strtoupper($color), $color_parts);
+	$parts    = array();
+	$hexColor = strtoupper(ltrim($hexColor, '#'));
 	
-	return imagecolorallocate($im, hexdec($color_parts[1]), hexdec($color_parts[2]), hexdec($color_parts[3]));
+	if( strlen($hexColor) == 6 )
+	{
+		preg_match('/^#?([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})$/', $hexColor, $tmp);
+		$parts['red']   = $tmp[1];
+		$parts['green'] = $tmp[2];
+		$parts['blue']  = $tmp[3];
+	}
+	else if( strlen($hexColor) == 3 )
+	{
+		preg_match('/^#?([[:xdigit:]])([[:xdigit:]])([[:xdigit:]])$/', $hexColor, $tmp);
+		$parts['red']   = $tmp[1] . $tmp[1];
+		$parts['green'] = $tmp[2] . $tmp[2];
+		$parts['blue']  = $tmp[3] . $tmp[3];
+	}
+	else
+	{
+		$parts['red']   = '0';
+		$parts['green'] = '0';
+		$parts['blue']  = '0';
+	}
+	
+	return (object)array_map('hexdec', $parts);
 }
 
 /**
@@ -51,8 +70,8 @@ function rvb_color($im, $color)
  * 
  * Calcule les coordonnées du rayon
  * 
- * @param float   $degre       Degré
- * @param integer $diametre    Diamètre du cercle
+ * @param float   $degre     Degré
+ * @param integer $diametre  Diamètre du cercle
  * 
  * @return array
  */
@@ -69,9 +88,9 @@ function xy_arc($degre, $diametre)
  * 
  * Créé le fichier de statistiques pour le mois et l'année donnés
  * 
- * @param array   $listdata    Données de la liste concernée
- * @param integer $month       Chiffre du mois
- * @param integer $year        Chiffre de l'année
+ * @param array   $listdata  Données de la liste concernée
+ * @param integer $month     Chiffre du mois
+ * @param integer $year      Chiffre de l'année
  * 
  * @return boolean
  */
@@ -128,7 +147,7 @@ function create_stats($listdata, $month, $year)
  * 
  * Mise à jour des données pour les statistiques 
  * 
- * @param array $listdata    Données de la liste concernée
+ * @param array $listdata  Données de la liste concernée
  * 
  * @return boolean
  */
@@ -176,8 +195,8 @@ function update_stats($listdata)
  * 
  * Suppression/déplacement de stats (lors de la suppression d'une liste) 
  * 
- * @param integer $liste_from    Id de la liste dont on supprime/déplace les stats
- * @param mixed   $liste_to      Id de la liste de destination ou boolean (dans ce cas, on supprime)
+ * @param integer $liste_from  Id de la liste dont on supprime/déplace les stats
+ * @param mixed   $liste_to    Id de la liste de destination ou boolean (dans ce cas, on supprime)
  * 
  * @return boolean
  */
@@ -250,7 +269,7 @@ function remove_stats($liste_from, $liste_to = false)
  * 
  * Effectue les traitements adéquats sur la chaine et retourne un tableau
  * 
- * @param string $contents	: Contenu du fichier des statistiques
+ * @param string $contents  Contenu du fichier des statistiques
  * 
  * @return array
  */
