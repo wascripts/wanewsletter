@@ -288,14 +288,14 @@ if( $img == 'camenbert' )
 	// Création du contour noir 
 	//
 	imagefill($im, 0, 0, $black);
-	imagefilledrectangle($im, 1, 1, ($width_img - 2), ($height_img - 2), $back_1);
+	imagefilledrectangle($im, 1, 1, ($width_img - 2), ($height_img - 2), $back_2);
 	
 	//
 	// titre du graphe 
 	//
 	$title = $lang['Num_abo_per_liste'];
 	$start = (($width_img - (imagefontwidth(3) * strlen($title))) / 2);
-	imagestring($im, 3, $start, 4, $title, $color[0]);
+	imagestring($im, 3, $start, 4, $title, $black);
 	
 	//
 	// Positionnement de départ du camenbert
