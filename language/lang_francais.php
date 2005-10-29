@@ -505,6 +505,7 @@ $lang['Abo_pseudo']                 = "Pseudo de l'abonné";
 $lang['Liste_to_register']          = "Cet abonné est inscrit aux listes suivantes";
 $lang['Fast_deletion']              = "Suppression rapide";
 $lang['Fast_deletion_note']         = "Entrez une ou plusieurs adresses emails, séparées par une virgule, et elles seront supprimées de la liste de diffusion";
+$lang['Choice_Format']              = "format choisi";
 
 
 //

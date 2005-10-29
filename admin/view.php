@@ -250,7 +250,7 @@ else if( $mode == 'abonnes' )
 		
 		$liste_id_ary = $auth->check_auth(AUTH_VIEW);
 		
-		$sql = "SELECT a.*, al.liste_id 
+		$sql = "SELECT a.*, al.liste_id, al.format 
 			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
 			WHERE a.abo_id = $abo_id 
 				AND al.abo_id = a.abo_id 
@@ -262,64 +262,58 @@ else if( $mode == 'abonnes' )
 		
 		if( $row = $db->fetch_array($result) )
 		{
-			$abodata = array();
+			$output->addHiddenField('abo_id', $row['abo_id']);
+			$output->addHiddenField('sessid', $session->session_id);
 			
-			$abodata['abo_id']     = $row['abo_id'];
-			$abodata['abo_email']  = $row['abo_email'];
-			$abodata['abo_pseudo'] = $row['abo_pseudo'];
-			$abodata['reg_date']   = $row['abo_register_date'];
-			$abodata['listes']     = array();
+			$output->page_header();
+			
+			$output->set_filenames(array(
+				'body' => 'view_abo_profil_body.tpl'
+			));
+			
+			$output->assign_vars(array(
+				'L_TITLE'                 => sprintf($lang['Title']['profile'], ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : $row['abo_email']),
+				'L_EXPLAIN'               => nl2br($lang['Explain']['abo']),
+				'L_PSEUDO'                => $lang['Abo_pseudo'],
+				'L_EMAIL'                 => $lang['Email_address'],
+				'L_REGISTER_DATE'         => $lang['Susbcribed_date'],
+				'L_LISTE_TO_REGISTER'     => $lang['Liste_to_register'],
+				'L_DELETE_ACCOUNT_BUTTON' => $lang['Button']['del_account'],
+				
+				'RETURN_TO_BACK'          => sprintf($lang['Click_return_back'], '<a href="' . sessid('./view.php?mode=abonnes' . $get_string . $get_page) . '">', '</a>'),
+				'S_ABO_PSEUDO'            => ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : '<b>' . $lang['No_data'] . '</b>',
+				'S_ABO_EMAIL'             => $row['abo_email'],
+				'S_REGISTER_DATE'         => convert_time($nl_config['date_format'], $row['abo_register_date']),
+				
+				'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
+			));
 			
 			do
 			{
-				$abodata['listes'][$row['liste_id']] = $auth->listdata[$row['liste_id']]['liste_name'];
+				if( $auth->listdata[$row['liste_id']]['liste_format'] == FORMAT_MULTIPLE )
+				{
+					$format = ' (' . $lang['Choice_Format'] . '&#160;: ' . (( $row['format'] == FORMAT_HTML ) ? 'html' : 'texte') . ')';
+				}
+				else
+				{
+					$format = '';
+				}
+				
+				$output->assign_block_vars('listerow', array(
+					'LISTE_NAME'    => $auth->listdata[$row['liste_id']]['liste_name'],
+					'CHOICE_FORMAT' => $format,
+					'U_VIEW_LISTE'  => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
+				));
 			}
 			while( $row = $db->fetch_array($result) );
+			
+			$output->pparse('body');
+			$output->page_footer();
 		}
 		else
 		{
 			trigger_error('abo_not_exists', MESSAGE);
 		}
-		
-		$s_title = ( !empty($abodata['abo_pseudo']) ) ? $abodata['abo_pseudo'] : $abodata['abo_email'];
-		
-		$output->addHiddenField('abo_id', $abodata['abo_id']);
-		$output->addHiddenField('sessid', $session->session_id);
-		
-		$output->page_header();
-		
-		$output->set_filenames(array(
-			'body' => 'view_abo_profil_body.tpl'
-		));
-		
-		$output->assign_vars(array(
-			'L_TITLE'                 => sprintf($lang['Title']['profile'], $s_title),
-			'L_EXPLAIN'               => nl2br($lang['Explain']['abo']),
-			'L_PSEUDO'                => $lang['Abo_pseudo'],
-			'L_EMAIL'                 => $lang['Email_address'],
-			'L_REGISTER_DATE'         => $lang['Susbcribed_date'],
-			'L_LISTE_TO_REGISTER'     => $lang['Liste_to_register'],
-			'L_DELETE_ACCOUNT_BUTTON' => $lang['Button']['del_account'],
-			
-			'RETURN_TO_BACK'          => sprintf($lang['Click_return_back'], '<a href="' . sessid('./view.php?mode=abonnes' . $get_string . $get_page) . '">', '</a>'),
-			'S_ABO_PSEUDO'            => ( !empty($abodata['abo_pseudo']) ) ? $abodata['abo_pseudo'] : '<b>' . $lang['No_data'] . '</b>',
-			'S_ABO_EMAIL'             => $abodata['abo_email'],
-			'S_REGISTER_DATE'         => convert_time($nl_config['date_format'], $abodata['reg_date']),
-			
-			'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
-		));
-		
-		foreach( $abodata['listes'] AS $liste_id => $liste_name )
-		{
-			$output->assign_block_vars('listerow', array(
-				'LISTE_NAME'   => $liste_name,
-				'U_VIEW_LISTE' => sessid('./view.php?mode=abonnes&amp;liste=' . $liste_id)
-			));
-		}
-		
-		$output->pparse('body');
-		
-		$output->page_footer();
 	}
 	else if( $action == 'delete' )
 	{
