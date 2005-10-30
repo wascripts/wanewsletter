@@ -65,7 +65,7 @@ $month = ( !empty($_GET['month']) ) ? intval($_GET['month']) : date('n');
 
 if( $img == 'graph' )
 {
-	$str_month = date('F', mktime(0, 0, 0, $month, 1, $year));
+	$ts = mktime(0, 0, 0, $month, 1, $year);
 	
 	//
 	// Dimensions de l'image 
@@ -99,7 +99,7 @@ if( $img == 'graph' )
 	// titre du graphe 
 	//
 	$title_px = 3;
-	$title = sprintf('%s - %s %4d', $lang['Subscribe_per_day'], $datetime[$str_month], $year);
+	$title = sprintf('%s - %s', $lang['Subscribe_per_day'], convert_time('F Y', $ts));
 	
 	$start = (($width_img - (imagefontwidth($title_px) * strlen($title))) / 2);
 	imagestring($im, $title_px, $start, 5, $title, $black);
@@ -110,7 +110,7 @@ if( $img == 'graph' )
 	$max_value	= 0;
 	$default_px = 2;
 	
-	$filename  = $year . '_' . $str_month . '_list' . $listdata['liste_id'] . '.txt';
+	$filename  = $year . '_' . date('F', $ts) . '_list' . $listdata['liste_id'] . '.txt';
 	
 	if( !file_exists(wa_stats_path . $filename) )
 	{
@@ -225,11 +225,11 @@ if( $img == 'graph' )
 
 if( $img == 'camenbert' )
 {
-	$sql = "SELECT COUNT(al.abo_id) AS num_inscrits, al.liste_id 
-		FROM " . ABO_LISTE_TABLE . " AS al, " . ABONNES_TABLE . " AS a 
-		WHERE al.liste_id IN(" . implode(', ', $liste_id_ary) . ") 
-			AND a.abo_status = " . ABO_ACTIF . " 
-			AND a.abo_id = al.abo_id 
+	$sql = "SELECT COUNT(al.abo_id) AS num_inscrits, al.liste_id
+		FROM " . ABO_LISTE_TABLE . " AS al
+			INNER JOIN " . ABONNES_TABLE . " AS a ON a.abo_id = al.abo_id
+				AND a.abo_status = " . ABO_ACTIF . "
+		WHERE al.liste_id IN(" . implode(', ', $liste_id_ary) . ")
 		GROUP BY al.liste_id";
 	if( !($result = $db->query($sql)) )
 	{
@@ -362,7 +362,11 @@ if( $img == 'camenbert' )
 		imagefilledrectangle($im, 165, ($hauteur + $int), 175, ($hauteur + $int + 10), $black);
 		imagefilledrectangle($im, 166, ($hauteur + $int + 1), 176, ($hauteur + $int + 11), $color_arc);
 		
-		imagestring($im, 2, 185, ($hauteur + $int), $listes[$i]['name'] . ' [' . $listes[$i]['num'] . '] [' . ($part * 100) . '%]', $black);
+		imagestring($im, 2, 185, ($hauteur + $int),
+			sprintf('%s [%d] [%s%%]', $listes[$i]['name'], $listes[$i]['num'],
+				($part > 0 ? round($part * 100, 2) : 0)),
+			$black
+		);
 	}
 	
 	imagearc($im, $start_x, $start_y, 100, 100, 0, 360, $black);
@@ -418,7 +422,7 @@ for(; $m >= $n; $m-- )
 {
 	$selected = ( $m == $month ) ? ' selected="selected"' : '';
 	$m_list  .= sprintf("\n\t<option value=\"%d\"%s>%s</option>", $m, $selected,
-		$datetime[date('F', mktime(0, 0, 0, $m, 1, $y))]);
+		convert_time('F', mktime(0, 0, 0, $m, 1, $y)));
 }
 
 $output->assign_vars(array(
