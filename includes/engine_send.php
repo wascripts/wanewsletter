@@ -38,8 +38,8 @@ include WA_PATH . 'includes/tags.inc.php';
  * Cette fonction est appellée soit dans envoi.php lors de l'envoi, soit 
  * dans le fichier appellé originellement cron.php 
  * 
- * @param array $listdata    Tableau des données de la liste concernée
- * @param array $logdata     Tableau des données de la newsletter
+ * @param array $listdata  Tableau des données de la liste concernée
+ * @param array $logdata   Tableau des données de la newsletter
  * 
  * @access private
  * 
@@ -337,9 +337,9 @@ function launch_sending($listdata, $logdata)
 	
 	if( $nl_config['emails_sended'] > 0 )
 	{
-		$sql = "UPDATE " . ABO_LISTE_TABLE . " 
-			SET send = 1 
-			WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ") 
+		$sql = "UPDATE " . ABO_LISTE_TABLE . "
+			SET send = 1
+			WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ")
 				AND liste_id = " . $listdata['liste_id'];
 		if( !$db->query($sql) )
 		{
@@ -350,17 +350,17 @@ function launch_sending($listdata, $logdata)
 			unset($db);
 			
 			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
-			if( !$db->connect_id || !$db->query($sql) )
+			if( !is_resource($db->connect_id) || !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
 			}
 		}
 		
-		$sql = "SELECT COUNT(*) AS num_dest, al.send 
-			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-			WHERE al.liste_id = " . $listdata['liste_id'] . " 
-				AND a.abo_id = al.abo_id 
-				AND a.abo_status = " . ABO_ACTIF . " 
+		$sql = "SELECT COUNT(*) AS num_dest, al.send
+			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
+			WHERE al.liste_id = $listdata[liste_id]
+				AND a.abo_id = al.abo_id
+				AND a.abo_status = " . ABO_ACTIF . "
 			GROUP BY al.send";
 		if( !($result = $db->query($sql)) )
 		{
@@ -415,7 +415,7 @@ function launch_sending($listdata, $logdata)
 			unset($db);
 			
 			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
-			if( !$db->connect_id || !$db->query($sql) )
+			if( !is_resource($db->connect_id) || !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
 			}
@@ -448,7 +448,7 @@ function launch_sending($listdata, $logdata)
  * 
  * Fonction renvoyant les liens à placer dans les newsletters, selon les réglages
  * 
- * @param array $listdata    Tableau des données de la liste concernée
+ * @param array $listdata  Tableau des données de la liste concernée
  * 
  * @access private
  * 
