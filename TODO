@@ -16,9 +16,10 @@
 - Permettre l'envoi d'emails multipart (text/html) ?
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Annuler un envoi
-- Permettre l’utilisation de tags dans le sujet de la newsletter
 - Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)
 - Ajouter une partie dans faq.fr.html pour SQLite ?
+- Supprimer choix de la méthode d’envoi si host est Online (Utiliser Mailer::is_online_host())
+- revoir les schémas de tables
 
 
 Coding
@@ -27,6 +28,7 @@ Coding
 - Vérifier réglages de mode lorsqu'on ouvre des fichiers
 - Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
 - remplacer mysql_get_client_info() dans tools.php, ligne 239
+- nommer tous les index de la forme nom_colonne_idx (en majuscule ?)
 
 Passer de SQLite 2.x à SQLite 3.x :
 	$ sqlite-old old.db .dump | sqlite-new new.db
