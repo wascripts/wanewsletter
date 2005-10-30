@@ -392,27 +392,33 @@ $output->set_filenames( array(
 	'body' => 'stats_body.tpl'
 ));
 
-$curYear   = date('Y');
-$curMonth  = date('n');
-$year_list = '';
-$tac=array();
+$y = date('Y');
+$m = date('n');
+$y_list = '';
+$m_list = '';
+
 do
 {
-	$year_list .= sprintf("\n\t<option value=\"%1\$d\">%1\$d</option>", $curYear);
+	$y_list .= sprintf("\n\t<option value=\"%1\$d\">%1\$d</option>", $y);
 	
-	do
-	{
-		$tac[$curMonth] = true;
-	}
-	while( (--$curMonth >= 1 && $curYear != date('Y')) || $curMonth >= date('n') );
 }
-while( --$curYear >= date('Y', $listdata['liste_startdate']) && $curMonth = 12 );
+while( --$y >= date('Y', $listdata['liste_startdate']) );
 
-$month_list = '';
-krsort($tac);
-foreach( $tac AS $m => $z ) {
-	$sel = ( $m == $month ) ? ' selected="selected"' : '';
-	$month_list .= "\n\t<option value=\"$m\"$sel>" . $datetime[date('F', mktime(0, 0, 0, $m, 1, $curYear))] . "</option>";
+if( $y == (date('Y') - 1) )
+{
+	$n = date('n', $listdata['liste_startdate']);
+}
+else
+{
+	$m = 12;
+	$n = 1;
+}
+
+for(; $m >= $n; $m-- )
+{
+	$selected = ( $m == $month ) ? ' selected="selected"' : '';
+	$m_list  .= sprintf("\n\t<option value=\"%d\"%s>%s</option>", $m, $selected,
+		$datetime[date('F', mktime(0, 0, 0, $m, 1, $y))]);
 }
 
 $output->assign_vars(array(
@@ -422,8 +428,8 @@ $output->assign_vars(array(
 	'L_IMG_GRAPH'     => $lang['Graph_bar_title'],
 	'L_IMG_CAMENBERT' => $lang['Camenbert_title'],
 	
-	'YEAR_LIST'       => $year_list,
-	'MONTH_LIST'      => $month_list,
+	'YEAR_LIST'       => $y_list,
+	'MONTH_LIST'      => $m_list,
 	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;year=' . $year . '&amp;month=' . $month),
 	'U_IMG_CAMENBERT' => sessid('./stats.php?img=camenbert'),
 	

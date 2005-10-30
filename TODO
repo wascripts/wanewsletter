@@ -20,6 +20,7 @@
 - Ajouter une partie dans faq.fr.html pour SQLite ?
 - Supprimer choix de la méthode d’envoi si host est Online (Utiliser Mailer::is_online_host())
 - revoir les schémas de tables
+- upgrader DOM-Compat et ajouter fichier copying
 
 
 Coding
