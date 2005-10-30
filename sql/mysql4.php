@@ -134,6 +134,8 @@ class sql {
 			$this->sql_error['errno']   = @mysqli_errno($this->connect_id);
 			$this->sql_error['message'] = @mysqli_error($this->connect_id);
 			$this->sql_error['query']   = $query;
+			
+			$this->transaction('ROLLBACK');
 		}
 		else
 		{

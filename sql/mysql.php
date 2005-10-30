@@ -135,15 +135,14 @@ class sql {
 			$this->sql_error['message'] = @mysql_error($this->connect_id);
 			$this->sql_error['query']   = $query;
 			
-			if( $this->trc_started )
-			{
-				$this->transaction('ROLLBACK');
-			}
+			$this->transaction('ROLLBACK');
 		}
 		else
 		{
 			$this->sql_error = array('errno' => '', 'message' => '', 'query' => '');
 		}
+		
+		return $this->query_result;
 	}
 	
 	function transaction($transaction)
