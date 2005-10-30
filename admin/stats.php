@@ -162,17 +162,31 @@ if( $img == 'graph' )
 	}
 	
 	$top_value = $max_value;
-	while( ($top_value % 10) != 0 /*|| ( $top_value > 10 && (($top_value/10) % 5) != 0 )*/ )
+	while( ($top_value % 10) != 0 )
 	{
 		$top_value++;
 	}
 	
-	$num	  = ($top_value / 5);
-	$interval = (200 / $top_value);
-	
-	for( $i = 0, $int = 0; $i < 10; $i++, $int += 20 )
+	$num = ($top_value / 5);
+	if( ($num % 6) == 0 )
 	{
-		if( ($int%40) == 0 )
+		$ec = 6;
+	}
+	else if( ($num % 4) == 0 )
+	{
+		$ec = 4;
+	}
+	else
+	{
+		$ec = 5;
+	}
+	
+	$num = ($top_value / $ec);
+	$coeff = (200 / $top_value);
+	
+	for( $i = 0, $int = 0; $i < ($ec*2); $i++, $int += (200/($ec*2)) )
+	{
+		if( ($i%2) == 0 )
 		{
 			imagestring($im, $default_px, 7, (29 + $int), $top_value, $black);
 			imagesetstyle($im, array($gray, $gray, $gray, $gray, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT));
@@ -196,13 +210,13 @@ if( $img == 'graph' )
 	//
 	for( $day = 1, $int = 0; $day <= 31; $day++, $int += 16 )
 	{
-		if( checkdate($month, $day, $year) && $num_per_day[$day] )
+		if( checkdate($month, $day, $year) && $num_per_day[$day] > 0 )
 		{
-			$val = ($interval * $num_per_day[$day]);
+			$val = max(3, ($coeff * $num_per_day[$day]));
 			$height = (237 - $val);
 			
 			imagefilledrectangle($im, (33 + $int), $height, (45 + $int), 235, $black);
-			imagecopyresized($im, $src, (34 + $int), $height+1, 0, 0, 11, ceil($val)-2, 10, 1);
+			imagecopyresized($im, $src, (34 + $int), $height+1, 0, 0, 11, ceil($val - 2), 10, 1);
 			
 			$start = (40 + $int - ((imagefontwidth($default_px) * strlen($num_per_day[$day])) / 2));
 			$color_value = ( $num_per_day[$day] == $max_value ) ? $color2 : $black;

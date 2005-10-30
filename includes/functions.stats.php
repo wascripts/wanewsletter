@@ -275,7 +275,7 @@ function remove_stats($liste_from, $liste_to = false)
  */
 function clean_stats($contents)
 {
-	$contents = preg_replace("/\r\n?/", "\n", $contents);
+	$contents = preg_replace("/\r\n?/", "\n", trim($contents));
 	
 	return array_map('intval', explode("\n", $contents));
 }
