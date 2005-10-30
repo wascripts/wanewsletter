@@ -526,7 +526,7 @@ function convert_time($dateformat, $timestamp)
 {
 	static $search, $replace;
 	
-	if( !isset($orig_ary) || !isset($repl_ary) )
+	if( !isset($search) || !isset($replace) )
 	{
 		global $datetime;
 		
