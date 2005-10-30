@@ -45,9 +45,6 @@ else if( !is_available_extension('gd') )
 include WA_PATH . 'includes/functions.stats.php';
 $img_type = $nl_config['gd_img_type'];
 
-$img  = ( !empty($_GET['img']) ) ? trim($_GET['img']) : '';
-$date = ( !empty($_GET['date']) ) ? trim($_GET['date']) : '';
-
 $liste_id_ary = $auth->check_auth(AUTH_VIEW);
 
 if( !$admindata['session_liste'] )
@@ -62,15 +59,9 @@ if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 
 $listdata = $auth->listdata[$admindata['session_liste']];
 
-if( $date != '' )
-{
-	list($month, $year) = explode('_', $date);
-}
-else
-{
-	$month = date('m');
-	$year  = date('Y');
-}
+$img   = ( !empty($_GET['img']) ) ? trim($_GET['img']) : '';
+$year  = ( !empty($_GET['year']) ) ? intval($_GET['year']) : date('Y');
+$month = ( !empty($_GET['month']) ) ? intval($_GET['month']) : date('n');
 
 if( $img == 'graph' )
 {
@@ -108,8 +99,7 @@ if( $img == 'graph' )
 	// titre du graphe 
 	//
 	$title_px = 3;
-	$title  = unhtmlspecialchars($auth->listdata[$listdata['liste_id']]['liste_name']);
-	$title .= ' : ' . $lang['Subscribe_per_day'] . ' - ' . $datetime[$str_month] . ' ' . $year;
+	$title = sprintf('%s - %s %4d', $lang['Subscribe_per_day'], $datetime[$str_month], $year);
 	
 	$start = (($width_img - (imagefontwidth($title_px) * strlen($title))) / 2);
 	imagestring($im, $title_px, $start, 5, $title, $black);
@@ -402,6 +392,29 @@ $output->set_filenames( array(
 	'body' => 'stats_body.tpl'
 ));
 
+$curYear   = date('Y');
+$curMonth  = date('n');
+$year_list = '';
+$tac=array();
+do
+{
+	$year_list .= sprintf("\n\t<option value=\"%1\$d\">%1\$d</option>", $curYear);
+	
+	do
+	{
+		$tac[$curMonth] = true;
+	}
+	while( (--$curMonth >= 1 && $curYear != date('Y')) || $curMonth >= date('n') );
+}
+while( --$curYear >= date('Y', $listdata['liste_startdate']) && $curMonth = 12 );
+
+$month_list = '';
+krsort($tac);
+foreach( $tac AS $m => $z ) {
+	$sel = ( $m == $month ) ? ' selected="selected"' : '';
+	$month_list .= "\n\t<option value=\"$m\"$sel>" . $datetime[date('F', mktime(0, 0, 0, $m, 1, $curYear))] . "</option>";
+}
+
 $output->assign_vars(array(
 	'L_TITLE'         => $lang['Title']['stats'],
 	'L_EXPLAIN_STATS' => nl2br($lang['Explain']['stats']),
@@ -409,8 +422,9 @@ $output->assign_vars(array(
 	'L_IMG_GRAPH'     => $lang['Graph_bar_title'],
 	'L_IMG_CAMENBERT' => $lang['Camenbert_title'],
 	
-	'DATE_BOX'        => date_box($listdata, $month, $year),
-	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;date=' . $month . '_' . $year),
+	'YEAR_LIST'       => $year_list,
+	'MONTH_LIST'      => $month_list,
+	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;year=' . $year . '&amp;month=' . $month),
 	'U_IMG_CAMENBERT' => sessid('./stats.php?img=camenbert'),
 	
 	'S_HIDDEN_FIELDS' => $output->getHiddenFields()

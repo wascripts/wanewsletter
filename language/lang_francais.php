@@ -582,7 +582,7 @@ $lang['File_on_server']             = "fichier existant";
 // Page : Statistiques
 //
 $lang['Explain']['stats']           = "Cette page vous permet de visualiser un graphique à barre, représentant le nombre d'inscriptions par jour, pour le mois et l'année donnés, ainsi qu'un deuxième graphique représentant la répartition des abonnés, par liste de diffusion.\nSi votre serveur n'a pas de librairie GD installée, vous devriez alors désactiver ce module dans la configuration du script";
-$lang['Num_abo_per_liste']          = "Repartition des abonnés par liste de diffusion";
+$lang['Num_abo_per_liste']          = "Répartition des abonnés par liste de diffusion";
 $lang['Subscribe_per_day']          = "Inscriptions/Jours";
 $lang['Graph_bar_title']            = "Le nombre d'inscriptions par jour pour le mois donné";
 $lang['Camenbert_title']            = "Les parts des différentes listes par rapport au nombre total d'abonnés";

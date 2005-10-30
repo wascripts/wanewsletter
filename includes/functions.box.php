@@ -76,10 +76,10 @@ function lang_box($default_lang = '')
  * 
  * Construction de la liste déroulante des formats de newsletter
  * 
- * @param string  $select_name       Nom de la liste déroulante
- * @param integer $default_format    Format par défaut
- * @param boolean $option_submit     True si submit lors du changement de valeur de la liste
- * @param boolean $multi_format      True si on doit affiche également multi-format comme valeur
+ * @param string  $select_name     Nom de la liste déroulante
+ * @param integer $default_format  Format par défaut
+ * @param boolean $option_submit   True si submit lors du changement de valeur de la liste
+ * @param boolean $multi_format    True si on doit affiche également multi-format comme valeur
  * 
  * @return string
  */
@@ -107,52 +107,6 @@ function format_box($select_name, $default_format = 0, $option_submit = false, $
 	$format_box .= '</select>';
 	
 	return $format_box;
-}
-
-/**
- * date_box()
- * 
- * Construction de la liste déroulante des périodes mois/année pour les statistiques
- * 
- * @param array   $listdata    Données de la liste concernée
- * @param integer $month       Chiffre du mois de valeur par défaut
- * @param integer $year        Chiffre de l'année de valeur par défaut
- * 
- * @return string
- */
-function date_box($listdata, $month, $year)
-{
-	global $db, $datetime;
-	
-	$m = date('n');
-	$y = date('Y');
-	
-	$first_m = date('n', $listdata['liste_startdate']);
-	$first_y = date('Y', $listdata['liste_startdate']);
-	
-	$date_box = '<select name="date">';
-	
-	do
-	{
-		$toc = ( $m == $first_m && $y == $first_y ) ? false : true;
-		
-		$str_month = date('F', mktime(0, 0, 0, $m, 1, $y));
-		
-		$selected = ( $month == $m && $year == $y ) ? ' selected="selected"' : '';
-		$date_box .= '<option value="' . $m . '_' . $y . '"' . $selected . '> - ' . $datetime[$str_month] . ' ' . $y . ' - </option>';
-		
-		$m--;
-		if( $m == 0 )
-		{
-			$m = 12;
-			$y--;
-		}
-	}
-	while( $toc );
-	
-	$date_box .= '</select>';
-	
-	return $date_box;
 }
 
 ?>

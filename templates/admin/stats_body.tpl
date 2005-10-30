@@ -8,8 +8,10 @@
 		</tr>
 	</table>
 	
-	<div class="bottom"> {S_HIDDEN_FIELDS} {DATE_BOX} &#160;
-		<input type="submit" value="{L_GO_BUTTON}" class="pbutton" />
+	<div class="bottom">
+		<select name="year">{YEAR_LIST}</select>
+		<select name="month">{MONTH_LIST}</select>
+		{S_HIDDEN_FIELDS} <input type="submit" value="{L_GO_BUTTON}" class="pbutton" />
 	</div>
 </div>
 </form>
