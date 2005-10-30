@@ -24,10 +24,8 @@
 Coding
 ------------------
 
-- Trouver une solution pour ne plus avoir besoin de $waroot
 - Vérifier réglages de mode lorsqu'on ouvre des fichiers
 - Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
-- stats.php, ligne 125, si taille fichier = 0, warning php
 - remplacer mysql_get_client_info() dans tools.php, ligne 239
 
 Passer de SQLite 2.x à SQLite 3.x :
