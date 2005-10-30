@@ -30,42 +30,40 @@
  * 
  * Construction de la liste déroulante des langues disponibles pour le script
  * 
- * @param string $default_lang    Langue actuellement utilisée
+ * @param string $default_lang  Langue actuellement utilisée
  * 
  * @return string
  */
 function lang_box($default_lang = '')
 {
 	$lang_ary = array();
+	$browse   = dir(WA_PATH . 'language/');
 	
-	$res = @opendir(WA_PATH . 'language/');
-	while( $filename = @readdir($res) ) 
+	while( ($entry = $browse->read()) !== false )
 	{
-		if( preg_match('/^lang_([\w_-]+)\.php$/', $filename, $match) )
+		if( preg_match('/^lang_([\w_-]+)\.php$/', $entry, $match) )
 		{
-			$lang_ary[] = $match[1];
+			array_push($lang_ary, $match[1]);
 		}
 	}
-	@closedir($res);
+	$browse->close();
 	
 	if( count($lang_ary) > 1 )
 	{
-		$lang_box = '<select id="language" name="language">';
-		
 		asort($lang_ary);
+		
+		$lang_box = '<select id="language" name="language">';
 		foreach( $lang_ary AS $lang_name )
 		{
-			$selected = ( $default_lang == $lang_name ) ? ' selected="selected"' : '';
-			$lang_box .= '<option value="' . $lang_name . '"' . $selected . '> - ' . $lang_name . ' - </option>';
+			$selected  = ( $default_lang == $lang_name ) ? ' selected="selected"' : '';
+			$lang_box .= sprintf('<option value="%1$s"%2$s>%1$s</option>', $lang_name, $selected);
 		}
-		
 		$lang_box .= '</select>';
 	}
 	else
 	{
-		list($lang_name) = $lang_ary;
-		
-		$lang_box = '<span class="m-texte">' . $lang_name . '<input type="hidden" id="language" name="language" value="' . $lang_name . '" />';
+		$lang_box = '<span class="m-texte">' . $lang_ary[0]
+			. '<input type="hidden" id="language" name="language" value="' . $lang_ary[0] . '" />';
 	}
 	
 	return $lang_box;
@@ -96,12 +94,12 @@ function format_box($select_name, $default_format = 0, $option_submit = false, $
 		$format_box .= '>';
 	}
 	
-	$format_box .= '<option value="1"' . (( $default_format == FORMAT_TEXTE ) ? 'selected="selected"' : '' ) . '> - texte - </option>';
-	$format_box .= '<option value="2"' . (( $default_format == FORMAT_HTML ) ? 'selected="selected"' : '' ) . '> - html - </option>';
+	$format_box .= '<option value="1"' . (( $default_format == FORMAT_TEXTE ) ? 'selected="selected"' : '' ) . '>texte</option>';
+	$format_box .= '<option value="2"' . (( $default_format == FORMAT_HTML ) ? 'selected="selected"' : '' ) . '>html</option>';
 	
 	if( $multi_format )
 	{
-		$format_box .= '<option value="3"' . (( $default_format == FORMAT_MULTIPLE ) ? 'selected="selected"' : '' ) . '> - texte &amp; html - </option>';
+		$format_box .= '<option value="3"' . (( $default_format == FORMAT_MULTIPLE ) ? 'selected="selected"' : '' ) . '>texte &amp; html</option>';
 	}
 	
 	$format_box .= '</select>';
