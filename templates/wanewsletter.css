@@ -36,7 +36,7 @@ hr    { display: none; }
 #header {
 	height: 70px;
 	background-color: #003B78;
-	background-image: url("images/background_header.gif");
+	background-image: url("images/header.png");
 	background-repeat: repeat-y;
 	margin: 0;
 	padding: 5px;
@@ -69,7 +69,7 @@ body>#header { height: 60px; }
 #menu {
 	height: 16px;
 	background-color: #FAFAFA;
-	background-image: url("images/bande.gif");
+	background-image: url("images/bande.png");
 	background-repeat: repeat-x;
 	margin: 0;
 	border-width: 1px 0;
@@ -200,7 +200,7 @@ div.left p, div.right p {
 
 .bloc h2, .smallbloc h2 {
 	background-color: #003B78;
-	background-image: url("images/head.gif");
+	background-image: url("images/head.png");
 	background-repeat: repeat-x;
 	margin: 0;
 	padding-top: 5px;
@@ -233,7 +233,7 @@ div.left p, div.right p {
 }
 
 .bottom {
-	background: #BBB url("images/bottom.gif") repeat-x bottom;
+	background: #BBB url("images/bottom.png") repeat-x bottom;
 	margin: 0;
 	padding-top: 3px;
 	height: 27px;
