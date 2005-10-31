@@ -29,755 +29,6 @@ define('IN_NEWSLETTER', true);
 
 require './pagestart.php';
 
-/**
- * Classe zip importée de phpMyAdmin 2.6.4
- * 
- * Zip file creation class.
- * Makes zip files.
- * 
- * Based on :
- * 
- *	http://www.zend.com/codex.php?id=535&single=1
- *	By Eric Mueller <eric@themepark.com>
- * 
- *	http://www.zend.com/codex.php?id=470&single=1
- *	by Denis125 <webmaster@atlant.ru>
- * 
- *	a patch from Peter Listiak <mlady@users.sourceforge.net> for last modified
- *	date and time of the compressed file
- * 
- * Official ZIP file format: http://www.pkware.com/appnote.txt
- * 
- * @access	public
- */
-class zipfile {
-
-	/**
-	 * Array to store compressed data
-	 * 
-	 * @var	 array	  $datasec
-	 */
-	var $datasec      = array();
-	
-	/**
-	 * Central directory
-	 * 
-	 * @var	 array	  $ctrl_dir
-	 */
-	var $ctrl_dir     = array();
-	
-	/**
-	 * End of central directory record
-	 * 
-	 * @var	 string	  $eof_ctrl_dir
-	 */
-	var $eof_ctrl_dir = "\x50\x4b\x05\x06\x00\x00\x00\x00";
-	
-	/**
-	 * Last offset position
-	 * 
-	 * @var	 integer  $old_offset
-	 */
-	var $old_offset   = 0;
-	
-	/**
-	 * Converts an Unix timestamp to a four byte DOS date and time format (date
-	 * in high two bytes, time in low two bytes allowing magnitude comparison).
-	 * 
-	 * @param  integer	the current Unix timestamp
-	 * 
-	 * @return integer	the current date in a four byte DOS format
-	 * 
-	 * @access private
-	 */
-	function unix2DosTime($unixtime = 0)
-	{
-		$timearray = ($unixtime == 0) ? getdate() : getdate($unixtime);
-		
-		if ($timearray['year'] < 1980)
-		{
-			$timearray['year']    = 1980;
-			$timearray['mon']     = 1;
-			$timearray['mday']    = 1;
-			$timearray['hours']   = 0;
-			$timearray['minutes'] = 0;
-			$timearray['seconds'] = 0;
-		} // end if
-		
-		return (($timearray['year'] - 1980) << 25) | ($timearray['mon'] << 21) | ($timearray['mday'] << 16) |
-				($timearray['hours'] << 11) | ($timearray['minutes'] << 5) | ($timearray['seconds'] >> 1);
-	} // end of the 'unix2DosTime()' method
-	
-	/**
-	 * Adds "file" to archive
-	 * 
-	 * @param  string	file contents
-	 * @param  string	name of the file in the archive (may contains the path)
-	 * @param  integer	the current timestamp
-	 * 
-	 * @access public
-	 */
-	function addFile($data, $name, $time = 0)
-	{
-		$name     = str_replace('\\', '/', $name);
-		
-		$dtime    = dechex($this->unix2DosTime($time));
-		$hexdtime = '\x' . $dtime[6] . $dtime[7]
-				  . '\x' . $dtime[4] . $dtime[5]
-				  . '\x' . $dtime[2] . $dtime[3]
-				  . '\x' . $dtime[0] . $dtime[1];
-		eval('$hexdtime = "' . $hexdtime . '";');
-		
-		$fr	   = "\x50\x4b\x03\x04";
-		$fr	  .= "\x14\x00";         // ver needed to extract
-		$fr	  .= "\x00\x00";         // gen purpose bit flag
-		$fr	  .= "\x08\x00";         // compression method
-		$fr	  .= $hexdtime;          // last mod time and date
-		
-		// "local file header" segment
-		$unc_len = strlen($data);
-		$crc	 = crc32($data);
-		$zdata	 = gzcompress($data);
-		$zdata	 = substr(substr($zdata, 0, strlen($zdata) - 4), 2); // fix crc bug
-		$c_len	 = strlen($zdata);
-		$fr	    .= pack('V', $crc);           // crc32
-		$fr	    .= pack('V', $c_len);         // compressed filesize
-		$fr	    .= pack('V', $unc_len);       // uncompressed filesize
-		$fr	    .= pack('v', strlen($name));  // length of filename
-		$fr	    .= pack('v', 0);              // extra field length
-		$fr	    .= $name;
-		
-		// "file data" segment
-		$fr .= $zdata;
-		
-		// "data descriptor" segment (optional but necessary if archive is not
-		// served as file)
-		// nijel(2004-10-19): this seems not to be needed at all and causes
-		// problems in some cases (bug #1037737)
-		//$fr .= pack('V', $crc);                  // crc32
-		//$fr .= pack('V', $c_len);                // compressed filesize
-		//$fr .= pack('V', $unc_len);              // uncompressed filesize
-		
-		// add this entry to array
-		$this->datasec[] = $fr;
-		
-		// now add to central directory record
-		$cdrec	= "\x50\x4b\x01\x02";
-		$cdrec .= "\x00\x00";                 // version made by
-		$cdrec .= "\x14\x00";                 // version needed to extract
-		$cdrec .= "\x00\x00";                 // gen purpose bit flag
-		$cdrec .= "\x08\x00";                 // compression method
-		$cdrec .= $hexdtime;                  // last mod time & date
-		$cdrec .= pack('V', $crc);            // crc32
-		$cdrec .= pack('V', $c_len);          // compressed filesize
-		$cdrec .= pack('V', $unc_len);        // uncompressed filesize
-		$cdrec .= pack('v', strlen($name));   // length of filename
-		$cdrec .= pack('v', 0);               // extra field length
-		$cdrec .= pack('v', 0);               // file comment length
-		$cdrec .= pack('v', 0);               // disk number start
-		$cdrec .= pack('v', 0);               // internal file attributes
-		$cdrec .= pack('V', 32);              // external file attributes - 'archive' bit set
-
-		$cdrec .= pack('V', $this->old_offset); // relative offset of local header
-		$this->old_offset += strlen($fr);
-
-		$cdrec .= $name;
-
-		// optional extra field, file comment goes here
-		// save to central directory
-		$this->ctrl_dir[] = $cdrec;
-	} // end of the 'addFile()' method
-	
-	/**
-	 * Dumps out file
-	 * 
-	 * @return	string	the zipped file
-	 * 
-	 * @access public
-	 */
-	function file()
-	{
-		$data    = implode('', $this->datasec);
-		$ctrldir = implode('', $this->ctrl_dir);
-
-		return
-			$data .
-			$ctrldir .
-			$this->eof_ctrl_dir .
-			pack('v', sizeof($this->ctrl_dir)) .  // total # of entries "on this disk"
-			pack('v', sizeof($this->ctrl_dir)) .  // total # of entries overall
-			pack('V', strlen($ctrldir)) .         // size of central dir
-			pack('V', strlen($data)) .            // offset to start of central dir
-			"\x00\x00";                           // .zip file comment length
-	} // end of the 'file()' method
-
-} // end of the 'zipfile' class
-
-
-//
-// MySQL 3.x/4.x
-//
-class mysql_backup {
-	
-	var $show_create = FALSE;
-	var $crlf        = '';
-	
-	/**
-	 * Protection des noms de table et de colonnes avec un quote inversé ( ` )
-	 * 
-	 * @access public
-	 */
-	var $protect_name = TRUE;
-	
-	function mysql_backup($crlf)
-	{
-		$this->crlf = $crlf;
-		
-		//
-		// La requète 'SHOW CREATE TABLE' est disponible à partir de MySQL 3.23.20
-		//
-		if( DATABASE == 'mysql4' || version_compare(mysql_get_client_info(), '3.23.20', '>=') == true )
-		{
-			$this->show_create = TRUE;
-		}
-		else
-		{
-			$this->show_create = FALSE;
-		}
-	}
-	
-	function file_header($dbhost, $dbname)
-	{
-		global $nl_config;
-		
-		$contents  = '# ' . $this->crlf;
-		$contents .= '# WAnewsletter ' . $nl_config['version'] . ' MySQL Dump ' . $this->crlf;
-		$contents .= '# ' . $this->crlf;
-		$contents .= "# Serveur  : $dbhost " . $this->crlf;
-		$contents .= "# Database : $dbname " . $this->crlf;
-		$contents .= '# Date     : ' . date('d/m/Y H:i:s') . ' ' . $this->crlf;
-		$contents .= '#' . $this->crlf . $this->crlf;
-		
-		return $contents;
-	}
-	
-	function get_tables($dbname)
-	{
-		global $db;
-		
-		$quote = ( $this->protect_name ) ? '`' : '';
-		
-		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $quote . $dbname . $quote)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
-		}
-		
-		$tables = array();
-		while( $row = $db->fetch_row($result) )
-		{
-			$tables[$row[0]] = $row[1];
-		}
-		
-		return $tables;
-	}
-	
-	function get_table_structure($tabledata, $drop_option)
-	{
-		global $db;
-		
-		$quote = ( $this->protect_name ) ? '`' : '';
-		
-		$contents  = '# ' . $this->crlf;
-		$contents .= '# Struture de la table ' . $tabledata['name'] . ' ' . $this->crlf;
-		$contents .= '# ' . $this->crlf;
-		
-		if( $drop_option )
-		{
-			$contents .= 'DROP TABLE IF EXISTS ' . $quote . $tabledata['name'] . $quote . ';' . $this->crlf;
-		}
-		
-		if( $this->show_create )
-		{
-			if( !($result = $db->query('SHOW CREATE TABLE `' . $tabledata['name'] . '`')) )
-			{
-				trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
-			}
-			
-			$create_table = $db->result($result, 0, 'Create Table');
-			$create_table = preg_replace("/(\r\n?)|\n/", $this->crlf, $create_table);
-			
-			if( !$this->protect_name )
-			{
-				$create_table = str_replace('`', '', $create_table);
-			}
-			
-			$contents .= $create_table;
-			
-			$db->free_result($result);
-		}
-		else
-		{
-			$contents .= 'CREATE TABLE ' . $quote . $tabledata['name'] . $quote . ' (' . $this->crlf;
-			
-			if( !($result = $db->query('SHOW FIELDS FROM ' . $quote . $tabledata['name'] . $quote)) )
-			{
-				trigger_error('Impossible d\'obtenir les noms des colonnes de la table', ERROR);
-			}
-			
-			$end_line = false;
-			while( $row = $db->fetch_array($result) )
-			{
-				if( $end_line )
-				{
-					$contents .= ',' . $this->crlf;
-				}
-				
-				$contents .= "\t" . $quote . $row['Field'] . $quote . ' ' . $row['Type'];
-				$contents .= ( !empty($row['Default']) ) ? ' DEFAULT \'' . $row['Default'] . '\'' : '';
-				$contents .= ( $row['Null'] != 'YES' ) ? ' NOT NULL' : '';
-				$contents .= ( $row['Extra'] != '' ) ? ' ' . $row['Extra'] : '';
-				
-				$end_line = true;
-			}
-			$db->free_result($result);
-			
-			if( !($result = $db->query('SHOW KEYS FROM ' . $quote . $tabledata['name'] . $quote)) )
-			{
-				trigger_error('Impossible d\'obtenir les clés de la table', ERROR);
-			}
-			
-			$index = array();
-			while( $row = $db->fetch_array($result) )
-			{
-				$name = $row['Key_name'];
-				
-				if( $name != 'PRIMARY' && $row['Non_unique'] == 0 )
-				{
-					$name = 'unique=' . $name;
-				}
-				
-				if( !isset($index[$name]) )
-				{
-					$index[$name] = array();
-				}
-				
-				$index[$name][] = $quote . $row['Column_name'] . $quote;
-			}
-			$db->free_result($result);
-			
-			foreach( $index AS $var => $columns )
-			{
-				$contents .= ',' . $this->crlf . "\t";
-				
-				if( $var == 'PRIMARY' )
-				{
-					$contents .= 'PRIMARY KEY';
-				}
-				else if( ereg('^unique=(.+)$', $var, $regs) )
-				{
-					$contents .= 'UNIQUE ' . $quote . $regs[1] . $quote;
-				}
-				else
-				{
-					$contents .= 'KEY ' . $quote . $var . $quote;
-				}
-				
-				$contents .= ' (' . $quote . implode($quote . ', ' . $quote, $columns) . $quote . ')';
-			}
-			
-			$contents .= $this->crlf . ')' . ( ( !empty($tabledata['type']) ) ? ' TYPE=' . $tabledata['type'] : '' );
-		}
-		
-		return $contents . ';' . $this->crlf;
-	}
-	
-	function get_table_data($tablename)
-	{
-		global $db;
-		
-		$quote = ( $this->protect_name ) ? '`' : '';
-		
-		$contents = '';
-		
-		$sql = 'SELECT * FROM ' . $quote . $tablename . $quote;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
-		}
-		
-		if( $row = $db->fetch_row($result) )
-		{
-			$contents  = $this->crlf;
-			$contents .= '# ' . $this->crlf;
-			$contents .= '# Contenu de la table ' . $tablename . ' ' . $this->crlf;
-			$contents .= '# ' . $this->crlf;
-			
-			$fields = array();
-			$num_fields = $db->num_fields($result);
-			for( $j = 0; $j < $num_fields; $j++ )
-			{
-				$fields[] = $db->field_name($j, $result);
-			}
-			
-			$columns_list = implode($quote . ', ' . $quote, $fields);
-			
-			do
-			{
-				$contents .= 'INSERT INTO ' . $quote . $tablename . $quote . ' (' . $quote . $columns_list . $quote . ') VALUES';
-				
-				foreach( $row AS $key => $value )
-				{
-					if( !isset($value) )
-					{
-						$row[$key] = 'NULL';
-					}
-					else if( !is_numeric($value) )
-					{
-						$row[$key] = '\'' . $db->escape($value) . '\'';
-					}
-				}
-				
-				$contents .= '(' . implode(', ', $row) . ');' . $this->crlf;
-			}
-			while( $row = $db->fetch_row($result) );
-		}
-		$db->free_result($result);
-		
-		return $contents;
-	}
-}
-
-//
-// PostgreSQL
-// - Basé sur phpPgAdmin 2.4.2
-//
-class postgre_backup {
-	
-	var $crlf = '';
-	
-	function postgre_backup($crlf)
-	{
-		$this->crlf = $crlf;
-	}
-	
-	function file_header($dbhost, $dbname)
-	{
-		global $nl_config;
-		
-		$contents  = '/* ------------------------------------------------------------ ' . $this->crlf;
-		$contents .= '  WAnewsletter ' . $nl_config['version'] . ' PostgreSQL Dump ' . $this->crlf;
-		$contents .= $this->crlf;
-		$contents .= "  Serveur	 : $dbhost " . $this->crlf;
-		$contents .= "  Database : $dbname " . $this->crlf;
-		$contents .= '  Date	 : ' . date('d/m/Y H:i:s') . ' ' . $this->crlf;
-		$contents .= ' ------------------------------------------------------------ */' . $this->crlf . $this->crlf;
-		
-		return $contents;
-	}
-	
-	function get_tables($dbname)
-	{
-		global $db;
-		
-		$sql = "SELECT tablename 
-			FROM pg_tables 
-			WHERE tablename NOT LIKE 'pg%' 
-			ORDER BY tablename";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
-		}
-		
-		$tables = array();
-		while( $row = $db->fetch_row($result) )
-		{
-			$tables[$row[0]] = '';
-		}
-		$db->free_result($result);
-		
-		return $tables;
-	}
-	
-	function get_sequences($drop_option)
-	{
-		global $db, $backup_type;
-		
-		$sql = "SELECT relname 
-			FROM pg_class 
-			WHERE NOT relname ~ 'pg_.*' AND relkind ='S' 
-			ORDER BY relname";
-		if( !($result_seq = $db->query($sql)) )
-		{
-			trigger_error('Impossible de récupérer les séquences', ERROR);
-		}
-		
-		$num_seq = $db->num_rows($result_seq);
-		
-		$contents = '';
-		
-		for( $i = 0; $i < $num_seq; $i++ )
-		{
-			$sequence = $db->result($result_seq, $i, 'relname');
-			$result   = $db->query('SELECT * FROM ' . $sequence);
-			
-			if( $row = $db->fetch_array($result) )
-			{
-				if( $drop_option )
-				{
-					$contents .= "DROP SEQUENCE $sequence;" . $this->crlf;
-				}
-				
-				$contents .= 'CREATE SEQUENCE ' . $sequence . ' start ' . $row['last_value'] . ' increment ' . $row['increment_by'] . ' maxvalue ' . $row['max_value'] . ' minvalue ' . $row['min_value'] . ' cache ' . $row['cache_value'] . '; ' . $this->crlf;
-				
-				if( $row['last_value'] > 1 && $backup_type != 1 )
-				{
-					$contents .= 'SELECT NEXTVALE(\'' . $sequence . '\'); ' . $this->crlf;
-				}
-			}
-		}
-		
-		return $contents;
-	}
-	
-	function get_table_structure($tabledata, $drop_option)
-	{
-		global $db;
-	
-		$contents  = '/* ------------------------------------------------------------ ' . $this->crlf;
-		$contents .= '  Sequences ' . $this->crlf;
-		$contents .= ' ------------------------------------------------------------ */' . $this->crlf;
-		$contents .= $this->get_sequences($drop_option);
-		
-		$contents .= $this->crlf;
-		$contents .= '/* ------------------------------------------------------------ ' . $this->crlf;
-		$contents .= '  Struture de la table ' . $tabledata['name'] . ' ' . $this->crlf;
-		$contents .= ' ------------------------------------------------------------ */' . $this->crlf;
-		
-		if( $drop_option )
-		{
-			$contents .= 'DROP TABLE IF EXISTS ' . $tabledata['name'] . ';' . $this->crlf;
-		}
-		
-		$sql = "SELECT a.attnum, a.attname AS field, t.typname as type, a.attlen AS length, 
-				a.atttypmod as lengthvar, a.attnotnull as notnull 
-			FROM pg_class c, pg_attribute a, pg_type t 
-			WHERE c.relname = '" . $tabledata['name'] . "' 
-				AND a.attnum > 0 
-				AND a.attrelid = c.oid 
-				AND a.atttypid = t.oid 
-			ORDER BY a.attnum";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tabledata['name'], ERROR);
-		}
-		
-		$contents .= 'CREATE TABLE ' . $tabledata['name'] . ' (' . $this->crlf;
-		
-		while( $row = $db->fetch_array($result) )
-		{
-			$sql = "SELECT d.adsrc AS rowdefault 
-				FROM pg_attrdef d, pg_class c 
-				WHERE (c.relname = '" . $tabledata['name'] . "') 
-					AND (c.oid = d.adrelid) 
-					AND d.adnum = " . $row['attnum'];
-			if( $res = $db->query($sql) )
-			{
-				$row['rowdefault'] = $db->result($res, 0, 'rowdefault');
-			}
-			else
-			{
-				unset($row['rowdefault']);
-			}
-			
-			if( $row['type'] == 'bpchar' )
-			{
-				// Internally stored as bpchar, but isn't accepted in a CREATE TABLE statement.
-				$row['type'] = 'char';
-			}
-			
-			$contents .= ' ' . $row['field'] . ' ' . $row['type'];
-			
-			if( eregi('char', $row['type']) && $row['lengthvar'] > 0 )
-			{
-				$contents .= '(' . ($row['lengthvar'] - 4) . ')';
-			}
-			else if( eregi('numeric', $row['type']) )
-			{
-				$contents .= sprintf('(%s,%s)', (($row['lengthvar'] >> 16) & 0xffff), (($row['lengthvar'] - 4) & 0xffff));
-			}
-			
-			if (!empty($row['rowdefault']))
-			{
-				$contents .= ' DEFAULT \'' . $row['rowdefault'] . '\'';
-			}
-			
-			if ($row['notnull'] == 't')
-			{
-				$contents .= ' NOT NULL';
-			}
-			
-			$contents .= ',' . $this->crlf;
-		}
-		
-		//
-		// Generate constraint clauses for UNIQUE and PRIMARY KEY constraints
-		//
-		$sql = "SELECT ic.relname AS index_name, bc.relname AS tab_name, ta.attname AS column_name, 
-				i.indisunique AS unique_key, i.indisprimary AS primary_key 
-			FROM pg_class bc, pg_class ic, pg_index i, pg_attribute ta, pg_attribute ia 
-			WHERE (bc.oid = i.indrelid) 
-				AND (ic.oid = i.indexrelid) 
-				AND (ia.attrelid = i.indexrelid) 
-				AND (ta.attrelid = bc.oid)
-				AND (bc.relname = '" . $tabledata['name'] . "') 
-				AND (ta.attrelid = i.indrelid) 
-				AND (ta.attnum = i.indkey[ia.attnum-1]) 
-			ORDER BY index_name, tab_name, column_name";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de récupérer les clés primaires et unique de la table ' . $tabledata['name'], ERROR);
-		}
-		
-		$primary_key = '';
-		$index_rows	 = array();
-		
-		while( $row = $db->fetch_array($result) )
-		{
-			if( $row['primary_key'] == 't' )
-			{
-				$primary_key .= ( ( $primary_key != '' ) ? ', ' : '' ) . $row['column_name'];
-				$primary_key_name = $row['index_name'];
-			}
-			else
-			{
-				//
-				// We have to store this all this info because it is possible to have a multi-column key...
-				// we can loop through it again and build the statement
-				//
-				$index_rows[$row['index_name']]['table']  = $tabledata['name'];
-				$index_rows[$row['index_name']]['unique'] = ($row['unique_key'] == 't') ? ' UNIQUE ' : '';
-				
-				if( empty($index_rows[$row['index_name']]['column_names']) )
-				{
-					$index_rows[$row['index_name']]['column_names'] = $row['column_name'] . ', ';
-				}
-				else
-				{
-					$index_rows[$row['index_name']]['column_names'] .= $row['column_name'] . ', ';
-				}
-			}
-		}
-		
-		$index_create = '';
-		if( count($index_rows) )
-		{
-			foreach( $index_rows AS $idx_name => $props )
-			{
-				$props['column_names'] = ereg_replace(', $', '', $props['column_names']);
-				$index_create .= 'CREATE ' . $props['unique'] . " INDEX $idx_name ON " . $tabledata['name'] . " (" . $props['column_names'] . ');' . $this->crlf;
-			}
-		}
-		
-		if( !empty($primary_key) )
-		{
-			$contents .= "CONSTRAINT $primary_key_name PRIMARY KEY ($primary_key)," . $this->crlf;
-		}
-		
-		//
-		// Generate constraint clauses for CHECK constraints
-		//
-		$sql = "SELECT rcname as index_name, rcsrc 
-			FROM pg_relcheck, pg_class bc 
-			WHERE rcrelid = bc.oid 
-				AND bc.relname = '" . $tabledata['name'] . "' 
-				AND NOT EXISTS (
-					SELECT * 
-					FROM pg_relcheck as c, pg_inherits as i 
-					WHERE i.inhrelid = pg_relcheck.rcrelid 
-						AND c.rcname = pg_relcheck.rcname 
-						AND c.rcsrc = pg_relcheck.rcsrc 
-						AND c.rcrelid = i.inhparent
-				)";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de récupérer les clauses de contraintes de la table ' . $tabledata['name'], ERROR);
-		}
-		
-		//
-		// Add the constraints to the sql file.
-		//
-		while( $row = $db->fetch_array($result) )
-		{
-			$contents .= 'CONSTRAINT ' . $row['index_name'] . ' CHECK ' . $row['rcsrc'] . ',' . $this->crlf;
-		}
-		
-		$contents = ereg_replace(',' . $this->crlf . '$', '', $contents);
-		$index_create = ereg_replace(',' . $this->crlf . '$', '', $index_create);
-		
-		$contents .= $this->crlf . ');' . $this->crlf;
-		
-		if( !empty($index_create) )
-		{
-			$contents .= $this->crlf . $index_create;
-		}
-		
-		return $contents;
-	}
-	
-	function get_table_data($tablename)
-	{
-		global $db;
-		
-		$contents = '';
-		
-		$sql = 'SELECT * FROM ' . $tablename;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
-		}
-		
-		if( $row = $db->fetch_row($result) )
-		{
-			$contents  = $this->crlf;
-			$contents .= '/* ------------------------------------------------------------ ' . $this->crlf;
-			$contents .= '  Contenu de la table ' . $tablename . ' ' . $this->crlf;
-			$contents .= ' ------------------------------------------------------------ */' . $this->crlf;
-			
-			$fields = array();
-			$num_fields = $db->num_fields($result);
-			for( $j = 0; $j < $num_fields; $j++ )
-			{
-				$fields[] = $db->field_name($j, $result);
-			}
-			
-			$columns_list = implode(', ', $fields);
-			
-			do
-			{
-				$contents .= "INSERT INTO $tablename ($columns_list) VALUES";
-				
-				foreach( $row AS $key => $value )
-				{
-					if( !isset($value) )
-					{
-						$row[$key] = 'NULL';
-					}
-					else if( !is_numeric($value) )
-					{
-						$row[$key] = '\'' . $db->escape($value) . '\'';
-					}
-				}
-				
-				$contents .= '(' . implode(', ', $row) . ');' . $this->crlf;
-			}
-			while( $row = $db->fetch_row($result) );
-		}
-		$db->free_result($result);
-		
-		return $contents;
-	}
-}
-
 //
 // Compression éventuelle des données et réglage du mime-type en conséquence
 //
@@ -914,9 +165,7 @@ switch( $mode )
 		// Les modules de sauvegarde et restauration 
 		// supportent actuellement MySQL 3.x ou 4.x, et PostgreSQL
 		//
-		$classname = ( ( DATABASE == 'mysql4' ) ? 'mysql' : DATABASE ) . '_backup';
-		
-		if( !class_exists($classname) )
+		if( !class_exists('sql_backup') )
 		{
 			trigger_error('Database_unsupported', MESSAGE);
 		}
@@ -1009,18 +258,25 @@ $zziplib_loaded = is_available_extension('zip');
 $zlib_loaded    = is_available_extension('zlib');
 $bzip2_loaded   = is_available_extension('bz2');
 
+if( $zlib_loaded )
+{
+	require WA_PATH . 'includes/zip/zip.lib.php';
+}
+
 if( WA_USER_OS == 'win' )
 {
-	$crlf = "\r\n";
+	$eol = "\r\n";
 }
 else if( WA_USER_OS == 'mac' )
 {
-	$crlf = "\r";
+	$eol = "\r";
 }
 else
 {
-	$crlf = "\n";
+	$eol = "\n";
 }
+
+define('WA_EOL', $eol);
 
 //
 // On augmente le temps d'exécution du script 
@@ -1042,7 +298,7 @@ switch( $mode )
 				trigger_error('tmp_dir_not_writable', MESSAGE);
 			}
 			
-			$glue = ( $glue != '' ) ? $glue : $crlf;
+			$glue = ( $glue != '' ) ? $glue : WA_EOL;
 			
 			$sql = "SELECT a.abo_email 
 				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
@@ -1303,7 +559,7 @@ switch( $mode )
 				}
 				else
 				{
-					$tmp_report .= sprintf('%s : %s%s', $email, $resultat['message'], $crlf);
+					$tmp_report .= sprintf('%s : %s%s', $email, $resultat['message'], WA_EOL);
 				}
 				
 				fake_header(true);
@@ -1324,8 +580,12 @@ switch( $mode )
 			{
 				if( is_writable(wa_tmp_path) && ($fw = @fopen(wa_tmp_path . '/wa_import_report.txt', 'w')) )
 				{
-					$report_str  = "#$crlf# Rapport des adresses emails refusées / Bad address email report$crlf";
-					$report_str .= "#$crlf $crlf" . $tmp_report . $crlf . "# END";
+					$report_str  = '#' . WA_EOL;
+					$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
+					$report_str .= '#' . WA_EOL;
+					$report_str .= WA_EOL;
+					$report_str .= $tmp_report . WA_EOL;
+					$report_str .= '# END' . WA_EOL;
 					
 					fwrite($fw, $report_str);
 					fclose($fw);
@@ -1623,8 +883,9 @@ switch( $mode )
 		$backup_type = ( isset($_POST['backup_type']) ) ? intval($_POST['backup_type']) : 0;
 		$drop_option = ( !empty($_POST['drop_option']) ) ? true : false;
 		
-		$backup = new $classname($crlf);
-		$tables_ary = $backup->get_tables($dbname);
+		$backup = new sql_backup();
+		$backup->eol = WA_EOL;
+		$tables_ary  = $backup->get_tables($dbname);
 		
 		foreach( $tables_ary AS $tablename => $tabletype )
 		{
@@ -1654,7 +915,7 @@ switch( $mode )
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql 
 			//
-			$contents = $backup->file_header($dbhost, $dbname);
+			$contents = $backup->header($dbhost, $dbname, 'WAnewsletter ' . $nl_config['version']);
 			
 			fake_header(false);
 			
@@ -1670,7 +931,7 @@ switch( $mode )
 					$contents .= $backup->get_table_data($tabledata['name']);
 				}
 				
-				$contents .= $crlf . $crlf;
+				$contents .= WA_EOL . WA_EOL;
 				
 				fake_header(true);
 			}

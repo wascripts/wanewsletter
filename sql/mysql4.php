@@ -344,4 +344,145 @@ class sql {
 	}
 }// fin de la classe
 
+class sql_backup {
+	/**
+	 * Fin de ligne
+	 * 
+	 * @var boolean
+	 * @access public
+	 */
+	var $eol = "\n";
+	
+	/**
+	 * Protection des noms de table et de colonnes avec un quote inversé ( ` )
+	 * 
+	 * @var boolean
+	 * @access public
+	 */
+	var $protect_name = TRUE;
+	
+	function header($dbhost, $dbname, $toolname = '')
+	{
+		$contents  = '-- ' . $this->eol;
+		$contents .= "-- $toolname MySQL Dump" . $this->eol;
+		$contents .= '-- ' . $this->eol;
+		$contents .= "-- Serveur  : $dbhost" . $this->eol;
+		$contents .= "-- Database : $dbname" . $this->eol;
+		$contents .= '-- Date     : ' . date('d/m/Y H:i:s') . $this->eol;
+		$contents .= '-- ' . $this->eol;
+		$contents .= $this->eol;
+		
+		return $contents;
+	}
+	
+	function get_tables($dbname)
+	{
+		global $db;
+		
+		$quote = ( $this->protect_name ) ? '`' : '';
+		
+		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $quote . $dbname . $quote)) )
+		{
+			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
+		}
+		
+		$tables = array();
+		while( $row = $db->fetch_row($result) )
+		{
+			$tables[$row[0]] = $row[1];
+		}
+		
+		return $tables;
+	}
+	
+	function get_table_structure($tabledata, $drop_option)
+	{
+		global $db;
+		
+		$quote = ( $this->protect_name ) ? '`' : '';
+		
+		$contents  = '-- ' . $this->eol;
+		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= '-- ' . $this->eol;
+		
+		if( $drop_option )
+		{
+			$contents .= 'DROP TABLE IF EXISTS ' . $quote . $tabledata['name'] . $quote . ';' . $this->eol;
+		}
+		
+		if( !($result = $db->query('SHOW CREATE TABLE `' . $tabledata['name'] . '`')) )
+		{
+			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
+		}
+		
+		$create_table = $db->result($result, 0, 'Create Table');
+		$create_table = preg_replace("/(\r\n?)|\n/", $this->eol, $create_table);
+		$db->free_result($result);
+		
+		if( !$this->protect_name )
+		{
+			$create_table = str_replace('`', '', $create_table);
+		}
+		
+		$contents .= $create_table . ';' . $this->eol;
+		
+		return $contents;
+	}
+	
+	function get_table_data($tablename)
+	{
+		global $db;
+		
+		$quote = ( $this->protect_name ) ? '`' : '';
+		
+		$contents = '';
+		
+		$sql = 'SELECT * FROM ' . $quote . $tablename . $quote;
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
+		}
+		
+		if( $row = $db->fetch_row($result) )
+		{
+			$contents  = $this->eol;
+			$contents .= '-- ' . $this->eol;
+			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
+			$contents .= '-- ' . $this->eol;
+			
+			$fields = array();
+			$num_fields = $db->num_fields($result);
+			for( $j = 0; $j < $num_fields; $j++ )
+			{
+				$fields[] = $db->field_name($j, $result);
+			}
+			
+			$columns_list = implode($quote . ', ' . $quote, $fields);
+			
+			do
+			{
+				$contents .= 'INSERT INTO ' . $quote . $tablename . $quote . ' (' . $quote . $columns_list . $quote . ') VALUES';
+				
+				foreach( $row AS $key => $value )
+				{
+					if( !isset($value) )
+					{
+						$row[$key] = 'NULL';
+					}
+					else if( !is_numeric($value) )
+					{
+						$row[$key] = '\'' . $db->escape($value) . '\'';
+					}
+				}
+				
+				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
+			}
+			while( $row = $db->fetch_row($result) );
+		}
+		$db->free_result($result);
+		
+		return $contents;
+	}
+}
+
 ?>

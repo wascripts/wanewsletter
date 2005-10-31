@@ -391,4 +391,334 @@ class sql {
 	}
 }
 
+//
+// PostgreSQL
+// - Basé sur phpPgAdmin 2.4.2
+//
+class sql_backup {
+	/**
+	 * Fin de ligne
+	 * 
+	 * @var boolean
+	 * @access public
+	 */
+	var $eol = "\n";
+	
+	function header($dbhost, $dbname, $toolname = '')
+	{
+		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
+		$contents .= "  $toolname PostgreSQL Dump" . $this->eol;
+		$contents .= $this->eol;
+		$contents .= "  Serveur  : $dbhost" . $this->eol;
+		$contents .= "  Database : $dbname" . $this->eol;
+		$contents .= '  Date     : ' . date('d/m/Y H:i:s') . $this->eol;
+		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+		$contents .= $this->eol;
+		
+		return $contents;
+	}
+	
+	function get_tables($dbname)
+	{
+		global $db;
+		
+		$sql = "SELECT tablename 
+			FROM pg_tables 
+			WHERE tablename NOT LIKE 'pg%' 
+			ORDER BY tablename";
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
+		}
+		
+		$tables = array();
+		while( $row = $db->fetch_row($result) )
+		{
+			$tables[$row[0]] = '';
+		}
+		$db->free_result($result);
+		
+		return $tables;
+	}
+	
+	function get_sequences($drop_option)
+	{
+		global $db, $backup_type;
+		
+		$sql = "SELECT relname 
+			FROM pg_class 
+			WHERE NOT relname ~ 'pg_.*' AND relkind ='S' 
+			ORDER BY relname";
+		if( !($result_seq = $db->query($sql)) )
+		{
+			trigger_error('Impossible de récupérer les séquences', ERROR);
+		}
+		
+		$num_seq = $db->num_rows($result_seq);
+		
+		$contents = '';
+		
+		for( $i = 0; $i < $num_seq; $i++ )
+		{
+			$sequence = $db->result($result_seq, $i, 'relname');
+			$result   = $db->query('SELECT * FROM ' . $sequence);
+			
+			if( $row = $db->fetch_array($result) )
+			{
+				if( $drop_option )
+				{
+					$contents .= "DROP SEQUENCE $sequence;" . $this->eol;
+				}
+				
+				$contents .= 'CREATE SEQUENCE ' . $sequence . ' start ' . $row['last_value'] . ' increment ' . $row['increment_by'] . ' maxvalue ' . $row['max_value'] . ' minvalue ' . $row['min_value'] . ' cache ' . $row['cache_value'] . '; ' . $this->eol;
+				
+				if( $row['last_value'] > 1 && $backup_type != 1 )
+				{
+					$contents .= 'SELECT NEXTVALE(\'' . $sequence . '\'); ' . $this->eol;
+				}
+			}
+		}
+		
+		return $contents;
+	}
+	
+	function get_table_structure($tabledata, $drop_option)
+	{
+		global $db;
+	
+		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
+		$contents .= '  Sequences ' . $this->eol;
+		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+		$contents .= $this->get_sequences($drop_option);
+		
+		$contents .= $this->eol;
+		$contents .= '/* ------------------------------------------------------------ ' . $this->eol;
+		$contents .= '  Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+		
+		if( $drop_option )
+		{
+			$contents .= 'DROP TABLE IF EXISTS ' . $tabledata['name'] . ';' . $this->eol;
+		}
+		
+		$sql = "SELECT a.attnum, a.attname AS field, t.typname as type, a.attlen AS length, 
+				a.atttypmod as lengthvar, a.attnotnull as notnull 
+			FROM pg_class c, pg_attribute a, pg_type t 
+			WHERE c.relname = '" . $tabledata['name'] . "' 
+				AND a.attnum > 0 
+				AND a.attrelid = c.oid 
+				AND a.atttypid = t.oid 
+			ORDER BY a.attnum";
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tabledata['name'], ERROR);
+		}
+		
+		$contents .= 'CREATE TABLE ' . $tabledata['name'] . ' (' . $this->eol;
+		
+		while( $row = $db->fetch_array($result) )
+		{
+			$sql = "SELECT d.adsrc AS rowdefault 
+				FROM pg_attrdef d, pg_class c 
+				WHERE (c.relname = '" . $tabledata['name'] . "') 
+					AND (c.oid = d.adrelid) 
+					AND d.adnum = " . $row['attnum'];
+			if( $res = $db->query($sql) )
+			{
+				$row['rowdefault'] = $db->result($res, 0, 'rowdefault');
+			}
+			else
+			{
+				unset($row['rowdefault']);
+			}
+			
+			if( $row['type'] == 'bpchar' )
+			{
+				// Internally stored as bpchar, but isn't accepted in a CREATE TABLE statement.
+				$row['type'] = 'char';
+			}
+			
+			$contents .= ' ' . $row['field'] . ' ' . $row['type'];
+			
+			if( eregi('char', $row['type']) && $row['lengthvar'] > 0 )
+			{
+				$contents .= '(' . ($row['lengthvar'] - 4) . ')';
+			}
+			else if( eregi('numeric', $row['type']) )
+			{
+				$contents .= sprintf('(%s,%s)', (($row['lengthvar'] >> 16) & 0xffff), (($row['lengthvar'] - 4) & 0xffff));
+			}
+			
+			if (!empty($row['rowdefault']))
+			{
+				$contents .= ' DEFAULT \'' . $row['rowdefault'] . '\'';
+			}
+			
+			if ($row['notnull'] == 't')
+			{
+				$contents .= ' NOT NULL';
+			}
+			
+			$contents .= ',' . $this->eol;
+		}
+		
+		//
+		// Generate constraint clauses for UNIQUE and PRIMARY KEY constraints
+		//
+		$sql = "SELECT ic.relname AS index_name, bc.relname AS tab_name, ta.attname AS column_name, 
+				i.indisunique AS unique_key, i.indisprimary AS primary_key 
+			FROM pg_class bc, pg_class ic, pg_index i, pg_attribute ta, pg_attribute ia 
+			WHERE (bc.oid = i.indrelid) 
+				AND (ic.oid = i.indexrelid) 
+				AND (ia.attrelid = i.indexrelid) 
+				AND (ta.attrelid = bc.oid)
+				AND (bc.relname = '" . $tabledata['name'] . "') 
+				AND (ta.attrelid = i.indrelid) 
+				AND (ta.attnum = i.indkey[ia.attnum-1]) 
+			ORDER BY index_name, tab_name, column_name";
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible de récupérer les clés primaires et unique de la table ' . $tabledata['name'], ERROR);
+		}
+		
+		$primary_key = '';
+		$index_rows	 = array();
+		
+		while( $row = $db->fetch_array($result) )
+		{
+			if( $row['primary_key'] == 't' )
+			{
+				$primary_key .= ( ( $primary_key != '' ) ? ', ' : '' ) . $row['column_name'];
+				$primary_key_name = $row['index_name'];
+			}
+			else
+			{
+				//
+				// We have to store this all this info because it is possible to have a multi-column key...
+				// we can loop through it again and build the statement
+				//
+				$index_rows[$row['index_name']]['table']  = $tabledata['name'];
+				$index_rows[$row['index_name']]['unique'] = ($row['unique_key'] == 't') ? ' UNIQUE ' : '';
+				
+				if( empty($index_rows[$row['index_name']]['column_names']) )
+				{
+					$index_rows[$row['index_name']]['column_names'] = $row['column_name'] . ', ';
+				}
+				else
+				{
+					$index_rows[$row['index_name']]['column_names'] .= $row['column_name'] . ', ';
+				}
+			}
+		}
+		
+		$index_create = '';
+		if( count($index_rows) )
+		{
+			foreach( $index_rows AS $idx_name => $props )
+			{
+				$props['column_names'] = ereg_replace(', $', '', $props['column_names']);
+				$index_create .= 'CREATE ' . $props['unique'] . " INDEX $idx_name ON " . $tabledata['name'] . " (" . $props['column_names'] . ');' . $this->eol;
+			}
+		}
+		
+		if( !empty($primary_key) )
+		{
+			$contents .= "CONSTRAINT $primary_key_name PRIMARY KEY ($primary_key)," . $this->eol;
+		}
+		
+		//
+		// Generate constraint clauses for CHECK constraints
+		//
+		$sql = "SELECT rcname as index_name, rcsrc 
+			FROM pg_relcheck, pg_class bc 
+			WHERE rcrelid = bc.oid 
+				AND bc.relname = '" . $tabledata['name'] . "' 
+				AND NOT EXISTS (
+					SELECT * 
+					FROM pg_relcheck as c, pg_inherits as i 
+					WHERE i.inhrelid = pg_relcheck.rcrelid 
+						AND c.rcname = pg_relcheck.rcname 
+						AND c.rcsrc = pg_relcheck.rcsrc 
+						AND c.rcrelid = i.inhparent
+				)";
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible de récupérer les clauses de contraintes de la table ' . $tabledata['name'], ERROR);
+		}
+		
+		//
+		// Add the constraints to the sql file.
+		//
+		while( $row = $db->fetch_array($result) )
+		{
+			$contents .= 'CONSTRAINT ' . $row['index_name'] . ' CHECK ' . $row['rcsrc'] . ',' . $this->eol;
+		}
+		
+		$contents = ereg_replace(',' . $this->eol . '$', '', $contents);
+		$index_create = ereg_replace(',' . $this->eol . '$', '', $index_create);
+		
+		$contents .= $this->eol . ');' . $this->eol;
+		
+		if( !empty($index_create) )
+		{
+			$contents .= $this->eol . $index_create;
+		}
+		
+		return $contents;
+	}
+	
+	function get_table_data($tablename)
+	{
+		global $db;
+		
+		$contents = '';
+		
+		$sql = 'SELECT * FROM ' . $tablename;
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
+		}
+		
+		if( $row = $db->fetch_row($result) )
+		{
+			$contents  = $this->eol;
+			$contents .= '/* ------------------------------------------------------------ ' . $this->eol;
+			$contents .= '  Contenu de la table ' . $tablename . ' ' . $this->eol;
+			$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+			
+			$fields = array();
+			$num_fields = $db->num_fields($result);
+			for( $j = 0; $j < $num_fields; $j++ )
+			{
+				$fields[] = $db->field_name($j, $result);
+			}
+			
+			$columns_list = implode(', ', $fields);
+			
+			do
+			{
+				$contents .= "INSERT INTO $tablename ($columns_list) VALUES";
+				
+				foreach( $row AS $key => $value )
+				{
+					if( !isset($value) )
+					{
+						$row[$key] = 'NULL';
+					}
+					else if( !is_numeric($value) )
+					{
+						$row[$key] = '\'' . $db->escape($value) . '\'';
+					}
+				}
+				
+				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
+			}
+			while( $row = $db->fetch_row($result) );
+		}
+		$db->free_result($result);
+		
+		return $contents;
+	}
+}
+
 ?>
