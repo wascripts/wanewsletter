@@ -898,7 +898,7 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 			$in_comments = true;
 		}
 		
-		if( $between_quotes || ( !$in_comments && strlen($lines[$i]) > 0 && $lines[$i]{0} != '#' ) )
+		if( $between_quotes || ( !$in_comments && strlen($lines[$i]) > 0 && $lines[$i]{0} != '#' && substr($lines[$i], 0, 3) != '-- ' ) )
 		{
 			//
 			// Nombre de simple quotes non échappés
@@ -927,7 +927,7 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 			}
 		}
 		
-		if( !$between_quotes && $in_comments && preg_match("/\*\/$/", rtrim($lines[$i])) )
+		if( !$between_quotes && $in_comments && preg_match('/\*\/$/', rtrim($lines[$i])) )
 		{
 			$in_comments = false;
 		}
