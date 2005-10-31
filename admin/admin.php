@@ -61,7 +61,7 @@ if( $mode == 'adduser' )
 	
 	if( isset($_POST['submit']) )
 	{
-		require WA_PATH . 'includes/functions.validate.php';
+		require WA_ROOTDIR . '/includes/functions.validate.php';
 		
 		if( !validate_pseudo($new_login) )
 		{
@@ -110,13 +110,13 @@ if( $mode == 'adduser' )
 				trigger_error('Impossible d\'ajouter le nouvel administrateur', ERROR);
 			}
 			
-			require WA_PATH . 'includes/wamailer/class.mailer.php';
+			require WAMAILER_DIR . '/class.mailer.php';
 			
-			$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
+			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			
 			if( $nl_config['use_smtp'] )
 			{
-				$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
+				$mailer->smtp_path = WAMAILER_DIR . '/';
 				$mailer->use_smtp(
 					$nl_config['smtp_host'],
 					$nl_config['smtp_port'],
@@ -267,7 +267,7 @@ if( isset($_POST['submit']) )
 		${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
 	}
 	
-	require WA_PATH . 'includes/functions.validate.php';
+	require WA_ROOTDIR . '/includes/functions.validate.php';
 	
 	if( $dateformat == '' )
 	{
@@ -387,13 +387,13 @@ if( isset($_POST['submit']) )
 			
 			$pseudo = $db->result($result, 0, 0);
 			
-			require WA_PATH . 'includes/wamailer/class.mailer.php';
+			require WAMAILER_DIR . '/class.mailer.php';
 			
-			$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
+			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			
 			if( $nl_config['use_smtp'] )
 			{
-				$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
+				$mailer->smtp_path = WAMAILER_DIR . '/';
 				$mailer->use_smtp(
 					$nl_config['smtp_host'],
 					$nl_config['smtp_port'],
@@ -491,7 +491,7 @@ else
 	$current_admin = $admindata;
 }
 
-require WA_PATH . 'includes/functions.box.php';
+require WA_ROOTDIR . '/includes/functions.box.php';
 
 $output->addHiddenField('admin_id', $current_admin['admin_id']);
 $output->addHiddenField('sessid',   $session->session_id);

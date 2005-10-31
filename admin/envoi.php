@@ -86,7 +86,7 @@ switch( $mode )
 	// Téléchargement d'un fichier joint
 	//
 	case 'download':
-		include WA_PATH . 'includes/class.attach.php';
+		include WA_ROOTDIR . '/includes/class.attach.php';
 		
 		$file_id = ( !empty($_GET['fid']) ) ? intval($_GET['fid']) : 0;
 		$attach  = new Attach();
@@ -223,7 +223,7 @@ switch( $mode )
 				trigger_error('Impossible de supprimer le log', ERROR);
 			}
 			
-			include WA_PATH . 'includes/class.attach.php';
+			include WA_ROOTDIR . '/includes/class.attach.php';
 			
 			$attach = new Attach();
 			$attach->delete_joined_files(true, $logdata['log_id']);
@@ -503,7 +503,7 @@ switch( $mode )
 			$errno_code   = ( !empty($_FILES['join_file']['error']) ) ? intval($_FILES['join_file']['error']) : UPLOAD_ERR_OK;
 			$file_id      = ( !empty($_POST['fid']) ) ? intval($_POST['fid']) : 0;
 			
-			include WA_PATH . 'includes/class.attach.php';
+			include WA_ROOTDIR . '/includes/class.attach.php';
 			
 			$attach = new Attach();
 			
@@ -558,7 +558,7 @@ switch( $mode )
 			//
 			// Suppression du fichier joint spécifié
 			//
-			include WA_PATH . 'includes/class.attach.php';
+			include WA_ROOTDIR . '/includes/class.attach.php';
 			
 			$attach = new Attach();
 			$attach->delete_joined_files(false, $logdata['log_id'], $file_ids);
@@ -641,8 +641,8 @@ if( $mode == 'resend' )
 		trigger_error('Not_auth_send', MESSAGE);
 	}
 	
-	include WA_PATH . 'includes/wamailer/class.mailer.php';
-	include WA_PATH . 'includes/engine_send.php';
+	include WAMAILER_DIR . '/class.mailer.php';
+	include WA_ROOTDIR . '/includes/engine_send.php';
 	
 	//
 	// On règle le script pour ignorer une déconnexion du client et 
@@ -667,11 +667,11 @@ if( $mode == 'resend' )
 	//
 	// Initialisation de la classe mailer
 	//
-	$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
+	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 	
 	if( $nl_config['use_smtp'] )
 	{
-		$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
+		$mailer->smtp_path = WAMAILER_DIR . '/';
 		$mailer->use_smtp(
 			$nl_config['smtp_host'],
 			$nl_config['smtp_port'],
@@ -698,7 +698,7 @@ if( $mode == 'resend' )
 
 $output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('section', './envoi.php?mode=resend', $lang['Resend_log']);
-$output->addScript(WA_PATH . 'templates/admin/editor.js');
+$output->addScript(WA_ROOTDIR . 'templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $logdata['log_status']);

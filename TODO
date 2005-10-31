@@ -20,7 +20,6 @@
 - Supprimer choix de la méthode d’envoi si host est Online (Utiliser Mailer::is_online_host())
 - revoir les schémas de tables (mots clés en majuscules ou minuscules, faire les modifs aussi dans les classes *_backup)
 - ajouter fichier README pour Wamailer
-- Ajouter des stats sur les formats choisis par les abonnés (listes multi-formats uniquement prise en compte ?)
 - Permettre l’exportation simple et rapide d’une newsletter (au "format" .eml)
 - durée de session semble illimitée, corriger ça
 - commenter plus le code

@@ -37,7 +37,7 @@
 function lang_box($default_lang = '')
 {
 	$lang_ary = array();
-	$browse   = dir(WA_PATH . 'language/');
+	$browse   = dir(WA_ROOTDIR . '/language');
 	
 	while( ($entry = $browse->read()) !== false )
 	{

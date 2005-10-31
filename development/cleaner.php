@@ -28,9 +28,9 @@ exit('<b>Fichier de développement désactivé</b>');
 //
 
 define('IN_NEWSLETTER', true);
+define('WA_ROOTDIR',   '..');
 
-$waroot = '../';
-require($waroot . 'start.php');
+require WA_ROOTDIR . '/start.php';
 
 $type = ( !empty($_GET['type']) ) ? $_GET['type'] : '';
 

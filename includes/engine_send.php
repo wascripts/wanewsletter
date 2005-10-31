@@ -30,7 +30,7 @@ if( !defined('IN_NEWSLETTER') )
 	exit('<b>No hacking</b>');
 }
 
-include WA_PATH . 'includes/tags.inc.php';
+include WA_ROOTDIR . '/includes/tags.inc.php';
 
 /**
  * launch_sending()
@@ -77,7 +77,7 @@ function launch_sending($listdata, $logdata)
 	$total_files = count($logdata['joined_files']);
 	$tmp_files   = array();
 	
-	include WA_PATH . 'includes/class.attach.php';
+	require WA_ROOTDIR . '/includes/class.attach.php';
 	$attach = new Attach();
 	
 	preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $body[FORMAT_HTML], $matches);
@@ -106,7 +106,7 @@ function launch_sending($listdata, $logdata)
 		}
 		else
 		{
-			$file_path = WA_PATH . $nl_config['upload_path'] . $physical_name;
+			$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 		}
 		
 		if( is_array($matches) && in_array($real_name, $matches[1]) )

@@ -42,7 +42,7 @@ $nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = arr
 $output = NULL;
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = $prefixe = '';
 
-include WA_PATH . 'includes/config.inc.php';
+include WA_ROOTDIR . '/includes/config.inc.php';
 
 if( !defined('NL_INSTALLED') )
 {
@@ -55,15 +55,17 @@ if( !defined('NL_INSTALLED') )
 		$header_location = 'Location: ';
 	}
 	
-	header($header_location . WA_PATH . 'setup/install.php');
+	$path = ( file_exists('setup/install.php') ) ? 'setup/install.php' : '../setup/install.php';
+	
+	header($header_location . $path);
 	exit;
 }
 
-require_once WA_PATH . 'includes/functions.php';
-require_once WA_PATH . 'includes/constantes.php';
-require_once WA_PATH . 'includes/template.php';
-require_once WA_PATH . 'includes/class.output.php';
-require_once WA_PATH . 'sql/db_type.php';
+require_once WA_ROOTDIR . '/includes/functions.php';
+require_once WA_ROOTDIR . '/includes/constantes.php';
+require_once WA_ROOTDIR . '/includes/template.php';
+require_once WA_ROOTDIR . '/includes/class.output.php';
+require_once WA_ROOTDIR . '/sql/db_type.php';
 
 //
 // Désactivation de magic_quotes_runtime + 
@@ -113,5 +115,19 @@ if( !(time() % 10) || !defined('IN_ADMIN') )
 // Le nom ne doit contenir / ni au début, ni à la fin
 //
 $tmp_name = 'tmp';
+
+//
+// Si nous avons un accés restreint à cause d'open_basedir sur le serveur, 
+// nous devrons utiliser le dossier des fichiers temporaires du script 
+//
+$tmp_name = trim($tmp_name, '/');
+
+if( OPEN_BASEDIR_RESTRICTION && !is_writable(WA_ROOTDIR . '/' . $tmp_name) )
+{
+	trigger_error('tmp_dir_not_writable', MESSAGE);
+}
+
+define('WA_TMPDIR',    WA_ROOTDIR . '/' . $tmp_name, true);
+define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
 
 ?>

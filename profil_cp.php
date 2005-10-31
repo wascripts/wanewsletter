@@ -26,11 +26,11 @@
  */
 
 define('IN_NEWSLETTER', true);
-define('WA_PATH',       './');
+define('WA_ROOTDIR',    './');
 
-require WA_PATH . 'start.php';
-require WA_PATH . 'includes/functions.validate.php';
-include WA_PATH . 'includes/tags.inc.php';
+require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/functions.validate.php';
+include WA_ROOTDIR . '/includes/tags.inc.php';
 
 if( !$nl_config['enable_profil_cp'] )
 {
@@ -41,7 +41,7 @@ if( !$nl_config['enable_profil_cp'] )
 //
 // Instanciation d'une session
 //
-include WA_PATH . 'includes/class.sessions.php';
+include WA_ROOTDIR . '/includes/class.sessions.php';
 $session = new Session();
 
 function check_login($email, $regkey = '', $passwd = '')
@@ -199,7 +199,7 @@ switch( $mode )
 	case 'sendkey':
 		if( isset($_POST['submit']) )
 		{
-			require WA_PATH . 'includes/functions.validate.php';
+			require WA_ROOTDIR . '/includes/functions.validate.php';
 			
 			$result = check_email($email, -1, '', true);
 			
@@ -209,13 +209,13 @@ switch( $mode )
 				{
 					list($liste_id, $listdata) = each($abodata['listes']);
 					
-					require WA_PATH . 'includes/wamailer/class.mailer.php';
+					require WAMAILER_DIR . '/class.mailer.php';
 					
-					$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
+					$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 					
 					if( $nl_config['use_smtp'] )
 					{
-						$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
+						$mailer->smtp_path = WAMAILER_DIR . '/';
 						$mailer->use_smtp(
 							$nl_config['smtp_host'],
 							$nl_config['smtp_port'],
@@ -352,7 +352,7 @@ switch( $mode )
 			}
 		}
 		
-		require WA_PATH . 'includes/functions.box.php';
+		require WA_ROOTDIR . '/includes/functions.box.php';
 		
 		$output->page_header();
 		
@@ -434,17 +434,17 @@ switch( $mode )
 				trigger_error('Impossible de récupérer la liste des archives', ERROR);
 			}
 			
-			require WA_PATH . 'includes/wamailer/class.mailer.php';
-			require WA_PATH . 'includes/engine_send.php';
+			require WAMAILER_DIR . '/class.mailer.php';
+			require WA_ROOTDIR . '/includes/engine_send.php';
 			
 			//
 			// Initialisation de la classe mailer
 			//
-			$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
+			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			
 			if( $nl_config['use_smtp'] )
 			{
-				$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
+				$mailer->smtp_path = WAMAILER_DIR . '/';
 				$mailer->use_smtp(
 					$nl_config['smtp_host'],
 					$nl_config['smtp_port'],
@@ -533,7 +533,7 @@ switch( $mode )
 					$total_files = count($files[$row['log_id']]);
 					$tmp_files	 = array();
 					
-					require WA_PATH . 'includes/class.attach.php';
+					require WA_ROOTDIR . '/includes/class.attach.php';
 					$attach = new Attach();
 					
 					preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $body, $matches);
@@ -562,7 +562,7 @@ switch( $mode )
 						}
 						else
 						{
-							$file_path = WA_PATH . $nl_config['upload_path'] . $physical_name;
+							$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 						}
 						
 						if( is_array($matches) && in_array($real_name, $matches[1]) )

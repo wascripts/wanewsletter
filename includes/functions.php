@@ -219,14 +219,14 @@ function load_settings($admindata = array())
 {
 	global $nl_config, $db, $lang, $datetime, $output;
 	
-	$template_path = WA_PATH . 'templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
+	$template_path = WA_ROOTDIR . '/templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
 	
 	$output = new output($template_path);
-	$output->addScript(WA_PATH . 'templates/DOM-Compat/DOM-Compat.js');
+	$output->addScript(WA_ROOTDIR . '/templates/DOM-Compat/DOM-Compat.js');
 	
 	if( defined('IN_ADMIN') )
 	{
-		$output->addScript(WA_PATH . 'templates/admin/admin.js');
+		$output->addScript(WA_ROOTDIR . '/templates/admin/admin.js');
 	}
 	
 	if( !is_array($admindata) )
@@ -244,12 +244,12 @@ function load_settings($admindata = array())
 		$nl_config['date_format'] = $admindata['admin_dateformat'];
 	}
 	
-	$language_path = wa_realpath(WA_PATH . 'language/lang_' . $nl_config['language'] . '.php');
+	$language_path = wa_realpath(WA_ROOTDIR . '/language/lang_' . $nl_config['language'] . '.php');
 	
 	if( !file_exists($language_path) )
 	{
 		$nl_config['language'] = 'francais';
-		$language_path = wa_realpath(WA_PATH . 'language/lang_' . $nl_config['language'] . '.php');
+		$language_path = wa_realpath(WA_ROOTDIR . '/language/lang_' . $nl_config['language'] . '.php');
 		
 		if( !file_exists($language_path) )
 		{
@@ -676,7 +676,7 @@ function strip_magic_quotes_gpc(&$data)
  */
 function wa_realpath($relative_path)
 {
-	if( !@function_exists('realpath') || !@realpath(WA_PATH . 'includes/functions.php') )
+	if( !@function_exists('realpath') || !@realpath(WA_ROOTDIR . '/includes/functions.php') )
 	{
 		return $relative_path;
 	}

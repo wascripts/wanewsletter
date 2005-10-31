@@ -42,7 +42,7 @@ else if( !is_available_extension('gd') )
 	trigger_error('No_gd_lib', MESSAGE);
 }
 
-include WA_PATH . 'includes/functions.stats.php';
+include WA_ROOTDIR . '/includes/functions.stats.php';
 
 $liste_id_ary = $auth->check_auth(AUTH_VIEW);
 
@@ -111,12 +111,12 @@ if( $img == 'graph' )
 	$max_value = 0;
 	$filename  = $year . '_' . date('F', $ts) . '_list' . $listdata['liste_id'] . '.txt';
 	
-	if( !file_exists(wa_stats_path . $filename) )
+	if( !file_exists(WA_STATSDIR . '/' . $filename) )
 	{
 		create_stats($listdata, $month, $year);
 	}
 	
-	if( ($filesize = filesize(wa_stats_path . $filename)) > 0 && $fp = @fopen(wa_stats_path . $filename, 'r') )
+	if( ($filesize = filesize(WA_STATSDIR . '/' . $filename)) > 0 && $fp = @fopen(WA_STATSDIR . '/' . $filename, 'r') )
 	{
 		$contents = fread($fp, $filesize);
 		$stats    = clean_stats($contents);
@@ -192,7 +192,7 @@ if( $img == 'graph' )
 	}
 	
 	$fct_imagecreatefrom = 'imagecreatefrom' . $img_type;
-	$src = $fct_imagecreatefrom(WA_PATH . 'images/barre.' . $img_type);
+	$src = $fct_imagecreatefrom(WA_ROOTDIR . '/images/barre.' . $img_type);
 	
 	//
 	// Affichage des résultats 
@@ -378,7 +378,7 @@ if( $img == 'camenbert' )
 
 $output->build_listbox(AUTH_VIEW, false);
 
-include WA_PATH . 'includes/functions.box.php';
+require WA_ROOTDIR . '/includes/functions.box.php';
 
 if( $session->sessid_url != '' )
 {

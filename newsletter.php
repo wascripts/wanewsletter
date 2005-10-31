@@ -31,12 +31,13 @@ if( !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
 }
 
 define('IN_NEWSLETTER', true);
+define('WA_ROOTDIR', $waroot);
 
 $default_magic_quotes_runtime = get_magic_quotes_runtime();
 $default_error_reporting      = error_reporting(E_ALL);
 
-require WA_PATH . 'start.php';
-require WA_PATH . 'includes/functions.validate.php';
+require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/functions.validate.php';
 
 if( !empty($language) && validate_lang($language) )
 {
@@ -73,15 +74,15 @@ if( $action != '' )
 		//
 		purge_liste();
 		
-		require WA_PATH . 'includes/class.form.php';
-		require WA_PATH . 'includes/wamailer/class.mailer.php';
-		include WA_PATH . 'includes/functions.stats.php';
+		require WA_ROOTDIR . '/includes/class.form.php';
+		require WAMAILER_DIR . '/class.mailer.php';
+		include WA_ROOTDIR . '/includes/functions.stats.php';
 		
-		$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
+		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 		
 		if( $nl_config['use_smtp'] )
 		{
-			$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
+			$mailer->smtp_path = WAMAILER_DIR . '/';
 			$mailer->use_smtp(
 				$nl_config['smtp_host'],
 				$nl_config['smtp_port'],

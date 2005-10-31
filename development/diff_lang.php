@@ -28,9 +28,9 @@ exit('<b>Fichier de développement désactivé</b>');
 // Affiche les entrées présentes dans le premier fichier de language 
 // qui ne sont pas présentes dans le deuxième fichier de language.
 //
+define('WA_ROOTDIR', '..');
 
-$waroot = '../';
-$language_dir = '../language/';
+$language_dir = WA_ROOTDIR . '/language';
 
 $Fichier_1 = 'lang_francais.php';
 $Fichier_2 = 'lang_deutsch.php';
@@ -60,13 +60,13 @@ function diff_lang($tab_1, $tab_2)
 }
 
 $lang = array();
-include($language_dir . $Fichier_1);
+include $language_dir . '/' . $Fichier_1;
 
 $lang_ary_1 = $lang;
 unset($lang);
 
 $lang = array();
-include($language_dir . $Fichier_2);
+include $language_dir . '/' . $Fichier_2;
 
 $lang_ary_2 = $lang;
 unset($lang);

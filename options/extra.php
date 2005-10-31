@@ -26,9 +26,9 @@
  */
 
 define('IN_NEWSLETTER', true);
-define('WA_PATH',      '../');
+define('WA_ROOTDIR',    '..');
 
-require WA_PATH . 'start.php';
+require WA_ROOTDIR . '/start.php';
 
 load_settings();
 

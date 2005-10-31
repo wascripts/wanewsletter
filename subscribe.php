@@ -26,9 +26,9 @@
  */
 
 define('IN_SUBSCRIBE', true);
-define('WA_PATH',      './');
+define('WA_ROOTDIR',   '.');
 
-require WA_PATH . 'newsletter.php';
+require WA_ROOTDIR . '/newsletter.php';
 
 $list_box = '';
 
@@ -73,7 +73,7 @@ else
 
 $output->send_headers(true);
 
-include WA_PATH . 'form_header.html';
+include WA_ROOTDIR . '/form_header.html';
 
 $output->set_filenames(array(
 	'body' => 'subscribe_body.tpl'
@@ -101,5 +101,5 @@ $output->pparse('body');
 //
 @restore_error_handler();
 
-include WA_PATH . 'form_footer.html';
+include WA_ROOTDIR . '/form_footer.html';
 ?>

@@ -30,7 +30,7 @@ if( !defined('IN_INSTALL') && !defined('IN_UPDATE') )
 	exit('<b>No hacking</b>');
 }
 
-define('WA_PATH', '../');
+define('WA_ROOTDIR', '..');
 
 function msg_result($str, $is_query = false)
 {
@@ -102,7 +102,7 @@ error_reporting(E_ALL);
 
 $new_version  = '2.3-dev';
 $default_lang = 'francais';
-$schemas_dir  = WA_PATH . 'setup/schemas/';
+$schemas_dir  = WA_ROOTDIR . '/setup/schemas';
 
 $supported_lang = array(
 	'fr' => 'francais',
@@ -166,7 +166,7 @@ if( !function_exists('version_compare') )
 	exit;
 }
 
-require WA_PATH . 'includes/functions.php';
+require WA_ROOTDIR . '/includes/functions.php';
 
 //
 // Désactivation de magic_quotes_runtime + 
@@ -198,9 +198,9 @@ if( $prefixe == '' )
 	$prefixe = 'wa_';
 }
 
-if( file_exists(WA_PATH . 'includes/config.inc.php') )
+if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
 {
-	include WA_PATH . 'includes/config.inc.php';
+	include WA_ROOTDIR . '/includes/config.inc.php';
 }
 
 if( defined('IN_UPDATE') && $dbhost == '' )
@@ -208,7 +208,7 @@ if( defined('IN_UPDATE') && $dbhost == '' )
 	plain_error('Aucune version de WAnewsletter ne semble présente, le fichier de configuration est vide');
 }
 
-require WA_PATH . 'includes/constantes.php';
+require WA_ROOTDIR . '/includes/constantes.php';
 
 foreach( $supported_db AS $db_name => $db_infos )
 {
@@ -223,8 +223,8 @@ if( count($supported_db) == 0 )
 	plain_error('Désolé mais WAnewsletter ' . $new_version . ' requiert une base de données MySQL 3.23.x/4.x, PostgreSQL 7.x/8.x et supérieur ou SQLite 2.8.x');
 }
 
-require WA_PATH . 'includes/template.php';
-require WA_PATH . 'includes/class.output.php';
+require WA_ROOTDIR . '/includes/template.php';
+require WA_ROOTDIR . '/includes/class.output.php';
 
 $config_file  = '<' . "?php\n\n";
 $config_file .= "//\n";
@@ -233,13 +233,13 @@ $config_file .= "// Ne pas modifier !\n";
 $config_file .= "//\n";
 $config_file .= "define('NL_INSTALLED', true);\n\n";
 $config_file .= "\$dbtype  = '$dbtype';\n\n";
-$config_file .= "\$dbhost  = " .  (($dbtype == 'sqlite') ? "WA_PATH . 'sql/wanewsletter.db'" : "'$dbhost'") . ";\n";
+$config_file .= "\$dbhost  = " .  (($dbtype == 'sqlite') ? "WA_ROOTDIR . '/sql/wanewsletter.db'" : "'$dbhost'") . ";\n";
 $config_file .= "\$dbuser  = '$dbuser';\n";
 $config_file .= "\$dbpassword = '$dbpassword';\n";
 $config_file .= "\$dbname  = '$dbname';\n\n";
 $config_file .= "\$prefixe = '$prefixe';\n\n";
 $config_file .= '?' . '>';
 
-$output = new output(WA_PATH . 'templates/');
+$output = new output(WA_ROOTDIR . '/templates/');
 
 ?>

@@ -72,7 +72,7 @@ class Attach {
 	{
 		global $nl_config;
 		
-		$this->upload_path = WA_PATH . $nl_config['upload_path'];
+		$this->upload_path = WA_ROOTDIR . '/' . $nl_config['upload_path'];
 		$this->use_ftp     = $nl_config['use_ftp'];
 		
 		if( $this->use_ftp )
@@ -333,7 +333,7 @@ class Attach {
 					return;
 				}
 				
-				$tmp_path = ( OPEN_BASEDIR_RESTRICTION ) ? wa_tmp_path : '/tmp';
+				$tmp_path = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : '/tmp';
 				$tmp_filename = tempnam($tmp_path, uniqid(rand()) . 'wa0');
 				
 				if( !($fw = @fopen($tmp_filename, 'wb')) )
@@ -443,7 +443,7 @@ class Attach {
 					}
 					ftp_quit($cid);
 					
-					include WA_PATH . 'includes/wamailer/class.mailer.php';
+					include WAMAILER_DIR . '/class.mailer.php';
 					
 					$filetype = Mailer::mime_type(substr($filename, (strrpos($filename, '.') + 1)));
 				}
@@ -456,7 +456,7 @@ class Attach {
 			//
 			else if( $upload_mode == 'local' )
 			{
-				include WA_PATH . 'includes/wamailer/class.mailer.php';
+				include WAMAILER_DIR . '/class.mailer.php';
 				
 				$filetype = Mailer::mime_type($extension);
 				
@@ -773,7 +773,7 @@ class Attach {
 	function ftp_to_tmp($data)
 	{
 		$mode         = $this->get_mode($data['file_mimetype']);
-		$tmp_path     = ( OPEN_BASEDIR_RESTRICTION ) ? wa_tmp_path : '/tmp';
+		$tmp_path     = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : '/tmp';
 		$tmp_filename = tempnam($tmp_path, uniqid(rand()) . 'wa1');
 		
 		if( !@ftp_get($this->connect_id, $tmp_filename, $data['file_physical_name'], $mode) )

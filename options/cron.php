@@ -27,9 +27,9 @@
 
 define('IN_NEWSLETTER', true);
 define('IN_CRON',       true);
-define('WA_PATH',      '../');
+define('WA_ROOTDIR',    '..');
 
-require WA_PATH . 'start.php';
+require WA_ROOTDIR . '/start.php';
 
 load_settings();
 
@@ -65,16 +65,16 @@ if( $listdata = $db->fetch_array($result) )
 		@set_time_limit(1200);
 	}
 	
-	include WA_PATH . 'includes/wamailer/class.mailer.php';
+	require WAMAILER_DIR . '/class.mailer.php';
 	
 	//
 	// Initialisation de la classe mailer
 	//
-	$mailer = new Mailer(WA_PATH . 'language/email_' . $nl_config['language'] . '/');
+	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 	
 	if( $nl_config['use_smtp'] )
 	{
-		$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
+		$mailer->smtp_path = WAMAILER_DIR . '/';
 		$mailer->use_smtp(
 			$nl_config['smtp_host'],
 			$nl_config['smtp_port'],
@@ -89,7 +89,7 @@ if( $listdata = $db->fetch_array($result) )
 	
 	if( $mode == 'send' )
 	{
-		include WA_PATH . 'includes/engine_send.php';
+		require WA_ROOTDIR . '/includes/engine_send.php';
 		
 		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 			FROM " . LOG_TABLE . "
@@ -134,10 +134,10 @@ if( $listdata = $db->fetch_array($result) )
 		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel 
 		$mailer->set_format(FORMAT_TEXTE);
 		
-		include WA_PATH . 'includes/class.form.php';
-		include WA_PATH . 'includes/class.pop.php';
-		include WA_PATH . 'includes/functions.validate.php';
-		include WA_PATH . 'includes/functions.stats.php';
+		require WA_ROOTDIR . '/includes/class.form.php';
+		require WA_ROOTDIR . '/includes/class.pop.php';
+		require WA_ROOTDIR . '/includes/functions.validate.php';
+		include WA_ROOTDIR . '/includes/functions.stats.php';
 		
 		$wan = new Wanewsletter($listdata);
 		$pop = new Pop();

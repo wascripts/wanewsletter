@@ -38,7 +38,7 @@ $admin_pass  = ( !empty($_POST['admin_pass']) ) ? trim($_POST['admin_pass']) : '
 
 if( isset($supported_db[$dbtype]) )
 {
-	include WA_PATH . 'sql/' . $dbtype . '.php';
+	require WA_ROOTDIR . '/sql/' . $dbtype . '.php';
 }
 else
 {
@@ -80,7 +80,7 @@ while( $row = $db->fetch_array($result) )
 }
 
 $language = $old_config['language'];
-require WA_PATH . 'language/lang_' . $language . '.php';
+require WA_ROOTDIR . '/language/lang_' . $language . '.php';
 
 $output->send_headers();
 
@@ -134,7 +134,7 @@ if( isset($_POST['start_update']) )
 		$msg_error[] = $lang['Message']['Error_login'];
 	}
 	
-	if( !is_writable(WA_PATH . 'includes/config.inc.php') )
+	if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
 	{
 		$error = TRUE;
 		$msg_error[] = $lang['File_config_unwritable'];
@@ -581,7 +581,7 @@ $sql_update[] = "ALTER TABLE " . LOG_TABLE . " DROP COLUMN attach";
 
 exec_queries($sql_update, true);
 
-require WA_PATH . 'includes/wamailer/class.mailer.php';
+require WA_ROOTDIR . '/includes/wamailer/class.mailer.php';
 
 $total_log = count($logrow);
 for( $i = 0; $i < $total_log; $i++ )
@@ -599,9 +599,9 @@ for( $i = 0; $i < $total_log; $i++ )
 		$mime_type = Mailer::mime_type(substr($files[$j], (strrpos($files[$j], '.') + 1)));
 		
 		$filesize = 0;
-		if( file_exists(WA_PATH . 'admin/upload/' . $files[$j]) )
+		if( file_exists(WA_ROOTDIR . '/admin/upload/' . $files[$j]) )
 		{
-			$filesize = filesize(WA_PATH . 'admin/upload/' . $files[$j]);
+			$filesize = filesize(WA_ROOTDIR . '/admin/upload/' . $files[$j]);
 		}
 		
 		$sql = "INSERT INTO " . JOINED_FILES_TABLE . " (file_real_name, file_physical_name, file_size, file_mimetype) 
@@ -734,21 +734,21 @@ exec_queries($sql, true);
 // Modification fichier de configuration + 
 // Affichage message de résultat
 //
-@chmod(WA_PATH . 'includes', 0777);
+@chmod(WA_ROOTDIR . '/includes', 0777);
 
-if( $fw = @fopen(WA_PATH . 'includes/config.inc.php', 'w') )
+if( $fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w') )
 {
 	fwrite($fw, $config_file);
 	fclose($fw);
 	
-	@chmod(WA_PATH . 'includes', 0755);
+	@chmod(WA_ROOTDIR . '/includes', 0755);
 	
-	$message = sprintf($lang['Success_update'], '<a href="' . WA_PATH . 'admin/login.php">', '</a>');
+	$message = sprintf($lang['Success_update'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>');
 	msg_result($message);
 }
 else
 {
-	@chmod(WA_PATH . 'includes', 0755);
+	@chmod(WA_ROOTDIR . '/includes', 0755);
 	
 	$message = sprintf($lang['Success_whithout_config2'], htmlspecialchars($config_file));
 	msg_result($message);

@@ -30,15 +30,15 @@ if( !defined('IN_NEWSLETTER') )
 	exit('<b>No hacking</b>');
 }
 
-define('IN_ADMIN', true);
-define('WA_PATH', '../');
+define('IN_ADMIN',   true);
+define('WA_ROOTDIR', '..');
 
 $secure = TRUE;
 
-require WA_PATH . 'start.php';
+require WA_ROOTDIR . '/start.php';
 
-include WA_PATH . 'includes/class.sessions.php';
-include WA_PATH . 'includes/class.auth.php';
+include WA_ROOTDIR . '/includes/class.sessions.php';
+include WA_ROOTDIR . '/includes/class.auth.php';
 
 $liste = ( !empty($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 
@@ -91,18 +91,5 @@ if( !defined('IN_LOGIN') )
 		}
 	}
 }
-
-//
-// Si nous avons un accés restreint à cause d'open_basedir sur le serveur, 
-// nous devrons utiliser le dossier des fichiers temporaires du script 
-//
-$tmp_name = preg_replace('/\/?(.*?)\/?/', '\\1', $tmp_name);
-
-if( OPEN_BASEDIR_RESTRICTION && !is_writable(WA_PATH . $tmp_name) )
-{
-	trigger_error('tmp_dir_not_writable', MESSAGE);
-}
-
-define('WA_TMP_PATH', WA_PATH . $tmp_name, true);
 
 ?>

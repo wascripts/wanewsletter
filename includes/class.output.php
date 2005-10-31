@@ -279,8 +279,8 @@ class output extends Template {
 			
 			$this->addLink('chapter',   './admin.php', $lang['Module']['users']);
 			$this->addLink('chapter',   './stats.php', $lang['Title']['stats']);
-			$this->addLink('help',      WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
-			$this->addLink('author',    WA_PATH . 'docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
+			$this->addLink('help',      WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
+			$this->addLink('author',    WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
 			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Copyleft');
 			
 			$page_title = sprintf($lang['General_title'], htmlspecialchars($nl_config['sitename']));
@@ -601,7 +601,7 @@ class output extends Template {
 			$u_download = './view.php?mode=download&amp;fid=%d';
 		}
 		
-		$u_show = WA_PATH . 'options/show.php?fid=%d';
+		$u_show = './options/show.php?fid=%d';
 		
 		for( $i = 0; $i < $num_files; $i++ )
 		{
@@ -639,7 +639,7 @@ class output extends Template {
 			if( ereg('^image/', $mime_type) )
 			{
 				$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '">';
-				$s_show .= '<img src="' . WA_PATH . 'images/icon_loupe.gif" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
+				$s_show .= '<img src="../images/icon_loupe.gif" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
 				$s_show .= '</a>';
 			}
 			else

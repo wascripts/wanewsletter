@@ -52,7 +52,7 @@ $language     = ( $language != '' ) ? $language : $default_lang;
 
 if( isset($supported_db[$dbtype]) )
 {
-	include WA_PATH . 'sql/' . $dbtype . '.php';
+	require WA_ROOTDIR . '/sql/' . $dbtype . '.php';
 }
 else
 {
@@ -82,7 +82,7 @@ if( $type != 'reinstall' && $type != 'update' )
 		{
 			$accept_lang = strtolower(substr($accept_lang, 0, 2));
 			
-			if( isset($supported_lang[$accept_lang]) && file_exists(WA_PATH . 'language/lang_' . $supported_lang[$accept_lang] . '.php') )
+			if( isset($supported_lang[$accept_lang]) && file_exists(WA_ROOTDIR . '/language/lang_' . $supported_lang[$accept_lang] . '.php') )
 			{
 				$language = $supported_lang[$accept_lang];
 				break;
@@ -114,7 +114,7 @@ if( defined('NL_INSTALLED') )
 	$language    = $old_config['language'];
 	$hebergeur   = $old_config['hebergeur'];
 	
-	require WA_PATH . 'language/lang_' . $language . '.php';
+	require WA_ROOTDIR . '/language/lang_' . $language . '.php';
 	
 	$login = false;
 	
@@ -150,11 +150,11 @@ else
 	{
 		if( $dbtype == 'sqlite' )
 		{
-			if( is_writable(WA_PATH . 'sql')
-				&& is_readable(WA_PATH . 'sql/wanewsletter.db')
-				&& is_writable(WA_PATH . 'sql/wanewsletter.db') )
+			if( is_writable(WA_ROOTDIR . '/sql')
+				&& is_readable(WA_ROOTDIR . '/sql/wanewsletter.db')
+				&& is_writable(WA_ROOTDIR . '/sql/wanewsletter.db') )
 			{
-				$db = new sql(WA_PATH . 'sql/wanewsletter.db');
+				$db = new sql(WA_ROOTDIR . '/sql/wanewsletter.db');
 			}
 			else
 			{
@@ -173,14 +173,14 @@ else
 			$msg_error[] = '<b>Impossible de se connecter à la base de données/Unable to connect to database</b>';
 		}
 		
-		if( !is_writable(WA_PATH . 'includes/config.inc.php') )
+		if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
 		{
 			$error = true;
 			$msg_error[] = 'Le fichier de configuration n\'est pas accessible en écriture/config file isn\'t writable';
 		}
 	}
 	
-	include WA_PATH . 'language/lang_' . $language . '.php';
+	include WA_ROOTDIR . '/language/lang_' . $language . '.php';
 }
 
 $output->send_headers();
@@ -216,7 +216,7 @@ if( defined('NL_INSTALLED') && ( !$start || $error ) )
 
 if( $send_file )
 {
-	include WA_PATH . 'includes/class.attach.php';
+	require WA_ROOTDIR . '/includes/class.attach.php';
 	
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
 	exit;
@@ -225,7 +225,7 @@ else
 {
 	if( $start )
 	{
-		include WA_PATH . 'includes/functions.validate.php';
+		require WA_ROOTDIR . '/includes/functions.validate.php';
 		
 		if( $dbhost == '' || $dbname == '' || $dbuser == '' || $prefixe == '' || $admin_login == '' )
 		{
@@ -278,7 +278,7 @@ else
 			//
 			// Création des tables du script 
 			//
-			$sql_file = $schemas_dir . $supported_db[$dbtype]['prefixe_file'] . '_tables.sql';
+			$sql_file = $schemas_dir . '/' . $supported_db[$dbtype]['prefixe_file'] . '_tables.sql';
 			
 			if( !($fp = @fopen($sql_file, 'r')) )
 			{
@@ -293,7 +293,7 @@ else
 			//
 			// Insertion des données de base 
 			//
-			$sql_file = $schemas_dir . $supported_db[$dbtype]['prefixe_file'] . '_data.sql';
+			$sql_file = $schemas_dir . '/' . $supported_db[$dbtype]['prefixe_file'] . '_data.sql';
 			
 			if( !($fp = @fopen($sql_file, 'r')) )
 			{
@@ -639,9 +639,9 @@ else
 			
 			if( $type == 'install' )
 			{
-				@chmod(WA_PATH . 'includes/config.inc.php', 0666);
+				@chmod(WA_ROOTDIR . '/includes/config.inc.php', 0666);
 				
-				if( !($fw = @fopen(WA_PATH . 'includes/config.inc.php', 'w')) )
+				if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
 				{
 					$output->addHiddenField('dbtype',     $dbtype);
 					$output->addHiddenField('dbhost',     $dbhost);
@@ -665,7 +665,7 @@ else
 				fwrite($fw, $config_file);
 				fclose($fw);
 				
-				@chmod(WA_PATH . 'includes/config.inc.php', 0644);
+				@chmod(WA_ROOTDIR . '/includes/config.inc.php', 0644);
 			}
 			
 			if( $type == 'install' || $type == 'reinstall' )
@@ -679,7 +679,7 @@ else
 			
 			$output->assign_block_vars('result', array(
 				'L_TITLE'    => $l_title,
-				'MSG_RESULT' => nl2br(sprintf($msg_result, '<a href="' . WA_PATH . 'admin/login.php">', '</a>'))
+				'MSG_RESULT' => nl2br(sprintf($msg_result, '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>'))
 			));
 			
 			$output->pparse('body');
@@ -687,7 +687,7 @@ else
 		}
 	}
 	
-	include WA_PATH . 'includes/functions.box.php';
+	require WA_ROOTDIR . '/includes/functions.box.php';
 	$lang_box = lang_box($language);
 	
 	$db_box = '';
@@ -710,7 +710,7 @@ else
 	$output->addHiddenField('prev_language', $language);
 	
 	$output->assign_block_vars('welcome', array(
-		'L_WELCOME'         => nl2br( sprintf($lang['Welcome_in_install'], '<a href="' . WA_PATH . 'docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>')),
+		'L_WELCOME'         => nl2br( sprintf($lang['Welcome_in_install'], '<a href="' . WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>')),
 		'TITLE_DATABASE'    => $lang['Title']['database'],
 		'TITLE_ADMIN'       => $lang['Title']['admin'],
 		'TITLE_DIVERS'      => $lang['Title']['config_divers'],

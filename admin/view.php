@@ -76,7 +76,7 @@ if( $mode == 'download' )
 		trigger_error('Not_auth_view', MESSAGE);
 	}
 	
-	include WA_PATH . 'includes/class.attach.php';
+	include WA_ROOTDIR . '/includes/class.attach.php';
 	
 	$file_id = ( !empty($_GET['fid']) ) ? intval($_GET['fid']) : 0;
 	$attach  = new Attach();
@@ -121,7 +121,7 @@ else if( $mode == 'iframe' )
 			{
 				$body = preg_replace(
 					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/i',
-					'<\\1"' . WA_PATH . 'options/show.php?file=\\2&amp;sessid=' . $session->session_id . '"\\3>',
+					'<\\1"' . WA_ROOTDIR . '/options/show.php?file=\\2&amp;sessid=' . $session->session_id . '"\\3>',
 					$body
 				);
 			}
@@ -754,7 +754,7 @@ else if( $mode == 'liste' )
 				$msg_error[] = $lang['Unknown_format'];
 			}
 			
-			include WA_PATH . 'includes/functions.validate.php';
+			require WA_ROOTDIR . '/includes/functions.validate.php';
 			
 			$result = check_email($sender_email);
 			if( $result['error'] )
@@ -787,7 +787,7 @@ else if( $mode == 'liste' )
 			
 			if( $use_cron && !is_disabled_func('fsockopen') )
 			{
-				include WA_PATH . 'includes/class.pop.php';
+				require WA_ROOTDIR . '/includes/class.pop.php';
 				
 				$pop = new Pop();
 				
@@ -872,7 +872,7 @@ else if( $mode == 'liste' )
 			}
 		}
 		
-		include WA_PATH . 'includes/functions.box.php';
+		require WA_ROOTDIR . '/includes/functions.box.php';
 		
 		$output->addHiddenField('action', $action);
 		$output->addHiddenField('sessid', $session->session_id);
@@ -889,7 +889,7 @@ else if( $mode == 'liste' )
 			'L_TITLE_CRON'         => $lang['Title']['cron'],
 			'L_EXPLAIN'            => nl2br($lang['Explain']['liste']),
 			'L_EXPLAIN_PURGE'      => nl2br($lang['Explain']['purge']),
-			'L_EXPLAIN_CRON'       => nl2br(sprintf($lang['Explain']['cron'], '<a href="' . WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#6">', '</a>')),
+			'L_EXPLAIN_CRON'       => nl2br(sprintf($lang['Explain']['cron'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#6">', '</a>')),
 			'L_LISTE_NAME'         => $lang['Liste_name'],
 			'L_AUTH_FORMAT'        => $lang['Auth_format'],
 			'L_SENDER_EMAIL'       => $lang['Sender_email'],
@@ -1054,7 +1054,7 @@ else if( $mode == 'liste' )
 					$log_id_ary[] = $row['log_id'];
 				}
 				
-				include WA_PATH . 'includes/class.attach.php';
+				require WA_ROOTDIR . '/includes/class.attach.php';
 				
 				$attach = new Attach();
 				$attach->delete_joined_files(true, $log_id_ary);
@@ -1066,7 +1066,7 @@ else if( $mode == 'liste' )
 					trigger_error('Impossible de supprimer les entrées de la table des logs', ERROR);
 				}
 				
-				include WA_PATH . 'includes/functions.stats.php';
+				include WA_ROOTDIR . '/includes/functions.stats.php';
 				remove_stats($listdata['liste_id']);
 			}
 			else
@@ -1180,7 +1180,7 @@ else if( $mode == 'liste' )
 					trigger_error('Impossible de supprimer les entrées de la table des logs', ERROR);
 				}
 				
-				include WA_PATH . 'includes/functions.stats.php';
+				include WA_ROOTDIR . '/includes/functions.stats.php';
 				remove_stats($listdata['liste_id'], $liste_id);
 			}
 			
@@ -1422,7 +1422,7 @@ else if( $mode == 'log' )
 				trigger_error('Impossible de supprimer les logs', ERROR);
 			}
 			
-			include WA_PATH . 'includes/class.attach.php';
+			include WA_ROOTDIR . '/includes/class.attach.php';
 			
 			$attach = new Attach();
 			$attach->delete_joined_files(true, $log_id_ary);
@@ -1642,7 +1642,7 @@ else if( $mode == 'log' )
 		'PAGEOF'                => ( $total_logs > 0 ) ? sprintf($lang['Page_of'], $page_id, ceil($total_logs / $log_per_page)) : '',
 		'NUM_LOGS'              => ( $total_logs > 0 ) ? '[ <b>' . $total_logs . '</b> ' . $lang['Module']['log'] . ' ]' : '',
 		
-		'WAROOT'                => WA_PATH,
+		'WAROOT'                => WA_ROOTDIR . '/',
 		'S_SESSID'              => $session->session_id,
 		'S_HIDDEN_FIELDS'       => $output->getHiddenFields(),
 		'U_FORM'                => sessid($u_form)
@@ -1673,7 +1673,7 @@ else if( $mode == 'log' )
 					$s_title_clip = $lang['Joined_file'];
 				}
 				
-				$s_clip = '<img src="' . WA_PATH . 'images/icon_clip.gif" width="10" height="13" alt="@" title="' . $s_title_clip . '" />';
+				$s_clip = '<img src="../images/icon_clip.gif" width="10" height="13" alt="@" title="' . $s_title_clip . '" />';
 			}
 			else
 			{
@@ -1716,7 +1716,7 @@ else if( $mode == 'log' )
 			
 			if( $listdata['liste_format'] == FORMAT_MULTIPLE )
 			{
-				include WA_PATH . 'includes/functions.box.php';
+				require WA_ROOTDIR . '/includes/functions.box.php';
 				
 				$output->assign_block_vars('format_box', array(
 					'L_FORMAT'    => $lang['Format'],

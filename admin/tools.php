@@ -260,7 +260,7 @@ $bzip2_loaded   = is_available_extension('bz2');
 
 if( $zlib_loaded )
 {
-	require WA_PATH . 'includes/zip/zip.lib.php';
+	require WA_ROOTDIR . '/includes/zip/zip.lib.php';
 }
 
 if( WA_USER_OS == 'win' )
@@ -293,7 +293,7 @@ switch( $mode )
 	case 'export':
 		if( isset($_POST['submit']) )
 		{
-			if( $action == 'store' && !is_writable(wa_tmp_path) )
+			if( $action == 'store' && !is_writable(WA_TMPDIR) )
 			{
 				trigger_error('tmp_dir_not_writable', MESSAGE);
 			}
@@ -329,13 +329,13 @@ switch( $mode )
 			
 			if( $action == 'download' )
 			{
-				include WA_PATH . 'includes/class.attach.php';
+				include WA_ROOTDIR . '/includes/class.attach.php';
 				
 				Attach::send_file($filename, $mime_type, $contents);
 			}
 			else
 			{
-				if( !($fw = @fopen(wa_tmp_path . '/' . $filename, 'wb')) )
+				if( !($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb')) )
 				{
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', ERROR);
 				}
@@ -386,7 +386,7 @@ switch( $mode )
 		
 		if( $listdata['liste_format'] == FORMAT_MULTIPLE )
 		{
-			include WA_PATH . 'includes/functions.box.php';
+			require WA_ROOTDIR . '/includes/functions.box.php';
 			
 			$output->assign_block_vars('format_box', array(
 				'L_FORMAT'	 => $lang['Format_to_export'],
@@ -414,7 +414,7 @@ switch( $mode )
 				{
 					//$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
 					
-					$tmp_filename = wa_realpath(WA_PATH . str_replace('\\', '/', $file_local));
+					$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local));
 					$filename     = $file_local;
 					
 					if( !file_exists($tmp_filename) )
@@ -443,7 +443,7 @@ switch( $mode )
 					if( OPEN_BASEDIR_RESTRICTION )
 					{
 						$unlink = true;
-						$tmp_filename = wa_realpath(wa_tmp_path . '/' . $filename);
+						$tmp_filename = wa_realpath(WA_TMPDIR . '/' . $filename);
 						
 						move_uploaded_file($file_upload['tmp_name'], $tmp_filename);
 					}
@@ -469,7 +469,7 @@ switch( $mode )
 				//
 				if( $unlink )
 				{
-					include WA_PATH . 'includes/class.attach.php';
+					include WA_ROOTDIR . '/includes/class.attach.php';
 					
 					Attach::remove_file($tmp_filename);
 				}
@@ -495,7 +495,7 @@ switch( $mode )
 				trigger_error($message, MESSAGE);
 			}
 			
-			include WA_PATH . 'includes/functions.validate.php'; 
+			require WA_ROOTDIR . '/includes/functions.validate.php'; 
 			
 			if( $glue == '' )
 			{
@@ -578,7 +578,7 @@ switch( $mode )
 			//
 			if( $tmp_report != '' )
 			{
-				if( is_writable(wa_tmp_path) && ($fw = @fopen(wa_tmp_path . '/wa_import_report.txt', 'w')) )
+				if( is_writable(WA_TMPDIR) && ($fw = @fopen(WA_TMPDIR . '/wa_import_report.txt', 'w')) )
 				{
 					$report_str  = '#' . WA_EOL;
 					$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
@@ -590,7 +590,7 @@ switch( $mode )
 					fwrite($fw, $report_str);
 					fclose($fw);
 					
-					$message = nl2br(sprintf($lang['Message']['Success_import3'], '<a href="' . wa_tmp_path . '/wa_import_report.txt">', '</a>'));
+					$message = nl2br(sprintf($lang['Message']['Success_import3'], '<a href="' . WA_TMPDIR . '/wa_import_report.txt">', '</a>'));
 				}
 				else
 				{
@@ -613,7 +613,7 @@ switch( $mode )
 		
 		$output->assign_vars(array(
 			'L_TITLE_IMPORT'   => $lang['Title']['import'],
-			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'], MAX_IMPORT, '<a href="' . WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#4">', '</a>')),
+			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'], MAX_IMPORT, '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#4">', '</a>')),
 			'L_GLUE'           => $lang['Char_glue'],
 			'L_FILE_LOCAL'     => $lang['File_local'],
 			'L_VALID_BUTTON'   => $lang['Button']['valid'],
@@ -625,7 +625,7 @@ switch( $mode )
 		
 		if( $listdata['liste_format'] == FORMAT_MULTIPLE )
 		{
-			include WA_PATH . 'includes/functions.box.php';
+			require WA_ROOTDIR . '/includes/functions.box.php';
 			
 			$output->assign_block_vars('format_box', array(
 				'L_FORMAT'   => $lang['Format_to_import'],
@@ -907,7 +907,7 @@ switch( $mode )
 		
 		if( isset($_POST['submit']) )
 		{
-			if( $action == 'store' && !is_writable(wa_tmp_path) )
+			if( $action == 'store' && !is_writable(WA_TMPDIR) )
 			{
 				trigger_error('tmp_dir_not_writable', MESSAGE);
 			}
@@ -946,13 +946,13 @@ switch( $mode )
 			
 			if( $action == 'download' )
 			{
-				include WA_PATH . 'includes/class.attach.php';
+				include WA_ROOTDIR . '/includes/class.attach.php';
 				
 				Attach::send_file($filename, $mime_type, $contents);
 			}
 			else
 			{
-				if( !($fw = @fopen(wa_tmp_path . '/' . $filename, 'wb')) )
+				if( !($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb')) )
 				{
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', ERROR);
 				}
@@ -1056,7 +1056,7 @@ switch( $mode )
 				{
 					//$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
 					
-					$tmp_filename = wa_realpath(WA_PATH . str_replace('\\', '/', $file_local));
+					$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local));
 					$filename     = $file_local;
 					
 					if( !file_exists($tmp_filename) )
@@ -1085,7 +1085,7 @@ switch( $mode )
 					if( OPEN_BASEDIR_RESTRICTION )
 					{
 						$unlink = true;
-						$tmp_filename = wa_realpath(wa_tmp_path . '/' . $filename);
+						$tmp_filename = wa_realpath(WA_TMPDIR . '/' . $filename);
 						
 						move_uploaded_file($file_upload['tmp_name'], $tmp_filename);
 					}
@@ -1111,7 +1111,7 @@ switch( $mode )
 				//
 				if( $unlink )
 				{
-					include WA_PATH . 'includes/class.attach.php';
+					include WA_ROOTDIR . '/includes/class.attach.php';
 					
 					Attach::remove_file($tmp_filename);
 				}
@@ -1206,13 +1206,13 @@ switch( $mode )
 			$code_html .= "<input type=\"submit\" name=\"wanewsletter\" value=\"" . $lang['Button']['valid'] . "\" />\n";
 			$code_html .= "</form>";
 			
-			$path = wa_realpath(WA_PATH . 'newsletter.php');
+			$path = wa_realpath(WA_ROOTDIR . '/newsletter.php');
 			
 			$code_php  = '<' . "?php\n";
 			$code_php .= "define('IN_WA_FORM', true);\n";
-			$code_php .= "define('WA_PATH', '" . substr($path, 0, (strrpos($path, '/') + 1)) . "');\n";
+			$code_php .= "define('WA_ROOTDIR', '" . substr($path, 0, strrpos($path, '/')) . "');\n";
 			$code_php .= "\n";
-			$code_php .= "include WA_PATH . 'newsletter.php';\n";
+			$code_php .= "include WA_ROOTDIR . '/newsletter.php';\n";
 			$code_php .= '?' . '>';
 			
 			$output->set_filenames(array(

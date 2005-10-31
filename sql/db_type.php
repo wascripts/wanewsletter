@@ -36,7 +36,7 @@ switch( $dbtype )
 	case 'mysql4':
 	case 'postgre':
 	case 'sqlite':
-		require WA_PATH . 'sql/' . $dbtype . '.php';
+		require WA_ROOTDIR . '/sql/' . $dbtype . '.php';
 		break;
 	
 	default:

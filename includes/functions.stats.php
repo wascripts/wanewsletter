@@ -25,9 +25,9 @@
  * @version $Id$
  */
 
-define('WA_STATS_PATH', WA_PATH . 'stats/', true);
+define('WA_STATSDIR', WA_ROOTDIR . '/stats', true);
 
-@chmod(wa_stats_path, 0777);
+@chmod(WA_STATSDIR, 0777);
 
 /**
  * convertToRGB()
@@ -107,7 +107,7 @@ function create_stats($listdata, $month, $year)
 	
 	$filename = date('Y_F', mktime(0, 0, 0, $month, 1, $year)) . '_list' . $listdata['liste_id'] . '.txt';
 	
-	if( $fw = @fopen(wa_stats_path . $filename, 'w') )
+	if( $fw = @fopen(WA_STATSDIR . '/' . $filename, 'w') )
 	{
 		$stats = array();
 		
@@ -162,22 +162,22 @@ function update_stats($listdata)
 	
 	$filename = date('Y_F') . '_list' . $listdata['liste_id'] . '.txt';
 	
-	if( !file_exists(wa_stats_path . $filename) )
+	if( !file_exists(WA_STATSDIR . '/' . $filename) )
 	{
 		return create_stats($listdata, date('m'), date('Y'));
 	}
 	else
 	{
-		if( $fp = @fopen(wa_stats_path . $filename, 'r') )
+		if( $fp = @fopen(WA_STATSDIR . '/' . $filename, 'r') )
 		{
-			$stats = clean_stats(fread($fp, filesize(wa_stats_path . $filename)));
+			$stats = clean_stats(fread($fp, filesize(WA_STATSDIR . '/' . $filename)));
 			fclose($fp);
 			
 			$offset = (date('j') - 1);
 			$stats[$offset] += 1;
 			
-			@chmod(wa_stats_path . $filename, 0666);
-			if( $fw = @fopen(wa_stats_path . $filename, 'w') )
+			@chmod(WA_STATSDIR . '/' . $filename, 0666);
+			if( $fw = @fopen(WA_STATSDIR . '/' . $filename, 'w') )
 			{
 				fwrite($fw, implode("\n", $stats));
 				fclose($fw);
@@ -211,9 +211,9 @@ function remove_stats($liste_from, $liste_to = false)
 	
 	@set_time_limit(300);
 	
-	if( $res = @opendir(wa_stats_path) )
+	if( $res = @opendir(WA_STATSDIR . '/') )
 	{
-		include WA_PATH . 'includes/class.attach.php';
+		require WA_ROOTDIR . '/includes/class.attach.php';
 		
 		$old_stats = array();
 		
@@ -221,13 +221,13 @@ function remove_stats($liste_from, $liste_to = false)
 		{
 			if( preg_match("/^([0-9]{4}_[a-zA-Z]+)_list$liste_from\.txt$/i", $filename, $match) )
 			{
-				if( $liste_to && $fp = @fopen(wa_stats_path . $filename, 'r') )
+				if( $liste_to && $fp = @fopen(WA_STATSDIR . '/' . $filename, 'r') )
 				{
-					$old_stats[$match[1]] = clean_stats(fread($fp, filesize(wa_stats_path . $filename)));
+					$old_stats[$match[1]] = clean_stats(fread($fp, filesize(WA_STATSDIR . '/' . $filename)));
 					fclose($fp);
 				}
 				
-				Attach::remove_file(wa_stats_path . $filename);
+				Attach::remove_file(WA_STATSDIR . '/' . $filename);
 			}
 		}
 		closedir($res);
@@ -238,9 +238,9 @@ function remove_stats($liste_from, $liste_to = false)
 			{
 				$filename = $date . '_list' . $liste_to . '.txt';
 				
-				if( $fp = @fopen(wa_stats_path . $filename, 'r') )
+				if( $fp = @fopen(WA_STATSDIR . '/' . $filename, 'r') )
 				{
-					$stats_to = clean_stats(fread($fp, filesize(wa_stats_path . $filename)));
+					$stats_to = clean_stats(fread($fp, filesize(WA_STATSDIR . '/' . $filename)));
 					fclose($fp);
 					
 					for( $i = 0; $i < count($stats_to); $i++ )
@@ -248,8 +248,8 @@ function remove_stats($liste_from, $liste_to = false)
 						$stats_to[$i] += $stats_from[$i];
 					}
 					
-					@chmod(wa_stats_path . $filename, 0666);
-					if( $fw = @fopen(wa_stats_path . $filename, 'w') )
+					@chmod(WA_STATSDIR . '/' . $filename, 0666);
+					if( $fw = @fopen(WA_STATSDIR . '/' . $filename, 'w') )
 					{
 						fwrite($fw, implode("\n", $stats_to));
 						fclose($fw);

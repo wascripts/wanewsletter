@@ -44,10 +44,10 @@ $pop_user = '';
 $pop_pass = '';
 
 define('IN_NEWSLETTER', true);
+define('WA_ROOTDIR',   '..');
 
-$waroot = '../';
-require($waroot . 'start.php');
-include($waroot . 'includes/class.pop.php');
+require WA_ROOTDIR . '/start.php');
+require WA_ROOTDIR . '/includes/class.pop.php');
 
 $pop = new Pop();
 $pop->connect($pop_host, $pop_port, $pop_user, $pop_pass);

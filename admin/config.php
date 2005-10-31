@@ -1,6 +1,6 @@
 <?php 
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
+ * Copyright (c) 2002-2006 Aurï¿½lien Maille
  * 
  * This file is part of Wanewsletter.
  * 
@@ -41,7 +41,7 @@ if( $admindata['admin_level'] != ADMIN )
 $sql = "SELECT * FROM " . CONFIG_TABLE;
 if( !($result = $db->query($sql)) )
 {
-	trigger_error('Impossible de récupérer la configuration du script', ERROR);
+	trigger_error('Impossible de rï¿½cupï¿½rer la configuration du script', ERROR);
 }
 
 $old_config = $db->fetch_array($result);
@@ -49,8 +49,8 @@ $move_files = false;
 
 if( isset($_POST['submit']) )
 {
-	require WA_PATH . 'includes/class.attach.php';
-	require WA_PATH . 'includes/functions.validate.php';
+	require WA_ROOTDIR . '/includes/class.attach.php';
+	require WA_ROOTDIR . '/includes/functions.validate.php';
 	
 	$new_config = array();
 	foreach( $old_config AS $name => $value )
@@ -58,7 +58,7 @@ if( isset($_POST['submit']) )
 		$new_config[$name] = ( isset($_POST[$name]) ) ? trim($_POST[$name]) : $value;
 	}
 	
-	// désactivé temporairement
+	// dï¿½sactivï¿½ temporairement
 	$new_config['check_email_mx'] = 0;
 	
 	if( $new_config['language'] == '' || !validate_lang($new_config['language']) )
@@ -139,7 +139,7 @@ if( isset($_POST['submit']) )
 	{
 		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $new_config['urlsite'], $match);
 		
-		require WA_PATH . 'includes/wamailer/class.smtp.php';
+		require WAMAILER_DIR . '/class.smtp.php';
 		
 		$smtp = new Smtp();
 		
@@ -168,9 +168,9 @@ if( isset($_POST['submit']) )
 	
 	if( !$new_config['disable_stats'] && is_available_extension('gd') )
 	{
-		require WA_PATH . 'includes/functions.stats.php';
+		require WA_ROOTDIR . '/includes/functions.stats.php';
 		
-		if( !is_writable(wa_stats_path) )
+		if( !is_writable(WA_STATSDIR) )
 		{
 			$error = TRUE;
 			$msg_error[] = $lang['Message']['stats_dir_not_writable'];
@@ -185,11 +185,11 @@ if( isset($_POST['submit']) )
 	{
 		if( !$db->query_build('UPDATE', CONFIG_TABLE, $new_config) )
 		{
-			trigger_error('Impossible de mettre à jour la configuration', ERROR);
+			trigger_error('Impossible de mettre ï¿½ jour la configuration', ERROR);
 		}
 		
 		//
-		// Déplacement des fichiers joints dans le nouveau dossier de stockage s'il est changé
+		// Dï¿½placement des fichiers joints dans le nouveau dossier de stockage s'il est changï¿½
 		//
 		if( $move_files && !file_exists(substr($new_config['upload_path'], 0, -1)) )
 		{
@@ -208,7 +208,7 @@ if( isset($_POST['submit']) )
 						@chmod($new_config['upload_path'] . $entry, 0644);
 						
 						//
-						// Suppression du fichier de l'ancien répertoire
+						// Suppression du fichier de l'ancien rï¿½pertoire
 						//
 						Attach::remove_file($nl_config['upload_path'] . $entry);
 					}
@@ -225,7 +225,7 @@ else
 	$new_config = $old_config;
 }
 
-require WA_PATH . 'includes/functions.box.php';
+require WA_ROOTDIR . '/includes/functions.box.php';
 
 $output->page_header();
 
@@ -243,7 +243,7 @@ $output->assign_vars( array(
 	'L_EXPLAIN'                 => nl2br($lang['Explain']['config']),
 	'L_EXPLAIN_COOKIES'         => nl2br($lang['Explain']['config_cookies']),
 	'L_EXPLAIN_JOINED_FILES'    => nl2br($lang['Explain']['config_files']),
-	'L_EXPLAIN_EMAIL'           => nl2br(sprintf($lang['Explain']['config_email'], '<a href="' . WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#10">', '</a>')),
+	'L_EXPLAIN_EMAIL'           => nl2br(sprintf($lang['Explain']['config_email'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#10">', '</a>')),
 	
 	'L_DEFAULT_LANG'            => $lang['Default_lang'],
 	'L_SITENAME'                => $lang['Sitename'],
@@ -263,7 +263,7 @@ $output->assign_vars( array(
 	'L_MAX_FILESIZE_NOTE'       => nl2br($lang['Max_filesize_note']),
 	'L_OCTETS'                  => $lang['Octets'],
 	'L_CHECK_EMAIL'             => $lang['Check_email'],
-	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . WA_PATH . 'docs/faq.' . $lang['CONTENT_LANG'] . '.html#12">', '</a>')),
+	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#12">', '</a>')),
 	'L_ENGINE_SEND'             => $lang['Choice_engine_send'],
 	'L_ENGINE_BCC'              => $lang['With_engine_bcc'],
 	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],

@@ -42,7 +42,7 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 	
 	if( !class_exists('Mailer') )
 	{
-		include WA_PATH . 'includes/wamailer/class.mailer.php';
+		require WAMAILER_DIR . '/class.mailer.php';
 	}
 	
 	//
@@ -145,7 +145,7 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 		// pour une adresse email extérieure à ce réseau)
 		//
 		$mailer = new Mailer();
-		$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
+		$mailer->smtp_path = WAMAILER_DIR . '/';
 		
 		if( $mailer->validate_email_mx($email) == false )
 		{
@@ -168,7 +168,7 @@ function validate_pass($password)
 
 function validate_lang($language)
 {
-	return preg_match('/^[\w_-]+$/', $language) && file_exists(WA_PATH . 'language/lang_' . $language . '.php');
+	return preg_match('/^[\w_-]+$/', $language) && file_exists(WA_ROOTDIR . '/language/lang_' . $language . '.php');
 }
 
 ?>
