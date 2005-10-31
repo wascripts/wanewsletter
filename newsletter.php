@@ -50,7 +50,7 @@ else
 
 $message = '';
 
-$vararray = array('action', 'email', 'code', 'format', 'liste');
+$vararray = array('action', 'email', 'code', 'liste');
 foreach( $vararray AS $varname )
 {
 	${$varname} = ( !empty($_REQUEST[$varname]) ) ? $_REQUEST[$varname] : '';
@@ -97,7 +97,7 @@ if( $action != '' )
 		
 		$wanewsletter = new Wanewsletter($listdata);
 		
-		if( $wanewsletter->account_info($email, '', $code, $format, $action) )
+		if( $wanewsletter->account_info($email, '', $code, $action) )
 		{
 			switch( $action )
 			{

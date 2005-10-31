@@ -45,12 +45,11 @@ class Wanewsletter {
 		$this->liste_email = ( !empty($listdata['liste_alias']) ) ? $listdata['liste_alias'] : $listdata['sender_email'];
 	}
 	
-	function account_info($email, $pseudo, $code, $format, $action)
+	function account_info($email, $pseudo, $code, $action)
 	{
 		$this->email  = trim($email);
 		$this->pseudo = trim($pseudo);
 		$this->code   = trim($code);
-		$this->format = intval($format);
 		
 		switch( $this->listdata['liste_format'] )
 		{
@@ -82,6 +81,7 @@ class Wanewsletter {
 				$this->account['abo_id'] = $result['abo_data']['abo_id'];
 				$this->account['code']   = $result['abo_data']['abo_register_key'];
 				$this->account['date']   = $result['abo_data']['abo_register_date'];
+				$this->account['format'] = $result['abo_data']['format'];
 				$this->account['status'] = $result['abo_data']['abo_status'];
 			}
 			else
@@ -91,6 +91,7 @@ class Wanewsletter {
 				$this->account['abo_id'] = 0;
 				$this->account['code']   = generate_key();
 				$this->account['date']   = time();
+				$this->account['format'] = $this->format;
 				$this->account['status'] = ABO_INACTIF;
 			}
 			
@@ -435,32 +436,20 @@ class Wanewsletter {
 		
 		if( $this->listdata['liste_format'] == FORMAT_MULTIPLE )
 		{
-			$sql = "SELECT format 
-				FROM " . ABO_LISTE_TABLE . " 
-				WHERE abo_id = " . $this->account['abo_id'] . " 
-					AND liste_id = " . $this->listdata['liste_id'];
-			if( $result = $db->query($sql) )
+			if( $this->account['format'] == FORMAT_TEXTE )
 			{
-				$format = $db->result($result, 0, 'format');
-				
-				switch( $format )
-				{
-					case FORMAT_TEXTE:
-						$this->format = FORMAT_HTML;
-						break;
-					
-					case FORMAT_HTML:
-					default:
-						$this->format = FORMAT_TEXTE;
-						break;
-				}
+				$this->format = FORMAT_HTML;
+			}
+			else
+			{
+				$this->format = FORMAT_TEXTE;
 			}
 			
-			$low_priority = ( strstr(DATABASE, 'mysql') ) ? 'LOW_PRIORITY' : '';
+			$low_priority = ( substr(DATABASE, 0, 5) == 'mysql' ) ? 'LOW_PRIORITY' : '';
 			
-			$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . " 
-				SET format = " . $this->format . " 
-				WHERE abo_id = " . $this->account['abo_id'] . " 
+			$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
+				SET format = " . $this->format . "
+				WHERE abo_id = " . $this->account['abo_id'] . "
 					AND liste_id = " . $this->listdata['liste_id'];
 			if( !$db->query($sql) )
 			{

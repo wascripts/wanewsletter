@@ -199,7 +199,7 @@ if( $listdata = $db->fetch_array($result) )
 				continue;
 			}
 			
-			if( $wan->account_info($email, $pseudo, $code, $listdata['liste_format'], $action) )
+			if( $wan->account_info($email, $pseudo, $code, $action) )
 			{
 				switch( $action )
 				{

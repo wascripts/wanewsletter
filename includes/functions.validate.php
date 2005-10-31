@@ -30,9 +30,9 @@
  * 
  * Vérification de l'email
  * 
- * @param string  $email     Email à vérifier
- * @param integer $liste     Id de la liste concernée
- * @param string  $action    Action en cours
+ * @param string  $email   Email à vérifier
+ * @param integer $liste   Id de la liste concernée
+ * @param string  $action  Action en cours
  * 
  * @return array
  */
@@ -48,9 +48,7 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 	//
 	// Vérification syntaxique de l'email
 	//
-	$result = Mailer::validate_email($email);
-	
-	if( !$result )
+	if( Mailer::validate_email($email) == false )
 	{
 		return array('error' => true, 'message' => $lang['Message']['Invalid_email']);
 	}
@@ -74,30 +72,32 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 		switch( DATABASE )
 		{
 			case 'postgre':
-				$sql = "SELECT a.*, 1 AS is_registered 
-					FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-					WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "' 
-						AND a.abo_id = al.abo_id 
-						AND al.liste_id = $liste 
+			case 'sqlite':
+			case 'mysql4':
+				$sql = "SELECT a.*, al.format 1 AS is_registered
+					FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
+					WHERE a.abo_email = '" . $db->escape($email) . "'
+						AND a.abo_id = al.abo_id
+						AND al.liste_id = $liste
 						UNION(
-							SELECT a.*, 0 AS is_registered 
-							FROM " . ABONNES_TABLE . " AS a 
-							WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "' 
+							SELECT a.*, al.format, 0 AS is_registered
+							FROM " . ABONNES_TABLE . " AS a
+							WHERE a.abo_email = '" . $db->escape($email) . "'
 								AND NOT EXISTS(
-									SELECT abo_id 
-									FROM " . ABO_LISTE_TABLE . " AS al 
-									WHERE al.abo_id = a.abo_id 
+									SELECT abo_id
+									FROM " . ABO_LISTE_TABLE . " AS al
+									WHERE al.abo_id = a.abo_id
 										AND al.liste_id = $liste
 							)
 						)";
 				break;
 			
 			default:
-				$sql = "SELECT a.*, COUNT(al.abo_id) AS is_registered 
-					FROM " . ABONNES_TABLE . " AS a 
-					LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON a.abo_id = al.abo_id 
-						AND al.liste_id = $liste 
-					WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "' 
+				$sql = "SELECT a.*, al.format, COUNT(al.abo_id) AS is_registered
+					FROM " . ABONNES_TABLE . " AS a
+					LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON a.abo_id = al.abo_id
+						AND al.liste_id = $liste
+					WHERE a.abo_email = '" . $db->escape($email) . "'
 					GROUP BY al.abo_id";
 				break;
 		}
@@ -145,10 +145,9 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 		// pour une adresse email extérieure à ce réseau)
 		//
 		$mailer = new Mailer();
-		$mailer->smtp_path = WA_PATH . 'includes/';
-		$result = $mailer->validate_email_mx($email);
+		$mailer->smtp_path = WA_PATH . 'includes/wamailer/';
 		
-		if( !$result )
+		if( $mailer->validate_email_mx($email) == false )
 		{
 			return array('error' => true, 'message' => $lang['Message']['Unrecognized_email']);
 		}
