@@ -601,7 +601,7 @@ class output extends Template {
 			$u_download = './view.php?mode=download&amp;fid=%d';
 		}
 		
-		$u_show = './options/show.php?fid=%d';
+		$u_show = '../options/show.php?fid=%d';
 		
 		for( $i = 0; $i < $num_files; $i++ )
 		{
