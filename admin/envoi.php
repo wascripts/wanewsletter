@@ -685,6 +685,11 @@ if( $mode == 'resend' )
 	$mailer->set_charset($lang['CHARSET']);
 	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
 	
+	if( $listdata['return_email'] != '' )
+	{
+		$mailer->set_return_path($listdata['return_email']);
+	}
+	
 	//
 	// On lance l'envoi
 	//

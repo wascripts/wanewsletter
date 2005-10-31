@@ -67,7 +67,7 @@ function launch_sending($listdata, $logdata)
 	if( $listdata['use_cron'] || $nl_config['engine_send'] == ENGINE_BCC )
 	{
 		$body[FORMAT_TEXTE] = str_replace('{LINKS}', $link[FORMAT_TEXTE], $body[FORMAT_TEXTE]);
-		$body[FORMAT_HTML]  = str_replace('{LINKS}', $link[FORMAT_HTML], $body[FORMAT_HTML]);
+		$body[FORMAT_HTML]  = str_replace('{LINKS}', $link[FORMAT_HTML],  $body[FORMAT_HTML]);
 	}
 	
 	//
@@ -186,28 +186,34 @@ function launch_sending($listdata, $logdata)
 				}
 			}
 			
-			//
-			// Envoi texte et html (si abonné il y a)
-			//
-			foreach( $abonnes AS $format => $emails_ary )
+			if( count($abonnes[FORMAT_TEXTE]) > 0 )
 			{
-				if( count($emails_ary) > 0 )
+				$mailer->set_address($abonnes[FORMAT_TEXTE], 'Bcc');
+				$mailer->set_format(FORMAT_TEXTE);
+				$mailer->set_message($body[FORMAT_TEXTE]);
+				$mailer->assign_tags($tags_replace);
+				
+				if( !$mailer->send() )
 				{
-					$mailer->clear_address();
-					$mailer->set_address($emails_ary, 'Bcc');
-					$mailer->set_format($format);
-					$mailer->set_message($body[$format]);
-					$mailer->assign_tags($tags_replace);
-					
-					if( $listdata['return_email'] != '' )
-					{
-						$mailer->set_return_path($listdata['return_email']);
-					}
-					
-					if( !$mailer->send() )
-					{
-						trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
-					}
+					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+				}
+			}
+			
+			if( count($abonnes[FORMAT_HTML]) > 0 )
+			{
+				$mailer->set_address($abonnes[FORMAT_HTML], 'Bcc');
+				$mailer->set_format($listdata['liste_format']);
+				$mailer->assign_tags($tags_replace);
+				$mailer->set_message($body[FORMAT_HTML]);
+				
+				if( $listdata['liste_format'] == FORMAT_MULTIPLE )
+				{
+					$mailer->set_altmessage($body[FORMAT_TEXTE]);
+				}
+				
+				if( !$mailer->send() )
+				{
+					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
 				}
 			}
 		}
@@ -231,11 +237,6 @@ function launch_sending($listdata, $logdata)
 				$mailer->clear_address();
 				$mailer->set_address($address);
 				$mailer->set_format($abo_format);
-				
-				if( $listdata['return_email'] != '' )
-				{
-					$mailer->set_return_path($listdata['return_email']);
-				}
 				
 				if( empty($mailer->compiled_message[$abo_format]) )
 				{
