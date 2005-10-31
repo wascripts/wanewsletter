@@ -3,7 +3,7 @@
 ------------------
 
 - Compatibilité assurée avec PHP5
-- Support de SQLite
+- Compléter le support de SQLite
 
 - Nouveaux formats possibles pour l'export d'emails
 - Enregistrement de l'IP lors d'une inscription ? (et checker pour empécher le spam de DB)
@@ -18,9 +18,12 @@
 - Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)
 - Ajouter une partie dans faq.fr.html pour SQLite ?
 - Supprimer choix de la méthode d’envoi si host est Online (Utiliser Mailer::is_online_host())
-- revoir les schémas de tables
+- revoir les schémas de tables (mots clés en majuscules ou minuscules, faire les modifs aussi dans les classes *_backup)
 - ajouter fichier README pour Wamailer
-- Passer les images en png (celles appelées dans wanewsletter.css en tout cas ont actuellement l'extension .gif)
+- Ajouter des stats sur les formats choisis par les abonnés (listes multi-formats uniquement prise en compte ?)
+- Permettre l’exportation simple et rapide d’une newsletter (au "format" .eml)
+- durée de session semble illimitée, corriger ça
+- commenter plus le code
 
 
 Coding
@@ -29,7 +32,7 @@ Coding
 - Vérifier réglages de mode lorsqu'on ouvre des fichiers
 - Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
 - remplacer mysql_get_client_info() dans tools.php, ligne 239
-- nommer tous les index de la forme nom_colonne_idx (en majuscule ?)
+- nommer tous les index de la forme nom_colonne_idx (en majuscule ?) et toutes les clefs primaires de la forme nom_colonne_pk
 
 Passer de SQLite 2.x à SQLite 3.x :
 	$ sqlite-old old.db .dump | sqlite-new new.db
