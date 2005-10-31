@@ -139,7 +139,7 @@ if( isset($_POST['submit']) )
 	{
 		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $new_config['urlsite'], $match);
 		
-		require WA_PATH . 'includes/class.smtp.php';
+		require WA_PATH . 'includes/wamailer/class.smtp.php';
 		
 		$smtp = new Smtp();
 		
