@@ -11,7 +11,6 @@
   ainsi que fournir une API utilisable dans d'autres applis PHP (phpBB, SPIP, ...)
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/
 - Pas de mention du code de compte si panneau de gestion de compte est désactivé (?)
-- email envoyé à admin lors de nouvel inscription: Limiter aux inscriptions confirmées si liste demande confirmation ?
 - confirmation à chaque demande d'inscription, pas seulement la première
 - Permettre l'envoi d'emails multipart (text/html) ?
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
@@ -21,6 +20,7 @@
 - Supprimer choix de la méthode d’envoi si host est Online (Utiliser Mailer::is_online_host())
 - revoir les schémas de tables
 - ajouter fichier README pour Wamailer
+- Passer les images en png (celles appelées dans wanewsletter.css en tout cas ont actuellement l'extension .gif)
 
 
 Coding
