@@ -12,7 +12,6 @@
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/
 - Pas de mention du code de compte si panneau de gestion de compte est désactivé (?)
 - confirmation à chaque demande d'inscription, pas seulement la première
-- Permettre l'envoi d'emails multipart (text/html) ?
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Annuler un envoi
 - Charger un modèle de newsletter via une url ? (ce qu'a fait thierry gagnon, voir spip-contrib)
