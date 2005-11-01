@@ -153,10 +153,9 @@ class Session {
 		
 		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $nl_config['urlsite'], $match);
 		
-		$this->cfg_cookie['cookie_name'] = $nl_config['cookie_name'];
-		$this->cfg_cookie['cookie_path'] = $nl_config['cookie_path'];
-//		$this->cfg_cookie['cookie_domain'] = $match[2];
-		$this->cfg_cookie['cookie_domain'] = '';
+		$this->cfg_cookie['cookie_name']   = $nl_config['cookie_name'];
+		$this->cfg_cookie['cookie_path']   = $nl_config['cookie_path'];
+		$this->cfg_cookie['cookie_domain'] = '';//$match[2];
 		$this->cfg_cookie['cookie_secure'] = ( !empty($match[1]) ) ? 1 : 0;
 	}
 	
@@ -190,7 +189,8 @@ class Session {
 			'session_liste' => $liste
 		);
 		
-		if( $this->session_id == '' || !$db->query_build('UPDATE', SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id)) )
+		if( $this->session_id == '' || !$db->query_build('UPDATE', SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id))
+			|| $db->affected_rows() == 0 )
 		{
 			$this->new_session = TRUE;
 			$this->session_id  = $sql_data['session_id'] = generate_key();
@@ -271,7 +271,7 @@ class Session {
 				//
 				$len_check_ip = 4;
 				
-				if( substr($row['session_ip'], 0, $len_check_ip) == substr($this->user_ip, 0, $len_check_ip) )
+				if( strncasecmp($row['session_ip'], $this->user_ip, $len_check_ip) == 0 )
 				{
 					$force_update = false;
 					if( ( $liste > 0 && $liste != $row['session_liste'] ) || $liste == -1 )
@@ -283,7 +283,7 @@ class Session {
 					if( ($current_time - $row['session_time']) > 60 || $force_update )
 					{
 						$sql = "UPDATE " . SESSIONS_TABLE . " 
-							SET session_time = $current_time, 
+							SET session_time  = $current_time, 
 								session_liste = $row[session_liste]
 							WHERE session_id = '{$this->session_id}'";
 						if( !$db->query($sql) )
@@ -306,7 +306,7 @@ class Session {
 						
 						$sql = "DELETE FROM " . SESSIONS_TABLE . " 
 							WHERE session_time < $expiry_time 
-								AND session_id <> '{$this->session_id}'";
+								AND session_id != '{$this->session_id}'";
 						if( !$db->query($sql) )
 						{
 							trigger_error('Impossible de supprimer les sessions périmées', CRITICAL_ERROR);
