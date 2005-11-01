@@ -23,6 +23,8 @@
 - Permettre l’exportation simple et rapide d’une newsletter (au "format" .eml)
 - durée de session semble illimitée, corriger ça
 - commenter plus le code
+- Permettre l’édition du profil des abonnés ?
+- faire fonctionner ce maudit cookie_domain (class.sessions.php)
 
 
 Coding
