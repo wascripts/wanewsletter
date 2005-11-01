@@ -52,6 +52,8 @@ $pop_port   = 110; // port du serveur. La valeur par défaut (110) est la plus ré
 $pop_user   = '';
 $pop_passwd = '';
 
+require '../tmp/pop_params.php';
+
 ### END OF CONFIGURATION ###
 
 function process_bounce($deliveryReport)
@@ -78,7 +80,7 @@ function process_bounce($deliveryReport)
 	}
 	
 	// Ne nous occupons que des erreurs permanentes (classe 5)
-	if( preg_match('/^5\.(\d{1,3})\.(\d{1,3})$/') ) {
+	if( preg_match('/^5\.(\d{1,3})\.(\d{1,3})$/', $status) ) {
 		
 		/*
 		$sql = "SELECT abo_id 
