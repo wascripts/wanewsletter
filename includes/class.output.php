@@ -639,7 +639,7 @@ class output extends Template {
 			if( ereg('^image/', $mime_type) )
 			{
 				$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '">';
-				$s_show .= '<img src="../images/icon_loupe.gif" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
+				$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
 				$s_show .= '</a>';
 			}
 			else

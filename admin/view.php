@@ -1673,7 +1673,7 @@ else if( $mode == 'log' )
 					$s_title_clip = $lang['Joined_file'];
 				}
 				
-				$s_clip = '<img src="../images/icon_clip.gif" width="10" height="13" alt="@" title="' . $s_title_clip . '" />';
+				$s_clip = '<img src="../templates/images/icon_clip.png" width="10" height="13" alt="@" title="' . $s_title_clip . '" />';
 			}
 			else
 			{
