@@ -19,17 +19,14 @@
 - revoir les schémas de tables (mots clés en majuscules ou minuscules, faire les modifs aussi dans les classes *_backup)
 - ajouter fichier README pour Wamailer
 - Permettre l’exportation simple et rapide d’une newsletter (au "format" .eml)
-- durée de session semble illimitée, corriger ça
 - commenter plus le code
 - Permettre l’édition du profil des abonnés ?
-- faire fonctionner ce maudit cookie_domain (class.sessions.php)
 - Pré-installer la base sqlite ?
 - Retirer la doc wamailer du paquet
 - Terminer support des chargements de newsletters externes
   - Charger un modèle de newsletter via une url (ce qu'a fait thierry gagnon, voir spip-contrib)
 - Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
 - Voir avec J.J Solari pour fct des javascript dans Safari
-- Mettre stats.php au propre
 
 
 Coding
