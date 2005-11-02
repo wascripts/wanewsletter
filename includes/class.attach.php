@@ -325,7 +325,7 @@ class Attach {
 			else if( $upload_mode == 'remote' )
 			{
 				$parts = parse_url($tmp_filename);
-				if( ($parts['scheme'] != 'http' && $parts['scheme'] != 'ftp') || empty($parts['host']) || empty($parts['path']) )
+				if( ($parts['scheme'] != 'http' && ($parts['scheme'] != 'ftp' || !extension_loaded('ftp'))) || empty($parts['host']) || empty($parts['path']) )
 				{
 					$error = TRUE;
 					$msg_error[] = $lang['Message']['Invalid_url'];
