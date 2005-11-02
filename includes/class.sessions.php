@@ -249,15 +249,30 @@ class Session {
 		$current_time = time();
 		$this->sessiondata = ( is_array($sessiondata) ) ? $sessiondata : array();
 		
+		//
+		// Suppression des sessions périmées 
+		//
+		if( !($current_time % 5) )
+		{
+			$expiry_time = ($current_time - $nl_config['session_length']);
+			
+			$sql = "DELETE FROM " . SESSIONS_TABLE . "
+				WHERE session_time < $expiry_time AND session_id != '{$this->session_id}'";
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de supprimer les sessions périmées', CRITICAL_ERROR);
+			}
+		}
+		
 		if( $this->session_id != '' )
 		{
 			//
 			// Récupération des infos sur la session et l'utilisateur 
 			//
-			$sql = "SELECT a.*, s.* 
-				FROM " . ADMIN_TABLE . " AS a, " . SESSIONS_TABLE . " AS s
-				WHERE s.session_id = '{$this->session_id}'
-					AND a.admin_id = s.admin_id";
+			$sql = "SELECT s.*, a.*
+				FROM " . SESSIONS_TABLE . " AS s
+					INNER JOIN " . ADMIN_TABLE . " AS a ON a.admin_id = s.admin_id
+				WHERE s.session_id = '{$this->session_id}'";
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible de récupérer les infos sur la session et l\'utilisateur', CRITICAL_ERROR);
@@ -294,22 +309,6 @@ class Session {
 						if( $force_update )
 						{
 							$this->send_cookie('listeid', $row['session_liste'], $current_time + 31536000);
-						}
-					}
-					
-					//
-					// Suppression des sessions périmées 
-					//
-					if( !($current_time % 5) )
-					{
-						$expiry_time = ($current_time - $nl_config['session_length']);
-						
-						$sql = "DELETE FROM " . SESSIONS_TABLE . " 
-							WHERE session_time < $expiry_time 
-								AND session_id != '{$this->session_id}'";
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de supprimer les sessions périmées', CRITICAL_ERROR);
 						}
 					}
 					
@@ -356,8 +355,7 @@ class Session {
 		if( $this->session_id != '' )
 		{
 			$sql = "DELETE FROM " . SESSIONS_TABLE . " 
-				WHERE session_id = '{$this->session_id}' 
-					AND admin_id = " . $admin_id;
+				WHERE session_id = '{$this->session_id}' AND admin_id = " . $admin_id;
 			if( !$db->query($sql) )
 			{
 				trigger_error('Erreur lors de la fermeture de la session', CRITICAL_ERROR);
