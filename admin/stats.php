@@ -44,7 +44,7 @@ else if( !is_available_extension('gd') )
 
 include WA_ROOTDIR . '/includes/functions.stats.php';
 
-$liste_id_ary = $auth->check_auth(AUTH_VIEW);
+$liste_ids = $auth->check_auth(AUTH_VIEW);
 
 if( !$admindata['session_liste'] )
 {
@@ -62,21 +62,78 @@ $img   = ( !empty($_GET['img']) ) ? trim($_GET['img']) : '';
 $year  = ( !empty($_GET['year']) ) ? intval($_GET['year']) : date('Y');
 $month = ( !empty($_GET['month']) ) ? intval($_GET['month']) : date('n');
 
-$img_type   = $nl_config['gd_img_type'];
-$title_font = 3;
-$text_font  = 2;
+$img_type = $nl_config['gd_img_type'];
+
+function display_img_error($str)
+{
+	global $img_type;
+	
+	$imageW = 560;
+	$imageH = 80;
+	$text_font = 3;
+	
+	$im = imagecreate($imageW, $imageH);
+	
+	$black = imagecolorallocate($im, 0, 0, 0);
+	$gray1 = convertToRGB('EAEAEA');
+	$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
+	
+	//
+	// Création du contour noir 
+	//
+	imagefill($im, 0, 0, $black);
+	imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $gray1);
+	
+	//
+	// titre du graphe 
+	//
+	$startW = (($imageW - (imagefontwidth($text_font) * strlen($str))) / 2);
+	$startH = (($imageH - imagefontheight($text_font)) / 2);
+	imagestring($im, 3, $startW, $startH, $str, $black);
+	
+	header('Content-Type: image/' . $img_type);
+	$fct_image = 'image' . $img_type;
+	$fct_image($im);
+	
+	imagedestroy($im);
+	exit;
+}
 
 if( $img == 'graph' )
 {
 	$ts = mktime(0, 0, 0, $month, 1, $year);
 	
 	//
-	// Dimensions de l'image 
+	// Réglages de l'image 
 	//
-	$width_img  = 560;
-	$height_img = 260;
+	$imageW = 560;
+	$imageH = 260;
+	$title_font = 3;
+	$text_font  = 2;
 	
-	$im = imagecreate($width_img, $height_img);
+	//
+	// Récupération des statistiques
+	//
+	$filename = sprintf('%04d_%s_list%d.txt', $year, date('F', $ts), $listdata['liste_id']);
+	
+	if( !file_exists(WA_STATSDIR . '/' . $filename) )
+	{
+		create_stats($listdata, $month, $year);
+	}
+	
+	if( ($filesize = filesize(WA_STATSDIR . '/' . $filename)) > 0 && $fp = @fopen(WA_STATSDIR . '/' . $filename, 'r') )
+	{
+		$contents = fread($fp, $filesize);
+		$stats    = clean_stats($contents);
+		fclose($fp);
+	}
+	else
+	{
+		display_img_error('An error has occured while generating image!');
+	}
+	
+	// C'est parti
+	$im = imagecreate($imageW, $imageH);
 	
 	$black	= imagecolorallocate($im, 0, 0, 0);
 	$gray	= imagecolorallocate($im, 200, 200, 200);
@@ -89,67 +146,45 @@ if( $img == 'graph' )
 	$color2 = convertToRGB('02F');
 	$color2 = imagecolorallocate($im, $color2->red, $color2->green, $color2->blue);
 	
-	imagefill($im, 0, 0, $black);
-	
 	//
 	// contours 
 	//
-	imagefilledrectangle($im, 1, 1, ($width_img - 2), ($height_img - 2), $back_2);
-	imagefilledrectangle($im, 24, 24, ($width_img - 25), ($height_img - 24), $black);
-	imagefilledrectangle($im, 25, 25, ($width_img - 26), ($height_img - 25), $back_2);
+	imagefill($im, 0, 0, $black);
+	imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $back_2);
+	imagefilledrectangle($im, 24, 24, ($imageW - 25), ($imageH - 24), $black);
+	imagefilledrectangle($im, 25, 25, ($imageW - 26), ($imageH - 25), $back_2);
 	
 	//
 	// titre du graphe 
 	//
 	$title = sprintf('%s - %s', $lang['Subscribe_per_day'], convert_time('F Y', $ts));
-	$start = (($width_img - (imagefontwidth($title_font) * strlen($title))) / 2);
+	$start = (($imageW - (imagefontwidth($title_font) * strlen($title))) / 2);
 	imagestring($im, $title_font, $start, 5, $title, $black);
 	
 	//
-	// Echelle horizontale et lecture du fichier des stats 
+	// Échelle horizontale et lecture du fichier des stats 
 	//
-	$max_value = 0;
-	$filename  = $year . '_' . date('F', $ts) . '_list' . $listdata['liste_id'] . '.txt';
+	$max_days    = date('t', $ts);
+	$num_per_day = array();
+	$max_value   = 10;
 	
-	if( !file_exists(WA_STATSDIR . '/' . $filename) )
+	for( $day = 1, $i = 0, $int = 0; $day <= $max_days; $day++, $i++, $int += 16 )
 	{
-		create_stats($listdata, $month, $year);
-	}
-	
-	if( ($filesize = filesize(WA_STATSDIR . '/' . $filename)) > 0 && $fp = @fopen(WA_STATSDIR . '/' . $filename, 'r') )
-	{
-		$contents = fread($fp, $filesize);
-		$stats    = clean_stats($contents);
+		$t = date('w', mktime(12, 0, 0, $month, $day, $year));
+		$color = ($t == 0 || $t == 6) ? $gray : $black;// Gris pour les samedi et dimanche
+		imagestring($im, $text_font, (34 + $int), 240, sprintf('%02d', $day), $color);
 		
-		for( $day = 1, $i = 0, $int = 0; $day <= 31; $day++, $i++, $int += 16 )
+		$num_per_day[$day] = ( isset($stats[$i]) ) ? $stats[$i] : 0;
+		
+		if( $stats[$i] > $max_value )
 		{
-			if( checkdate($month, $day, $year) )
-			{
-				$t = date('w', mktime(12, 0, 0, $month, $day, $year));
-				imagestring($im, $text_font, (34 + $int), 240, sprintf('%02d', $day), (($t == 0 || $t == 6) ? $gray : $black));
-				
-				$num_per_day[$day] = ( isset($stats[$i]) ) ? $stats[$i] : 0;
-				
-				if( $stats[$i] > $max_value )
-				{
-					$max_value = $stats[$i];
-				}
-			}
+			$max_value = $stats[$i];
 		}
 	}
-	else
-	{
-		return;
-	}
 	
 	//
-	// Echelle vertical (nombre d'inscriptions) 
+	// Échelle vertical (nombre d'inscriptions) 
 	//
-	if( $max_value == 0 )
-	{
-		$max_value = 10;
-	}
-	
 	$top_value = $max_value;
 	while( ($top_value % 10) != 0 )
 	{
@@ -159,35 +194,35 @@ if( $img == 'graph' )
 	$num = ($top_value / 5);
 	if( ($num % 6) == 0 )
 	{
-		$ec = 6;
+		$numgrad = 6;
 	}
 	else if( ($num % 4) == 0 )
 	{
-		$ec = 4;
+		$numgrad = 4;
 	}
 	else
 	{
-		$ec = 5;
+		$numgrad = 5;
 	}
 	
-	$num = ($top_value / $ec);
+	$num = ($top_value / $numgrad);
 	$coeff = (200 / $top_value);
 	
-	for( $i = 0, $int = 0; $i < ($ec*2); $i++, $int += (200/($ec*2)) )
+	for( $i = 0, $int = 0; $i < ($numgrad * 2); $i++, $int += (200/($numgrad * 2)) )
 	{
-		if( ($i%2) == 0 )
+		if( ($i % 2) == 0 )
 		{
 			imagestring($im, $text_font, 7, (29 + $int), $top_value, $black);
 			imagesetstyle($im, array($gray, $gray, $gray, $gray, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT));
-			imageline($im, 32, (37 + $int), ($width_img - 33), (37 + $int), IMG_COLOR_STYLED);
+			imageline($im, 32, (37 + $int), ($imageW - 33), (37 + $int), IMG_COLOR_STYLED);
 			imageline($im, 25, (37 + $int), 28, (37 + $int), $black);
-			imageline($im, ($width_img - 29), (37 + $int), ($width_img - 26), (37 + $int), $black);
+			imageline($im, ($imageW - 29), (37 + $int), ($imageW - 26), (37 + $int), $black);
 			$top_value -= $num;
 		}
 		else
 		{
 			imageline($im, 25, (37 + $int), 26, (37 + $int), $black);
-			imageline($im, ($width_img - 27), (37 + $int), ($width_img - 26), (37 + $int), $black);
+			imageline($im, ($imageW - 27), (37 + $int), ($imageW - 26), (37 + $int), $black);
 		}
 	}
 	
@@ -197,9 +232,9 @@ if( $img == 'graph' )
 	//
 	// Affichage des résultats 
 	//
-	for( $day = 1, $int = 0; $day <= 31; $day++, $int += 16 )
+	for( $day = 1, $int = 0; $day <= $max_days; $day++, $int += 16 )
 	{
-		if( checkdate($month, $day, $year) && $num_per_day[$day] > 0 )
+		if( $num_per_day[$day] > 0 )
 		{
 			$val = max(3, ($coeff * $num_per_day[$day]));
 			$height = (237 - $val);
@@ -222,17 +257,17 @@ if( $img == 'graph' )
 	exit;
 }
 
-if( $img == 'camenbert' )
+if( $img == 'camembert' )
 {
 	$sql = "SELECT COUNT(al.abo_id) AS num_inscrits, al.liste_id
 		FROM " . ABO_LISTE_TABLE . " AS al
 			INNER JOIN " . ABONNES_TABLE . " AS a ON a.abo_id = al.abo_id
 				AND a.abo_status = " . ABO_ACTIF . "
-		WHERE al.liste_id IN(" . implode(', ', $liste_id_ary) . ")
+		WHERE al.liste_id IN(" . implode(', ', $liste_ids) . ")
 		GROUP BY al.liste_id";
 	if( !($result = $db->query($sql)) )
 	{
-		return;
+		display_img_error('An error has occured while generating image!');
 	}
 	
 	$tmpdata = array();
@@ -243,7 +278,7 @@ if( $img == 'camenbert' )
 	
 	$total_inscrits = 0;
 	$listes = array();
-	foreach( $liste_id_ary AS $liste_id )
+	foreach( $liste_ids AS $liste_id )
 	{
 		$liste_name   = cut_str(unhtmlspecialchars($auth->listdata[$liste_id]['liste_name']), 30);
 		$num_inscrits = ( !empty($tmpdata[$liste_id]) ) ? $tmpdata[$liste_id] : 0;
@@ -255,25 +290,28 @@ if( $img == 'camenbert' )
 	$total_listes = count($listes);
 	
 	//
-	// Taille de base de l'image (varie s'il y a beaucoup de listes)
+	// Taille de base de l'image (varie s'il y a beaucoup de listes) et tailles de texte
 	//
-	$width_img  = 560;
-	$height_img = 170;
+	$imageW = 560;
+	$imageH = 170;
+	$title_font = 3;
+	$text_font  = 2;
 	
 	if( $total_listes > 3 )
 	{
-		$height_img += (($total_listes - 3) * 20);
+		$imageH += (($total_listes - 3) * 20);
 	}
 	
-	$im = imagecreate($width_img, $height_img);
+	$im = imagecreate($imageW, $imageH);
 	
 	//
 	// Allocation des couleurs
 	//
-	$black  = imagecolorallocate($im, 0, 0, 0);
-	$back_1 = convertToRGB('036');
-	$back_1 = imagecolorallocate($im, $back_1->red, $back_1->green, $back_1->blue);
-	$back_2 = imagecolorallocate($im, 240, 240, 240);
+	$black = imagecolorallocate($im, 0, 0, 0);
+	$gray1 = convertToRGB('EAEAEA');
+	$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
+	$gray2 = convertToRGB('888');
+	$gray2 = imagecolorallocate($im, $gray2->red, $gray2->green, $gray2->blue);
 	
 	$color = array();
 	$colorList = array('F80', '6B0', '0BC', '30C', '608', 'C03');
@@ -287,13 +325,13 @@ if( $img == 'camenbert' )
 	// Création du contour noir 
 	//
 	imagefill($im, 0, 0, $black);
-	imagefilledrectangle($im, 1, 1, ($width_img - 2), ($height_img - 2), $back_2);
+	imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $gray1);
 	
 	//
-	// titre du graphe 
+	// Titre du graphe 
 	//
 	$title = $lang['Num_abo_per_liste'];
-	$start = (($width_img - (imagefontwidth($title_font) * strlen($title))) / 2);
+	$start = (($imageW - (imagefontwidth($title_font) * strlen($title))) / 2);
 	imagestring($im, $title_font, $start, 4, $title, $black);
 	
 	//
@@ -305,9 +343,11 @@ if( $img == 'camenbert' )
 	//
 	// Emplacement des noms de liste de diffusion (cadre blanc) 
 	//
+	$outerDecal = 2;
 	$hauteur = ($start_y - (100 / 2));
-	imagefilledrectangle($im, 145, $hauteur, ($width_img - 20), ($hauteur + 30 + ($total_listes * 20)), $black);
-	imagefilledrectangle($im, 146, ($hauteur + 1), ($width_img - 21), ($hauteur + 29 + ($total_listes * 20)), $back_2);
+	imagefilledrectangle($im, 145-$outerDecal, $hauteur+$outerDecal, ($imageW - 20 - $outerDecal), ($hauteur + (30+$outerDecal) + ($total_listes * 20)), $gray2);
+	imagefilledrectangle($im, 145, $hauteur, ($imageW - 20), ($hauteur + 30 + ($total_listes * 20)), $black);
+	imagefilledrectangle($im, 146, ($hauteur + 1), ($imageW - 21), ($hauteur + 29 + ($total_listes * 20)), $gray1);
 	
 	//
 	// Ok, on génère le camenbert
@@ -354,7 +394,7 @@ if( $img == 'camenbert' )
 		//
 		// Insertion du carré de couleur pour la légende, suivi du nom de la liste et du nombre d'abonnés 
 		//
-		imagefilledrectangle($im, 165, ($hauteur + $int), 175, ($hauteur + $int + 10), $black);
+		imagefilledrectangle($im, 165, ($hauteur + $int + 2), 175, ($hauteur + $int + 12), $gray2);
 		imagefilledrectangle($im, 166, ($hauteur + $int + 1), 176, ($hauteur + $int + 11), $color_arc);
 		
 		imagestring($im, $text_font, 185, ($hauteur + $int),
@@ -425,12 +465,12 @@ $output->assign_vars(array(
 	'L_EXPLAIN_STATS' => nl2br($lang['Explain']['stats']),
 	'L_GO_BUTTON'     => $lang['Button']['go'],
 	'L_IMG_GRAPH'     => $lang['Graph_bar_title'],
-	'L_IMG_CAMENBERT' => $lang['Camenbert_title'],
+	'L_IMG_CAMEMBERT' => $lang['Camembert_title'],
 	
 	'YEAR_LIST'       => $y_list,
 	'MONTH_LIST'      => $m_list,
 	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;year=' . $year . '&amp;month=' . $month),
-	'U_IMG_CAMENBERT' => sessid('./stats.php?img=camenbert'),
+	'U_IMG_CAMEMBERT' => sessid('./stats.php?img=camembert'),
 	
 	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 ));

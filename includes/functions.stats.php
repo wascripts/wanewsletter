@@ -27,8 +27,6 @@
 
 define('WA_STATSDIR', WA_ROOTDIR . '/stats', true);
 
-@chmod(WA_STATSDIR, 0777);
-
 /**
  * convertToRGB()
  * 
@@ -109,27 +107,25 @@ function create_stats($listdata, $month, $year)
 	
 	if( $fw = @fopen(WA_STATSDIR . '/' . $filename, 'w') )
 	{
-		$stats = array();
+		$stats    = array();
+		$max_days = date('t', mktime(0, 0, 0, $month, 15, $year));
 		
-		for( $day = 1, $i = 0; $day <= 31; $day++, $i++ )
+		for( $day = 1, $i = 0; $day <= $max_days; $day++, $i++ )
 		{
 			$stats[$i] = 0;
 			
-			if( checkdate($month, $day, $year) )
+			$min_time = mktime(0, 0, 0, $month, $day, $year);
+			$max_time = mktime(23, 59, 59, $month, $day, $year);
+			
+			$sql = "SELECT COUNT(a.abo_id) AS num_abo
+				FROM " . ABONNES_TABLE . " AS a
+					INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+						AND al.liste_id = $listdata[liste_id]
+				WHERE ( a.abo_register_date BETWEEN $min_time AND $max_time )
+					AND a.abo_status = " . ABO_ACTIF;
+			if( $result = $db->query($sql) )
 			{
-				$min_time = mktime(0, 0, 0, $month, $day, $year);
-				$max_time = mktime(23, 59, 59, $month, $day, $year);
-				
-				$sql = "SELECT COUNT(a.abo_id) AS num_abo 
-					FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-					WHERE al.liste_id = " . $listdata['liste_id'] . " 
-						AND a.abo_id = al.abo_id 
-						AND a.abo_status = " . ABO_ACTIF . " 
-						AND ( a.abo_register_date BETWEEN $min_time AND $max_time )";
-				if( $result = $db->query($sql) )
-				{
-					$stats[$i] = $db->result($result, 0, 'num_abo');
-				}
+				$stats[$i] = $db->result($result, 0, 'num_abo');
 			}
 		}
 		
@@ -211,13 +207,13 @@ function remove_stats($liste_from, $liste_to = false)
 	
 	@set_time_limit(300);
 	
-	if( $res = @opendir(WA_STATSDIR . '/') )
+	if( $browse = dir(WA_STATSDIR . '/') )
 	{
 		require WA_ROOTDIR . '/includes/class.attach.php';
 		
 		$old_stats = array();
 		
-		while( $filename = @readdir($res) )
+		while( ($filename = $browse->read()) !== false )
 		{
 			if( preg_match("/^([0-9]{4}_[a-zA-Z]+)_list$liste_from\.txt$/i", $filename, $match) )
 			{
@@ -230,7 +226,7 @@ function remove_stats($liste_from, $liste_to = false)
 				Attach::remove_file(WA_STATSDIR . '/' . $filename);
 			}
 		}
-		closedir($res);
+		$browse->close();
 		
 		if( $liste_to && count($old_stats) )
 		{

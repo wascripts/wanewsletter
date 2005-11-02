@@ -21,7 +21,7 @@
 </div>
 
 <div class="stats">
-	<img src="{U_IMG_CAMENBERT}" alt="" title="{L_IMG_CAMENBERT}" />
+	<img src="{U_IMG_CAMEMBERT}" alt="" title="{L_IMG_CAMEMBERT}" />
 </div>
 
 {LISTBOX}
