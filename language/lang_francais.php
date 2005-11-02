@@ -585,7 +585,7 @@ $lang['Explain']['stats']           = "Cette page vous permet de visualiser un g
 $lang['Num_abo_per_liste']          = "Répartition des abonnés par liste de diffusion";
 $lang['Subscribe_per_day']          = "Inscriptions/Jours";
 $lang['Graph_bar_title']            = "Le nombre d'inscriptions par jour pour le mois donné";
-$lang['Camenbert_title']            = "Les parts des différentes listes par rapport au nombre total d'abonnés";
+$lang['Camembert_title']            = "Les parts des différentes listes par rapport au nombre total d'abonnés";
 
 
 //

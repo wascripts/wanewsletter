@@ -581,7 +581,7 @@ $lang['Explain']['stats']           = "This page allows you to view a bar graph 
 $lang['Num_abo_per_liste']          = "Dividing up of subscribers by mailing list";
 $lang['Subscribe_per_day']          = "Subscriptions/Days";
 $lang['Graph_bar_title']            = "The number of inscriptions per day for the month given";
-$lang['Camenbert_title']            = "Shares of the various lists compared to the total number of subscribers";
+$lang['Camembert_title']            = "Shares of the various lists compared to the total number of subscribers";
 
 
 //
