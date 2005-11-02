@@ -28,6 +28,7 @@
 define('IN_NEWSLETTER', true);
 
 require './pagestart.php';
+require WAMAILER_DIR . '/class.mailer.php';
 
 if( $admindata['admin_level'] != ADMIN )
 {
@@ -41,7 +42,7 @@ if( $admindata['admin_level'] != ADMIN )
 $sql = "SELECT * FROM " . CONFIG_TABLE;
 if( !($result = $db->query($sql)) )
 {
-	trigger_error('Impossible de rï¿½cupï¿½rer la configuration du script', ERROR);
+	trigger_error('Impossible de récupérer la configuration du script', ERROR);
 }
 
 $old_config = $db->fetch_array($result);
@@ -58,7 +59,7 @@ if( isset($_POST['submit']) )
 		$new_config[$name] = ( isset($_POST[$name]) ) ? trim($_POST[$name]) : $value;
 	}
 	
-	// dï¿½sactivï¿½ temporairement
+	// désactivé temporairement
 	$new_config['check_email_mx'] = 0;
 	
 	if( $new_config['language'] == '' || !validate_lang($new_config['language']) )
@@ -135,6 +136,11 @@ if( isset($_POST['submit']) )
 		$new_config['use_ftp'] = 0;
 	}
 	
+	if( Mailer::is_online_host() == true )
+	{
+		$new_config['engine_send'] = ENGINE_UNIQ;
+	}
+	
 	if( $new_config['use_smtp'] && !is_disabled_func('fsockopen') )
 	{
 		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $new_config['urlsite'], $match);
@@ -185,11 +191,11 @@ if( isset($_POST['submit']) )
 	{
 		if( !$db->query_build('UPDATE', CONFIG_TABLE, $new_config) )
 		{
-			trigger_error('Impossible de mettre ï¿½ jour la configuration', ERROR);
+			trigger_error('Impossible de mettre à jour la configuration', ERROR);
 		}
 		
 		//
-		// Dï¿½placement des fichiers joints dans le nouveau dossier de stockage s'il est changï¿½
+		// Déplacement des fichiers joints dans le nouveau dossier de stockage s'il est changé
 		//
 		if( $move_files && !file_exists(substr($new_config['upload_path'], 0, -1)) )
 		{
@@ -208,7 +214,7 @@ if( isset($_POST['submit']) )
 						@chmod($new_config['upload_path'] . $entry, 0644);
 						
 						//
-						// Suppression du fichier de l'ancien rï¿½pertoire
+						// Suppression du fichier de l'ancien répertoire
 						//
 						Attach::remove_file($nl_config['upload_path'] . $entry);
 					}
@@ -264,9 +270,6 @@ $output->assign_vars( array(
 	'L_OCTETS'                  => $lang['Octets'],
 	'L_CHECK_EMAIL'             => $lang['Check_email'],
 	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#12">', '</a>')),
-	'L_ENGINE_SEND'             => $lang['Choice_engine_send'],
-	'L_ENGINE_BCC'              => $lang['With_engine_bcc'],
-	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],
 	'L_EMAILS_SENDED'           => $lang['Emails_paquet'],
 	'L_EMAILS_SENDED_NOTE'      => nl2br($lang['Emails_paquet_note']),
 	'L_USE_SMTP'                => $lang['Use_smtp'],
@@ -296,8 +299,6 @@ $output->assign_vars( array(
 	'MAX_FILESIZE'              => $new_config['max_filesize'],
 	'CHECKED_CHECK_EMAIL_ON'    => ' disabled="disabled"',//( $new_config['check_email_mx'] ) ? ' checked="checked"' : '',
 	'CHECKED_CHECK_EMAIL_OFF'   => ' checked="checked"',//( !$new_config['check_email_mx'] ) ? ' checked="checked"' : '',
-	'CHECKED_ENGINE_BCC'        => ( $new_config['engine_send'] == ENGINE_BCC ) ? ' checked="checked"' : '',
-	'CHECKED_ENGINE_UNIQ'       => ( $new_config['engine_send'] == ENGINE_UNIQ ) ? ' checked="checked"' : '',
 	'EMAILS_SENDED'             => $new_config['emails_sended'],
 	'CHECKED_USE_SMTP_ON'       => ( $new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'CHECKED_USE_SMTP_OFF'      => ( !$new_config['use_smtp'] ) ? ' checked="checked"' : '',
@@ -335,7 +336,17 @@ if( is_available_extension('ftp') )
 	));
 }
 
-$output->addHiddenField('sessid', $session->session_id);
+if( Mailer::is_online_host() == false )
+{
+	$output->assign_block_vars('choice_engine_send', array(
+		'L_ENGINE_SEND'       => $lang['Choice_engine_send'],
+		'L_ENGINE_BCC'        => $lang['With_engine_bcc'],
+		'L_ENGINE_UNIQ'       => $lang['With_engine_uniq'],
+		
+		'CHECKED_ENGINE_BCC'  => ( $new_config['engine_send'] == ENGINE_BCC ) ? ' checked="checked"' : '',
+		'CHECKED_ENGINE_UNIQ' => ( $new_config['engine_send'] == ENGINE_UNIQ ) ? ' checked="checked"' : ''
+	));
+}
 
 if( is_available_extension('gd') )
 {
@@ -356,6 +367,7 @@ else
 	$output->addHiddenField('disable_stats', '1');
 }
 
+$output->addHiddenField('sessid', $session->session_id);
 $output->assign_var('S_HIDDEN_FIELDS', $output->getHiddenFields());
 
 $output->pparse('body');
