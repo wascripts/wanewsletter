@@ -109,26 +109,37 @@ switch( $mode )
 		
 		if( isset($_POST['submit']) || $logdata['log_id'] )
 		{
-			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status 
-				FROM " . LOG_TABLE . " 
-				WHERE liste_id = " . $listdata['liste_id'] . " 
-					AND log_id = " . $logdata['log_id'] . $sql_where;
-			if( !($result = $db->query($sql)) )
+			if( !empty($_POST['body_text_url']) || !empty($_POST['body_html_url']) )
 			{
-				trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
-			}
-			
-			if( $row = $db->fetch_array($result) )
-			{
-				$logdata = $row;
+				// TODO gérer cas problématiques, urls invalides, etc
+				// passer par class.attach.php ? adapter celle-ci dans ce cas
+				
+				$logdata['log_body_text'] = file_get_contents($_POST['body_text_url']);
+				$logdata['log_body_html'] = file_get_contents($_POST['body_html_url']);
 			}
 			else
 			{
-				$output->redirect('envoi.php?mode=' . $mode, 4);
+				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status 
+					FROM " . LOG_TABLE . " 
+					WHERE liste_id = " . $listdata['liste_id'] . " 
+						AND log_id = " . $logdata['log_id'] . $sql_where;
+				if( !($result = $db->query($sql)) )
+				{
+					trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
+				}
 				
-				$message  = $lang['Message']['log_not_exists'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=' . $mode) . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				if( $row = $db->fetch_array($result) )
+				{
+					$logdata = $row;
+				}
+				else
+				{
+					$output->redirect('envoi.php?mode=' . $mode, 4);
+					
+					$message  = $lang['Message']['log_not_exists'];
+					$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=' . $mode) . '">', '</a>');
+					trigger_error($message, MESSAGE);
+				}
 			}
 		}
 		else
@@ -192,6 +203,31 @@ switch( $mode )
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM'          => sessid('./envoi.php')
 			));
+			
+			if( $mode == 'load' )
+			{
+				switch( $listdata['liste_format'] )
+				{
+					case FORMAT_TEXTE:
+						$bloc_name = 'load_text_by_url';
+						break;
+					case FORMAT_HTML:
+						$bloc_name = 'load_html_by_url';
+						break;
+					default:
+						$bloc_name = 'load_multi_by_url';
+						break;
+				}
+				
+				$output->assign_block_vars($bloc_name, array(
+					'L_LOAD_BY_URL' => 'Chargez une newsletter depuis une URL',
+					'L_FORMAT_TEXT' => $lang['Log_in_text'],
+					'L_FORMAT_HTML' => $lang['Log_in_html'],
+					
+					'BODY_TEXT_URL' => ( !empty($_POST['body_text_url']) ) ? htmlspecialchars(trim($_POST['body_text_url'])) : '',
+					'BODY_HTML_URL' => ( !empty($_POST['body_html_url']) ) ? htmlspecialchars(trim($_POST['body_html_url'])) : ''
+				));
+			}
 			
 			$output->pparse('body');
 			
