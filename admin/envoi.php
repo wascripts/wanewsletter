@@ -114,14 +114,21 @@ switch( $mode )
 				// TODO gérer cas problématiques, urls invalides, etc
 				// passer par class.attach.php ? adapter celle-ci dans ce cas
 				
-				$logdata['log_body_text'] = file_get_contents($_POST['body_text_url']);
-				$logdata['log_body_html'] = file_get_contents($_POST['body_html_url']);
+				if( config_status('allow_url_fopen') == true )
+				{
+					$logdata['log_body_text'] = file_get_contents($_POST['body_text_url']);
+					$logdata['log_body_html'] = file_get_contents($_POST['body_html_url']);
+				}
+				else
+				{
+					// TODO
+				}
 			}
 			else
 			{
 				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status 
 					FROM " . LOG_TABLE . " 
-					WHERE liste_id = " . $listdata['liste_id'] . " 
+					WHERE liste_id = $listdata[liste_id]
 						AND log_id = " . $logdata['log_id'] . $sql_where;
 				if( !($result = $db->query($sql)) )
 				{
@@ -170,7 +177,10 @@ switch( $mode )
 						$style  = 'color: black !important;';
 					}
 					
-					$log_box .= '<option style="' . $style . '" value="' . $row['log_id'] . '"> - ' . htmlspecialchars(cut_str($row['log_subject'], 60)) . ' ' . $status . ' - </option>';
+					$log_box .= sprintf(
+						"<option style=\"%s\" value=\"%d\"> - %s %s - </option>\n",
+						$style, $row['log_id'], htmlspecialchars(cut_str($row['log_subject'], 60)), $status
+					);
 				}
 				while( $row = $db->fetch_array($result) );
 				
@@ -220,12 +230,16 @@ switch( $mode )
 				}
 				
 				$output->assign_block_vars($bloc_name, array(
-					'L_LOAD_BY_URL' => 'Chargez une newsletter depuis une URL',
+					'L_LOAD_BY_URL' => $lang['Load_by_URL'],
 					'L_FORMAT_TEXT' => $lang['Log_in_text'],
 					'L_FORMAT_HTML' => $lang['Log_in_html'],
 					
 					'BODY_TEXT_URL' => ( !empty($_POST['body_text_url']) ) ? htmlspecialchars(trim($_POST['body_text_url'])) : '',
 					'BODY_HTML_URL' => ( !empty($_POST['body_html_url']) ) ? htmlspecialchars(trim($_POST['body_html_url'])) : ''
+				));
+				
+				$output->assign_block_vars('script_load_by_url', array(
+					'L_FROM_AN_URL' => str_replace('\'', '\\\'', $lang['From_an_URL'])
 				));
 			}
 			
@@ -259,7 +273,7 @@ switch( $mode )
 				trigger_error('Impossible de supprimer le log', ERROR);
 			}
 			
-			include WA_ROOTDIR . '/includes/class.attach.php';
+			require WA_ROOTDIR . '/includes/class.attach.php';
 			
 			$attach = new Attach();
 			$attach->delete_joined_files(true, $logdata['log_id']);
@@ -349,7 +363,7 @@ switch( $mode )
 						FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
 						WHERE jf.file_id = lf.file_id
 							AND lf.log_id = l.log_id
-							AND l.liste_id = " . $listdata['liste_id'] . "
+							AND l.liste_id = $listdata[liste_id]
 						ORDER BY jf.file_real_name ASC";
 					if( !($result = $db->query($sql)) )
 					{
@@ -619,11 +633,11 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	// On récupère tous les fichiers joints de la liste pour avoir les fichiers joints de la newsletter
 	// en cours, et construire le select box des fichiers existants
 	//
-	$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
-		FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l 
-		WHERE jf.file_id = lf.file_id 
-			AND lf.log_id = l.log_id 
-			AND l.liste_id = " . $listdata['liste_id'] . " 
+	$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+		FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
+		WHERE jf.file_id = lf.file_id
+			AND lf.log_id = l.log_id
+			AND l.liste_id = $listdata[liste_id]
 		ORDER BY jf.file_real_name ASC";
 	if( !($result = $db->query($sql)) )
 	{
@@ -677,8 +691,8 @@ if( $mode == 'resend' )
 		trigger_error('Not_auth_send', MESSAGE);
 	}
 	
-	include WAMAILER_DIR . '/class.mailer.php';
-	include WA_ROOTDIR . '/includes/engine_send.php';
+	require WAMAILER_DIR . '/class.mailer.php';
+	require WA_ROOTDIR . '/includes/engine_send.php';
 	
 	//
 	// On règle le script pour ignorer une déconnexion du client et 
