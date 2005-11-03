@@ -325,7 +325,7 @@ class Attach {
 			else if( $upload_mode == 'remote' )
 			{
 				$parts = parse_url($tmp_filename);
-				if( ($parts['scheme'] != 'http' && ($parts['scheme'] != 'ftp' || !extension_loaded('ftp'))) || empty($parts['host']) || empty($parts['path']) )
+				if( ($parts['scheme'] != 'http' && ($parts['scheme'] != 'ftp' || !is_available_extension('ftp'))) || empty($parts['host']) || empty($parts['path']) )
 				{
 					$error = TRUE;
 					$msg_error[] = $lang['Message']['Invalid_url'];
@@ -443,7 +443,7 @@ class Attach {
 					}
 					ftp_quit($cid);
 					
-					include WAMAILER_DIR . '/class.mailer.php';
+					require WAMAILER_DIR . '/class.mailer.php';
 					
 					$filetype = Mailer::mime_type(substr($filename, (strrpos($filename, '.') + 1)));
 				}
@@ -456,7 +456,7 @@ class Attach {
 			//
 			else if( $upload_mode == 'local' )
 			{
-				include WAMAILER_DIR . '/class.mailer.php';
+				require WAMAILER_DIR . '/class.mailer.php';
 				
 				$filetype = Mailer::mime_type($extension);
 				
