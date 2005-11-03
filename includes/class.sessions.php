@@ -392,7 +392,7 @@ class Session {
 			trigger_error('Impossible d\'obtenir les données sur cet utilisateur', CRITICAL_ERROR);
 		}
 		
-		if( $admindata = $db->fetch_array($result) && $admindata['admin_pwd'] == $admin_pwd )
+		if( ($admindata = $db->fetch_array($result)) && $admindata['admin_pwd'] == $admin_pwd )
 		{
 			return $this->open($admindata, $autologin);
 		}

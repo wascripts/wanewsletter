@@ -225,7 +225,7 @@ if( !isset($_POST['submit']) )
 	foreach( $tools_ary AS $tool_name )
 	{
 		$selected = ( $mode == $tool_name ) ? ' selected="selected"' : '';
-		$tools_box .= '<option value="' . $tool_name . '"' . $selected . '> - ' . $lang['Title'][$tool_name] . ' - </option>';
+		$tools_box .= '<option value="' . $tool_name . '"' . $selected . '>' . $lang['Title'][$tool_name] . '</option>';
 	}
 	$tools_box .= '</select>';
 	
@@ -389,7 +389,7 @@ switch( $mode )
 			require WA_ROOTDIR . '/includes/functions.box.php';
 			
 			$output->assign_block_vars('format_box', array(
-				'L_FORMAT'	 => $lang['Format_to_export'],
+				'L_FORMAT'   => $lang['Format_to_export'],
 				'FORMAT_BOX' => format_box('format')
 			));
 		}
@@ -412,8 +412,6 @@ switch( $mode )
 				
 				if( !empty($file_local) )
 				{
-					//$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
-					
 					$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local));
 					$filename     = $file_local;
 					
@@ -428,7 +426,7 @@ switch( $mode )
 				}
 				else
 				{
-					$tmp_filename = $file_upload['tmp_name'];//str_replace('\\\\', '\\', $file_upload['tmp_name']);
+					$tmp_filename = $file_upload['tmp_name'];
 					$filename     = $file_upload['name'];
 					
 					if( !is_uploaded_file($tmp_filename) )
@@ -469,7 +467,7 @@ switch( $mode )
 				//
 				if( $unlink )
 				{
-					include WA_ROOTDIR . '/includes/class.attach.php';
+					require WA_ROOTDIR . '/includes/class.attach.php';
 					
 					Attach::remove_file($tmp_filename);
 				}
@@ -840,7 +838,7 @@ switch( $mode )
 		{
 			do
 			{		
-				$reallow_ext_box .= '<option value="' . $row['fe_id'] . '"> - ' . $row['fe_ext'] . ' - </option>';
+				$reallow_ext_box .= '<option value="' . $row['fe_id'] . '">' . $row['fe_ext'] . '</option>';
 			}
 			while( $row = $db->fetch_array($result) );
 		}
@@ -1054,8 +1052,6 @@ switch( $mode )
 				
 				if( !empty($file_local) )
 				{
-					//$file_local   = str_replace('\\\\', '\\', str_replace('\\\'', '\'', $file_local));
-					
 					$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local));
 					$filename     = $file_local;
 					
@@ -1070,7 +1066,7 @@ switch( $mode )
 				}
 				else
 				{
-					$tmp_filename = $file_upload['tmp_name'];//str_replace('\\\\', '\\', $file_upload['tmp_name']);
+					$tmp_filename = $file_upload['tmp_name'];
 					$filename     = $file_upload['name'];
 					
 					if( !is_uploaded_file($tmp_filename) )
@@ -1111,7 +1107,7 @@ switch( $mode )
 				//
 				if( $unlink )
 				{
-					include WA_ROOTDIR . '/includes/class.attach.php';
+					require WA_ROOTDIR . '/includes/class.attach.php';
 					
 					Attach::remove_file($tmp_filename);
 				}

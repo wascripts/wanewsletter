@@ -356,7 +356,7 @@ $lang['Dbsize']                     = "Database size (script's tables)";
 $lang['Explain']['config']          = "The following form will allow you to configure all of the script's settings";
 $lang['Explain']['config_cookies']  = "These parameters allow you to set the cookies used by the script. \nIf you feel unsure about this, leave the settings to their default values";
 $lang['Explain']['config_files']    = "You can attach files to your outgoing newsletters. \nTo accomplish this, the script has two options. The easiest option is to have files stored on the server, in the folder defined as a storage directory (the folder must have writing permissions). \nIf, for any reason, this option is not possible on your server, the script offers you the possibility to store the files on a <acronym title=\"File Transfert Protocol\" xml:lang=\"en\">smtp</acronym> server.\n For this option, you must enter acces parameters for the ftp server.";
-$lang['Explain']['config_email']    = "These settings allow you to configure the email sending methods you will want to use. \nThe first send engine uses the newsletter's email address as the principal recipient, with all subscribed recipients in hidden copy. The second engine is a bit heavier, but sends a separate email to each subscriber (you <b>must</b> use this engine if you are hosted on Online).\n If, for any reason, your server does not have the mail() function, or a similar function, you can use a specific <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> server by indicating its access parameters in the script. \nBe carefull though, restrictions might apply in this case. For more information, please refer to the %sscript's FAQ%s.";
+$lang['Explain']['config_email']    = "These settings allow you to configure the email sending methods you will want to use. \nThe first send engine uses the newsletter's email address as the principal recipient, with all subscribed recipients in hidden copy. The second engine is a bit heavier, but sends a separate email to each subscriber (this last will be automatically used if the host is <strong>Online</strong>).\n If, for any reason, your server does not have the mail() function, or a similar function, you can use a specific <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> server by indicating its access parameters in the script. \nBe carefull though, restrictions might apply in this case. For more information, please refer to the %sscript's FAQ%s.";
 $lang['Explain']['config_stats']    = "The script has a small statistics module. The module requires that the GD libraty is installed on your server to make it work. \nIf the GD library is not installed, it is recommended that you deactivate the statistics module to avoid unnecessary data processing by the script.";
 
 $lang['Default_lang']               = "Select the default language";
@@ -556,6 +556,8 @@ $lang['Explain']['html']            = "Compose your newsletter in html format he
 
 $lang['Select_log_to_load']         = "Select a newsletter to load";
 $lang['Select_log_to_send']         = "Select a newsletter that you want to resend";
+$lang['Load_by_URL']                = "Load a newsletter from an URL";
+$lang['From_an_URL']                = "from an URL";
 $lang['Resend_log']                 = "Resend a newsletter";
 $lang['Load_log']                   = "Load newsletter";
 $lang['Handle']                     = "Template";

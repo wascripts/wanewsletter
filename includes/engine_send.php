@@ -141,11 +141,12 @@ function launch_sending($listdata, $logdata)
 	// On récupère les infos sur les abonnés destinataires
 	//
 	$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, a.abo_register_key, al.format
-		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
-		WHERE al.liste_id = $listdata[liste_id]
-			AND a.abo_id = al.abo_id
-			AND al.send = 0
-			AND a.abo_status = " . ABO_ACTIF;
+		FROM " . ABONNES_TABLE . " AS a
+			INNER JOIN " . ABO_LISTE_TABLE . " AS al
+			ON al.abo_id = a.abo_id
+				AND al.liste_id = $listdata[liste_id]
+				AND al.send = 0
+		WHERE a.abo_status = " . ABO_ACTIF;
 	if( !($result = $db->query($sql, 0, $nl_config['emails_sended'])) )
 	{
 		trigger_error('Impossible d\'obtenir la liste des adresses emails', ERROR);
@@ -155,8 +156,8 @@ function launch_sending($listdata, $logdata)
 	{
 		fake_header(false);
 		
-		$abo_id_ary = array();
-		$format     = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
+		$abo_ids = array();
+		$format  = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
 		
 		if( $nl_config['engine_send'] == ENGINE_BCC )
 		{
@@ -164,10 +165,9 @@ function launch_sending($listdata, $logdata)
 			
 			do
 			{
-				$abo_id_ary[] = $row['abo_id'];
-				$abo_format   = ( !$format ) ? $row['format'] : $format;
-				
-				$abonnes[$abo_format][] = $row['abo_email'];
+				array_push($abo_ids, $row['abo_id']);
+				$abo_format = ( !$format ) ? $row['format'] : $format;
+				array_push($abonnes[$abo_format], $row['abo_email']);
 				
 				fake_header(true);
 			}
@@ -295,7 +295,7 @@ function launch_sending($listdata, $logdata)
 				// envoi
 				if( $mailer->send() )
 				{
-					$abo_id_ary[] = $row['abo_id'];
+					array_push($abo_ids, $row['abo_id']);
 				}
 				
 				fake_header(true);
@@ -305,7 +305,7 @@ function launch_sending($listdata, $logdata)
 			//
 			// Aucun email envoyé, il y a manifestement un problème, on affiche le message d'erreur
 			//
-			if( count($abo_id_ary) == 0 )
+			if( count($abo_ids) == 0 )
 			{
 				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
 			}
@@ -340,7 +340,7 @@ function launch_sending($listdata, $logdata)
 	{
 		$sql = "UPDATE " . ABO_LISTE_TABLE . "
 			SET send = 1
-			WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ")
+			WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
 				AND liste_id = " . $listdata['liste_id'];
 		if( !$db->query($sql) )
 		{
@@ -358,10 +358,11 @@ function launch_sending($listdata, $logdata)
 		}
 		
 		$sql = "SELECT COUNT(*) AS num_dest, al.send
-			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
+			FROM " . ABO_LISTE_TABLE . " AS al
+				INNER JOIN " . ABONNES_TABLE . " AS a
+				ON a.abo_id = al.abo_id
+					AND a.abo_status = " . ABO_ACTIF . "
 			WHERE al.liste_id = $listdata[liste_id]
-				AND a.abo_id = al.abo_id
-				AND a.abo_status = " . ABO_ACTIF . "
 			GROUP BY al.send";
 		if( !($result = $db->query($sql)) )
 		{
@@ -383,7 +384,7 @@ function launch_sending($listdata, $logdata)
 	}
 	else
 	{
-		$sended = count($abo_id_ary);
+		$sended = count($abo_ids);
 	}
 	
 	if( $no_send > 0 )

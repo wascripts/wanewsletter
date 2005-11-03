@@ -15,25 +15,20 @@
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Annuler un envoi
 - Ajouter une partie dans faq.fr.html pour SQLite ?
-- Supprimer choix de la méthode d’envoi si host est Online (Utiliser Mailer::is_online_host())
-- revoir les schémas de tables (mots clés en majuscules ou minuscules, faire les modifs aussi dans les classes *_backup)
 - ajouter fichier README pour Wamailer
 - Permettre l’exportation simple et rapide d’une newsletter (au "format" .eml)
-- commenter plus le code
 - Permettre l’édition du profil des abonnés ?
-- Pré-installer la base sqlite ?
 - Retirer la doc wamailer du paquet
 - Terminer support des chargements de newsletters externes
-  - Charger un modèle de newsletter via une url (ce qu'a fait thierry gagnon, voir spip-contrib)
-- Ne pas stocker le numéro de version du script dans la DB, c’est stupide.
 - Voir avec J.J Solari pour fct des javascript dans Safari
+- Vérifier que les schémas de tables sont valides pour chaque db
+- Revoir requètes de functions.validate.php
 
 
 Coding
 ------------------
 
 - Vérifier réglages de mode lorsqu'on ouvre des fichiers
-- nommer tous les index de la forme nom_colonne_idx (en majuscule ?) et toutes les clefs primaires de la forme nom_colonne_pk
 
 Passer de SQLite 2.x à SQLite 3.x :
 	$ sqlite-old old.db .dump | sqlite-new new.db

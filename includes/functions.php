@@ -95,14 +95,6 @@ function Location($url)
 	$absolute_url  = make_script_url() . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
 	$absolute_url .= unhtmlspecialchars($url);
 	
-/*	if( version_compare(PHP_VERSION, '4.3.0', '>=') == 1 )
-	{
-		header('Found', TRUE, 302);
-	}
-	else
-	{
-		header('HTTP/1.x 302 Found');
-	}*/
 	header((( $use_refresh ) ? 'Refresh: 0; URL=' : 'Location: ' ) . $absolute_url);
 	
 	//
@@ -257,7 +249,7 @@ function load_settings($admindata = array())
 		}
 	}
 	
-	include $language_path;
+	require $language_path;
 }
 
 /**
@@ -534,8 +526,8 @@ function convert_time($dateformat, $timestamp)
 		
 		foreach( $datetime AS $orig_word => $repl_word )
 		{
-			$search[]  = '/\b' . $orig_word . '\b/i';
-			$replace[] = $repl_word;
+			array_push($search,  '/\b' . $orig_word . '\b/i');
+			array_push($replace, $repl_word);
 		}
 	}
 	
@@ -586,36 +578,37 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 	}
 	else
 	{
-		$sql = "SELECT a.abo_id 
-			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-			WHERE al.liste_id = $liste_id 
-				AND a.abo_id = al.abo_id 
-				AND a.abo_status = " . ABO_INACTIF . " 
+		$sql = "SELECT a.abo_id
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al
+				ON al.abo_id = a.abo_id
+					AND al.liste_id = $liste_id
+			WHERE a.abo_status = " . ABO_INACTIF . "
 				AND a.abo_register_date < " . (time() - ($limitevalidate * 86400));
 		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir les entrées à supprimer', ERROR);
 		}
 		
-		$abo_id_ary = array();
+		$abo_ids = array();
 		while( $row = $db->fetch_array($result) )
 		{
-			$abo_id_ary[] = $row['abo_id'];
+			array_push($abo_ids, $row['abo_id']);
 		}
 		
-		if( $num_abo_deleted = count($abo_id_ary) )
+		if( $num_abo_deleted = count($abo_ids) )
 		{
 			$db->transaction(START_TRC);
 			
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
-				WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ")";
+				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de supprimer les entrées périmées de la table abo_liste', ERROR);
 			}
 			
 			$sql = "DELETE FROM " . ABONNES_TABLE . " 
-				WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ")";
+				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de supprimer les entrées périmées de la table abonnes', ERROR);

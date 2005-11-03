@@ -76,7 +76,7 @@ if( $mode == 'download' )
 		trigger_error('Not_auth_view', MESSAGE);
 	}
 	
-	include WA_ROOTDIR . '/includes/class.attach.php';
+	require WA_ROOTDIR . '/includes/class.attach.php';
 	
 	$file_id = ( !empty($_GET['fid']) ) ? intval($_GET['fid']) : 0;
 	$attach  = new Attach();
@@ -193,7 +193,7 @@ else if( $mode == 'abonnes' )
 	{
 		if( strlen($search_keyword) > 1 )
 		{
-			$get_string .= '&amp;keyword=' . urlencode($search_keyword);
+			$get_string .= '&amp;keyword=' . htmlspecialchars(urlencode($search_keyword));
 			$sql_search .= ' AND a.abo_email LIKE \'' . $db->escape(str_replace('*', '%', urldecode($search_keyword))) . '\' ';
 		}
 		
@@ -248,13 +248,14 @@ else if( $mode == 'abonnes' )
 			trigger_error('No_abo_id', MESSAGE);
 		}
 		
-		$liste_id_ary = $auth->check_auth(AUTH_VIEW);
+		$liste_ids = $auth->check_auth(AUTH_VIEW);
 		
-		$sql = "SELECT a.*, al.liste_id, al.format 
-			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-			WHERE a.abo_id = $abo_id 
-				AND al.abo_id = a.abo_id 
-				AND al.liste_id IN(" . implode(', ', $liste_id_ary) . ")";
+		$sql = "SELECT a.*, al.liste_id, al.format
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al
+				ON al.abo_id = a.abo_id
+					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
+			WHERE a.abo_id = $abo_id";
 		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir les données sur cet abonné', ERROR);
@@ -318,14 +319,14 @@ else if( $mode == 'abonnes' )
 	else if( $action == 'delete' )
 	{
 		$email_list = ( !empty($_POST['email_list']) ) ? $_POST['email_list'] : '';
-		$abo_id_ary = ( !empty($_POST['abo_id']) ) ? $_POST['abo_id'] : array();
+		$abo_ids    = ( !empty($_POST['abo_id']) ) ? $_POST['abo_id'] : array();
 		
-		if( !is_array($abo_id_ary) )
+		if( !is_array($abo_ids) )
 		{
-			$abo_id_ary = array(intval($abo_id_ary));
+			$abo_ids = array(intval($abo_ids));
 		}
 		
-		if( $email_list == '' && count($abo_id_ary) == 0 )
+		if( $email_list == '' && count($abo_ids) == 0 )
 		{
 			$output->redirect('./view.php?mode=abonnes', 4);
 			trigger_error('No_abo_id', MESSAGE);
@@ -337,12 +338,40 @@ else if( $mode == 'abonnes' )
 			
 			switch( DATABASE )
 			{
-				case 'postgre':
+				case 'mysql':
+					$sql = "SELECT abo_id 
+						FROM " . ABO_LISTE_TABLE . " 
+						WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
+						GROUP BY abo_id 
+						HAVING COUNT(abo_id) = 1";
+					if( $result = $db->query($sql) )
+					{
+						if( $row = $db->fetch_array($result) )
+						{
+							$abo_ids2 = array();
+							
+							do
+							{
+								array_push($abo_ids2, $row['abo_id']);
+							}
+							while( $row = $db->fetch_array($result) );
+							
+							$sql = "DELETE FROM " . ABONNES_TABLE . " 
+								WHERE abo_id IN(" . implode(', ', $abo_ids2) . ")";
+							if( !$db->query($sql) )
+							{
+								trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
+							}
+						}
+					}
+					break;
+				
+				default:
 					$sql = "DELETE FROM " . ABONNES_TABLE . " 
 						WHERE abo_id IN(
 							SELECT abo_id 
 							FROM " . ABO_LISTE_TABLE . " 
-							WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ") 
+							WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
 							GROUP BY abo_id 
 							HAVING COUNT(abo_id) = 1
 						)";
@@ -351,38 +380,10 @@ else if( $mode == 'abonnes' )
 						trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
 					}
 					break;
-				
-				default:
-					$sql = "SELECT abo_id 
-						FROM " . ABO_LISTE_TABLE . " 
-						WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ") 
-						GROUP BY abo_id 
-						HAVING COUNT(abo_id) = 1";
-					if( $result = $db->query($sql) )
-					{
-						if( $row = $db->fetch_array($result) )
-						{
-							$id_ary = array();
-							
-							do
-							{
-								$id_ary[] = $row['abo_id'];
-							}
-							while( $row = $db->fetch_array($result) );
-							
-							$sql = "DELETE FROM " . ABONNES_TABLE . " 
-								WHERE abo_id IN(" . implode(', ', $id_ary) . ")";
-							if( !$db->query($sql) )
-							{
-								trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-							}
-						}
-					}
-					break;
 			}
 			
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
-				WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ") 
+				WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
 					AND liste_id = " . $listdata['liste_id'];
 			if( !$db->query($sql) )
 			{
@@ -418,7 +419,8 @@ else if( $mode == 'abonnes' )
 				{
 					if( !empty($email_list[$i]) )
 					{
-						$sql_list .= ( $i == 0 ) ? '\'' . $email_list[$i] . '\'' : ', \'' . $email_list[$i] . '\'';
+						$sql_list .= ($i > 0) ? ', ' : '';
+						$sql_list .= '\'' . $db->escape($email_list[$i]) . '\'';
 					}
 				}
 				
@@ -428,11 +430,12 @@ else if( $mode == 'abonnes' )
 					trigger_error('No_abo_id', MESSAGE);
 				}
 				
-				$sql = "SELECT a.abo_id 
-					FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-					WHERE al.liste_id = $listdata[liste_id]
-						AND a.abo_id = al.abo_id 
-						AND a.abo_email IN($sql_list)";
+				$sql = "SELECT a.abo_id
+					FROM " . ABONNES_TABLE . " AS a
+						INNER JOIN " . ABO_LISTE_TABLE . " AS al
+						ON al.abo_id = a.abo_id
+							AND al.liste_id = $listdata[liste_id]
+					WHERE a.abo_email IN($sql_list)";
 				if( !($result = $db->query($sql)) )
 				{
 					trigger_error('Impossible d\'obtenir les ID des adresses email entrées', ERROR);
@@ -451,7 +454,7 @@ else if( $mode == 'abonnes' )
 			}
 			else
 			{
-				foreach( $abo_id_ary AS $abo_id )
+				foreach( $abo_ids AS $abo_id )
 				{
 					$output->addHiddenField('abo_id[]', $abo_id);
 				}
@@ -484,10 +487,11 @@ else if( $mode == 'abonnes' )
 	$start        = (($page_id - 1) * $abo_per_page);
 	
 	$sql = "SELECT COUNT(a.abo_id) AS total_abo
-		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
-		WHERE al.liste_id = $listdata[liste_id]
-			AND a.abo_id = al.abo_id
-			AND a.abo_status = " . $abo_status . $sql_search;
+		FROM " . ABONNES_TABLE . " AS a
+			INNER JOIN " . ABO_LISTE_TABLE . " AS al
+			ON al.abo_id = a.abo_id
+				AND al.liste_id = $listdata[liste_id]
+		WHERE a.abo_status = " . $abo_status . $sql_search;
 	if( !($result = $db->query($sql)) )
 	{
 		trigger_error('Impossible d\'obtenir le nombre d\'abonnés', ERROR);
@@ -498,11 +502,11 @@ else if( $mode == 'abonnes' )
 	if( $total_abo > 0 )
 	{
 		$sql = "SELECT a.abo_id, a.abo_email, a.abo_register_date, al.format
-			FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
-			WHERE al.liste_id = $listdata[liste_id]
-				AND a.abo_id = al.abo_id
-				AND a.abo_status = $abo_status
-				$sql_search
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al
+				ON al.abo_id = a.abo_id
+					AND al.liste_id = $listdata[liste_id]
+			WHERE a.abo_status = $abo_status $sql_search
 			ORDER BY $sql_type " . $sql_order;
 		if( !($result = $db->query($sql, $start, $abo_per_page)) )
 		{
@@ -548,15 +552,15 @@ else if( $mode == 'abonnes' )
 	}
 	
 	$search_days_box  = '<select name="days">';
-	$search_days_box .= '<option value="0"> - ' . $lang['All_abo'] . ' - </option>';
+	$search_days_box .= '<option value="0">' . $lang['All_abo'] . '</option>';
 	
 	$selected = ( $search_date == -1 ) ? ' selected="selected"' : '';
-	$search_days_box .= '<option value="-1"' . $selected . '> - ' . $lang['Inactive_account'] . ' - </option>';
+	$search_days_box .= '<option value="-1"' . $selected . '>' . $lang['Inactive_account'] . '</option>';
 	
 	for( $i = 0, $days = 10; $i < 4; $i++, $days *= 3 )
 	{
 		$selected = ( $search_date == $days ) ? ' selected="selected"' : '';
-		$search_days_box .= '<option value="' . $days . '"' . $selected . '> - ' . sprintf($lang['Days_interval'], $days) . ' - </option>';
+		$search_days_box .= '<option value="' . $days . '"' . $selected . '>' . sprintf($lang['Days_interval'], $days) . '</option>';
 	}
 	$search_days_box .= '</select>';
 	
@@ -571,20 +575,20 @@ else if( $mode == 'abonnes' )
 	));
 	
 	$output->assign_vars(array(
-		'L_EXPLAIN'        => nl2br($lang['Explain']['abo']),
-		'L_TITLE'          => $lang['Title']['abo'],
-		'L_SEARCH'         => $lang['Search_abo'],
-		'L_SEARCH_NOTE'    => $lang['Search_abo_note'],
-		'L_SEARCH_BUTTON'  => $lang['Button']['search'],
-		'L_CLASSEMENT'     => $lang['Classement'],
-		'L_BY_EMAIL'       => $lang['By_email'],
-		'L_BY_DATE'        => $lang['By_date'],
-		'L_BY_FORMAT'      => $lang['By_format'],
-		'L_BY_ASC'         => $lang['By_asc'],
-		'L_BY_DESC'        => $lang['By_desc'],
-		'L_CLASSER_BUTTON' => $lang['Button']['classer'],
-		'L_EMAIL'          => $lang['Email_address'],
-		'L_DATE'           => $lang['Susbcribed_date'],
+		'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
+		'L_TITLE'              => $lang['Title']['abo'],
+		'L_SEARCH'             => $lang['Search_abo'],
+		'L_SEARCH_NOTE'        => $lang['Search_abo_note'],
+		'L_SEARCH_BUTTON'      => $lang['Button']['search'],
+		'L_CLASSEMENT'         => $lang['Classement'],
+		'L_BY_EMAIL'           => $lang['By_email'],
+		'L_BY_DATE'            => $lang['By_date'],
+		'L_BY_FORMAT'          => $lang['By_format'],
+		'L_BY_ASC'             => $lang['By_asc'],
+		'L_BY_DESC'            => $lang['By_desc'],
+		'L_CLASSER_BUTTON'     => $lang['Button']['classer'],
+		'L_EMAIL'              => $lang['Email_address'],
+		'L_DATE'               => $lang['Susbcribed_date'],
 		
 		'KEYWORD'              => htmlspecialchars($search_keyword),
 		'SEARCH_DAYS_BOX'      => $search_days_box,
@@ -594,12 +598,12 @@ else if( $mode == 'abonnes' )
 		'SELECTED_ORDER_ASC'   => ( $sql_order == 'ASC' ) ? ' selected="selected"' : '',
 		'SELECTED_ORDER_DESC'  => ( $sql_order == 'DESC' ) ? ' selected="selected"' : '',
 		
-		'PAGINATION'      => $navigation,
-		'PAGEOF'          => ( $total_abo > 0 ) ? sprintf($lang['Page_of'], $page_id, ceil($total_abo / $abo_per_page)) : '',
-		'NUM_SUBSCRIBERS' => ( $total_abo > 0 ) ? '[ <b>' . $total_abo . '</b> ' . $lang['Module']['subscribers'] . ' ]' : '',
+		'PAGINATION'           => $navigation,
+		'PAGEOF'               => ( $total_abo > 0 ) ? sprintf($lang['Page_of'], $page_id, ceil($total_abo / $abo_per_page)) : '',
+		'NUM_SUBSCRIBERS'      => ( $total_abo > 0 ) ? '[ <b>' . $total_abo . '</b> ' . $lang['Module']['subscribers'] . ' ]' : '',
 		
-		'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-		'U_FORM'          => sessid('./view.php?mode=abonnes' . $get_page)
+		'S_HIDDEN_FIELDS'      => $output->getHiddenFields(),
+		'U_FORM'               => sessid('./view.php?mode=abonnes' . $get_page)
 	));
 	
 	if( $listdata['liste_format'] == FORMAT_MULTIPLE )
@@ -650,17 +654,8 @@ else if( $mode == 'abonnes' )
 	}
 	else
 	{
-		if( isset($_POST['search']) )
-		{
-			$empty_reason = $lang['No_search_result'];
-		}
-		else
-		{
-			$empty_reason = $lang['No_abo_in_list'];
-		}
-		
 		$output->assign_block_vars('empty', array(
-			'L_EMPTY' => $empty_reason
+			'L_EMPTY' => ( isset($_POST['search']) ) ? $lang['No_search_result'] : $lang['No_abo_in_list']
 		));
 	}
 }
@@ -964,7 +959,57 @@ else if( $mode == 'liste' )
 			{
 				switch( DATABASE )
 				{
-					case 'postgre':
+					case 'mysql':
+						
+						$sql = "SELECT abo_id 
+							FROM " . ABO_LISTE_TABLE . " AS al 
+							WHERE liste_id = " . $listdata['liste_id'];
+						if( !($result = $db->query($sql)) )
+						{
+							trigger_error('Impossible d\'obtenir la liste des abonnés de cette liste', ERROR);
+						}
+						
+						if( $row = $db->fetch_array($result) )
+						{
+							$abo_ids = array();
+							
+							do
+							{
+								array_push($abo_ids, $row['abo_id']);
+							}
+							while( $row = $db->fetch_array($result) );
+							
+							$sql = "SELECT abo_id 
+								FROM " . ABO_LISTE_TABLE . " 
+								WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
+								GROUP BY abo_id 
+								HAVING COUNT(abo_id) = 1";
+							if( !($result = $db->query($sql)) )
+							{
+								trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
+							}
+							
+							if( $row = $db->fetch_array($result) )
+							{
+								$abo_ids = array();
+								
+								do
+								{
+									array_push($abo_ids, $row['abo_id']);
+								}
+								while( $row = $db->fetch_array($result) );
+								
+								$sql = "DELETE FROM " . ABONNES_TABLE . " 
+									WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
+								if( !$db->query($sql) )
+								{
+									trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
+								}
+							}
+						}
+						break;
+					
+					default:
 						$sql = "DELETE FROM " . ABONNES_TABLE . "
 							WHERE abo_id IN(
 								SELECT abo_id
@@ -980,55 +1025,6 @@ else if( $mode == 'liste' )
 						if( !$db->query($sql) )
 						{
 							trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-						}
-						break;
-					
-					default:
-						$sql = "SELECT abo_id 
-							FROM " . ABO_LISTE_TABLE . " AS al 
-							WHERE liste_id = " . $listdata['liste_id'];
-						if( !($result = $db->query($sql)) )
-						{
-							trigger_error('Impossible d\'obtenir la liste des abonnés de cette liste', ERROR);
-						}
-						
-						if( $row = $db->fetch_array($result) )
-						{
-							$abo_id_ary = array();
-							
-							do
-							{
-								$abo_id_ary[] = $row['abo_id'];
-							}
-							while( $row = $db->fetch_array($result) );
-							
-							$sql = "SELECT abo_id 
-								FROM " . ABO_LISTE_TABLE . " 
-								WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ") 
-								GROUP BY abo_id 
-								HAVING COUNT(abo_id) = 1";
-							if( !($result = $db->query($sql)) )
-							{
-								trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
-							}
-							
-							if( $row = $db->fetch_array($result) )
-							{
-								$abo_id_ary = array();
-								
-								do
-								{
-									$abo_id_ary[] = $row['abo_id'];
-								}
-								while( $row = $db->fetch_array($result) );
-								
-								$sql = "DELETE FROM " . ABONNES_TABLE . " 
-									WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ")";
-								if( !$db->query($sql) )
-								{
-									trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-								}
-							}
 						}
 						break;
 				}
@@ -1048,18 +1044,18 @@ else if( $mode == 'liste' )
 					trigger_error('Impossible d\'obtenir la liste des logs', ERROR);
 				}
 				
-				$log_id_ary = array();
+				$log_ids = array();
 				while( $row = $db->fetch_array($result) )
 				{
-					$log_id_ary[] = $row['log_id'];
+					array_push($log_ids, $row['log_id']);
 				}
 				
 				require WA_ROOTDIR . '/includes/class.attach.php';
 				
 				$attach = new Attach();
-				$attach->delete_joined_files(true, $log_id_ary);
+				$attach->delete_joined_files(true, $log_ids);
 				
-				$sql = "DELETE FROM " . LOG_TABLE . " 
+				$sql = "DELETE FROM " . LOG_TABLE . "
 					WHERE liste_id = " . $listdata['liste_id'];
 				if( !$db->query($sql) )
 				{
@@ -1078,7 +1074,67 @@ else if( $mode == 'liste' )
 				
 				switch( DATABASE )
 				{
-					case 'postgre':
+					case 'mysql':
+						$sql = "SELECT abo_id 
+							FROM " . ABO_LISTE_TABLE . " 
+							WHERE liste_id = " . $listdata['liste_id'];
+						if( !($result = $db->query($sql)) )
+						{
+							trigger_error('Impossible d\'obtenir la liste des abonnés', ERROR);
+						}
+						
+						if( $row = $db->fetch_array($result) )
+						{
+							$abo_ids = array();
+							
+							do
+							{
+								array_push($abo_ids, $row['abo_id']);
+							}
+							while( $row = $db->fetch_array($result) );
+							
+							$sql = "SELECT abo_id 
+								FROM " . ABO_LISTE_TABLE . " 
+								WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
+									AND liste_id = " . $liste_id;
+							if( !($result = $db->query($sql)) )
+							{
+								trigger_error('Impossible d\'obtenir la liste des abonnés[2]', ERROR);
+							}
+							
+							if( $row = $db->fetch_array($result) )
+							{
+								$abo_ids2 = array();
+								
+								do
+								{
+									array_push($abo_ids2, $row['abo_id']);
+								}
+								while( $row = $db->fetch_array($result) );
+								
+								$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
+									WHERE abo_id IN(" . implode(', ', $abo_ids2) . ") 
+										AND liste_id = " . $listdata['liste_id'];
+								if( !$db->query($sql) )
+								{
+									trigger_error('Impossible de supprimer les entrées inutiles de la table abo_liste', ERROR);
+								}
+								
+								$abo_ids = array_diff($abo_ids, $abo_ids2);
+							}
+							
+							$sql = "UPDATE " . ABO_LISTE_TABLE . " 
+								SET liste_id = $liste_id 
+								WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
+									AND liste_id = " . $listdata['liste_id'];
+							if( !$db->query($sql) )
+							{
+								trigger_error('Impossible de mettre à jour la table abo_liste', ERROR);
+							}
+						}
+						break;
+					
+					default:
 						$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
 							WHERE abo_id IN(
 								SELECT abo_id
@@ -1108,66 +1164,6 @@ else if( $mode == 'liste' )
 						if( !$db->query($sql) )
 						{
 							trigger_error('Impossible de mettre à jour la table abo_liste', ERROR);
-						}						
-						break;
-					
-					default:
-						$sql = "SELECT abo_id 
-							FROM " . ABO_LISTE_TABLE . " 
-							WHERE liste_id = " . $listdata['liste_id'];
-						if( !($result = $db->query($sql)) )
-						{
-							trigger_error('Impossible d\'obtenir la liste des abonnés', ERROR);
-						}
-						
-						if( $row = $db->fetch_array($result) )
-						{
-							$abo_id_ary = array();
-							
-							do
-							{
-								$abo_id_ary[] = $row['abo_id'];
-							}
-							while( $row = $db->fetch_array($result) );
-							
-							$sql = "SELECT abo_id 
-								FROM " . ABO_LISTE_TABLE . " 
-								WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ") 
-									AND liste_id = " . $liste_id;
-							if( !($result = $db->query($sql)) )
-							{
-								trigger_error('Impossible d\'obtenir la liste des abonnés[2]', ERROR);
-							}
-							
-							if( $row = $db->fetch_array($result) )
-							{
-								$abo_id_ary2 = array();
-								
-								do
-								{
-									$abo_id_ary2[] = $row['abo_id'];
-								}
-								while( $row = $db->fetch_array($result) );
-								
-								$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
-									WHERE abo_id IN(" . implode(', ', $abo_id_ary2) . ") 
-										AND liste_id = " . $listdata['liste_id'];
-								if( !$db->query($sql) )
-								{
-									trigger_error('Impossible de supprimer les entrées inutiles de la table abo_liste', ERROR);
-								}
-								
-								$abo_id_ary = array_diff($abo_id_ary, $abo_id_ary2);
-							}
-							
-							$sql = "UPDATE " . ABO_LISTE_TABLE . " 
-								SET liste_id = $liste_id 
-								WHERE abo_id IN(" . implode(', ', $abo_id_ary) . ") 
-									AND liste_id = " . $listdata['liste_id'];
-							if( !$db->query($sql) )
-							{
-								trigger_error('Impossible de mettre à jour la table abo_liste', ERROR);
-							}
 						}
 						break;
 				}
@@ -1207,11 +1203,11 @@ else if( $mode == 'liste' )
 		else
 		{
 			$list_box     = '';
-			$liste_id_ary = $auth->check_auth(AUTH_VIEW);
+			$liste_ids = $auth->check_auth(AUTH_VIEW);
 			
 			foreach( $auth->listdata AS $liste_id => $data )
 			{
-				if( in_array($liste_id, $liste_id_ary) && $liste_id != $listdata['liste_id'] )
+				if( in_array($liste_id, $liste_ids) && $liste_id != $listdata['liste_id'] )
 				{
 					$selected  = ( $admindata['session_liste'] == $liste_id ) ? ' selected="selected"' : '';
 					$list_box .= '<option value="' . $liste_id . '"' . $selected . '> - ' . cut_str($data['liste_name'], 30) . ' - </option>';
@@ -1403,9 +1399,9 @@ else if( $mode == 'log' )
 	
 	if( $action == 'delete' )
 	{
-		$log_id_ary = ( !empty($_POST['log_id']) && is_array($_POST['log_id']) ) ? array_map('intval', $_POST['log_id']) : array();
+		$log_ids = ( !empty($_POST['log_id']) && is_array($_POST['log_id']) ) ? array_map('intval', $_POST['log_id']) : array();
 		
-		if( count($log_id_ary) == 0 )
+		if( count($log_ids) == 0 )
 		{
 			$output->redirect('./view.php?mode=log', 4);
 			trigger_error('No_log_id', MESSAGE);
@@ -1416,16 +1412,16 @@ else if( $mode == 'log' )
 			$db->transaction(START_TRC);
 			
 			$sql = "DELETE FROM " . LOG_TABLE . " 
-				WHERE log_id IN(" . implode(', ', $log_id_ary) . ")";
+				WHERE log_id IN(" . implode(', ', $log_ids) . ")";
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de supprimer les logs', ERROR);
 			}
 			
-			include WA_ROOTDIR . '/includes/class.attach.php';
+			require WA_ROOTDIR . '/includes/class.attach.php';
 			
 			$attach = new Attach();
-			$attach->delete_joined_files(true, $log_id_ary);
+			$attach->delete_joined_files(true, $log_ids);
 			
 			$db->transaction(END_TRC);
 			
@@ -1447,7 +1443,7 @@ else if( $mode == 'log' )
 			$output->addHiddenField('action', 'delete');
 			$output->addHiddenField('sessid', $session->session_id);
 			
-			foreach( $log_id_ary AS $log_id )
+			foreach( $log_ids AS $log_id )
 			{
 				$output->addHiddenField('log_id[]', $log_id);
 			}
@@ -1536,7 +1532,7 @@ else if( $mode == 'log' )
 				$logdata['joined_files'] = array();
 			}
 			
-			$logrow[] = $row;
+			array_push($logrow, $row);
 		}
 		
 		$sql = "SELECT COUNT(jf.file_id) as num_files, l.log_id

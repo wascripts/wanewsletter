@@ -296,7 +296,7 @@ $lang['Octets']                     = "Octets";
 $lang['Wait_loading']               = "Veuillez patienter pendant le chargement de la page";
 $lang['Show']                       = "Visualiser";
 $lang['View']                       = "Voir";
-$lang['Edit']                       = "Editer";
+$lang['Edit']                       = "Éditer";
 $lang['Import']                     = "Importer";
 $lang['Export']                     = "Exporter";
 $lang['Ban']                        = "Bannir";
@@ -359,7 +359,7 @@ $lang['Dbsize']                     = "Taille de la base de données (tables du s
 $lang['Explain']['config']          = "Le formulaire ci-dessous vous permet de configurer tous les aspects du script";
 $lang['Explain']['config_cookies']  = "Ces paramètres vous permettent de régler les cookies utilisés par le script. \nSi vous n'êtes pas sùr de vous, laissez les paramètres par défaut";
 $lang['Explain']['config_files']    = "Vous avez la possibilité de joindre des fichiers à vos envois de newsletters. \nPour ce faire, le script offre deux options. Le plus simple est de stocker les fichiers sur le serveur, dans le dossier défini comme répertoire de stockage (le dossier en question doit être accessible en écriture). \nSi, pour une raison ou une autre, cela n'est pas rendu possible sur votre serveur, le script a la possibilité de stocker les fichiers sur un serveur <acronym title=\"File Transfert Protocol\" xml:lang=\"en\">ftp</acronym>.\n Vous devez alors entrer les paramètres d'accés au serveur ftp en question.";
-$lang['Explain']['config_email']    = "Ces paramètres vous permettent de configurer les méthodes d'envois d'emails à utiliser. \nLe premier moteur prend comme destinataire l'adresse email de la newsletter elle-même, avec les destinataires en copie cachée. Le deuxième moteur est un peu plus lourd mais envoie un email pour chaque abonné (vous <b>devez</b> utiliser ce moteur là si vous êtes hébergé sur Online).\n Si, pour une raison quelconque, votre serveur ne dispose pas de fonction mail() ou dérivé, vous avez la possibilité d'utiliser un serveur <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> précis en indiquant les paramètres d'accés au script. \nAttention cependant, certaines restrictions peuvent survenir dans ce cas précis. Référez vous, pour plus de précisions, à la %sfaq du script%s.";
+$lang['Explain']['config_email']    = "Ces paramètres vous permettent de configurer les méthodes d'envois d'emails à utiliser. \nLe premier moteur prend comme destinataire l'adresse email de la newsletter elle-même, avec les destinataires en copie cachée. Le deuxième moteur est un peu plus lourd mais envoie un email pour chaque abonné (ce dernier sera automatiquement utilisé si l'hébergeur est <strong>Online</strong>).\n Si, pour une raison quelconque, votre serveur ne dispose pas de fonction mail() ou dérivé, vous avez la possibilité d'utiliser un serveur <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> précis en indiquant les paramètres d'accés au script. \nAttention cependant, certaines restrictions peuvent survenir dans ce cas précis. Référez vous, pour plus de précisions, à la %sfaq du script%s.";
 $lang['Explain']['config_stats']    = "Le script dispose d'un petit module de statistique. Celui ci demande que la librairie GD soit installée sur votre serveur pour fonctionner. \nSi la librairie GD n'est pas installée, il est recommandé de désactiver le module de statistiques pour éviter des traitement de données superflus par le script.";
 
 $lang['Default_lang']               = "Sélectionnez la langue par défaut";
@@ -416,7 +416,7 @@ $lang['Click_return_profile']       = "Cliquez %sici%s pour retourner au panneau
 $lang['Add_user']                   = "Ajouter un utilisateur";
 $lang['Del_user']                   = "Supprimer cet utilisateur";
 $lang['Del_note']                   = "Attention, cette opération est irréversible";
-$lang['Email_new_inscrit']          = "Etre prévenu par email des nouvelles inscriptions";
+$lang['Email_new_inscrit']          = "Être prévenu par email des nouvelles inscriptions";
 $lang['New_pass']                   = "Nouveau mot de passe";
 $lang['Conf_pass']                  = "Confirmez le mot de passe";
 $lang['Note_pass']                  = "seulement si vous changez votre mot de passe";
@@ -543,7 +543,7 @@ $lang['Backup_full']                = "Complète";
 $lang['Backup_structure']           = "Structure uniquement";
 $lang['Backup_data']                = "Données uniquement";
 $lang['Drop_option']                = "Ajouter des énoncés DROP TABLE";
-$lang['File_action']                = "Que voulez vous faire du fichier";
+$lang['File_action']                = "Que voulez-vous faire du fichier";
 $lang['Download_action']            = "Le télécharger";
 $lang['Store_action']               = "Le stocker sur le serveur";
 $lang['Additionnal_tables']         = "Tables supplémentaires à sauvegarder";
@@ -560,6 +560,8 @@ $lang['Explain']['html']            = "Rédigez ici votre newsletter au format ht
 
 $lang['Select_log_to_load']         = "Choisissez la newsletter à charger";
 $lang['Select_log_to_send']         = "Choisissez la newsletter dont vous voulez reprendre l'envoi";
+$lang['Load_by_URL']                = "Chargez une newsletter depuis une URL";
+$lang['From_an_URL']                = "depuis une URL";
 $lang['Resend_log']                 = "Reprendre un envoi";
 $lang['Load_log']                   = "Charger une newsletter";
 $lang['Handle']                     = "Modèle";
