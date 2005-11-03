@@ -247,6 +247,7 @@ class Session {
 		}
 		
 		$current_time = time();
+		$expiry_time  = ($current_time - $nl_config['session_length']);
 		$this->sessiondata = ( is_array($sessiondata) ) ? $sessiondata : array();
 		
 		//
@@ -254,10 +255,9 @@ class Session {
 		//
 		if( !($current_time % 5) )
 		{
-			$expiry_time = ($current_time - $nl_config['session_length']);
-			
 			$sql = "DELETE FROM " . SESSIONS_TABLE . "
-				WHERE session_time < $expiry_time AND session_id != '{$this->session_id}'";
+				WHERE session_time < $expiry_time
+					AND session_id != '{$this->session_id}'";
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de supprimer les sessions périmées', CRITICAL_ERROR);
@@ -272,7 +272,8 @@ class Session {
 			$sql = "SELECT s.*, a.*
 				FROM " . SESSIONS_TABLE . " AS s
 					INNER JOIN " . ADMIN_TABLE . " AS a ON a.admin_id = s.admin_id
-				WHERE s.session_id = '{$this->session_id}'";
+				WHERE s.session_id = '{$this->session_id}'
+					AND s.session_start > " . $expiry_time;
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible de récupérer les infos sur la session et l\'utilisateur', CRITICAL_ERROR);
@@ -384,19 +385,16 @@ class Session {
 		$sql = 'SELECT a.*, s.session_id, s.session_start, s.session_time, s.session_ip, s.session_liste 
 			FROM ' . ADMIN_TABLE . ' AS a 
 			LEFT JOIN ' . SESSIONS_TABLE . ' AS s ON a.admin_id = s.admin_id WHERE ';
-		$sql .= ( is_numeric($admin_mixed) ) ? 'a.admin_id = ' . $admin_mixed : 'LOWER(a.admin_login) = \'' . $db->escape(strtolower($admin_mixed)) . '\'';
+		$sql .= ( is_numeric($admin_mixed) ) ? 'a.admin_id = ' . $admin_mixed : 'a.admin_login = \'' . $db->escape($admin_mixed) . '\'';
 		$sql .= ' ORDER BY s.session_time DESC';
 		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir les données sur cet utilisateur', CRITICAL_ERROR);
 		}
 		
-		if( $admindata = $db->fetch_array($result) )
+		if( $admindata = $db->fetch_array($result) && $admindata['admin_pwd'] == $admin_pwd )
 		{
-			if( $admindata['admin_pwd'] == $admin_pwd )
-			{
-				return $this->open($admindata, $autologin);
-			}
+			return $this->open($admindata, $autologin);
 		}
 		
 		return false;
