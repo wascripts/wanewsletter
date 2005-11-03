@@ -77,7 +77,7 @@ if( isset($_POST['submit']) )
 	
 	$new_config['date_format'] = ( $new_config['date_format'] == '' ) ? 'd M Y H:i' : $new_config['date_format'];
 	
-	if( !($new_config['session_length'] = intval($new_config['session_length'])) )
+	if( ($new_config['session_length'] = intval($new_config['session_length'])) <= 0 )
 	{
 		$new_config['session_length'] = 3600;
 	}
@@ -92,7 +92,7 @@ if( isset($_POST['submit']) )
 		}
 	}
 	
-	if( !($new_config['max_filesize'] = intval($new_config['max_filesize'])) )
+	if( ($new_config['max_filesize'] = intval($new_config['max_filesize'])) <= 0 )
 	{
 		$new_config['max_filesize'] = 100000;
 	}
