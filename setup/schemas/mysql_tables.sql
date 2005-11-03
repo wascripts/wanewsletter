@@ -63,7 +63,7 @@ CREATE TABLE `wa_auth_admin` (
 	`auth_export` TINYINT(1) NOT NULL DEFAULT '0',
 	`auth_ban`    TINYINT(1) NOT NULL DEFAULT '0',
 	`auth_attach` TINYINT(1) NOT NULL DEFAULT '0',
-	INDEX `admin_id` (`admin_id`)
+	INDEX `admin_id_idx` (`admin_id`)
 ) TYPE=MyISAM;
 
 
@@ -181,8 +181,8 @@ CREATE TABLE `wa_log` (
 	`log_status`    TINYINT(1)   NOT NULL DEFAULT '0',
 	`log_numdest`   SMALLINT(5)  NOT NULL DEFAULT '0',
 	CONSTRAINT `wa_log_pk` PRIMARY KEY (`log_id`),
-	INDEX `liste_id` (`liste_id`),
-	INDEX `log_status` (`log_status`)
+	INDEX `liste_id_idx` (`liste_id`),
+	INDEX `log_status_idx` (`log_status`)
 ) TYPE=MyISAM;
 
 
