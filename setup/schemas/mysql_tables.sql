@@ -1,211 +1,211 @@
-#
-# Schéma des tables de WAnewsletter 2.3.x pour MySQL
-#
-# $Id$
-#
+-- 
+-- Schéma des tables de WAnewsletter 2.3.x pour MySQL
+-- 
+-- $Id$
+-- 
 
-
-#
-# Structure de la table "wa_abo_liste"
-#
+-- 
+-- Structure de la table "wa_abo_liste"
+-- 
 CREATE TABLE `wa_abo_liste` (
-	`abo_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
-	`liste_id` TINYINT(3) NOT NULL DEFAULT '0',
-	`format` TINYINT(1) NOT NULL DEFAULT '0',
-	`send` TINYINT(1) NOT NULL DEFAULT '0',
-	PRIMARY KEY (`abo_id`, `liste_id`)
+	`abo_id`   MEDIUMINT(8) NOT NULL DEFAULT '0',
+	`liste_id` TINYINT(3)   NOT NULL DEFAULT '0',
+	`format`   TINYINT(1)   NOT NULL DEFAULT '0',
+	`send`     TINYINT(1)   NOT NULL DEFAULT '0',
+	CONSTRAINT `wa_abo_liste_pk` PRIMARY KEY (`abo_id`, `liste_id`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_abonnes"
-#
+-- 
+-- Structure de la table "wa_abonnes"
+-- 
 CREATE TABLE `wa_abonnes` (
-	`abo_id` MEDIUMINT(8) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`abo_pseudo` VARCHAR(30) NOT NULL DEFAULT '',
-	`abo_pwd` VARCHAR(32) NOT NULL DEFAULT '',
-	`abo_email` VARCHAR(255) NOT NULL DEFAULT '',
-	`abo_lang` VARCHAR(30) NOT NULL DEFAULT '',
-	`abo_register_key` VARCHAR(32) NOT NULL DEFAULT '',
-	`abo_register_date` INT(11) NOT NULL DEFAULT '0',
-	`abo_status` TINYINT(1) NOT NULL DEFAULT '0',
-	PRIMARY KEY (`abo_id`),
-	KEY `abo_status` (`abo_status`)
+	`abo_id`            MEDIUMINT(8) NOT NULL AUTO_INCREMENT,
+	`abo_pseudo`        VARCHAR(30)  NOT NULL DEFAULT '',
+	`abo_pwd`           VARCHAR(32)  NOT NULL DEFAULT '',
+	`abo_email`         VARCHAR(255) NOT NULL DEFAULT '',
+	`abo_lang`          VARCHAR(30)  NOT NULL DEFAULT '',
+	`abo_register_key`  VARCHAR(32)  NOT NULL DEFAULT '',
+	`abo_register_date` INT(11)      NOT NULL DEFAULT '0',
+	`abo_status`        TINYINT(1)   NOT NULL DEFAULT '0',
+	CONSTRAINT `wa_abonnes_pk` PRIMARY KEY (`abo_id`),
+	INDEX `abo_status_idx` (`abo_status`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_admin"
-#
+-- 
+-- Structure de la table "wa_admin"
+-- 
 CREATE TABLE `wa_admin` (
-	`admin_id` TINYINT(3) NOT NULL AUTO_INCREMENT,
-	`admin_login` VARCHAR(30) NOT NULL DEFAULT '',
-	`admin_pwd` VARCHAR(32) NOT NULL DEFAULT '',
-	`admin_email` VARCHAR(255) NOT NULL DEFAULT '',
-	`admin_lang` VARCHAR(30) NOT NULL DEFAULT '',
-	`admin_dateformat` VARCHAR(20) NOT NULL DEFAULT '',
-	`admin_level` TINYINT(1) NOT NULL DEFAULT '1',
-	`email_new_inscrit` TINYINT(1) NOT NULL DEFAULT '0',
-	PRIMARY KEY (`admin_id`)
+	`admin_id`          TINYINT(3)   NOT NULL AUTO_INCREMENT,
+	`admin_login`       VARCHAR(30)  NOT NULL DEFAULT '',
+	`admin_pwd`         VARCHAR(32)  NOT NULL DEFAULT '',
+	`admin_email`       VARCHAR(255) NOT NULL DEFAULT '',
+	`admin_lang`        VARCHAR(30)  NOT NULL DEFAULT '',
+	`admin_dateformat`  VARCHAR(20)  NOT NULL DEFAULT '',
+	`admin_level`       TINYINT(1)   NOT NULL DEFAULT '1',
+	`email_new_inscrit` TINYINT(1)   NOT NULL DEFAULT '0',
+	CONSTRAINT `wa_admin_pk` PRIMARY KEY (`admin_id`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_auth_admin"
-#
+-- 
+-- Structure de la table "wa_auth_admin"
+-- 
 CREATE TABLE `wa_auth_admin` (
-	`admin_id` TINYINT(3) NOT NULL DEFAULT '0',
-	`liste_id` TINYINT(3) NOT NULL DEFAULT '0',
-	`auth_view` TINYINT(1) NOT NULL DEFAULT '0',
-	`auth_edit` TINYINT(1) NOT NULL DEFAULT '0',
-	`auth_del` TINYINT(1) NOT NULL DEFAULT '0',
-	`auth_send` TINYINT(1) NOT NULL DEFAULT '0',
+	`admin_id`    TINYINT(3) NOT NULL DEFAULT '0',
+	`liste_id`    TINYINT(3) NOT NULL DEFAULT '0',
+	`auth_view`   TINYINT(1) NOT NULL DEFAULT '0',
+	`auth_edit`   TINYINT(1) NOT NULL DEFAULT '0',
+	`auth_del`    TINYINT(1) NOT NULL DEFAULT '0',
+	`auth_send`   TINYINT(1) NOT NULL DEFAULT '0',
 	`auth_import` TINYINT(1) NOT NULL DEFAULT '0',
 	`auth_export` TINYINT(1) NOT NULL DEFAULT '0',
-	`auth_ban` TINYINT(1) NOT NULL DEFAULT '0',
+	`auth_ban`    TINYINT(1) NOT NULL DEFAULT '0',
 	`auth_attach` TINYINT(1) NOT NULL DEFAULT '0',
-	KEY `admin_id` (`admin_id`)
+	INDEX `admin_id` (`admin_id`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_ban_list"
-#
+-- 
+-- Structure de la table "wa_ban_list"
+-- 
 CREATE TABLE `wa_ban_list` (
-	`ban_id` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`liste_id` TINYINT(3) NOT NULL DEFAULT '0',
+	`ban_id`    SMALLINT(5)  NOT NULL AUTO_INCREMENT,
+	`liste_id`  TINYINT(3)   NOT NULL DEFAULT '0',
 	`ban_email` VARCHAR(250) NOT NULL DEFAULT '',
-	PRIMARY KEY (`ban_id`)
+	CONSTRAINT `wa_ban_list_pk` PRIMARY KEY (`ban_id`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_config"
-#
+-- 
+-- Structure de la table "wa_config"
+-- 
 CREATE TABLE `wa_config` (
-	`sitename` VARCHAR(100) NOT NULL DEFAULT '',
-	`urlsite` VARCHAR(100) NOT NULL DEFAULT '',
-	`path` VARCHAR(100) NOT NULL DEFAULT '',
-	`hebergeur` TINYINT(1) NOT NULL DEFAULT '0',
-	`date_format` VARCHAR(20) NOT NULL DEFAULT '',
-	`session_length` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
-	`language` VARCHAR(30) NOT NULL DEFAULT '',
-	`cookie_name` VARCHAR(100) NOT NULL DEFAULT '',
-	`cookie_path` VARCHAR(100) NOT NULL DEFAULT '',
-	`upload_path` VARCHAR(100) NOT NULL DEFAULT '',
-	`max_filesize` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
-	`use_ftp` TINYINT(1) NOT NULL DEFAULT '0',
-	`ftp_server` VARCHAR(50) NOT NULL DEFAULT '',
-	`ftp_port` SMALLINT(5) NOT NULL DEFAULT '21',
-	`ftp_pasv` TINYINT(1) NOT NULL DEFAULT '0',
-	`ftp_path` VARCHAR(100) NOT NULL DEFAULT '',
-	`ftp_user` VARCHAR(30) NOT NULL DEFAULT '',
-	`ftp_pass` VARCHAR(30) NOT NULL DEFAULT '',
-	`engine_send` TINYINT(1) NOT NULL DEFAULT '0',
-	`emails_sended` SMALLINT(5) NOT NULL DEFAULT '0',
-	`use_smtp` TINYINT(1) NOT NULL DEFAULT '0',
-	`smtp_host` VARCHAR(100) NOT NULL DEFAULT '',
-	`smtp_port` SMALLINT(5) NOT NULL DEFAULT '25',
-	`smtp_user` VARCHAR(50) NOT NULL DEFAULT '',
-	`smtp_pass` VARCHAR(50) NOT NULL DEFAULT '',
-	`disable_stats` TINYINT(1) NOT NULL DEFAULT '0',
-	`gd_img_type` VARCHAR(5) NOT NULL DEFAULT '',
-	`check_email_mx` TINYINT(1) NOT NULL DEFAULT '0',
-	`enable_profil_cp` TINYINT(1) NOT NULL DEFAULT '0',
-	`mailing_startdate` INT(11) NOT NULL DEFAULT '0',
-	`version` VARCHAR(10) NOT NULL DEFAULT ''
+	`sitename`          VARCHAR(100) NOT NULL DEFAULT '',
+	`urlsite`           VARCHAR(100) NOT NULL DEFAULT '',
+	`path`              VARCHAR(100) NOT NULL DEFAULT '',
+	`hebergeur`         TINYINT(1)   NOT NULL DEFAULT '0',
+	`date_format`       VARCHAR(20)  NOT NULL DEFAULT '',
+	`session_length`    SMALLINT(5)  NOT NULL DEFAULT '0',
+	`language`          VARCHAR(30)  NOT NULL DEFAULT '',
+	`cookie_name`       VARCHAR(100) NOT NULL DEFAULT '',
+	`cookie_path`       VARCHAR(100) NOT NULL DEFAULT '',
+	`upload_path`       VARCHAR(100) NOT NULL DEFAULT '',
+	`max_filesize`      MEDIUMINT(8) NOT NULL DEFAULT '0',
+	`use_ftp`           TINYINT(1)   NOT NULL DEFAULT '0',
+	`ftp_server`        VARCHAR(50)  NOT NULL DEFAULT '',
+	`ftp_port`          SMALLINT(5)  NOT NULL DEFAULT '21',
+	`ftp_pasv`          TINYINT(1)   NOT NULL DEFAULT '0',
+	`ftp_path`          VARCHAR(100) NOT NULL DEFAULT '',
+	`ftp_user`          VARCHAR(30)  NOT NULL DEFAULT '',
+	`ftp_pass`          VARCHAR(30)  NOT NULL DEFAULT '',
+	`engine_send`       TINYINT(1)   NOT NULL DEFAULT '0',
+	`emails_sended`     SMALLINT(5)  NOT NULL DEFAULT '0',
+	`use_smtp`          TINYINT(1)   NOT NULL DEFAULT '0',
+	`smtp_host`         VARCHAR(100) NOT NULL DEFAULT '',
+	`smtp_port`         SMALLINT(5)  NOT NULL DEFAULT '25',
+	`smtp_user`         VARCHAR(50)  NOT NULL DEFAULT '',
+	`smtp_pass`         VARCHAR(50)  NOT NULL DEFAULT '',
+	`disable_stats`     TINYINT(1)   NOT NULL DEFAULT '0',
+	`gd_img_type`       VARCHAR(5)   NOT NULL DEFAULT '',
+	`check_email_mx`    TINYINT(1)   NOT NULL DEFAULT '0',
+	`enable_profil_cp`  TINYINT(1)   NOT NULL DEFAULT '0',
+	`mailing_startdate` INT(11)      NOT NULL DEFAULT '0',
+	`version`           VARCHAR(10)  NOT NULL DEFAULT ''
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_forbidden_ext"
-#
+-- 
+-- Structure de la table "wa_forbidden_ext"
+-- 
 CREATE TABLE `wa_forbidden_ext` (
-	`fe_id` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`liste_id` TINYINT(3) NOT NULL DEFAULT '0',
-	`fe_ext` VARCHAR(10) NOT NULL DEFAULT '',
-	PRIMARY KEY (`fe_id`)
+	`fe_id`    SMALLINT(5) NOT NULL AUTO_INCREMENT,
+	`liste_id` TINYINT(3)  NOT NULL DEFAULT '0',
+	`fe_ext`   VARCHAR(10) NOT NULL DEFAULT '',
+	CONSTRAINT `wa_forbidden_ext_pk` PRIMARY KEY (`fe_id`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_joined_files"
-#
+-- 
+-- Structure de la table "wa_joined_files"
+-- 
 CREATE TABLE `wa_joined_files` (
-	`file_id` MEDIUMINT(8) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`file_real_name` VARCHAR(200) NOT NULL DEFAULT '',
+	`file_id`            MEDIUMINT(8) NOT NULL AUTO_INCREMENT,
+	`file_real_name`     VARCHAR(200) NOT NULL DEFAULT '',
 	`file_physical_name` VARCHAR(200) NOT NULL DEFAULT '',
-	`file_size` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
-	`file_mimetype` VARCHAR(100) NOT NULL DEFAULT '',
-	PRIMARY KEY (`file_id`)
+	`file_size`          MEDIUMINT(8) NOT NULL DEFAULT '0',
+	`file_mimetype`      VARCHAR(100) NOT NULL DEFAULT '',
+	CONSTRAINT `wa_joined_files_pk` PRIMARY KEY (`file_id`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_liste"
-#
+-- 
+-- Structure de la table "wa_liste"
+-- 
 CREATE TABLE `wa_liste` (
-	`liste_id` TINYINT(3) NOT NULL AUTO_INCREMENT,
-	`liste_name` VARCHAR(100) NOT NULL DEFAULT '',
-	`liste_format` TINYINT(1) NOT NULL DEFAULT '1',
-	`sender_email` VARCHAR(250) NOT NULL DEFAULT '',
-	`return_email` VARCHAR(250) NOT NULL DEFAULT '',
-	`confirm_subscribe` TINYINT(1) NOT NULL DEFAULT '0',
-	`limitevalidate` TINYINT(3) NOT NULL DEFAULT '3',
-	`form_url` VARCHAR(255) NOT NULL DEFAULT '',
-	`liste_sig` TEXT NOT NULL,
-	`auto_purge` TINYINT(1) NOT NULL DEFAULT '0',
-	`purge_freq` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
-	`purge_next` INT(11) NOT NULL DEFAULT '0',
-	`liste_startdate` INT(11) NOT NULL DEFAULT '0',
-	`liste_alias` VARCHAR(250) NOT NULL DEFAULT '',
-	`liste_numlogs` SMALLINT(5) NOT NULL DEFAULT '0',
-	`use_cron` TINYINT(1) NOT NULL DEFAULT '0',
-	`pop_host` VARCHAR(100) NOT NULL DEFAULT '',
-	`pop_port` SMALLINT(5) NOT NULL DEFAULT '110',
-	`pop_user` VARCHAR(50) NOT NULL DEFAULT '',
-	`pop_pass` VARCHAR(50) NOT NULL DEFAULT '',
-	PRIMARY KEY (`liste_id`)
+	`liste_id`          TINYINT(3)   NOT NULL AUTO_INCREMENT,
+	`liste_name`        VARCHAR(100) NOT NULL DEFAULT '',
+	`liste_format`      TINYINT(1)   NOT NULL DEFAULT '1',
+	`sender_email`      VARCHAR(250) NOT NULL DEFAULT '',
+	`return_email`      VARCHAR(250) NOT NULL DEFAULT '',
+	`confirm_subscribe` TINYINT(1)   NOT NULL DEFAULT '0',
+	`limitevalidate`    TINYINT(3)   NOT NULL DEFAULT '3',
+	`form_url`          VARCHAR(255) NOT NULL DEFAULT '',
+	`liste_sig`         TEXT         NOT NULL,
+	`auto_purge`        TINYINT(1)   NOT NULL DEFAULT '0',
+	`purge_freq`        TINYINT(3)   NOT NULL DEFAULT '0',
+	`purge_next`        INT(11)      NOT NULL DEFAULT '0',
+	`liste_startdate`   INT(11)      NOT NULL DEFAULT '0',
+	`liste_alias`       VARCHAR(250) NOT NULL DEFAULT '',
+	`liste_numlogs`     SMALLINT(5)  NOT NULL DEFAULT '0',
+	`use_cron`          TINYINT(1)   NOT NULL DEFAULT '0',
+	`pop_host`          VARCHAR(100) NOT NULL DEFAULT '',
+	`pop_port`          SMALLINT(5)  NOT NULL DEFAULT '110',
+	`pop_user`          VARCHAR(50)  NOT NULL DEFAULT '',
+	`pop_pass`          VARCHAR(50)  NOT NULL DEFAULT '',
+	CONSTRAINT `wa_liste_pk` PRIMARY KEY (`liste_id`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_log"
-#
+-- 
+-- Structure de la table "wa_log"
+-- 
 CREATE TABLE `wa_log` (
-	`log_id` SMALLINT(5) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`liste_id` TINYINT(3) NOT NULL DEFAULT '0',
-	`log_subject` VARCHAR(100) NOT NULL DEFAULT '',
-	`log_body_html` TEXT NOT NULL,
-	`log_body_text` TEXT NOT NULL,
-	`log_date` INT(11) NOT NULL DEFAULT '0',
-	`log_status` TINYINT(1) NOT NULL DEFAULT '0',
-	`log_numdest` SMALLINT(5) NOT NULL DEFAULT '0',
-	PRIMARY KEY (`log_id`),
-	KEY `liste_id` (`liste_id`),
-	KEY `log_status` (`log_status`)
+	`log_id`        SMALLINT(5)  NOT NULL AUTO_INCREMENT,
+	`liste_id`      TINYINT(3)   NOT NULL DEFAULT '0',
+	`log_subject`   VARCHAR(100) NOT NULL DEFAULT '',
+	`log_body_html` TEXT         NOT NULL,
+	`log_body_text` TEXT         NOT NULL,
+	`log_date`      INT(11)      NOT NULL DEFAULT '0',
+	`log_status`    TINYINT(1)   NOT NULL DEFAULT '0',
+	`log_numdest`   SMALLINT(5)  NOT NULL DEFAULT '0',
+	CONSTRAINT `wa_log_pk` PRIMARY KEY (`log_id`),
+	INDEX `liste_id` (`liste_id`),
+	INDEX `log_status` (`log_status`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_log_files"
-#
+-- 
+-- Structure de la table "wa_log_files"
+-- 
 CREATE TABLE `wa_log_files` (
-	`log_id` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
-	`file_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
-	PRIMARY KEY (`log_id`, `file_id`)
+	`log_id`  SMALLINT(5)  NOT NULL DEFAULT '0',
+	`file_id` MEDIUMINT(8) NOT NULL DEFAULT '0',
+	CONSTRAINT `wa_log_files_pk` PRIMARY KEY (`log_id`, `file_id`)
 ) TYPE=MyISAM;
 
 
-#
-# Structure de la table "wa_session"
-#
+-- 
+-- Structure de la table "wa_session"
+-- 
 CREATE TABLE `wa_session` (
-	`session_id` CHAR(32) NOT NULL DEFAULT '',
-	`admin_id` TINYINT(3) NOT NULL DEFAULT '0',
-	`session_start` INT(11) NOT NULL DEFAULT '0',
-	`session_time` INT(11) NOT NULL DEFAULT '0',
-	`session_ip` CHAR(8) NOT NULL DEFAULT '',
+	`session_id`    CHAR(32)   NOT NULL DEFAULT '',
+	`admin_id`      TINYINT(3) NOT NULL DEFAULT '0',
+	`session_start` INT(11)    NOT NULL DEFAULT '0',
+	`session_time`  INT(11)    NOT NULL DEFAULT '0',
+	`session_ip`    CHAR(8)    NOT NULL DEFAULT '',
 	`session_liste` TINYINT(3) NOT NULL DEFAULT '0',
-	PRIMARY KEY (`session_id`)
+	CONSTRAINT `wa_session_pk` PRIMARY KEY (`session_id`)
 ) TYPE=HEAP;
+
