@@ -89,7 +89,7 @@ function display_img_error($str)
 	//
 	$startW = (($imageW - (imagefontwidth($text_font) * strlen($str))) / 2);
 	$startH = (($imageH - imagefontheight($text_font)) / 2);
-	imagestring($im, 3, $startW, $startH, $str, $black);
+	imagestring($im, $text_font, $startW, $startH, $str, $black);
 	
 	header('Content-Type: image/' . $img_type);
 	$fct_image = 'image' . $img_type;
