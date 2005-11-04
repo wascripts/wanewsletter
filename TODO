@@ -2,27 +2,27 @@
 
 ------------------
 
-- Compatibilité assurée avec PHP5
 - Compléter le support de SQLite
+  - Problème requètes sensibles à la casse avec SQLite
+  - Revoir requètes de functions.validate.php
 
-- Nouveaux formats possibles pour l'export d'emails ?
 - Enregistrement de l'IP lors d'une inscription ? (et checker pour empécher le spam de DB)
 - revoir la partie newsletter.php/class.form.php pour permettre les inscriptions à plusieurs listes en même temps
   ainsi que fournir une API utilisable dans d'autres applis PHP (phpBB, SPIP, ...)
-- Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)
+- Rendre plus simple l'ajout et remplissage de champs supplémentaires
+- Confirmation à chaque demande d'inscription, pas seulement la première
 - Pas de mention du code de compte si panneau de gestion de compte est désactivé (?)
-- confirmation à chaque demande d'inscription, pas seulement la première
+
+- Nouveaux formats possibles pour l'export d'emails ?
+- Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Annuler un envoi
 - Ajouter une partie dans faq.fr.html pour SQLite ?
-- ajouter fichier README pour Wamailer
 - Permettre l’exportation simple et rapide d’une newsletter (au "format" .eml)
-- Permettre l’édition du profil des abonnés ?
-- Retirer la doc wamailer du paquet
 - Terminer support des chargements de newsletters externes
 - Voir avec J.J Solari pour fct des javascript dans Safari
 - Vérifier que les schémas de tables sont valides pour chaque db
-- Revoir requètes de functions.validate.php
+- Réorganiser les scripts d’installation et mise à jour
 
 
 Coding

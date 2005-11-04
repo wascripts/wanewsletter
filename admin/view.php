@@ -19,8 +19,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
- * @author	Bobe <wascripts@phpcodeur.net>
- * @link	http://phpcodeur.net/wascripts/wanewsletter/
+ * @author  Bobe <wascripts@phpcodeur.net>
+ * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * @version $Id$
  */
