@@ -240,14 +240,14 @@ else if( $mode == 'abonnes' )
 	
 	$get_page = ( $page_id > 1 ) ? '&amp;page=' . $page_id : '';
 	
+	if( ($action == 'view' || $action == 'edit') && !$abo_id )
+	{
+		$output->redirect('./view.php?mode=abonnes', 4);
+		trigger_error('No_abo_id', MESSAGE);
+	}
+	
 	if( $action == 'view' )
 	{
-		if( !$abo_id )
-		{
-			$output->redirect('./view.php?mode=abonnes', 4);
-			trigger_error('No_abo_id', MESSAGE);
-		}
-		
 		$liste_ids = $auth->check_auth(AUTH_VIEW);
 		
 		$sql = "SELECT a.*, al.liste_id, al.format
@@ -263,9 +263,6 @@ else if( $mode == 'abonnes' )
 		
 		if( $row = $db->fetch_array($result) )
 		{
-			$output->addHiddenField('abo_id', $row['abo_id']);
-			$output->addHiddenField('sessid', $session->session_id);
-			
 			$output->page_header();
 			
 			$output->set_filenames(array(
@@ -273,20 +270,21 @@ else if( $mode == 'abonnes' )
 			));
 			
 			$output->assign_vars(array(
-				'L_TITLE'                 => sprintf($lang['Title']['profile'], ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : $row['abo_email']),
-				'L_EXPLAIN'               => nl2br($lang['Explain']['abo']),
-				'L_PSEUDO'                => $lang['Abo_pseudo'],
-				'L_EMAIL'                 => $lang['Email_address'],
-				'L_REGISTER_DATE'         => $lang['Susbcribed_date'],
-				'L_LISTE_TO_REGISTER'     => $lang['Liste_to_register'],
-				'L_DELETE_ACCOUNT_BUTTON' => $lang['Button']['del_account'],
+				'L_TITLE'             => sprintf($lang['Title']['profile'], ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : $row['abo_email']),
+				'L_EXPLAIN'           => nl2br($lang['Explain']['abo']),
+				'L_PSEUDO'            => $lang['Abo_pseudo'],
+				'L_EMAIL'             => $lang['Email_address'],
+				'L_REGISTER_DATE'     => $lang['Susbcribed_date'],
+				'L_LISTE_TO_REGISTER' => $lang['Liste_to_register'],
+				'L_GOTO_LIST'         => $lang['Goto_list'],
+				'L_EDIT_ACCOUNT'      => $lang['Edit_account'],
+				'L_DELETE_ACCOUNT'    => $lang['Button']['del_account'],
 				
-				'RETURN_TO_BACK'          => sprintf($lang['Click_return_back'], '<a href="' . sessid('./view.php?mode=abonnes' . $get_string . $get_page) . '">', '</a>'),
-				'S_ABO_PSEUDO'            => ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : '<b>' . $lang['No_data'] . '</b>',
-				'S_ABO_EMAIL'             => $row['abo_email'],
-				'S_REGISTER_DATE'         => convert_time($nl_config['date_format'], $row['abo_register_date']),
-				
-				'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
+				'U_GOTO_LIST'         => sessid('./view.php?mode=abonnes' . $get_string . $get_page),
+				'S_ABO_PSEUDO'        => ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : '<b>' . $lang['No_data'] . '</b>',
+				'S_ABO_EMAIL'         => $row['abo_email'],
+				'S_ABO_ID'            => $row['abo_id'],
+				'S_REGISTER_DATE'     => convert_time($nl_config['date_format'], $row['abo_register_date'])
 			));
 			
 			do
@@ -316,10 +314,141 @@ else if( $mode == 'abonnes' )
 			trigger_error('abo_not_exists', MESSAGE);
 		}
 	}
+	else if( $action == 'edit' )
+	{
+		if( isset($_POST['submit']) )
+		{
+			$email = ( !empty($_POST['email']) ) ? trim($_POST['email']) : '';
+			
+			require WA_ROOTDIR . '/includes/functions.validate.php';
+			
+			$result = check_email($email);
+			if( $result['error'] )
+			{
+				$error = TRUE;
+				$msg_error[] = $result['message'];
+			}
+			
+			if( !$error )
+			{
+				$sql_data = array(
+					'abo_email'  => $email,
+					'abo_pseudo' => ( !empty($_POST['pseudo']) ) ? strip_tags(trim($_POST['pseudo'])) : ''
+				);
+				
+				if( !$db->query_build('UPDATE', ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id)) )
+				{
+					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+				}
+				
+				$formatList = ( !empty($_POST['format']) && is_array($_POST['format']) ) ? $_POST['format'] : array();
+				
+				$update = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
+				
+				foreach( $formatList AS $liste_id => $format )
+				{
+					if( in_array($format, array(FORMAT_TEXTE, FORMAT_HTML)) && $auth->check_auth(AUTH_EDIT, $liste_id) )
+					{
+						array_push($update[$format], $liste_id);
+					}
+				}
+				
+				foreach( $update AS $format => $sql_ids )
+				{
+					if( count($sql_ids) > 0 )
+					{
+						$sql = "UPDATE " . ABO_LISTE_TABLE . "
+							SET format = $format
+							WHERE abo_id = $abo_id AND liste_id IN(" . implode(', ', $sql_ids) . ")";
+						if( !$db->query($sql) )
+						{
+							trigger_error('Impossible de mettre à jour la table abo_liste', ERROR);
+						}
+					}
+				}
+				
+				$output->redirect('./view.php?mode=abonnes&action=view&id=' . $abo_id, 4);
+				
+				$message  = $lang['Message']['Profile_updated'];
+				$message .= '<br /><br />' . sprintf($lang['Click_return_abo_profile'],
+					'<a href="' . sessid('./view.php?mode=abonnes&action=view&id=' . $abo_id) . '">', '</a>');
+				trigger_error($message, MESSAGE);
+			}
+		}
+		
+		$liste_ids = $auth->check_auth(AUTH_EDIT);
+		
+		$sql = "SELECT a.*, al.liste_id, al.format
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al
+				ON al.abo_id = a.abo_id
+					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
+			WHERE a.abo_id = $abo_id";
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir les données sur cet abonné', ERROR);
+		}
+		
+		if( $row = $db->fetch_array($result) )
+		{
+			require WA_ROOTDIR . '/includes/functions.box.php';
+			
+			$output->addHiddenField('id', $row['abo_id']);
+			$output->addHiddenField('action', 'edit');
+			$output->addHiddenField('sessid', $session->session_id);
+			
+			$output->page_header();
+			
+			$output->set_filenames(array(
+				'body' => 'edit_abo_profil_body.tpl'
+			));
+			
+			$output->assign_vars(array(
+				'L_TITLE'              => sprintf($lang['Title']['profile'], ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : $row['abo_email']),
+				'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
+				'L_PSEUDO'             => $lang['Abo_pseudo'],
+				'L_EMAIL'              => $lang['Email_address'],
+				'L_LISTE_TO_REGISTER'  => $lang['Liste_to_register'],
+				'L_GOTO_LIST'          => $lang['Goto_list'],
+				'L_VIEW_ACCOUNT'       => $lang['View_account'],
+				'L_DELETE_ACCOUNT'     => $lang['Button']['del_account'],
+				'L_VALID_BUTTON'       => $lang['Button']['valid'],
+				'L_WARNING_EMAIL_DIFF' => str_replace("\n", '\n', addslashes($lang['Warning_email_diff'])),
+				
+				'U_GOTO_LIST'          => sessid('./view.php?mode=abonnes' . $get_string . $get_page),
+				'S_ABO_PSEUDO'         => htmlspecialchars($row['abo_pseudo']),
+				'S_ABO_EMAIL'          => htmlspecialchars($row['abo_email']),
+				'S_ABO_ID'             => $row['abo_id'],
+				
+				'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
+			));
+			
+			do
+			{
+				if( $auth->listdata[$row['liste_id']]['liste_format'] == FORMAT_MULTIPLE )
+				{
+					$output->assign_block_vars('listerow', array(
+						'LISTE_NAME'    => $auth->listdata[$row['liste_id']]['liste_name'],
+						'FORMAT_BOX'    => format_box('format[' . $row['liste_id'] . ']', $row['format'], false, false, true),
+						'U_VIEW_LISTE'  => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
+					));
+					$format = ' (' . $lang['Choice_Format'] . '&#160;: ' . (( $row['format'] == FORMAT_HTML ) ? 'html' : 'texte') . ')';
+				}
+			}
+			while( $row = $db->fetch_array($result) );
+			
+			$output->pparse('body');
+			$output->page_footer();
+		}
+		else
+		{
+			trigger_error('abo_not_exists', MESSAGE);
+		}
+	}
 	else if( $action == 'delete' )
 	{
 		$email_list = ( !empty($_POST['email_list']) ) ? $_POST['email_list'] : '';
-		$abo_ids    = ( !empty($_POST['abo_id']) ) ? $_POST['abo_id'] : array();
+		$abo_ids    = ( !empty($_REQUEST['id']) ) ? $_REQUEST['id'] : array();
 		
 		if( !is_array($abo_ids) )
 		{
@@ -449,14 +578,14 @@ else if( $mode == 'abonnes' )
 				
 				while( $row = $db->fetch_array($result) )
 				{
-					$output->addHiddenField('abo_id[]', $row['abo_id']);
+					$output->addHiddenField('id[]', $row['abo_id']);
 				}
 			}
 			else
 			{
 				foreach( $abo_ids AS $abo_id )
 				{
-					$output->addHiddenField('abo_id[]', $abo_id);
+					$output->addHiddenField('id[]', $abo_id);
 				}
 			}
 			

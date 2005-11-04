@@ -492,6 +492,7 @@ $lang['Joined_file']                = "Cette archive a un fichier joint";
 //
 $lang['Explain']['abo']             = "Ici, vous pouvez voir et supprimer les comptes des personnes qui se sont inscrites à vos listes de diffusion";
 $lang['Click_return_abo']           = "Cliquez %sici%s pour retourner à la liste des abonnés";
+$lang['Click_return_abo_profile']   = "Cliquez %sici%s pour retourner au profil de l'abonné";
 $lang['Delete_abo']                 = "Êtes-vous sûr de vouloir supprimer les abonnés sélectionnés ?";
 $lang['No_abo_in_list']             = "Il n'y a pas encore d'abonné à cette liste de diffusion";
 $lang['Susbcribed_date']            = "Date d'inscription";
@@ -506,6 +507,10 @@ $lang['Liste_to_register']          = "Cet abonné est inscrit aux listes suivant
 $lang['Fast_deletion']              = "Suppression rapide";
 $lang['Fast_deletion_note']         = "Entrez une ou plusieurs adresses emails, séparées par une virgule, et elles seront supprimées de la liste de diffusion";
 $lang['Choice_Format']              = "format choisi";
+$lang['Warning_email_diff']         = "Attention, vous allez modifier l'adresse email de cet abonné\nSouhaitez-vous continuer ?";
+$lang['Goto_list']                  = "Retour à la liste des abonnés";
+$lang['View_account']               = "Voir ce compte";
+$lang['Edit_account']               = "Modifier ce compte";
 
 
 //
