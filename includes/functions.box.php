@@ -78,12 +78,13 @@ function lang_box($default_lang = '')
  * @param integer $default_format  Format par défaut
  * @param boolean $option_submit   True si submit lors du changement de valeur de la liste
  * @param boolean $multi_format    True si on doit affiche également multi-format comme valeur
+ * @param boolean $no_id           True pour ne pas mettre d'attribut id à la balise <select>
  * 
  * @return string
  */
-function format_box($select_name, $default_format = 0, $option_submit = false, $multi_format = false)
+function format_box($select_name, $default_format = 0, $option_submit = false, $multi_format = false, $no_id = false)
 {
-	$format_box = '<select id="' . $select_name . '" name="' . $select_name . '"';
+	$format_box = '<select' . ($no_id == false ? ' id="' . $select_name . '"' : '') . ' name="' . $select_name . '"';
 	
 	if( $option_submit )
 	{

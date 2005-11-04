@@ -53,6 +53,7 @@ class sql {
 		if( is_resource($this->connect_id) )
 		{
 			$this->query('PRAGMA short_column_names = 1');
+			$this->query('PRAGMA case_sensitive_like = 0');
 		}
 	}
 	
