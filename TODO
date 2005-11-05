@@ -23,6 +23,7 @@
 - Voir avec J.J Solari pour fct des javascript dans Safari
 - Vérifier que les schémas de tables sont valides pour chaque db
 - Réorganiser les scripts d’installation et mise à jour
+  - suppression champs hébergeur et version de wa_config
 
 
 Coding
