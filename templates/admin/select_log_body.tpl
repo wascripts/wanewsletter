@@ -2,10 +2,12 @@
 <script type="text/javascript">
 <!--
 if( typeof(document.styleSheets) != 'undefined' ) {
+	
 	if( typeof(document.styleSheets[0].cssRules) != 'undefined' ) {
 		document.styleSheets[0].insertRule('tr#loadByURL, tr#loadByURL-bis { display: none; }', 0);
 	} else {
-		document.styleSheets[0].addRule('tr#loadByURL, tr#loadByURL-bis', 'display: none');
+		document.styleSheets[0].addRule('tr#loadByURL', 'display: none');
+		document.styleSheets[0].addRule('tr#loadByURL-bis', 'display: none');
 	}
 	
 	DOM_Events.addListener('load', function() {
@@ -14,8 +16,10 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 			
 			//
 			// La détection de navigateur est à éviter mais il arrive que l'on ait pas trop le choix...
+			// IE ne reconnait pas la valeur 'table-row' de la propriété CSS display. Ça semble en revanche
+			// fonctionner avec 'block'...
 			//
-			if( navigator.userAgent.indexOf('MSIE') != -1 ) {
+			if( navigator.userAgent.indexOf('MSIE') != -1 && displayVal == 'table-row' ) {
 				displayVal = 'block';
 			}
 			
