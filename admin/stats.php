@@ -337,17 +337,32 @@ if( $img == 'camembert' )
 	//
 	// Positionnement de départ du camenbert
 	//
-	$start_x = 70;
-	$start_y = 100;
+	$startX = 70;
+	$startY = 100;
 	
 	//
 	// Emplacement des noms de liste de diffusion (cadre blanc) 
 	//
-	$outerDecal = 2;
-	$hauteur = ($start_y - (100 / 2));
-	imagefilledrectangle($im, 145-$outerDecal, $hauteur+$outerDecal, ($imageW - 20 - $outerDecal), ($hauteur + (30+$outerDecal) + ($total_listes * 20)), $gray2);
-	imagefilledrectangle($im, 145, $hauteur, ($imageW - 20), ($hauteur + 30 + ($total_listes * 20)), $black);
-	imagefilledrectangle($im, 146, ($hauteur + 1), ($imageW - 21), ($hauteur + 29 + ($total_listes * 20)), $gray1);
+	$globalY = ($startY - (100 / 2));
+	$outer   = 5;
+	$rectX   = 145;
+	$rectH   = ($globalY + 30 + ($total_listes * 20));
+	$shadowX = ($rectX - $outer);
+	
+	if( $img_type == 'png' )
+	{
+		$src = imagecreatefrompng(WA_ROOTDIR . '/images/shadow.png');
+		imagecopyresized($im, $src, $shadowX, $globalY, 0, 0, $outer, $outer, $outer, $outer); // Angle supérieur gauche
+		imagecopyresized($im, $src, $shadowX, ($globalY + $outer), 0, $outer, $outer, 90, $outer, 1); // Coté gauche
+		imagecopyresized($im, $src, $shadowX, ($rectH + 1), 0, (imagesy($src) - $outer), 401, $outer, 401, $outer); // Coté gauche
+	}
+	else
+	{
+		imagefilledrectangle($im, $shadowX, ($globalY + $outer), ($imageW - 20 - $outer), ($rectH + $outer), $gray2);
+	}
+	
+	imagefilledrectangle($im, $rectX, $globalY, ($imageW - 20), $rectH, $black);
+	imagefilledrectangle($im, ($rectX + 1), ($globalY + 1), ($imageW - 21), ($rectH - 1), $gray1);
 	
 	//
 	// Ok, on génère le camenbert
@@ -378,34 +393,34 @@ if( $img == 'camembert' )
 			$degre  += ($part * 360);
 			$end_arc = round($degre);
 			
-			imagearc($im, $start_x, $start_y, 100, 100, $deb_arc, $end_arc, $color_arc);
+			imagearc($im, $startX, $startY, 100, 100, $deb_arc, $end_arc, $color_arc);
 			
-			list($x_arc, $y_arc) = xy_arc($deb_arc, 100);
-			imageline($im, $start_x, $start_y, floor($start_x + $x_arc), floor($start_y + $y_arc), $color_arc);
+			list($arcX, $arcY) = xy_arc($deb_arc, 100);
+			imageline($im, $startX, $startY, floor($startX + $arcX), floor($startY + $arcY), $color_arc);
 			
-			list($x_arc, $y_arc) = xy_arc($end_arc, 100);
-			imageline($im, $start_x, $start_y, ceil($start_x + $x_arc), ceil($start_y + $y_arc), $color_arc);
+			list($arcX, $arcY) = xy_arc($end_arc, 100);
+			imageline($im, $startX, $startY, ceil($startX + $arcX), ceil($startY + $arcY), $color_arc);
 			
 			$mid_arc = round((($end_arc - $deb_arc) / 2) + $deb_arc);
-			list($x_arc, $y_arc) = xy_arc($mid_arc, 50);
-			imagefilltoborder($im, floor($start_x + $x_arc), floor($start_y + $y_arc), $color_arc, $color_arc);
+			list($arcX, $arcY) = xy_arc($mid_arc, 50);
+			imagefilltoborder($im, floor($startX + $arcX), floor($startY + $arcY), $color_arc, $color_arc);
 		}
 		
 		//
 		// Insertion du carré de couleur pour la légende, suivi du nom de la liste et du nombre d'abonnés 
 		//
-		imagefilledrectangle($im, 165, ($hauteur + $int + 2), 175, ($hauteur + $int + 12), $gray2);
-		imagefilledrectangle($im, 166, ($hauteur + $int + 1), 176, ($hauteur + $int + 11), $color_arc);
+		imagefilledrectangle($im, 165, ($globalY + $int + 2), 175, ($globalY + $int + 12), $gray2);
+		imagefilledrectangle($im, 166, ($globalY + $int + 1), 176, ($globalY + $int + 11), $color_arc);
 		
-		imagestring($im, $text_font, 185, ($hauteur + $int),
+		imagestring($im, $text_font, 185, ($globalY + $int),
 			sprintf('%s [%d] [%s%%]', $listes[$i]['name'], $listes[$i]['num'],
 				($part > 0 ? round($part * 100, 2) : 0)),
 			$black
 		);
 	}
 	
-	imagearc($im, $start_x, $start_y, 100, 100, 0, 360, $black);
-	imagearc($im, $start_x, $start_y, 101, 101, 0, 360, $black);
+	imagearc($im, $startX, $startY, 100, 100, 0, 360, $black);
+	imagearc($im, $startX, $startY, 101, 101, 0, 360, $black);
 	
 	header('Content-Disposition: inline; filename="parts_by_liste.' . $img_type . '"');
 	header('Content-Type: image/' . $img_type);
