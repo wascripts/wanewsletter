@@ -345,23 +345,23 @@ if( $img == 'camembert' )
 	$globalY = ($startY - (100 / 2));
 	$outer   = 5;
 	$rectX   = 145;
-	$rectH   = ($globalY + 30 + ($total_listes * 20));
+	$rectH   = (30 + ($total_listes * 20));
 	$shadowX = ($rectX - $outer);
 	
 	if( $img_type == 'png' )
 	{
 		$src = imagecreatefrompng(WA_ROOTDIR . '/images/shadow.png');
 		imagecopyresized($im, $src, $shadowX, $globalY, 0, 0, $outer, $outer, $outer, $outer); // Angle supérieur gauche
-		imagecopyresized($im, $src, $shadowX, ($globalY + $outer), 0, $outer, $outer, 90, $outer, 1); // Coté gauche
-		imagecopyresized($im, $src, $shadowX, ($rectH + 1), 0, (imagesy($src) - $outer), 401, $outer, 401, $outer); // Coté gauche
+		imagecopyresized($im, $src, $shadowX, ($globalY + $outer), 0, $outer, $outer, $rectH, $outer, 1); // Coté gauche
+		imagecopyresized($im, $src, $shadowX, ($globalY + $rectH + 1), 0, (imagesy($src) - $outer), 401, $outer, 401, $outer); // Coté gauche
 	}
 	else
 	{
-		imagefilledrectangle($im, $shadowX, ($globalY + $outer), ($imageW - 20 - $outer), ($rectH + $outer), $gray2);
+		imagefilledrectangle($im, $shadowX, ($globalY + $outer), ($imageW - 20 - $outer), ($globalY + $rectH + $outer), $gray2);
 	}
 	
-	imagefilledrectangle($im, $rectX, $globalY, ($imageW - 20), $rectH, $black);
-	imagefilledrectangle($im, ($rectX + 1), ($globalY + 1), ($imageW - 21), ($rectH - 1), $gray1);
+	imagefilledrectangle($im, $rectX, $globalY, ($imageW - 20), ($globalY + $rectH), $black);
+	imagefilledrectangle($im, ($rectX + 1), ($globalY + 1), ($imageW - 21), ($globalY + $rectH - 1), $gray1);
 	
 	//
 	// Ok, on génère le camenbert
