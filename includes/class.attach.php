@@ -944,13 +944,7 @@ class Attach {
 	 */
 	function remove_file($filename)
 	{
-		@chmod($filename, 0777);
 		@unlink($filename);
-		
-		if( file_exists($filename) )
-		{
-			@system('del ' . str_replace('/', '\\', $filename));// TODO
-		}
 	}
 	
 	/**
