@@ -722,13 +722,13 @@ switch( $mode )
 		{
 			do
 			{		
-				$unban_email_box .= '<option value="' . $row['ban_id'] . '"> - ' . $row['ban_email'] . ' - </option>';
+				$unban_email_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['ban_id'], $row['ban_email']);
 			}
 			while( $row = $db->fetch_array($result) );
 		}
 		else
 		{
-			$unban_email_box .= '<option value="0"> - ' . $lang['No_email_banned'] . ' - </option>';
+			$unban_email_box .= '<option value="0">' . $lang['No_email_banned'] . '</option>';
 		}
 		$unban_email_box .= '</select>';
 		
@@ -837,13 +837,13 @@ switch( $mode )
 		{
 			do
 			{		
-				$reallow_ext_box .= '<option value="' . $row['fe_id'] . '">' . $row['fe_ext'] . '</option>';
+				$reallow_ext_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['fe_id'], $row['fe_ext']);
 			}
 			while( $row = $db->fetch_array($result) );
 		}
 		else
 		{
-			$reallow_ext_box .= '<option value="0"> - ' . $lang['No_forbidden_ext'] . ' - </option>';
+			$reallow_ext_box .= '<option value="0">' . $lang['No_forbidden_ext'] . '</option>';
 		}
 		$reallow_ext_box .= '</select>';
 		
@@ -1000,7 +1000,7 @@ switch( $mode )
 			$tables_box = '<select id="tables_plus" name="tables_plus[]" multiple="multiple" size="' . $total_tables . '">';
 			foreach( $tables_plus AS $table_name )
 			{
-				$tables_box .= '<option value="' . $table_name . '"> - ' . $table_name . ' - </option>';
+				$tables_box .= sprintf("<option value=\"%1\$s\">%1\$s</option>\n\t", $table_name);
 			}
 			$tables_box .= '</select>';
 			
