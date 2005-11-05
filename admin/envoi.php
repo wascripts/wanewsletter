@@ -742,7 +742,7 @@ if( $mode == 'resend' )
 
 $output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('section', './envoi.php?mode=resend', $lang['Resend_log']);
-$output->addScript(WA_ROOTDIR . 'templates/admin/editor.js');
+$output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $logdata['log_status']);
