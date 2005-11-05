@@ -360,10 +360,10 @@ switch( $mode )
 					}
 					
 					$sql = "SELECT jf.file_real_name, l.log_id
-						FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
-						WHERE jf.file_id = lf.file_id
-							AND lf.log_id = l.log_id
-							AND l.liste_id = $listdata[liste_id]
+						FROM " . JOINED_FILES_TABLE . " AS jf
+							INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+							INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+								AND l.liste_id = $listdata[liste_id]
 						ORDER BY jf.file_real_name ASC";
 					if( !($result = $db->query($sql)) )
 					{
@@ -553,7 +553,7 @@ switch( $mode )
 			$errno_code   = ( !empty($_FILES['join_file']['error']) ) ? intval($_FILES['join_file']['error']) : UPLOAD_ERR_OK;
 			$file_id      = ( !empty($_POST['fid']) ) ? intval($_POST['fid']) : 0;
 			
-			include WA_ROOTDIR . '/includes/class.attach.php';
+			require WA_ROOTDIR . '/includes/class.attach.php';
 			
 			$attach = new Attach();
 			
@@ -608,7 +608,7 @@ switch( $mode )
 			//
 			// Suppression du fichier joint spécifié
 			//
-			include WA_ROOTDIR . '/includes/class.attach.php';
+			require WA_ROOTDIR . '/includes/class.attach.php';
 			
 			$attach = new Attach();
 			$attach->delete_joined_files(false, $logdata['log_id'], $file_ids);
@@ -634,10 +634,10 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	// en cours, et construire le select box des fichiers existants
 	//
 	$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-		FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
-		WHERE jf.file_id = lf.file_id
-			AND lf.log_id = l.log_id
-			AND l.liste_id = $listdata[liste_id]
+		FROM " . JOINED_FILES_TABLE . " AS jf
+			INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+				AND l.liste_id = $listdata[liste_id]
 		ORDER BY jf.file_real_name ASC";
 	if( !($result = $db->query($sql)) )
 	{
@@ -669,13 +669,13 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	{
 		if( !in_array($tmp_id, $joined_files_id) )
 		{
-			$file_box .= '<option value="' . $tmp_id . '"> - ' . htmlspecialchars($row['file_real_name']) . ' - </option>';
+			$file_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $tmp_id, htmlspecialchars($row['file_real_name']));
 		}
 	}
 	
 	if( $file_box != '' )
 	{
-		$file_box = '<select name="fid"><option value="0"> - ' . $lang['File_on_server'] . ' - </option>' . $file_box . '</select>';
+		$file_box = '<select name="fid"><option value="0">' . $lang['File_on_server'] . '</option>' . $file_box . '</select>';
 	}
 	
 	unset($other_files, $joined_files_id);
@@ -698,10 +698,7 @@ if( $mode == 'resend' )
 	// On règle le script pour ignorer une déconnexion du client et 
 	// poursuivre l'envoi du flot d'emails jusqu'à son terme. 
 	//
-	if( !is_disabled_func('ignore_user_abort') )
-	{
-		@ignore_user_abort(true);
-	}
+	@ignore_user_abort(true);
 	
 	//
 	// On augmente également le temps d'exécution maximal du script. 
@@ -709,10 +706,7 @@ if( $mode == 'resend' )
 	// Certains hébergeurs désactivent pour des raisons évidentes cette fonction
 	// Si c'est votre cas, vous êtes mal barré
 	//
-	if( !is_disabled_func('set_time_limit') )
-	{
-		@set_time_limit(1200);
-	}
+	@set_time_limit(1200);
 	
 	//
 	// Initialisation de la classe mailer

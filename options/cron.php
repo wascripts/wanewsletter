@@ -30,6 +30,7 @@ define('IN_CRON',       true);
 define('WA_ROOTDIR',    '..');
 
 require WA_ROOTDIR . '/start.php';
+require WAMAILER_DIR . '/class.mailer.php';
 
 load_settings();
 
@@ -49,10 +50,7 @@ if( $listdata = $db->fetch_array($result) )
 	// On règle le script pour ignorer une déconnexion du client et 
 	// poursuivre l'envoi du flot d'emails jusqu'à son terme. 
 	//
-	if( !is_disabled_func('ignore_user_abort') )
-	{
-		@ignore_user_abort(true);
-	}
+	@ignore_user_abort(true);
 	
 	//
 	// On augmente également le temps d'exécution maximal du script. 
@@ -60,12 +58,7 @@ if( $listdata = $db->fetch_array($result) )
 	// Certains hébergeurs désactivent pour des raisons évidentes cette fonction
 	// Si c'est votre cas, vous êtes mal barré
 	//
-	if( !is_disabled_func('set_time_limit') )
-	{
-		@set_time_limit(1200);
-	}
-	
-	require WAMAILER_DIR . '/class.mailer.php';
+	@set_time_limit(1200);
 	
 	//
 	// Initialisation de la classe mailer
@@ -110,11 +103,11 @@ if( $listdata = $db->fetch_array($result) )
 		}
 		
 		$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-			FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
-			WHERE l.log_id = $logdata[log_id]
-				AND lf.log_id = l.log_id
-				AND jf.file_id = lf.file_id
-				AND l.liste_id = $listdata[liste_id]
+			FROM " . JOINED_FILES_TABLE . " AS jf
+				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+				INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+					AND l.liste_id = $listdata[liste_id]
+					AND l.log_id   = $logdata[log_id]
 			ORDER BY jf.file_real_name ASC";
 		if( !($result = $db->query($sql)) )
 		{

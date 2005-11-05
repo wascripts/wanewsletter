@@ -25,7 +25,11 @@
  * @version $Id$
  */
 
-/*
+if( !defined('CLASS_ATTACH_INC') ) {
+
+define('CLASS_ATTACH_INC', true);
+
+/**
  * Class Attach
  * 
  * Gestion des fichiers joints des newsletters
@@ -147,7 +151,7 @@ class Attach {
 	 * 
 	 * @param string  $filename    Nom du fichier
 	 * @param boolean $error       True si une erreur s'est produite
-	 * @param array	  $msg_error   Tableau des erreurs
+	 * @param array   $msg_error   Tableau des erreurs
 	 * 
 	 * @return integer
 	 */
@@ -1014,4 +1018,5 @@ class Attach {
 	}
 }
 
+}
 ?>

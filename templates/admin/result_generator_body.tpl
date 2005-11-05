@@ -3,7 +3,7 @@
 	
 	<table class="content">
 		<tr>
-			<td class="explain"> {L_EXPLAIN_CODE_HTML} </td>
+			<td class="explain">{L_EXPLAIN_CODE_HTML}</td>
 		</tr>
 		<tr>
 			<td class="row-full">
@@ -11,7 +11,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="explain"> {L_EXPLAIN_CODE_PHP} </td>
+			<td class="explain">{L_EXPLAIN_CODE_PHP}</td>
 		</tr>
 		<tr>
 			<td class="row-full">

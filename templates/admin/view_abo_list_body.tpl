@@ -4,7 +4,10 @@
 <div class="bloc">
 	<table class="content">
 		<tr>
-			<td rowspan="2" class="row1"><label for="keyword">{L_SEARCH}&#160;: </label><br /><span class="m-texte">{L_SEARCH_NOTE}</span></td>
+			<td rowspan="2" class="row1">
+				<label for="keyword">{L_SEARCH}&#160;: </label><br />
+				<span class="m-texte">{L_SEARCH_NOTE}</span>
+			</td>
 			<td class="row2">
 				<input type="text" id="keyword" name="keyword" value="{KEYWORD}" size="35" maxlength="60" class="text" />
 				<input type="submit" name="search" value="{L_SEARCH_BUTTON}" class="pbutton" />

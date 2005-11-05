@@ -339,7 +339,7 @@ if( isset($_POST['submit']) )
 		if( $admindata['admin_level'] == ADMIN )
 		{
 			$auth_data = ( $admindata['admin_id'] == $admin_id ) ? $auth->listdata : $auth->read_data($admin_id);
-			$liste_ids = ( !empty($_POST['liste_id']) ) ? (array) $_POST['liste_id'] : array();
+			$liste_ids = ( !empty($_POST['liste_id']) && is_array($_POST['liste_id']) ) ? $_POST['liste_id'] : array();
 			
 			foreach( $auth->auth_ary AS $auth_name )
 			{

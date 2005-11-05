@@ -2,6 +2,9 @@
 /* $Id$ */
 // vim: expandtab sw=4 ts=4 sts=4:
 
+if( !defined('ZIP_LIB_INC') ) {
+
+define('ZIP_LIB_INC', true);
 
 /**
  * Zip file creation class.
@@ -185,4 +188,6 @@ class zipfile
     } // end of the 'file()' method
 
 } // end of the 'zipfile' class
+
+}
 ?>

@@ -20,13 +20,16 @@
  *
  ***************************************************************************/
 
+if( !defined('CLASS_TEMPLATE_INC') ) {
+
+define('CLASS_TEMPLATE_INC', true);
+
 /**
  * Template class. By Nathan Codding of the phpBB group.
  * The interface was originally inspired by PHPLib templates,
  * and the template file formats are quite similar.
  *
  */
-
 class Template {
     var $classname = "Template";
 
@@ -479,4 +482,5 @@ class Template {
 
 }
 
+}
 ?>

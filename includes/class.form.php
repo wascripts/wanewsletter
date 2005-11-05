@@ -25,6 +25,10 @@
  * @version $Id$
  */
 
+if( !defined('CLASS_FORM_INC') ) {
+
+define('CLASS_FORM_INC', true);
+
 class Wanewsletter {
 	
 	var $update_stats  = FALSE;
@@ -477,4 +481,5 @@ class Wanewsletter {
 	}
 }
 
+}
 ?>

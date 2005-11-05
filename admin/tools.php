@@ -283,10 +283,7 @@ define('WA_EOL', $eol);
 // Certains hébergeurs empèchent pour des raisons évidentes cette possibilité
 // Si c'est votre cas, vous êtes mal barré 
 //
-if( !is_disabled_func('set_time_limit') )
-{
-	@set_time_limit(1200);
-}
+@set_time_limit(1200);
 
 switch( $mode )
 {
@@ -301,11 +298,13 @@ switch( $mode )
 			$glue = ( $glue != '' ) ? $glue : WA_EOL;
 			
 			$sql = "SELECT a.abo_email 
-				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
-				WHERE al.liste_id = $listdata[liste_id]
-					AND a.abo_id = al.abo_id
-					AND a.abo_status = " . ABO_ACTIF;
+				FROM " . ABONNES_TABLE . " AS a
+					INNER JOIN " . ABO_LISTE_TABLE . " AS al
+					ON al.abo_id = a.abo_id
+						AND al.liste_id = $listdata[liste_id]";
 			$sql .= ( $listdata['liste_format'] == FORMAT_MULTIPLE ) ? ' AND al.format = ' . $format : '';
+			$sql .= " WHERE a.abo_status = " . ABO_ACTIF;
+			
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible d\'obtenir la liste des emails à exporter', ERROR);
@@ -662,7 +661,7 @@ switch( $mode )
 					{
 						case 'mysql':
 						case 'mysql4':
-							array_push($sql_values, "($listdata[liste_id], '" . $db->escape($pattern) . "')");
+							$sql_values[] = "($listdata[liste_id], '" . $db->escape($pattern) . "')";
 							break;
 						
 						default:
@@ -776,7 +775,7 @@ switch( $mode )
 						{
 							case 'mysql':
 							case 'mysql4':
-								array_push($sql_values, "($listdata[liste_id], '$ext')");
+								$sql_values[] = "($listdata[liste_id], '$ext')";
 								break;
 							
 							default:
@@ -1038,10 +1037,7 @@ switch( $mode )
 			// On règle le script pour ignorer une déconnexion du client et mener 
 			// la restauration à son terme
 			//
-			if( !is_disabled_func('ignore_user_abort') )
-			{
-				@ignore_user_abort(true);
-			}
+			@ignore_user_abort(true);
 			
 			//
 			// Import via upload ou fichier local ? 

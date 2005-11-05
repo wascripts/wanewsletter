@@ -25,6 +25,10 @@
  * @version $Id$
  */
 
+if( !defined('FUNCTIONS_BOX_INC') ) {
+
+define('FUNCTIONS_BOX_INC', true);
+
 /**
  * lang_box()
  * 
@@ -108,4 +112,5 @@ function format_box($select_name, $default_format = 0, $option_submit = false, $
 	return $format_box;
 }
 
+}
 ?>

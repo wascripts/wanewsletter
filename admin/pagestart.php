@@ -36,9 +36,8 @@ define('WA_ROOTDIR', '..');
 $secure = TRUE;
 
 require WA_ROOTDIR . '/start.php';
-
-include WA_ROOTDIR . '/includes/class.sessions.php';
-include WA_ROOTDIR . '/includes/class.auth.php';
+require WA_ROOTDIR . '/includes/class.sessions.php';
+require WA_ROOTDIR . '/includes/class.auth.php';
 
 $liste = ( !empty($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 
@@ -72,7 +71,8 @@ if( !defined('IN_LOGIN') )
 	{
 		$admindata['session_liste'] = 0;
 		
-		$sql = "UPDATE " . SESSIONS_TABLE . " SET session_liste = 0 
+		$sql = "UPDATE " . SESSIONS_TABLE . "
+			SET session_liste = 0 
 			WHERE session_id = '" . $session->session_id . "' 
 				AND admin_id = " . $admindata['admin_id'];
 		if( !$db->query($sql) )
@@ -85,7 +85,7 @@ if( !defined('IN_LOGIN') )
 	{
 		$sessid = ( !empty($_POST['sessid']) ) ? trim($_POST['sessid']) : '';
 		
-		if( $session->new_session || ( $sessid != $session->session_id ) )
+		if( $session->new_session || $sessid != $session->session_id )
 		{
 			trigger_error('Invalid_session', MESSAGE);
 		}

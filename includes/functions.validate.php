@@ -25,6 +25,10 @@
  * @version $Id$
  */
 
+if( !defined('FUNCTIONS_VALIDATE_INC') ) {
+
+define('FUNCTIONS_VALIDATE_INC', true);
+
 /**
  * check_email()
  * 
@@ -171,4 +175,5 @@ function validate_lang($language)
 	return preg_match('/^[\w_-]+$/', $language) && file_exists(WA_ROOTDIR . '/language/lang_' . $language . '.php');
 }
 
+}
 ?>

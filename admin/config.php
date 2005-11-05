@@ -1,6 +1,6 @@
 <?php 
 /**
- * Copyright (c) 2002-2006 Aurï¿½lien Maille
+ * Copyright (c) 2002-2006 Aurélien Maille
  * 
  * This file is part of Wanewsletter.
  * 

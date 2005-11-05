@@ -28,6 +28,7 @@
 define('IN_NEWSLETTER', true);
 
 require './pagestart.php';
+require WA_ROOTDIR . '/includes/functions.stats.php';
 
 //
 // Si le module de statistiques est désactivé ou que la librairie GD n'est pas installé, 
@@ -41,8 +42,6 @@ else if( !is_available_extension('gd') )
 {
 	trigger_error('No_gd_lib', MESSAGE);
 }
-
-include WA_ROOTDIR . '/includes/functions.stats.php';
 
 $liste_ids = $auth->check_auth(AUTH_VIEW);
 

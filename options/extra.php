@@ -32,30 +32,23 @@ require WA_ROOTDIR . '/start.php';
 
 load_settings();
 
-$js_data  = 'No data';
 $liste_id = ( !empty($_GET['liste']) ) ? intval($_GET['liste']) : 0;
 
-if( $liste_id > 0 )
-{
-	$sql = "SELECT COUNT(a.abo_id) AS num_inscrits 
-		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al 
-		WHERE al.liste_id = $liste_id 
-			AND a.abo_id = al.abo_id 
-			AND a.abo_status = " . ABO_ACTIF;
-	if( $result = $db->query($sql) )
-	{
-		$js_data = $db->result($result, 0, 'num_inscrits');
-	}
-}
+$sql = "SELECT COUNT(a.abo_id) AS num_subscribe
+	FROM " . ABONNES_TABLE . " AS a
+		INNER JOIN " . ABO_LISTE_TABLE . " AS al
+		ON al.liste_id = $liste_id
+			AND al.abo_id = a.abo_id
+	WHERE a.abo_status = " . ABO_ACTIF;
+$result = $db->query($sql);
+$data   = $db->result($result, 0, 'num_subscribe');
 
-header('Content-Type: application/x-javascript; charset=ISO-8859-1');
+header('Content-Type: application/x-javascript');
 
-if( isset($_GET['mode']) && strtoupper($_GET['mode']) == 'DOM' ) {
-?>
-
-
-<?php
+if( isset($_GET['use-variable']) ) {
+	echo "var numSubscribe = '$data';";
 } else {
-	echo "document.write('$js_data');";
+	echo "document.write('$data');";
 }
+
 ?>

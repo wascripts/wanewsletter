@@ -25,7 +25,11 @@
  * @version $Id$
  */
 
-/*
+if( !defined('CLASS_SESSION_INC') ) {
+
+define('CLASS_SESSION_INC', true);
+
+/**
  * Class Session
  * 
  * Gestion des connexions à l'administration
@@ -487,4 +491,5 @@ function sessid($var, $is_str = false)
 	return $var;
 }
 
+}
 ?>

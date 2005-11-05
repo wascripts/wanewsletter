@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
+ * Copyright (c) 2002-2006 Aurï¿½lien Maille
  * 
  * This file is part of Wanewsletter.
  * 
@@ -35,7 +35,7 @@ error_reporting(E_ALL);
 $starttime = array_sum(explode(' ', microtime()));
 
 //
-// Intialisation des variables pour éviter toute injection malveillante de code 
+// Intialisation des variables pour ï¿½viter toute injection malveillante de code 
 //
 $simple_header = $error = FALSE;
 $nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = array();
@@ -61,15 +61,15 @@ if( !defined('NL_INSTALLED') )
 	exit;
 }
 
-require_once WA_ROOTDIR . '/includes/functions.php';
-require_once WA_ROOTDIR . '/includes/constantes.php';
-require_once WA_ROOTDIR . '/includes/template.php';
-require_once WA_ROOTDIR . '/includes/class.output.php';
-require_once WA_ROOTDIR . '/sql/db_type.php';
+require WA_ROOTDIR . '/includes/functions.php';
+require WA_ROOTDIR . '/includes/constantes.php';
+require WA_ROOTDIR . '/includes/template.php';
+require WA_ROOTDIR . '/includes/class.output.php';
+require WA_ROOTDIR . '/sql/db_type.php';
 
 //
-// Désactivation de magic_quotes_runtime + 
-// magic_quotes_gpc et ajout éventuel des backslashes 
+// Dï¿½sactivation de magic_quotes_runtime + 
+// magic_quotes_gpc et ajout ï¿½ventuel des backslashes 
 //
 set_magic_quotes_runtime(0);
 
@@ -82,17 +82,17 @@ if( get_magic_quotes_gpc() )
 }
 
 //
-// Intialisation de la connexion à la base de données 
+// Intialisation de la connexion ï¿½ la base de donnï¿½es 
 //
 $db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
 
 if( !$db->connect_id )
 {
-	trigger_error('<b>Impossible de se connecter à la base de données</b>', CRITICAL_ERROR);
+	trigger_error('<b>Impossible de se connecter ï¿½ la base de donnï¿½es</b>', CRITICAL_ERROR);
 }
 
 //
-// On récupère la configuration du script 
+// On rï¿½cupï¿½re la configuration du script 
 //
 $sql = 'SELECT * FROM ' . CONFIG_TABLE;
 if( !($result = $db->query($sql)) )
@@ -103,7 +103,7 @@ if( !($result = $db->query($sql)) )
 $nl_config = $db->fetch_array($result);
 
 //
-// Purge 'automatique' des listes (comptes non activés au dela du temps limite)
+// Purge 'automatique' des listes (comptes non activï¿½s au dela du temps limite)
 //
 if( !(time() % 10) || !defined('IN_ADMIN') )
 {
@@ -112,12 +112,12 @@ if( !(time() % 10) || !defined('IN_ADMIN') )
 
 //
 // Nom du dossier des fichiers temporaires du script
-// Le nom ne doit contenir / ni au début, ni à la fin
+// Le nom ne doit contenir / ni au dï¿½but, ni ï¿½ la fin
 //
 $tmp_name = 'tmp';
 
 //
-// Si nous avons un accés restreint à cause d'open_basedir sur le serveur, 
+// Si nous avons un accï¿½s restreint ï¿½ cause d'open_basedir sur le serveur, 
 // nous devrons utiliser le dossier des fichiers temporaires du script 
 //
 $tmp_name = trim($tmp_name, '/');

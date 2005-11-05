@@ -25,6 +25,10 @@
  * @version $Id$
  */
 
+if( !defined('CLASS_AUTH_INC') ) {
+
+define('CLASS_AUTH_INC', true);
+
 //
 // permissions 
 //
@@ -37,7 +41,7 @@ define('AUTH_EXPORT', 6);
 define('AUTH_BAN',    7);
 define('AUTH_ATTACH', 8);
 
-/*
+/**
  * Class Auth
  * 
  * Gestion des permissions des utilisateurs
@@ -75,7 +79,7 @@ class Auth {
 	/**
 	 * Auth::read_data()
 	 * 
-	 * Récupération des permissions pour l'utilisateur demandé
+	 * Récupèration des permissions pour l'utilisateur demandé
 	 * 
 	 * @param integer $admin_id    Identifiant de l'utilisateur concerné
 	 * 
@@ -88,12 +92,12 @@ class Auth {
 		$sql = "SELECT li.*, aa.auth_view, aa.auth_edit, aa.auth_del, aa.auth_send,
 				aa.auth_import, aa.auth_export, aa.auth_ban, aa.auth_attach
 			FROM " . LISTE_TABLE . " AS li
-			LEFT JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = $admin_id
-				AND aa.liste_id = li.liste_id
+				LEFT JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = $admin_id
+					AND aa.liste_id = li.liste_id
 			ORDER BY li.liste_name ASC";
 		if( !($result = $db->query($sql)) )
 		{
-			trigger_error('Impossible d\'obtenir les données des listes de diffusion', ERROR);
+			trigger_error('Impossible d\'obtenir les donnï¿½es des listes de diffusion', ERROR);
 		}
 		
 		$tmp_ary = array();
@@ -175,4 +179,5 @@ class Auth {
 	}
 }
 
+}
 ?>

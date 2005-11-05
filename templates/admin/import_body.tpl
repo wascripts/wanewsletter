@@ -32,7 +32,8 @@
 	</table>
 	
 	<div class="bottom"> {S_HIDDEN_FIELDS}
-		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" /> <input type="reset" value="{L_RESET_BUTTON}" class="button" />
+		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
+		<input type="reset" value="{L_RESET_BUTTON}" class="button" />
 	</div>
 </div>
 </form>

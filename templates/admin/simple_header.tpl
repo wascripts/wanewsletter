@@ -37,11 +37,11 @@
 	<script type="text/javascript">
 	<!--
 	window.onload = function() {
-		if( document.forms.length && document.forms['login-form'] )
+		if( typeof(document.forms['login-form']) != 'undefined' )
 		{
 			document.forms['login-form'].elements['login'].focus();
 		}
-	}
+	};
 	//-->
 	</script>
 

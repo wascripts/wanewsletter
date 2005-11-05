@@ -1665,10 +1665,10 @@ else if( $mode == 'log' )
 		}
 		
 		$sql = "SELECT COUNT(jf.file_id) as num_files, l.log_id
-			FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
-			WHERE lf.log_id = l.log_id
-				AND jf.file_id = lf.file_id
-				AND l.liste_id = $listdata[liste_id]
+			FROM " . JOINED_FILES_TABLE . " AS jf
+				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.log_id = l.log_id
+				INNER JOIN " . LOG_TABLE . " AS l ON l.liste_id = $listdata[liste_id]
+			WHERE jf.file_id = lf.file_id
 			GROUP BY l.log_id";
 		if( !($result = $db->query($sql)) )
 		{
@@ -1715,11 +1715,11 @@ else if( $mode == 'log' )
 		if( is_array($logdata) && !empty($files_count[$log_id]) )
 		{
 			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-				FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l
-				WHERE l.log_id = $log_id
-					AND lf.log_id = l.log_id
-					AND jf.file_id = lf.file_id
-					AND l.liste_id = $listdata[liste_id]
+				FROM " . JOINED_FILES_TABLE . " AS jf
+					INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+					INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+						AND l.liste_id = $listdata[liste_id]
+						AND l.log_id   = $log_id
 				ORDER BY jf.file_real_name ASC";
 			if( !($result = $db->query($sql)) )
 			{
@@ -1802,7 +1802,7 @@ else if( $mode == 'log' )
 			}
 			else
 			{
-				$s_clip = '&nbsp;&nbsp;';
+				$s_clip = '&#160;&#160;';
 			}
 			
 			$output->assign_block_vars('logrow', array(

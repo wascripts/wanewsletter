@@ -4,12 +4,12 @@
 	
 	<table class="content">
 		<tr>
-			<td class="row1"> <label for="liste">{L_SELECT_LISTE}&#160;:</label> </td>
-			<td class="row2"> {LISTE_BOX} </td>
+			<td class="row1"><label for="liste">{L_SELECT_LISTE}&#160;:</label></td>
+			<td class="row2">{LISTE_BOX}</td>
 		</tr>
 	</table>
 	
-	<div class="bottom"> {S_HIDDEN_FIELDS}
+	<div class="bottom">{S_HIDDEN_FIELDS}
 		<input type="submit" value="{L_VALID_BUTTON}" class="pbutton" />
 	</div>
 </div>

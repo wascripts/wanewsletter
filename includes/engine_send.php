@@ -30,6 +30,10 @@ if( !defined('IN_NEWSLETTER') )
 	exit('<b>No hacking</b>');
 }
 
+if( !defined('ENGINE_SEND_INC') ) {
+
+define('ENGINE_SEND_INC', true);
+
 include WA_ROOTDIR . '/includes/tags.inc.php';
 
 /**
@@ -497,4 +501,5 @@ function newsletter_links($listdata)
 	return $link;
 }
 
+}
 ?>

@@ -28,7 +28,9 @@
 		</tr>
 		<!-- BEGIN listerow -->
 		<tr>
-			<td class="row1" colspan="2"><span class="texte">&#8211;&#160;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a>{listerow.CHOICE_FORMAT}</span></td>
+			<td class="row1" colspan="2">
+				<span class="texte">&#8211;&#160;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a> {listerow.CHOICE_FORMAT}</span>
+			</td>
 		</tr>
 		<!-- END listerow -->
 	</table>

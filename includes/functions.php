@@ -25,6 +25,10 @@
  * @version $Id$
  */
 
+if( !defined('FUNCTIONS_INC') ) {
+
+define('FUNCTIONS_INC', true);
+
 /**
  * generate_key()
  * 
@@ -951,4 +955,5 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 //
 set_error_handler('wanewsletter_handler');
 
+}
 ?>

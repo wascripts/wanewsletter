@@ -25,6 +25,10 @@
  * @version $Id$
  */
 
+if( !defined('CLASS_OUTPUT_INC') ) {
+
+define('CLASS_OUTPUT_INC', true);
+
 class output extends Template {
 
 	/**
@@ -703,7 +707,7 @@ class output extends Template {
 			if( in_array($liste_id, $liste_id_ary) )
 			{
 				$selected = ( $admindata['session_liste'] == $liste_id ) ? ' selected="selected"' : '';
-				$tmp_box .= '<option value="' . $liste_id . '"' . $selected . '> - ' . cut_str($data['liste_name'], 30) . ' - </option>';
+				$tmp_box .= sprintf("<option value=\"%d\"%s>%s</option>\n\t", $liste_id, $selected, cut_str($data['liste_name'], 30));
 			}
 		}
 		
@@ -726,7 +730,7 @@ class output extends Template {
 		$list_box = '<select id="liste" name="liste">';
 		if( !$display )
 		{
-			$list_box .= '<option value="0"> - ' . $lang['Choice_liste'] . ' - </option>';
+			$list_box .= '<option value="0">' . $lang['Choice_liste'] . '</option>';
 			$list_box .= '<option value="0"> -------------------- </option>';
 		}
 		$list_box .= $tmp_box . '</select>';
@@ -776,4 +780,5 @@ class output extends Template {
 	}
 }
 
+}
 ?>
