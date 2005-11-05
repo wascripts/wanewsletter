@@ -38,16 +38,20 @@
 <body>
 
 <div id="header">
-	<p><a href="./profil_cp.php"><img src="./images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" /></a></p>
+	<div id="logo">
+		<a href="./profil_cp.php">
+			<img src="./images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" />
+		</a>
+	</div>
 	
 	<h1>{PAGE_TITLE}</h1>
 </div>
 
-<div id="menu">
-	<a href="./profil_cp.php?mode=logout">{L_LOGOUT}</a> &#8226; 
-	<a href="./profil_cp.php?mode=editprofile">{L_EDITPROFILE}</a> &#8226; 
-	<a href="./profil_cp.php?mode=archives">{L_LOG}</a>
-</div>
+<ul id="menu">
+	<li><a href="./profil_cp.php?mode=logout">{L_LOGOUT}</a></li>
+	<li><a href="./profil_cp.php?mode=editprofile">{L_EDITPROFILE}</a></li>
+	<li><a href="./profil_cp.php?mode=archives">{L_LOG}</a></li>
+</ul>
 
 {ERROR_BOX}
 

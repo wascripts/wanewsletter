@@ -35,32 +35,34 @@
 	{S_NAV_LINKS}
 	
 	{S_SCRIPTS}
-
 </head>
 <body id="top">
 
 <div id="header">
-	<p><a href="./index.php"><img src="../images/logo-wa.png" width="160" height="60" alt="{L_INDEX}" title="{L_INDEX}" /></a></p>
+	<div id="logo">
+		<a href="./index.php">
+			<img src="../images/logo-wa.png" width="160" height="60" alt="{L_INDEX}" title="{L_INDEX}" />
+		</a>
+	</div>
 	
-	<h1>
-	{SITENAME}
+	<h1>{SITENAME}
 	<!-- BEGIN display_liste -->
 	<br />{display_liste.LISTE_NAME}
 	<!-- END display_liste -->
 	</h1>
 </div>
 
-<div id="menu">
-	<a href="./login.php?mode=logout">{L_LOGOUT}</a> &#8226; 
-	<a href="./config.php">{L_CONFIG}</a> &#8226; 
-	<a href="./envoi.php">{L_SEND}</a> &#8226; 
-	<a href="./view.php?mode=abonnes">{L_SUBSCRIBERS}</a> &#8226; 
-	<a href="./view.php?mode=liste">{L_LIST}</a> &#8226; 
-	<a href="./view.php?mode=log">{L_LOG}</a> &#8226; 
-	<a href="./tools.php">{L_TOOLS}</a> &#8226; 
-	<a href="./admin.php">{L_USERS}</a> &#8226; 
-	<a href="./stats.php">{L_STATS}</a>
-</div>
+<ul id="menu">
+	<li><a href="./login.php?mode=logout">{L_LOGOUT}</a></li>
+	<li><a href="./config.php">{L_CONFIG}</a></li>
+	<li><a href="./envoi.php">{L_SEND}</a></li>
+	<li><a href="./view.php?mode=abonnes">{L_SUBSCRIBERS}</a></li>
+	<li><a href="./view.php?mode=liste">{L_LIST}</a></li>
+	<li><a href="./view.php?mode=log">{L_LOG}</a></li>
+	<li><a href="./tools.php">{L_TOOLS}</a></li>
+	<li><a href="./admin.php">{L_USERS}</a></li>
+	<li><a href="./stats.php">{L_STATS}</a></li>
+</ul>
 
 {ERROR_BOX}
 

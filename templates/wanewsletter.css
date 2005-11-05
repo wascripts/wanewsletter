@@ -33,41 +33,30 @@ hr    { display: none; }
 
 /* Structure des pages */
 
-#header {
-	height: 70px;
+div#header {
+	height: 60px;
 	background-color: #003B78;
 	background-image: url("images/header.png");
 	background-repeat: repeat-y;
-	margin: 0;
 	padding: 5px;
 	color: black;
-	voice-family: "\"}\"";
-	voice-family: inherit;
-	height: 60px;
 }
-body>#header { height: 60px; }
 
-#header p {
-	background-color: transparent;
-	margin: 0;
-	color: black;
-}
-#header p a,
-#header p img { display: block; position: absolute; }
+div#logo a,
+div#logo img { display: block; float: left; }
 
-#header h1 {
+div#header h1 {
 	position: absolute;
-	top: 10px;
+	top: 15px;
 	right: 200px;
-	background-color: transparent;
+	margin: 0;
+	text-align: center;
 	font-weight: bold;
 	font-size: 1em;
-	text-align: center;
 	color: white;
 }
 
-#menu {
-	height: 16px;
+ul#menu {
 	background-color: #FAFAFA;
 	background-image: url("images/bande.png");
 	background-repeat: repeat-x;
@@ -75,12 +64,20 @@ body>#header { height: 60px; }
 	border-width: 1px 0;
 	border-color: black;
 	border-style: solid;
-	padding-top: 4px;
-	font-size: .7em;
-	font-style: normal;
 	text-align: center;
+	font-style: normal;
+	font-size: 11px;
+	line-height: 19px;
 	color: black;
 }
+ul#menu li {
+	display: inline;
+	background: transparent url("images/puce.png") no-repeat scroll center left;
+	padding-left: 8px;
+}
+ul#menu>li { background-image: none; padding-left: 0; }
+ul#menu li::before { content: "\2022\00A0"; }
+ul#menu li:first-child::before { content: normal; }
 
 div#smallheader, div#global, address#footer {
 	background-color: #DDD;
@@ -126,7 +123,7 @@ p#explain {
 	padding: 0 .8%;
 	line-height: 1.35em;
 	font-weight: normal;
-	font-size: .6em;
+	font-size: .7em;
 	text-align: justify;
 	color: black;
 }
@@ -204,26 +201,20 @@ div.left p, div.right p {
 	background-repeat: repeat-x;
 	margin: 0;
 	padding-top: 5px;
-	height: 27px;
+	height: 22px;
 	white-space: nowrap;
 	font-size: .8em;
 	color: #FAFAFA;
-	
-	voice-family: "\"}\"";
-	voice-family:inherit;
-	height: 22px;
-}
-
-.bloc > h2, .smallbloc > h2 {
-	height: 22px;
 }
 
 .bloc p, .smallbloc p {
 	background-color: transparent;
 	margin: 0;
 	padding: 1em;
-	font-weight: normal; font-size: .7em; line-height: 1.2em;
 	text-align: justify;
+	font-weight: normal;
+	font-size: .7em;
+	line-height: 1.2em;
 }
 
 .bloc p.message, .smallbloc p.message {
@@ -235,7 +226,6 @@ div.left p, div.right p {
 .bottom {
 	background: #BBB url("images/bottom.png") repeat-x bottom;
 	margin: 0;
-	padding-top: 3px;
 	height: 27px;
 	color: black;
 	voice-family: "\"}\"";
@@ -285,12 +275,13 @@ a:hover              { background-color: transparent; font-size: inherit; color:
 
 .texte, .m-texte, .s-texte {
 	background-color: transparent;
-	font-weight: normal; color: black;
+	font-weight: normal;
+	color: black;
 }
 
 .texte   { font-size: .8em; }
-.m-texte { font-size: .7em; }
-.s-texte { font-size: .6em; }
+.m-texte { font-size: .75em; }
+.s-texte { font-size: .65em; }
 
 code, samp, var { font-family: "Courier new", Courier, Monospace; font-size: 1em; }
 
@@ -318,7 +309,8 @@ form#smallbox {
 }
 
 form#smallbox label {
-	font-size: .6em; font-weight: normal;
+	font-size: .8em;
+	font-weight: normal;
 }
 
 input.pbutton, input.button {
@@ -332,24 +324,25 @@ input[type="submit"]:hover, input[type="reset"]:hover, input[type="button"]:hove
 	color: #FA5;
 }
 
-input[type="text"][disabled], input[type="password"][disabled] {
-	background-color: #D6D8DA;
-}
+input[type="text"][disabled],
+input[type="password"][disabled] { background-color: #D6D8DA; }
+input[type="text"]:disabled,
+input[type="password"]:disabled  { background-color: #D6D8DA; }
 
 input.text, textarea, select {
-	font-size: .7em;
+	font-size: .8em;
 	font-weight: normal;
 	color: black;
 }
 
-input[type="file"]  { font-size: .7em; font-weight: normal; color: black; }
+input[type="file"]  { font-size: .8em; font-weight: normal; color: black; }
 input[type="radio"] { vertical-align: sub; }
 
 /*
-  Malgrï¿½ la propriété font-family dans body, textarea n'en tient pas compte, 
-  que ce soit dans un navigateur gecko ou IE... :/
+  Malgré la propriété font-family dans body, textarea n'en tient pas compte, 
+  que ce soit dans un navigateur gecko ou IE :¬/
   On redéclare...
- */
+*/
 textarea   { font-family: Verdana, Arial, Helvetica, sans-serif; }
 input.text { text-indent: 2px; }
 
@@ -358,13 +351,7 @@ input.text:focus, textarea:focus { background-color: white; border-style: solid;
 
 /* tables */
 
-table.content {
-	background-color: #FAFAFA;
-	border-spacing: 1px;
-	
-	/* Les bordures externes sont parfois mangées sous les navigateurs gecko si width est à 100% */
-	w\idth: 99.9%;
-}
+table.content    { background-color: #FAFAFA; border-spacing: 1px; width: 99.95%; }
 
 th {
 	background-color: #C6C8CA;
@@ -380,13 +367,14 @@ td.explain {
 	background-color: #C6C8CA;
 	padding: .3em .4em;
 	font-weight: normal;
-	font-size: .6em;
+	font-size: .7em;
 	line-height: 1.3em;
-	text-align: justify;
+	text-align: left;
 	color: black;
 }
 
-td.row1, td.row2, td.medrow1, td.medrow2, td.smallrow1, td.smallrow2, td.minirow {
+td.row1, td.row2, td.medrow1, td.medrow2,
+td.smallrow1, td.smallrow2, td.minirow {
 	padding: .1em .2em;
 	empty-cells: show;
 	vertical-align: top;
