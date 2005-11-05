@@ -324,7 +324,7 @@ class output extends Template {
 				'L_USERS'       => $lang['Module']['users'],
 				'L_STATS'       => $lang['Module']['stats'],
 				
-				'SITENAME'      => htmlspecialchars($nl_config['sitename']),
+				'SITENAME'      => htmlspecialchars($nl_config['sitename'], ENT_NOQUOTES),
 			));
 			
 			if( isset($auth) && isset($auth->listdata[$admindata['session_liste']]) )
@@ -475,21 +475,23 @@ class output extends Template {
 		$charset = ( !empty($lang['CHARSET']) ) ? $lang['CHARSET'] : 'ISO-8859-1';
 		
 		$this->send_headers();
-?>
+		
+		echo <<<BASIC
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $lg; ?>" lang="<?php echo $lg; ?>" dir="<?php echo $dir; ?>">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="$lg" lang="$lg" dir="$dir">
 <head>
-	<?php echo $this->meta_redirect; ?>
-	<title><?php echo $page_title; ?></title>
+	$this->meta_redirect
+	<title>$page_title</title>
+	
 	<style type="text/css" media="screen">
 	body { margin: 10px; text-align: left; }
 	</style>
 </head>
 <body>
-	<div><?php echo $content; ?></div>
+	<div>$content</div>
 </body>
 </html>
-<?php
+BASIC;
 		
 		exit;
 	}
