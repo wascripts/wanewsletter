@@ -490,7 +490,7 @@ $lang['Joined_file']                = "Cette archive a un fichier joint";
 //
 // Page : Gestion des abonnés
 //
-$lang['Explain']['abo']             = "Ici, vous pouvez voir et supprimer les comptes des personnes qui se sont inscrites à vos listes de diffusion";
+$lang['Explain']['abo']             = "Ici, vous pouvez voir, modifier et supprimer les comptes des personnes qui se sont inscrites à vos listes de diffusion";
 $lang['Click_return_abo']           = "Cliquez %sici%s pour retourner à la liste des abonnés";
 $lang['Click_return_abo_profile']   = "Cliquez %sici%s pour retourner au profil de l'abonné";
 $lang['Delete_abo']                 = "Êtes-vous sûr de vouloir supprimer les abonnés sélectionnés ?";

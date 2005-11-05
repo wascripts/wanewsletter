@@ -12,26 +12,36 @@
 - Rendre plus simple l'ajout et remplissage de champs supplémentaires
 - Confirmation à chaque demande d'inscription, pas seulement la première
 - Pas de mention du code de compte si panneau de gestion de compte est désactivé (?)
+- Rendre possible l’inclusion de subscribe.php dans une page web ?
 
 - Nouveaux formats possibles pour l'export d'emails ?
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Annuler un envoi
-- Ajouter une partie dans faq.fr.html pour SQLite ?
 - Permettre l’exportation simple et rapide d’une newsletter (au "format" .eml)
-- Terminer support des chargements de newsletters externes
 - Voir avec J.J Solari pour fct des javascript dans Safari
 - Vérifier que les schémas de tables sont valides pour chaque db
 - Réorganiser les scripts d’installation et mise à jour
   - suppression champs hébergeur et version de wa_config
+- Ajouter mécanisme de translitération pour les newsletters texte (pour éviter présence d'entité html envoyées
+  dans le texte par le navigateur, problème du &#8217; notamment). Passer dans ce cas la newsletter texte en
+  utf-8 juste avant envoi ?
+
+- Terminer support des chargements de newsletters externes
+- Pour le chargement via une URL, trouver moyen pour spécifier les URLs une fois seulement (cas de SPIP), puis 
+  seulement avoir à indiquer de charger via les URLs habituelles
 
 
-Coding
-------------------
+Modifications sur la doc
+------------------------
 
-- Vérifier réglages de mode lorsqu'on ouvre des fichiers
+- Revoir la doc de manière générale
+- Ajouter une partie dans faq.fr.html pour SQLite ?
+- Modifier FAQ pour script extra.php qui accepte 'use-variable' en paramètre
+
+
+------------------------
 
 Passer de SQLite 2.x à SQLite 3.x :
 	$ sqlite-old old.db .dump | sqlite-new new.db
-
 
