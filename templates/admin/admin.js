@@ -42,7 +42,7 @@ function make_admin()
 		}
 	}
 	
-	if( document.forms['logs'] || document.forms['abo'] )
+	if( typeof(document.forms['logs']) != 'undefined' || typeof(document.forms['abo']) != 'undefined' )
 	{
 		var bottomAdmin = document.getElementById('nav-bottom');
 		
@@ -81,40 +81,44 @@ function jump(evt)
 
 function switch_checkbox(evt)
 {
-	if( document.forms['logs'] )
+	var checkbox_ary = null;
+	
+	if( typeof(document.forms['logs']) != 'undefined' )
 	{
-		var checkbox_ary = document.forms['logs'].elements['log_id[]'];
+		checkbox_ary = document.forms['logs'].elements['log_id[]'];
 	}
-	else if( document.forms['abo'] )
+	else if( typeof(document.forms['abo']) != 'undefined' )
 	{
-		var checkbox_ary = document.forms['abo'].elements['abo_id[]'];
+		checkbox_ary = document.forms['abo'].elements['id[]'];
 	}
 	else
 	{
 		return;
 	}
 	
-	if( checkbox_ary.length )
+	if( checkbox_ary != null )
 	{
-		for( var i = 0, m = checkbox_ary.length; i < m; i++ )
+		if( checkbox_ary.length )
 		{
-			checkbox_ary[i].checked = check;
+			for( var i = 0, m = checkbox_ary.length; i < m; i++ )
+			{
+				checkbox_ary[i].checked = check;
+			}
 		}
+		else
+		{
+			checkbox_ary.checked = check;
+		}
+		
+		check = !check;
+		
+		evt.preventDefault();
 	}
-	else
-	{
-		checkbox_ary.checked = check;
-	}
-	
-	check = !check;
-	
-	evt.preventDefault();
 }
 
 function show(evt)
 {
-	var lien	  = evt.currentTarget;
-	var sessid	  = '';
+	var sessid = '';
 	
 	for( var i = 0, m = document.forms.length; i < m; i++ )
 	{
@@ -125,11 +129,13 @@ function show(evt)
 		}
 	}
 	
-	var w = window.open(lien.href + '&mode=popup&sessid=' + sessid,'showimage','directories=0,menuBar=0,status=0,location=0,scrollbars=0,resizable=yes,toolbar=0,width=400,height=200,left=20,top=20');
+	var w = window.open(evt.currentTarget.href + '&mode=popup&sessid=' + sessid, 'showimage', 'directories=0,menuBar=0,status=0,location=0,scrollbars=0,resizable=yes,toolbar=0,width=400,height=200,left=20,top=20');
 	w.focus();
 	
 	if( w )
+	{
 		evt.preventDefault();
+	}
 }
 
 if( supportDOM() )
@@ -137,3 +143,4 @@ if( supportDOM() )
 	var check = true;
 	DOM_Events.addListener('load', make_admin, false, document);
 }
+
