@@ -14,6 +14,7 @@ mysql_escape_string()    => 4.0.3 sql/mysql.php
 array_sum()              => 4.0.4
 preg_split()             => 4.0.5 (avec PREG_SPLIT_DELIM_CAPTURE) (includes/functions.php)
 mysql_get_client_info()  => 4.0.5 (admin/tools.php)
+is_scalar()              => 4.0.5 (includes/functions.php)
 array_map()              => 4.0.6
 imagesetstyle()          => 4.0.6 admin/stats.php
 $_REQUEST                => 4.1.0
