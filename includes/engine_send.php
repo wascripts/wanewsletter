@@ -364,9 +364,8 @@ function launch_sending($listdata, $logdata)
 			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
 			// On initialise une nouvelle connexion
 			//
-			unset($db);
-			
 			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+			
 			if( !is_resource($db->connect_id) || !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
@@ -430,9 +429,8 @@ function launch_sending($listdata, $logdata)
 			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
 			// On initialise une nouvelle connexion
 			//
-			unset($db);
-			
 			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+			
 			if( !is_resource($db->connect_id) || !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des logs', ERROR);

@@ -126,56 +126,70 @@ function get_data($liste_id_mixed)
 	
 	if( is_array($liste_id_mixed) )
 	{
-		$sql_where = 'IN(' . implode(', ', $liste_id_mixed) . ')';
+		$sql_where = 'liste_id IN(' . implode(', ', $liste_id_mixed) . ')';
 	}
 	else
 	{
-		$sql_where = '= ' . $liste_id_mixed;
+		$sql_where = 'liste_id = ' . $liste_id_mixed;
 	}
 	
 	$data = array('num_inscrits' => 0, 'num_temp' => 0, 'num_logs' => 0, 'last_log' => 0);
 	
 	$sql = "SELECT DISTINCT(abo_id)
 		FROM " . ABO_LISTE_TABLE . "
-		WHERE liste_id " . $sql_where;
-	if( !($result = $db->query($sql)) )
+		WHERE " . $sql_where;
+	if( DATABASE == 'mysql' )
 	{
-		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
-	}
-	
-	if( $db->num_rows() > 0 )
-	{
-		$abo_ids = array();
-		while( $row = $db->fetch_array($result) )
-		{
-			array_push($abo_ids, $row['abo_id']);
-		}
-		
-		$sql = "SELECT COUNT(abo_id) AS num_abo, abo_status
-			FROM " . ABONNES_TABLE . "
-			WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
-			GROUP BY abo_status";
 		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
 		}
 		
-		while( $row = $db->fetch_array($result) )
+		$abo_ids = array();
+		
+		if( $db->num_rows() > 0 )
 		{
-			if( $row['abo_status'] == ABO_ACTIF )
+			while( $row = $db->fetch_array($result) )
 			{
-				$data['num_inscrits'] = $row['num_abo'];
+				array_push($abo_ids, $row['abo_id']);
 			}
-			else
-			{
-				$data['num_temp'] = $row['num_abo'];
-			}
+		}
+		else
+		{
+			$abo_ids[] = 0;
+		}
+		
+		$abo_ids = implode(', ', $abo_ids);
+	}
+	else
+	{
+		$abo_ids = $sql;
+	}
+	
+	$sql = "SELECT COUNT(abo_id) AS num_abo, abo_status
+		FROM " . ABONNES_TABLE . "
+		WHERE abo_id IN($abo_ids)
+		GROUP BY abo_status";
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
+	}
+	
+	while( $row = $db->fetch_array($result) )
+	{
+		if( $row['abo_status'] == ABO_ACTIF )
+		{
+			$data['num_inscrits'] = $row['num_abo'];
+		}
+		else
+		{
+			$data['num_temp'] = $row['num_abo'];
 		}
 	}
 	
 	$sql = "SELECT SUM(liste_numlogs) AS num_logs 
 		FROM " . LISTE_TABLE . " 
-		WHERE liste_id " . $sql_where;
+		WHERE " . $sql_where;
 	if( !($result = $db->query($sql)) )
 	{
 		trigger_error('Impossible d\'obtenir le nombre de logs envoyés', ERROR);
@@ -188,7 +202,7 @@ function get_data($liste_id_mixed)
 	
 	$sql = "SELECT MAX(log_date) AS last_log 
 		FROM " . LOG_TABLE . " 
-		WHERE log_status = " . STATUS_SENDED . " AND liste_id " . $sql_where;
+		WHERE log_status = " . STATUS_SENDED . " AND " . $sql_where;
 	if( !($result = $db->query($sql)) )
 	{
 		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
@@ -304,15 +318,25 @@ function wanewsletter_handler($errno, $errstr, $errfile, $errline)
 	switch( $errno )
 	{
 		case CRITICAL_ERROR:
-			echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n";
-			echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"fr\" lang=\"fr\" dir=\"ltr\">\n";
-			echo "<head>\n";
-			echo "<title>Erreur critique !</title>\n";
-			echo "<style type=\"text/css\" media=\"screen\">\n";
-			echo 'body { margin: 10px; text-align: left; }' . "\n";
-			echo "</style>\n</head>\n<body>\n\n<div>\n";
-			echo "<h1>Erreur critique !</h1>\n\n<p>" . $errstr . '</p>';
-			echo "\n</div>\n\n</body>\n</html>\n";
+			echo <<<BASIC
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" dir="ltr">
+<head>
+	<title>Erreur critique !</title>
+	
+	<style type="text/css" media="screen">
+	body { margin: 10px; text-align: left; }
+	</style>
+</head>
+<body>
+	<div>
+		<h1>Erreur critique !</h1>
+		
+		<p>$errstr</p>
+	</div>
+</body>
+</html>
+BASIC;
 			
 			exit;
 			break;

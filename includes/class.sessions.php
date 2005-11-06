@@ -273,9 +273,12 @@ class Session {
 			//
 			// Récupération des infos sur la session et l'utilisateur 
 			//
-			$sql = "SELECT s.*, a.*
+			$sql = "SELECT s.session_id, s.session_start, s.session_time, s.session_ip, s.session_liste,
+					a.admin_id, a.admin_login, a.admin_pwd, a.admin_email, a.admin_lang, a.admin_dateformat,
+					a.admin_level, a.email_new_inscrit
 				FROM " . SESSIONS_TABLE . " AS s
-					INNER JOIN " . ADMIN_TABLE . " AS a ON a.admin_id = s.admin_id
+					INNER JOIN " . ADMIN_TABLE . " AS a
+					ON a.admin_id = s.admin_id
 				WHERE s.session_id = '{$this->session_id}'
 					AND s.session_start > " . $expiry_time;
 			if( !($result = $db->query($sql)) )
@@ -360,7 +363,8 @@ class Session {
 		if( $this->session_id != '' )
 		{
 			$sql = "DELETE FROM " . SESSIONS_TABLE . " 
-				WHERE session_id = '{$this->session_id}' AND admin_id = " . $admin_id;
+				WHERE session_id = '{$this->session_id}'
+					AND admin_id = " . $admin_id;
 			if( !$db->query($sql) )
 			{
 				trigger_error('Erreur lors de la fermeture de la session', CRITICAL_ERROR);
@@ -386,11 +390,21 @@ class Session {
 	{
 		global $db;
 		
-		$sql = 'SELECT a.*, s.session_id, s.session_start, s.session_time, s.session_ip, s.session_liste 
-			FROM ' . ADMIN_TABLE . ' AS a 
-			LEFT JOIN ' . SESSIONS_TABLE . ' AS s ON a.admin_id = s.admin_id WHERE ';
-		$sql .= ( is_numeric($admin_mixed) ) ? 'a.admin_id = ' . $admin_mixed : 'a.admin_login = \'' . $db->escape($admin_mixed) . '\'';
+		$sql = 'SELECT s.session_id, s.session_start, s.session_time, s.session_ip, s.session_liste,
+					a.admin_id, a.admin_login, a.admin_pwd, a.admin_email, a.admin_lang, a.admin_dateformat,
+					a.admin_level, a.email_new_inscrit
+			FROM ' . ADMIN_TABLE . ' AS a
+			LEFT JOIN ' . SESSIONS_TABLE . ' AS s ON s.admin_id = a.admin_id WHERE ';
+		if( is_numeric($admin_mixed) )
+		{
+			$sql .= 'a.admin_id = ' . $admin_mixed;
+		}
+		else
+		{
+			$sql .= 'LOWER(a.admin_login) = \'' . $db->escape(strtolower($admin_mixed)) . '\'';
+		}
 		$sql .= ' ORDER BY s.session_time DESC';
+		
 		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir les données sur cet utilisateur', CRITICAL_ERROR);

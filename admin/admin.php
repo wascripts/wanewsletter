@@ -72,7 +72,7 @@ if( $mode == 'adduser' )
 		{
 			$sql = "SELECT COUNT(*) AS login_test 
 				FROM " . ADMIN_TABLE . " 
-				WHERE admin_login = '" . $db->escape($new_login) . "'";
+				WHERE LOWER(admin_login) = '" . $db->escape(strtolower($new_login)) . "'";
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible de tester le login', ERROR);
@@ -376,9 +376,10 @@ if( isset($_POST['submit']) )
 			}
 		}
 		
-		if( $set_password )
+		if( $set_password == true )
 		{
-			$sql = "SELECT admin_login FROM " . ADMIN_TABLE . " 
+			$sql = "SELECT admin_login
+				FROM " . ADMIN_TABLE . "
 				WHERE admin_id = " . $admin_id;
 			if( !($result = $db->query($sql)) )
 			{
@@ -438,7 +439,9 @@ if( $admindata['admin_level'] == ADMIN )
 	
 	if( !empty($admin_id) && $admin_id != $admindata['admin_id'] )
 	{
-		$sql = "SELECT * FROM " . ADMIN_TABLE . " 
+		$sql = "SELECT  admin_id, admin_login, admin_pwd, admin_email, admin_lang,
+				admin_dateformat, admin_level, email_new_inscrit
+			FROM " . ADMIN_TABLE . " 
 			WHERE admin_id = " . $admin_id;
 		if( $result = $db->query($sql) )
 		{
@@ -454,9 +457,9 @@ if( $admindata['admin_level'] == ADMIN )
 		$current_admin = $admindata;
 	}
 	
-	$sql = "SELECT admin_id, admin_login 
-		FROM " . ADMIN_TABLE . " 
-		WHERE admin_id <> " . $current_admin['admin_id'] . " 
+	$sql = "SELECT admin_id, admin_login
+		FROM " . ADMIN_TABLE . "
+		WHERE admin_id <> $current_admin[admin_id]
 		ORDER BY admin_login ASC";
 	if( !($result = $db->query($sql)) )
 	{
@@ -466,11 +469,11 @@ if( $admindata['admin_level'] == ADMIN )
 	if( $row = $db->fetch_array($result) )
 	{
 		$admin_box  = '<select id="admin_id" name="admin_id">';
-		$admin_box .= '<option value="0"> - ' . $lang['Choice_user'] . ' - </option>';
+		$admin_box .= '<option value="0">' . $lang['Choice_user'] . '</option>';
 		
 		do 
 		{
-			$admin_box .= '<option value="' . $row['admin_id'] . '"> - ' . htmlspecialchars($row['admin_login']) . ' - </option>';
+			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
 		}
 		while( $row = $db->fetch_array($result) );
 		
@@ -508,7 +511,7 @@ $output->set_filenames( array(
 ));
 
 $output->assign_vars(array(
-	'L_TITLE'               => sprintf($lang['Title']['profile'], htmlspecialchars($current_admin['admin_login'])),
+	'L_TITLE'               => sprintf($lang['Title']['profile'], htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
 	'L_EXPLAIN'             => nl2br($lang['Explain']['admin']),
 	'L_DEFAULT_LANG'        => $lang['Default_lang'],
 	'L_EMAIL'               => $lang['Email_address'],
@@ -530,8 +533,8 @@ $output->assign_vars(array(
 	'EMAIL_NEW_INSCRIT_YES' => ( $current_admin['email_new_inscrit'] == SUBSCRIBE_NOTIFY_YES ) ? ' checked="checked"' : '',
 	'EMAIL_NEW_INSCRIT_NO'  => ( $current_admin['email_new_inscrit'] == SUBSCRIBE_NOTIFY_NO ) ? ' checked="checked"' : '',
 	
-	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
-)); 
+	'S_HIDDEN_FIELDS'       => $output->getHiddenFields()
+));
 
 if( $admindata['admin_level'] == ADMIN )
 {

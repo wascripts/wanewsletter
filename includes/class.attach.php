@@ -219,8 +219,8 @@ class Attach {
 		
 		if( $physical_filename != $prev_physical_filename )
 		{
-			$sql = "SELECT COUNT(file_id) AS test_name 
-				FROM " . JOINED_FILES_TABLE . " 
+			$sql = "SELECT COUNT(file_id) AS test_name
+				FROM " . JOINED_FILES_TABLE . "
 				WHERE file_physical_name = '$physical_filename'";
 			if( !($result = $db->query($sql)) )
 			{
@@ -586,12 +586,14 @@ class Attach {
 	{
 		global $db, $nl_config, $lang, $listdata;
 		
-		$sql = "SELECT f.file_physical_name 
-			FROM " . JOINED_FILES_TABLE . " AS f, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l 
-			WHERE f.file_id = $file_id 
-				AND lf.file_id = f.file_id 
-				AND lf.log_id = l.log_id 
-				AND l.liste_id = " . $listdata['liste_id'];
+		$sql = "SELECT jf.file_physical_name
+			FROM " . JOINED_FILES_TABLE . " AS jf
+				INNER JOIN " . LOG_TABLE . " AS l
+				ON l.liste_id = $listdata[liste_id]
+				INNER JOIN " . LOG_FILES_TABLE . " AS lf
+				ON lf.file_id = jf.file_id
+					AND lf.log_id = l.log_id
+			WHERE jf.file_id = " . $file_id;
 		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible de récupérer les données sur ce fichier', ERROR);
@@ -665,9 +667,9 @@ class Attach {
 	{
 		global $db, $listdata;
 		
-		$sql = "SELECT COUNT(fe_id) AS test_extension 
-			FROM " . FORBIDDEN_EXT_TABLE . " 
-			WHERE fe_ext = '" . $db->escape($extension) . "' 
+		$sql = "SELECT COUNT(fe_id) AS test_extension
+			FROM " . FORBIDDEN_EXT_TABLE . "
+			WHERE LOWER(fe_ext) = '" . $db->escape(strtolower($extension)) . "'
 				AND liste_id = " . $listdata['liste_id'];
 		if( !($result = $db->query($sql)) )
 		{
@@ -692,9 +694,11 @@ class Attach {
 	{
 		global $db, $nl_config;
 		
-		$sql = "SELECT SUM(jf.file_size) AS total_size 
-			FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf 
-			WHERE jf.file_id = lf.file_id AND lf.log_id = " . $log_id;
+		$sql = "SELECT SUM(jf.file_size) AS total_size
+			FROM " . JOINED_FILES_TABLE . " AS jf
+				INNER JOIN " . LOG_FILES_TABLE . " AS lf
+				ON lf.file_id = jf.file_id
+					AND lf.log_id = " . $log_id;
 		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir la somme du poids des fichiers joints', ERROR);
@@ -718,12 +722,14 @@ class Attach {
 	{
 		global $db, $listdata, $lang;
 		
-		$sql = "SELECT f.file_real_name, f.file_physical_name, f.file_size, f.file_mimetype 
-			FROM " . JOINED_FILES_TABLE . " AS f, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l 
-			WHERE f.file_id = $file_id 
-				AND lf.file_id = f.file_id 
-				AND lf.log_id = l.log_id 
-				AND l.liste_id = " . $listdata['liste_id'];
+		$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+			FROM " . JOINED_FILES_TABLE . " AS jf
+				INNER JOIN " . LOG_TABLE . " AS l
+				ON l.liste_id = $listdata[liste_id]
+				INNER JOIN " . LOG_FILES_TABLE . " AS lf
+				ON lf.file_id = jf.file_id
+					AND lf.log_id = l.log_id
+			WHERE jf.file_id = " . $file_id;
 		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir les données sur ce fichier', ERROR);
@@ -745,11 +751,7 @@ class Attach {
 				trigger_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)', ERROR);
 			}
 			
-			$data = '';
-			while( !@feof($fp) )
-			{
-				$data .= fread($fp, 1024);
-			}
+			$data = fread($fp, filesize($tmp_filename));
 			fclose($fp);
 			
 			if( $this->use_ftp && OPEN_BASEDIR_RESTRICTION )
@@ -830,7 +832,7 @@ class Attach {
 		
 		if( count($log_ids) > 0 )
 		{
-			if( $massive_delete )
+			if( $massive_delete == true )
 			{
 				$sql = "SELECT file_id 
 					FROM " . LOG_FILES_TABLE . " 
@@ -844,7 +846,7 @@ class Attach {
 				$file_ids = array();
 				while( $row = $db->fetch_array($result) )
 				{
-					$file_ids[] = $row['file_id'];
+					array_push($file_ids, $row['file_id']);
 				}
 			}
 			
@@ -852,30 +854,13 @@ class Attach {
 			{
 				$filename_ary = array();
 				
-				switch( DATABASE )
-				{
-					case 'postgre':
-						$sql = "SELECT jf.file_id, jf.file_physical_name 
-							FROM " . JOINED_FILES_TABLE . " AS jf 
-							WHERE jf.file_id IN(
-								SELECT lf.file_id 
-								FROM " . LOG_FILES_TABLE . " AS lf 
-								WHERE lf.file_id IN(" . implode(', ', $file_ids) . ") 
-								GROUP BY lf.file_id 
-								HAVING COUNT(lf.file_id) = 1
-							)";
-						break;
-					
-					default:
-						$sql = "SELECT lf.file_id, jf.file_physical_name 
-							FROM " . LOG_FILES_TABLE . " AS lf, " . JOINED_FILES_TABLE . " AS jf 
-							WHERE lf.file_id IN(" . implode(', ', $file_ids) . ") 
-								AND lf.file_id = jf.file_id 
-							GROUP BY lf.file_id 
-							HAVING COUNT(lf.file_id) = 1";
-						break;
-				}
-				
+				$sql = "SELECT lf.file_id, jf.file_physical_name
+					FROM " . LOG_FILES_TABLE . " AS lf
+						INNER JOIN " . JOINED_FILES_TABLE . " AS jf
+						ON jf.file_id = lf.file_id
+					WHERE lf.file_id IN(" . implode(', ', $file_ids) . ")
+					GROUP BY lf.file_id
+					HAVING COUNT(lf.file_id) = 1";
 				if( !($result = $db->query($sql)) )
 				{
 					trigger_error('Impossible d\'obtenir la liste des fichiers à supprimer', ERROR);
@@ -887,8 +872,8 @@ class Attach {
 					
 					do
 					{
-						$ids[]          = $row['file_id'];
-						$filename_ary[] = $row['file_physical_name'];
+						array_push($ids,          $row['file_id']);
+						array_push($filename_ary, $row['file_physical_name']);
 					}
 					while( $row = $db->fetch_array($result) );
 					

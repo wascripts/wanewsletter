@@ -49,12 +49,14 @@ else
 	$sql_where = 'jf.file_id = ' . $file_id;
 }
 
-$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
-	FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf, " . LOG_TABLE . " AS l 
-	WHERE $sql_where 
-		AND jf.file_id = lf.file_id 
-		AND lf.log_id = l.log_id 
-		AND l.liste_id = " . $listdata['liste_id'];
+$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+	FROM " . JOINED_FILES_TABLE . " AS jf
+		INNER JOIN " . LOG_FILES_TABLE . " AS lf
+		ON lf.file_id = jf.file_id
+		INNER JOIN " . LOG_TABLE . " AS l
+		ON l.log_id = lf.log_id
+			AND l.liste_id = $listdata[liste_id]
+	WHERE $sql_where";
 if( !($result = $db->query($sql)) )
 {
 	plain_error('Impossible de récupérer les données sur le fichier : ' . $db->sql_error['message']);
@@ -65,8 +67,8 @@ if( $filedata = $db->fetch_array($result) )
 	if( $nl_config['use_ftp'] )
 	{
 		require WA_ROOTDIR . '/includes/class.attach.php';
-		$attach = new Attach();
 		
+		$attach = new Attach();
 		$tmp_filename = $attach->ftp_to_tmp($filedata);
 	}
 	else
@@ -79,15 +81,12 @@ if( $filedata = $db->fetch_array($result) )
 	
 	if( $mode != 'popup' || $is_svg == true )
 	{
-		if( !($fp = fopen($tmp_filename, 'rb')) )
+		if( !($fp = @fopen($tmp_filename, 'rb')) )
 		{
 			exit('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
 		}
 		
-		while( !feof($fp) )
-		{
-			$data .= fread($fp, 1024);
-		}
+		$data = fread($fp, filesize($tmp_filename));
 		fclose($fp);
 	}
 	

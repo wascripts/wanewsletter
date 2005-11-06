@@ -16,6 +16,7 @@
   - Pour le chargement via une URL, trouver moyen pour spécifier les URLs une fois seulement (cas de SPIP), puis 
     seulement avoir à indiquer de charger via les URLs habituelles
   - Prendre en compte les problèmes de charset !!
+  - et passer le 'include' ligne 89 en 'require'
 
 - Nouveaux formats possibles pour l'export d'emails ?
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)
@@ -26,6 +27,8 @@
 - Vérifier que les schémas de tables sont valides pour chaque db
 - Réorganiser les scripts d’installation et mise à jour
   - suppression champs hébergeur (et version ?) de wa_config
+
+- vérifier bon fonctionnement de profil_cp.php, checker le code
 
 
 Modifications sur la doc

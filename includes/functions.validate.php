@@ -73,20 +73,24 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 			}
 		}
 		
+		$sql_email = $db->escape(strtolower($email));
+		
 		switch( DATABASE )
 		{
 			case 'postgre':
 			case 'sqlite':
 			case 'mysql4':
-				$sql = "SELECT a.*, al.format 1 AS is_registered
+				$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
+						a.abo_register_date, a.abo_status, al.format, 1 AS is_registered
 					FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
-					WHERE a.abo_email = '" . $db->escape($email) . "'
+					WHERE LOWER(a.abo_email) = '$sql_email'
 						AND a.abo_id = al.abo_id
 						AND al.liste_id = $liste
 						UNION(
-							SELECT a.*, al.format, 0 AS is_registered
+							SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
+								a.abo_register_date, a.abo_status, al.format, 0 AS is_registered
 							FROM " . ABONNES_TABLE . " AS a
-							WHERE a.abo_email = '" . $db->escape($email) . "'
+							WHERE LOWER(a.abo_email) = '$sql_email'
 								AND NOT EXISTS(
 									SELECT abo_id
 									FROM " . ABO_LISTE_TABLE . " AS al
@@ -97,11 +101,12 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 				break;
 			
 			default:
-				$sql = "SELECT a.*, al.format, COUNT(al.abo_id) AS is_registered
+				$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
+						a.abo_register_date, a.abo_status, al.format, COUNT(al.abo_id) AS is_registered
 					FROM " . ABONNES_TABLE . " AS a
 					LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON a.abo_id = al.abo_id
 						AND al.liste_id = $liste
-					WHERE a.abo_email = '" . $db->escape($email) . "'
+					WHERE LOWER(a.abo_email) = '$sql_email'
 					GROUP BY al.abo_id";
 				break;
 		}
