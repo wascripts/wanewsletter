@@ -391,16 +391,27 @@ function wanewsletter_handler($errno, $errstr, $errfile, $errline)
 /**
  * plain_error()
  * 
- * @param mixed   $var     Variable à afficher
- * @param boolean $exit    True pour terminer l'exécution du script
+ * @param mixed   $var      Variable à afficher
+ * @param boolean $exit     True pour terminer l'exécution du script
+ * @param boolean $verbose  True pour utiliser var_dump() (détails sur le contenu de la variable)
  * 
  * @return void
  */
-function plain_error($var, $exit = true)
+function plain_error($var, $exit = true, $verbose = false)
 {
-	header('Content-Type: text/plain; charset=ISO-8859-15');
+	if( headers_sent() == false ) {
+		header('Content-Type: text/plain; charset=ISO-8859-15');
+	}
 	
-	var_dump($var);
+	if( $verbose == true ) {
+		var_dump($var);
+	} else {
+		if( is_scalar($var) ) {
+			echo $var;
+		} else {
+			print_r($var);
+		}
+	}
 	
 	if( $exit ) {
 		exit;
@@ -600,19 +611,20 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			array_push($abo_ids, $row['abo_id']);
 		}
 		
-		if( $num_abo_deleted = count($abo_ids) )
+		if( ($num_abo_deleted = count($abo_ids)) > 0 )
 		{
+			$sql_abo_ids = implode(', ', $abo_ids);
 			$db->transaction(START_TRC);
 			
-			$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
-				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
+			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
+				WHERE abo_id IN($sql_abo_ids)";
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de supprimer les entrées périmées de la table abo_liste', ERROR);
 			}
 			
-			$sql = "DELETE FROM " . ABONNES_TABLE . " 
-				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
+			$sql = "DELETE FROM " . ABONNES_TABLE . "
+				WHERE abo_id IN($sql_abo_ids)";
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de supprimer les entrées périmées de la table abonnes', ERROR);
@@ -870,14 +882,14 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 	$in_comments    = false;
 	$between_quotes = false;
 	
-	$lines       = preg_split("/(\r\n?)|\n/", $input, -1, PREG_SPLIT_DELIM_CAPTURE);
+	$lines       = preg_split("/(\r\n?|\n)/", $input, -1, PREG_SPLIT_DELIM_CAPTURE);
 	$total_lines = count($lines);
 	
 	fake_header(false);
 	
 	for( $i = 0; $i < $total_lines; $i++ )
 	{
-		if( preg_match("/^(\r\n?)|\n$/", $lines[$i]) )
+		if( preg_match("/^\r\n?|\n$/", $lines[$i]) )
 		{
 			if( $between_quotes )
 			{
@@ -895,7 +907,7 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 			$in_comments = true;
 		}
 		
-		if( $between_quotes || ( !$in_comments && strlen($lines[$i]) > 0 && $lines[$i]{0} != '#' && substr($lines[$i], 0, 3) != '-- ' ) )
+		if( $between_quotes || ( !$in_comments && strlen($lines[$i]) > 0 && $lines[$i]{0} != '#' && !preg_match('/^--\x20/', $lines[$i]) ) )
 		{
 			//
 			// Nombre de simple quotes non échappés
@@ -904,7 +916,7 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 			
 			if( ( !$between_quotes && !($unescaped_quotes % 2) ) || ( $between_quotes && ($unescaped_quotes % 2) ) )
 			{
-				if( preg_match('/' . $delimiter . '$/i', rtrim($lines[$i])) )
+				if( preg_match('/' . $delimiter . '\s*$/i', $lines[$i]) )
 				{
 					$lines[$i] = ( $tmp != '' ) ? rtrim($lines[$i]) : trim($lines[$i]);
 					$output[]  = $tmp . substr($lines[$i], 0, -(strlen($delimiter)));
@@ -939,7 +951,7 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 	
 	if( $prefixe != '' )
 	{
-		$output = preg_replace('/wa_/', $prefixe, $output);
+		$output = str_replace('wa_', $prefixe, $output);
 	}
 	
 	//
@@ -999,34 +1011,34 @@ function purge_latin1($str, $translite = false)
 	else
 	{
 		$cp1252_map = array(
-			"\x80" => "&#8364;",    /* EURO SIGN */
-			"\x82" => "&#8218;",    /* SINGLE LOW-9 QUOTATION MARK */
-			"\x83" => "&#402;",     /* LATIN SMALL LETTER F WITH HOOK */
-			"\x84" => "&#8222;",    /* DOUBLE LOW-9 QUOTATION MARK */
-			"\x85" => "&#8230;",    /* HORIZONTAL ELLIPSIS */
-			"\x86" => "&#8224;",    /* DAGGER */
-			"\x87" => "&#8225;",    /* DOUBLE DAGGER */
-			"\x88" => "&#710;",     /* MODIFIER LETTER CIRCUMFLEX ACCENT */
-			"\x89" => "&#8240;",    /* PER MILLE SIGN */
-			"\x8a" => "&#352;",     /* LATIN CAPITAL LETTER S WITH CARON */
-			"\x8b" => "&#8249;",    /* SINGLE LEFT-POINTING ANGLE QUOTATION */
-			"\x8c" => "&#338;",     /* LATIN CAPITAL LIGATURE OE */
-			"\x8e" => "&#381;",     /* LATIN CAPITAL LETTER Z WITH CARON */
-			"\x91" => "&#8216;",    /* LEFT SINGLE QUOTATION MARK */
-			"\x92" => "&#8217;",    /* RIGHT SINGLE QUOTATION MARK */
-			"\x93" => "&#8220;",    /* LEFT DOUBLE QUOTATION MARK */
-			"\x94" => "&#8221;",    /* RIGHT DOUBLE QUOTATION MARK */
-			"\x95" => "&#8226;",    /* BULLET */
-			"\x96" => "&#8211;",    /* EN DASH */
-			"\x97" => "&#8212;",    /* EM DASH */
+			"\x80" => "&#8364;",    # EURO SIGN
+			"\x82" => "&#8218;",    # SINGLE LOW-9 QUOTATION MARK
+			"\x83" => "&#402;",     # LATIN SMALL LETTER F WITH HOOK
+			"\x84" => "&#8222;",    # DOUBLE LOW-9 QUOTATION MARK
+			"\x85" => "&#8230;",    # HORIZONTAL ELLIPSIS
+			"\x86" => "&#8224;",    # DAGGER
+			"\x87" => "&#8225;",    # DOUBLE DAGGER
+			"\x88" => "&#710;",     # MODIFIER LETTER CIRCUMFLEX ACCENT
+			"\x89" => "&#8240;",    # PER MILLE SIGN */
+			"\x8a" => "&#352;",     # LATIN CAPITAL LETTER S WITH CARON
+			"\x8b" => "&#8249;",    # SINGLE LEFT-POINTING ANGLE QUOTATION
+			"\x8c" => "&#338;",     # LATIN CAPITAL LIGATURE OE
+			"\x8e" => "&#381;",     # LATIN CAPITAL LETTER Z WITH CARON
+			"\x91" => "&#8216;",    # LEFT SINGLE QUOTATION MARK
+			"\x92" => "&#8217;",    # RIGHT SINGLE QUOTATION MARK
+			"\x93" => "&#8220;",    # LEFT DOUBLE QUOTATION MARK
+			"\x94" => "&#8221;",    # RIGHT DOUBLE QUOTATION MARK
+			"\x95" => "&#8226;",    # BULLET
+			"\x96" => "&#8211;",    # EN DASH
+			"\x97" => "&#8212;",    # EM DASH
 			
-			"\x98" => "&#732;",     /* SMALL TILDE */
-			"\x99" => "&#8482;",    /* TRADE MARK SIGN */
-			"\x9a" => "&#353;",     /* LATIN SMALL LETTER S WITH CARON */
-			"\x9b" => "&#8250;",    /* SINGLE RIGHT-POINTING ANGLE QUOTATION*/
-			"\x9c" => "&#339;",     /* LATIN SMALL LIGATURE OE */
-			"\x9e" => "&#382;",     /* LATIN SMALL LETTER Z WITH CARON */
-			"\x9f" => "&#376;"      /* LATIN CAPITAL LETTER Y WITH DIAERESIS*/
+			"\x98" => "&#732;",     # SMALL TILDE
+			"\x99" => "&#8482;",    # TRADE MARK SIGN
+			"\x9a" => "&#353;",     # LATIN SMALL LETTER S WITH CARON
+			"\x9b" => "&#8250;",    # SINGLE RIGHT-POINTING ANGLE QUOTATION
+			"\x9c" => "&#339;",     # LATIN SMALL LIGATURE OE
+			"\x9e" => "&#382;",     # LATIN SMALL LETTER Z WITH CARON
+			"\x9f" => "&#376;"      # LATIN CAPITAL LETTER Y WITH DIAERESIS
 		);
 	}
 	
