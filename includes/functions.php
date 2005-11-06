@@ -950,6 +950,89 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 	return $output;
 }
 
+/**
+ * purge_latin1()
+ * 
+ * Effectue une translitération sur les caractères interdits provenant de Windows-1252
+ * ou les transforme en références d'entité numérique selon que la chaîne est du texte brut ou du HTML
+ * 
+ * @param string $str        Chaîne à modifier
+ * @param string $translite  Active ou non la translitération
+ * 
+ * @return string
+ */
+function purge_latin1($str, $translite = false)
+{
+	if( $translite == true )
+	{
+		$cp1252_map = array(
+			"\x80" => "euro",    # EURO SIGN
+			"\x82" => ",",       # SINGLE LOW-9 QUOTATION MARK
+			"\x83" => "f",       # LATIN SMALL LETTER F WITH HOOK
+			"\x84" => ",,",      # DOUBLE LOW-9 QUOTATION MARK
+			"\x85" => "...",     # HORIZONTAL ELLIPSIS
+			"\x86" => "?",       # DAGGER
+			"\x87" => "?",       # DOUBLE DAGGER
+			"\x88" => "^",       # MODIFIER LETTER CIRCUMFLEX ACCENT
+			"\x89" => "?",       # PER MILLE SIGN
+			"\x8a" => "S",       # LATIN CAPITAL LETTER S WITH CARON
+			"\x8b" => "?",       # SINGLE LEFT-POINTING ANGLE QUOTATION
+			"\x8c" => "OE",      # LATIN CAPITAL LIGATURE OE
+			"\x8e" => "Z",       # LATIN CAPITAL LETTER Z WITH CARON
+			"\x91" => "'",       # LEFT SINGLE QUOTATION MARK
+			"\x92" => "'",       # RIGHT SINGLE QUOTATION MARK
+			"\x93" => "\"",      # LEFT DOUBLE QUOTATION MARK
+			"\x94" => "\"",      # RIGHT DOUBLE QUOTATION MARK
+			"\x95" => "?",       # BULLET
+			"\x96" => "-",       # EN DASH
+			"\x97" => "--",      # EM DASH
+			
+			"\x98" => "~",       # SMALL TILDE
+			"\x99" => "tm",      # TRADE MARK SIGN
+			"\x9a" => "s",       # LATIN SMALL LETTER S WITH CARON
+			"\x9b" => ">",       # SINGLE RIGHT-POINTING ANGLE QUOTATION
+			"\x9c" => "oe",      # LATIN SMALL LIGATURE OE
+			"\x9e" => "z",       # LATIN SMALL LETTER Z WITH CARON
+			"\x9f" => "Y"        # LATIN CAPITAL LETTER Y WITH DIAERESIS
+		);
+	}
+	else
+	{
+		$cp1252_map = array(
+			"\x80" => "&#8364;",    /* EURO SIGN */
+			"\x82" => "&#8218;",    /* SINGLE LOW-9 QUOTATION MARK */
+			"\x83" => "&#402;",     /* LATIN SMALL LETTER F WITH HOOK */
+			"\x84" => "&#8222;",    /* DOUBLE LOW-9 QUOTATION MARK */
+			"\x85" => "&#8230;",    /* HORIZONTAL ELLIPSIS */
+			"\x86" => "&#8224;",    /* DAGGER */
+			"\x87" => "&#8225;",    /* DOUBLE DAGGER */
+			"\x88" => "&#710;",     /* MODIFIER LETTER CIRCUMFLEX ACCENT */
+			"\x89" => "&#8240;",    /* PER MILLE SIGN */
+			"\x8a" => "&#352;",     /* LATIN CAPITAL LETTER S WITH CARON */
+			"\x8b" => "&#8249;",    /* SINGLE LEFT-POINTING ANGLE QUOTATION */
+			"\x8c" => "&#338;",     /* LATIN CAPITAL LIGATURE OE */
+			"\x8e" => "&#381;",     /* LATIN CAPITAL LETTER Z WITH CARON */
+			"\x91" => "&#8216;",    /* LEFT SINGLE QUOTATION MARK */
+			"\x92" => "&#8217;",    /* RIGHT SINGLE QUOTATION MARK */
+			"\x93" => "&#8220;",    /* LEFT DOUBLE QUOTATION MARK */
+			"\x94" => "&#8221;",    /* RIGHT DOUBLE QUOTATION MARK */
+			"\x95" => "&#8226;",    /* BULLET */
+			"\x96" => "&#8211;",    /* EN DASH */
+			"\x97" => "&#8212;",    /* EM DASH */
+			
+			"\x98" => "&#732;",     /* SMALL TILDE */
+			"\x99" => "&#8482;",    /* TRADE MARK SIGN */
+			"\x9a" => "&#353;",     /* LATIN SMALL LETTER S WITH CARON */
+			"\x9b" => "&#8250;",    /* SINGLE RIGHT-POINTING ANGLE QUOTATION*/
+			"\x9c" => "&#339;",     /* LATIN SMALL LIGATURE OE */
+			"\x9e" => "&#382;",     /* LATIN SMALL LETTER Z WITH CARON */
+			"\x9f" => "&#376;"      /* LATIN CAPITAL LETTER Y WITH DIAERESIS*/
+		);
+	}
+	
+	return strtr($str, $cp1252_map);
+}
+
 //
 // Appel du gestionnaire d'erreur 
 //

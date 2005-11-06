@@ -56,6 +56,10 @@ function launch_sending($listdata, $logdata)
 	//
 	// On traite les données de la newsletter à envoyer
 	//
+	if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
+	{
+		$logdata['log_subject'] = purge_latin1($logdata['log_subject'], true);
+	}
 	$mailer->set_subject($logdata['log_subject']);
 	
 	$body = array(
@@ -163,6 +167,12 @@ function launch_sending($listdata, $logdata)
 		$abo_ids = array();
 		$format  = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
 		
+		if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
+		{
+			$body[FORMAT_TEXTE] = purge_latin1($body[FORMAT_TEXTE], true);
+			$body[FORMAT_HTML]  = purge_latin1($body[FORMAT_HTML]);
+		}
+		
 		if( $nl_config['engine_send'] == ENGINE_BCC )
 		{
 			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
@@ -202,6 +212,8 @@ function launch_sending($listdata, $logdata)
 					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
 				}
 			}
+			
+			$mailer->clear_address();
 			
 			if( count($abonnes[FORMAT_HTML]) > 0 )
 			{

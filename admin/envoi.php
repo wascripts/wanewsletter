@@ -740,6 +740,17 @@ if( $mode == 'resend' )
 	launch_sending($listdata, $logdata);
 }
 
+$subject   = htmlspecialchars($logdata['log_subject']);
+$body_text = htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
+$body_html = htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
+
+if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
+{
+	$subject   = purge_latin1($subject);
+	$body_text = purge_latin1($body_text);
+	$body_html = purge_latin1($body_html);
+}
+
 $output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('section', './envoi.php?mode=resend', $lang['Resend_log']);
 $output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
@@ -770,7 +781,7 @@ $output->assign_vars(array(
 	'L_ADDLINK_BUTTON'        => str_replace('\'', '\\\'', $lang['Button']['links']),
 	
 	'S_DEST'                  => $listdata['liste_name'],
-	'S_SUBJECT'               => htmlspecialchars($logdata['log_subject']),
+	'S_SUBJECT'               => $subject,
 	'S_STATUS'                => ( $logdata['log_status'] == STATUS_WRITING ) ? $lang['Status_writing'] : $lang['Status_handle'],
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
 	'SELECTED_STATUS_HANDLE'  => ( $logdata['log_status'] == STATUS_HANDLE ) ? ' selected="selected"' : '',
@@ -786,7 +797,7 @@ if( $listdata['liste_format'] != FORMAT_HTML )
 		'L_EXPLAIN_BODY'  => nl2br($lang['Explain']['text']),
 		
 		'S_TEXTAREA_NAME' => 'body_text',
-		'S_BODY'          => htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES),
+		'S_BODY'          => $body_text,
 		'S_FORMAT'        => FORMAT_TEXTE
 	));
 }
@@ -798,7 +809,7 @@ if( $listdata['liste_format'] != FORMAT_TEXTE )
 		'L_EXPLAIN_BODY'  => nl2br($lang['Explain']['html']),
 		
 		'S_TEXTAREA_NAME' => 'body_html',
-		'S_BODY'          => htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES),
+		'S_BODY'          => $body_html,
 		'S_FORMAT'        => FORMAT_HTML
 	));
 }
