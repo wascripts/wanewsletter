@@ -674,7 +674,7 @@ $datetime['Dec']        = "Déc";
 //
 // Données diverses sur la langue
 //
-$lang['CHARSET']        = 'ISO-8859-15';
+$lang['CHARSET']        = 'ISO-8859-1';
 $lang['CONTENT_LANG']   = 'fr';
 $lang['CONTENT_DIR']    = 'ltr'; // sens du texte Left To Right ou Right To Left
 $lang['TRANSLATE']      = '';
