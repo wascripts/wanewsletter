@@ -30,7 +30,9 @@ if( !defined('IN_INSTALL') && !defined('IN_UPDATE') )
 	exit('<b>No hacking</b>');
 }
 
-define('WA_ROOTDIR', '..');
+define('WA_ROOTDIR',   '..');
+define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
+define('SCHEMAS_DIR',  WA_ROOTDIR . '/setup/schemas');
 
 function msg_result($str, $is_query = false)
 {
@@ -102,7 +104,6 @@ error_reporting(E_ALL);
 
 $new_version  = '2.3-dev';
 $default_lang = 'francais';
-$schemas_dir  = WA_ROOTDIR . '/setup/schemas';
 
 $supported_lang = array(
 	'fr' => 'francais',
@@ -140,7 +141,7 @@ $supported_db = array(
 	)
 );
 
-$sql_drop   = array(
+$sql_drop = array(
 	'DROP TABLE wa_abo_liste',
 	'DROP TABLE wa_abonnes',
 	'DROP TABLE wa_admin',
@@ -200,12 +201,17 @@ if( $prefixe == '' )
 
 if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
 {
-	include WA_ROOTDIR . '/includes/config.inc.php';
+	@include WA_ROOTDIR . '/includes/config.inc.php';
 }
 
 if( defined('IN_UPDATE') && $dbhost == '' )
 {
 	plain_error('Aucune version de WAnewsletter ne semble présente, le fichier de configuration est vide');
+}
+else if( $dbtype == 'mssql' )
+{
+	plain_error('Désolé mais le support de SQL Server a été abandonné dans Wanewsletter 2.3
+	// Sorry but the support for SQL Server has been withdrawn in Wanewsletter 2.3');
 }
 
 require WA_ROOTDIR . '/includes/constantes.php';

@@ -30,7 +30,9 @@
 <body>
 
 <div id="header">
-	<p><img src="../images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" /></p>
+	<div id="logo">
+		<img src="../images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" />
+	</div>
 	
 	<h1>{PAGE_TITLE}</h1>
 </div>

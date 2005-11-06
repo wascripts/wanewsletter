@@ -180,7 +180,7 @@ else
 		}
 	}
 	
-	include WA_ROOTDIR . '/language/lang_' . $language . '.php';
+	require WA_ROOTDIR . '/language/lang_' . $language . '.php';
 }
 
 $output->send_headers();
@@ -278,7 +278,7 @@ else
 			//
 			// Création des tables du script 
 			//
-			$sql_file = $schemas_dir . '/' . $supported_db[$dbtype]['prefixe_file'] . '_tables.sql';
+			$sql_file = SCHEMAS_DIR . '/' . $supported_db[$dbtype]['prefixe_file'] . '_tables.sql';
 			
 			if( !($fp = @fopen($sql_file, 'r')) )
 			{
@@ -293,7 +293,7 @@ else
 			//
 			// Insertion des données de base 
 			//
-			$sql_file = $schemas_dir . '/' . $supported_db[$dbtype]['prefixe_file'] . '_data.sql';
+			$sql_file = SCHEMAS_DIR . '/' . $supported_db[$dbtype]['prefixe_file'] . '_data.sql';
 			
 			if( !($fp = @fopen($sql_file, 'r')) )
 			{
@@ -303,9 +303,20 @@ else
 			$sql_data = make_sql_ary(fread($fp, filesize($sql_file)), $supported_db[$dbtype]['delimiter2'], $prefixe);
 			fclose($fp);
 			
-			$sql_data[] = "UPDATE " . ADMIN_TABLE . " SET admin_login = '" . $db->escape($admin_login) . "', admin_pwd = '" . md5($admin_pass) . "', admin_email = '" . $db->escape($admin_email) . "', admin_lang = '$language' WHERE admin_id = 1";
-			$sql_data[] = "UPDATE " . CONFIG_TABLE . " SET urlsite = '" . $db->escape($urlsite) . "', path = '" . $db->escape($urlscript) . "', language = '$language', mailing_startdate = " . time() . ", version = '$new_version'";
-			$sql_data[] = "UPDATE " . LISTE_TABLE . " SET liste_startdate = " . time() . " WHERE liste_id = 1";
+			$sql_data[] = "UPDATE " . ADMIN_TABLE . "
+				SET admin_login = '" . $db->escape($admin_login) . "',
+					admin_pwd   = '" . md5($admin_pass) . "',
+					admin_email = '" . $db->escape($admin_email) . "',
+					admin_lang  = '$language'
+				WHERE admin_id = 1";
+			$sql_data[] = "UPDATE " . CONFIG_TABLE . "
+				SET urlsite  = '" . $db->escape($urlsite) . "',
+					path     = '" . $db->escape($urlscript) . "',
+					language = '$language',
+					mailing_startdate = " . time() . ",
+					version  = '$new_version'";
+			$sql_data[] = "UPDATE " . LISTE_TABLE . "
+				SET liste_startdate = " . time() . " WHERE liste_id = 1";
 			
 			exec_queries($sql_data, true);
 			
@@ -321,23 +332,6 @@ else
 				case '2.2-Beta2':
 					switch( DATABASE )
 					{
-						case 'mssql':
-							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-								ALTER COLUMN [smtp_user] [varchar] (50) NOT NULL";
-							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-								ALTER COLUMN [smtp_pass] [varchar] (50) NOT NULL";
-							$sql_update[] = "ALTER TABLE " . LISTE_TABLE . " ADD 
-								liste_alias varchar(250) NOT NULL, 
-								use_cron smallint NOT NULL, 
-								pop_host varchar(100) NOT NULL, 
-								pop_port smallint NOT NULL, 
-								pop_user varchar(50) NOT NULL, 
-								pop_pass varchar(50) NOT NULL, 
-								liste_alias varchar(250) NOT NULL, 
-								CONSTRAINT [DF_" . LISTE_TABLE . "_use_cron] DEFAULT (0) FOR [use_cron], 
-								CONSTRAINT [DF_" . LISTE_TABLE . "_pop_port] DEFAULT (110) FOR [pop_port]";
-							break;
-						
 						case 'postgre':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 								RENAME COLUMN smtp_user TO smtp_user_old, 
@@ -440,24 +434,6 @@ else
 					
 					switch( DATABASE )
 					{
-						case 'mssql':
-							$sql_update[] = "ALTER TABLE " . LISTE_TABLE . " ADD 
-								liste_numlogs smallint NOT NULL, 
-								CONSTRAINT [DF_" . LISTE_TABLE . "_liste_numlogs] DEFAULT (0) FOR [liste_numlogs]";
-							$sql_update[] = "ALTER TABLE " . LOG_TABLE . " ADD 
-								log_numdest smallint NOT NULL, 
-								CONSTRAINT [DF_" . LOG_TABLE . "_log_numdest] DEFAULT (0) FOR [log_numdest]";
-							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . " ADD 
-								check_email_mx smallint NOT NULL, 
-								CONSTRAINT [DF_" . CONFIG_TABLE . "_check_email_mx] DEFAULT (0) FOR [check_email_mx]";
-							$sql_update[] = "DROP INDEX " . ABO_LISTE_TABLE . ".IX_" . ABO_LISTE_TABLE;
-							$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . " ADD 
-								CONSTRAINT [PK_" . ABO_LISTE_TABLE . "] PRIMARY KEY CLUSTERED ([abo_id], [liste_id]) ON [PRIMARY]";
-							$sql_update[] = "DROP INDEX " . LOG_FILES_TABLE . ".IX_" . LOG_FILES_TABLE;
-							$sql_update[] = "ALTER TABLE " . LOG_FILES_TABLE . " ADD 
-								CONSTRAINT [PK_" . LOG_FILES_TABLE . "] PRIMARY KEY CLUSTERED ([log_id], [file_id]) ON [PRIMARY]";
-							break;
-						
 						case 'postgre':
 							$sql_update[] = "ALTER TABLE " . LISTE_TABLE . " 
 								ADD COLUMN liste_numlogs int2 NOT NULL";
@@ -526,13 +502,6 @@ else
 				case '2.2-RC2b':
 					switch( DATABASE )
 					{
-						case 'mssql':
-							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . " ADD 
-								enable_profil_cp smallint NOT NULL, 
-								CONSTRAINT [DF_" . CONFIG_TABLE . "_enable_profil_cp] DEFAULT (0) FOR [enable_profil_cp]";
-							$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . " ADD abo_lang varchar(30) NOT NULL";
-							break;
-						
 						case 'postgre':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . " 
 								ADD COLUMN enable_profil_cp int NOT NULL DEFAULT '0'";
@@ -575,12 +544,6 @@ else
 				case '2.2-RC3':
 					switch( DATABASE )
 					{
-						case 'mssql':
-							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . " ADD 
-								ftp_port smallint NOT NULL, 
-								CONSTRAINT [DF_" . CONFIG_TABLE . "_ftp_port] DEFAULT (21) FOR [ftp_port]";
-							break;
-						
 						case 'postgre':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . " 
 								ADD COLUMN ftp_port int NOT NULL DEFAULT '21'";
@@ -609,6 +572,7 @@ else
 				case '2.2.5':
 				case '2.2.6':
 				case '2.2.7':
+					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . " DROP COLUMN hebergeur";
 					break;
 				
 				default:
