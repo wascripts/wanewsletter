@@ -3,8 +3,7 @@
 ------------------
 
 - Compléter le support de SQLite
-  - Problème requètes sensibles à la casse avec SQLite
-  - Revoir requètes de functions.validate.php
+  - Revoir requètes de functions.validate.php (? bof, ça marche donc bon...)
 
 - revoir la partie newsletter.php/class.form.php pour permettre les inscriptions à plusieurs listes en même temps
   ainsi que fournir une API utilisable dans d'autres applis PHP (phpBB, SPIP, ...)

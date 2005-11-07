@@ -250,7 +250,8 @@ else if( $mode == 'abonnes' )
 	{
 		$liste_ids = $auth->check_auth(AUTH_VIEW);
 		
-		$sql = "SELECT a.*, al.liste_id, al.format
+		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
+				a.abo_register_date, a.abo_status, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al
 				ON al.abo_id = a.abo_id
@@ -378,7 +379,8 @@ else if( $mode == 'abonnes' )
 		
 		$liste_ids = $auth->check_auth(AUTH_EDIT);
 		
-		$sql = "SELECT a.*, al.liste_id, al.format
+		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
+				a.abo_register_date, a.abo_status, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al
 				ON al.abo_id = a.abo_id
@@ -404,7 +406,7 @@ else if( $mode == 'abonnes' )
 			));
 			
 			$output->assign_vars(array(
-				'L_TITLE'              => sprintf($lang['Title']['profile'], ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : $row['abo_email']),
+				'L_TITLE'              => sprintf($lang['Title']['mod_profile'], ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : $row['abo_email']),
 				'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
 				'L_PSEUDO'             => $lang['Abo_pseudo'],
 				'L_EMAIL'              => $lang['Email_address'],
@@ -847,7 +849,8 @@ else if( $mode == 'liste' )
 		);
 		
 		$vararray2 = array(
-			'liste_format', 'confirm_subscribe', 'limitevalidate', 'auto_purge', 'purge_freq', 'use_cron', 'pop_port'
+			'liste_format', 'confirm_subscribe', 'reconfirm_subscribe',
+			'limitevalidate', 'auto_purge', 'purge_freq', 'use_cron', 'pop_port'
 		);
 		foreach( $vararray2 AS $varname )
 		{
@@ -1019,6 +1022,7 @@ else if( $mode == 'liste' )
 			'L_SENDER_EMAIL'       => $lang['Sender_email'],
 			'L_RETURN_EMAIL'       => $lang['Return_email'],
 			'L_CONFIRM_SUBSCRIBE'  => $lang['Confirm_subscribe'],
+			'L_RECONFIRM_SUBSCRIBE' => $lang['Reconfirm_subscribe'],
 			'L_LIMITEVALIDATE'     => $lang['Limite_validate'],
 			'L_NOTE_VALIDATE'      => nl2br($lang['Note_validate']),
 			'L_FORM_URL'           => $lang['Form_url'],
@@ -1050,6 +1054,8 @@ else if( $mode == 'liste' )
 			'PURGE_FREQ'           => intval($purge_freq),
 			'CHECK_CONFIRM_YES'    => ( $confirm_subscribe ) ? ' checked="checked"' : '',
 			'CHECK_CONFIRM_NO'     => ( !$confirm_subscribe ) ? ' checked="checked"' : '',
+			'CHECK_RECONFIRM_YES'  => ( $reconfirm_subscribe ) ? ' checked="checked"' : '',
+			'CHECK_RECONFIRM_NO'   => ( !$reconfirm_subscribe ) ? ' checked="checked"' : '',
 			'CHECKED_PURGE_ON'     => ( $auto_purge ) ? ' checked="checked"' : '',
 			'CHECKED_PURGE_OFF'    => ( !$auto_purge ) ? ' checked="checked"' : '',
 			'CHECKED_USE_CRON_ON'  => ( $use_cron ) ? ' checked="checked"' : '',
@@ -1432,6 +1438,7 @@ else if( $mode == 'liste' )
 		'L_SENDER_EMAIL'      => $lang['Sender_email'],
 		'L_RETURN_EMAIL'      => $lang['Return_email'],
 		'L_CONFIRM_SUBSCRIBE' => $lang['Confirm_subscribe'],
+		'L_RECONFIRM_SUBSCRIBE' => $lang['Reconfirm_subscribe'],
 		'L_NUM_SUBSCRIBERS'   => $lang['Reg_subscribers_list'],
 		'L_NUM_LOGS'          => $lang['Total_newsletter_list'],
 		'L_FORM_URL'          => $lang['Form_url'],
@@ -1442,7 +1449,8 @@ else if( $mode == 'liste' )
 		'AUTH_FORMAT'         => $l_format,
 		'SENDER_EMAIL'        => $listdata['sender_email'],
 		'RETURN_EMAIL'        => $listdata['return_email'],
-		'CONFIRM_SUBSCRIBE'   => ( $listdata['confirm_subscribe'] ) ? $lang['Yes'] : $lang['No'], 
+		'CONFIRM_SUBSCRIBE'   => ( $listdata['confirm_subscribe'] ) ? $lang['Yes'] : $lang['No'],
+		'RECONFIRM_SUBSCRIBE' => ( $listdata['reconfirm_subscribe'] ) ? $lang['Yes'] : $lang['No'],
 		'NUM_SUBSCRIBERS'     => $num_inscrits,
 		'NUM_LOGS'            => $num_logs,
 		'FORM_URL'            => htmlspecialchars($listdata['form_url']),

@@ -43,6 +43,10 @@
 			<td class="row1"><span class="texte">{L_CONFIRM_SUBSCRIBE}&#160;:</span></td>
 			<td class="row2"><span class="texte">{CONFIRM_SUBSCRIBE}</span></td>
 		</tr>
+		<tr>
+			<td class="row1"><span class="texte">{L_RECONFIRM_SUBSCRIBE}&#160;:</span></td>
+			<td class="row2"><span class="texte">{RECONFIRM_SUBSCRIBE}</span></td>
+		</tr>
 		<!-- BEGIN liste_confirm -->
 		<tr>
 			<td class="row1"><span class="texte">{liste_confirm.L_LIMITEVALIDATE}&#160;:</span></td>
