@@ -211,7 +211,7 @@ $lang['Message']['No_subscribers']          = "You cannot send any newsletter to
 $lang['Message']['Unknown_engine']          = "No send engine specyfied";
 $lang['Message']['No_log_found']            = "No newsletter ready to be sent has been found";
 $lang['Message']['Invalid_url']             = "Given URL is not valid";
-$lang['Message']['Unaccess_url']            = "The URL %s seems actually unreachable";
+$lang['Message']['Unaccess_host']           = "The host %s seems actually unreachable";
 $lang['Message']['Not_found_at_url']        = "The file does not seems to be at indicated URL";
 $lang['Message']['No_data_at_url']          = "No data available about the file";
 

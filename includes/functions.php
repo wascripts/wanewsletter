@@ -1069,6 +1069,52 @@ function purge_latin1($str, $translite = false)
 	return strtr($str, $cp1252_map);
 }
 
+function http_get_contents($URL, &$errstr)
+{
+	global $nl_config, $lang;
+	
+	require WA_ROOTDIR . '/includes/http/Client.php';
+	
+	$client =& new HTTP_Client();
+	$client->openURL('HEAD', $URL);
+	$client->setRequestHeader('User-Agent', "Wanewsletter $nl_config[version]");
+	$client->setRequestHeader('Accept-Encoding', 'gzip');
+	
+	if( $client->send() == false )
+	{
+		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($client->url->host));
+		return false;
+	}
+	
+	if( $client->responseCode != HTTP_STATUS_OK )
+	{
+		$errstr = $lang['Message']['Not_found_at_url'];
+		return false;
+	}
+	
+	//
+	// Recherche du type mime des données
+	//
+	$datatype = $client->getResponseHeader('Content-Type');
+	
+	if( !preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z0-9.:_-]+)(?(2)"))?/i', $datatype, $match) )
+	{
+		$errstr = $lang['Message']['No_data_at_url'] . ' (type manquant)';
+		return false;
+	}
+	
+	$datatype = $match[1];
+	$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
+	
+	//
+	// Ok, Tout va bien, on récupère les données
+	//
+	$client->openURL('GET', $URL);
+	$client->send();
+	
+	return array('type' => $datatype, 'charset' => $charset, 'data' => $client->responseData);
+}
+
 //
 // Appel du gestionnaire d'erreur 
 //

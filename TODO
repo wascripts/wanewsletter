@@ -2,6 +2,7 @@
 
 ------------------
 
+- S’assurer du bon fonctionnement sur la futur branche php 5.1.x
 - Compléter le support de SQLite
   - Revoir requètes de functions.validate.php (? bof, ça marche donc bon...)
 
@@ -10,12 +11,14 @@
 - Rendre plus simple l'ajout et remplissage de champs supplémentaires
 - Confirmation à chaque demande d'inscription, pas seulement la première <- option à régler dans les paramètres de
   la liste
+- Tenir compte du fait que magic_quotes peut être à on ou off, et que les données dans $_POST, $_GET ...
+  peuvent avoir été modifiées par l'application qui fait appel à l'API wanewsletter (ex: phpBB) donc
+  un paramètre magic_quotes_gpc interne et null par défaut mais peut être positionné à true ou false
 
 - Terminer support des chargements de newsletters externes
   - Pour le chargement via une URL, trouver moyen pour spécifier les URLs une fois seulement (cas de SPIP), puis 
     seulement avoir à indiquer de charger via les URLs habituelles
   - Prendre en compte les problèmes de charset !!
-  - et passer le 'include' ligne 89 en 'require'
 
 - Nouveaux formats possibles pour l'export d'emails ?
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)
@@ -29,6 +32,7 @@
   - ajout champ reconfirm_subscribe à wa_liste (avec DEFAULT '1') et dans les schémas
 
 - vérifier bon fonctionnement de profil_cp.php, checker le code
+- commenter la classe URL_Parser
 
 
 Modifications sur la doc

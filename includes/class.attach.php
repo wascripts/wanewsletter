@@ -328,8 +328,10 @@ class Attach {
 			//
 			else if( $upload_mode == 'remote' )
 			{
-				$parts = parse_url($tmp_filename);
-				if( ($parts['scheme'] != 'http' && ($parts['scheme'] != 'ftp' || !is_available_extension('ftp'))) || empty($parts['host']) || empty($parts['path']) )
+				require WA_ROOTDIR . '/includes/http/URL_Parser.php';
+				
+				$URL =& new URL_Parser($tmp_filename);
+				if( $URL->isRelative == true || $URL->scheme != 'http' && ($URL->scheme != 'ftp' || !is_available_extension('ftp')) )
 				{
 					$error = TRUE;
 					$msg_error[] = $lang['Message']['Invalid_url'];
@@ -348,97 +350,44 @@ class Attach {
 					return;
 				}
 				
-				if( $parts['scheme'] == 'http' )
+				if( $URL->scheme == 'http' )
 				{
-					if( !($fsock = @fsockopen($parts['host'], (!empty($parts['port'])) ? $parts['port'] : 80, $errno, $errstr, 5)) )
+					$result = http_get_contents($URL, $errstr);
+					
+					if( $result == false )
 					{
 						$error = TRUE;
-						$msg_error[] = sprintf($lang['Message']['Unaccess_url'], htmlspecialchars($tmp_filename));
+						$msg_error[] = $errstr;
 						
 						return;
 					}
 					
-					@fputs($fsock, "GET $parts[path]" . (!empty($parts['query']) ? '?' . $parts['query'] : '') . " HTTP/1.1\r\n");
-					@fputs($fsock, "Host: $parts[host]\r\n");
-					@fputs($fsock, "Accept: */*\r\n");
-					@fputs($fsock, 'User-Agent: Wanewsletter ' . $nl_config['version'] . "\r\n");
-					@fputs($fsock, "Connection: close\r\n\r\n");
-					
-					//
-					// Ok, le fichier est bien présent, on récupère le reste des données
-					//
-					$data = '';
-					while( !@feof($fsock) )
-					{
-						$data .= @fread($fsock, 512);
-					}
-					fclose($fsock);
-					
-					list($headers, $data) = explode("\r\n\r\n", $data, 3);
-					$headers = str_replace("\r\n", "\n", $headers);
-					list($response) = explode("\n", $headers, 2);
-					
-					//
-					// Si le code réponse est différent de 200, le fichier n'est pas ou plus à l'emplacement indiqué
-					//
-					if( !strstr($response, '200') )
-					{
-						$error = TRUE;
-						$msg_error[] = $lang['Message']['Not_found_at_url'];
-						
-						return;
-					}
-					
-					//
-					// Recherche de la taille des données
-					//
-					if( !preg_match('/^Content-Length:[[:space:]]*([0-9]+)$/mi', $headers, $match) )
-					{
-						$error = TRUE;
-						$msg_error[] = $lang['Message']['No_data_at_url'] . ' (taille manquante)';
-						
-						return;
-					}
-					
-					$filesize = $match[1];
-					
-					//
-					// Recherche du type mime des données
-					//
-					if( !preg_match('/^Content-Type:[[:space:]]*([a-z]+\/[a-z0-9+.-]+)$/mi', $headers, $match) )
-					{
-						$error = TRUE;
-						$msg_error[] = $lang['Message']['No_data_at_url'] . ' (type manquant)';
-						
-						return;
-					}
-					
-					$filetype = $match[1];
-					
-					fwrite($fw, $data);
+					fwrite($fw, $result['data']);
+					$filesize = strlen($result['data']);
+					$filetype = $result['type'];
 				}
 				else
 				{
-					if( empty($parts['user']) )
+					if( empty($URL->user) )
 					{
-						$parts['user'] = 'anonymous';
+						$URL->user = 'anonymous';
 					}
-					if( empty($parts['pass']) )
+					if( empty($URL->pass) )
 					{
-						$parts['pass'] = 'anonymous';
+						$URL->pass = 'anonymous';
 					}
 					
-					if( !($cid = @ftp_connect($parts['host'], (!empty($parts['port'])) ? $parts['port'] : 21)) || !@ftp_login($cid, $parts['user'], $parts['pass']) )
+					if( !($cid = @ftp_connect($URL->host, $URL->port)) || !@ftp_login($cid, $URL->user, $URL->pass) )
 					{
 						$error = TRUE;
-						$msg_error[] = sprintf($lang['Message']['Unaccess_url'], htmlspecialchars($tmp_filename));
+						$msg_error[] = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($URL->host));
 						
 						return;
 					}
 					
-					$filesize = ftp_size($cid, $parts['path']);
+					$filesize = ftp_size($cid, $URL->path);
 					
-					if( !ftp_fget($cid, $fw, $parts['path'], FTP_BINARY) )
+					if( !ftp_fget($cid, $fw, $URL->path, FTP_BINARY) )
 					{
 						$error = TRUE;
 						$msg_error[] = $lang['Message']['Not_found_at_url'];

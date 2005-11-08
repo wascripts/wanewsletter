@@ -84,7 +84,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	</table>
 	
 	<div class="bottom">{S_HIDDEN_FIELDS}
-		<input type="submit" value="{L_VALID_BUTTON}" class="pbutton" />
+		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
 	</div>
 </div>
 </form> 

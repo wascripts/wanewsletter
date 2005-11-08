@@ -86,7 +86,7 @@ switch( $mode )
 	// Téléchargement d'un fichier joint
 	//
 	case 'download':
-		include WA_ROOTDIR . '/includes/class.attach.php';
+		require WA_ROOTDIR . '/includes/class.attach.php';
 		
 		$file_id = ( !empty($_GET['fid']) ) ? intval($_GET['fid']) : 0;
 		$attach  = new Attach();
@@ -111,18 +111,44 @@ switch( $mode )
 		{
 			if( !empty($_POST['body_text_url']) || !empty($_POST['body_html_url']) )
 			{
-				// TODO gérer cas problématiques, urls invalides, etc
-				// passer par class.attach.php ? adapter celle-ci dans ce cas
+				if( !empty($_POST['body_text_url']) )
+				{
+					$result = http_get_contents($_POST['body_text_url'], $errstr);
+					
+					if( $result == false )
+					{
+						$message  = $errstr;
+						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=' . $mode) . '">', '</a>');
+						trigger_error($message, MESSAGE);
+					}
+					
+					$logdata['log_body_text'] = $result['data'];
+				}
 				
-				if( config_status('allow_url_fopen') == true )
+				if( !empty($_POST['body_html_url']) )
 				{
-					$logdata['log_body_text'] = file_get_contents($_POST['body_text_url']);
-					$logdata['log_body_html'] = file_get_contents($_POST['body_html_url']);
+					$result = http_get_contents($_POST['body_html_url'], $errstr);
+					
+					if( $result == false )
+					{
+						$message  = $errstr;
+						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=' . $mode) . '">', '</a>');
+						trigger_error($message, MESSAGE);
+					}
+					
+					$logdata['log_body_html'] = $result['data'];
 				}
-				else
+				
+				// TODO gérer le charset des données reçues
+				// - avec $result['charset'] si renseigné
+				// - en détectant le BOM de l'UTF-8 strncasecmp($data, "\xEF\xBB\xBF", 3)
+				
+				if( strncasecmp($logdata['log_body_text'], "\xEF\xBB\xBF", 3) == 0 )
 				{
-					// TODO
+					$logdata['log_body_text'] = utf8_decode(substr($logdata['log_body_text'], 3));
 				}
+				
+				plain_error($logdata['log_body_text']);
 			}
 			else
 			{

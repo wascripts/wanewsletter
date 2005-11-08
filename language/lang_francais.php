@@ -215,7 +215,7 @@ $lang['Message']['No_subscribers']          = "Vous ne pouvez pas envoyer de new
 $lang['Message']['Unknown_engine']          = "Aucun moteur d'envoi spécifié !";
 $lang['Message']['No_log_found']            = "Aucune newsletter prête à être envoyée n'a été trouvée";
 $lang['Message']['Invalid_url']             = "L'url donnée n'est pas valide";
-$lang['Message']['Unaccess_url']            = "L'url %s semble inaccessible actuellement";
+$lang['Message']['Unaccess_host']           = "L'hôte %s semble inaccessible actuellement";
 $lang['Message']['Not_found_at_url']        = "Le fichier ne semble pas présent à l'url indiquée";
 $lang['Message']['No_data_at_url']          = "Aucune donnée disponible sur le fichier";
 
