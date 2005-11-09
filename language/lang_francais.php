@@ -352,6 +352,7 @@ $lang['Total_newsletters']          = "Un total de <b>%1\$d</b> newsletters ont 
 $lang['Total_newsletter']           = "Un total de <b>%1\$d</b> newsletter a été envoyée, soit <b>%2\$.2f</b> newsletters par mois";
 $lang['No_newsletter_sended']       = "Aucune newsletter n'a encore été envoyée";
 $lang['Dbsize']                     = "Taille de la base de données (tables du script)";
+$lang['Filesize']                   = "Espace disque occupé par les fichiers sur le serveur (pièces jointes et statistiques)";
 
 
 //

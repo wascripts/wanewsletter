@@ -29,18 +29,42 @@ define('IN_NEWSLETTER', true);
 
 require './pagestart.php';
 
-$num_inscrits = $num_temp = $num_logs = $last_log = 0;
+$num_inscrits = $num_temp = $num_logs = $last_log = $filesize = 0;
 
-$liste_id_ary = $auth->check_auth(AUTH_VIEW);
+$liste_ids = $auth->check_auth(AUTH_VIEW);
 
-if( count($liste_id_ary) > 0 )
+if( count($liste_ids) > 0 )
 {
-	$data = get_data($liste_id_ary);
+	$data = get_data($liste_ids);
 	
 	$num_inscrits = $data['num_inscrits'];
 	$num_temp     = $data['num_temp'];
 	$num_logs     = $data['num_logs'];
 	$last_log     = $data['last_log'];
+	
+	$sql = "SELECT SUM(jf.file_size) AS totalsize
+		FROM " . JOINED_FILES_TABLE . " AS jf
+			INNER JOIN " . LOG_FILES_TABLE . " AS lf
+			ON lf.file_id = jf.file_id
+			INNER JOIN " . LOG_TABLE . " AS l
+			ON l.log_id = lf.log_id
+				AND l.liste_id IN(" . implode(', ', $liste_ids) . ")";
+	$result   = $db->query($sql);
+	$filesize = $db->result($result, 0, 'totalsize');
+	
+	if( file_exists(WA_ROOTDIR . '/stats') && is_readable(WA_ROOTDIR . '/stats') )
+	{
+		$listid = implode('', array_unique($liste_ids));
+		$browse = dir(WA_ROOTDIR . '/stats');
+		while( ($entry = $browse->read()) !== false )
+		{
+			if( is_file(WA_ROOTDIR . '/stats/' . $entry) && $entry != 'index.html' && preg_match('/list['.$listid.']\.txt$/', $entry) )
+			{
+				$filesize += filesize(WA_ROOTDIR . '/stats/' . $entry);
+			}
+		}
+		$browse->close();
+	}
 }
 
 //
@@ -166,15 +190,34 @@ if( is_numeric($dbsize) )
 	$dbsize = sprintf('%.2f ' . $lang_size, $dbsize);
 }
 
+if( $filesize >= 1048576 )
+{
+	$lang_size = $lang['MO'];
+	$filesize /= 1048576;
+}
+else if( $filesize > 1024 )
+{
+	$lang_size = $lang['KO'];
+	$filesize /= 1024;
+}
+else
+{
+	$lang_size = $lang['Octets'];
+}
+
+$filesize = sprintf('%.2f ' . $lang_size, $filesize);
+
 $output->assign_vars( array(
 	'TITLE_HOME'             => $lang['Title']['accueil'],
 	'L_EXPLAIN'              => nl2br($lang['Explain']['accueil']),
 	'L_DBSIZE'               => $lang['Dbsize'],
+	'L_FILESIZE'             => $lang['Filesize'],
 	
 	'REGISTERED_SUBSCRIBERS' => $l_num_inscrits,
 	'TEMP_SUBSCRIBERS'       => $l_num_temp,
 	'NEWSLETTERS_SENDED'     => $l_num_logs,
-	'DBSIZE'                 => $dbsize
+	'DBSIZE'                 => $dbsize,
+	'FILESIZE'               => $filesize
 ));
 
 $output->pparse('body');
