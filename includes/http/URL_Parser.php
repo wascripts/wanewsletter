@@ -30,19 +30,76 @@ if( !defined('URL_PARSER_INC') ) {
 define('URL_PARSER_INC', true);
 
 class URL_Parser {
-	
+	/**
+	 * @var string
+	 * @access public
+	 */
 	var $scheme       = '';
+	
+	/**
+	 * @var string
+	 * @access public
+	 */
 	var $user         = '';
+	
+	/**
+	 * @var string
+	 * @access public
+	 */
 	var $pass         = '';
+	
+	/**
+	 * @var string
+	 * @access public
+	 */
 	var $host         = '';
+	
+	/**
+	 * @var string
+	 * @access public
+	 */
 	var $port         = '';
+	
+	/**
+	 * @var string
+	 * @access public
+	 */
 	var $path         = '/';
+	
+	/**
+	 * @var string
+	 * @access public
+	 */
 	var $query        = '';
+	
+	/**
+	 * @var string
+	 * @access public
+	 */
 	var $fragment     = '';
 	
+	/**
+	 * @var boolean
+	 * @access public
+	 */
 	var $passIRI      = false;
+	
+	/**
+	 * @var boolean
+	 * @access public
+	 */
 	var $isRelative   = false;
 	
+	/**
+	 * URL_Parser::URL_Parser()
+	 * 
+	 * Constructeur de classe; initialise les attributs de la classe, en complétant si besoin avec les infos serveur
+	 * 
+	 * @param string $url
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	function URL_Parser($url = null)
 	{
 		if( !preg_match('/^[\w\d]+:(\/\/)?/', $url) )
@@ -123,6 +180,14 @@ class URL_Parser {
 		}
 	}
 	
+	/**
+	 * URL_Parser::__toString()
+	 * 
+	 * Renvoie l'URL sous forme de chaîne à partir des informations présentes
+	 * 
+	 * @access public
+	 * @return string
+	 */
 	function __toString()
 	{
 		$pass = ( $this->passIRI == true ) ? 'passToIRI' : 'passToURI';
@@ -136,16 +201,49 @@ class URL_Parser {
 			. (!empty($this->fragment) ? '#' : '') . $this->{$pass}($this->fragment);
 	}
 	
+	/**
+	 * URL_Parser::passToURI()
+	 * 
+	 * Encode les caractères non-ascii sous la forme %xx (RFC 2396, chapitre 2)
+	 * 
+	 * @param string $str
+	 * 
+	 * @see    RFC 2396 - Uniform Resource Identifiers (URI): Generic Syntax
+	 * @access public
+	 * @return string
+	 */
 	function passToURI($str)
 	{
 		return preg_replace('/([\x7f-\xff])/ie', '\'%\' . strtoupper(dechex(ord(\'\\1\')))', $str);
 	}
 	
+	/**
+	 * URL_Parser::passToIRI()
+	 * 
+	 * Décode les caractères non-ascii
+	 * 
+	 * @param string $str
+	 * 
+	 * @see    URL_Parser::passToURI()
+	 * @access public
+	 * @return string
+	 */
 	function passToIRI($str)
 	{
 		return preg_replace('/%(7f|[a-f89][a-f0-9])/ie', 'chr(hexdec(\'\\1\'))', $str);
 	}
 	
+	/**
+	 * URL_Parser::addParameter()
+	 * 
+	 * Ajoute un argument à l'URL
+	 * 
+	 * @param string $name
+	 * @param string $value
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	function addParameter($name, $value)
 	{
 		if( empty($this->query) )
@@ -158,11 +256,29 @@ class URL_Parser {
 		}
 	}
 	
+	/**
+	 * URL_Parser::removeParameter()
+	 * 
+	 * Retire l'argument de nom $name de l'URL
+	 * 
+	 * @param string $name
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	function removeParameter($name)
 	{
 		
 	}
 	
+	/**
+	 * URL_Parser::resolvePath()
+	 * 
+	 * @param string $path
+	 * 
+	 * @access public
+	 * @return string
+	 */
 	function resolvePath($path)
 	{
 		$path = preg_replace('/\/{2,}/', '/', $path);
@@ -188,6 +304,14 @@ class URL_Parser {
 		return implode('/', $path);
 	}
 	
+	/**
+	 * URL_Parser::getDefaultPort()
+	 * 
+	 * @param string $scheme
+	 * 
+	 * @access public
+	 * @return integer
+	 */
 	function getDefaultPort($scheme)
 	{
 		switch( strtolower($scheme) )
