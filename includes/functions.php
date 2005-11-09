@@ -1127,7 +1127,7 @@ function http_get_contents($URL, &$errstr)
 }
 
 /**
- * http_get_contents()
+ * wa_number_format()
  * 
  * Formate un nombre en fonction de paramètres de langue (idem que number_format() mais on ne spécifie
  * que deux arguments max, les deux autres sont récupérés dans $lang)
@@ -1139,9 +1139,7 @@ function http_get_contents($URL, &$errstr)
  */
 function wa_number_format($number, $decimals = 2)
 {
-	global $lang;
-	
-	return number_format($number, $decimals, $lang['DEC_POINT'], $lang['THOUSANDS_SEP']);
+	return number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
 }
 
 //
