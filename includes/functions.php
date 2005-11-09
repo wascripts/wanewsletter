@@ -1069,6 +1069,17 @@ function purge_latin1($str, $translite = false)
 	return strtr($str, $cp1252_map);
 }
 
+/**
+ * http_get_contents()
+ * 
+ * Récupère un contenu via HTTP et le retourne, ainsi que le jeu de caractère de la chaîne,
+ * si disponible, et le type de média
+ * 
+ * @param mixed $URL      L'URL à appeller
+ * @param string $errstr  Conteneur pour un éventuel message d'erreur
+ * 
+ * @return array
+ */
 function http_get_contents($URL, &$errstr)
 {
 	global $nl_config, $lang;
@@ -1113,6 +1124,24 @@ function http_get_contents($URL, &$errstr)
 	$client->send();
 	
 	return array('type' => $datatype, 'charset' => $charset, 'data' => $client->responseData);
+}
+
+/**
+ * http_get_contents()
+ * 
+ * Formate un nombre en fonction de paramètres de langue (idem que number_format() mais on ne spécifie
+ * que deux arguments max, les deux autres sont récupérés dans $lang)
+ * 
+ * @param float   $number
+ * @param integer $decimals  Nombre de décimales
+ * 
+ * @return string
+ */
+function wa_number_format($number, $decimals = 2)
+{
+	global $lang;
+	
+	return number_format($number, $decimals, $lang['DEC_POINT'], $lang['THOUSANDS_SEP']);
 }
 
 //

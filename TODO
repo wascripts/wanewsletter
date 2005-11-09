@@ -33,10 +33,8 @@
 
 - vérifier bon fonctionnement de profil_cp.php, checker le code
 - commenter la classe URL_Parser
-- Ajouter gestion du format de nombre selon la langue
 - problème avec l'option de reconnexion auto, chercher la cause (semble aléatoire, soupçonne supression ligne dans
   wa_sessions qui ferait que la reco auto se ferait pas ??)
-- requète SQL de récupération du totalsize des fichiers joints est erronée, la corriger (devrait renvoyer 196079)
 
 
 Modifications sur la doc

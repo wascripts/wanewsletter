@@ -573,8 +573,6 @@ BASIC;
 			$lang_size = $lang['Octets'];
 		}
 		
-		$l_total_size = sprintf('%.2f', $total_size) . ' ' . $lang_size;
-		
 		$this->set_filenames(array(
 			'files_box_body' => 'files_box.tpl'
 		));
@@ -584,11 +582,11 @@ BASIC;
 			'L_FILESIZE'       => $lang['Filesize'],
 			'L_TOTAL_LOG_SIZE' => $lang['Total_log_size'],
 			
-			'TOTAL_LOG_SIZE'   => $l_total_size,
+			'TOTAL_LOG_SIZE'   => sprintf('%s %s', wa_number_format($total_size), $lang_size),
 			'S_ROWSPAN'        => ( $page_envoi ) ? '4' : '3'
 		));
 		
-		if( $page_envoi )
+		if( $page_envoi == true )
 		{
 			$this->assign_block_vars('del_column', array());
 			$this->assign_block_vars('joined_files.files_box', array(
@@ -640,9 +638,7 @@ BASIC;
 				$lang_size = $lang['Octets'];
 			}
 			
-			$l_filesize = sprintf('%.2f', $filesize) . ' ' . $lang_size;
-			
-			if( ereg('^image/', $mime_type) )
+			if( strpos($mime_type, 'image') === 0 )
 			{
 				$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '">';
 				$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
@@ -656,7 +652,7 @@ BASIC;
 			$this->assign_block_vars('file_info', array(
 				'OFFSET'     => ($i + 1),
 				'FILENAME'   => htmlspecialchars($filename),
-				'FILESIZE'   => $l_filesize,
+				'FILESIZE'   => sprintf('%s %s', wa_number_format($filesize), $lang_size),
 				'S_SHOW'     => $s_show,
 				'U_DOWNLOAD' => sessid(sprintf($u_download, $file_id))
 			));

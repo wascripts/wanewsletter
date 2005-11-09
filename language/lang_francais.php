@@ -343,16 +343,16 @@ $lang['Lost_key']                   = "J'ai perdu mon code ou mon mot de passe";
 // Page d'accueil
 //
 $lang['Explain']['accueil']         = "Bienvenue sur l'administration de WAnewsletter, nous vous remercions d'avoir choisi WAnewsletter comme solution de newsletter/mailing liste.\n L'administration vous permet de contrôler vos listes de diffusion de façon très simple. \nVous pouvez à tout moment retourner sur cette page en cliquant sur le logo WAnewsletter en haut à gauche de l'écran.";
-$lang['Registered_subscribers']     = "Il y a au total <b>%1\$d</b> inscrits, soit <b>%2\$.2f</b> nouveaux inscrits par jour";
-$lang['Registered_subscriber']      = "Il y a au total <b>%1\$d</b> inscrit, soit <b>%2\$.2f</b> nouveaux inscrits par jour";
+$lang['Registered_subscribers']     = "Il y a au total <b>%1\$d</b> inscrits, soit <b>%2\$s</b> nouveaux inscrits par jour";
+$lang['Registered_subscriber']      = "Il y a au total <b>%1\$d</b> inscrit, soit <b>%2\$s</b> nouveaux inscrits par jour";
 $lang['Tmp_subscribers']            = "Il y a <b>%d</b> personnes n'ayant pas confirmé leur inscription";
 $lang['Tmp_subscriber']             = "Il y a <b>%d</b> personne n'ayant pas confirmé son inscription";
 $lang['Last_newsletter']            = "Dernière newsletter envoyée le <b>%s</b>";
-$lang['Total_newsletters']          = "Un total de <b>%1\$d</b> newsletters ont été envoyées, soit <b>%2\$.2f</b> newsletters par mois";
-$lang['Total_newsletter']           = "Un total de <b>%1\$d</b> newsletter a été envoyée, soit <b>%2\$.2f</b> newsletters par mois";
+$lang['Total_newsletters']          = "Un total de <b>%1\$d</b> newsletters ont été envoyées, soit <b>%2\$s</b> newsletters par mois";
+$lang['Total_newsletter']           = "Un total de <b>%1\$d</b> newsletter a été envoyée, soit <b>%2\$s</b> newsletters par mois";
 $lang['No_newsletter_sended']       = "Aucune newsletter n'a encore été envoyée";
 $lang['Dbsize']                     = "Taille de la base de données (tables du script)";
-$lang['Filesize']                   = "Espace disque occupé par les fichiers sur le serveur (pièces jointes et statistiques)";
+$lang['Total_Filesize']             = "Espace disque occupé par les fichiers sur le serveur (pièces jointes et statistiques)";
 
 
 //
@@ -681,5 +681,10 @@ $lang['CHARSET']        = 'ISO-8859-1';
 $lang['CONTENT_LANG']   = 'fr';
 $lang['CONTENT_DIR']    = 'ltr'; // sens du texte Left To Right ou Right To Left
 $lang['TRANSLATE']      = '';
+
+
+// Formatage de nombres
+$lang['DEC_POINT']      = ",";
+$lang['THOUSANDS_SEP']  = "\xA0"; // Espace insécable
 
 ?>

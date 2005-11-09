@@ -670,4 +670,9 @@ $lang['CONTENT_LANG']   = 'en';
 $lang['CONTENT_DIR']    = 'ltr'; // sens du texte Left To Right ou Right To Left
 $lang['TRANSLATE']      = '<a href="mailto:robert.leroux@percuweb.ca">Rleroux</a>';
 
+
+// Formatage de nombres
+$lang['DEC_POINT']      = ".";
+$lang['THOUSANDS_SEP']  = ",";
+
 ?>

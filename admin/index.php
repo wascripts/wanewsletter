@@ -42,13 +42,43 @@ if( count($liste_ids) > 0 )
 	$num_logs     = $data['num_logs'];
 	$last_log     = $data['last_log'];
 	
-	$sql = "SELECT SUM(jf.file_size) AS totalsize
-		FROM " . JOINED_FILES_TABLE . " AS jf
-			INNER JOIN " . LOG_FILES_TABLE . " AS lf
-			ON lf.file_id = jf.file_id
+	$sql = "SELECT lf.file_id
+		FROM " . LOG_FILES_TABLE . " AS lf
 			INNER JOIN " . LOG_TABLE . " AS l
 			ON l.log_id = lf.log_id
 				AND l.liste_id IN(" . implode(', ', $liste_ids) . ")";
+	
+	if( DATABASE == 'mysql' )
+	{
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir la liste des identifiants de fichiers', ERROR);
+		}
+		
+		$file_ids = array();
+		
+		if( $db->num_rows() > 0 )
+		{
+			while( $row = $db->fetch_array($result) )
+			{
+				array_push($file_ids, $row['file_id']);
+			}
+		}
+		else
+		{
+			$file_ids[] = 0;
+		}
+		
+		$file_ids = implode(', ', $file_ids);
+	}
+	else
+	{
+		$file_ids = $sql;
+	}
+	
+	$sql = "SELECT SUM(jf.file_size) AS totalsize
+		FROM " . JOINED_FILES_TABLE . " AS jf
+		WHERE jf.file_id IN($file_ids)";
 	$result   = $db->query($sql);
 	$filesize = $db->result($result, 0, 'totalsize');
 	
@@ -127,11 +157,11 @@ if( !($month = round(( time() - $nl_config['mailing_startdate'] ) / 2592000)) )
 
 if( $num_inscrits > 1 )
 {
-	$l_num_inscrits = sprintf($lang['Registered_subscribers'], $num_inscrits, ($num_inscrits/$days));
+	$l_num_inscrits = sprintf($lang['Registered_subscribers'], $num_inscrits, wa_number_format($num_inscrits/$days));
 }
 else
 {
-	$l_num_inscrits = sprintf($lang['Registered_subscriber'], $num_inscrits, ($num_inscrits/$days));
+	$l_num_inscrits = sprintf($lang['Registered_subscriber'], $num_inscrits, wa_number_format($num_inscrits/$days));
 }
 
 if( $num_temp > 1 )
@@ -154,11 +184,11 @@ if( $num_logs > 0 )
 {
 	if( $num_logs > 1 )
 	{
-		$l_num_logs = sprintf($lang['Total_newsletters'], $num_logs, ($num_logs/$month));
+		$l_num_logs = sprintf($lang['Total_newsletters'], $num_logs, wa_number_format($num_logs/$month));
 	}
 	else
 	{
-		$l_num_logs = sprintf($lang['Total_newsletter'], $num_logs, ($num_logs/$month));
+		$l_num_logs = sprintf($lang['Total_newsletter'], $num_logs, wa_number_format($num_logs/$month));
 	}
 	
 	$output->assign_block_vars('switch_last_newsletter', array(
@@ -187,7 +217,7 @@ if( is_numeric($dbsize) )
 		$lang_size = $lang['Octets'];
 	}
 	
-	$dbsize = sprintf('%.2f ' . $lang_size, $dbsize);
+	$dbsize = sprintf('%s %s', wa_number_format($dbsize), $lang_size);
 }
 
 if( $filesize >= 1048576 )
@@ -205,13 +235,13 @@ else
 	$lang_size = $lang['Octets'];
 }
 
-$filesize = sprintf('%.2f ' . $lang_size, $filesize);
+$filesize = sprintf('%s %s', wa_number_format($filesize), $lang_size);
 
 $output->assign_vars( array(
 	'TITLE_HOME'             => $lang['Title']['accueil'],
 	'L_EXPLAIN'              => nl2br($lang['Explain']['accueil']),
 	'L_DBSIZE'               => $lang['Dbsize'],
-	'L_FILESIZE'             => $lang['Filesize'],
+	'L_FILESIZE'             => $lang['Total_Filesize'],
 	
 	'REGISTERED_SUBSCRIBERS' => $l_num_inscrits,
 	'TEMP_SUBSCRIBERS'       => $l_num_temp,

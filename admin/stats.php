@@ -413,7 +413,7 @@ if( $img == 'camembert' )
 		
 		imagestring($im, $text_font, 185, ($globalY + $int),
 			sprintf('%s [%d] [%s%%]', $listes[$i]['name'], $listes[$i]['num'],
-				($part > 0 ? round($part * 100, 2) : 0)),
+				wa_number_format(($part > 0 ? round($part * 100, 2) : 0), 1)),
 			$black
 		);
 	}
