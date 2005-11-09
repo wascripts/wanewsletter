@@ -122,7 +122,7 @@ switch( $mode )
 						trigger_error($message, MESSAGE);
 					}
 					
-					$logdata['log_body_text'] = $result['data'];
+					$logdata['log_body_text'] = convert_encoding($result['data'], $result['charset']);
 				}
 				
 				if( !empty($_POST['body_html_url']) )
@@ -136,19 +136,8 @@ switch( $mode )
 						trigger_error($message, MESSAGE);
 					}
 					
-					$logdata['log_body_html'] = $result['data'];
+					$logdata['log_body_html'] = convert_encoding($result['data'], $result['charset']);
 				}
-				
-				// TODO gérer le charset des données reçues
-				// - avec $result['charset'] si renseigné
-				// - en détectant le BOM de l'UTF-8 strncasecmp($data, "\xEF\xBB\xBF", 3)
-				
-				if( strncasecmp($logdata['log_body_text'], "\xEF\xBB\xBF", 3) == 0 )
-				{
-					$logdata['log_body_text'] = utf8_decode(substr($logdata['log_body_text'], 3));
-				}
-				
-				plain_error($logdata['log_body_text']);
 			}
 			else
 			{

@@ -1001,7 +1001,7 @@ function purge_latin1($str, $translite = false)
 {
 	if( $translite == true )
 	{
-		$cp1252_map = array(
+		$convmap = array(
 			"\x80" => "euro",    # EURO SIGN
 			"\x82" => ",",       # SINGLE LOW-9 QUOTATION MARK
 			"\x83" => "f",       # LATIN SMALL LETTER F WITH HOOK
@@ -1022,7 +1022,6 @@ function purge_latin1($str, $translite = false)
 			"\x95" => "?",       # BULLET
 			"\x96" => "-",       # EN DASH
 			"\x97" => "--",      # EM DASH
-			
 			"\x98" => "~",       # SMALL TILDE
 			"\x99" => "tm",      # TRADE MARK SIGN
 			"\x9a" => "s",       # LATIN SMALL LETTER S WITH CARON
@@ -1034,7 +1033,7 @@ function purge_latin1($str, $translite = false)
 	}
 	else
 	{
-		$cp1252_map = array(
+		$convmap = array(
 			"\x80" => "&#8364;",    # EURO SIGN
 			"\x82" => "&#8218;",    # SINGLE LOW-9 QUOTATION MARK
 			"\x83" => "&#402;",     # LATIN SMALL LETTER F WITH HOOK
@@ -1055,7 +1054,6 @@ function purge_latin1($str, $translite = false)
 			"\x95" => "&#8226;",    # BULLET
 			"\x96" => "&#8211;",    # EN DASH
 			"\x97" => "&#8212;",    # EM DASH
-			
 			"\x98" => "&#732;",     # SMALL TILDE
 			"\x99" => "&#8482;",    # TRADE MARK SIGN
 			"\x9a" => "&#353;",     # LATIN SMALL LETTER S WITH CARON
@@ -1066,7 +1064,115 @@ function purge_latin1($str, $translite = false)
 		);
 	}
 	
-	return strtr($str, $cp1252_map);
+	return strtr($str, $convmap);
+}
+
+function is_utf8($str)
+{
+	// From http://w3.org/International/questions/qa-forms-utf-8.html
+	return preg_match('/^(?:
+		 [\x09\x0A\x0D\x20-\x7E]            # ASCII
+	   | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
+	   |  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
+	   | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  # straight 3-byte
+	   |  \xED[\x80-\x9F][\x80-\xBF]        # excluding surrogates
+	   |  \xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
+	   | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
+	   |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
+	)*$/xs', $str);
+} // function is_utf8
+
+function convert_encoding($data, $charset, $check_bom = true)
+{
+	if( empty($charset) )
+	{
+		if( $check_bom == true && strncmp($data, "\xEF\xBB\xBF", 3) == 0 ) // détection du BOM
+		{
+			$charset = 'UTF-8';
+			$data = substr($data, 3);
+		}
+		else if( is_utf8($data) )
+		{
+			$charset = 'UTF-8';
+		}
+	}
+	
+	if( $charset == 'UTF-8' )
+	{
+		if( $GLOBALS['lang']['CHARSET'] == 'ISO-8859-1' )
+		{
+			// Conversion caractères illégaux provenant de Windows-1252
+			$convmap = array(
+				"\xe2\x82\xac" => "&#8364;",
+				"\xe2\x80\x9a" => "&#8218;",
+				"\xc6\x92"     => "&#402;",
+				"\xe2\x80\x9e" => "&#8222;",
+				"\xe2\x80\xa6" => "&#8230;",
+				"\xe2\x80\xa0" => "&#8224;",
+				"\xe2\x80\xa1" => "&#8225;",
+				"\xcb\x86"     => "&#710;",
+				"\xe2\x80\xb0" => "&#8240;",
+				"\xc5\xa0"     => "&#352;",
+				"\xe2\x80\xb9" => "&#8249;",
+				"\xc5\x92"     => "&#338;",
+				"\xc5\xbd"     => "&#381;",
+				"\xe2\x80\x98" => "&#8216;",
+				"\xe2\x80\x99" => "&#8217;",
+				"\xe2\x80\x9c" => "&#8220;",
+				"\xe2\x80\x9d" => "&#8221;",
+				"\xe2\x80\xa2" => "&#8226;",
+				"\xe2\x80\x93" => "&#8211;",
+				"\xe2\x80\x94" => "&#8212;",
+				"\xcb\x9c"     => "&#732;",
+				"\xe2\x84\xa2" => "&#8482;",
+				"\xc5\xa1"     => "&#353;",
+				"\xe2\x80\xba" => "&#8250;",
+				"\xc5\x93"     => "&#339;",
+				"\xc5\xbe"     => "&#382;",
+				"\xc5\xb8"     => "&#376;"
+			);
+			
+			$data = utf8_decode(strtr($data, $convmap));
+			
+			$convmap = array(
+				"&#8364;" => "\x80",
+				"&#8218;" => "\x82",
+				"&#402;"  => "\x83",
+				"&#8222;" => "\x84",
+				"&#8230;" => "\x85",
+				"&#8224;" => "\x86",
+				"&#8225;" => "\x87",
+				"&#710;"  => "\x88",
+				"&#8240;" => "\x89",
+				"&#352;"  => "\x8a",
+				"&#8249;" => "\x8b",
+				"&#338;"  => "\x8c",
+				"&#381;"  => "\x8e",
+				"&#8216;" => "\x91",
+				"&#8217;" => "\x92",
+				"&#8220;" => "\x93",
+				"&#8221;" => "\x94",
+				"&#8226;" => "\x95",
+				"&#8211;" => "\x96",
+				"&#8212;" => "\x97",
+				"&#732;"  => "\x98",
+				"&#8482;" => "\x99",
+				"&#353;"  => "\x9a",
+				"&#8250;" => "\x9b",
+				"&#339;"  => "\x9c",
+				"&#382;"  => "\x9e",
+				"&#376;"  => "\x9f"
+			);
+			
+			$data = strtr($data, $convmap);
+		}
+		else if( is_available_extension('mbstring') )
+		{
+			$data = mb_convert_encoding($data, $GLOBALS['lang']['CHARSET'], $charset);
+		}
+	}
+	
+	return $data;
 }
 
 /**
@@ -1108,7 +1214,7 @@ function http_get_contents($URL, &$errstr)
 	//
 	$datatype = $client->getResponseHeader('Content-Type');
 	
-	if( !preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z0-9.:_-]+)(?(2)"))?/i', $datatype, $match) )
+	if( !preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $datatype, $match) )
 	{
 		$errstr = $lang['Message']['No_data_at_url'] . ' (type manquant)';
 		return false;
@@ -1123,6 +1229,16 @@ function http_get_contents($URL, &$errstr)
 	$client->openURL('GET', $URL);
 	$client->send();
 	
+	if( empty($charset) && preg_match('#(?:/|\+)xml#', $datatype) && substr($client->responseData, 0, 5) == '<?xml' )
+	{
+		$prolog = substr($client->responseData, 0, strpos($client->responseData, "\n"));
+		
+		if( preg_match('/encoding=("|\')([a-z][a-z0-9._-]*)\\1"/i', $prolog, $match) )
+		{
+			$charset = $match[2];
+		}
+	}
+	
 	return array('type' => $datatype, 'charset' => $charset, 'data' => $client->responseData);
 }
 
@@ -1133,7 +1249,7 @@ function http_get_contents($URL, &$errstr)
  * que deux arguments max, les deux autres sont récupérés dans $lang)
  * 
  * @param float   $number
- * @param integer $decimals  Nombre de décimales
+ * @param integer $decimals
  * 
  * @return string
  */

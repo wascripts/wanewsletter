@@ -18,7 +18,7 @@
 - Terminer support des chargements de newsletters externes
   - Pour le chargement via une URL, trouver moyen pour spécifier les URLs une fois seulement (cas de SPIP), puis 
     seulement avoir à indiquer de charger via les URLs habituelles
-  - Prendre en compte les problèmes de charset !!
+  - Prendre en compte les problèmes de charset !! (fait mais à peaufiner éventuellement)
 
 - Nouveaux formats possibles pour l'export d'emails ?
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)
@@ -32,7 +32,6 @@
   - ajout champ reconfirm_subscribe à wa_liste (avec DEFAULT '1') et dans les schémas
 
 - vérifier bon fonctionnement de profil_cp.php, checker le code
-- commenter la classe URL_Parser
 - problème avec l'option de reconnexion auto, chercher la cause (semble aléatoire, soupçonne supression ligne dans
   wa_sessions qui ferait que la reco auto se ferait pas ??)
 
