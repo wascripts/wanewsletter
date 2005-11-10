@@ -332,17 +332,20 @@ class Session {
 		//
 		// Connexion automatique 
 		//
+		
 		if( !empty($this->sessiondata['adminloginkey']) )
 		{
 			$admin_id = ( !empty($this->sessiondata['adminid']) ) ? intval($this->sessiondata['adminid']) : 0;
 			
 			return $this->login($admin_id, $this->sessiondata['adminloginkey'], TRUE);
 		}
-		
-		$this->send_cookie('sessid', '', $current_time - 31536000);
-		$this->send_cookie('data', '', $current_time - 31536000);
-		
-		return false;
+		else
+		{
+			$this->send_cookie('sessid', '', $current_time - 31536000);
+			$this->send_cookie('data', '', $current_time - 31536000);
+			
+			return false;
+		}
 	}
 	
 	/**
@@ -403,7 +406,6 @@ class Session {
 		{
 			$sql .= 'LOWER(a.admin_login) = \'' . $db->escape(strtolower($admin_mixed)) . '\'';
 		}
-		$sql .= ' ORDER BY s.session_time DESC';
 		
 		if( !($result = $db->query($sql)) )
 		{
