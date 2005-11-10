@@ -391,6 +391,18 @@ class output extends Template {
 			));
 		}
 		
+		if( count($GLOBALS['_php_errors']) > 0 )
+		{
+			$this->assign_block_vars('php_errors', array());
+			
+			foreach( $GLOBALS['_php_errors'] AS $php_error )
+			{
+				$this->assign_block_vars('php_errors.item', array(
+					'TEXT' => $php_error
+				));
+			}
+		}
+		
 		$this->pparse('footer');
 		
 		$data = ob_get_contents();

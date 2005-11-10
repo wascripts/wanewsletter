@@ -38,7 +38,7 @@ $starttime = array_sum(explode(' ', microtime()));
 // Intialisation des variables pour éviter toute injection malveillante de code 
 //
 $simple_header = $error = FALSE;
-$nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = array();
+$nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = $_php_errors = array();
 $output = NULL;
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = $prefixe = '';
 

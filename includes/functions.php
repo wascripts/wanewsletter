@@ -408,7 +408,14 @@ BASIC;
 			exit;
 		}
 		
-		echo '<p>' . $php_errormsg . '</p>';
+		if( DISPLAY_ERRORS_IN_BLOCK == TRUE )
+		{
+			array_push($GLOBALS['_php_errors'], $php_errormsg);
+		}
+		else
+		{
+			echo '<p>' . $php_errormsg . '</p>';
+		}
 	}
 }
 

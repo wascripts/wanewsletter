@@ -79,7 +79,7 @@ ul#menu>li { background-image: none; padding-left: 0; }
 ul#menu li::before { content: "\2022\00A0"; }
 ul#menu li:first-child::before { content: normal; }
 
-div#smallheader, div#global, address#footer {
+div#smallheader, div#global, address#footer, ul#php_errors {
 	background-color: #DDD;
 	margin: 20px;
 	border: 1px solid black;
@@ -104,6 +104,8 @@ address#footer {
 	font-weight: bold;
 	font-size: .6em;
 }
+
+ul#php_errors { padding: 10px 15px 10px 35px; text-align: left; font-size: .9em; }
 
 div#dev {
 	background-color: inherit;

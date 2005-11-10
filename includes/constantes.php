@@ -42,6 +42,11 @@ define('DEV_INFOS', TRUE);
 //define('DEV_INFOS', FALSE);
 
 //
+// Active/Désactive l'affichage des erreurs proprement dans un bloc html en bas de page
+//
+define('DISPLAY_ERRORS_IN_BLOCK', TRUE);
+
+//
 // Tables du script 
 //
 define('ABO_LISTE_TABLE',     $prefixe . 'abo_liste');
