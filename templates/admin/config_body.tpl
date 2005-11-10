@@ -1,3 +1,47 @@
+<script type="text/javascript">
+<!--
+var use_ftp_status  = {USE_FTP_STATUS};
+var use_smtp_status = {USE_SMTP_STATUS};
+
+function display_block(evt)
+{
+	var dVal = ( evt.currentTarget.value == 1 ) ? 'table-row' : 'none';
+	var node = evt.currentTarget.parentNode.parentNode;
+	
+	while( (node = node.nextSibling) != null ) {
+		if( node.nodeType == Node.ELEMENT_NODE && node.nodeName.toLowerCase() == 'tr' ) {
+			node.style.display = dVal;
+		}
+	}
+}
+
+if( typeof(document.styleSheets) != 'undefined' && typeof(document.styleSheets[0].insertRule) != 'undefined' ) {
+	
+	if( use_ftp_status == false ) {
+		document.styleSheets[0].insertRule(
+			'table.content tr#use_ftp_choice + tr, table.content tr#use_ftp_choice ~ tr { display: none; }',
+			document.styleSheets[0].cssRules.length-1
+		);
+	}
+	
+	if( use_smtp_status == false ) {
+		document.styleSheets[0].insertRule(
+			'table.content tr#use_smtp_choice + tr, table.content tr#use_smtp_choice ~ tr { display: none; }',
+			document.styleSheets[0].cssRules.length-1
+		);
+	}
+	
+	DOM_Events.addListener('load', function() {
+		DOM_Events.addListener('change', display_block, false, document.forms[0].elements['use_ftp'][0]);
+		DOM_Events.addListener('change', display_block, false, document.forms[0].elements['use_ftp'][1]);
+		
+		DOM_Events.addListener('change', display_block, false, document.forms[0].elements['use_smtp'][0]);
+		DOM_Events.addListener('change', display_block, false, document.forms[0].elements['use_smtp'][1]);
+	}, false, document);
+}
+//-->
+</script>
+
 <p id="explain">{L_EXPLAIN}</p>
 
 <form method="post" action="./config.php">
@@ -76,7 +120,7 @@
 			<td class="row2"><input type="text" id="max_filesize" name="max_filesize" value="{MAX_FILESIZE}" size="7" maxlength="8" class="text" /> <span class="m-texte">{L_OCTETS}</span></td>
 		</tr>
 		<!-- BEGIN extension_ftp -->
-		<tr>
+		<tr id="use_ftp_choice">
 			<td class="row1"><label>{extension_ftp.L_USE_FTP}&#160;:</label></td>
 			<td class="row2">
 				<input type="radio" id="use_ftp_yes" name="use_ftp" value="1" {extension_ftp.CHECKED_USE_FTP_ON}/>
@@ -147,7 +191,7 @@
 			<td class="row1"><label for="emails_sended">{L_EMAILS_SENDED}&#160;:</label><br /><span class="m-texte">{L_EMAILS_SENDED_NOTE}</span></td>
 			<td class="row2"><input type="text" id="emails_sended" name="emails_sended" value="{EMAILS_SENDED}" size="5" maxlength="5" class="text" style="width:30px" /></td>
 		</tr>
-		<tr>
+		<tr id="use_smtp_choice">
 			<td class="row1"><label>{L_USE_SMTP}&#160;:{WARNING_SMTP}</label><br /><span class="m-texte">{L_USE_SMTP_NOTE}</span></td>
 			<td class="row2">
 				<input type="radio" id="use_smtp_on" name="use_smtp" value="1"{CHECKED_USE_SMTP_ON}{DISABLED_SMTP} />

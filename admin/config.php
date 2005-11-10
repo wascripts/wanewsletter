@@ -307,7 +307,10 @@ $output->assign_vars( array(
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
 	'SMTP_USER'                 => $new_config['smtp_user'],
-	'SMTP_PASS'                 => $new_config['smtp_pass']
+	'SMTP_PASS'                 => $new_config['smtp_pass'],
+	
+	'USE_FTP_STATUS'            => ( $new_config['use_ftp'] ) ? 'true' : 'false',
+	'USE_SMTP_STATUS'           => ( $new_config['use_smtp'] ) ? 'true' : 'false'
 ));
 
 if( is_available_extension('ftp') )
