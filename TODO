@@ -31,8 +31,7 @@
   - ajout champ reconfirm_subscribe à wa_liste (avec DEFAULT '1') et dans les schémas
 
 - vérifier bon fonctionnement de profil_cp.php, checker le code
-- problème avec l'option de reconnexion auto, chercher la cause (semble aléatoire, soupçonne supression ligne dans
-  wa_sessions qui ferait que la reco auto se ferait pas ??)
+- compléter fichier AUTHORS (renommer en CREDITS ?)
 
 
 Modifications sur la doc
