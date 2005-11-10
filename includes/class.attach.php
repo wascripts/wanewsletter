@@ -293,7 +293,7 @@ class Attach {
 			// Si l'upload a échoué, on récupère le message correspondant à l'erreur survenue
 			// Voir fichier constantes.php pour les codes d'erreur
 			//
-			if( $upload_mode == 'upload' && !is_uploaded_file($tmp_filename) )
+			if( $upload_mode == 'upload' )
 			{
 				$error = TRUE;
 				

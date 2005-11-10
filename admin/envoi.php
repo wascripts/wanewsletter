@@ -561,7 +561,7 @@ switch( $mode )
 		//
 		if( $mode == 'attach' && !empty($logdata['log_id']) && $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 		{
-			$tmp_filename = ( !empty($_FILES['join_file']['tmp_name']) && $_FILES['join_file']['tmp_name'] != 'none' ) ? str_replace('\\\\', '\\', $_FILES['join_file']['tmp_name']) : ( ( !empty($_POST['join_file']) ) ? trim($_POST['join_file']) : '' );
+			$tmp_filename = ( !empty($_FILES['join_file']['tmp_name']) && $_FILES['join_file']['tmp_name'] != 'none' ) ? $_FILES['join_file']['tmp_name'] : ( ( !empty($_POST['join_file']) ) ? trim($_POST['join_file']) : '' );
 			$filename     = ( !empty($_FILES['join_file']['name']) ) ? $_FILES['join_file']['name'] : '';
 			$filesize     = ( !empty($_FILES['join_file']['size']) ) ? intval($_FILES['join_file']['size']) : 0;
 			$filetype     = ( !empty($_FILES['join_file']['type']) ) ? $_FILES['join_file']['type'] : '';
@@ -579,13 +579,13 @@ switch( $mode )
 				//
 				$attach->use_file_exists($file_id, $logdata['log_id'], $error, $msg_error);
 			}
-			else if( !empty($tmp_filename) )
+			else
 			{
 				//
 				// On a affaire soit à un fichier présent localement, soit à un fichier 
 				// distant, soit à un fichier uploadé
 				//
-				if( empty($filename) )
+				if( !empty($_POST['join_file']) )
 				{
 					$tmp_filename = str_replace('\\', '/', $tmp_filename);
 					
@@ -606,11 +606,6 @@ switch( $mode )
 				}
 				
 				$attach->upload_file($upload_mode, $logdata['log_id'], $filename, $tmp_filename, $filesize, $filetype, $errno_code, $error, $msg_error);
-			}
-			else
-			{
-				$error = true;
-				$msg_error[] = $lang['Message']['No_data_received'];
 			}
 		}
 		break;
