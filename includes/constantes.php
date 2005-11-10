@@ -64,7 +64,8 @@ define('CRITICAL_ERROR', E_USER_WARNING);
 define('ERROR',          E_USER_ERROR);
 define('MESSAGE',        E_USER_NOTICE);
 
-if( !defined('E_STRICT') ) {// Compatibilité PHP5
+if( !defined('E_STRICT') ) // Compatibilité PHP5
+{
 	define('E_STRICT', 2048);
 }
 
@@ -115,15 +116,23 @@ define('ENGINE_UNIQ', 2);
 //
 // Codes d'erreur lors de l'upload 
 //
-// Ces constantes ne sont définies en natif qu'à partir de php >= 4.3.0
-//
-if( version_compare(phpversion(), '4.3.0', '<') )
+if( !defined('UPLOAD_ERR_OK') ) // Introduites en PHP 4.3.0
 {
-    define('UPLOAD_ERR_OK'       , 0);
-    define('UPLOAD_ERR_INI_SIZE' , 1);
-    define('UPLOAD_ERR_FORM_SIZE', 2);
-    define('UPLOAD_ERR_PARTIAL'  , 3);
-    define('UPLOAD_ERR_NO_FILE'  , 4);
+    define('UPLOAD_ERR_OK',         0);
+    define('UPLOAD_ERR_INI_SIZE',   1);
+    define('UPLOAD_ERR_FORM_SIZE',  2);
+    define('UPLOAD_ERR_PARTIAL',    3);
+    define('UPLOAD_ERR_NO_FILE',    4);
+}
+
+if( !defined('UPLOAD_ERR_NO_TMP_DIR') ) // Introduite en PHP 4.3.10 et 5.0.3
+{
+	define('UPLOAD_ERR_NO_TMP_DIR', 6);
+}
+
+if( !defined('UPLOAD_ERR_CANT_WRITE') ) // Introduite en PHP 5.1.0
+{
+	define('UPLOAD_ERR_CANT_WRITE', 7);
 }
 
 //

@@ -2,9 +2,8 @@
 
 ------------------
 
-- S’assurer du bon fonctionnement sur la futur branche php 5.1.x
-- Compléter le support de SQLite
-  - Revoir requètes de functions.validate.php (? bof, ça marche donc bon...)
+- S’assurer du bon fonctionnement sur la future branche PHP 5.1.x
+- Revoir requètes de functions.validate.php (? bof, ça marche donc bon...)
 
 - revoir la partie newsletter.php/class.form.php pour permettre les inscriptions à plusieurs listes en même temps
   ainsi que fournir une API utilisable dans d'autres applis PHP (phpBB, SPIP, ...)
@@ -18,7 +17,7 @@
 - Terminer support des chargements de newsletters externes
   - Pour le chargement via une URL, trouver moyen pour spécifier les URLs une fois seulement (cas de SPIP), puis 
     seulement avoir à indiquer de charger via les URLs habituelles
-  - Prendre en compte les problèmes de charset !! (fait mais à peaufiner éventuellement)
+  - Prendre en compte les problèmes de charset (fait mais à peaufiner éventuellement)
 
 - Nouveaux formats possibles pour l'export d'emails ?
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)

@@ -315,6 +315,14 @@ class Attach {
 						$msg_error[] = $lang['Message']['Upload_error_4'];
 						break;
 					
+					case UPLOAD_ERR_NO_TMP_DIR:
+						$msg_error[] = $lang['Message']['Upload_error_6'];
+						break;
+					
+					case UPLOAD_ERR_CANT_WRITE:
+						$msg_error[] = $lang['Message']['Upload_error_7'];
+						break;
+					
 					default:
 						$msg_error[] = $lang['Message']['Upload_error_5'];
 						break;
