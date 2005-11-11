@@ -260,7 +260,7 @@ $bzip2_loaded   = is_available_extension('bz2');
 
 if( $zlib_loaded )
 {
-	require WA_ROOTDIR . '/includes/zip/zip.lib.php';
+	require WA_ROOTDIR . '/includes/zip.lib.php';
 }
 
 if( WA_USER_OS == 'win' )
