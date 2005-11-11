@@ -475,10 +475,11 @@ else if( $mode == 'abonnes' )
 			switch( DATABASE )
 			{
 				case 'mysql':
-					$sql = "SELECT abo_id 
-						FROM " . ABO_LISTE_TABLE . " 
-						WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
-						GROUP BY abo_id 
+					$sql = "SELECT abo_id
+						FROM " . ABO_LISTE_TABLE . "
+						WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
+							AND liste_id = $listdata[liste_id]
+						GROUP BY abo_id
 						HAVING COUNT(abo_id) = 1";
 					if( $result = $db->query($sql) )
 					{
@@ -503,12 +504,13 @@ else if( $mode == 'abonnes' )
 					break;
 				
 				default:
-					$sql = "DELETE FROM " . ABONNES_TABLE . " 
+					$sql = "DELETE FROM " . ABONNES_TABLE . "
 						WHERE abo_id IN(
-							SELECT abo_id 
-							FROM " . ABO_LISTE_TABLE . " 
-							WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
-							GROUP BY abo_id 
+							SELECT abo_id
+							FROM " . ABO_LISTE_TABLE . "
+							WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
+								AND liste_id = $listdata[liste_id]
+							GROUP BY abo_id
 							HAVING COUNT(abo_id) = 1
 						)";
 					if( !$db->query($sql) )
