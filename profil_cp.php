@@ -536,7 +536,7 @@ switch( $mode )
 					require WA_ROOTDIR . '/includes/class.attach.php';
 					$attach = new Attach();
 					
-					preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $body, $matches);
+					hasCidReferences($body, $refs);
 					
 					for( $i = 0; $i < $total_files; $i++ )
 					{
@@ -557,15 +557,15 @@ switch( $mode )
 						
 						if( $nl_config['use_ftp'] )
 						{
-							$file_path   = $attach->ftp_to_tmp($files[$row['log_id']][$i]);
-							$tmp_files[] = $file_path;
+							$file_path = $attach->ftp_to_tmp($files[$row['log_id']][$i]);
+							array_push($tmp_files, $file_path);
 						}
 						else
 						{
 							$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 						}
 						
-						if( is_array($matches) && in_array($real_name, $matches[1]) )
+						if( is_array($refs) && in_array($real_name, $refs) )
 						{
 							$embedded = TRUE;
 						}

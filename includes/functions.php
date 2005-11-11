@@ -1265,6 +1265,54 @@ function wa_number_format($number, $decimals = 2)
 	return number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
 }
 
+/**
+ * hasCidReferences()
+ * 
+ * Retourne le nombre de références 'cid' (appel d'objet dans un email)
+ * 
+ * @param string  $body
+ * @param array   $refs
+ * 
+ * @return integer
+ */
+function hasCidReferences($body, &$refs)
+{
+	$total = preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $body, $matches);
+	$refs  = $matches[1];
+	
+	return $total;
+}
+
+/**
+ * formateSize()
+ * 
+ * Retourne une taille en octet formatée pour être lisible par un humain
+ * 
+ * @param string  $body
+ * @param array   $refs
+ * 
+ * @return integer
+ */
+function formateSize($size)
+{
+	if( $size >= 1048576 )
+	{
+		$lsize = $GLOBALS['lang']['MO'];
+		$size /= 1048576;
+	}
+	else if( $size > 1024 )
+	{
+		$lsize = $GLOBALS['lang']['KO'];
+		$size /= 1024;
+	}
+	else
+	{
+		$lsize = $GLOBALS['lang']['Octets'];
+	}
+	
+	return sprintf("%s\xA0%s", wa_number_format($size), $lsize);
+}
+
 //
 // Appel du gestionnaire d'erreur 
 //

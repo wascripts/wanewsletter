@@ -88,7 +88,7 @@ function launch_sending($listdata, $logdata)
 	require WA_ROOTDIR . '/includes/class.attach.php';
 	$attach = new Attach();
 	
-	preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $body[FORMAT_HTML], $matches);
+	hasCidReferences($body[FORMAT_HTML], $refs);
 	
 	for( $i = 0; $i < $total_files; $i++ )
 	{
@@ -109,15 +109,15 @@ function launch_sending($listdata, $logdata)
 		
 		if( $nl_config['use_ftp'] )
 		{
-			$file_path   = $attach->ftp_to_tmp($logdata['joined_files'][$i]);
-			$tmp_files[] = $file_path;
+			$file_path = $attach->ftp_to_tmp($logdata['joined_files'][$i]);
+			array_push($tmp_files, $file_path);
 		}
 		else
 		{
 			$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 		}
 		
-		if( is_array($matches) && in_array($real_name, $matches[1]) )
+		if( is_array($refs) && in_array($real_name, $refs) )
 		{
 			$embedded = TRUE;
 		}

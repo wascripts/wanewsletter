@@ -560,29 +560,14 @@ BASIC;
 			$test_ary[]  = $logdata['joined_files'][$i]['file_real_name'];
 		}
 		
-		if( $format == FORMAT_HTML && preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $logdata['log_body_html'], $matches) )
+		if( $format == FORMAT_HTML && hasCidReferences($logdata['log_body_html'], $refs) > 0 )
 		{
-			$embed_ary = array_intersect($test_ary, $matches[1]);
+			$embed_ary = array_intersect($test_ary, $refs);
 			
 			if( ($num_files - count($embed_ary)) == 0 )
 			{
 				return false;
 			}
-		}
-		
-		if( $total_size >= 1048576 )
-		{
-			$lang_size   = $lang['MO'];
-			$total_size /= 1048576;
-		}
-		else if( $total_size > 1024 )
-		{
-			$lang_size   = $lang['KO'];
-			$total_size /= 1024;
-		}
-		else
-		{
-			$lang_size = $lang['Octets'];
 		}
 		
 		$this->set_filenames(array(
@@ -594,7 +579,7 @@ BASIC;
 			'L_FILESIZE'       => $lang['Filesize'],
 			'L_TOTAL_LOG_SIZE' => $lang['Total_log_size'],
 			
-			'TOTAL_LOG_SIZE'   => sprintf('%s %s', wa_number_format($total_size), $lang_size),
+			'TOTAL_LOG_SIZE'   => formateSize($total_size),
 			'S_ROWSPAN'        => ( $page_envoi ) ? '4' : '3'
 		));
 		
@@ -635,21 +620,6 @@ BASIC;
 				continue;
 			}
 			
-			if( $filesize >= 1048576 )
-			{
-				$lang_size = $lang['MO'];
-				$filesize /= 1048576;
-			}
-			else if( $filesize > 1024 )
-			{
-				$lang_size = $lang['KO'];
-				$filesize /= 1024;
-			}
-			else
-			{
-				$lang_size = $lang['Octets'];
-			}
-			
 			if( strpos($mime_type, 'image') === 0 )
 			{
 				$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '">';
@@ -664,7 +634,7 @@ BASIC;
 			$this->assign_block_vars('file_info', array(
 				'OFFSET'     => ($i + 1),
 				'FILENAME'   => htmlspecialchars($filename),
-				'FILESIZE'   => sprintf('%s %s', wa_number_format($filesize), $lang_size),
+				'FILESIZE'   => formateSize($filesize),
 				'S_SHOW'     => $s_show,
 				'U_DOWNLOAD' => sessid(sprintf($u_download, $file_id))
 			));

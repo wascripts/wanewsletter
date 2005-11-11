@@ -200,43 +200,6 @@ else
 	$l_num_logs = $lang['No_newsletter_sended'];
 }
 
-if( is_numeric($dbsize) )
-{
-	if( $dbsize >= 1048576 )
-	{
-		$lang_size = $lang['MO'];
-		$dbsize /= 1048576;
-	}
-	else if( $dbsize > 1024 )
-	{
-		$lang_size = $lang['KO'];
-		$dbsize /= 1024;
-	}
-	else
-	{
-		$lang_size = $lang['Octets'];
-	}
-	
-	$dbsize = sprintf('%s %s', wa_number_format($dbsize), $lang_size);
-}
-
-if( $filesize >= 1048576 )
-{
-	$lang_size = $lang['MO'];
-	$filesize /= 1048576;
-}
-else if( $filesize > 1024 )
-{
-	$lang_size = $lang['KO'];
-	$filesize /= 1024;
-}
-else
-{
-	$lang_size = $lang['Octets'];
-}
-
-$filesize = sprintf('%s %s', wa_number_format($filesize), $lang_size);
-
 $output->assign_vars( array(
 	'TITLE_HOME'             => $lang['Title']['accueil'],
 	'L_EXPLAIN'              => nl2br($lang['Explain']['accueil']),
@@ -246,8 +209,8 @@ $output->assign_vars( array(
 	'REGISTERED_SUBSCRIBERS' => $l_num_inscrits,
 	'TEMP_SUBSCRIBERS'       => $l_num_temp,
 	'NEWSLETTERS_SENDED'     => $l_num_logs,
-	'DBSIZE'                 => $dbsize,
-	'FILESIZE'               => $filesize
+	'DBSIZE'                 => (is_numeric($dbsize)) ? formateSize($dbsize) : $dbsize,
+	'FILESIZE'               => formateSize($filesize)
 ));
 
 $output->pparse('body');

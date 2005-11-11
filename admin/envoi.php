@@ -193,8 +193,8 @@ switch( $mode )
 					}
 					
 					$log_box .= sprintf(
-						"<option style=\"%s\" value=\"%d\"> - %s %s - </option>\n",
-						$style, $row['log_id'], htmlspecialchars(cut_str($row['log_subject'], 60)), $status
+						"<option style=\"%s\" value=\"%d\">&#8211; %s %s</option>\n",
+						$style, $row['log_id'], htmlspecialchars(cut_str($row['log_subject'], 40)), $status
 					);
 				}
 				while( $row = $db->fetch_array($result) );
@@ -394,13 +394,13 @@ switch( $mode )
 						}
 					}
 					
-					$total_cid = preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/i', $logdata['log_body_html'], $matches);
+					$total_cid = hasCidReferences($logdata['log_body_html'], $refs);
 					
 					for( $i = 0; $i < $total_cid; $i++ )
 					{
-						if( !in_array($matches[1][$i], $files) )
+						if( !in_array($refs[$i], $files) )
 						{
-							$files_error[] = htmlspecialchars($matches[1][$i]);
+							$files_error[] = htmlspecialchars($refs[$i]);
 						}
 					}
 					
