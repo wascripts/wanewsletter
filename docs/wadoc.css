@@ -61,10 +61,10 @@ address#footer { font-weight: bold; font-style: normal; font-size: 0.6em; }
 .bloc h3 {
 	background-color: transparent;
 	margin: 0;
-	padding: 1.5em 1.4em 0.5em;
+	padding: 1.5em 1.4em .5em;
 	text-align: left;
 	font-weight: normal;
-	font-size: 0.8em;
+	font-size: .8em;
 	color: #25F;
 }
 
@@ -72,7 +72,7 @@ address#footer { font-weight: bold; font-style: normal; font-size: 0.6em; }
 	margin: 1em 1.6em;
 	padding: 0;
 	text-align: justify;
-	font-size: 0.8em;
+	font-size: .8em;
 	line-height: 1.5em;
 }
 
@@ -82,9 +82,9 @@ address#footer { font-weight: bold; font-style: normal; font-size: 0.6em; }
 
 ul, ol {
 	margin: 20px;
-	padding: 0 2em;
+	padding: 0 3em;
 	text-align: left;
-	font-size: 0.8em;
+	font-size: .8em;
 	line-height: 1.4em;
 }
 
@@ -126,6 +126,12 @@ pre {
 	text-align: left;
 	font-weight: normal; font-size: 0.8em; line-height: 1.2em;
 	font-family: Courier, "Courier New", monospace !important;
+}
+
+div#page { counter-reset: item; }
+div#page h2[id]::before {
+	content: counter(item, upper-roman) ".\00A0";
+	counter-increment: item;
 }
 
 /*

@@ -3,69 +3,70 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	
-	<title>FAQ - WAnewsletter</title>
+	<title>FAQ – WAnewsletter</title>
 	
 	<meta name="Author" content="Bobe" />
 	<meta name="Editor" content="jEdit" />
-	<meta name="Copyright" content="phpCodeur (c) 2002-2005" />
+	<meta name="Copyright" content="phpCodeur (c) 2002–2005" />
 	
 	<link rel="contents" href="#top" title="Table des matières" />
-	<link rel="chapter" href="#p1" title="Comment afficher le nombre d'inscrits sur mon site&#8201;?" />
+	<link rel="chapter" href="#p1" title="Comment afficher le nombre d’inscrits sur mon site&#8201;?" />
 	<link rel="chapter" href="#p2" title="WAnewsletter, un script multilingue&#8201;?" />
-	<link rel="chapter" href="#p3" title="Comment être prévenu de la sortie d'une nouvelle version&#8201;?" />
-	<link rel="chapter" href="#p4" title="Comment fonctionne l'importation d'emails&#8201;?" />
+	<link rel="chapter" href="#p3" title="Comment être prévenu de la sortie d’une nouvelle version&#8201;?" />
+	<link rel="chapter" href="#p4" title="Comment fonctionne l’importation d’emails&#8201;?" />
 	<link rel="chapter" href="#p5" title="Comment gérer le script à plusieurs&#8201;?" />
 	<link rel="chapter" href="#p6" title="Mais où se trouve le formulaire d'inscription&#8201;?" />
-	<link rel="chapter" href="#p7" title="Pourquoi y a-t-il deux moteurs d'envoi&#8201;?" />
+	<link rel="chapter" href="#p7" title="Pourquoi y a t-il deux moteurs d'envoi&#8201;?" />
 	<link rel="chapter" href="#p8" title="Dossier temporaire du script, safe mode et open_basedir" />
 	<link rel="chapter" href="#p9" title="Impossible de joindre des fichiers à mes newsletter&#8201;!" />
-	<link rel="chapter" href="#p10" title="Utilisation d'un serveur smtp pour les envois d'emails" />
-	<link rel="chapter" href="#p11" title="Appeller le formulaire d'inscription via une popup" />
+	<link rel="chapter" href="#p10" title="Utilisation d’un serveur smtp pour les envois d’emails" />
+	<link rel="chapter" href="#p11" title="Appeller le formulaire d’inscription via une popup" />
 	<link rel="chapter" href="#p12" title="Méthodes de validation des adresses emails" />
 	<link rel="chapter" href="#p13" title="Changement du nom du dossier des statistiques" />
 	<link rel="chapter" href="#p14" title="Envoi des newsletters avec cron" />
 	<link rel="chapter" href="#p15" title="Utilisation de tags personnalisés" />
 	<link rel="chapter" href="#p16" title="Définir une langue selon le formulaire" />
-	<link rel="copyright" href="http://www.gnu.org/copyleft/gpl.html" hreflang="en" title="Copyleft" />
+	<link rel="chapter" href="#p17" title="Utiliser Wanewsletter avec SQLite" />
 	
 	<link rel="stylesheet" type="text/css" href="./wadoc.css" media="screen" title="Thème Wadoc" />
 </head>
 <body>
 
-<h1>FAQ - WAnewsletter</h1>
+<h1>FAQ – WAnewsletter</h1>
 
 <div id="page">
 
 	<p id="preface">Voici une liste des questions les plus fréquemment posées, et les 
-	explications correspondantes.</p>
+	réponses correspondantes.</p>
 	
 	<div class="bloc">
 	<h2>Sommaire</h2>
 	
 	<ol>
-		<li> <a href="#p1">Comment afficher le nombre d'inscrits sur mon site&#8201;?</a> </li>
-		<li> <a href="#p2">WAnewsletter, un script multilingue&#8201;?</a> </li>
-		<li> <a href="#p3">Comment être prévenu de la sortie d'une nouvelle version&#8201;?</a> </li>
-		<li> <a href="#p4">Comment fonctionne l'importation d'emails&#8201;?</a> </li>
-		<li> <a href="#p5">Comment gérer le script à plusieurs&#8201;?</a> </li>
-		<li> <a href="#p6">Mais où se trouve le formulaire d'inscription&#8201;?</a> </li>
-		<li> <a href="#p7">Pourquoi y a-t-il deux moteurs d'envoi&#8201;?</a> </li>
-		<li> <a href="#p8">Dossier temporaire du script, safe mode et open_basedir</a> </li>
-		<li> <a href="#p9">Impossible de joindre des fichiers à mes newsletter&#8201;!</a> </li>
-		<li> <a href="#p10">Utilisation d'un serveur smtp pour les envois d'emails</a> </li>
-		<li> <a href="#p11">Appeller le formulaire d'inscription via une popup</a> </li>
-		<li> <a href="#p12">Méthodes de validation des adresses emails</a> </li>
-		<li> <a href="#p13">Changement du nom du dossier des statistiques</a> </li>
-		<li> <a href="#p14">Envoi des newsletters avec cron</a> </li>
-		<li> <a href="#p15">Utilisation de tags personnalisés</a> </li>
-		<li> <a href="#p16">Définir une langue selon le formulaire</a> </li>
+		<li><a href="#p1">Comment afficher le nombre d’inscrits sur mon site&#8201;?</a></li>
+		<li><a href="#p2">WAnewsletter, un script multilingue&#8201;?</a></li>
+		<li><a href="#p3">Comment être prévenu de la sortie d’une nouvelle version&#8201;?</a></li>
+		<li><a href="#p4">Comment fonctionne l’importation d’emails&#8201;?</a></li>
+		<li><a href="#p5">Comment gérer le script à plusieurs&#8201;?</a></li>
+		<li><a href="#p6">Mais où se trouve le formulaire d’inscription&#8201;?</a></li>
+		<li><a href="#p7">Pourquoi y a t-il deux moteurs d’envoi&#8201;?</a></li>
+		<li><a href="#p8">Dossier temporaire du script, safe mode et open_basedir</a></li>
+		<li><a href="#p9">Impossible de joindre des fichiers à mes newsletter&#8201;!</a></li>
+		<li><a href="#p10">Utilisation d’un serveur smtp pour les envois d’emails</a></li>
+		<li><a href="#p11">Appeller le formulaire d’inscription via une popup</a></li>
+		<li><a href="#p12">Méthodes de validation des adresses emails</a></li>
+		<li><a href="#p13">Changement du nom du dossier des statistiques</a></li>
+		<li><a href="#p14">Envoi des newsletters avec cron</a></li>
+		<li><a href="#p15">Utilisation de tags personnalisés</a></li>
+		<li><a href="#p16">Définir une langue selon le formulaire</a></li>
+		<li><a href="#p17">Utiliser Wanewsletter avec SQLite</a></li>
 	</ol>
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p1">I. Comment afficher le nombre d'inscrits sur mon site&#8201;?</h2>
+	<h2 id="p1">Comment afficher le nombre d’inscrits sur mon site&#8201;?</h2>
 	
-	<p>Pour cela, insérez simplement cette ligne de code à l'endroit où vous voulez 
+	<p>Pour cela, insérez simplement cette ligne de code à l’endroit où vous voulez 
 	afficher le nombre d'inscrits (prenez soin de mettre la bonne adresse vers le 
 	fichier <samp>extra.php</samp>)&#160;:</p>
 	
@@ -76,7 +77,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p2">II. WAnewsletter, un script multilingue&#8201;?</h2>
+	<h2 id="p2">WAnewsletter, un script multilingue&#8201;?</h2>
 	
 	<p>Notre but étant de rendre WAnewsletter disponible au plus grand nombre, le script 
 	gère donc différentes langues. Si vous avez des connaissances dans une langue dans 
@@ -88,7 +89,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p3">III. Comment être prévenu de la sortie d'une nouvelle version&#8201;?</h2>
+	<h2 id="p3">Comment être prévenu de la sortie d’une nouvelle version&#8201;?</h2>
 	
 	<p>Pour être prévenu de la sortie d'une nouvelle version, ou de la découverte 
 	(improbable&#8201;? :) ) d'une faille de sécurité, passez de temps en temps sur 
@@ -98,7 +99,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p4">IV. Comment fonctionne l'importation d'emails&#8201;?</h2>
+	<h2 id="p4">Comment fonctionne l’importation d’emails&#8201;?</h2>
 	
 	<p>Un utilitaire d'importation est disponible dans la rubrique "importation". 
 	Il vous permettra, si vous avez les droits suffisants, d'importer des emails 
@@ -119,7 +120,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p5">V. Comment gérer le script à plusieurs&#8201;?</h2>
+	<h2 id="p5">Comment gérer le script à plusieurs&#8201;?</h2>
 	
 	<p>WAnewsletter peut être géré par plusieurs utilisateurs. Vous pouvez modifier 
 	les permissions des utilisateurs via le profil de l'utilisateur en question.</p>
@@ -135,7 +136,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p6">VI. Mais où se trouve le formulaire d'inscription&#8201;?</h2>
+	<h2 id="p6">Mais où se trouve le formulaire d’inscription&#8201;?</h2>
 	
 	<p>Vous disposez d'un formulaire par défaut, le fichier <samp>subscribe.php</samp> 
 	(note aux possesseurs de versions 2.0.x ou 2.1.x, le nom a changé et n'est plus 
@@ -190,7 +191,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p7">VII. Pourquoi y a-t-il deux méthodes d'envoi&#8201;?</h2>
+	<h2 id="p7">Pourquoi y a t-il deux méthodes d’envoi&#8201;?</h2>
 	
 	<p>WAnewsletter dispose de deux méthodes d'envoi pour pouvoir être utilisé par 
 	le plus grand nombre. En effet, certains hébergeurs limitent le nombre d'emails 
@@ -214,7 +215,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p8">VIII. Dossier temporaire du script, safe mode et open_basedir</h2>
+	<h2 id="p8">Dossier temporaire du script, safe mode et open_basedir</h2>
 	
 	<p>Le dossier temporaire du script, <samp>tmp/</samp> par défaut, peut être 
 	utilisé par le script dans certains cas précis&#160;:</p>
@@ -246,7 +247,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p9">IX. Impossible de joindre des fichiers à mes newsletter&#8201;!</h2>
+	<h2 id="p9">Impossible de joindre des fichiers à mes newsletter&#8201;!</h2>
 	
 	<p>Dans le cas où l'upload de fichier est autorisé sur votre serveur, cela peut 
 	être dù au fait que le script n'a pas les droits en écriture sur le dossier de 
@@ -262,7 +263,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p10">X. Utilisation d'un serveur smtp pour les envois d'emails</h2>
+	<h2 id="p10">Utilisation d'un serveur smtp pour les envois d'emails</h2>
 	
 	<p>Malheureusement, utiliser l'option 
 	<abbr title="Simple Mail Transfert Protocol" xml:lang="en" lang="en">SMTP</abbr> 
@@ -287,7 +288,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p11">XI. Appeller le formulaire d'inscription via une popup</h2>
+	<h2 id="p11">Appeller le formulaire d'inscription via une popup</h2>
 	
 	<p>Intégrer le formulaire d'inscription sur votre site, en l'appellant tout 
 	simplement à l'aide d'une popup, est très simple. Le code est le suivant&#160;:</p>
@@ -305,7 +306,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p12">XII. Méthodes de validation des adresses email</h2>
+	<h2 id="p12">Méthodes de validation des adresses email</h2>
 	
 	<p style="color: red;">Cette fonctionnalité n'est pas disponible dans la 
 	version 2.2.5 et dans les prochaines versions mineures.</p>
@@ -335,7 +336,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p13">XIII. Changement du nom du dossier des statistiques</h2>
+	<h2 id="p13">Changement du nom du dossier des statistiques</h2>
 	
 	<p>
 	Pour changer le nom du dossier <code>stats/</code>, c'est simple, éditez le fichier functions.stats.php et 
@@ -350,7 +351,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p14">XIV. Envoi des newsletters avec cron</h2>
+	<h2 id="p14">Envoi des newsletters avec cron</h2>
 	
 	<p>
 	Le script donne la possibilité de réaliser vos envois de newsletters avec cron.<br />
@@ -373,7 +374,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p15">XV. Utilisation de tags personnalisés</h2>
+	<h2 id="p15">Utilisation de tags personnalisés</h2>
 	
 	<p>
 	Pour utiliser les tags personnalisés (à l'instar de &#123;LINKS&#125; ou &#123;NAME&#125; ), éditez le fichier 
@@ -460,7 +461,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p16">XVI. Définir une langue selon le formulaire</h2>
+	<h2 id="p16">Définir une langue selon le formulaire</h2>
 	
 	<p>
 	Cette fonctionnalité était demandée par plusieurs utilisateurs de Wanewsletter.<br />
@@ -475,13 +476,27 @@
 	</p>
 	</div>
 	</div>
+	
+	<div class="bloc">
+	<h2 id="p17">Utiliser Wanewsletter avec SQLite</h2>
+	
+	<p>Wanewsletter peut fonctionner avec les bases de données SQLite à partir de sa version 2.3.0.</p>
+	
+	<p>Vous devez vous assurer avant de débuter l’installation que le répertoire <samp>sql/</samp> de 
+	Wanewsletter lui est accessible en lecture <strong>et</strong> écriture. En effet, c’est dans ce 
+	répertoire que sera créé par défaut la base de données sqlite de Wanewsletter.</p>
+	
+	<p>Libre à vous de choisir par la suite un emplacement plus adapté (en dehors du <code>DocumentRoot</code> 
+	du site, si possible), il vous suffira de déplacer le fichier <samp>wanewsletter.db</samp> où vous souhaiter 
+	et d’indiquer son nouvel emplacement dans le fichier <samp>includes/config.inc.php</samp>.</p>
+	</div>
 </div>
 
 <hr />
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
-phpCodeur</a> © 2002-2005 | WAnewsletter 2.2.7<br />
+phpCodeur</a> © 2002–2005 | WAnewsletter 2.3.0<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
 </address>

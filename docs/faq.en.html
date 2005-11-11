@@ -3,11 +3,11 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	
-	<title>FAQ - WAnewsletter</title>
+	<title>FAQ – WAnewsletter</title>
 	
 	<meta name="Author" content="Bobe" />
 	<meta name="Editor" content="jEdit" />
-	<meta name="Copyright" content="phpCodeur (c) 2002-2005" />
+	<meta name="Copyright" content="phpCodeur (c) 2002–2005" />
 	
 	<link rel="contents" href="#top" title="Table of contents" />
 	<link rel="chapter" href="#p1" title="How to display the number of subscribers on my site&#8201;?" />
@@ -26,13 +26,13 @@
 	<link rel="chapter" href="#p14" title="Send newsletters with cron" />
 	<link rel="chapter" href="#p15" title="Use of personnalised tags" />
 	<link rel="chapter" href="#p16" title="Define a language according to the form" />
-	<link rel="copyright" href="http://www.gnu.org/copyleft/gpl.html" hreflang="en" title="Copyleft" />
+	<link rel="chapter" href="#p17" title="Utiliser Wanewsletter avec SQLite" />
 	
 	<link rel="stylesheet" type="text/css" href="./wadoc.css" media="screen" title="Thème Wadoc" />
 </head>
 <body>
 
-<h1>FAQ - WAnewsletter</h1>
+<h1>FAQ – WAnewsletter</h1>
 
 <div id="page">
 
@@ -42,27 +42,28 @@
 	<h2>Sommaire</h2>
 	
 	<ol>
-		<li> <a href="#p1">How to display the number of subscribers on my site&#8201;?</a> </li>
-		<li> <a href="#p2">WAnewsletter, a multilingual script&#8201;?</a> </li>
-		<li> <a href="#p3">How to be informed of a new version release&#8201;?</a></li>
-		<li> <a href="#p4">How to import emails&#8201;?</a> </li>
-		<li> <a href="#p5">How to have multiple users manage the script&#8201;?</a> </li>
-		<li> <a href="#p6">Where is the subscription form located&#8201;?</a> </li>
-		<li> <a href="#p7">Why are there two send engines&#8201;?</a> </li>
-		<li> <a href="#p8">Script's temporary folder, safe mode and open_basedir</a> </li>
-		<li> <a href="#p9">Cannot attach files to my newsletters&#8201;!</a> </li>
-		<li> <a href="#p10">Using a smtp server to send emails</a> </li>
-		<li> <a href="#p11">Calling the subscription form via a popup window</a> </li>
-		<li> <a href="#p12">Methods for addresses email validation</a> </li>
-		<li> <a href="#p13">Statistics directory name change</a> </li>
-		<li> <a href="#p14">Send newsletters with cron</a> </li>
-		<li> <a href="#p15">Use personnalised tags</a> </li>
-		<li> <a href="#p16">Define a language according to the form</a> </li>
+		<li><a href="#p1">How to display the number of subscribers on my site&#8201;?</a></li>
+		<li><a href="#p2">WAnewsletter, a multilingual script&#8201;?</a></li>
+		<li><a href="#p3">How to be informed of a new version release&#8201;?</a></li>
+		<li><a href="#p4">How to import emails&#8201;?</a></li>
+		<li><a href="#p5">How to have multiple users manage the script&#8201;?</a></li>
+		<li><a href="#p6">Where is the subscription form located&#8201;?</a></li>
+		<li><a href="#p7">Why are there two send engines&#8201;?</a></li>
+		<li><a href="#p8">Script's temporary folder, safe mode and open_basedir</a></li>
+		<li><a href="#p9">Cannot attach files to my newsletters&#8201;!</a></li>
+		<li><a href="#p10">Using a smtp server to send emails</a></li>
+		<li><a href="#p11">Calling the subscription form via a popup window</a></li>
+		<li><a href="#p12">Methods for addresses email validation</a></li>
+		<li><a href="#p13">Statistics directory name change</a></li>
+		<li><a href="#p14">Send newsletters with cron</a></li>
+		<li><a href="#p15">Use personnalised tags</a></li>
+		<li><a href="#p16">Define a language according to the form</a></li>
+		<li><a href="#p17">Utiliser Wanewsletter avec SQLite</a></li>
 	</ol>
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p1">I. How to display the number of subscribers on my site&#8201;?</h2>
+	<h2 id="p1">How to display the number of subscribers on my site&#8201;?</h2>
 	
 	<p>To do this, simply insert the following code where you want to display the 
 	number of subscribers (be carefull to put the right link to the <samp>extra.php</samp> 
@@ -75,7 +76,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p2">II. WAnewsletter, a multilingual script&#8201;?</h2>
+	<h2 id="p2">WAnewsletter, a multilingual script&#8201;?</h2>
 	
 	<p>Since our goal is to make WAnewsletter available to the largest audience,
 	the script manages different languages. If you are fluent in a language in 
@@ -87,7 +88,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p3">III. How to be informed of a new version release&#8201;?</h2>
+	<h2 id="p3">How to be informed of a new version release&#8201;?</h2>
 	
 	<p>To be informed of a new version release, or newly found security failures 
 	(possible&#8201;? :) ), visit the phpCodeur site every now and then, or 
@@ -96,7 +97,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p4">IV. How to import emails&#8201;?</h2>
+	<h2 id="p4">How to import emails&#8201;?</h2>
 	
 	<p>An import utility is available  under the "Tools" header of the administration menu. 
 	This utility will allow you, if you have proper rights, to import subscribers' 
@@ -117,7 +118,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p5">V. How to have multiple users manage the script&#8201;?</h2>
+	<h2 id="p5">How to have multiple users manage the script&#8201;?</h2>
 	
 	<p>WAnewsletter can be managed by multiple users. You can change the users' 
 	permissions through each user's profile.</p>
@@ -131,7 +132,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p6">VI. But where is the subscription form&#8201;?</h2>
+	<h2 id="p6">But where is the subscription form&#8201;?</h2>
 	
 	<p>There already is a default subscription form, the <samp>subscribe.php</samp> 
 	file (users of versions 2.0.x or 2.1.x, please note that the name of that file 
@@ -186,7 +187,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p7">VII. Why are there two send engines&#8201;?</h2>
+	<h2 id="p7">Why are there two send engines&#8201;?</h2>
 	
 	<p>In order to be  accessible to the largest number of users, WAnewsletter
 	has two send engines. Some hosting services limit the number of emails sent 
@@ -211,7 +212,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p8">VIII. Script's temporary folder, safe mode and open_basedir</h2>
+	<h2 id="p8">Script's temporary folder, safe mode and open_basedir</h2>
 	
 	<p>The script's temporary folder, tmp/ by default, can be used by the script
 	in some specific cases&#160;:</p>
@@ -241,7 +242,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p9">IX. Cannot attach files to my newsletters&#8201;!</h2>
+	<h2 id="p9">Cannot attach files to my newsletters&#8201;!</h2>
 	
 	<p>If file upload is authorized by your host, it might be caused by the script
 	not having writing permissions on the attached files storage folder, or
@@ -257,7 +258,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p10">X. Using a smtp server to send emails</h2>
+	<h2 id="p10">Using a smtp server to send emails</h2>
 	
 	<p>Unfortunately, using WAnewsletter's <abbr title="Simple Mail Transfert Protocol">SMTP</abbr> 
 	option does not permit to send emails to recipients other than those whose 
@@ -281,7 +282,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p11">XI. Calling the subscription form via a popup window</h2>
+	<h2 id="p11">Calling the subscription form via a popup window</h2>
 	
 	<p>Integrating the subscription form to your site by calling it with a popup
 	window is very simple. Here is the code&#160;:</p>
@@ -299,7 +300,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p12">XII. Methods for email addresses  validation</h2>
+	<h2 id="p12">Methods for email addresses  validation</h2>
 	
 	<p style="color: red;">This feature is unavailable in the version 2.2.5 and 
 	next minor releases.</p>
@@ -336,7 +337,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p13">XIII. Statistics directory name change</h2>
+	<h2 id="p13">Statistics directory name change</h2>
 	
 	<p>
 	Changing the  tstats/ directory name is easy. Edit the functions.stats.php
@@ -351,7 +352,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p14">XIV. Send newsletters with cron</h2>
+	<h2 id="p14">Send newsletters with cron</h2>
 	
 	<p>
 	The script allows you to send your newsletters with cron.<br />
@@ -373,7 +374,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p15">XV. Use personnalised tags</h2>
+	<h2 id="p15">Use personnalised tags</h2>
 	
 	<p>
 	Pour utiliser les tags personnalisés (à l'instar de {LINKS} ou {NAME}), éditez le fichier tags.inc.php avec 
@@ -459,7 +460,7 @@
 	</div>
 	
 	<div class="bloc">
-	<h2 id="p16">XVI. Define a language according to the form</h2>
+	<h2 id="p16">Define a language according to the form</h2>
 	
 	<p>
 	This feature was asked by several users of Wanewsletter. <br />
@@ -478,13 +479,27 @@
 	  <li> This code <strong>must</strong> be added before the inclusion of file newsletter.php (before <code>include()</code> ) </li>
 	</ul>
 	</div>
+	
+	<div class="bloc">
+	<h2 id="p17">Utiliser Wanewsletter avec SQLite</h2>
+	
+	<p>Wanewsletter peut fonctionner avec les bases de données SQLite à partir de sa version 2.3.0.</p>
+	
+	<p>Vous devez vous assurer avant de débuter l’installation que le répertoire <samp>sql/</samp> de 
+	Wanewsletter lui est accessible en lecture <strong>et</strong> écriture. En effet, c’est dans ce 
+	répertoire que sera créé par défaut la base de données sqlite de Wanewsletter.</p>
+	
+	<p>Libre à vous de choisir par la suite un emplacement plus adapté (en dehors du <code>DocumentRoot</code> 
+	du site, si possible), il vous suffira de déplacer le fichier <samp>wanewsletter.db</samp> où vous souhaiter 
+	et d’indiquer son nouvel emplacement dans le fichier <samp>includes/config.inc.php</samp>.</p>
+	</div>
 </div>
 
 <hr />
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
-phpCodeur</a> © 2002-2005 | WAnewsletter 2.2.7<br />
+phpCodeur</a> © 2002–2005 | WAnewsletter 2.3.0<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
 </address>
