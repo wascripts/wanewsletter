@@ -160,7 +160,6 @@ $lang['Message']['Success_operation']       = "L'opération a été effectuée avec 
 $lang['Message']['SQLite_backup']           = "Pour faire une sauvegarde de votre base de données SQLite, il vous suffit de récupérer via FTP le fichier <samp>%s</samp>";
 $lang['Message']['SQLite_restore']          = "Pour restaurer votre base de données SQLite, il vous suffit simplement de replacer le fichier de données à l'emplacement suivant: <samp>%s</samp>";
 
-
 $lang['Message']['Profile_updated']         = "Le profil a été mis à jour avec succés";
 $lang['Message']['Admin_added']             = "L'utilisateur a été ajouté avec succés, il va recevoir par email ses identifiants de connexion";
 $lang['Message']['Admin_deleted']           = "L'utilisateur a été supprimé avec succés";
@@ -173,6 +172,7 @@ $lang['Message']['log_deleted']             = "La newsletter a été supprimée ave
 $lang['Message']['log_saved']               = "La newsletter a été sauvegardée avec succés";
 $lang['Message']['log_ready']               = "La newsletter a été sauvegardée avec succés et est prète à être envoyée";
 $lang['Message']['abo_deleted']             = "Les abonnés ont été supprimés avec succés";
+$lang['Message']['Send_canceled']           = "Opération effectuée. Tous les envois restants pour cette newsletter ont été annulés";
 
 $lang['Message']['Not_authorized']          = "Vous n'avez pas les permissions suffisantes pour accéder à cette page ou exécuter cette action";
 $lang['Message']['Not_auth_view']           = "Vous n'êtes pas autorisé à visualiser cette liste de diffusion";
@@ -572,8 +572,11 @@ $lang['Select_log_to_load']         = "Choisissez la newsletter à charger";
 $lang['Select_log_to_send']         = "Choisissez la newsletter dont vous voulez reprendre l'envoi";
 $lang['Load_by_URL']                = "Chargez une newsletter depuis une URL";
 $lang['From_an_URL']                = "depuis une URL";
-$lang['Resend_log']                 = "Reprendre un envoi";
+$lang['Create_log']                 = "Créer une newsletter";
 $lang['Load_log']                   = "Charger une newsletter";
+$lang['List_send']                  = "Liste des envois en cours";
+$lang['Restart_send']               = "Reprendre cet envoi";
+$lang['Cancel_send']                = "Annuler cet envoi";
 $lang['Handle']                     = "Modèle";
 $lang['Dest']                       = "Destinataire";
 $lang['Log_in_text']                = "Newsletter au format texte";
@@ -585,9 +588,11 @@ $lang['Body_empty']                 = "Vous devez remplir le(s) champs texte";
 $lang['No_links_in_body']           = "Vous devez placer le lien de désinscription";
 $lang['Cid_error_in_body']          = "Certains fichiers ciblés dans votre newsletter <abbr>HTML</abbr> avec le scheme <samp>cid:</samp> sont manquants (%s)";
 $lang['Status']                     = "Statut";
+$lang['Done']                       = "Effectué";
 $lang['Status_writing']             = "Newsletter normale";
 $lang['Status_handle']              = "Modèle réutilisable";
 $lang['File_on_server']             = "fichier existant";
+$lang['Cancel_send_log']            = "'Êtes-vous sùr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
 
 
 //

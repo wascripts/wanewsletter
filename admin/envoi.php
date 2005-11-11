@@ -55,7 +55,7 @@ if( isset($_POST['cancel']) )
 	Location('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 }
 
-$vararray = array('send', 'resend', 'save', 'delete'); 
+$vararray = array('send', 'progress', 'save', 'delete');
 foreach( $vararray AS $varname )
 {
 	$mode = ( isset($_REQUEST[$varname]) ) ? $varname : $mode;
@@ -93,20 +93,203 @@ switch( $mode )
 		$attach->download_file($file_id);
 		break;
 	
+	case 'cancel':
+		if( $logdata['log_id'] == 0 )
+		{
+			Location('envoi.php');
+		}
+		
+		if( isset($_POST['confirm']) )
+		{
+			$db->transaction(START_TRC);
+			
+			$sql = "SELECT liste_id, log_status
+				FROM " . LOG_TABLE . "
+				WHERE log_id = " . $logdata['log_id'];
+			if( !($result = $db->query($sql)) )
+			{
+				trigger_error('Impossible d\'obtenir la liste d\'appartenance du log', ERROR);
+			}
+			
+			$liste_id   = $db->result($result, 0, 'liste_id');
+			$log_status = $db->result($result, 0, 'log_status');
+			
+			if( $log_status != STATUS_STANDBY )
+			{
+				Location('envoi.php');
+			}
+			
+			$sql = "SELECT COUNT(send) AS sended
+				FROM " . ABO_LISTE_TABLE . "
+				WHERE liste_id = $liste_id AND send = 1";
+			if( !($result = $db->query($sql)) )
+			{
+				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
+			}
+			
+			$sended = $db->result($result, 0, 'sended');
+			
+			$sql = "UPDATE " . LOG_TABLE . "
+				SET log_status  = " . STATUS_SENDED . ",
+					log_numdest = $sended
+				WHERE log_id = " . $logdata['log_id'];
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
+			}
+			
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
+				SET send = 0
+				WHERE liste_id = " . $liste_id;
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+			}
+			
+			$sql = "UPDATE " . LISTE_TABLE . " 
+				SET liste_numlogs = liste_numlogs + 1 
+				WHERE liste_id = " . $liste_id;
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table des listes', ERROR);
+			}
+			
+			$db->transaction(END_TRC);
+			
+			trigger_error('Send_canceled', MESSAGE);
+		}
+		else
+		{
+			$output->addHiddenField('id', $logdata['log_id']);
+			$output->addHiddenField('sessid', $session->session_id);
+			
+			$output->page_header();
+			
+			$output->set_filenames(array(
+				'body' => 'confirm_body.tpl'
+			));
+			
+			$output->assign_vars(array(
+				'L_CONFIRM' => $lang['Title']['confirm'],
+				
+				'TEXTE' => $lang['Cancel_send_log'],
+				'L_YES' => $lang['Yes'],
+				'L_NO'  => $lang['No'],
+				
+				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
+				'U_FORM' => sessid('./envoi.php?mode=cancel')
+			));
+			
+			$output->pparse('body');
+			
+			$output->page_footer();
+		}
+		break;
+	
+	case 'progress':
+		$liste_ids = $auth->check_auth(AUTH_SEND);
+		
+		if( $logdata['log_id'] )
+		{
+			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
+				FROM " . LOG_TABLE . "
+				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
+					AND log_id = $logdata[log_id]
+					AND log_status = " . STATUS_STANDBY;
+			if( !($result = $db->query($sql)) )
+			{
+				trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
+			}
+			
+			if( $row = $db->fetch_array($result) )
+			{
+				$logdata = $row;
+			}
+			else
+			{
+				$output->redirect('envoi.php?mode=progress', 4);
+				
+				$message  = $lang['Message']['No_log_found'];
+				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=progress') . '">', '</a>');
+				trigger_error($message, MESSAGE);
+			}
+		}
+		else
+		{
+			$sql = "SELECT COUNT(send) AS num, send, liste_id
+				FROM " . ABO_LISTE_TABLE . "
+				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
+				GROUP BY liste_id, send";
+			if( !($result = $db->query($sql)) )
+			{
+				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
+			}
+			
+			$data = array();
+			while( $row = $db->fetch_array($result) )
+			{
+				if( !isset($data[$row['liste_id']]) )
+				{
+					$data[$row['liste_id']] = array(0, 0, 't' => 0);
+				}
+				$data[$row['liste_id']][$row['send']] = $row['num'];
+				$data[$row['liste_id']]['t'] += $row['num'];
+			}
+			
+			$sql = "SELECT log_id, log_subject, log_status, liste_id
+				FROM " . LOG_TABLE . "
+				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
+					AND log_status <> " . STATUS_STANDBY . "
+				ORDER BY log_subject ASC";
+			if( !($result = $db->query($sql)) )
+			{
+				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
+			}
+			
+			if( $db->num_rows($result) == 0 )
+			{
+				$output->redirect('envoi.php', 4);
+				
+				$message  = $lang['Message']['No_log_to_send'];
+				$message .= '<br /><br />' . sprintf($lang['Click_return_form'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
+				trigger_error($message, MESSAGE);
+			}
+			
+			$output->page_header();
+			
+			$output->set_filenames(array(
+				'body' => 'send_progress_body.tpl'
+			));
+			
+			$output->assign_vars(array(
+				'L_TITLE'       => $lang['List_send'],
+				'L_SUBJECT'     => $lang['Log_subject'],
+				'L_DONE'        => $lang['Done'],
+				'L_DO_SEND'     => $lang['Restart_send'],
+				'L_CANCEL_SEND' => $lang['Cancel_send'],
+				'L_CREATE_LOG'  => $lang['Create_log'],
+				'L_LOAD_LOG'    => $lang['Load_log']
+			));
+			
+			while( $row = $db->fetch_array($result) )
+			{
+				$output->assign_block_vars('logrow', array(
+					'LOG_ID'       => $row['log_id'],
+					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40)),
+					'SEND_PERCENT' => wa_number_format(round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2))
+				));
+			}
+			
+			$output->pparse('body');
+			
+			$output->page_footer();
+		}
+		break;
+	
 	//
 	// Chargement d'un log dont on veut reprendre l'écriture ou l'envoi
 	//
 	case 'load':
-	case 'resend':
-		if( $mode == 'resend' )
-		{
-			$sql_where = ' AND log_status = ' . STATUS_STANDBY;
-		}
-		else
-		{
-			$sql_where = ' AND ( log_status = ' . STATUS_WRITING . ' OR log_status = ' . STATUS_HANDLE . ' )';
-		}
-		
 		if( isset($_POST['submit']) || $logdata['log_id'] )
 		{
 			if( !empty($_POST['body_text_url']) || !empty($_POST['body_html_url']) )
@@ -118,7 +301,7 @@ switch( $mode )
 					if( $result == false )
 					{
 						$message  = $errstr;
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=' . $mode) . '">', '</a>');
+						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
 						trigger_error($message, MESSAGE);
 					}
 					
@@ -132,7 +315,7 @@ switch( $mode )
 					if( $result == false )
 					{
 						$message  = $errstr;
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=' . $mode) . '">', '</a>');
+						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
 						trigger_error($message, MESSAGE);
 					}
 					
@@ -144,7 +327,8 @@ switch( $mode )
 				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status 
 					FROM " . LOG_TABLE . " 
 					WHERE liste_id = $listdata[liste_id]
-						AND log_id = " . $logdata['log_id'] . $sql_where;
+						AND log_id = $logdata[log_id]
+						AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_HANDLE . ")";
 				if( !($result = $db->query($sql)) )
 				{
 					trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
@@ -156,10 +340,10 @@ switch( $mode )
 				}
 				else
 				{
-					$output->redirect('envoi.php?mode=' . $mode, 4);
+					$output->redirect('envoi.php?mode=load', 4);
 					
 					$message  = $lang['Message']['log_not_exists'];
-					$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=' . $mode) . '">', '</a>');
+					$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
 					trigger_error($message, MESSAGE);
 				}
 			}
@@ -168,7 +352,8 @@ switch( $mode )
 		{
 			$sql = "SELECT log_id, log_subject, log_status 
 				FROM " . LOG_TABLE . " 
-				WHERE liste_id = " . $listdata['liste_id'] . $sql_where . " 
+				WHERE liste_id = $listdata[liste_id]
+					AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_HANDLE . ")
 				ORDER BY log_subject ASC";
 			if( !($result = $db->query($sql)) )
 			{
@@ -205,12 +390,12 @@ switch( $mode )
 			{
 				$output->redirect('envoi.php', 4);
 				
-				$message  = ( $mode == 'load' ) ? $lang['Message']['No_log_to_load'] : $lang['Message']['No_log_to_send'];
+				$message  = $lang['Message']['No_log_to_load'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_form'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
 				trigger_error($message, MESSAGE);
 			}
 			
-			$output->addHiddenField('mode',   $mode);
+			$output->addHiddenField('mode',   'load');
 			$output->addHiddenField('sessid', $session->session_id);
 			
 			$output->page_header();
@@ -221,7 +406,7 @@ switch( $mode )
 			
 			$output->assign_vars(array(
 				'L_TITLE'         => $lang['Title']['select'],
-				'L_SELECT_LOG'    => ( $mode == 'load' ) ? $lang['Select_log_to_load'] : $lang['Select_log_to_send'],
+				'L_SELECT_LOG'    => $lang['Select_log_to_load'],
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
 				
 				'LOG_BOX'         => $log_box,
@@ -229,34 +414,31 @@ switch( $mode )
 				'U_FORM'          => sessid('./envoi.php')
 			));
 			
-			if( $mode == 'load' )
+			switch( $listdata['liste_format'] )
 			{
-				switch( $listdata['liste_format'] )
-				{
-					case FORMAT_TEXTE:
-						$bloc_name = 'load_text_by_url';
-						break;
-					case FORMAT_HTML:
-						$bloc_name = 'load_html_by_url';
-						break;
-					default:
-						$bloc_name = 'load_multi_by_url';
-						break;
-				}
-				
-				$output->assign_block_vars($bloc_name, array(
-					'L_LOAD_BY_URL' => $lang['Load_by_URL'],
-					'L_FORMAT_TEXT' => $lang['Log_in_text'],
-					'L_FORMAT_HTML' => $lang['Log_in_html'],
-					
-					'BODY_TEXT_URL' => ( !empty($_POST['body_text_url']) ) ? htmlspecialchars(trim($_POST['body_text_url'])) : '',
-					'BODY_HTML_URL' => ( !empty($_POST['body_html_url']) ) ? htmlspecialchars(trim($_POST['body_html_url'])) : ''
-				));
-				
-				$output->assign_block_vars('script_load_by_url', array(
-					'L_FROM_AN_URL' => str_replace('\'', '\\\'', $lang['From_an_URL'])
-				));
+				case FORMAT_TEXTE:
+					$bloc_name = 'load_text_by_url';
+					break;
+				case FORMAT_HTML:
+					$bloc_name = 'load_html_by_url';
+					break;
+				default:
+					$bloc_name = 'load_multi_by_url';
+					break;
 			}
+			
+			$output->assign_block_vars($bloc_name, array(
+				'L_LOAD_BY_URL' => $lang['Load_by_URL'],
+				'L_FORMAT_TEXT' => $lang['Log_in_text'],
+				'L_FORMAT_HTML' => $lang['Log_in_html'],
+				
+				'BODY_TEXT_URL' => ( !empty($_POST['body_text_url']) ) ? htmlspecialchars(trim($_POST['body_text_url'])) : '',
+				'BODY_HTML_URL' => ( !empty($_POST['body_html_url']) ) ? htmlspecialchars(trim($_POST['body_html_url'])) : ''
+			));
+			
+			$output->assign_block_vars('script_load_by_url', array(
+				'L_FROM_AN_URL' => str_replace('\'', '\\\'', $lang['From_an_URL'])
+			));
 			
 			$output->pparse('body');
 			
@@ -548,7 +730,7 @@ switch( $mode )
 					else
 					{
 						$message  = $lang['Message']['log_ready'];
-						$message .= '<br /><br />' . sprintf($lang['Click_start_send'], '<a href="' . sessid('./envoi.php?mode=resend&amp;id=' . $logdata['log_id']) . '">', '</a>');
+						$message .= '<br /><br />' . sprintf($lang['Click_start_send'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id']) . '">', '</a>');
 					}
 					
 					trigger_error($message, MESSAGE);
@@ -694,7 +876,7 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 //
 // Envois des emails
 //
-if( $mode == 'resend' )
+if( $mode == 'progress' )
 {
 	if( !$auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
 	{
@@ -762,7 +944,7 @@ if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
 }
 
 $output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
-$output->addLink('section', './envoi.php?mode=resend', $lang['Resend_log']);
+$output->addLink('section', './envoi.php?mode=progress', $lang['List_send']);
 $output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);
@@ -778,7 +960,7 @@ $output->set_filenames(array(
 $output->assign_vars(array(
 	'L_EXPLAIN'               => nl2br($lang['Explain']['send']),	
 	'L_LOAD_LOG'              => $lang['Load_log'],
-	'L_RESEND_LOG'            => $lang['Resend_log'],
+	'L_LIST_SEND'             => $lang['List_send'],
 	'L_DEST'                  => $lang['Dest'],
 	'L_SUBJECT'               => $lang['Log_subject'],
 	'L_STATUS'                => $lang['Status'],

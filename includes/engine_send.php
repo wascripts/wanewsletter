@@ -410,11 +410,11 @@ function launch_sending($listdata, $logdata)
 		{
 			if( !empty($_GET['step']) && $_GET['step'] == 'auto' )
 			{
-				Location("envoi.php?resend=true&id=$logdata[log_id]&step=auto");
+				Location("envoi.php?progress=true&id=$logdata[log_id]&step=auto");
 			}
 			
-			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], '<a href="' . sessid('./envoi.php?resend=true&amp;id=' . $logdata['log_id'] . '&amp;step=auto') . '">', '</a>');
-			$message .= '<br /><br />' .  sprintf($lang['Click_resend_manuel'], '<a href="' . sessid('./envoi.php?resend=true&amp;id=' . $logdata['log_id']) . '">', '</a>');
+			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], '<a href="' . sessid('./envoi.php?progress=true&amp;id=' . $logdata['log_id'] . '&amp;step=auto') . '">', '</a>');
+			$message .= '<br /><br />' .  sprintf($lang['Click_resend_manuel'], '<a href="' . sessid('./envoi.php?progress=true&amp;id=' . $logdata['log_id']) . '">', '</a>');
 		}
 	}
 	else

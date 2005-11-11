@@ -11,7 +11,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 <form id="send-form" method="post" action="./envoi.php" enctype="{S_ENCTYPE}">
 <ul class="links">
 	<li><a href="./envoi.php?mode=load">{L_LOAD_LOG}</a></li>
-	<li><a href="./envoi.php?mode=resend">{L_RESEND_LOG}</a></li>
+	<li><a href="./envoi.php?mode=progress">{L_LIST_SEND}</a></li>
 </ul>
 
 <div class="bloc">
