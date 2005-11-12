@@ -10,6 +10,15 @@
 			<td class="row2"><input type="text" id="liste_name" name="liste_name" value="{LISTE_NAME}" size="40" maxlength="100" class="text" /></td>
 		</tr>
 		<tr>
+			<td class="row1"><label for="liste_format">{L_LISTE_PUBLIC}&#160;:</label></td>
+			<td class="row2">
+				<input type="radio" id="liste_public_yes" name="liste_public" value="1"{CHECK_PUBLIC_YES} />
+				<label for="liste_public_yes" class="m-texte">{L_YES}</label>
+				<input type="radio" id="liste_public_no" name="liste_public" value="0"{CHECK_PUBLIC_NO} />
+				<label for="liste_public_no" class="m-texte">{L_NO}</label>
+			</td>					   
+		</tr>
+		<tr>
 			<td class="row1"><label for="liste_format">{L_AUTH_FORMAT}&#160;:</label></td>
 			<td class="row2">{FORMAT_BOX}</td>					   
 		</tr>
@@ -28,19 +37,12 @@
 		<tr>
 			<td class="row1"><label>{L_CONFIRM_SUBSCRIBE}&#160;:</label></td>
 			<td class="row2">
-				<input type="radio" id="confirm_subscribe_yes" name="confirm_subscribe" value="1"{CHECK_CONFIRM_YES} />
-				<label for="confirm_subscribe_yes" class="m-texte">{L_YES}</label>
-				<input type="radio" id="confirm_subscribe_no" name="confirm_subscribe" value="0"{CHECK_CONFIRM_NO} />
-				<label for="confirm_subscribe_no" class="m-texte">{L_NO}</label>
-			</td>
-		</tr>
-		<tr>
-			<td class="row1"><label>{L_RECONFIRM_SUBSCRIBE}&#160;:</label></td>
-			<td class="row2">
-				<input type="radio" id="reconfirm_subscribe_yes" name="reconfirm_subscribe" value="1"{CHECK_RECONFIRM_YES} />
-				<label for="reconfirm_subscribe_yes" class="m-texte">{L_YES}</label>
-				<input type="radio" id="reconfirm_subscribe_no" name="reconfirm_subscribe" value="0"{CHECK_RECONFIRM_NO} />
-				<label for="reconfirm_subscribe_no" class="m-texte">{L_NO}</label>
+				<input type="radio" id="confirm_everytime" name="confirm_subscribe" value="2"{CHECK_CONFIRM_EVERYTIME} />
+				<label for="confirm_everytime" class="m-texte">{L_CONFIRM_EVERYTIME}</label>
+				<input type="radio" id="confirm_once" name="confirm_subscribe" value="1"{CHECK_CONFIRM_ONCE} />
+				<label for="confirm_once" class="m-texte">{L_CONFIRM_ONCE}</label>
+				<input type="radio" id="confirm_no" name="confirm_subscribe" value="0"{CHECK_CONFIRM_NO} />
+				<label for="confirm_no" class="m-texte">{L_NO}</label>
 			</td>
 		</tr>
 		<tr>

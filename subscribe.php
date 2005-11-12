@@ -33,7 +33,8 @@ require WA_ROOTDIR . '/newsletter.php';
 $list_box = '';
 
 $sql = 'SELECT liste_id, liste_name, liste_format 
-	FROM ' . LISTE_TABLE;
+	FROM ' . LISTE_TABLE . '
+	WHERE liste_public = 1';
 if( !($result = $db->query($sql)) )
 {
 	trigger_error('Impossible d\'obtenir la liste des listes de diffusion', ERROR);

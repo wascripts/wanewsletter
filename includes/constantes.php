@@ -118,6 +118,10 @@ define('MAX_IMPORT', 2500);
 define('ENGINE_BCC',  1);
 define('ENGINE_UNIQ', 2);
 
+define('CONFIRM_EVERYTIME', 2);
+define('CONFIRM_ONCE',      1);
+define('CONFIRM_NONE',      0);
+
 //
 // Codes d'erreur lors de l'upload 
 //

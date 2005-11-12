@@ -28,6 +28,10 @@
 			<td class="row2"><span class="texte">{LISTE_NAME}</span></td>
 		</tr>
 		<tr>
+			<td class="row1"><span class="texte">{L_LISTE_PUBLIC}&#160;:</span></td>
+			<td class="row2"><span class="texte">{LISTE_PUBLIC}</span></td>
+		</tr>
+		<tr>
 			<td class="row1"><span class="texte">{L_AUTH_FORMAT}&#160;:</span></td>
 			<td class="row2"><span class="texte">{AUTH_FORMAT}</span></td>
 		</tr>
@@ -42,10 +46,6 @@
 		<tr>
 			<td class="row1"><span class="texte">{L_CONFIRM_SUBSCRIBE}&#160;:</span></td>
 			<td class="row2"><span class="texte">{CONFIRM_SUBSCRIBE}</span></td>
-		</tr>
-		<tr>
-			<td class="row1"><span class="texte">{L_RECONFIRM_SUBSCRIBE}&#160;:</span></td>
-			<td class="row2"><span class="texte">{RECONFIRM_SUBSCRIBE}</span></td>
 		</tr>
 		<!-- BEGIN liste_confirm -->
 		<tr>

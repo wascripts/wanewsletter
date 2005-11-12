@@ -849,14 +849,17 @@ else if( $mode == 'liste' )
 		}
 		
 		$default_values = array(
-			'liste_format'   => FORMAT_TEXTE,
-			'limitevalidate' => 3,
-			'purge_freq'     => 7,
-			'pop_port'       => 110
+			'liste_format'      => FORMAT_TEXTE,
+			'limitevalidate'    => 3,
+			'auto_purge'        => true,
+			'purge_freq'        => 7,
+			'pop_port'          => 110,
+			'liste_public'      => true,
+			'confirm_subscribe' => 2,
 		);
 		
 		$vararray2 = array(
-			'liste_format', 'confirm_subscribe', 'reconfirm_subscribe',
+			'liste_format', 'confirm_subscribe', 'liste_public',
 			'limitevalidate', 'auto_purge', 'purge_freq', 'use_cron', 'pop_port'
 		);
 		foreach( $vararray2 AS $varname )
@@ -1025,11 +1028,13 @@ else if( $mode == 'liste' )
 			'L_EXPLAIN_PURGE'      => nl2br($lang['Explain']['purge']),
 			'L_EXPLAIN_CRON'       => nl2br(sprintf($lang['Explain']['cron'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#6">', '</a>')),
 			'L_LISTE_NAME'         => $lang['Liste_name'],
+			'L_LISTE_PUBLIC'       => $lang['Liste_public'],
 			'L_AUTH_FORMAT'        => $lang['Auth_format'],
 			'L_SENDER_EMAIL'       => $lang['Sender_email'],
 			'L_RETURN_EMAIL'       => $lang['Return_email'],
 			'L_CONFIRM_SUBSCRIBE'  => $lang['Confirm_subscribe'],
-			'L_RECONFIRM_SUBSCRIBE' => $lang['Reconfirm_subscribe'],
+			'L_CONFIRM_EVERYTIME'  => $lang['Confirm_everytime'],
+			'L_CONFIRM_ONCE'       => $lang['Confirm_once'],
 			'L_LIMITEVALIDATE'     => $lang['Limite_validate'],
 			'L_NOTE_VALIDATE'      => nl2br($lang['Note_validate']),
 			'L_FORM_URL'           => $lang['Form_url'],
@@ -1059,10 +1064,11 @@ else if( $mode == 'liste' )
 			'SIG_EMAIL'            => htmlspecialchars($liste_sig),
 			'LIMITEVALIDATE'       => intval($limitevalidate),
 			'PURGE_FREQ'           => intval($purge_freq),
-			'CHECK_CONFIRM_YES'    => ( $confirm_subscribe ) ? ' checked="checked"' : '',
-			'CHECK_CONFIRM_NO'     => ( !$confirm_subscribe ) ? ' checked="checked"' : '',
-			'CHECK_RECONFIRM_YES'  => ( $reconfirm_subscribe ) ? ' checked="checked"' : '',
-			'CHECK_RECONFIRM_NO'   => ( !$reconfirm_subscribe ) ? ' checked="checked"' : '',
+			'CHECK_CONFIRM_EVERYTIME' => ( $confirm_subscribe == CONFIRM_EVERYTIME ) ? ' checked="checked"' : '',
+			'CHECK_CONFIRM_ONCE'   => ( $confirm_subscribe == CONFIRM_ONCE ) ? ' checked="checked"' : '',
+			'CHECK_CONFIRM_NO'     => ( $confirm_subscribe == CONFIRM_NONE ) ? ' checked="checked"' : '',
+			'CHECK_PUBLIC_YES'     => ( $liste_public ) ? ' checked="checked"' : '',
+			'CHECK_PUBLIC_NO'      => ( !$liste_public ) ? ' checked="checked"' : '',
 			'CHECKED_PURGE_ON'     => ( $auto_purge ) ? ' checked="checked"' : '',
 			'CHECKED_PURGE_OFF'    => ( !$auto_purge ) ? ' checked="checked"' : '',
 			'CHECKED_USE_CRON_ON'  => ( $use_cron ) ? ' checked="checked"' : '',
@@ -1436,16 +1442,30 @@ else if( $mode == 'liste' )
 		'body' => 'view_liste_body.tpl'
 	));
 	
+	switch( $listdata['confirm_subscribe'] )
+	{
+		case CONFIRM_EVERYTIME:
+			$l_confirm = $lang['Confirm_everytime'];
+			break;
+		case CONFIRM_ONCE:
+			$l_confirm = $lang['Confirm_once'];
+			break;
+		case CONFIRM_NONE:
+		default:
+			$l_confirm = $lang['No'];
+			break;
+	}
+	
 	$output->assign_vars( array(
 		'L_TITLE'             => $lang['Title']['info_liste'],
 		'L_EXPLAIN'           => nl2br($lang['Explain']['liste']),
 		'L_LISTE_ID'          => $lang['ID_list'],
 		'L_LISTE_NAME'        => $lang['Liste_name'],
+		'L_LISTE_PUBLIC'      => $lang['Liste_public'],
 		'L_AUTH_FORMAT'       => $lang['Auth_format'],
 		'L_SENDER_EMAIL'      => $lang['Sender_email'],
 		'L_RETURN_EMAIL'      => $lang['Return_email'],
 		'L_CONFIRM_SUBSCRIBE' => $lang['Confirm_subscribe'],
-		'L_RECONFIRM_SUBSCRIBE' => $lang['Reconfirm_subscribe'],
 		'L_NUM_SUBSCRIBERS'   => $lang['Reg_subscribers_list'],
 		'L_NUM_LOGS'          => $lang['Total_newsletter_list'],
 		'L_FORM_URL'          => $lang['Form_url'],
@@ -1453,11 +1473,11 @@ else if( $mode == 'liste' )
 		
 		'LISTE_ID'            => $listdata['liste_id'],
 		'LISTE_NAME'          => $listdata['liste_name'],
+		'LISTE_PUBLIC'        => ( $listdata['liste_public'] ) ? $lang['Yes'] : $lang['No'],
 		'AUTH_FORMAT'         => $l_format,
 		'SENDER_EMAIL'        => $listdata['sender_email'],
 		'RETURN_EMAIL'        => $listdata['return_email'],
-		'CONFIRM_SUBSCRIBE'   => ( $listdata['confirm_subscribe'] ) ? $lang['Yes'] : $lang['No'],
-		'RECONFIRM_SUBSCRIBE' => ( $listdata['reconfirm_subscribe'] ) ? $lang['Yes'] : $lang['No'],
+		'CONFIRM_SUBSCRIBE'   => $l_confirm,
 		'NUM_SUBSCRIBERS'     => $num_inscrits,
 		'NUM_LOGS'            => $num_logs,
 		'FORM_URL'            => htmlspecialchars($listdata['form_url']),

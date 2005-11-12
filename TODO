@@ -3,7 +3,6 @@
 ------------------
 
 - S’assurer du bon fonctionnement sur la future branche PHP 5.1.x
-- Revoir requètes de functions.validate.php (? bof, ça marche donc bon...)
 
 - revoir la partie newsletter.php/class.form.php pour permettre les inscriptions à plusieurs listes en même temps
   ainsi que fournir une API utilisable dans d'autres applis PHP (phpBB, SPIP, ...)
@@ -17,28 +16,35 @@
 - Terminer support des chargements de newsletters externes
   - Pour le chargement via une URL, trouver moyen pour spécifier les URLs une fois seulement (cas de SPIP), puis 
     seulement avoir à indiquer de charger via les URLs habituelles
-  - Prendre en compte les problèmes de charset (fait mais à peaufiner éventuellement)
 
 - Nouveaux formats possibles pour l'export d'emails ?
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
-- Annuler un envoi (fait mais à peaufiner)
+
 - Voir avec J.J Solari pour fct des javascript dans Safari
 - Vérifier que les schémas de tables sont valides pour chaque db
 - Réorganiser les scripts d’installation et mise à jour
   - suppression champs hébergeur (et version ?) de wa_config
-  - ajout champ reconfirm_subscribe à wa_liste (avec DEFAULT '1') et dans les schémas
+  - ajout champ public_liste à wa_liste (avec DEFAULT '1') et dans les schémas
 
 - vérifier bon fonctionnement de profil_cp.php, checker le code
-- compléter fichier CREDITS
 
 
 Modifications sur la doc
 ------------------------
 
 - Revoir la doc de manière générale
-- Ajouter une partie dans faq.fr.html pour SQLite ?
 - Modifier FAQ pour script extra.php qui accepte 'use-variable' en paramètre
+- compléter fichier CREDITS
+
+
+Fait mais à peaufiner
+------------------------
+
+- Annuler un envoi
+- Prendre en compte les problèmes de charset lors du chargement via une URL
+- Requètes de functions.validate.php (? bof, ça marche donc bon...)
+- Remettre log_status = " . STATUS_STANDBY . " dans envoi.php, ligne 242
 
 
 ------------------------
