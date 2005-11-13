@@ -1,28 +1,36 @@
 <?php
-/*******************************************************************
- *          
- *          Fichier         :   diff_lang.php 
- *          Créé le         :   23 juin 2003 
- *          Dernière modif  :   10 octobre 2003 
- *          Email           :   wascripts@phpcodeur.net 
+/**
+ * Copyright (c) 2002-2006 Aurélien Maille
  * 
- *              Copyright © 2002-2003 phpCodeur
+ * This file is part of Wanewsletter.
  * 
- *******************************************************************/
-
-/*******************************************************************
- *  This program is free software; you can redistribute it and/or 
- *  modify it under the terms of the GNU General Public License as 
- *  published by the Free Software Foundation; either version 2 of 
- *  the License, or (at your option) any later version. 
- *******************************************************************/
+ * Wanewsletter is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License 
+ * as published by the Free Software Foundation; either version 2 
+ * of the License, or (at your option) any later version.
+ * 
+ * Wanewsletter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Wanewsletter; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * 
+ * @package Wanewsletter
+ * @author  Bobe <wascripts@phpcodeur.net>
+ * @link    http://phpcodeur.net/wascripts/wanewsletter/
+ * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @version $Id$
+ */
 
 
 //
 // Ceci est un fichier de test ou d'aide lors du développement. 
 // Commentez la ligne suivante uniquement si vous êtes sùr de ce que vous faites !
 //
-exit('<b>Fichier de développement désactivé</b>');
+//exit('<b>Fichier de développement désactivé</b>');
 
 //
 // Affiche les entrées présentes dans le premier fichier de language 
@@ -33,7 +41,7 @@ define('WA_ROOTDIR', '..');
 $language_dir = WA_ROOTDIR . '/language';
 
 $Fichier_1 = 'lang_francais.php';
-$Fichier_2 = 'lang_deutsch.php';
+$Fichier_2 = '../../branche_2.2/language/lang_francais.php';
 
 function diff_lang($tab_1, $tab_2)
 {
@@ -54,6 +62,14 @@ function diff_lang($tab_1, $tab_2)
         {
             $new_tab[$varname] = htmlspecialchars(addcslashes($tab_1[$varname], "\x0A\x0D"));
         }
+		
+		//
+		// Temporaire, même langue mais branche différente only
+		//
+		else if( strcmp($varval, $tab_2[$varname]) !== 0 )
+		{
+			$new_tab[$varname] = htmlspecialchars(addcslashes($tab_1[$varname], "\x0A\x0D"));
+		}
     }
     
     return $new_tab;
