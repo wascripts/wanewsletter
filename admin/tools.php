@@ -55,10 +55,6 @@ function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 			$contents  = bzcompress($contents);
 			$filename .= '.bz2';
 			break;
-		
-		default:
-			$mime_type = 'text/plain';
-			break;
 	}
 	
 	return $contents;
@@ -130,6 +126,7 @@ function decompress_filedata($filename, $file_ext)
 
 $mode     = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
 $format   = ( !empty($_POST['format']) ) ? intval($_POST['format']) : FORMAT_TEXTE;
+$eformat  = ( !empty($_POST['eformat']) ) ? $_POST['eformat'] : '';
 $glue     = ( !empty($_POST['glue']) ) ? trim($_POST['glue']) : '';
 $action   = ( !empty($_POST['action']) ) ? $_POST['action'] : 'download';
 $compress = ( !empty($_POST['compress']) ) ? $_POST['compress'] : 'none';
@@ -295,16 +292,20 @@ switch( $mode )
 				trigger_error('tmp_dir_not_writable', MESSAGE);
 			}
 			
+			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
+			{
+				$format = $listdata['liste_format'];
+			}
+			
 			$glue = ( $glue != '' ) ? $glue : WA_EOL;
 			
 			$sql = "SELECT a.abo_email 
 				FROM " . ABONNES_TABLE . " AS a
 					INNER JOIN " . ABO_LISTE_TABLE . " AS al
 					ON al.abo_id = a.abo_id
-						AND al.liste_id = $listdata[liste_id]";
-			$sql .= ( $listdata['liste_format'] == FORMAT_MULTIPLE ) ? ' AND al.format = ' . $format : '';
-			$sql .= " WHERE a.abo_status = " . ABO_ACTIF;
-			
+						AND al.liste_id = $listdata[liste_id]
+						AND al.format   = $format
+				WHERE a.abo_status = " . ABO_ACTIF;
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible d\'obtenir la liste des emails à exporter', ERROR);
@@ -313,13 +314,35 @@ switch( $mode )
 			$contents = '';
 			while( $row = $db->fetch_array($result) )
 			{
-				$contents .= ( $contents != '' ) ? $glue : '';
-				$contents .= $row['abo_email'];
+				if( $eformat == 'xml' )
+				{
+					$contents .= "\t<email>".$row['abo_email']."</email>\n";
+				}
+				else
+				{
+					$contents .= ( $contents != '' ) ? $glue : '';
+					$contents .= $row['abo_email'];
+				}
 			}
 			$db->free_result($result);
 			
-			$filename  = 'wa_export_' . $admindata['session_liste'] . '.txt';
-			$mime_type = '';
+			if( $eformat == 'xml' )
+			{
+				$label_format = ( $format == FORMAT_HTML ) ? 'HTML' : 'text';
+				
+				$contents  = '<' . '?xml version="1.0"?' . ">\n"
+					. "<!-- Date : " . gmdate('d/m/Y H:i:s') . " GMT \xe2\x80\x93 Format : $label_format -->\n"
+					. "<liste>\n" . $contents . "</liste>";
+				$mime_type = 'application/xml';
+				$ext = 'xml';
+			}
+			else
+			{
+				$mime_type = 'text/plain';
+				$ext = 'txt';
+			}
+			
+			$filename = sprintf('wa_export_%d.%s', $admindata['session_liste'], $ext);
 			
 			//
 			// Préparation des données selon l'option demandée 
@@ -355,6 +378,8 @@ switch( $mode )
 		$output->assign_vars(array(
 			'L_TITLE_EXPORT'    => $lang['Title']['export'],
 			'L_EXPLAIN_EXPORT'  => nl2br($lang['Explain']['export']),
+			'L_EXPORT_FORMAT'   => $lang['Export_format'],
+			'L_PLAIN_TEXT'      => $lang['Plain_text'],
 			'L_GLUE'            => $lang['Char_glue'],
 			'L_ACTION'          => $lang['File_action'],
 			'L_DOWNLOAD'        => $lang['Download_action'],
@@ -934,7 +959,7 @@ switch( $mode )
 			}
 			
 			$filename  = 'wanewsletter_backup.sql';
-			$mime_type = '';
+			$mime_type = 'text/plain';
 			
 			//
 			// Préparation des données selon l'option demandée 

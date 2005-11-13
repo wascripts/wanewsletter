@@ -537,6 +537,8 @@ $lang['Explain']['code_html']       = "Placez ce code à l'adresse que vous avez/
 $lang['Explain']['code_php']        = "Vous devez placer ce code à l'adresse de destination du formulaire (adresse entrée précédemment), le fichier doit avoir l'extension php !\nLe script s'occupe de trouver le chemin canonique à placer dans la variable \$waroot, si toutefois il n'est pas bon, vous devrez le modifier vous même et indiquer le bon chemin (le chemin doit être relatif, pas absolus)";
 
 $lang['Select_tool']                = "Sélectionnez l'outil que vous voulez utiliser";
+$lang['Export_format']              = "Export au format";
+$lang['Plain_text']                 = "texte plat";
 $lang['Char_glue']                  = "Caractère de séparation";
 $lang['Compress']                   = "Compression";
 $lang['Format_to_export']           = "Exporter les abonnés qui ont le format";
