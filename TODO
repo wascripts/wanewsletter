@@ -25,16 +25,16 @@
 - Vérifier que les schémas de tables sont valides pour chaque db
 - Réorganiser les scripts d’installation et mise à jour
   - suppression champs hébergeur (et version ?) de wa_config
-  - ajout champ public_liste à wa_liste (avec DEFAULT '1') et dans les schémas
+  - ajout champ liste_public à wa_liste (avec DEFAULT '1') et dans les schémas
 
 - vérifier bon fonctionnement de profil_cp.php, checker le code
+- Améliorer la vérification syntaxique des emails
 
 
 Modifications sur la doc
 ------------------------
 
 - Revoir la doc de manière générale
-- Modifier FAQ pour script extra.php qui accepte 'use-variable' en paramètre
 - compléter fichier CREDITS
 
 
@@ -44,7 +44,6 @@ Fait mais à peaufiner
 - Annuler un envoi
 - Prendre en compte les problèmes de charset lors du chargement via une URL
 - Requètes de functions.validate.php (? bof, ça marche donc bon...)
-- Remettre log_status = " . STATUS_STANDBY . " dans envoi.php, ligne 242
 
 
 ------------------------

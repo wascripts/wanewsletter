@@ -239,7 +239,7 @@ switch( $mode )
 			$sql = "SELECT log_id, log_subject, log_status, liste_id
 				FROM " . LOG_TABLE . "
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
-					AND log_status <> " . STATUS_STANDBY . "
+					AND log_status = " . STATUS_STANDBY . "
 				ORDER BY log_subject ASC";
 			if( !($result = $db->query($sql)) )
 			{
@@ -320,6 +320,11 @@ switch( $mode )
 					}
 					
 					$logdata['log_body_html'] = convert_encoding($result['data'], $result['charset']);
+					
+					if( preg_match('/<\s*title\s*>(.+?)<\/title\s*>/is', $logdata['log_body_html'], $match) )
+					{
+						$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
+					}
 				}
 			}
 			else
