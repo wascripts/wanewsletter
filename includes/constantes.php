@@ -93,7 +93,7 @@ define('FORMAT_MULTIPLE', 3);
 define('STATUS_WRITING', 0);
 define('STATUS_STANDBY', 1);
 define('STATUS_SENDED',  2);
-define('STATUS_HANDLE',  3);
+define('STATUS_MODEL',   3);
 
 //
 // Statut des abonnés 

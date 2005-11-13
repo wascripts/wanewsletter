@@ -48,7 +48,7 @@ $logdata['log_id']        = ( !empty($_REQUEST['id']) ) ? intval($_REQUEST['id']
 $logdata['log_subject']   = ( !empty($_POST['subject']) ) ? trim($_POST['subject']) : '';
 $logdata['log_body_text'] = ( !empty($_POST['body_text']) ) ? trim($_POST['body_text']) : '';
 $logdata['log_body_html'] = ( !empty($_POST['body_html']) ) ? trim($_POST['body_html']) : '';
-$logdata['log_status']    = ( !empty($_POST['log_status']) ) ? STATUS_HANDLE : STATUS_WRITING;
+$logdata['log_status']    = ( !empty($_POST['log_status']) ) ? STATUS_MODEL : STATUS_WRITING;
 
 if( isset($_POST['cancel']) )
 {
@@ -333,17 +333,13 @@ switch( $mode )
 					FROM " . LOG_TABLE . " 
 					WHERE liste_id = $listdata[liste_id]
 						AND log_id = $logdata[log_id]
-						AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_HANDLE . ")";
+						AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")";
 				if( !($result = $db->query($sql)) )
 				{
 					trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 				}
 				
-				if( $row = $db->fetch_array($result) )
-				{
-					$logdata = $row;
-				}
-				else
+				if( !($logdata = $db->fetch_array($result)) )
 				{
 					$output->redirect('envoi.php?mode=load', 4);
 					
@@ -358,7 +354,7 @@ switch( $mode )
 			$sql = "SELECT log_id, log_subject, log_status 
 				FROM " . LOG_TABLE . " 
 				WHERE liste_id = $listdata[liste_id]
-					AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_HANDLE . ")
+					AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")
 				ORDER BY log_subject ASC";
 			if( !($result = $db->query($sql)) )
 			{
@@ -371,9 +367,9 @@ switch( $mode )
 				
 				do
 				{
-					if( $row['log_status'] == STATUS_HANDLE )
+					if( $row['log_status'] == STATUS_MODEL )
 					{
-						$status = '[' . $lang['Handle'] . ']';
+						$status = '[' . $lang['Model'] . ']';
 						$style  = 'color: #25F !important;';
 					}
 					else
@@ -622,7 +618,7 @@ switch( $mode )
 						$logdata['log_status'] = STATUS_STANDBY;
 					}
 					
-					if( $prev_status == STATUS_HANDLE )
+					if( $prev_status == STATUS_MODEL )
 					{
 						$handle_id      = $tmp_id;
 						$tmp_id         = 0;
@@ -970,7 +966,7 @@ $output->assign_vars(array(
 	'L_SUBJECT'               => $lang['Log_subject'],
 	'L_STATUS'                => $lang['Status'],
 	'L_STATUS_WRITING'        => $lang['Status_writing'],
-	'L_STATUS_HANDLE'         => $lang['Status_handle'],
+	'L_STATUS_MODEL'          => $lang['Status_model'],
 	'L_SEND_BUTTON'           => $lang['Button']['send'],
 	'L_SAVE_BUTTON'           => $lang['Button']['save'],
 	'L_DELETE_BUTTON'         => $lang['Button']['delete'],
@@ -981,7 +977,7 @@ $output->assign_vars(array(
 	'S_SUBJECT'               => $subject,
 	'S_STATUS'                => ( $logdata['log_status'] == STATUS_WRITING ) ? $lang['Status_writing'] : $lang['Status_handle'],
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
-	'SELECTED_STATUS_HANDLE'  => ( $logdata['log_status'] == STATUS_HANDLE ) ? ' selected="selected"' : '',
+	'SELECTED_STATUS_MODEL'   => ( $logdata['log_status'] == STATUS_MODEL ) ? ' selected="selected"' : '',
 	
 	'S_ENCTYPE'               => ( FILE_UPLOADS_ON ) ? 'multipart/form-data' : 'application/x-www-form-urlencoded', 
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()

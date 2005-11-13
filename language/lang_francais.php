@@ -579,7 +579,7 @@ $lang['Load_log']                   = "Charger une newsletter";
 $lang['List_send']                  = "Liste des envois en cours";
 $lang['Restart_send']               = "Reprendre cet envoi";
 $lang['Cancel_send']                = "Annuler cet envoi";
-$lang['Handle']                     = "Modèle";
+$lang['Model']                      = "Modèle";
 $lang['Dest']                       = "Destinataire";
 $lang['Log_in_text']                = "Newsletter au format texte";
 $lang['Log_in_html']                = "Newsletter au format html";
@@ -592,7 +592,7 @@ $lang['Cid_error_in_body']          = "Certains fichiers ciblés dans votre newsl
 $lang['Status']                     = "Statut";
 $lang['Done']                       = "Effectué";
 $lang['Status_writing']             = "Newsletter normale";
-$lang['Status_handle']              = "Modèle réutilisable";
+$lang['Status_model']               = "Modèle réutilisable";
 $lang['File_on_server']             = "fichier existant";
 $lang['Cancel_send_log']            = "'Êtes-vous sùr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
 
