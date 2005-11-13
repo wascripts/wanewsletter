@@ -4,29 +4,25 @@
 if( typeof(document.styleSheets) != 'undefined' ) {
 	
 	if( typeof(document.styleSheets[0].cssRules) != 'undefined' ) {
-		document.styleSheets[0].insertRule('tr#loadByURL, tr#loadByURL-bis { display: none; }', 0);
+		document.styleSheets[0].insertRule('tbody#loadByURL { display: none; }', 0);
 	} else {
-		document.styleSheets[0].addRule('tr#loadByURL', 'display: none');
-		document.styleSheets[0].addRule('tr#loadByURL-bis', 'display: none');
+		document.styleSheets[0].addRule('tbody#loadByURL', 'display: none');
 	}
 	
 	DOM_Events.addListener('load', function() {
 		DOM_Events.addListener('change', function() {
-			var displayVal = (this.selectedIndex == (this.options.length - 1)) ? 'table-row' : 'none';
+			var displayVal = (this.selectedIndex == (this.options.length - 1)) ? 'table-row-group' : 'none';
 			
 			//
 			// La détection de navigateur est à éviter mais il arrive que l'on ait pas trop le choix...
 			// IE ne reconnait pas la valeur 'table-row' de la propriété CSS display. Ça semble en revanche
 			// fonctionner avec 'block'...
 			//
-			if( navigator.userAgent.indexOf('MSIE') != -1 && displayVal == 'table-row' ) {
+			if( navigator.userAgent.indexOf('Opera') == -1 && navigator.userAgent.indexOf('MSIE') != -1 && displayVal == 'table-row-group' ) {
 				displayVal = 'block';
 			}
 			
 			document.getElementById('loadByURL').style.display = displayVal;
-			if( document.getElementById('loadByURL-bis') != null ) {
-				document.getElementById('loadByURL-bis').style.display = displayVal;
-			}
 		}, false, document.forms[0].elements['id']);
 		
 		var newOption = document.createElement('option');
@@ -44,43 +40,47 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	<h2>{L_TITLE}</h2>
 	
 	<table class="content">
-		<tr>
-			<td class="row1"><label>{L_SELECT_LOG}&#160;:</label></td>
-			<td class="row2">{LOG_BOX}</td>
-		</tr>
-		<!-- BEGIN load_text_by_url -->
-		<tr id="loadByURL">
-			<td class="row1"><label>{load_text_by_url.L_LOAD_BY_URL}&#160;:</label></td>
-			<td class="row2">
-				<input type="text" name="body_text_url" value="{load_text_by_url.BODY_TEXT_URL}" size="35" class="text" />
-				<span class="m-texte">({load_text_by_url.L_FORMAT_TEXT})</span>
-			</td>
-		</tr>
-		<!-- END load_text_by_url -->
-		<!-- BEGIN load_html_by_url -->
-		<tr id="loadByURL">
-			<td class="row1"><label>{load_html_by_url.L_LOAD_BY_URL}&#160;:</label></td>
-			<td class="row2">
-				<input type="text" name="body_html_url" value="{load_html_by_url.BODY_HTML_URL}" size="35" class="text" />
-				<span class="m-texte">({load_html_by_url.L_FORMAT_HTML})</span>
-			</td>
-		</tr>
-		<!-- END load_html_by_url -->
-		<!-- BEGIN load_multi_by_url -->
-		<tr id="loadByURL">
-			<td class="row1" rowspan="2"><label>{load_multi_by_url.L_LOAD_BY_URL}&#160;:</label></td>
-			<td class="row2">
-				<input type="text" name="body_text_url" value="{load_multi_by_url.BODY_TEXT_URL}" size="35" class="text" />
-				<span class="m-texte">({load_multi_by_url.L_FORMAT_TEXT})</span>
-			</td>
-		</tr>
-		<tr id="loadByURL-bis">
-			<td class="row2">
-				<input type="text" name="body_html_url" value="{load_multi_by_url.BODY_HTML_URL}" size="35" class="text" />
-				<span class="m-texte">({load_multi_by_url.L_FORMAT_HTML})</span>
-			</td>
-		</tr>
-		<!-- END load_multi_by_url -->
+		<tbody>
+			<tr>
+				<td class="row1"><label>{L_SELECT_LOG}&#160;:</label></td>
+				<td class="row2">{LOG_BOX}</td>
+			</tr>
+		</tbody>
+		<tbody id="loadByURL">
+			<!-- BEGIN load_text_by_url -->
+			<tr>
+				<td class="row1"><label>{load_text_by_url.L_LOAD_BY_URL}&#160;:</label></td>
+				<td class="row2">
+					<input type="text" name="body_text_url" value="{load_text_by_url.BODY_TEXT_URL}" size="35" class="text" />
+					<span class="m-texte">({load_text_by_url.L_FORMAT_TEXT})</span>
+				</td>
+			</tr>
+			<!-- END load_text_by_url -->
+			<!-- BEGIN load_html_by_url -->
+			<tr>
+				<td class="row1"><label>{load_html_by_url.L_LOAD_BY_URL}&#160;:</label></td>
+				<td class="row2">
+					<input type="text" name="body_html_url" value="{load_html_by_url.BODY_HTML_URL}" size="35" class="text" />
+					<span class="m-texte">({load_html_by_url.L_FORMAT_HTML})</span>
+				</td>
+			</tr>
+			<!-- END load_html_by_url -->
+			<!-- BEGIN load_multi_by_url -->
+			<tr>
+				<td class="row1" rowspan="2"><label>{load_multi_by_url.L_LOAD_BY_URL}&#160;:</label></td>
+				<td class="row2">
+					<input type="text" name="body_text_url" value="{load_multi_by_url.BODY_TEXT_URL}" size="35" class="text" />
+					<span class="m-texte">({load_multi_by_url.L_FORMAT_TEXT})</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="row2">
+					<input type="text" name="body_html_url" value="{load_multi_by_url.BODY_HTML_URL}" size="35" class="text" />
+					<span class="m-texte">({load_multi_by_url.L_FORMAT_HTML})</span>
+				</td>
+			</tr>
+			<!-- END load_multi_by_url -->
+		</tbody>
 	</table>
 	
 	<div class="bottom">{S_HIDDEN_FIELDS}
