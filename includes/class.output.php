@@ -556,18 +556,22 @@ BASIC;
 		$test_ary = array();
 		for( $i = 0; $i < $num_files; $i++ )
 		{
-			$total_size += $logdata['joined_files'][$i]['file_size'];
-			$test_ary[]  = $logdata['joined_files'][$i]['file_real_name'];
+			$total_size  += $logdata['joined_files'][$i]['file_size'];
+			$test_files[] = $logdata['joined_files'][$i]['file_real_name'];
 		}
 		
 		if( $format == FORMAT_HTML && hasCidReferences($logdata['log_body_html'], $refs) > 0 )
 		{
-			$embed_ary = array_intersect($test_ary, $refs);
+			$embed_files = array_intersect($test_files, $refs);
 			
-			if( ($num_files - count($embed_ary)) == 0 )
+			if( ($num_files - count($embed_files)) == 0 )
 			{
 				return false;
 			}
+		}
+		else
+		{
+			$embed_files = array();
 		}
 		
 		$this->set_filenames(array(
@@ -615,7 +619,7 @@ BASIC;
 			// On affiche pas dans la liste les fichiers incorporés dans 
 			// une newsletter au format HTML.
 			//
-			if( $format == FORMAT_HTML && in_array($filename, $embed_ary) )
+			if( $format == FORMAT_HTML && in_array($filename, $embed_files) )
 			{
 				continue;
 			}
