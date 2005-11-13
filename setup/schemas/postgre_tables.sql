@@ -94,7 +94,6 @@ CREATE TABLE wa_config (
 	sitename          VARCHAR(100) NOT NULL DEFAULT '',
 	urlsite           VARCHAR(100) NOT NULL DEFAULT '',
 	path              VARCHAR(100) NOT NULL DEFAULT '',
-	hebergeur         INT          NOT NULL DEFAULT '0',
 	date_format       VARCHAR(20)  NOT NULL DEFAULT '',
 	session_length    INT2         NOT NULL DEFAULT '0',
 	language          VARCHAR(30)  NOT NULL DEFAULT '',
@@ -155,6 +154,7 @@ CREATE TABLE wa_joined_files (
 CREATE TABLE wa_liste (
 	liste_id          INT4         NOT NULL DEFAULT nextval('wa_liste_id_seq'::text),
 	liste_name        VARCHAR(100) NOT NULL DEFAULT '',
+	liste_public      INT          NOT NULL DEFAULT '1',
 	liste_format      INT          NOT NULL DEFAULT '1',
 	sender_email      VARCHAR(250) NOT NULL DEFAULT '',
 	return_email      VARCHAR(250) NOT NULL DEFAULT '',
