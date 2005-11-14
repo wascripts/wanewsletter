@@ -690,7 +690,7 @@ function strip_magic_quotes_gpc(&$data)
 {
 	if( is_array($data) )
 	{
-		foreach( $data AS $key => $val )
+		foreach( $data AS $key => &$val )
 		{
 			if( is_array($val) )
 			{
