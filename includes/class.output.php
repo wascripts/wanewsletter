@@ -299,6 +299,15 @@ class output extends Template {
 			$page_title = $lang['Title']['profil_cp'];
 		}
 		
+		if( !defined('IN_ADMIN') )
+		{
+			$l_logout = $lang['Module']['logout'];
+		}
+		else
+		{
+			$l_logout = sprintf($lang['Module']['logout_2'], htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES));
+		}
+		
 		$this->assign_vars( array(
 			'PAGE_TITLE'   => $page_title,
 			'META'         => $this->meta_redirect,
@@ -307,7 +316,7 @@ class output extends Template {
 			'CHARSET'      => $lang['CHARSET'],
 			'L_LOG'        => $lang['Module']['log'],
 			
-			'L_LOGOUT'     => sprintf($lang['Module']['logout'], htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)),
+			'L_LOGOUT'     => $l_logout,
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts()
 		));
