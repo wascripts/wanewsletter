@@ -118,17 +118,28 @@ if( !(time() % 10) || !defined('IN_ADMIN') )
 $tmp_name = 'tmp';
 
 //
-// Si nous avons un accès restreint à cause d'open_basedir sur le serveur, 
-// nous devrons utiliser le dossier des fichiers temporaires du script 
+// Utilisons de préférence le répertoire tmp du système
 //
-$tmp_name = trim($tmp_name, '/');
-
-if( OPEN_BASEDIR_RESTRICTION && !is_writable(WA_ROOTDIR . '/' . $tmp_name) )
+if( !OPEN_BASEDIR_RESTRICTION && is_readable('/tmp') && is_writable('/tmp') )
 {
-	trigger_error('tmp_dir_not_writable', MESSAGE);
+	$tmpdir = '/tmp';
+}
+else
+{
+	//
+	// Si nous avons un accès restreint à cause d'open_basedir sur le serveur,
+	// ou que le répertoire tmp du système est inaccessible, nous devrons
+	// utiliser le répertoire tmp du script.
+	//
+	$tmpdir = WA_ROOTDIR . '/' . trim($tmp_name, '/');
+	
+	if( !is_writable($tmpdir) )
+	{
+		trigger_error('tmp_dir_not_writable', MESSAGE);
+	}
 }
 
-define('WA_TMPDIR',    WA_ROOTDIR . '/' . $tmp_name, true);
+define('WA_TMPDIR',    $tmpdir);
 define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
 
 ?>
