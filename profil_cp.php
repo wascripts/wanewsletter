@@ -26,9 +26,10 @@
  */
 
 define('IN_NEWSLETTER', true);
-define('WA_ROOTDIR',    './');
+define('WA_ROOTDIR',    '.');
 
 require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/class.sessions.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 include WA_ROOTDIR . '/includes/tags.inc.php';
 
@@ -41,18 +42,37 @@ if( !$nl_config['enable_profil_cp'] )
 //
 // Instanciation d'une session
 //
-include WA_ROOTDIR . '/includes/class.sessions.php';
 $session = new Session();
 
 function check_login($email, $regkey = '', $passwd = '')
 {
 	global $db, $other_tags;
 	
-	$sql = "SELECT a.*, al.format, l.* 
-		FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al, " . LISTE_TABLE . " AS l 
-		WHERE a.abo_id = al.abo_id 
-			AND al.liste_id = l.liste_id 
-			AND LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
+	//
+	// Récupération des champs des tags personnalisés
+	//
+	if( count($other_tags) > 0 )
+	{
+		$fields_str = '';
+		foreach( $other_tags AS $data )
+		{
+			$fields_str .= ', a.' . $data['column_name'];
+		}
+	}
+	else
+	{
+		$fields_str = '';
+	}
+	
+	$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
+			a.abo_register_date, a.abo_status, al.format, l.liste_id, l.liste_name, l.sender_email,
+			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias $fields_str
+		FROM " . ABONNES_TABLE . " AS a
+			INNER JOIN " . ABO_LISTE_TABLE . " AS al
+			ON al.abo_id = a.abo_id
+			INNER JOIN " . LISTE_TABLE . " AS l
+			ON l.liste_id = al.liste_id
+		WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
 	if( $regkey != '' && $passwd != '' )
 	{
 		$sql .= " AND ( a.abo_pwd = '$passwd' OR a.abo_register_key = '$regkey' )";
@@ -106,7 +126,7 @@ if( $mode != 'login' && $mode != 'sendkey' )
 {
 	if( !empty($_COOKIE[$nl_config['cookie_name'] . '_abo']) )
 	{
-		$data = (array) unserialize(stripslashes($_COOKIE[$nl_config['cookie_name'] . '_abo']));
+		$data = (array) unserialize($_COOKIE[$nl_config['cookie_name'] . '_abo']);
 	}
 	else
 	{
@@ -199,8 +219,6 @@ switch( $mode )
 	case 'sendkey':
 		if( isset($_POST['submit']) )
 		{
-			require WA_ROOTDIR . '/includes/functions.validate.php';
-			
 			$result = check_email($email, -1, '', true);
 			
 			if( !$result['error'] )
@@ -411,9 +429,10 @@ switch( $mode )
 			}
 			
 			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
-				FROM " . JOINED_FILES_TABLE . " AS jf, " . LOG_FILES_TABLE . " AS lf 
-				WHERE jf.file_id = lf.file_id 
-					AND lf.log_id IN(" . implode(', ', $sql_log_id) . ")";
+				FROM " . JOINED_FILES_TABLE . " AS jf
+					INNER JOIN " . LOG_FILES_TABLE . " AS lf
+					ON lf.file_id = jf.file_id
+						AND lf.log_id IN(" . implode(', ', $sql_log_id) . ")";
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
@@ -435,7 +454,6 @@ switch( $mode )
 			}
 			
 			require WAMAILER_DIR . '/class.mailer.php';
-			require WA_ROOTDIR . '/includes/engine_send.php';
 			
 			//
 			// Initialisation de la classe mailer
@@ -465,16 +483,23 @@ switch( $mode )
 				$address = $abodata['email'];
 			}
 			
+			$lang['CHARSET'] = strtoupper($lang['CHARSET']);
+			
 			while( $row = $db->fetch_array($result) )
 			{
 				$listdata = $abodata['listes'][$row['liste_id']];
 				$format   = $abodata['listes'][$row['liste_id']]['format'];
 				
+				if( $lang['CHARSET'] == 'ISO-8859-1' )
+				{
+					$row['log_subject'] = purge_latin1($row['log_subject'], true);
+				}
+				
 				$mailer->clear_all();
 				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
 				$mailer->set_address($address);
 				$mailer->set_format($format);
-				$mailer->set_subject(stripslashes($row['log_subject']));
+				$mailer->set_subject($row['log_subject']);
 				
 				if( $listdata['return_email'] != '' )
 				{
@@ -483,11 +508,19 @@ switch( $mode )
 				
 				if( $format == FORMAT_TEXTE )
 				{
-					$body = stripslashes($row['log_body_text']);
+					$body = $row['log_body_text'];
+					if( $lang['CHARSET'] == 'ISO-8859-1' )
+					{
+						$body = purge_latin1($body, true);
+					}
 				}
 				else
 				{
-					$body = stripslashes($row['log_body_html']);
+					$body = $row['log_body_html'];
+					if( $lang['CHARSET'] == 'ISO-8859-1' )
+					{
+						$body = purge_latin1($body);
+					}
 				}
 				
 				//
@@ -637,7 +670,7 @@ switch( $mode )
 		$sql_list_id = array();
 		foreach( $abodata['listes'] AS $liste_id => $listdata )
 		{
-			$sql_list_id[] = $liste_id;
+			array_push($sql_list_id, $liste_id);
 		}
 		
 		$sql = "SELECT log_id, liste_id, log_subject, log_date 
@@ -686,8 +719,8 @@ switch( $mode )
 			{
 				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
 				
-				$select_log .= '<option value="' . $logrow['log_id'] . '"> - ' . cut_str($logrow['log_subject'], 80);
-				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . '] - </option>';
+				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . htmlspecialchars(cut_str($logrow['log_subject'], 40));
+				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
 			}
 			$select_log .= '</select>';
 			
