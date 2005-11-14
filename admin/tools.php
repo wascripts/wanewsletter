@@ -453,9 +453,23 @@ switch( $mode )
 					$tmp_filename = $file_upload['tmp_name'];
 					$filename     = $file_upload['name'];
 					
-					if( !is_uploaded_file($tmp_filename) )
+					if( !isset($file_upload['error']) && empty($tmp_filename) )
 					{
-						trigger_error('Upload_error_5', MESSAGE);
+						$file_upload['error'] = -1;
+					}
+					
+					if( $file_upload['error'] != UPLOAD_ERR_OK )
+					{
+						if( isset($lang['Message']['Upload_error_'.$file_upload['error']]) )
+						{
+							$upload_error = 'Upload_error_'.$file_upload['error'];
+						}
+						else
+						{
+							$upload_error = 'Upload_error_5';
+						}
+						
+						trigger_error($upload_error, MESSAGE);
 					}
 					
 					//
@@ -467,7 +481,10 @@ switch( $mode )
 						$unlink = true;
 						$tmp_filename = wa_realpath(WA_TMPDIR . '/' . $filename);
 						
-						move_uploaded_file($file_upload['tmp_name'], $tmp_filename);
+						if( !move_uploaded_file($file_upload['tmp_name'], $tmp_filename) )
+						{
+							trigger_error('Upload_error_5', MESSAGE);
+						}
 					}
 				}
 				
@@ -1090,9 +1107,23 @@ switch( $mode )
 					$tmp_filename = $file_upload['tmp_name'];
 					$filename     = $file_upload['name'];
 					
-					if( !is_uploaded_file($tmp_filename) )
+					if( !isset($file_upload['error']) && empty($tmp_filename) )
 					{
-						trigger_error('Upload_error_5', MESSAGE);
+						$file_upload['error'] = -1;
+					}
+					
+					if( $file_upload['error'] != UPLOAD_ERR_OK )
+					{
+						if( isset($lang['Message']['Upload_error_'.$file_upload['error']]) )
+						{
+							$upload_error = 'Upload_error_'.$file_upload['error'];
+						}
+						else
+						{
+							$upload_error = 'Upload_error_5';
+						}
+						
+						trigger_error($upload_error, MESSAGE);
 					}
 					
 					//
@@ -1104,7 +1135,10 @@ switch( $mode )
 						$unlink = true;
 						$tmp_filename = wa_realpath(WA_TMPDIR . '/' . $filename);
 						
-						move_uploaded_file($file_upload['tmp_name'], $tmp_filename);
+						if( !move_uploaded_file($file_upload['tmp_name'], $tmp_filename) )
+						{
+							trigger_error('Upload_error_5', MESSAGE);
+						}
 					}
 				}
 				
