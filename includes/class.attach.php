@@ -221,7 +221,7 @@ class Attach {
 		{
 			$sql = "SELECT COUNT(file_id) AS test_name
 				FROM " . JOINED_FILES_TABLE . "
-				WHERE file_physical_name = '$physical_filename'";
+				WHERE file_physical_name = '" . $db->escape($physical_filename) . "'";
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible de tester la table des fichiers joints', ERROR);
@@ -266,7 +266,7 @@ class Attach {
 		
 		if( $extension == '' )
 		{
-			$extension = 'wa';
+			$extension = 'x-wa';
 		}
 		
 		//
