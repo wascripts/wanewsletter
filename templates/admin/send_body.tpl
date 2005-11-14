@@ -29,7 +29,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 			<td class="row2">
 				<select id="log_status" name="log_status">
 					<option value="0" {SELECTED_STATUS_WRITING}>{L_STATUS_WRITING}</option>
-					<option value="3"{SELECTED_STATUS_HANDLE}>{L_STATUS_MODEL}</option>
+					<option value="3"{SELECTED_STATUS_MODEL}>{L_STATUS_MODEL}</option>
 				</select>
 			</td>
 		</tr>
