@@ -744,11 +744,14 @@ switch( $mode )
 		//
 		if( $mode == 'attach' && !empty($logdata['log_id']) && $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 		{
-			$tmp_filename = ( !empty($_FILES['join_file']['tmp_name']) && $_FILES['join_file']['tmp_name'] != 'none' ) ? $_FILES['join_file']['tmp_name'] : ( ( !empty($_POST['join_file']) ) ? trim($_POST['join_file']) : '' );
-			$filename     = ( !empty($_FILES['join_file']['name']) ) ? $_FILES['join_file']['name'] : '';
-			$filesize     = ( !empty($_FILES['join_file']['size']) ) ? intval($_FILES['join_file']['size']) : 0;
-			$filetype     = ( !empty($_FILES['join_file']['type']) ) ? $_FILES['join_file']['type'] : '';
-			$errno_code   = ( !empty($_FILES['join_file']['error']) ) ? intval($_FILES['join_file']['error']) : UPLOAD_ERR_OK;
+			$join_file  = ( isset($_FILES['join_file']) ) ? $_FILES['join_file'] : array();
+			$local_file = ( !empty($_POST['join_file']) ) ? trim($_POST['join_file']) : '';
+			
+			$tmp_filename = ( !empty($join_file['tmp_name']) && $join_file['tmp_name'] != 'none' ) ? $join_file['tmp_name'] : $local_file;
+			$filename     = ( !empty($join_file['name']) ) ? $join_file['name'] : '';
+			$filesize     = ( !empty($join_file['size']) ) ? intval($join_file['size']) : 0;
+			$filetype     = ( !empty($join_file['type']) ) ? $join_file['type'] : '';
+			$errno_code   = ( !empty($join_file['error']) ) ? intval($join_file['error']) : UPLOAD_ERR_OK;
 			$file_id      = ( !empty($_POST['fid']) ) ? intval($_POST['fid']) : 0;
 			
 			require WA_ROOTDIR . '/includes/class.attach.php';
@@ -768,7 +771,7 @@ switch( $mode )
 				// On a affaire soit à un fichier présent localement, soit à un fichier 
 				// distant, soit à un fichier uploadé
 				//
-				if( !empty($_POST['join_file']) )
+				if( !empty($local_file) )
 				{
 					$tmp_filename = str_replace('\\', '/', $tmp_filename);
 					
@@ -975,7 +978,6 @@ $output->assign_vars(array(
 	
 	'S_DEST'                  => $listdata['liste_name'],
 	'S_SUBJECT'               => $subject,
-	'S_STATUS'                => ( $logdata['log_status'] == STATUS_WRITING ) ? $lang['Status_writing'] : $lang['Status_handle'],
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
 	'SELECTED_STATUS_MODEL'   => ( $logdata['log_status'] == STATUS_MODEL ) ? ' selected="selected"' : '',
 	
