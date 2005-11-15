@@ -32,16 +32,41 @@ require WA_ROOTDIR . '/start.php';
 
 load_settings();
 
-$liste_id = ( !empty($_GET['liste']) ) ? intval($_GET['liste']) : 0;
+$liste_ids = ( !empty($_GET['liste']) ) ? $_GET['liste'] : 0;
+$liste_ids = array_unique(array_map('intval', explode(' ', $liste_ids)));
 
-$sql = "SELECT COUNT(a.abo_id) AS num_subscribe
-	FROM " . ABONNES_TABLE . " AS a
-		INNER JOIN " . ABO_LISTE_TABLE . " AS al
-		ON al.liste_id = $liste_id
-			AND al.abo_id = a.abo_id
-	WHERE a.abo_status = " . ABO_ACTIF;
-$result = $db->query($sql);
-$data   = $db->result($result, 0, 'num_subscribe');
+if( count($liste_ids) > 0 )
+{
+	$liste_ids = implode(', ', $liste_ids);
+	
+	if( DATABASE == 'sqlite' )
+	{
+		$sql = "SELECT COUNT(a.abo_id) AS num_subscribe
+			FROM " . ABONNES_TABLE . " AS a
+			WHERE a.abo_id IN(
+					SELECT al.abo_id
+					FROM " . ABO_LISTE_TABLE . " AS al
+					WHERE al.liste_id IN($liste_ids)
+				)
+				AND a.abo_status = " . ABO_ACTIF;
+	}
+	else
+	{
+		$sql = "SELECT COUNT(DISTINCT(a.abo_id)) AS num_subscribe
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al
+				ON al.liste_id IN($liste_ids)
+					AND al.abo_id = a.abo_id
+			WHERE a.abo_status = " . ABO_ACTIF;
+	}
+	
+	$result = $db->query($sql);
+	$data   = $db->result($result, 0, 'num_subscribe');
+}
+else
+{
+	$data   = 'No data';
+}
 
 header('Content-Type: application/x-javascript');
 
