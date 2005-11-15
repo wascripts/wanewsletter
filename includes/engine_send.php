@@ -235,11 +235,60 @@ function launch_sending($listdata, $logdata)
 		}
 		else if( $nl_config['engine_send'] == ENGINE_UNIQ )
 		{
+			if( ($isPHP5 = version_compare(phpversion(), '5.0.0', '>=')) == true )
+			{
+				eval('$mailerText = clone $mailer;');
+				eval('$mailerHTML = clone $mailer;');
+			}
+			else
+			{
+				$mailerText = $mailer;
+				$mailerHTML = $mailer;
+			}
+			
+			if( !$listdata['use_cron'] )
+			{
+				$body[FORMAT_TEXTE] = str_replace('{LINKS}', $link[FORMAT_TEXTE], $body[FORMAT_TEXTE]);
+				$body[FORMAT_HTML]  = str_replace('{LINKS}', $link[FORMAT_HTML], $body[FORMAT_HTML]);
+			}
+			
+			$mailerText->set_format(FORMAT_TEXTE);
+			$mailerText->set_message($body[FORMAT_TEXTE]);
+			
+			$mailerHTML->set_format(FORMAT_HTML);
+			if( $listdata['liste_format'] == FORMAT_MULTIPLE )
+			{
+				$mailerHTML->set_format(FORMAT_MULTIPLE);
+				$mailerHTML->set_altmessage($body[FORMAT_TEXTE]);
+			}
+			$mailerHTML->set_message($body[FORMAT_HTML]);
+			
 			do
 			{
 				$abo_format = ( !$format ) ? $row['format'] : $format;
-				$body_tmp   = $body[$abo_format];
-				$link_tmp   = $link[$abo_format];
+				
+				if( $abo_format == FORMAT_TEXTE )
+				{
+					if( $isPHP5 == true )
+					{
+						eval('$mailer = clone $mailerText;');
+					}
+					else
+					{
+						$mailer = $mailerText;
+					}
+				}
+				else
+				{
+					if( $isPHP5 == true )
+					{
+						eval('$mailer = clone $mailerHTML;');
+					}
+					else
+					{
+						$mailer = $mailerHTML;
+					}
+				}
 				
 				if( $row['abo_pseudo'] != '' )
 				{
@@ -252,17 +301,6 @@ function launch_sending($listdata, $logdata)
 				
 				$mailer->clear_address();
 				$mailer->set_address($address);
-				$mailer->set_format($abo_format);
-				
-				if( empty($mailer->compiled_message[$abo_format]) )
-				{
-					if( !$listdata['use_cron'] )
-					{
-						$body_tmp = str_replace('{LINKS}', $link_tmp, $body_tmp);
-					}
-					
-					$mailer->set_message($body_tmp);
-				}
 				
 				//
 				// Traitement des tags et tags personnalisés
