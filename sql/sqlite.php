@@ -51,12 +51,16 @@ class sql {
 	{
 		$sql_connect = ( $persistent ) ? 'sqlite_popen' : 'sqlite_open';
 		
-		$this->connect_id = @$sql_connect($dbpath, 0666);
+		$this->connect_id = @$sql_connect($dbpath, 0666, $errorstr);
 		
 		if( is_resource($this->connect_id) )
 		{
 			$this->query('PRAGMA short_column_names = 1');
 			$this->query('PRAGMA case_sensitive_like = 0');
+		}
+		else
+		{
+			$this->sql_error['message'] = $errorstr;
 		}
 	}
 	

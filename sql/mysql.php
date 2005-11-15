@@ -52,8 +52,15 @@ class sql {
 			
 			if( !$select_db )
 			{
+				$this->sql_error['errno']   = @mysql_errno();
+				$this->sql_error['message'] = @mysql_error();
 				@mysql_close($this->connect_id);
 			}
+		}
+		else
+		{
+			$this->sql_error['errno']   = @mysql_errno();
+			$this->sql_error['message'] = @mysql_error();
 		}
 	}
 	

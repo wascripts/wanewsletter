@@ -35,7 +35,7 @@ class sql {
 	var $connect_id   = '';
 	var $query_result = '';
 	var $trc_started  = 0;
-	var $sql_error    = array('errno' => '', 'message' => '', 'query' => '');
+	var $sql_error    = array('errno' => 0, 'message' => '', 'query' => '');
 	
 	var $queries      = 0;
 	var $sql_time     = 0;
@@ -77,6 +77,10 @@ class sql {
 		}
 		
 		$this->connect_id = @$sql_connect($login_str);
+		if( !is_resource($this->connect_id) )
+		{
+			$this->sql_error['message'] = pg_errormessage();
+		}
 	}
 	
 	function prepare_value($value)
@@ -161,13 +165,12 @@ class sql {
 		if( $this->query_result )
 		{
 			$this->row_id[$this->query_result] = 0;
-			$this->sql_error = array('errno' => '', 'message' => '', 'query' => '');
+			$this->sql_error = array('errno' => 0, 'message' => '', 'query' => '');
 			
 			return $this->query_result;
 		}
 		else
 		{
-			$this->sql_error['errno']   = 0;
 			$this->sql_error['message'] = @pg_errormessage($this->connect_id);
 			$this->sql_error['query']   = $query;
 			
