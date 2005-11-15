@@ -61,11 +61,10 @@ function make_script_url($url = '')
 	$excluded_ports = array(80, 8080);
 	$server_port    = server_info('SERVER_PORT');
 	
-	$server_name = preg_replace('/^http(s)?:\/\/(.*?)\/?$/', 'http\\1://\\2', $nl_config['urlsite']);
-	$server_port = ( !in_array($server_port, $excluded_ports) ) ? ':' . $server_port : '';
-	$script_path = ( $nl_config['path'] != '/' ) ? preg_replace('/^\/?(.*?)\/?$/', '/\\1/', $nl_config['path']) : '/';
-	
-	return $server_name . $server_port . $script_path . $url;
+	return rtrim($nl_config['urlsite'], '/')
+		. (( !in_array($server_port, $excluded_ports) ) ? ':' . $server_port : '')
+		. (( $nl_config['path'] != '/' ) ? '/' . trim($nl_config['path'], '/') . '/' : '/')
+		. $url;
 }
 
 /**
@@ -96,7 +95,7 @@ function Location($url)
 	}
 	
 	$use_refresh   = preg_match("#Microsoft|WebSTAR|Xitami#i", server_info('SERVER_SOFTWARE'));
-	$absolute_url  = make_script_url() . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
+	$absolute_url  = make_script_url() . (( defined('IN_ADMIN') ) ? 'admin/' : '');
 	$absolute_url .= unhtmlspecialchars($url);
 	
 	header((( $use_refresh ) ? 'Refresh: 0; URL=' : 'Location: ' ) . $absolute_url);
@@ -408,7 +407,7 @@ BASIC;
 			exit;
 		}
 		
-		if( DISPLAY_ERRORS_IN_BLOCK == TRUE )
+		if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE )
 		{
 			array_push($GLOBALS['_php_errors'], $php_errormsg);
 		}
