@@ -2,6 +2,11 @@
 /* $Id$ */
 // vim: expandtab sw=4 ts=4 sts=4:
 
+/*
+ * This library was imported from phpMyAdmin 2.6.4pl1 which is distributed
+ * under GPL license.
+ */
+
 if( !defined('ZIP_LIB_INC') ) {
 
 define('ZIP_LIB_INC', true);
