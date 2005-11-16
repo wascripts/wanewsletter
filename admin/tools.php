@@ -554,6 +554,9 @@ switch( $mode )
 			
 			fake_header(false);
 			
+			$db->query("DROP INDEX abo_email_idx ON " . ABONNES_TABLE);
+			$db->query("DROP INDEX abo_status_idx ON " . ABONNES_TABLE);
+			
 			foreach( $emails_ary AS $email )
 			{
 				// on désactive le check_mx si cette option est valide, cela prendrait trop de temps
@@ -610,6 +613,9 @@ switch( $mode )
 				
 				$cpt++;
 			}
+			
+			$db->query("CREATE UNIQUE INDEX abo_email_idx ON " . ABONNES_TABLE . " (abo_email)");
+			$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
 			
 			//
 			// Selon que des emails ont été refusés ou pas, affichage du message correspondant 
