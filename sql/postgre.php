@@ -56,7 +56,7 @@ class sql {
 			list($dbhost, $dbport) = explode(':', $dbhost);
 			$login_str .= "host='$dbhost' port='$dbport' ";
 		}
-		else
+		else if( !empty($dbhost) )
 		{
 			$login_str .= "host='$dbhost' port='" . $this->dbport . "' ";
 		}
@@ -79,7 +79,7 @@ class sql {
 		$this->connect_id = @$sql_connect($login_str);
 		if( !is_resource($this->connect_id) )
 		{
-			$this->sql_error['message'] = pg_errormessage();
+			$this->sql_error['message'] = $GLOBALS['php_errormsg'];
 		}
 	}
 	
