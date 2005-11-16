@@ -13,23 +13,23 @@
   peuvent avoir été modifiées par l'application qui fait appel à l'API wanewsletter (ex: phpBB) donc
   un paramètre magic_quotes_gpc interne et null par défaut mais peut être positionné à true ou false
 
-- Terminer support des chargements de newsletters externes
-  - Pour le chargement via une URL, trouver moyen pour spécifier les URLs une fois seulement (cas de SPIP), puis 
-    seulement avoir à indiquer de charger via les URLs habituelles
+- Réorganiser les scripts d’installation et mise à jour
+  - suppression champs version de wa_config ?
 
 - Fournir un gestionnaire de bounces basique dans le répertoire contrib/ (en cours)
 - Voir pour rendre refonctionnel la détection approfondie des emails (sinon, la supprimer, pas seulement la désactiver)
 - Voir avec J.J Solari pour fct des javascript dans Safari
-- Réorganiser les scripts d’installation et mise à jour
-  - suppression champs hébergeur (et version ?) de wa_config
-  - ajout champ liste_public à wa_liste (avec DEFAULT '1')
+
+- WA_ROOTDIR à ne pas déclarer dans newsletter.php si déjà déclaré dans bout de code php ...
+- Recréer tous les index dans le script de mise à jour ?
+  Modifier les types des champs admin_id et liste_id (tinyint -> smallint)
+- Ajout commandes de transaction dans les fichiers *.sql dans setup/schemas/
 
 
 Modifications sur la doc
 ------------------------
 
 - Revoir la doc de manière générale
-- compléter fichier CREDITS
 
 
 Fait mais à peaufiner/Rapide à faire mais à faire
@@ -39,6 +39,10 @@ Fait mais à peaufiner/Rapide à faire mais à faire
 - Prendre en compte les problèmes de charset lors du chargement via une URL
 - Requètes de functions.validate.php (? bof, ça marche donc bon...)
 - Vérifier que les schémas de tables sont valides pour chaque db
-- vérifier bon fonctionnement de profil_cp.php, checker le code
 
+"Oui, en fait je prend un raccourci. La cassure n'est pas sur 3.23 / 4.0 mais sur
+4.0.x / 4.0.y, je ne me souviens plus exactement où.
+Il y a aussi des gens qui utilisent les mysql_* avec mysql 4.1 et > mais c'est
+au prix d'une bidouille (une config spéciale du serveur mysql qui lui demande
+d'utiliser les anciens protocoles d'authentification)"
 

@@ -29,7 +29,7 @@ define('IN_UPDATE', true);
 
 require './setup.inc.php';
 
-$lang  = $datetime = $msg_error = array();
+$lang  = $datetime = $msg_error = $_php_errors = array();
 $error = FALSE;
 $type  = 'update';
 

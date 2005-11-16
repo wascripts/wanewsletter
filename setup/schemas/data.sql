@@ -1,5 +1,5 @@
 -- 
--- Données de base de WAnewsletter 2.3.x pour MySQL
+-- Données de base de WAnewsletter 2.3.x
 -- 
 -- $Id$
 -- 
@@ -8,15 +8,17 @@
 -- 
 -- Création d'un compte administrateur
 -- 
-INSERT INTO wa_admin (admin_login, admin_pwd, admin_email, admin_lang, admin_dateformat, admin_level) VALUES('admin', '', 'admin@domaine.com', 'francais', 'd M Y H:i', 2);
-INSERT INTO wa_auth_admin (admin_id, liste_id, auth_view, auth_edit, auth_del, auth_send, auth_import, auth_export, auth_ban, auth_attach) VALUES (1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+INSERT INTO wa_admin (admin_login, admin_pwd, admin_email, admin_lang, admin_dateformat, admin_level)
+	VALUES('admin', '', 'admin@domaine.com', 'francais', 'd M Y H:i', 2);
+INSERT INTO wa_auth_admin (admin_id, liste_id, auth_view, auth_edit, auth_del, auth_send, auth_import, auth_export, auth_ban, auth_attach)
+	VALUES (1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
 
 -- 
 -- Configuration de base
 -- 
 INSERT INTO wa_config (sitename, urlsite, path, date_format, session_length, language, cookie_name, cookie_path, upload_path, max_filesize, engine_send, gd_img_type, version) 
-	VALUES('Yourdomaine', 'http://www.yourdomaine.com', '/', 'd M Y H:i', 3600, 'francais', 'wanewsletter', '/', 'upload/', 80000, 1, 'png', '2.2.x');
+	VALUES('Yourdomaine', 'http://www.yourdomaine.com', '/', 'd M Y H:i', 3600, 'francais', 'wanewsletter', '/', 'upload/', 80000, 1, 'png', '2.3.x');
 
 
 -- 

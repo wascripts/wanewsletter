@@ -29,7 +29,7 @@ define('IN_INSTALL', true);
 
 require './setup.inc.php';
 
-$lang  = $datetime = $msg_error = array();
+$lang  = $datetime = $msg_error = $_php_errors = array();
 $error = false;
 
 $vararray = array('start', 'confirm', 'send_file');
@@ -54,7 +54,7 @@ if( isset($supported_db[$dbtype]) )
 {
 	require WA_ROOTDIR . '/sql/' . $dbtype . '.php';
 }
-else
+else if( defined('NL_INSTALLED') || $start == true )
 {
 	plain_error('Le type de base de données n\'est pas défini !');
 }
@@ -100,7 +100,7 @@ if( defined('NL_INSTALLED') )
 		plain_error('Impossible de se connecter à la base de données');
 	}
 	
-	$sql = "SELECT language, urlsite, path, version, hebergeur FROM " . CONFIG_TABLE;
+	$sql = "SELECT language, urlsite, path, version FROM " . CONFIG_TABLE;
 	if( !($result = $db->query($sql)) )
 	{
 		plain_error('Impossible d\'obtenir la configuration du script');
@@ -112,7 +112,6 @@ if( defined('NL_INSTALLED') )
 	$urlsite     = $old_config['urlsite'];
 	$urlscript   = $old_config['path'];
 	$language    = $old_config['language'];
-	$hebergeur   = $old_config['hebergeur'];
 	
 	require WA_ROOTDIR . '/language/lang_' . $language . '.php';
 	
@@ -146,6 +145,8 @@ if( defined('NL_INSTALLED') )
 }
 else
 {
+	require WA_ROOTDIR . '/language/lang_' . $language . '.php';
+	
 	if( $start )
 	{
 		if( $dbtype == 'sqlite' )
@@ -159,7 +160,7 @@ else
 			else
 			{
 				$error = true;
-				$msg_error[] = 'Pour utiliser une base de données SQLite, vous devez rendre accessible en lecture et écriture le répertoire sql/ du script ainsi que le fichier wanewsletter.db qui s\'y trouve';
+				$msg_error[] = $lang['sqldir_perms_problem'];
 			}
 		}
 		else
@@ -170,17 +171,15 @@ else
 		if( $error == false && !is_resource($db->connect_id) )
 		{
 			$error = true;
-			$msg_error[] = '<b>Impossible de se connecter à la base de données/Unable to connect to database</b>';
+			$msg_error[] = sprintf($lang['Connect_db_error'], $db->sql_error['message']);
 		}
 		
 		if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
 		{
 			$error = true;
-			$msg_error[] = 'Le fichier de configuration n\'est pas accessible en écriture/config file isn\'t writable';
+			$msg_error[] = $lang['File_config_unwritable'];
 		}
 	}
-	
-	require WA_ROOTDIR . '/language/lang_' . $language . '.php';
 }
 
 $output->send_headers();
@@ -252,11 +251,11 @@ else
 			$msg_error[] = $result['message'];
 		}
 		
-		$urlsite = preg_replace('/^http(s)?:\/\/(.*?)\/?$/i', 'http\\1://\\2', $urlsite);
+		$urlsite = rtrim($urlsite, '/');
 		
 		if( $urlscript != '/' )
 		{
-			$urlscript = preg_replace('/^\/?(.*?)\/?$/i', '/\\1/', $urlscript);
+			$urlscript = '/' . trim($urlscript, '/') . '/';
 		}
 		
 		//
@@ -366,11 +365,6 @@ else
 								ADD COLUMN pop_user varchar(50) NOT NULL DEFAULT '',
 								ADD COLUMN pop_pass varchar(50) NOT NULL DEFAULT ''";
 							break;
-					}
-					
-					if( $hebergeur == 3 )
-					{
-						$sql_update[] = "UPDATE " . CONFIG_TABLE . " SET hebergeur = 1";
 					}
 				
 				//
@@ -572,7 +566,22 @@ else
 				case '2.2.5':
 				case '2.2.6':
 				case '2.2.7':
+				case '2.2.8':
+					switch( DATABASE )
+					{
+						case 'postgre':
+							$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index ON " . ABONNES_TABLE;
+							break;
+						default:
+							$sql_update[] = "DROP INDEX abo_status ON " . ABONNES_TABLE;
+							break;
+					}
+					
+					$sql_update[] = "CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)";
+					$sql_update[] = "CREATE UNIQUE INDEX abo_email_idx ON " . ABONNES_TABLE . " (abo_email)";
 					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . " DROP COLUMN hebergeur";
+					$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
+						ADD COLUMN liste_public tinyint(1) NOT NULL DEFAULT '1' AFTER liste_name";
 					break;
 				
 				default:
