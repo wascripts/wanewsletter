@@ -159,18 +159,26 @@ if( $num_inscrits > 1 )
 {
 	$l_num_inscrits = sprintf($lang['Registered_subscribers'], $num_inscrits, wa_number_format($num_inscrits/$days));
 }
+else if( $num_inscrits == 1 )
+{
+	$l_num_inscrits = sprintf($lang['Registered_subscriber'], wa_number_format($num_inscrits/$days));
+}
 else
 {
-	$l_num_inscrits = sprintf($lang['Registered_subscriber'], $num_inscrits, wa_number_format($num_inscrits/$days));
+	$l_num_inscrits = $lang['No_registered_subscriber'];
 }
 
 if( $num_temp > 1 )
 {
 	$l_num_temp = sprintf($lang['Tmp_subscribers'], $num_temp);
 }
-else
+else if( $num_temp == 1 )
 {
 	$l_num_temp = sprintf($lang['Tmp_subscriber'], $num_temp);
+}
+else
+{
+	$l_num_temp = $lang['No_tmp_subscriber'];
 }
 
 $output->build_listbox(AUTH_VIEW, false, './view.php?mode=liste');
