@@ -381,7 +381,7 @@ class sql {
 		return str_replace("'", "''", str_replace('\\', '\\\\', $str));
 	}
 	
-	function close_connexion()
+	function close()
 	{
 		if( is_resource($this->connect_id) )
 		{

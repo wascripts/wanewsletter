@@ -338,7 +338,7 @@ class sql {
 		return mysqli_real_escape_string($str, $this->connect_id);
 	}
 	
-	function close_connexion()
+	function close()
 	{
 		if( $this->connect_id )
 		{

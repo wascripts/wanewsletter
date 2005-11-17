@@ -328,7 +328,7 @@ class sql {
 		return mysql_escape_string($str);
 	}
 	
-	function close_connexion()
+	function close()
 	{
 		if( is_resource($this->connect_id) )
 		{
