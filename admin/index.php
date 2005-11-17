@@ -35,22 +35,104 @@ $liste_ids = $auth->check_auth(AUTH_VIEW);
 
 if( count($liste_ids) > 0 )
 {
-	$data = get_data($liste_ids);
+	$sql_liste_ids = implode(', ', $liste_ids);
 	
-	$num_inscrits = $data['num_inscrits'];
-	$num_temp     = $data['num_temp'];
-	$num_logs     = $data['num_logs'];
-	$last_log     = $data['last_log'];
+	//
+	// Récupération des nombres d'inscrits
+	//
+	$sql_abo_ids = "SELECT DISTINCT(abo_id)
+		FROM " . ABO_LISTE_TABLE . "
+		WHERE liste_id IN($sql_liste_ids)";
+	if( DATABASE == 'mysql' )
+	{
+		if( !($result = $db->query($sql_abo_ids)) )
+		{
+			trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
+		}
+		
+		$abo_ids = array();
+		
+		if( $db->num_rows() > 0 )
+		{
+			while( $row = $db->fetch_array($result) )
+			{
+				array_push($abo_ids, $row['abo_id']);
+			}
+		}
+		else
+		{
+			$abo_ids[] = 0;
+		}
+		
+		$sql_abo_ids = implode(', ', $abo_ids);
+	}
 	
-	$sql = "SELECT lf.file_id
+	$sql = "SELECT COUNT(abo_id) AS num_abo, abo_status
+		FROM " . ABONNES_TABLE . "
+		WHERE abo_id IN($sql_abo_ids)
+		GROUP BY abo_status";
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
+	}
+	
+	while( $row = $db->fetch_array($result) )
+	{
+		if( $row['abo_status'] == ABO_ACTIF )
+		{
+			$num_inscrits = $row['num_abo'];
+		}
+		else
+		{
+			$num_temp = $row['num_abo'];
+		}
+	}
+	
+	//
+	// Récupération du nombre d'archives
+	//
+	$sql = "SELECT SUM(liste_numlogs) AS num_logs 
+		FROM " . LISTE_TABLE . " 
+		WHERE liste_id IN($sql_liste_ids)";
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir le nombre de logs envoyés', ERROR);
+	}
+	
+	if( $row = $db->fetch_array($result) )
+	{
+		$num_logs = $row['num_logs'];
+	}
+	
+	//
+	// Récupération de la date du dernier envoi
+	//
+	$sql = "SELECT MAX(log_date) AS last_log 
+		FROM " . LOG_TABLE . " 
+		WHERE log_status = " . STATUS_SENDED . "
+			AND liste_id IN($sql_liste_ids)";
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
+	}
+	
+	if( $row = $db->fetch_array($result) )
+	{
+		$last_log = $row['last_log'];
+	}
+	
+	//
+	// Espace disque occupé
+	//
+	$sql_file_ids = "SELECT lf.file_id
 		FROM " . LOG_FILES_TABLE . " AS lf
 			INNER JOIN " . LOG_TABLE . " AS l
 			ON l.log_id = lf.log_id
-				AND l.liste_id IN(" . implode(', ', $liste_ids) . ")";
+				AND l.liste_id IN($sql_liste_ids)";
 	
 	if( DATABASE == 'mysql' )
 	{
-		if( !($result = $db->query($sql)) )
+		if( !($result = $db->query($sql_file_ids)) )
 		{
 			trigger_error('Impossible d\'obtenir la liste des identifiants de fichiers', ERROR);
 		}
@@ -69,16 +151,12 @@ if( count($liste_ids) > 0 )
 			$file_ids[] = 0;
 		}
 		
-		$file_ids = implode(', ', $file_ids);
-	}
-	else
-	{
-		$file_ids = $sql;
+		$sql_file_ids = implode(', ', $file_ids);
 	}
 	
 	$sql = "SELECT SUM(jf.file_size) AS totalsize
 		FROM " . JOINED_FILES_TABLE . " AS jf
-		WHERE jf.file_id IN($file_ids)";
+		WHERE jf.file_id IN($sql_file_ids)";
 	$result   = $db->query($sql);
 	$filesize = $db->result($result, 0, 'totalsize');
 	

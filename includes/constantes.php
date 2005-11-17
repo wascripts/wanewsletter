@@ -101,6 +101,9 @@ define('STATUS_MODEL',   3);
 define('ABO_ACTIF',   1);
 define('ABO_INACTIF', 0);
 
+define('SUBSCRIBE_CONFIRMED',     1);
+define('SUBSCRIBE_NOT_CONFIRMED', 0);
+
 //
 // Niveau des utilisateurs, ne pas modifier !! 
 //
@@ -118,9 +121,9 @@ define('MAX_IMPORT', 2500);
 define('ENGINE_BCC',  1);
 define('ENGINE_UNIQ', 2);
 
-define('CONFIRM_EVERYTIME', 2);
-define('CONFIRM_ONCE',      1);
-define('CONFIRM_NONE',      0);
+define('CONFIRM_ALWAYS', 2);
+define('CONFIRM_ONCE',   1);
+define('CONFIRM_NONE',   0);
 
 //
 // Codes d'erreur lors de l'upload 

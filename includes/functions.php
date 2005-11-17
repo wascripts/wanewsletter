@@ -91,7 +91,7 @@ function Location($url)
 	//
 	if( isset($db) && is_object($db) )
 	{
-		$db->close_connexion();
+		$db->close();
 	}
 	
 	$use_refresh   = preg_match("#Microsoft|WebSTAR|Xitami#i", server_info('SERVER_SOFTWARE'));
@@ -107,112 +107,6 @@ function Location($url)
 	
 	$output->redirect($url, 0);
 	$output->basic($message, 'Redirection');
-}
-
-/**
- * get_data()
- * 
- * Récupération du nombre de logs, inscrits, inscrits en attente 
- * de confirmation pour la/les liste(s) donnée(s)
- * 
- * @param mixed $liste_id_mixed    Id, ou tableau contenant les id de la/les listes 
- * 
- * @return array
- */
-function get_data($liste_id_mixed)
-{
-	global $db;
-	
-	if( is_array($liste_id_mixed) )
-	{
-		$sql_where = 'liste_id IN(' . implode(', ', $liste_id_mixed) . ')';
-	}
-	else
-	{
-		$sql_where = 'liste_id = ' . $liste_id_mixed;
-	}
-	
-	$data = array('num_inscrits' => 0, 'num_temp' => 0, 'num_logs' => 0, 'last_log' => 0);
-	
-	$sql = "SELECT DISTINCT(abo_id)
-		FROM " . ABO_LISTE_TABLE . "
-		WHERE " . $sql_where;
-	if( DATABASE == 'mysql' )
-	{
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
-		}
-		
-		$abo_ids = array();
-		
-		if( $db->num_rows() > 0 )
-		{
-			while( $row = $db->fetch_array($result) )
-			{
-				array_push($abo_ids, $row['abo_id']);
-			}
-		}
-		else
-		{
-			$abo_ids[] = 0;
-		}
-		
-		$abo_ids = implode(', ', $abo_ids);
-	}
-	else
-	{
-		$abo_ids = $sql;
-	}
-	
-	$sql = "SELECT COUNT(abo_id) AS num_abo, abo_status
-		FROM " . ABONNES_TABLE . "
-		WHERE abo_id IN($abo_ids)
-		GROUP BY abo_status";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
-	}
-	
-	while( $row = $db->fetch_array($result) )
-	{
-		if( $row['abo_status'] == ABO_ACTIF )
-		{
-			$data['num_inscrits'] = $row['num_abo'];
-		}
-		else
-		{
-			$data['num_temp'] = $row['num_abo'];
-		}
-	}
-	
-	$sql = "SELECT SUM(liste_numlogs) AS num_logs 
-		FROM " . LISTE_TABLE . " 
-		WHERE " . $sql_where;
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre de logs envoyés', ERROR);
-	}
-	
-	if( $row = $db->fetch_array($result) )
-	{
-		$data['num_logs'] = $row['num_logs'];
-	}
-	
-	$sql = "SELECT MAX(log_date) AS last_log 
-		FROM " . LOG_TABLE . " 
-		WHERE log_status = " . STATUS_SENDED . " AND " . $sql_where;
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
-	}
-	
-	if( $row = $db->fetch_array($result) )
-	{
-		$data['last_log'] = $row['last_log'];
-	}
-	
-	return $data;
 }
 
 /**
@@ -623,16 +517,14 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 	}
 	else
 	{
-		$sql = "SELECT a.abo_id
-			FROM " . ABONNES_TABLE . " AS a
-				INNER JOIN " . ABO_LISTE_TABLE . " AS al
-				ON al.abo_id = a.abo_id
-					AND al.liste_id = $liste_id
-			WHERE a.abo_status = " . ABO_INACTIF . "
-				AND a.abo_register_date < " . (time() - ($limitevalidate * 86400));
+		$sql = "SELECT abo_id
+			FROM " . ABO_LISTE_TABLE . "
+			WHERE liste_id = $liste_id
+				AND confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
+				AND register_date < " . (time() - ($limitevalidate * 86400));
 		if( !($result = $db->query($sql)) )
 		{
-			trigger_error('Impossible d\'obtenir les entrées à supprimer', ERROR);
+			trigger_error('Impossible d\'obtenir les entrées à supprimer de la table abo_liste', ERROR);
 		}
 		
 		$abo_ids = array();
@@ -640,35 +532,77 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 		{
 			array_push($abo_ids, $row['abo_id']);
 		}
+		$db->free_result($result);
 		
 		if( ($num_abo_deleted = count($abo_ids)) > 0 )
 		{
 			$sql_abo_ids = implode(', ', $abo_ids);
+			
 			$db->transaction(START_TRC);
 			
+			switch( DATABASE )
+			{
+				case 'mysql':
+					$sql = "SELECT abo_id
+						FROM " . ABO_LISTE_TABLE . "
+						WHERE abo_id IN($sql_abo_ids)
+						GROUP BY abo_id
+						HAVING COUNT(abo_id) = 1";
+					if( $result = $db->query($sql) )
+					{
+						if( $row = $db->fetch_array($result) )
+						{
+							$abo_ids = array();
+							
+							do
+							{
+								array_push($abo_ids, $row['abo_id']);
+							}
+							while( $row = $db->fetch_array($result) );
+							
+							$sql = "DELETE FROM " . ABONNES_TABLE . " 
+								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
+							if( !$db->query($sql) )
+							{
+								trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
+							}
+						}
+					}
+					break;
+				
+				default:
+					$sql = "DELETE FROM " . ABONNES_TABLE . "
+						WHERE abo_id IN(
+							SELECT abo_id
+							FROM " . ABO_LISTE_TABLE . "
+							WHERE abo_id IN($sql_abo_ids)
+							GROUP BY abo_id
+							HAVING COUNT(abo_id) = 1
+						)";
+					if( !$db->query($sql) )
+					{
+						trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
+					}
+					break;
+			}
+			
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
-				WHERE abo_id IN($sql_abo_ids)";
+				WHERE abo_id IN($sql_abo_ids)
+					AND liste_id = " . $liste_id;
 			if( !$db->query($sql) )
 			{
-				trigger_error('Impossible de supprimer les entrées périmées de la table abo_liste', ERROR);
-			}
-			
-			$sql = "DELETE FROM " . ABONNES_TABLE . "
-				WHERE abo_id IN($sql_abo_ids)";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les entrées périmées de la table abonnes', ERROR);
-			}
-			
-			$sql = "UPDATE " . LISTE_TABLE . " 
-				SET purge_next = " . (time() + ($purge_freq * 86400)) . " 
-				WHERE liste_id = " . $liste_id;
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table liste', ERROR);
+				trigger_error('Impossible de supprimer les entrées de la table abo_liste', ERROR);
 			}
 			
 			$db->transaction(END_TRC);
+		}
+		
+		$sql = "UPDATE " . LISTE_TABLE . " 
+			SET purge_next = " . (time() + ($purge_freq * 86400)) . " 
+			WHERE liste_id = " . $liste_id;
+		if( !$db->query($sql) )
+		{
+			trigger_error('Impossible de mettre à jour la table liste', ERROR);
 		}
 		
 		return $num_abo_deleted;

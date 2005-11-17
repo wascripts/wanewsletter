@@ -123,7 +123,8 @@ function create_stats($listdata, $month, $year)
 			$sql = "SELECT COUNT(a.abo_id) AS num_abo
 				FROM " . ABONNES_TABLE . " AS a
 					INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
-						AND al.liste_id = $listdata[liste_id]
+						AND al.liste_id  = $listdata[liste_id]
+						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 				WHERE ( a.abo_register_date BETWEEN $min_time AND $max_time )
 					AND a.abo_status = " . ABO_ACTIF;
 			if( $result = $db->query($sql) )

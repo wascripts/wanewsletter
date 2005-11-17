@@ -152,8 +152,9 @@ function launch_sending($listdata, $logdata)
 		FROM " . ABONNES_TABLE . " AS a
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al
 			ON al.abo_id = a.abo_id
-				AND al.liste_id = $listdata[liste_id]
-				AND al.send = 0
+				AND al.liste_id  = $listdata[liste_id]
+				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
+				AND al.send      = 0
 		WHERE a.abo_status = " . ABO_ACTIF;
 	if( !($result = $db->query($sql, 0, $nl_config['emails_sended'])) )
 	{
@@ -415,7 +416,8 @@ function launch_sending($listdata, $logdata)
 				INNER JOIN " . ABONNES_TABLE . " AS a
 				ON a.abo_id = al.abo_id
 					AND a.abo_status = " . ABO_ACTIF . "
-			WHERE al.liste_id = $listdata[liste_id]
+			WHERE al.liste_id    = $listdata[liste_id]
+				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 			GROUP BY al.send";
 		if( !($result = $db->query($sql)) )
 		{

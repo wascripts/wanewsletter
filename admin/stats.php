@@ -239,7 +239,7 @@ if( $img == 'graph' )
 			$height = (237 - $val);
 			
 			imagefilledrectangle($im, (33 + $int), $height, (45 + $int), 235, $black);
-			imagecopyresized($im, $src, (34 + $int), $height+1, 0, 0, 11, ceil($val - 2), 10, 1);
+			imagecopyresized($im, $src, (34 + $int), ($height + 1), 0, 0, 11, ceil($val - 2), 10, 1);
 			
 			$start = (40 + $int - ((imagefontwidth($text_font) * strlen($num_per_day[$day])) / 2));
 			$color_value = ( $num_per_day[$day] == $max_value ) ? $color2 : $black;
@@ -260,9 +260,8 @@ if( $img == 'camembert' )
 {
 	$sql = "SELECT COUNT(al.abo_id) AS num_inscrits, al.liste_id
 		FROM " . ABO_LISTE_TABLE . " AS al
-			INNER JOIN " . ABONNES_TABLE . " AS a ON a.abo_id = al.abo_id
-				AND a.abo_status = " . ABO_ACTIF . "
 		WHERE al.liste_id IN(" . implode(', ', $liste_ids) . ")
+			AND confirmed = " . SUBSCRIBE_CONFIRMED . "
 		GROUP BY al.liste_id";
 	if( !($result = $db->query($sql)) )
 	{

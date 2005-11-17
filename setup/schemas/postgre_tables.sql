@@ -17,10 +17,12 @@ CREATE SEQUENCE wa_log_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1
 -- Structure de la table "wa_abo_liste"
 -- 
 CREATE TABLE wa_abo_liste (
-	abo_id   INTEGER  NOT NULL DEFAULT 0,
-	liste_id SMALLINT NOT NULL DEFAULT 0,
-	format   SMALLINT NOT NULL DEFAULT 0,
-	send     SMALLINT NOT NULL DEFAULT 0,
+	abo_id        INTEGER  NOT NULL DEFAULT 0,
+	liste_id      SMALLINT NOT NULL DEFAULT 0,
+	format        SMALLINT NOT NULL DEFAULT 0,
+	send          SMALLINT NOT NULL DEFAULT 0,
+	confirmed     SMALLINT NOT NULL DEFAULT 0,
+	register_date INTEGER  NOT NULL DEFAULT 0,
 	CONSTRAINT wa_abo_liste_pk PRIMARY KEY (abo_id, liste_id)
 );
 

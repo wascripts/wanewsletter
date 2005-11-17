@@ -189,7 +189,7 @@ else if( $mode == 'abonnes' )
 	//
 	// Si la fonction de recherche est sollicitée 
 	//
-	$abo_status     = ABO_ACTIF;
+	$abo_confirmed  = SUBSCRIBE_CONFIRMED;
 	$sql_search     = '';
 	$search_keyword = ( !empty($_REQUEST['keyword']) ) ? trim($_REQUEST['keyword']) : '';
 	$search_date    = ( !empty($_REQUEST['days']) ) ? intval($_REQUEST['days']) : 0;
@@ -208,7 +208,7 @@ else if( $mode == 'abonnes' )
 			
 			if( $search_date < 0 )
 			{
-				$abo_status = ABO_INACTIF;
+				$abo_confirmed = SUBSCRIBE_NOT_CONFIRMED;
 			}
 			else
 			{
@@ -261,6 +261,7 @@ else if( $mode == 'abonnes' )
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al
 				ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
+					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 			WHERE a.abo_id = $abo_id";
 		if( !($result = $db->query($sql)) )
 		{
@@ -390,6 +391,7 @@ else if( $mode == 'abonnes' )
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al
 				ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
+					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 			WHERE a.abo_id = $abo_id";
 		if( !($result = $db->query($sql)) )
 		{
@@ -628,8 +630,9 @@ else if( $mode == 'abonnes' )
 		FROM " . ABONNES_TABLE . " AS a
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al
 			ON al.abo_id = a.abo_id
-				AND al.liste_id = $listdata[liste_id]
-		WHERE a.abo_status = " . $abo_status . $sql_search;
+				AND al.liste_id  = $listdata[liste_id]
+				AND al.confirmed = $abo_confirmed
+		WHERE a.abo_status = " . ABO_ACTIF . $sql_search;
 	if( !($result = $db->query($sql)) )
 	{
 		trigger_error('Impossible d\'obtenir le nombre d\'abonnés', ERROR);
@@ -643,8 +646,9 @@ else if( $mode == 'abonnes' )
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al
 				ON al.abo_id = a.abo_id
-					AND al.liste_id = $listdata[liste_id]
-			WHERE a.abo_status = $abo_status $sql_search
+					AND al.liste_id  = $listdata[liste_id]
+					AND al.confirmed = $abo_confirmed
+			WHERE a.abo_status = " . ABO_ACTIF . " $sql_search
 			ORDER BY $sql_type " . $sql_order;
 		if( !($result = $db->query($sql, $start, $abo_per_page)) )
 		{
@@ -855,7 +859,7 @@ else if( $mode == 'liste' )
 			'purge_freq'        => 7,
 			'pop_port'          => 110,
 			'liste_public'      => true,
-			'confirm_subscribe' => 2,
+			'confirm_subscribe' => CONFIRM_ALWAYS,
 		);
 		
 		$vararray2 = array(
@@ -1033,7 +1037,7 @@ else if( $mode == 'liste' )
 			'L_SENDER_EMAIL'       => $lang['Sender_email'],
 			'L_RETURN_EMAIL'       => $lang['Return_email'],
 			'L_CONFIRM_SUBSCRIBE'  => $lang['Confirm_subscribe'],
-			'L_CONFIRM_EVERYTIME'  => $lang['Confirm_everytime'],
+			'L_CONFIRM_ALWAYS'     => $lang['Confirm_always'],
 			'L_CONFIRM_ONCE'       => $lang['Confirm_once'],
 			'L_LIMITEVALIDATE'     => $lang['Limite_validate'],
 			'L_NOTE_VALIDATE'      => nl2br($lang['Note_validate']),
@@ -1064,7 +1068,7 @@ else if( $mode == 'liste' )
 			'SIG_EMAIL'            => htmlspecialchars($liste_sig),
 			'LIMITEVALIDATE'       => intval($limitevalidate),
 			'PURGE_FREQ'           => intval($purge_freq),
-			'CHECK_CONFIRM_EVERYTIME' => ( $confirm_subscribe == CONFIRM_EVERYTIME ) ? ' checked="checked"' : '',
+			'CHECK_CONFIRM_ALWAYS' => ( $confirm_subscribe == CONFIRM_ALWAYS ) ? ' checked="checked"' : '',
 			'CHECK_CONFIRM_ONCE'   => ( $confirm_subscribe == CONFIRM_ONCE ) ? ' checked="checked"' : '',
 			'CHECK_CONFIRM_NO'     => ( $confirm_subscribe == CONFIRM_NONE ) ? ' checked="checked"' : '',
 			'CHECK_PUBLIC_YES'     => ( $liste_public ) ? ' checked="checked"' : '',
@@ -1410,12 +1414,50 @@ else if( $mode == 'liste' )
 		trigger_error($message, MESSAGE); 
 	}
 	
-	$data = get_data($listdata['liste_id']);
+	//
+	// Récupération des nombres d'inscrits
+	//
+	$num_inscrits = 0;
+	$num_temp     = 0;
+	$last_log     = 0;
 	
-	$num_inscrits = $data['num_inscrits'];
-	$num_temp     = $data['num_temp'];
-	$num_logs     = $data['num_logs'];
-	$last_log     = $data['last_log'];
+	$sql = "SELECT COUNT(*) AS num_abo, confirmed
+		FROM " . ABO_LISTE_TABLE . "
+		WHERE liste_id = $listdata[liste_id]
+		GROUP BY confirmed";
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
+	}
+	
+	while( $row = $db->fetch_array($result) )
+	{
+		if( $row['confirmed'] == SUBSCRIBE_CONFIRMED )
+		{
+			$num_inscrits = $row['num_abo'];
+		}
+		else
+		{
+			$num_temp = $row['num_abo'];
+		}
+	}
+	
+	//
+	// Récupération de la date du dernier envoi
+	//
+	$sql = "SELECT MAX(log_date) AS last_log 
+		FROM " . LOG_TABLE . " 
+		WHERE log_status = " . STATUS_SENDED . "
+			AND liste_id = " . $listdata['liste_id'];
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
+	}
+	
+	if( $row = $db->fetch_array($result) )
+	{
+		$last_log = $row['last_log'];
+	}
 	
 	switch( $listdata['liste_format'] )
 	{
@@ -1444,8 +1486,8 @@ else if( $mode == 'liste' )
 	
 	switch( $listdata['confirm_subscribe'] )
 	{
-		case CONFIRM_EVERYTIME:
-			$l_confirm = $lang['Confirm_everytime'];
+		case CONFIRM_ALWAYS:
+			$l_confirm = $lang['Confirm_always'];
 			break;
 		case CONFIRM_ONCE:
 			$l_confirm = $lang['Confirm_once'];
@@ -1479,7 +1521,7 @@ else if( $mode == 'liste' )
 		'RETURN_EMAIL'        => $listdata['return_email'],
 		'CONFIRM_SUBSCRIBE'   => $l_confirm,
 		'NUM_SUBSCRIBERS'     => $num_inscrits,
-		'NUM_LOGS'            => $num_logs,
+		'NUM_LOGS'            => $listdata['liste_numlogs'],
 		'FORM_URL'            => htmlspecialchars($listdata['form_url']),
 		'STARTDATE'           => convert_time($nl_config['date_format'], $listdata['liste_startdate'])
 	));
@@ -1496,7 +1538,7 @@ else if( $mode == 'liste' )
 		));
 	}
 	
-	if( $num_logs )
+	if( $listdata['liste_numlogs'] > 0 )
 	{
 		$output->assign_block_vars('date_last_log', array(
 			'L_LAST_LOG' => $lang['Last_newsletter2'],

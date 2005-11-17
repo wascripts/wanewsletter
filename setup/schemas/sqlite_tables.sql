@@ -8,10 +8,12 @@
 -- Structure de la table "wa_abo_liste"
 -- 
 CREATE TABLE wa_abo_liste (
-	abo_id   INTEGER NOT NULL DEFAULT 0,
-	liste_id INTEGER NOT NULL DEFAULT 0,
-	format   INTEGER NOT NULL DEFAULT 0,
-	send     INTEGER NOT NULL DEFAULT 0,
+	abo_id        INTEGER NOT NULL DEFAULT 0,
+	liste_id      INTEGER NOT NULL DEFAULT 0,
+	format        INTEGER NOT NULL DEFAULT 0,
+	send          INTEGER NOT NULL DEFAULT 0,
+	confirmed     INTEGER NOT NULL DEFAULT 0,
+	register_date INTEGER NOT NULL DEFAULT 0,
 	CONSTRAINT wa_abo_liste_pk PRIMARY KEY (abo_id, liste_id)
 );
 

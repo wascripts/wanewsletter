@@ -37,8 +37,8 @@
 		<tr>
 			<td class="row1"><label>{L_CONFIRM_SUBSCRIBE}&#160;:</label></td>
 			<td class="row2">
-				<input type="radio" id="confirm_everytime" name="confirm_subscribe" value="2"{CHECK_CONFIRM_EVERYTIME} />
-				<label for="confirm_everytime" class="m-texte">{L_CONFIRM_EVERYTIME}</label>
+				<input type="radio" id="confirm_always" name="confirm_subscribe" value="2"{CHECK_CONFIRM_ALWAYS} />
+				<label for="confirm_always" class="m-texte">{L_CONFIRM_ALWAYS}</label>
 				<input type="radio" id="confirm_once" name="confirm_subscribe" value="1"{CHECK_CONFIRM_ONCE} />
 				<label for="confirm_once" class="m-texte">{L_CONFIRM_ONCE}</label>
 				<input type="radio" id="confirm_no" name="confirm_subscribe" value="0"{CHECK_CONFIRM_NO} />
