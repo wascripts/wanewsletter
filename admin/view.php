@@ -133,8 +133,6 @@ else if( $mode == 'iframe' )
 				$body = preg_replace('/(_\w+_)/', '<u>\\1</u>', $body);
 			}
 			
-			$body = purge_latin1($body);
-			
 			if( $format != FORMAT_HTML )
 			{
 				$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
@@ -1868,7 +1866,7 @@ else if( $mode == 'log' )
 			$output->assign_block_vars('logrow', array(
 				'TD_CLASS'    => ( !($i % 2) ) ? 'row1' : 'row2',
 				'ITEM_CLIP'   => $s_clip,
-				'LOG_SUBJECT' => purge_latin1(htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60))),
+				'LOG_SUBJECT' => htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
 				'LOG_DATE'    => convert_time($nl_config['date_format'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sessid('./view.php?mode=log&amp;action=view&amp;id=' . $logrow[$i]['log_id'] . $get_string)
 			));
@@ -1893,7 +1891,7 @@ else if( $mode == 'log' )
 				'L_SUBJECT'  => $lang['Log_subject'],
 				'L_NUMDEST'  => $lang['Log_numdest'],
 				
-				'SUBJECT'    => htmlspecialchars($logdata['log_subject']),
+				'SUBJECT'    => htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
 				'S_NUMDEST'  => $logdata['log_numdest'],
 				'S_CODEBASE' => $nl_config['urlsite'] . $nl_config['path'] . 'admin/',
 				'U_FRAME'    => sessid('./view.php?mode=iframe&amp;id=' . $log_id . '&amp;format=' . $format)

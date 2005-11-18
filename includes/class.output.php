@@ -199,7 +199,7 @@ class output extends Template {
 	 */
 	function addHiddenField($name, $value)
 	{
-		$this->hidden_fields .= '<input type="hidden" name="' . $name . '" value="' . $value . '" />' . "\r\n";
+		$this->hidden_fields .= sprintf('<input type="hidden" name="%s" value="%s" />', $name, $value) . "\r\n";
 	}
 	
 	/**
@@ -233,7 +233,7 @@ class output extends Template {
 	 */
 	function redirect($url, $timer)
 	{
-		$this->meta_redirect = '<meta http-equiv="Refresh" content="' . $timer . '; url=' . (( function_exists('sessid') ) ? sessid($url) : $url) . '" />';
+		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, (( function_exists('sessid') ) ? sessid($url) : $url));
 	}
 	
 	/**
@@ -417,6 +417,11 @@ class output extends Template {
 		$data = ob_get_contents();
 		ob_end_clean();
 		
+		if( $lang['CHARSET'] == 'ISO-8859-1' )
+		{
+			$data = purge_latin1($data);
+		}
+		
 		if( $this->output_xhtml )
 		{
 			$data = preg_replace(
@@ -454,9 +459,11 @@ class output extends Template {
 	{
 		global $lang;
 		
+		require WA_ROOTDIR . '/includes/http/main.php';
+		
+		header('Last-Modified: ' . HTTP_Main::date());
+		header('Expires: ' . HTTP_Main::date());
 		header('Cache-Control: no-cache, no-store, must-revalidate, private, pre-check=0, post-check=0, max-age=0');
-		header('Expires: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');
-		header('Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');
 		header('Pragma: no-cache');
 		header('Content-Language: ' . $lang['CONTENT_LANG']);
 		
@@ -496,6 +503,11 @@ class output extends Template {
 		$charset = ( !empty($lang['CHARSET']) ) ? $lang['CHARSET'] : 'ISO-8859-1';
 		
 		$this->send_headers();
+		
+		if( $charset == 'ISO-8859-1' )
+		{
+			$content = purge_latin1($content);
+		}
 		
 		echo <<<BASIC
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">

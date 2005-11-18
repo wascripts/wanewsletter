@@ -280,7 +280,7 @@ switch( $mode )
 			{
 				$output->assign_block_vars('logrow', array(
 					'LOG_ID'       => $row['log_id'],
-					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40)),
+					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
 					'SEND_PERCENT' => wa_number_format(round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2))
 				));
 			}
@@ -964,9 +964,9 @@ if( $mode == 'progress' )
 	launch_sending($listdata, $logdata);
 }
 
-$subject   = purge_latin1(htmlspecialchars($logdata['log_subject']));
-$body_text = purge_latin1(htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES));
-$body_html = purge_latin1(htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES));
+$subject   = htmlspecialchars($logdata['log_subject']);
+$body_text = htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
+$body_html = htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
 
 $output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('section', './envoi.php?mode=progress', $lang['List_send']);
