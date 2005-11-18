@@ -39,6 +39,24 @@ if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 	trigger_error('Not_auth_view', MESSAGE);
 }
 
+//
+// Vous pouvez, grâce à cette constante, désactiver la vérification de 
+// l'existence du tag {LINKS} dans les lettres au moment de l'envoi.
+// 
+// N'oubliez pas que permettre aux abonnés à vos listes de se désinscrire
+// simplement et rapidement si tel est leur souhait est une obligation légale (1).
+// Aussi, et sauf cas particuliers, vous ne devriez pas retirer ces liens 
+// des lettres que vous envoyez, et donc changer la valeur de cette constante.
+// 
+// (1) Au moins en France, en application de l'article 22 de la loi n° 2004-575 
+// du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN).
+//
+define('DISABLE_CHECK_LINKS', FALSE);
+
+//
+// End of Configuration
+//
+
 $listdata = $auth->listdata[$admindata['session_liste']];
 
 $mode = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
@@ -55,26 +73,13 @@ if( isset($_POST['cancel']) )
 	Location('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 }
 
-$vararray = array('send', 'progress', 'save', 'delete');
+$vararray = array('send', 'progress', 'save', 'delete', 'attach', 'unattach');
 foreach( $vararray AS $varname )
 {
-	$mode = ( isset($_REQUEST[$varname]) ) ? $varname : $mode;
-	
-	if( $mode != '' )
+	if( isset($_REQUEST[$varname]) )
 	{
+		$mode = $varname;
 		break;
-	}
-}
-
-if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) && empty($mode) )
-{
-	if( isset($_POST['attach']) )
-	{
-		$mode = 'attach';
-	}
-	else if( isset($_POST['unattach']) )
-	{
-		$mode = 'unattach';
 	}
 }
 
@@ -101,8 +106,6 @@ switch( $mode )
 		
 		if( isset($_POST['confirm']) )
 		{
-			$db->transaction(START_TRC);
-			
 			$sql = "SELECT liste_id, log_status
 				FROM " . LOG_TABLE . "
 				WHERE log_id = " . $logdata['log_id'];
@@ -128,6 +131,8 @@ switch( $mode )
 			}
 			
 			$sended = $db->result($result, 0, 'sended');
+			
+			$db->transaction(START_TRC);
 			
 			$sql = "UPDATE " . LOG_TABLE . "
 				SET log_status  = " . STATUS_SENDED . ",
@@ -319,12 +324,35 @@ switch( $mode )
 						trigger_error($message, MESSAGE);
 					}
 					
-					$logdata['log_body_html'] = convert_encoding($result['data'], $result['charset']);
-					
-					if( preg_match('/<\s*title\s*>(.+?)<\/title\s*>/is', $logdata['log_body_html'], $match) )
+					if( preg_match('/<head[^>]*>(.+?)<\/head>/is', $result['data'], $match_head) )
 					{
-						$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
+						if( empty($result['charset']) )
+						{
+							preg_match_all('/<meta[^>]+>/si', $match_head[1], $match_meta, PREG_SET_ORDER);
+							
+							foreach( $match_meta AS $meta )
+							{
+								if( preg_match('/http-equiv=("|\')Content-Type\\1/si', $meta[0])
+									&& preg_match('/content=("|\').+?;\s*charset=([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
+								{
+									$result['charset'] = $match[2];
+								}
+							}
+						}
+						
+						if( preg_match('/<title[^>]*>(.+?)<\/title>/is', $match_head[1], $match) )
+						{
+							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
+						}
+						
+						$result['data'] = preg_replace(
+							'/<(head[^>]*)>/si',
+							'<\\1><base href="' . htmlspecialchars(dirname($_POST['body_html_url'])) . '">',
+							$result['data']
+						);
 					}
+					
+					$logdata['log_body_html'] = convert_encoding($result['data'], $result['charset']);
 				}
 			}
 			else
@@ -543,7 +571,7 @@ switch( $mode )
 			
 			if( $mode == 'send' )
 			{
-				if( $listdata['liste_format'] != FORMAT_HTML && !strstr($logdata['log_body_text'], '{LINKS}') )
+				if( DISABLE_CHECK_LINKS == false && $listdata['liste_format'] != FORMAT_HTML && !strstr($logdata['log_body_text'], '{LINKS}') )
 				{
 					$error = true;
 					$msg_error[] = $lang['No_links_in_body'];
@@ -551,7 +579,7 @@ switch( $mode )
 				
 				if( $listdata['liste_format'] != FORMAT_TEXTE )
 				{
-					if( !strstr($logdata['log_body_html'], '{LINKS}') )
+					if( DISABLE_CHECK_LINKS == false && !strstr($logdata['log_body_html'], '{LINKS}') )
 					{
 						$error = true;
 						$msg_error[] = $lang['No_links_in_body'];
@@ -936,16 +964,9 @@ if( $mode == 'progress' )
 	launch_sending($listdata, $logdata);
 }
 
-$subject   = htmlspecialchars($logdata['log_subject']);
-$body_text = htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
-$body_html = htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
-
-if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
-{
-	$subject   = purge_latin1($subject);
-	$body_text = purge_latin1($body_text);
-	$body_html = purge_latin1($body_html);
-}
+$subject   = purge_latin1(htmlspecialchars($logdata['log_subject']));
+$body_text = purge_latin1(htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES));
+$body_html = purge_latin1(htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES));
 
 $output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('section', './envoi.php?mode=progress', $lang['List_send']);
