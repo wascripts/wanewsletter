@@ -46,7 +46,7 @@ class sql {
 		
 		$this->connect_id = @$sql_connect($dbhost, $dbuser, $dbpwd);
 		
-		if( $this->connect_id )
+		if( is_resource($this->connect_id) )
 		{
 			$select_db = @mysql_select_db($dbname, $this->connect_id);
 			

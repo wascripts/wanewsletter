@@ -46,7 +46,7 @@ class sql {
 		
 		$this->connect_id = @$sql_connect($dbhost, $dbuser, $dbpwd);
 		
-		if( $this->connect_id )
+		if( is_resource($this->connect_id) )
 		{
 			$select_db = @mysqli_select_db($dbname, $this->connect_id);
 			
@@ -84,8 +84,8 @@ class sql {
 		
 		foreach( $query_data AS $field => $value )
 		{
-			$fields[] = $field;
-			$values[] = $this->prepare_value($value);
+			array_push($fields, $field);
+			array_push($values, $this->prepare_value($value));
 		}
 		
 		if( $query_type == 'INSERT' )
