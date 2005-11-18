@@ -339,7 +339,7 @@ class Attach {
 				require WA_ROOTDIR . '/includes/http/URL_Parser.php';
 				
 				$URL =& new URL_Parser($tmp_filename);
-				if( $URL->isRelative == true || $URL->scheme != 'http' && ($URL->scheme != 'ftp' || !is_available_extension('ftp')) )
+				if( $URL->isRelative == true || $URL->scheme != 'http' && ($URL->scheme != 'ftp' || !extension_loaded('ftp')) )
 				{
 					$error = TRUE;
 					$msg_error[] = $lang['Message']['Invalid_url'];

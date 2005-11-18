@@ -38,7 +38,7 @@ if( $nl_config['disable_stats'] )
 {
 	trigger_error('Stats_disabled', MESSAGE);
 }
-else if( !is_available_extension('gd') )
+else if( !extension_loaded('gd') )
 {
 	trigger_error('No_gd_lib', MESSAGE);
 }

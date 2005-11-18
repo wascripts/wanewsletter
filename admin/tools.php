@@ -251,9 +251,9 @@ if( !isset($_POST['submit']) )
 //
 // On vérifie la présence des extensions nécessaires pour les différents formats de fichiers proposés
 //
-$zziplib_loaded = is_available_extension('zip');
-$zlib_loaded    = is_available_extension('zlib');
-$bzip2_loaded   = is_available_extension('bz2');
+$zziplib_loaded = extension_loaded('zip');
+$zlib_loaded    = extension_loaded('zlib');
+$bzip2_loaded   = extension_loaded('bz2');
 
 if( $zlib_loaded )
 {

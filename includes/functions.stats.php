@@ -99,7 +99,7 @@ function create_stats($listdata, $month, $year)
 {
 	global $db, $nl_config;
 	
-	if( $nl_config['disable_stats'] || !is_available_extension('gd') )
+	if( $nl_config['disable_stats'] || !extension_loaded('gd') )
 	{
 		return false;
 	}
@@ -155,7 +155,7 @@ function update_stats($listdata)
 {
 	global $nl_config;
 	
-	if( $nl_config['disable_stats'] || !is_available_extension('gd') )
+	if( $nl_config['disable_stats'] || !extension_loaded('gd') )
 	{
 		return false;
 	}
@@ -204,7 +204,7 @@ function remove_stats($liste_from, $liste_to = false)
 {
 	global $nl_config;
 	
-	if( $nl_config['disable_stats'] || !is_available_extension('gd') )
+	if( $nl_config['disable_stats'] || !extension_loaded('gd') )
 	{
 		return false;
 	}

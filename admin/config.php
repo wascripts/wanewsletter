@@ -110,7 +110,7 @@ if( isset($_POST['submit']) )
 		$new_config['smtp_port'] = 25;
 	}
 	
-	if( $new_config['use_ftp'] && is_available_extension('ftp') )
+	if( $new_config['use_ftp'] && extension_loaded('ftp') )
 	{
 		$result = Attach::connect_to_ftp(
 			$new_config['ftp_server'],
@@ -172,7 +172,7 @@ if( isset($_POST['submit']) )
 		$new_config['use_smtp'] = 0;
 	}
 	
-	if( !$new_config['disable_stats'] && is_available_extension('gd') )
+	if( !$new_config['disable_stats'] && extension_loaded('gd') )
 	{
 		require WA_ROOTDIR . '/includes/functions.stats.php';
 		
@@ -313,7 +313,7 @@ $output->assign_vars( array(
 	'USE_SMTP_STATUS'           => ( $new_config['use_smtp'] ) ? 'true' : 'false'
 ));
 
-if( is_available_extension('ftp') )
+if( extension_loaded('ftp') )
 {
 	$output->assign_block_vars('extension_ftp', array(
 		'L_USE_FTP'            => $lang['Use_ftp'],
@@ -351,7 +351,7 @@ if( Mailer::is_online_host() == false )
 	));
 }
 
-if( is_available_extension('gd') )
+if( extension_loaded('gd') )
 {
 	$output->assign_block_vars('extension_gd', array(
 		'TITLE_CONFIG_STATS'        => $lang['Title']['config_stats'],
