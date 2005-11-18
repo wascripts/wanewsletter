@@ -63,6 +63,26 @@ $month = ( !empty($_GET['month']) ) ? intval($_GET['month']) : date('n');
 
 $img_type = $nl_config['gd_img_type'];
 
+function send_image($name, $img)
+{
+	global $img_type;
+	
+	require WA_ROOTDIR . '/includes/http/main.php';
+	
+	header('Last-Modified: ' . HTTP_Main::date());
+	header('Expires: ' . HTTP_Main::date());
+	header('Cache-Control: no-cache, no-store, must-revalidate, proxy-revalidate, private, max-age=0');
+	header('Pragma: no-cache');
+	header('Content-Disposition: inline; filename="' . $name . '.' . $img_type . '"');
+	header('Content-Type: image/' . $img_type);
+	
+	$fct_image = 'image' . $img_type;
+	$fct_image($img);
+	imagedestroy($img);
+	
+	exit;
+}
+
 function display_img_error($str)
 {
 	global $img_type;
@@ -90,12 +110,7 @@ function display_img_error($str)
 	$startH = (($imageH - imagefontheight($text_font)) / 2);
 	imagestring($im, $text_font, $startW, $startH, $str, $black);
 	
-	header('Content-Type: image/' . $img_type);
-	$fct_image = 'image' . $img_type;
-	$fct_image($im);
-	
-	imagedestroy($im);
-	exit;
+	send_image('error', $im);
 }
 
 if( $img == 'graph' )
@@ -247,13 +262,7 @@ if( $img == 'graph' )
 		}
 	}
 	
-	header('Content-Disposition: inline; filename="subscribers_per_day.' . $img_type . '"');
-	header('Content-Type: image/' . $img_type);
-	$fct_image = 'image' . $img_type;
-	$fct_image($im);
-	
-	imagedestroy($im);
-	exit;
+	send_image('subscribers_per_day', $im);
 }
 
 if( $img == 'camembert' )
@@ -312,7 +321,7 @@ if( $img == 'camembert' )
 	$gray2 = imagecolorallocate($im, $gray2->red, $gray2->green, $gray2->blue);
 	
 	$color = array();
-	$colorList = array('F80', '6B0', '0BC', '30C', '608', 'C03');
+	$colorList = array('F80', '0A0', '0BC', '30C', '608', 'C03');
 	foreach( $colorList AS $hexColor )
 	{
 		$tmp = convertToRGB($hexColor);
@@ -420,13 +429,7 @@ if( $img == 'camembert' )
 	imagearc($im, $startX, $startY, 100, 100, 0, 360, $black);
 	imagearc($im, $startX, $startY, 101, 101, 0, 360, $black);
 	
-	header('Content-Disposition: inline; filename="parts_by_liste.' . $img_type . '"');
-	header('Content-Type: image/' . $img_type);
-	$fct_image = 'image' . $img_type;
-	$fct_image($im);
-	
-	imagedestroy($im);
-	exit;
+	send_image('parts_by_liste', $im);
 }
 
 $output->build_listbox(AUTH_VIEW, false);
