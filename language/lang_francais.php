@@ -139,6 +139,7 @@ $lang['Message']['Unknown_email']           = "Email inconnu";
 $lang['Message']['Email_banned']            = "Cet email ou ce type d'email a été banni";
 $lang['Message']['Allready_reg']            = "Vous êtes déja inscrit !";
 $lang['Message']['Reg_not_confirmed']       = "Vous êtes déjà inscrit mais n'avez pas encore confirmé votre inscription.\nVous allez recevoir un nouvel email de confirmation.\nAttention, le lien de confirmation contenu dans l'email sera valide pendant %d jours !\nPassé ce délai, il vous faudra vous réinscrire.";
+$lang['Message']['Reg_not_confirmed2']      = "Vous êtes déjà inscrit mais n'avez pas encore confirmé votre inscription";
 $lang['Message']['Allready_confirm']        = "Vous avez déja confirmé votre inscription !";
 $lang['Message']['Unknown_list']            = "Liste inconnue";
 $lang['Message']['Failed_sending']          = "L'email n'a pu être envoyé !";

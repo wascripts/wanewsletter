@@ -303,8 +303,9 @@ switch( $mode )
 				FROM " . ABONNES_TABLE . " AS a
 					INNER JOIN " . ABO_LISTE_TABLE . " AS al
 					ON al.abo_id = a.abo_id
-						AND al.liste_id = $listdata[liste_id]
-						AND al.format   = $format
+						AND al.liste_id  = $listdata[liste_id]
+						AND al.format    = $format
+						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 				WHERE a.abo_status = " . ABO_ACTIF;
 			if( !($result = $db->query($sql)) )
 			{
@@ -548,29 +549,29 @@ switch( $mode )
 			}
 			
 			$cpt = 0;
+			$report = '';
+			$emails = array_unique(array_map('trim', explode($glue, $list_tmp)));
 			$current_time = time();
-			$tmp_report   = '';
-			$emails_ary   = array_unique(array_map('trim', explode($glue, $list_tmp)));
 			
 			fake_header(false);
 			
 			$db->query("DROP INDEX abo_email_idx ON " . ABONNES_TABLE);
 			$db->query("DROP INDEX abo_status_idx ON " . ABONNES_TABLE);
 			
-			foreach( $emails_ary AS $email )
+			foreach( $emails AS $email )
 			{
 				// on désactive le check_mx si cette option est valide, cela prendrait trop de temps
-				$resultat = check_email($email, $admindata['session_liste'], 'inscription', true);
+				$result = check_email($email, $listdata['liste_id'], 'inscription', true);
 				
 				//
 				// Si l'email est ok après vérification, on commence l'insertion, 
 				// autrement, on ajoute au rapport d'erreur
 				//
-				if( !$resultat['error'] )
+				if( !$result['error'] )
 				{
 					$db->transaction(START_TRC);
 					
-					if( empty($resultat['abo_data']['abo_id']) )
+					if( empty($result['abodata']) )
 					{
 						$sql_data = array();
 						$sql_data['abo_email']         = $email;
@@ -587,11 +588,17 @@ switch( $mode )
 					}
 					else
 					{
-						$abo_id = $resultat['abo_data']['abo_id'];
+						$abo_id = $result['abodata']['abo_id'];
+						
+						// Déja inscrit à cette liste, mais n'a pas encore confirmé son inscription, on ignore
+						if( isset($result['abodata']['confirmed']) )
+						{
+							$report .= sprintf('%s : %s%s', $email, $lang['Message']['Reg_not_confirmed2'], WA_EOL);
+						}
 					}
 					
-					$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format) 
-						VALUES($abo_id, $listdata[liste_id], $format)";
+					$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, confirmed, register_date) 
+						VALUES($abo_id, $listdata[liste_id], $format, " . SUBSCRIBE_CONFIRMED . ", $current_time)";
 					if( !$db->query($sql) )
 					{
 						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
@@ -601,7 +608,7 @@ switch( $mode )
 				}
 				else
 				{
-					$tmp_report .= sprintf('%s : %s%s', $email, $resultat['message'], WA_EOL);
+					$report .= sprintf('%s : %s%s', $email, $result['message'], WA_EOL);
 				}
 				
 				fake_header(true);
@@ -621,15 +628,15 @@ switch( $mode )
 			// Selon que des emails ont été refusés ou pas, affichage du message correspondant 
 			// et écriture éventuelle du rapport d'erreur 
 			//
-			if( $tmp_report != '' )
+			if( $report != '' )
 			{
-				if( is_writable(WA_TMPDIR) && ($fw = @fopen(WA_TMPDIR . '/wa_import_report.txt', 'w')) )
+				if( is_writable(WA_TMPDIR) && ($fw = fopen(WA_TMPDIR . '/wa_import_report.txt', 'w')) )
 				{
 					$report_str  = '#' . WA_EOL;
 					$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
 					$report_str .= '#' . WA_EOL;
 					$report_str .= WA_EOL;
-					$report_str .= $tmp_report . WA_EOL;
+					$report_str .= $report . WA_EOL;
 					$report_str .= '# END' . WA_EOL;
 					
 					fwrite($fw, $report_str);
