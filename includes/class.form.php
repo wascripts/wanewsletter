@@ -283,6 +283,8 @@ class Wanewsletter {
 				}
 				
 				$db->transaction(END_TRC);
+				
+				$this->update_stats = true;
 				$this->alertAdmin();
 				
 				$this->message = $lang['Message']['Confirm_ok'];
