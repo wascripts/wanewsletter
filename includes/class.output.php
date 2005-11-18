@@ -435,7 +435,7 @@ class output extends Template {
 		//
 		if( isset($db) && is_object($db) )
 		{
-			$db->close_connexion();
+			$db->close();
 		}
 		
 		exit;
