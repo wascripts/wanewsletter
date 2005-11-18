@@ -156,11 +156,13 @@ function load_settings($admindata = array())
 		
 		if( !file_exists($language_path) )
 		{
-			trigger_error('<b>Les fichiers de language sont introuvables !</b>', CRITICAL_ERROR);
+			trigger_error('<b>Les fichiers de localisation sont introuvables !</b>', CRITICAL_ERROR);
 		}
 	}
 	
 	require $language_path;
+	
+	$lang['CHARSET'] = strtoupper($lang['CHARSET']);
 }
 
 /**
@@ -640,10 +642,7 @@ function strip_magic_quotes_gpc(&$data)
 /**
  * wa_realpath()
  * 
- * Fonction similaire à realpath() mais utilise un autre moyen d'obtenir l'url canonique si 
- * la fonction realpath() est désactivée
- * 
- * @param string $relative_path    Url relative à résoudre
+ * @param string $relative_path  Chemin relative à résoudre
  * 
  * @return string
  */
@@ -721,28 +720,6 @@ function active_urls($str)
 	
 	// Remove our padding..
 	return substr($str, 1);
-}
-
-/**
- * is_available_extension()
- * 
- * Vérifie si une extension est chargée, et tente de le faire si ce n'est pas le cas
- * 
- * @param string $module	: Nom de l'extension
- * 
- * @return boolean
- */
-function is_available_extension($module, $use_dl = false)
-{
-	$module_file = ( stristr(PHP_OS, 'WIN') ) ? 'php_' . $module . '.dll' : $module . '.so';
-	
-	if( extension_loaded($module) || ($use_dl == true && !config_status('safe_mode') && config_status('enable_dl') && @dl($module_file)) )
-	{
-		return true;
-	}
-	
-	return false;
-//	return extension_loaded($module);
 }
 
 /**
@@ -939,6 +916,13 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
  */
 function purge_latin1($str, $translite = false)
 {
+	global $lang;
+	
+	if( $lang['CHARSET'] != 'ISO-8859-1' )
+	{
+		return $str;
+	}
+	
 	if( $translite == true )
 	{
 		$convmap = array(
@@ -1106,7 +1090,7 @@ function convert_encoding($data, $charset, $check_bom = true)
 			
 			$data = strtr($data, $convmap);
 		}
-		else if( is_available_extension('mbstring') )
+		else if( extension_loaded('mbstring') )
 		{
 			$data = mb_convert_encoding($data, $GLOBALS['lang']['CHARSET'], $charset);
 		}
