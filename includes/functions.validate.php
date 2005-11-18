@@ -57,83 +57,42 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 		return array('error' => true, 'message' => $lang['Message']['Invalid_email']);
 	}
 	
-	$row = '';
-	if( $liste > 0 )
+	$sql = 'SELECT ban_email FROM ' . BANLIST_TABLE . ' 
+		WHERE liste_id = ' . $liste;
+	if( $result = $db->query($sql) )
 	{
-		$sql = 'SELECT ban_email FROM ' . BANLIST_TABLE . ' 
-			WHERE liste_id = ' . $liste;
-		if( $result = $db->query($sql) )
+		while( $row = $db->fetch_array($result) )
 		{
-			while( $row = $db->fetch_array($result) )
+			if( preg_match('/\b' . str_replace('*', '.*?', $row['ban_email']) . '\b/i', $email) )
 			{
-				if( preg_match('/\b' . str_replace('*', '.*?', $row['ban_email']) . '\b/i', $email) )
-				{
-					return array('error' => true, 'message' => $lang['Message']['Email_banned']);
-				}
+				return array('error' => true, 'message' => $lang['Message']['Email_banned']);
 			}
 		}
-		
-		$sql_email = $db->escape(strtolower($email));
-		
-		switch( DATABASE )
+	}
+	
+	$abodata   = array();
+	$sql_email = $db->escape(strtolower($email));
+	
+	$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key, a.abo_register_date,
+			a.abo_status, al.format, al.confirmed, al.register_date
+		FROM " . ABONNES_TABLE . " AS a
+			LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+				AND al.liste_id = $liste
+		WHERE LOWER(a.abo_email) = '$sql_email'";
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
+	}
+	
+	if( $abodata = $db->fetch_array($result) )
+	{
+		if( isset($abodata['confirmed']) )
 		{
-			case 'postgre':
-			case 'sqlite':
-			case 'mysql4':
-				$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
-						a.abo_register_date, a.abo_status, al.format, 1 AS is_registered
-					FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
-					WHERE LOWER(a.abo_email) = '$sql_email'
-						AND a.abo_id = al.abo_id
-						AND al.liste_id = $liste
-						UNION(
-							SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
-								a.abo_register_date, a.abo_status, al.format, 0 AS is_registered
-							FROM " . ABONNES_TABLE . " AS a
-							WHERE LOWER(a.abo_email) = '$sql_email'
-								AND NOT EXISTS(
-									SELECT abo_id
-									FROM " . ABO_LISTE_TABLE . " AS al
-									WHERE al.abo_id = a.abo_id
-										AND al.liste_id = $liste
-							)
-						)";
-				break;
-			
-			default:
-				$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
-						a.abo_register_date, a.abo_status, al.format, COUNT(al.abo_id) AS is_registered
-					FROM " . ABONNES_TABLE . " AS a
-					LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON a.abo_id = al.abo_id
-						AND al.liste_id = $liste
-					WHERE LOWER(a.abo_email) = '$sql_email'
-					GROUP BY al.abo_id";
-				break;
-		}
-		
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
-		}
-		
-		if( $row = $db->fetch_array($result) )
-		{
-			if( $row['is_registered'] )
+			if( $action == 'inscription' && $abodata['confirmed'] == SUBSCRIBE_CONFIRMED )
 			{
-				if( $action == 'inscription' )
-				{
-					return array('error' => true, 'message' => $lang['Message']['Allready_reg']);
-				}
+				return array('error' => true, 'message' => $lang['Message']['Allready_reg']);
 			}
-			else
-			{
-				if( $action == 'desinscription' || $action == 'setformat' )
-				{
-					return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
-				}
-			}
-			
-			if( $action == 'confirmation' && $row['abo_status'] == ABO_ACTIF )
+			else if( $action == 'confirmation' && $abodata['confirmed'] == SUBSCRIBE_CONFIRMED )
 			{
 				return array('error' => true, 'message' => $lang['Message']['Allready_confirm']);
 			}
@@ -143,8 +102,12 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 			return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
 		}
 	}
+	else if( $action != 'inscription' )
+	{
+		return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
+	}
 	
-	if( !$disable_check_mx && $nl_config['check_email_mx'] && ( !$liste || !is_array($row) ) )
+	if( !$disable_check_mx && $nl_config['check_email_mx'] && $abodata === false )
 	{
 		//
 		// Vérification de l'existence d'un Mail eXchanger sur le domaine de l'email, 
@@ -162,19 +125,40 @@ function check_email($email, $liste = 0, $action = '', $disable_check_mx = false
 		}
 	}
 	
-	return array('error' => false, 'abo_data' => $row);
+	return array('error' => false, 'abodata' => $abodata);
 }
 
+/**
+ * validate_pseudo()
+ * 
+ * @param string $pseudo
+ * 
+ * @return boolean
+ */
 function validate_pseudo($pseudo)
 {
 	return ( strlen($pseudo) >= 2 && strlen($pseudo) <= 30 );
 }
 
-function validate_pass($password)
+/**
+ * validate_pass()
+ * 
+ * @param string $passwd
+ * 
+ * @return boolean
+ */
+function validate_pass($passwd)
 {
-	return preg_match('/^[[:alnum:]][[:alnum:]_-]{2,30}[[:alnum:]]$/', $password);
+	return preg_match('/^[[:alnum:]][[:alnum:]_-]{2,30}[[:alnum:]]$/', $passwd);
 }
 
+/**
+ * validate_lang()
+ * 
+ * @param string $language
+ * 
+ * @return boolean
+ */
 function validate_lang($language)
 {
 	return preg_match('/^[\w_-]+$/', $language) && file_exists(WA_ROOTDIR . '/language/lang_' . $language . '.php');
