@@ -327,13 +327,12 @@ else if( $mode == 'abonnes' )
 		{
 			$email = ( !empty($_POST['email']) ) ? trim($_POST['email']) : '';
 			
-			require WA_ROOTDIR . '/includes/functions.validate.php';
+			require WAMAILER_DIR . '/class.mailer.php';
 			
-			$result = check_email($email);
-			if( $result['error'] )
+			if( Mailer::validate_email($email) == false )
 			{
 				$error = TRUE;
-				$msg_error[] = $result['message'];
+				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 			
 			if( !$error )

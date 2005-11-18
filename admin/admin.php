@@ -62,6 +62,7 @@ if( $mode == 'adduser' )
 	if( isset($_POST['submit']) )
 	{
 		require WA_ROOTDIR . '/includes/functions.validate.php';
+		require WAMAILER_DIR . '/class.mailer.php';
 		
 		if( !validate_pseudo($new_login) )
 		{
@@ -85,12 +86,10 @@ if( $mode == 'adduser' )
 			}
 		}
 		
-		$result = check_email($new_email);
-		
-		if( $result['error'] )
+		if( Mailer::validate_email($new_email) == false )
 		{
 			$error = TRUE;
-			$msg_error[] = $result['message'];
+			$msg_error[] = $lang['Message']['Invalid_email'];
 		}
 		
 		if( !$error )
@@ -109,8 +108,6 @@ if( $mode == 'adduser' )
 			{
 				trigger_error('Impossible d\'ajouter le nouvel administrateur', ERROR);
 			}
-			
-			require WAMAILER_DIR . '/class.mailer.php';
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			
@@ -268,6 +265,7 @@ if( isset($_POST['submit']) )
 	}
 	
 	require WA_ROOTDIR . '/includes/functions.validate.php';
+	require WAMAILER_DIR . '/class.mailer.php';
 	
 	if( $dateformat == '' )
 	{
@@ -304,12 +302,10 @@ if( isset($_POST['submit']) )
 		$set_password = TRUE;
 	}
 	
-	$result = check_email($email);
-	
-	if( $result['error'] )
+	if( Mailer::validate_email($email) == false )
 	{
 		$error = TRUE;
-		$msg_error[] = $result['message'];
+		$msg_error[] = $lang['Message']['Invalid_email'];
 	}
 	
 	if( !$error )
@@ -387,8 +383,6 @@ if( isset($_POST['submit']) )
 			}
 			
 			$pseudo = $db->result($result, 0, 0);
-			
-			require WAMAILER_DIR . '/class.mailer.php';
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			
