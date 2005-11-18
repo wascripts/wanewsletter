@@ -480,7 +480,6 @@ else if( $mode == 'abonnes' )
 					$sql = "SELECT abo_id
 						FROM " . ABO_LISTE_TABLE . "
 						WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
-							AND liste_id = $listdata[liste_id]
 						GROUP BY abo_id
 						HAVING COUNT(abo_id) = 1";
 					if( $result = $db->query($sql) )
@@ -511,7 +510,6 @@ else if( $mode == 'abonnes' )
 							SELECT abo_id
 							FROM " . ABO_LISTE_TABLE . "
 							WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
-								AND liste_id = $listdata[liste_id]
 							GROUP BY abo_id
 							HAVING COUNT(abo_id) = 1
 						)";
@@ -895,35 +893,24 @@ else if( $mode == 'liste' )
 				$msg_error[] = $lang['Unknown_format'];
 			}
 			
-			require WA_ROOTDIR . '/includes/functions.validate.php';
+			require WAMAILER_DIR . '/class.mailer.php';
 			
-			$result = check_email($sender_email);
-			if( $result['error'] )
+			if( Mailer::validate_email($sender_email) == false )
 			{
 				$error = TRUE;
-				$msg_error[] = $result['message'];
+				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 			
-			if( $return_email != '' )
+			if( !empty($return_email) && Mailer::validate_email($return_email) == false )
 			{
-				$result = check_email($return_email);
-				
-				if( $result['error'] )
-				{
-					$error = TRUE;
-					$msg_error[] = $result['message'];
-				}
+				$error = TRUE;
+				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 			
-			if( $liste_alias != '' )
+			if( !empty($liste_alias) && Mailer::validate_email($liste_alias) == false )
 			{
-				$result = check_email($liste_alias);
-				
-				if( $result['error'] )
-				{
-					$error = TRUE;
-					$msg_error[] = $result['message'];
-				}
+				$error = TRUE;
+				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 			
 			if( $use_cron && !is_disabled_func('fsockopen') )
