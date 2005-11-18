@@ -316,15 +316,20 @@ form#smallbox label {
 }
 
 input.pbutton, input.button {
-	font-size: .7em; font-weight: normal;
+	font-weight: normal;
+	font-size: .8em;
 	color: black;
 }
 
-input.pbutton { font-weight: bold !important; }
+input.pbutton { font-weight: bold; }
 
-input[type="submit"]:hover, input[type="reset"]:hover, input[type="button"]:hover {
-	color: #FA5;
-}
+input[type="reset"],
+input[type="button"],
+input[type="submit"] { border: 1px outset silver;}
+
+input[type="reset"]:active,
+input[type="button"]:active,
+input[type="submit"]:active { border-style: inset; }
 
 input[type="text"][disabled],
 input[type="password"][disabled] { background-color: #D6D8DA; }
