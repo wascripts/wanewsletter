@@ -239,8 +239,8 @@ div.left p, div.right p {
 	height: 24px;
 }
 
-ul.links         { margin: 0 2.5% -.9em; padding: 0; text-align: left; }
-ul.links.special { margin: 0 8% -.9em; }
+ul.links         { margin: 1% 2.5% -.9em; padding: 0; text-align: left; }
+ul.links.special { margin: 1% 8% -.9em; }
 
 ul.links li {
 	display: inline;
