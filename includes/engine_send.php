@@ -56,15 +56,11 @@ function launch_sending($listdata, $logdata)
 	//
 	// On traite les données de la newsletter à envoyer
 	//
-	if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
-	{
-		$logdata['log_subject'] = purge_latin1($logdata['log_subject'], true);
-	}
-	$mailer->set_subject($logdata['log_subject']);
+	$mailer->set_subject(purge_latin1($logdata['log_subject'], true));
 	
 	$body = array(
-		FORMAT_TEXTE => $logdata['log_body_text'],
-		FORMAT_HTML  => $logdata['log_body_html']
+		FORMAT_TEXTE => purge_latin1($logdata['log_body_text'], true),
+		FORMAT_HTML  => purge_latin1($logdata['log_body_html'])
 	);
 	
 	//
@@ -167,12 +163,6 @@ function launch_sending($listdata, $logdata)
 		
 		$abo_ids = array();
 		$format  = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
-		
-		if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
-		{
-			$body[FORMAT_TEXTE] = purge_latin1($body[FORMAT_TEXTE], true);
-			$body[FORMAT_HTML]  = purge_latin1($body[FORMAT_HTML]);
-		}
 		
 		if( $nl_config['engine_send'] == ENGINE_BCC )
 		{

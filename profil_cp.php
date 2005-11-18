@@ -490,16 +490,11 @@ switch( $mode )
 				$listdata = $abodata['listes'][$row['liste_id']];
 				$format   = $abodata['listes'][$row['liste_id']]['format'];
 				
-				if( $lang['CHARSET'] == 'ISO-8859-1' )
-				{
-					$row['log_subject'] = purge_latin1($row['log_subject'], true);
-				}
-				
 				$mailer->clear_all();
 				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
 				$mailer->set_address($address);
 				$mailer->set_format($format);
-				$mailer->set_subject($row['log_subject']);
+				$mailer->set_subject(purge_latin1($row['log_subject'], true));
 				
 				if( $listdata['return_email'] != '' )
 				{
@@ -508,19 +503,11 @@ switch( $mode )
 				
 				if( $format == FORMAT_TEXTE )
 				{
-					$body = $row['log_body_text'];
-					if( $lang['CHARSET'] == 'ISO-8859-1' )
-					{
-						$body = purge_latin1($body, true);
-					}
+					$body = purge_latin1($row['log_body_text'], true);
 				}
 				else
 				{
-					$body = $row['log_body_html'];
-					if( $lang['CHARSET'] == 'ISO-8859-1' )
-					{
-						$body = purge_latin1($body);
-					}
+					$body = purge_latin1($row['log_body_html']);
 				}
 				
 				//
@@ -719,7 +706,7 @@ switch( $mode )
 			{
 				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
 				
-				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . htmlspecialchars(cut_str($logrow['log_subject'], 40));
+				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . purge_latin1(htmlspecialchars(cut_str($logrow['log_subject'], 40)));
 				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
 			}
 			$select_log .= '</select>';

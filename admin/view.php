@@ -133,10 +133,7 @@ else if( $mode == 'iframe' )
 				$body = preg_replace('/(_\w+_)/', '<u>\\1</u>', $body);
 			}
 			
-			if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
-			{
-				$body = purge_latin1($body);
-			}
+			$body = purge_latin1($body);
 			
 			if( $format != FORMAT_HTML )
 			{
@@ -1868,17 +1865,10 @@ else if( $mode == 'log' )
 				$s_clip = '&#160;&#160;';
 			}
 			
-			$subject = htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60));
-			
-			if( strtoupper($lang['CHARSET']) == 'ISO-8859-1' )
-			{
-				$subject = purge_latin1($subject);
-			}
-			
 			$output->assign_block_vars('logrow', array(
 				'TD_CLASS'    => ( !($i % 2) ) ? 'row1' : 'row2',
 				'ITEM_CLIP'   => $s_clip,
-				'LOG_SUBJECT' => $subject,
+				'LOG_SUBJECT' => purge_latin1(htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60))),
 				'LOG_DATE'    => convert_time($nl_config['date_format'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sessid('./view.php?mode=log&amp;action=view&amp;id=' . $logrow[$i]['log_id'] . $get_string)
 			));
