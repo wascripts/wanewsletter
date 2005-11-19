@@ -79,6 +79,7 @@ function decompress_filedata($filename, $file_ext)
 			case 'bz2':
 			case 'txt':
 			case 'sql':
+			case 'xml':
 				$open  = 'fopen';
 				$eof   = 'feof';
 				$gets  = 'fgets';
@@ -133,6 +134,11 @@ $compress = ( !empty($_POST['compress']) ) ? $_POST['compress'] : 'none';
 
 $file_local  = ( !empty($_POST['file_local']) ) ? trim($_POST['file_local']) : '';
 $file_upload = ( !empty($_FILES['file_upload']) ) ? $_FILES['file_upload'] : array();
+
+if( !in_array($format, array(FORMAT_TEXTE, FORMAT_HTML)) )
+{
+	$format = FORMAT_TEXTE;
+}
 
 switch( $mode )
 {
@@ -222,7 +228,7 @@ if( !isset($_POST['submit']) )
 	foreach( $tools_ary AS $tool_name )
 	{
 		$selected = ( $mode == $tool_name ) ? ' selected="selected"' : '';
-		$tools_box .= '<option value="' . $tool_name . '"' . $selected . '>' . $lang['Title'][$tool_name] . '</option>';
+		$tools_box .= sprintf("<option value=\"%s\"%s> %s </option>\n\t", $tool_name, $selected, $lang['Title'][$tool_name]);
 	}
 	$tools_box .= '</select>';
 	
@@ -333,7 +339,7 @@ switch( $mode )
 				
 				$contents  = '<' . '?xml version="1.0"?' . ">\n"
 					. "<!-- Date : " . gmdate('d/m/Y H:i:s') . " GMT \xe2\x80\x93 Format : $label_format -->\n"
-					. "<liste>\n" . $contents . "</liste>";
+					. "<Wanliste>\n" . $contents . "</Wanliste>";
 				$mime_type = 'application/xml';
 				$ext = 'xml';
 			}
@@ -425,8 +431,9 @@ switch( $mode )
 	case 'import':
 		if( isset($_POST['submit']) )
 		{
-			$list_email = ( !empty($_POST['list_email']) ) ? trim($_POST['list_email']) : '';
-			$list_tmp   = '';
+			$list_email  = ( !empty($_POST['list_email']) ) ? trim($_POST['list_email']) : '';
+			$list_tmp    = '';
+			$data_is_xml = false;
 			
 			//
 			// Import via upload ou fichier local ? 
@@ -453,6 +460,7 @@ switch( $mode )
 				{
 					$tmp_filename = $file_upload['tmp_name'];
 					$filename     = $file_upload['name'];
+					$data_is_xml  = preg_match('#(?:/|\+)xml#', $file_upload['type']);
 					
 					if( !isset($file_upload['error']) && empty($tmp_filename) )
 					{
@@ -489,7 +497,7 @@ switch( $mode )
 					}
 				}
 				
-				if( !preg_match('/\.(txt|zip|gz|bz2)$/i', $filename, $match) )
+				if( !preg_match('/\.(txt|xml|zip|gz|bz2)$/i', $filename, $match) )
 				{
 					trigger_error('Bad_file_type', MESSAGE);
 				}
@@ -502,6 +510,11 @@ switch( $mode )
 				}
 				
 				$list_tmp = decompress_filedata($tmp_filename, $file_ext);
+				
+				if( !empty($file_local) )
+				{
+					$data_is_xml = (strncmp($list_tmp, '<?xml', 5) == 0);
+				}
 				
 				//
 				// S'il y a une restriction d'accés par l'open_basedir, et que c'est un fichier uploadé, 
@@ -526,7 +539,7 @@ switch( $mode )
 			// 
 			// Aucun fichier d'import reçu et textarea vide 
 			//
-			else
+			if( empty($list_tmp) )
 			{
 				$output->redirect('./tools.php?mode=import', 4);
 				
@@ -535,90 +548,172 @@ switch( $mode )
 				trigger_error($message, MESSAGE);
 			}
 			
-			require WA_ROOTDIR . '/includes/functions.validate.php'; 
-			
-			if( $glue == '' )
-			{
-				$list_tmp = preg_replace("/\r\n?/", "\n", $list_tmp);
-				$glue = "\n";
-			}
-			
 			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
 			{
 				$format = $listdata['liste_format'];
 			}
 			
-			$cpt = 0;
+			require WAMAILER_DIR . '/class.mailer.php';
+			
+			if( $data_is_xml == true )
+			{
+				$emails = array();
+				
+				if( extension_loaded('simplexml') )
+				{
+					$xml = simplexml_load_string($list_tmp);
+					$xml = $xml->xpath('/Wanliste/email');
+					
+					foreach( $xml AS $email )
+					{
+						array_push($emails, "$email");
+					}
+				}
+				else if( extension_loaded('xml') )
+				{
+					$depth = 0;
+					$tagName = '';
+					
+					$parser = xml_parser_create();
+					xml_set_element_handler($parser,
+						create_function('$parser,$name,$attrs',
+							'if( ($GLOBALS["depth"] == 0 && strtolower($name) == "wanliste") || $GLOBALS["depth"] > 0 ) {
+								$GLOBALS["depth"]++;
+							}
+							
+							$GLOBALS["tagName"] = strtolower($name);'
+						),
+						create_function('$parser,$name', '$GLOBALS["depth"]--;')
+					);
+					xml_set_character_data_handler($parser, create_function('$parser, $data',
+						'if( $GLOBALS["tagName"] == "email" && $GLOBALS["depth"] == 2 ) {
+							array_push($GLOBALS["emails"], $data);
+						}'
+					));
+					
+					if( !xml_parse($parser, $list_tmp) )
+					{
+						trigger_error(sprintf(
+							$lang['Message']['Invalid_xml_data'],
+							htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
+							xml_get_current_line_number($parser)
+						), MESSAGE);
+					}
+					
+					xml_parser_free($parser);
+				}
+				else
+				{
+					trigger_error('Xml_ext_needed', MESSAGE);
+				}
+			}
+			else
+			{
+				if( $glue == '' )
+				{
+					$list_tmp = preg_replace("/\r\n?/", "\n", $list_tmp);
+					$glue = "\n";
+				}
+				
+				$emails = explode($glue, $list_tmp);
+			}
+			
 			$report = '';
-			$emails = array_unique(array_map('trim', explode($glue, $list_tmp)));
+			$emails = array_slice($emails, 0, MAX_IMPORT);
+			$emails = array_map('trim', $emails);
+			$emails = array_unique($emails);
+			
 			$current_time = time();
+			$emails_ok    = array();
 			
 			fake_header(false);
+			
+			//
+			// Vérification syntaxique des emails
+			//
+			$emails = array_filter($emails, create_function('$email',
+				'global $lang, $report;
+				
+				if( Mailer::validate_email($email) ) {
+					return true;
+				} else {
+					$report .= sprintf(\'%s : %s%s\', $email, $lang[\'Message\'][\'Invalid_email\'], WA_EOL);
+				}'
+			));
+			
+			$sql_emails = array_map(create_function('$email', 'return $GLOBALS["db"]->escape($email);'), $emails);
+			
+			$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
+				FROM " . ABONNES_TABLE . " AS a
+					LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+						AND al.liste_id = $listdata[liste_id]
+				WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
+			if( !($result = $db->query($sql)) )
+			{
+				trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
+			}
 			
 			$db->query("DROP INDEX abo_email_idx ON " . ABONNES_TABLE);
 			$db->query("DROP INDEX abo_status_idx ON " . ABONNES_TABLE);
 			
-			foreach( $emails AS $email )
+			while( $abodata = $db->fetch_array($result) )
 			{
-				// on désactive le check_mx si cette option est valide, cela prendrait trop de temps
-				$result = check_email($email, $listdata['liste_id'], 'inscription', true);
-				
-				//
-				// Si l'email est ok après vérification, on commence l'insertion, 
-				// autrement, on ajoute au rapport d'erreur
-				//
-				if( !$result['error'] )
+				if( !isset($abodata['confirmed']) ) // N'est pas inscrit à cette liste
 				{
-					$db->transaction(START_TRC);
+					$sql_data = array();
+					$sql_data['abo_id']        = $abodata['abo_id'];
+					$sql_data['liste_id']      = $listdata['liste_id'];
+					$sql_data['format']        = $format;
+					$sql_data['register_key']  = generate_key(20, false);
+					$sql_data['register_date'] = $current_time;
+					$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 					
-					if( empty($result['abodata']) )
-					{
-						$sql_data = array();
-						$sql_data['abo_email']         = $email;
-						$sql_data['abo_register_key']  = generate_key();
-						$sql_data['abo_register_date'] = $current_time;
-						$sql_data['abo_status']        = ABO_ACTIF;
-						
-						if( !$db->query_build('INSERT', ABONNES_TABLE, $sql_data) )
-						{
-							trigger_error('Impossible d\'ajouter un nouvel abonné dans la table des abonnés', ERROR);
-						}
-						
-						$abo_id = $db->next_id();
-					}
-					else
-					{
-						$abo_id = $result['abodata']['abo_id'];
-						
-						// Déja inscrit à cette liste, mais n'a pas encore confirmé son inscription, on ignore
-						if( isset($result['abodata']['confirmed']) )
-						{
-							$report .= sprintf('%s : %s%s', $email, $lang['Message']['Reg_not_confirmed2'], WA_EOL);
-						}
-					}
-					
-					$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, confirmed, register_date) 
-						VALUES($abo_id, $listdata[liste_id], $format, " . SUBSCRIBE_CONFIRMED . ", $current_time)";
-					if( !$db->query($sql) )
+					if( !$db->query_build('INSERT', ABO_LISTE_TABLE, $sql_data) )
 					{
 						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
 					}
-					
-					$db->transaction(END_TRC);
 				}
 				else
 				{
-					$report .= sprintf('%s : %s%s', $email, $result['message'], WA_EOL);
+					$report .= sprintf('%s : %s%s', $abodata['abo_email'], $lang['Message']['Allready_reg'], WA_EOL);
 				}
+				
+				array_push($emails_ok, $abodata['abo_email']);
+			}
+			
+			$emails = array_diff($emails, $emails_ok);
+			
+			foreach( $emails AS $email )
+			{
+				$db->transaction(START_TRC);
+				
+				$sql_data = array();
+				$sql_data['abo_email']         = $email;
+				$sql_data['abo_register_key']  = generate_key(32, false);
+				$sql_data['abo_register_date'] = $current_time;
+				$sql_data['abo_status']        = ABO_ACTIF;
+				
+				if( !$db->query_build('INSERT', ABONNES_TABLE, $sql_data) )
+				{
+					trigger_error('Impossible d\'ajouter un nouvel abonné dans la table des abonnés', ERROR);
+				}
+				
+				$sql_data = array();
+				$sql_data['abo_id']        = $db->next_id();
+				$sql_data['liste_id']      = $listdata['liste_id'];
+				$sql_data['format']        = $format;
+				$sql_data['register_key']  = generate_key(20, false);
+				$sql_data['register_date'] = $current_time;
+				$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
+				
+				if( !$db->query_build('INSERT', ABO_LISTE_TABLE, $sql_data) )
+				{
+					trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
+				}
+				
+				$db->transaction(END_TRC);
 				
 				fake_header(true);
-				
-				if( $cpt >= MAX_IMPORT )
-				{
-					break;
-				}
-				
-				$cpt++;
 			}
 			
 			$db->query("CREATE UNIQUE INDEX abo_email_idx ON " . ABONNES_TABLE . " (abo_email)");
