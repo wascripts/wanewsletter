@@ -347,7 +347,7 @@ switch( $mode )
 						
 						$result['data'] = preg_replace(
 							'/<(head[^>]*)>/si',
-							'<\\1><base href="' . htmlspecialchars(dirname($_POST['body_html_url'])) . '">',
+							"<\\1>\n<base href=\"" . htmlspecialchars(dirname($result['URI'])) . "/\">",
 							$result['data']
 						);
 					}

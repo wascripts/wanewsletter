@@ -1163,7 +1163,12 @@ function http_get_contents($URL, &$errstr)
 		}
 	}
 	
-	return array('type' => $datatype, 'charset' => $charset, 'data' => $client->responseData);
+	return array(
+		'URI'     => $client->url->__toString(),
+		'type'    => $datatype,
+		'charset' => $charset,
+		'data'    => $client->responseData
+	);
 }
 
 /**
