@@ -34,13 +34,22 @@ define('FUNCTIONS_INC', true);
  * 
  * Génération d'une chaîne aléatoire
  * 
- * @param integer $num_char    nombre de caractères
+ * @param integer $num_char    Nombre de caractères
+ * @param integer $use_uniqid  Active/Désactive l'utilisation de uniqid() (très
+ *                             consommateur de ressources lors des importations de masse)
  * 
  * @return string
  */
-function generate_key($num_char = 32)
+function generate_key($num_char = 32, $use_uniqid = true)
 {
-	$rand_str = md5( uniqid( rand() ) );
+	if( $use_uniqid == true )
+	{
+		$rand_str = md5( uniqid( rand() ) );
+	}
+	else
+	{
+		$rand_str = md5( microtime() );
+	}
 	
 	return ( $num_char >= 32 ) ? $rand_str : substr($rand_str, 0, $num_char);
 }
@@ -192,12 +201,12 @@ function wanewsletter_handler($errno, $errstr, $errfile, $errline)
 	{
 		if( !empty($db->sql_error['message']) )
 		{
-			$debug_text .= '<b>SQL query</b> :<br /> ' . nl2br($db->sql_error['query']) . "<br /><br />\n";
-			$debug_text .= '<b>SQL errno</b> : ' . $db->sql_error['errno'] . "<br />\n";
-			$debug_text .= '<b>SQL error</b> : ' . $db->sql_error['message'] . "<br />\n<br />\n";
+			$debug_text .= '<b>SQL query</b>&#160;:<br /> ' . nl2br($db->sql_error['query']) . "<br /><br />\n";
+			$debug_text .= '<b>SQL errno</b>&#160;: ' . $db->sql_error['errno'] . "<br />\n";
+			$debug_text .= '<b>SQL error</b>&#160;: ' . $db->sql_error['message'] . "<br />\n<br />\n";
 		}
 		
-		$debug_text .= '<b>Fichier</b> : ' . basename($errfile) . " \n<b>Ligne</b> : " . $errline . ' <br />';
+		$debug_text .= '<b>Fichier</b>&#160;: ' . basename($errfile) . " \n<b>Ligne</b>&#160;: " . $errline . '<br />';
 	}
 	
 	if( !empty($lang['Message'][$errstr]) )
@@ -217,7 +226,7 @@ function wanewsletter_handler($errno, $errstr, $errfile, $errline)
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" dir="ltr">
 <head>
-	<title>Erreur critique !</title>
+	<title>Erreur critique&#160;!</title>
 	
 	<style type="text/css" media="screen">
 	body { margin: 10px; text-align: left; }
@@ -225,7 +234,7 @@ function wanewsletter_handler($errno, $errstr, $errfile, $errline)
 </head>
 <body>
 	<div>
-		<h1>Erreur critique !</h1>
+		<h1>Erreur critique&#160;!</h1>
 		
 		<p>$errstr</p>
 	</div>
@@ -265,7 +274,7 @@ BASIC;
 				
 				$output->assign_vars( array(
 					'MSG_TITLE' => $msg_title,
-					'MSG_TEXT'	=> $errstr
+					'MSG_TEXT'  => $errstr
 				));
 				
 				$output->pparse('body');
@@ -281,11 +290,11 @@ BASIC;
 	
 	if( $errno == E_WARNING )
 	{
-		$php_errormsg .= '<b>Warning !</b> : ';
+		$php_errormsg .= '<b>Warning !</b>&#160;: ';
 	}
 	else if( $errno == E_NOTICE )
 	{
-		$php_errormsg .= '<b>Notice</b> : ';
+		$php_errormsg .= '<b>Notice</b>&#160;: ';
 	}
 	
 	$php_errormsg .= $errstr . ' in <b>' . basename($errfile) . '</b> on line <b>' . $errline . '</b>';
@@ -1153,7 +1162,7 @@ function http_get_contents($URL, &$errstr)
 	$client->openURL('GET', $URL);
 	$client->send();
 	
-	if( empty($charset) && preg_match('#(?:/|\+)xml#', $datatype) && substr($client->responseData, 0, 5) == '<?xml' )
+	if( empty($charset) && preg_match('#(?:/|\+)xml#', $datatype) && strncmp($client->responseData, '<?xml', 5) == 0 )
 	{
 		$prolog = substr($client->responseData, 0, strpos($client->responseData, "\n"));
 		
