@@ -116,7 +116,7 @@ define('USER',  1);
 define('SUBSCRIBE_NOTIFY_YES', 1);
 define('SUBSCRIBE_NOTIFY_NO',  0);
 
-define('MAX_IMPORT', 2500);
+define('MAX_IMPORT', 5000);
 
 define('ENGINE_BCC',  1);
 define('ENGINE_UNIQ', 2);
