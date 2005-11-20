@@ -20,7 +20,7 @@ Restant à faire :
 	au lieu de :
 	http://domain.tld/path/to/subscribe.php?action=inscription&email=bobe@phpcodeur.net&code=c61b334dbf80e6b442feec9a08b4b40b&liste=5
   - Donc ajouter un champ register_key ? 16 ou 32 caractères ?
-  - Permettrer de facilité l’implémentation de "Inscription à plusieurs listes en même temps" car
+  - Permettrait de facilité l’implémentation de "Inscription à plusieurs listes en même temps" car
     le code fourni pourrait matcher plusieurs entrées de la table abo_liste, correspondant aux
 	listes dont on fait confirmation ...?
 
@@ -31,20 +31,15 @@ Restant à faire :
   - Rendre optionnel le dbhost et dbuser dans script d'install (postgresql peut ne nécessiter que dbname pour pg_connect())
   - Ajouts register_key, register_date et confirmed et cp éventuel des données en provenance de abonnes
 
+- Vérifier bon fonctionnement de profil_cp.php
 - Revoir cron.php
   - Fonctionnement en ligne de commande
-  - Modifs sur class.form.php bien prises en compte
-
-- Revoir profil_cp.php
   - Modifs sur class.form.php bien prises en compte
 
 - Passer newsletter texte en utf-8 si caractères windows-1252, sauf si une constante
   mise à true/false pour préférer translitération
 - Vérifier que les schémas de tables sont valides pour chaque db (ils sont ok pour MySQL et SQLite, à confirmer. Tester pour PostgreSQL)
 
-- passer les id de manière sécure (abo_id ou log_id) lors des suppressions dans view.php, actuellement, c'est pas secure
-  passer le tableau d'ids en session ? champ session_data en plus dans la table session et stocker tableau
-  de données de session serialisé ?
 - Optimiser la phase d’envoi
 
 
@@ -56,8 +51,9 @@ Restant à faire :
 - Annuler un envoi
 - Revoir la doc de manière générale
   - Ajout des abréviations dans la documentation
-
-- Tester pour voir si modifs concernant confirmation à chaque inscription sont OK
+- passer les id de manière sécure (abo_id ou log_id) lors des suppressions dans view.php, actuellement, c'est pas secure
+  passer le tableau d'ids en session ? champ session_data en plus dans la table session et stocker tableau
+  de données de session serialisé ?
 
 
 Pas sùr/Chiant à faire :
@@ -71,16 +67,6 @@ Pas sùr/Chiant à faire :
     un paramètre magic_quotes_gpc interne et null par défaut mais peut être positionné à true ou false
   - Voir travaux dans tmp/wanewsletter.php
 - Voir avec J.J Solari pour fct des javascript dans Safari
-
-
-Bric à brac :
--------------
-
-"Oui, en fait je prend un raccourci. La cassure n'est pas sur 3.23 / 4.0 mais sur
-4.0.x / 4.0.y, je ne me souviens plus exactement où.
-Il y a aussi des gens qui utilisent les mysql_* avec mysql 4.1 et > mais c'est
-au prix d'une bidouille (une config spéciale du serveur mysql qui lui demande
-d'utiliser les anciens protocoles d'authentification)"
 
 
 Ajout à la FAQ :
