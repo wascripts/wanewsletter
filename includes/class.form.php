@@ -172,7 +172,7 @@ class Wanewsletter {
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'welcome_cron1' : 'welcome_form1';
 			$link_action = 'desinscription';
 			
-			$this->alertAdmin();
+			$this->alert_admin();
 		}
 		
 		$mailer->clear_all();
@@ -285,7 +285,7 @@ class Wanewsletter {
 				$db->transaction(END_TRC);
 				
 				$this->update_stats = true;
-				$this->alertAdmin();
+				$this->alert_admin();
 				
 				$this->message = $lang['Message']['Confirm_ok'];
 				
@@ -452,16 +452,16 @@ class Wanewsletter {
 		return $prefix . 'action=' . $action . '&email=' . rawurlencode($this->account['email']) . '&code=' . $this->account['code'] . '&liste=' . $this->listdata['liste_id'];
 	}
 	
-	function alertAdmin()
+	function alert_admin()
 	{
 		global $nl_config, $db, $mailer;
 		
-		$sql = "SELECT a.admin_login, a.admin_email 
-			FROM " . ADMIN_TABLE . " AS a, " . AUTH_ADMIN_TABLE . " AS aa 
-			WHERE a.admin_id = aa.admin_id 
-				AND aa.liste_id = " . $this->listdata['liste_id'] . " 
-				AND a.email_new_inscrit = " . SUBSCRIBE_NOTIFY_YES . " 
-				AND ( a.admin_level = " . ADMIN . " OR aa.auth_view = " . TRUE . " )";
+		$sql = "SELECT a.admin_login, a.admin_email
+			FROM " . ADMIN_TABLE . " AS a
+				INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
+					AND aa.liste_id = {$this->listdata['liste_id']}
+					AND ( a.admin_level = " . ADMIN . " OR aa.auth_view = " . TRUE . " )
+			WHERE a.email_new_inscrit = " . SUBSCRIBE_NOTIFY_YES;
 		if( $result = $db->query($sql) )
 		{
 			if( $row = $db->fetch_array($result) )
