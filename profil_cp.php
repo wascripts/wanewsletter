@@ -68,10 +68,8 @@ function check_login($email, $regkey = '', $passwd = '')
 			a.abo_register_date, a.abo_status, al.format, l.liste_id, l.liste_name, l.sender_email,
 			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias $fields_str
 		FROM " . ABONNES_TABLE . " AS a
-			INNER JOIN " . ABO_LISTE_TABLE . " AS al
-			ON al.abo_id = a.abo_id
-			INNER JOIN " . LISTE_TABLE . " AS l
-			ON l.liste_id = al.liste_id
+			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
 		WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
 	if( $regkey != '' && $passwd != '' )
 	{
@@ -168,34 +166,25 @@ switch( $mode )
 		if( isset($_POST['submit']) )
 		{
 			$regkey = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
-			$result = check_email($email, -1, '', true);
 			
-			if( !$result['error'] )
+			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey, md5($regkey))) )
 			{
-				if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey, md5($regkey))) )
+				if( $abodata['status'] == ABO_ACTIF )
 				{
-					if( $abodata['status'] == ABO_ACTIF )
-					{
-						$key  = ( $regkey == $abodata['regkey'] ) ? $regkey : md5($regkey);
-						$data = serialize(array('email' => $abodata['email'], 'key' => $key));
-						
-						$session->send_cookie('abo', $data, (time() + 3600));
-						
-						Location('profil_cp.php');
-					}
+					$key  = ( $regkey == $abodata['regkey'] ) ? $regkey : md5($regkey);
+					$data = serialize(array('email' => $abodata['email'], 'key' => $key));
 					
-					trigger_error('Inactive_account', MESSAGE);
+					$session->send_cookie('abo', $data, (time() + 3600));
+					
+					Location('profil_cp.php');
 				}
-				else
-				{
-					$error = TRUE;
-					$msg_error[] = $lang['Message']['Error_login'];
-				}
+				
+				trigger_error('Inactive_account', MESSAGE);
 			}
 			else
 			{
 				$error = TRUE;
-				$msg_error[] = $result['message'];
+				$msg_error[] = $lang['Message']['Error_login'];
 			}
 		}
 		
@@ -219,71 +208,61 @@ switch( $mode )
 	case 'sendkey':
 		if( isset($_POST['submit']) )
 		{
-			$result = check_email($email, -1, '', true);
-			
-			if( !$result['error'] )
+			if( $abodata = check_login($email) )
 			{
-				if( $abodata = check_login($email) )
+				list($liste_id, $listdata) = each($abodata['listes']);
+				
+				require WAMAILER_DIR . '/class.mailer.php';
+				
+				$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+				
+				if( $nl_config['use_smtp'] )
 				{
-					list($liste_id, $listdata) = each($abodata['listes']);
-					
-					require WAMAILER_DIR . '/class.mailer.php';
-					
-					$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-					
-					if( $nl_config['use_smtp'] )
-					{
-						$mailer->smtp_path = WAMAILER_DIR . '/';
-						$mailer->use_smtp(
-							$nl_config['smtp_host'],
-							$nl_config['smtp_port'],
-							$nl_config['smtp_user'],
-							$nl_config['smtp_pass']
-						);
-					}
-					
-					$mailer->correctRpath = !is_disabled_func('ini_set');
-					$mailer->set_charset($lang['CHARSET']);
-					$mailer->set_format(FORMAT_TEXTE);
-					
-					if( $abodata['pseudo'] != '' )
-					{
-						$address = array($abodata['pseudo'] => $abodata['email']);
-					}
-					else
-					{
-						$address = $abodata['email'];
-					}
-					
-					$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
-					$mailer->set_address($address);
-					$mailer->set_subject($lang['Subject_email']['Sendkey']);
-					$mailer->set_return_path($listdata['return_email']);
-					
-					$mailer->use_template('account_info', array(
-						'EMAIL'   => $abodata['email'],
-						'CODE'    => $abodata['regkey'],
-						'URLSITE' => $nl_config['urlsite'],
-						'SIG'     => $listdata['liste_sig']
-					));
-					
-					if( !$mailer->send() )
-					{
-						trigger_error('Failed_sending', ERROR);
-					}
-					
-					trigger_error('IDs_sended', MESSAGE);
+					$mailer->smtp_path = WAMAILER_DIR . '/';
+					$mailer->use_smtp(
+						$nl_config['smtp_host'],
+						$nl_config['smtp_port'],
+						$nl_config['smtp_user'],
+						$nl_config['smtp_pass']
+					);
+				}
+				
+				$mailer->correctRpath = !is_disabled_func('ini_set');
+				$mailer->set_charset($lang['CHARSET']);
+				$mailer->set_format(FORMAT_TEXTE);
+				
+				if( $abodata['pseudo'] != '' )
+				{
+					$address = array($abodata['pseudo'] => $abodata['email']);
 				}
 				else
 				{
-					$error = TRUE;
-					$msg_error[] = $lang['Message']['Unknown_email'];
+					$address = $abodata['email'];
 				}
+				
+				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+				$mailer->set_address($address);
+				$mailer->set_subject($lang['Subject_email']['Sendkey']);
+				$mailer->set_return_path($listdata['return_email']);
+				
+				$mailer->use_template('account_info', array(
+					'EMAIL'   => $abodata['email'],
+					'CODE'    => $abodata['regkey'],
+					'URLSITE' => $nl_config['urlsite'],
+					'SIG'     => $listdata['liste_sig']
+				));
+				
+				if( !$mailer->send() )
+				{
+					trigger_error('Failed_sending', ERROR);
+				}
+				
+				trigger_error('IDs_sended', MESSAGE);
 			}
 			else
 			{
 				$error = TRUE;
-				$msg_error[] = $result['message'];
+				$msg_error[] = $lang['Message']['Unknown_email'];
 			}
 		}
 		
@@ -430,8 +409,7 @@ switch( $mode )
 			
 			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
 				FROM " . JOINED_FILES_TABLE . " AS jf
-					INNER JOIN " . LOG_FILES_TABLE . " AS lf
-					ON lf.file_id = jf.file_id
+					INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 						AND lf.log_id IN(" . implode(', ', $sql_log_id) . ")";
 			if( !($result = $db->query($sql)) )
 			{
@@ -654,15 +632,15 @@ switch( $mode )
 			trigger_error(sprintf($lang['Message']['Logs_sent'], $abodata['email']), MESSAGE);
 		}
 		
-		$sql_list_id = array();
+		$liste_ids = array();
 		foreach( $abodata['listes'] AS $liste_id => $listdata )
 		{
-			array_push($sql_list_id, $liste_id);
+			array_push($liste_ids, $liste_id);
 		}
 		
 		$sql = "SELECT log_id, liste_id, log_subject, log_date 
 			FROM " . LOG_TABLE . " 
-			WHERE liste_id IN(" . implode(', ', $sql_list_id) . ") 
+			WHERE liste_id IN(" . implode(', ', $liste_ids) . ") 
 				AND log_status = " . STATUS_SENDED . " 
 			ORDER BY log_date DESC";
 		if( !($result = $db->query($sql)) )
@@ -706,7 +684,7 @@ switch( $mode )
 			{
 				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
 				
-				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . purge_latin1(htmlspecialchars(cut_str($logrow['log_subject'], 40)));
+				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
 				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
 			}
 			$select_log .= '</select>';

@@ -31,7 +31,19 @@ if( !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
 }
 
 define('IN_NEWSLETTER', true);
-define('WA_ROOTDIR', $waroot);
+
+//
+// Compatibilité avec les version < 2.3.x
+//
+if( !defined('WA_ROOTDIR') )
+{
+	if( !isset($waroot) )
+	{
+		exit("Le répertoire de Wanewsletter n'est pas défini!");
+	}
+	
+	define('WA_ROOTDIR', rtrim($waroot, '/'));
+}
 
 $default_magic_quotes_runtime = get_magic_quotes_runtime();
 $default_error_reporting      = error_reporting(E_ALL);
@@ -57,6 +69,14 @@ foreach( $vararray AS $varname )
 	${$varname} = ( !empty($_REQUEST[$varname]) ) ? $_REQUEST[$varname] : '';
 }
 
+//
+// Compatibilité avec les version < 2.3.x
+//
+if( strlen($code) == 32 )
+{
+	$code = substr($code, 0, 20);
+}
+
 if( $action != '' )
 {
 	$sql = 'SELECT * FROM ' . LISTE_TABLE . ' 
@@ -70,12 +90,11 @@ if( $action != '' )
 		//
 		// Purge des éventuelles inscriptions dépassées
 		// pour parer au cas d'une réinscription
-		// (Moyen de faire autrement pour éviter cette requète - voir plus tard)
 		//
 		purge_liste();
 		
-		require WA_ROOTDIR . '/includes/class.form.php';
 		require WAMAILER_DIR . '/class.mailer.php';
+		require WA_ROOTDIR . '/includes/class.form.php';
 		include WA_ROOTDIR . '/includes/functions.stats.php';
 		
 		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
@@ -147,7 +166,7 @@ if( defined('IN_WA_FORM') )
 }
 
 //
-// remise des paramètres par défaut
+// remise des paramêtres par défaut
 //
 error_reporting($default_error_reporting);
 
