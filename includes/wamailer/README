@@ -1,0 +1,49 @@
+﻿----------
+Wamailer
+----------
+
+Qu’est-ce que c’est ?
+---------------------
+
+  Wamailer est un script de génération et d’envoi d’emails. Les envois peuvent
+également être effectués directement avec sendmail (si disponible) ou via un
+serveur SMTP plutôt que de passer par la fonction mail() de PHP.
+
+  L’hébergeur Online est également supporté.
+
+
+Installation
+------------
+
+  Incluez simplement la classe dans vos scripts. Exemple d’utilisation :
+
+  require 'wamailer/class.mailer.php';
+  
+  $mailer = new Mailer();
+  $mailer->set_from('my@domain.example', 'MyName');
+  $mailer->set_address('other@domain.example');
+  $mailer->set_subject('This is the subject');
+  $mailer->set_message('This is the body of mail');
+  
+  $mailer->send();
+
+  Consultez la documentation fournie avec Wamailer pour plus de détails sur le
+fonctionnement et les possibilités de celle-ci.
+
+  La documentation est également accessible à l’adresse HTTP suivante :
+  http://phpcodeur.net/wascripts/wamailer/doc/2.2/
+
+
+Licence
+-------
+
+  Wamailer est distribué sous licence LGPL. Pour plus d’informations,
+consultez le fichier COPYING livré avec Wamailer, ou rendez-vous à l’URL
+suivante : http://www.gnu.org/copyleft/lesser.html
+
+
+Auteurs
+-------
+
+  Aurélien Maille <wascripts@phpcodeur.net> Développeur principal
+

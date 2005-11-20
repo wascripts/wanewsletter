@@ -1,0 +1,7 @@
+﻿Version 2.2
+--------------------
+
+– Ajustements pour respecter la syntaxe des commentaires phpDoc
+– Switch automatique vers la fonction email() de l’hébergeur Online le cas
+  échéant, plus besoin de spécifier manuellement via Mailer::hebergeur
+– Passage à la licence LGPL
