@@ -1,0 +1,51 @@
+﻿----------
+DOM-Compat
+----------
+
+Qu’est-ce que c’est ?
+---------------------
+
+  DOM-Compat est une petite application écrite en JavaScript et dont le but est 
+de faciliter la vie des personnes écrivant des programmes JavaScript nécessitant
+l’utilisation du module « évènement » du DOM du W3C.
+
+  Cette partie du DOM étant supporté avec plus ou moins de bonheur par les
+différents navigateurs du marché, je ne doute pas que certaines personnes
+trouveront leur compte dans l’utilisation de DOM-Compat.
+
+
+Installation
+------------
+
+  Il vous suffit simplement de lier le fichier DOM-Compat.js à votre page HTML 
+par le biais de l’élément <script/>.
+
+  Par la suite, vous utiliserez dans vos scripts l’objet DOM_Events ainsi
+accessible. Par exemple, pour ajouter un guetteur pour l’évènement « load »,
+vous utiliserez l’instruction suivante :
+
+  DOM_Events.addListener('load', myFunction, false, document);
+
+  Comme vous pouvez le constater, l’utilisation et les arguments à passer sont
+les mêmes que si vous utilisiez le DOM natif. L’exception est que vous passez en
+argument supplémentaire l’objet sur lequel vous souhaitez faire l’opération
+(ajout de guetteur, retrait, …).
+
+  À propos de cet argument supplémentaire, ne passez jamais l’objet window en
+argument, utilisez plutôt l’objet document dans ces cas-là (ceci est conforme à
+la note rédigée par le W3C concernant le DOM Events niveau 3).
+
+
+Licence
+-------
+
+  DOM-Compat est distribué sous licence LGPL. Pour plus d’informations,
+consultez le fichier COPYING livré avec DOM-Compat, ou rendez-vous à l’URL
+suivante : http://www.gnu.org/copyleft/lesser.html
+
+
+Auteurs
+-------
+
+  Aurélien Maille <bobe@webnaute.net> Développeur principal
+
