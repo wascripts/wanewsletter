@@ -102,7 +102,7 @@ function exec_queries($sql_ary, $return_error = false)
 
 error_reporting(E_ALL);
 
-$new_version  = '2.3-dev';
+$new_version  = '###VERSION###';
 $default_lang = 'francais';
 
 $supported_lang = array(
@@ -218,7 +218,7 @@ require WA_ROOTDIR . '/includes/constantes.php';
 
 foreach( $supported_db AS $db_name => $db_infos )
 {
-	if( !is_available_extension($db_infos['extension']) )
+	if( !extension_loaded($db_infos['extension']) )
 	{
 		unset($supported_db[$db_name]);
 	}
@@ -234,7 +234,7 @@ require WA_ROOTDIR . '/includes/class.output.php';
 
 $config_file  = '<' . "?php\n\n";
 $config_file .= "//\n";
-$config_file .= "// Paramètres d'accés à la base de données\n";
+$config_file .= "// Paramêtres d'accés à la base de données\n";
 $config_file .= "// Ne pas modifier !\n";
 $config_file .= "//\n";
 $config_file .= "define('NL_INSTALLED', true);\n\n";
