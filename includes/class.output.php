@@ -736,7 +736,6 @@ BASIC;
 		if( !$display )
 		{
 			$list_box .= '<option value="0">' . $lang['Choice_liste'] . '</option>';
-			$list_box .= '<option value="0"> -------------------- </option>';
 		}
 		$list_box .= $tmp_box . '</select>';
 		

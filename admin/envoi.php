@@ -407,7 +407,7 @@ switch( $mode )
 					}
 					
 					$log_box .= sprintf(
-						"<option style=\"%s\" value=\"%d\">&#8211; %s %s</option>\n",
+						"<option style=\"%s\" value=\"%d\"> %s %s</option>\n",
 						$style, $row['log_id'], htmlspecialchars(cut_str($row['log_subject'], 40)), $status
 					);
 				}

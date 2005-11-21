@@ -11,22 +11,28 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	
 	DOM_Events.addListener('load', function() {
 		DOM_Events.addListener('change', function() {
-			var displayVal = (this.selectedIndex == (this.options.length - 1)) ? 'table-row-group' : 'none';
+			var displayVal = null;
 			
-			//
-			// La détection de navigateur est à éviter mais il arrive que l'on ait pas trop le choix...
-			// IE ne reconnait pas la valeur 'table-row' de la propriété CSS display. Ça semble en revanche
-			// fonctionner avec 'block'...
-			//
-			if( navigator.userAgent.indexOf('Opera') == -1 && navigator.userAgent.indexOf('MSIE') != -1 && displayVal == 'table-row-group' ) {
-				displayVal = 'block';
+			if( this.selectedIndex == (this.options.length - 1) ) {
+				//
+				// La détection de navigateur est à éviter mais il arrive que l'on ait pas trop le choix...
+				// IE ne reconnait pas la valeur 'table-row-group' de la propriété CSS display. Ça semble 
+				// en revanche fonctionner avec 'block'...
+				//
+				if( navigator.userAgent.indexOf('Opera') == -1 && navigator.userAgent.indexOf('MSIE') != -1 ) {
+					displayVal = 'block';
+				} else {
+					displayVal = 'table-row-group';
+				}
+			} else {
+				displayVal = 'none';
 			}
 			
 			document.getElementById('loadByURL').style.display = displayVal;
 		}, false, document.forms[0].elements['id']);
 		
 		var newOption = document.createElement('option');
-		newOption.appendChild(document.createTextNode('{script_load_by_url.L_FROM_AN_URL}\u2026'));
+		newOption.appendChild(document.createTextNode('\u2013 {script_load_by_url.L_FROM_AN_URL}\u2026'));
 		
 		document.forms[0].elements['id'].appendChild(newOption);
 	}, false, document);
