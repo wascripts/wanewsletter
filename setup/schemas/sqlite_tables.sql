@@ -65,7 +65,8 @@ CREATE TABLE wa_auth_admin (
 	auth_import INTEGER NOT NULL DEFAULT 0,
 	auth_export INTEGER NOT NULL DEFAULT 0,
 	auth_ban    INTEGER NOT NULL DEFAULT 0,
-	auth_attach INTEGER NOT NULL DEFAULT 0
+	auth_attach INTEGER NOT NULL DEFAULT 0,
+	cc_admin    INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX admin_id_idx ON wa_auth_admin (admin_id);
 

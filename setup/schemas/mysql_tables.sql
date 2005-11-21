@@ -66,6 +66,7 @@ CREATE TABLE wa_auth_admin (
 	auth_export TINYINT(1) NOT NULL DEFAULT 0,
 	auth_ban    TINYINT(1) NOT NULL DEFAULT 0,
 	auth_attach TINYINT(1) NOT NULL DEFAULT 0,
+	cc_admin    TINYINT(1) NOT NULL DEFAULT 0,
 	INDEX admin_id_idx (admin_id)
 ) TYPE=MyISAM;
 

@@ -981,6 +981,23 @@ if( $mode == 'progress' )
 		array_push($supp_address, $admindata['admin_email']);
 	}
 	
+	$sql = "SELECT a.admin_email
+		FROM " . ADMIN_TABLE . " AS a
+			INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
+				AND aa.cc_admin = " . TRUE . "
+		WHERE a.admin_id <> " . $admindata['admin_id'];
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
+	}
+	
+	while( $row = $db->fetch_array($result) )
+	{
+		array_push($supp_address, $row['admin_email']);
+	}
+	
+	$supp_address = array_unique($supp_address); // Normalement, il n'y a pas de doublons mais au cas où...
+	
 	//
 	// On lance l'envoi
 	//
