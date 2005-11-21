@@ -549,6 +549,19 @@ switch( $mode )
 	case 'attach':
 	case 'send':
 	case 'save':
+		$cc_admin = ( !empty($_POST['cc_admin']) ) ? 1 : 0;
+		
+		if( ($mode == 'save' || $mode == 'send') && $listdata['cc_admin'] != $cc_admin )
+		{
+			$listdata['cc_admin'] = $cc_admin;
+			
+			$sql = "UPDATE " . AUTH_ADMIN_TABLE . "
+				SET cc_admin = $cc_admin
+				WHERE admin_id   = $admindata[admin_id]
+					AND liste_id = " . $listdata['liste_id'];
+			$db->query($sql);
+		}
+		
 		if( ( $mode == 'attach' && empty($logdata['log_id']) ) || $mode == 'send' || $mode == 'save' )
 		{
 			if( $logdata['log_subject'] == '' )
@@ -959,9 +972,19 @@ if( $mode == 'progress' )
 	}
 	
 	//
+	// Adresses supplémentaires à mettre en destinataires
+	//
+	$supp_address = array();
+	
+	if( $listdata['cc_admin'] )
+	{
+		array_push($supp_address, $admindata['admin_email']);
+	}
+	
+	//
 	// On lance l'envoi
 	//
-	launch_sending($listdata, $logdata);
+	launch_sending($listdata, $logdata, $supp_address);
 }
 
 $subject   = htmlspecialchars($logdata['log_subject']);
@@ -991,6 +1014,8 @@ $output->assign_vars(array(
 	'L_STATUS'                => $lang['Status'],
 	'L_STATUS_WRITING'        => $lang['Status_writing'],
 	'L_STATUS_MODEL'          => $lang['Status_model'],
+	'L_CC_ADMIN'              => $lang['Receive_copy'],
+	'L_CC_ADMIN_TITLE'        => htmlspecialchars($lang['Receive_copy_title']),
 	'L_SEND_BUTTON'           => $lang['Button']['send'],
 	'L_SAVE_BUTTON'           => $lang['Button']['save'],
 	'L_DELETE_BUTTON'         => $lang['Button']['delete'],
@@ -1001,6 +1026,7 @@ $output->assign_vars(array(
 	'S_SUBJECT'               => $subject,
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
 	'SELECTED_STATUS_MODEL'   => ( $logdata['log_status'] == STATUS_MODEL ) ? ' selected="selected"' : '',
+	'CHECKED_CC_ADMIN'        => ( $listdata['cc_admin'] ) ? ' checked="checked"' : '',
 	
 	'S_ENCTYPE'               => ( FILE_UPLOADS_ON ) ? 'multipart/form-data' : 'application/x-www-form-urlencoded', 
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()

@@ -42,14 +42,15 @@ include WA_ROOTDIR . '/includes/tags.inc.php';
  * Cette fonction est appellée soit dans envoi.php lors de l'envoi, soit 
  * dans le fichier appellé originellement cron.php 
  * 
- * @param array $listdata  Tableau des données de la liste concernée
- * @param array $logdata   Tableau des données de la newsletter
+ * @param array $listdata      Tableau des données de la liste concernée
+ * @param array $logdata       Tableau des données de la newsletter
+ * @param array $supp_address  Adresses de destinataires supplémentaires
  * 
  * @access private
  * 
  * @return void
  */
-function launch_sending($listdata, $logdata)
+function launch_sending($listdata, $logdata, $supp_address = array())
 {
 	global $nl_config, $db, $dbhost, $dbuser, $dbpassword, $dbname, $lang, $mailer, $other_tags;
 	
@@ -178,6 +179,16 @@ function launch_sending($listdata, $logdata)
 			}
 			while( $row = $db->fetch_array($result) );
 			
+			if( $listdata['liste_format'] != FORMAT_HTML )
+			{
+				$abonnes[FORMAT_TEXTE] = array_merge($abonnes[FORMAT_TEXTE], $supp_address);
+			}
+			
+			if( $listdata['liste_format'] != FORMAT_TEXTE )
+			{
+				$abonnes[FORMAT_HTML] = array_merge($abonnes[FORMAT_HTML], $supp_address);
+			}
+			
 			//
 			// Tableau pour remplacer les tags par des chaines vides
 			// Non utilisation des tags avec le moteur d'envoi en copie cachée
@@ -254,6 +265,32 @@ function launch_sending($listdata, $logdata)
 			}
 			$mailerHTML->set_message($body[FORMAT_HTML]);
 			
+			$supp_address_ok = array();
+			foreach( $supp_address AS $address )
+			{
+				if( $listdata['liste_format'] != FORMAT_HTML )
+				{
+					array_push($supp_address_ok, array(
+						'format' => FORMAT_TEXTE,
+						'abo_pseudo' => '',
+						'abo_email'  => $address,
+						'abo_register_key' => '',
+						'abo_id'     => -1
+					));
+				}
+				
+				if( $listdata['liste_format'] != FORMAT_TEXTE )
+				{
+					array_push($supp_address_ok, array(
+						'format' => FORMAT_HTML,
+						'abo_pseudo' => '',
+						'abo_email'  => $address,
+						'abo_register_key' => '',
+						'abo_id'     => -1
+					));
+				}
+			}
+			
 			do
 			{
 				$abo_format = ( !$format ) ? $row['format'] : $format;
@@ -311,7 +348,7 @@ function launch_sending($listdata, $logdata)
 				{
 					foreach( $other_tags AS $data )
 					{
-						if( $row[$data['column_name']] != '' )
+						if( isset($row[$data['column_name']]) )
 						{
 							if( !is_numeric($row[$data['column_name']]) && $abo_format == FORMAT_HTML )
 							{
@@ -345,7 +382,7 @@ function launch_sending($listdata, $logdata)
 				
 				fake_header(true);
 			}
-			while( $row = $db->fetch_array($result) );
+			while( ($row = $db->fetch_array($result)) != false || ($row = array_pop($supp_address_ok)) != null );
 			
 			//
 			// Aucun email envoyé, il y a manifestement un problème, on affiche le message d'erreur

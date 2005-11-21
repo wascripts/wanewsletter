@@ -3,7 +3,7 @@
  *
  *          Fichier         :   lang_francais.php [francais]
  *          Créé le         :   29 juin 2002
- *          Dernière modif  :   26 septembre 2005
+ *          Dernière modif  :   21 novembre 2005
  *          Email           :   wascripts@phpcodeur.net
  *
  *              Copyright © 2002-2005 phpCodeur
@@ -601,7 +601,9 @@ $lang['Done']                       = "Effectué";
 $lang['Status_writing']             = "Newsletter normale";
 $lang['Status_model']               = "Modèle réutilisable";
 $lang['File_on_server']             = "fichier existant";
-$lang['Cancel_send_log']            = "'Êtes-vous sùr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
+$lang['Cancel_send_log']            = "Êtes-vous sùr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
+$lang['Receive_copy']               = "Recevoir une copie";
+$lang['Receive_copy_title']         = "Si actif, vous recevrez une copie de la newsletter envoyée";
 
 
 //
