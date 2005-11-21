@@ -1,0 +1,10 @@
+Hi %USER%,
+
+A person has unsubscribed to the "%LISTE%" list.
+
+His or her email address is %EMAIL%.
+
+See you soon on %URLSITE%
+
+~~~~~~~~~~
+%SIG%

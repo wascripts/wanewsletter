@@ -172,7 +172,7 @@ class Wanewsletter {
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'welcome_cron1' : 'welcome_form1';
 			$link_action = 'desinscription';
 			
-			$this->alert_admin();
+			$this->alert_admin(true);
 		}
 		
 		$mailer->clear_all();
@@ -285,7 +285,7 @@ class Wanewsletter {
 				$db->transaction(END_TRC);
 				
 				$this->update_stats = true;
-				$this->alert_admin();
+				$this->alert_admin(true);
 				
 				$this->message = $lang['Message']['Confirm_ok'];
 				
@@ -352,6 +352,7 @@ class Wanewsletter {
 				}
 				
 				$db->transaction(END_TRC);
+				$this->alert_admin(false);
 				
 				return true;
 			}
@@ -452,16 +453,31 @@ class Wanewsletter {
 		return $prefix . 'action=' . $action . '&email=' . rawurlencode($this->account['email']) . '&code=' . $this->account['code'] . '&liste=' . $this->listdata['liste_id'];
 	}
 	
-	function alert_admin()
+	function alert_admin($new_subscribe)
 	{
 		global $nl_config, $db, $mailer;
+		
+		if( $new_subscribe == true )
+		{
+			$fieldname  = 'email_new_subscribe';
+			$fieldvalue = SUBSCRIBE_NOTIFY_YES;
+			$subject    = $lang['Subject_email']['New_subscribe'];
+			$template   = 'admin_new_subscribe';
+		}
+		else
+		{
+			$fieldname  = 'email_unsubscribe';
+			$fieldvalue = UNSUBSCRIBE_NOTIFY_YES;
+			$subject    = $lang['Subject_email']['Unsubscribe'];
+			$template   = 'admin_unsubscribe';
+		}
 		
 		$sql = "SELECT a.admin_login, a.admin_email
 			FROM " . ADMIN_TABLE . " AS a
 				INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
 					AND aa.liste_id = {$this->listdata['liste_id']}
 					AND ( a.admin_level = " . ADMIN . " OR aa.auth_view = " . TRUE . " )
-			WHERE a.email_new_inscrit = " . SUBSCRIBE_NOTIFY_YES;
+			WHERE a.$fieldname = " . $fieldvalue;
 		if( $result = $db->query($sql) )
 		{
 			if( $row = $db->fetch_array($result) )
@@ -469,9 +485,9 @@ class Wanewsletter {
 				$mailer->clear_all();
 				
 				$mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
-				$mailer->set_subject($lang['Subject_email']['New_subscriber']);
+				$mailer->set_subject($subject);
 				
-				$mailer->use_template('admin_new_subscribe', array(
+				$mailer->use_template($template, array(
 					'EMAIL'   => $this->account['email'],
 					'LISTE'   => unhtmlspecialchars($this->listdata['liste_name']),
 					'URLSITE' => $nl_config['urlsite'],

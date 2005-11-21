@@ -24,12 +24,21 @@
 			<td class="row2"><input type="text" id="dateformat" name="dateformat" value="{DATEFORMAT}" size="15" maxlength="20" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="row1"><label>{L_EMAIL_NEW_INSCRIT}&#160;:</label></td>
+			<td class="row1"><label>{L_EMAIL_NEW_SUBSCRIBE}&#160;:</label></td>
 			<td class="row2">
-				<input type="radio" id="email_new_inscrit_yes" name="email_new_inscrit" value="1" {EMAIL_NEW_INSCRIT_YES}/>
-				<label for="email_new_inscrit_yes" class="m-texte">{L_YES}</label>
-				<input type="radio" id="email_new_inscrit_no" name="email_new_inscrit" value="0" {EMAIL_NEW_INSCRIT_NO}/>
-				<label for="email_new_inscrit_no" class="m-texte">{L_NO}</label>
+				<input type="radio" id="email_new_subscribe_yes" name="email_new_subscribe" value="1" {EMAIL_NEW_SUBSCRIBE_YES}/>
+				<label for="email_new_subscribe_yes" class="m-texte">{L_YES}</label>
+				<input type="radio" id="email_new_subscribe_no" name="email_new_subscribe" value="0" {EMAIL_NEW_SUBSCRIBE_NO}/>
+				<label for="email_new_subscribe_no" class="m-texte">{L_NO}</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="row1"><label>{L_EMAIL_UNSUBSCRIBE}&#160;:</label></td>
+			<td class="row2">
+				<input type="radio" id="email_unsubscribe_yes" name="email_unsubscribe" value="1" {EMAIL_UNSUBSCRIBE_YES}/>
+				<label for="email_unsubscribe_yes" class="m-texte">{L_YES}</label>
+				<input type="radio" id="email_unsubscribe_no" name="email_unsubscribe" value="0" {EMAIL_UNSUBSCRIBE_NO}/>
+				<label for="email_unsubscribe_no" class="m-texte">{L_NO}</label>
 			</td>
 		</tr>
 		<!-- BEGIN owner_profil -->

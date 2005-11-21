@@ -40,14 +40,15 @@ CREATE INDEX abo_status_idx ON wa_abonnes (abo_status);
 -- Structure de la table "wa_admin"
 -- 
 CREATE TABLE wa_admin (
-	admin_id          INTEGER      NOT NULL,
-	admin_login       VARCHAR(30)  NOT NULL DEFAULT '',
-	admin_pwd         VARCHAR(32)  NOT NULL DEFAULT '',
-	admin_email       VARCHAR(255) NOT NULL DEFAULT '',
-	admin_lang        VARCHAR(30)  NOT NULL DEFAULT '',
-	admin_dateformat  VARCHAR(20)  NOT NULL DEFAULT '',
-	admin_level       INTEGER      NOT NULL DEFAULT 1,
-	email_new_inscrit INTEGER      NOT NULL DEFAULT 0,
+	admin_id            INTEGER      NOT NULL,
+	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
+	admin_pwd           VARCHAR(32)  NOT NULL DEFAULT '',
+	admin_email         VARCHAR(255) NOT NULL DEFAULT '',
+	admin_lang          VARCHAR(30)  NOT NULL DEFAULT '',
+	admin_dateformat    VARCHAR(20)  NOT NULL DEFAULT '',
+	admin_level         INTEGER      NOT NULL DEFAULT 1,
+	email_new_subscribe INTEGER      NOT NULL DEFAULT 0,
+	email_unsubscribe   INTEGER      NOT NULL DEFAULT 0,
 	CONSTRAINT wa_admin_pk PRIMARY KEY (admin_id)
 );
 

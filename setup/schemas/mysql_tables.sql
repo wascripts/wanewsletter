@@ -40,14 +40,15 @@ CREATE TABLE wa_abonnes (
 -- Structure de la table "wa_admin"
 -- 
 CREATE TABLE wa_admin (
-	admin_id          SMALLINT     NOT NULL AUTO_INCREMENT,
-	admin_login       VARCHAR(30)  NOT NULL DEFAULT '',
-	admin_pwd         VARCHAR(32)  NOT NULL DEFAULT '',
-	admin_email       VARCHAR(255) NOT NULL DEFAULT '',
-	admin_lang        VARCHAR(30)  NOT NULL DEFAULT '',
-	admin_dateformat  VARCHAR(20)  NOT NULL DEFAULT '',
-	admin_level       TINYINT(1)   NOT NULL DEFAULT 1,
-	email_new_inscrit TINYINT(1)   NOT NULL DEFAULT 0,
+	admin_id            SMALLINT     NOT NULL AUTO_INCREMENT,
+	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
+	admin_pwd           VARCHAR(32)  NOT NULL DEFAULT '',
+	admin_email         VARCHAR(255) NOT NULL DEFAULT '',
+	admin_lang          VARCHAR(30)  NOT NULL DEFAULT '',
+	admin_dateformat    VARCHAR(20)  NOT NULL DEFAULT '',
+	admin_level         TINYINT(1)   NOT NULL DEFAULT 1,
+	email_new_subscribe TINYINT(1)   NOT NULL DEFAULT 0,
+	email_unsubscribe   TINYINT(1)   NOT NULL DEFAULT 0,
 	CONSTRAINT wa_admin_pk PRIMARY KEY (admin_id)
 ) TYPE=MyISAM;
 

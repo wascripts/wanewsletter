@@ -115,6 +115,8 @@ define('USER',  1);
 //
 define('SUBSCRIBE_NOTIFY_YES', 1);
 define('SUBSCRIBE_NOTIFY_NO',  0);
+define('UNSUBSCRIBE_NOTIFY_YES', 1);
+define('UNSUBSCRIBE_NOTIFY_NO',  0);
 
 define('MAX_IMPORT', 5000);
 

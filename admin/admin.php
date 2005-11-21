@@ -277,7 +277,8 @@ if( isset($_POST['submit']) )
 		$language = $nl_config['language'];
 	}
 	
-	$email_new_inscrit = ( !empty($_POST['email_new_inscrit']) ) ? intval($_POST['email_new_inscrit']) : SUBSCRIBE_NOTIFY_NO;
+	$email_new_subscribe = ( !empty($_POST['email_new_subscribe']) ) ? intval($_POST['email_new_subscribe']) : SUBSCRIBE_NOTIFY_NO;
+	$email_unsubscribe   = ( !empty($_POST['email_unsubscribe']) ) ? intval($_POST['email_unsubscribe']) : UNSUBSCRIBE_NOTIFY_NO;
 	
 	if( $admin_id == $admindata['admin_id'] && $current_pass != '' && md5($current_pass) != $admindata['admin_pwd'] )
 	{
@@ -311,10 +312,11 @@ if( isset($_POST['submit']) )
 	if( !$error )
 	{
 		$sql_data = array(
-			'admin_email'       => $email,
-			'admin_dateformat'  => $dateformat,
-			'admin_lang'        => $language,
-			'email_new_inscrit' => $email_new_inscrit
+			'admin_email'         => $email,
+			'admin_dateformat'    => $dateformat,
+			'admin_lang'          => $language,
+			'email_new_subscribe' => $email_new_subscribe,
+			'email_unsubscribe'   => $email_unsubscribe
 		);
 		
 		if( $set_password )
@@ -434,7 +436,7 @@ if( $admindata['admin_level'] == ADMIN )
 	if( !empty($admin_id) && $admin_id != $admindata['admin_id'] )
 	{
 		$sql = "SELECT  admin_id, admin_login, admin_pwd, admin_email, admin_lang,
-				admin_dateformat, admin_level, email_new_inscrit
+				admin_dateformat, admin_level, email_new_subscribe, email_unsubscribe
 			FROM " . ADMIN_TABLE . " 
 			WHERE admin_id = " . $admin_id;
 		if( $result = $db->query($sql) )
@@ -511,7 +513,8 @@ $output->assign_vars(array(
 	'L_EMAIL'               => $lang['Email_address'],
 	'L_DATEFORMAT'          => $lang['Dateformat'],
 	'L_NOTE_DATE'           => sprintf($lang['Fct_date'], '<a href="http://www.php.net/date">', '</a>'),
-	'L_EMAIL_NEW_INSCRIT'   => $lang['Email_new_inscrit'],
+	'L_EMAIL_NEW_SUBSCRIBE' => $lang['Email_new_subscribe'],
+	'L_EMAIL_UNSUBSCRIBE'   => $lang['Email_unsubscribe'],
 	'L_PASS'                => $lang['Password'],
 	'L_NEW_PASS'            => $lang['New_pass'],
 	'L_CONFIRM_PASS'        => $lang['Conf_pass'],
@@ -524,8 +527,12 @@ $output->assign_vars(array(
 	'LANG_BOX'              => lang_box($current_admin['admin_lang']),
 	'EMAIL'                 => $current_admin['admin_email'],
 	'DATEFORMAT'            => $current_admin['admin_dateformat'],
-	'EMAIL_NEW_INSCRIT_YES' => ( $current_admin['email_new_inscrit'] == SUBSCRIBE_NOTIFY_YES ) ? ' checked="checked"' : '',
-	'EMAIL_NEW_INSCRIT_NO'  => ( $current_admin['email_new_inscrit'] == SUBSCRIBE_NOTIFY_NO ) ? ' checked="checked"' : '',
+	
+	'EMAIL_NEW_SUBSCRIBE_YES' => ( $current_admin['email_new_subscribe'] == SUBSCRIBE_NOTIFY_YES ) ? ' checked="checked"' : '',
+	'EMAIL_NEW_SUBSCRIBE_NO'  => ( $current_admin['email_new_subscribe'] == SUBSCRIBE_NOTIFY_NO ) ? ' checked="checked"' : '',
+	
+	'EMAIL_UNSUBSCRIBE_YES' => ( $current_admin['email_unsubscribe'] == UNSUBSCRIBE_NOTIFY_YES ) ? ' checked="checked"' : '',
+	'EMAIL_UNSUBSCRIBE_NO'  => ( $current_admin['email_unsubscribe'] == UNSUBSCRIBE_NOTIFY_NO ) ? ' checked="checked"' : '',
 	
 	'S_HIDDEN_FIELDS'       => $output->getHiddenFields()
 ));
