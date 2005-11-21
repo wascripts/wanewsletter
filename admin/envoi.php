@@ -1038,12 +1038,15 @@ $output->assign_vars(array(
 	'L_DELETE_BUTTON'         => $lang['Button']['delete'],
 	'L_PREVIEW_BUTTON'        => str_replace('\'', '\\\'', $lang['Button']['preview']),
 	'L_ADDLINK_BUTTON'        => str_replace('\'', '\\\'', $lang['Button']['links']),
+	'L_YES'                   => $lang['Yes'],
+	'L_NO'                    => $lang['No'],
 	
 	'S_DEST'                  => $listdata['liste_name'],
 	'S_SUBJECT'               => $subject,
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
 	'SELECTED_STATUS_MODEL'   => ( $logdata['log_status'] == STATUS_MODEL ) ? ' selected="selected"' : '',
-	'CHECKED_CC_ADMIN'        => ( $listdata['cc_admin'] ) ? ' checked="checked"' : '',
+	'SELECTED_CC_ADMIN_ON'    => ( $listdata['cc_admin'] ) ? ' selected="selected"' : '',
+	'SELECTED_CC_ADMIN_OFF'   => ( !$listdata['cc_admin'] ) ? ' selected="selected"' : '',
 	
 	'S_ENCTYPE'               => ( FILE_UPLOADS_ON ) ? 'multipart/form-data' : 'application/x-www-form-urlencoded', 
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()

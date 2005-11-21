@@ -35,7 +35,12 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 		</tr>
 		<tr title="{L_CC_ADMIN_TITLE}">
 			<td class="medrow1"><label for="cc_admin">{L_CC_ADMIN}&#160;:</label></td>
-			<td class="row2"><input type="checkbox" id="cc_admin" name="cc_admin" value="1"{CHECKED_CC_ADMIN} /></td>
+			<td class="row2">
+				<select id="cc_admin" name="cc_admin">
+					<option value="1"{SELECTED_CC_ADMIN_ON}>{L_YES}</option>
+					<option value="0"{SELECTED_CC_ADMIN_OFF}>{L_NO}</option>
+				</select>
+			</td>
 		</tr>
 	</table>
 </div>
