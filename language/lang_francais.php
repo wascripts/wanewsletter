@@ -1,23 +1,29 @@
 <?php
-/*******************************************************************
- *
- *          Fichier         :   lang_francais.php [francais]
- *          Créé le         :   29 juin 2002
- *          Dernière modif  :   21 novembre 2005
- *          Email           :   wascripts@phpcodeur.net
- *
- *              Copyright © 2002-2005 phpCodeur
- *
- *******************************************************************/
-
-/*******************************************************************
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License as
- *  published by the Free Software Foundation; either version 2 of
- *  the License, or (at your option) any later version.
- *******************************************************************/
-
-/********************************************************************
+/**
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License 
+ * as published by the Free Software Foundation; either version 2 
+ * of the License, or (at your option) any later version.
+ * 
+ * Wanewsletter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Wanewsletter; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * 
+ * @package Wanewsletter
+ * @author  Bobe <wascripts@phpcodeur.net>
+ * @link    http://phpcodeur.net/wascripts/wanewsletter/
+ * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @version $Id$
+ * 
  * Vous pouez très facilement modifier WAnewsletter dans une autre
  * langue.
  * Pour cela, il vous suffit de traduire ce qui se trouve entre
@@ -27,7 +33,7 @@
  * vont être remplacés par un contenu variable. Placez les de façon
  * adéquat dans la phrase mais ne les enlevez pas.
  * Enfin, les \n représentent un retour à la ligne.
- ********************************************************************/
+ */
 
 
 $lang['General_title']              = "Administration des listes de diffusion";
