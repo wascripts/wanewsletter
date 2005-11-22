@@ -71,7 +71,7 @@ $output->build_listbox(AUTH_VIEW, false, './view.php?mode=' . $mode);
 //
 if( $mode == 'download' )
 {
-	if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
+	if( !$auth->check_auth(AUTH_VIEW, $listdata['liste_id']) )
 	{
 		trigger_error('Not_auth_view', MESSAGE);
 	}
@@ -88,7 +88,7 @@ if( $mode == 'download' )
 //
 else if( $mode == 'iframe' )
 {
-	if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
+	if( !$auth->check_auth(AUTH_VIEW, $listdata['liste_id']) )
 	{
 		$output->basic($lang['Message']['Not_auth_view']);
 	}
@@ -103,8 +103,8 @@ else if( $mode == 'iframe' )
 	
 	$body_type = ( $format == FORMAT_HTML ) ? 'log_body_html' : 'log_body_text';
 	
-	$sql = "SELECT $body_type 
-		FROM " . LOG_TABLE . " 
+	$sql = "SELECT $body_type
+		FROM " . LOG_TABLE . "
 		WHERE log_id = $log_id AND liste_id = " . $listdata['liste_id'];
 	if( !($result = $db->query($sql)) )
 	{
@@ -127,7 +127,7 @@ else if( $mode == 'iframe' )
 			}
 			else
 			{
-				$body = nl2br(active_urls(htmlspecialchars(trim($body))));
+				$body = nl2br(active_urls(htmlspecialchars(trim($body), ENT_NOQUOTES)));
 				$body = preg_replace('/(\*\w+\*)/', '<strong>\\1</strong>', $body);
 				$body = preg_replace('/(\/\w+\/)/', '<em>\\1</em>', $body);
 				$body = preg_replace('/(_\w+_)/', '<u>\\1</u>', $body);
@@ -173,7 +173,7 @@ else if( $mode == 'abonnes' )
 			break;
 	}
 	
-	if( !$auth->check_auth($auth_type, $admindata['session_liste']) )
+	if( !$auth->check_auth($auth_type, $listdata['liste_id']) )
 	{
 		trigger_error('Not_' . $auth->auth_ary[$auth_type], MESSAGE);
 	}
@@ -291,17 +291,22 @@ else if( $mode == 'abonnes' )
 			
 			do
 			{
-				if( $auth->listdata[$row['liste_id']]['liste_format'] == FORMAT_MULTIPLE )
+				$liste_name   = $auth->listdata[$row['liste_id']]['liste_name'];
+				$liste_format = $auth->listdata[$row['liste_id']]['liste_format'];
+				
+				if( $liste_format == FORMAT_MULTIPLE )
 				{
-					$format = ' (' . $lang['Choice_Format'] . '&#160;: ' . (( $row['format'] == FORMAT_HTML ) ? 'html' : 'texte') . ')';
+					$format = sprintf(' (%s&#160;: %s)', $lang['Choice_Format'],
+						(( $row['format'] == FORMAT_HTML ) ? 'html' : 'texte'));
 				}
 				else
 				{
-					$format = '';
+					$format = sprintf(' (%s&#160;: %s)', $lang['Format'],
+						(( $liste_format == FORMAT_HTML ) ? 'html' : 'texte'));
 				}
 				
 				$output->assign_block_vars('listerow', array(
-					'LISTE_NAME'    => $auth->listdata[$row['liste_id']]['liste_name'],
+					'LISTE_NAME'    => $liste_name,
 					'CHOICE_FORMAT' => $format,
 					'U_VIEW_LISTE'  => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
 				));
@@ -318,6 +323,8 @@ else if( $mode == 'abonnes' )
 	}
 	else if( $action == 'edit' )
 	{
+		$liste_ids = $auth->check_auth(AUTH_EDIT);
+		
 		if( isset($_POST['submit']) )
 		{
 			$email = ( !empty($_POST['email']) ) ? trim($_POST['email']) : '';
@@ -332,6 +339,30 @@ else if( $mode == 'abonnes' )
 			
 			if( !$error )
 			{
+				$sql = "SELECT liste_id
+					FROM " . ABO_LISTE_TABLE . "
+					WHERE abo_id = " . $abo_id;
+				if( !($result = $db->query($sql)) )
+				{
+					trigger_error('Impossible de récupérer les données sur l\'abonné', ERROR);
+				}
+				
+				$tmp_ids = array();
+				while( $row = $db->fetch_array($result) )
+				{
+					array_push($tmp_ids, $row['liste_id']);
+				}
+				
+				$result_ids = array_intersect($liste_ids, $tmp_ids);
+				
+				//
+				// Cet utiliteur n'a pas les droits nécessaires pour faire cette opération
+				//
+				if( count($result_ids) == 0 )
+				{
+					trigger_error('Not_auth_edit', MESSAGE);
+				}
+				
 				$sql_data = array(
 					'abo_email'  => $email,
 					'abo_pseudo' => ( !empty($_POST['pseudo']) ) ? strip_tags(trim($_POST['pseudo'])) : ''
@@ -376,8 +407,6 @@ else if( $mode == 'abonnes' )
 				trigger_error($message, MESSAGE);
 			}
 		}
-		
-		$liste_ids = $auth->check_auth(AUTH_EDIT);
 		
 		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
 				a.abo_register_date, a.abo_status, al.liste_id, al.format
@@ -1701,9 +1730,9 @@ else if( $mode == 'log' )
 	
 	if( $total_logs )
 	{
-		$sql = "SELECT log_id, log_subject, log_date, log_body_text, log_body_html, log_numdest 
-			FROM " . LOG_TABLE . " 
-			WHERE log_status = " . STATUS_SENDED . " 
+		$sql = "SELECT log_id, log_subject, log_date, log_body_text, log_body_html, log_numdest
+			FROM " . LOG_TABLE . "
+			WHERE log_status = " . STATUS_SENDED . "
 				AND liste_id = $listdata[liste_id]
 			ORDER BY $sql_type " . $sql_order;
 		if( !($result = $db->query($sql, $start, $log_per_page)) )
