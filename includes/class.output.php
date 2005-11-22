@@ -417,11 +417,6 @@ class output extends Template {
 		$data = ob_get_contents();
 		ob_end_clean();
 		
-		if( $lang['CHARSET'] == 'ISO-8859-1' )
-		{
-			$data = purge_latin1($data);
-		}
-		
 		if( $this->output_xhtml )
 		{
 			$data = preg_replace(
@@ -433,7 +428,7 @@ class output extends Template {
 			$data = preg_replace('/<([^ >]+)([^>]*)>[ \t\r\n]*<\/\\1>/', '<\\1\\2/>', $data);
 		}
 		
-		echo $data;
+		echo purge_latin1($data);
 		
 		//
 		// On ferme la connexion à la base de données, si elle existe 
@@ -501,13 +496,9 @@ class output extends Template {
 		$lg      = ( !empty($lang['CONTENT_LANG']) ) ? $lang['CONTENT_LANG'] : 'fr';
 		$dir     = ( !empty($lang['CONTENT_DIR']) ) ? $lang['CONTENT_DIR'] : 'ltr';
 		$charset = ( !empty($lang['CHARSET']) ) ? $lang['CHARSET'] : 'ISO-8859-1';
+		$content = purge_latin1($content);
 		
 		$this->send_headers();
-		
-		if( $charset == 'ISO-8859-1' )
-		{
-			$content = purge_latin1($content);
-		}
 		
 		echo <<<BASIC
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">

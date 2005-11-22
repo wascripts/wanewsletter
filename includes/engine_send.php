@@ -57,11 +57,30 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	// On traite les données de la newsletter à envoyer
 	//
-	$mailer->set_subject(purge_latin1($logdata['log_subject'], true));
+	if( preg_match('/[\x80-\x9F]/', $logdata['log_subject']) || preg_match('/[\x80-\x9F]/', $logdata['log_body_text'])
+		|| preg_match('/[\x80-\x9F]/', $logdata['log_body_html']) )
+	{
+		if( TRANSLITE_INVALID_CHARS == false )
+		{
+			$logdata['log_subject']   = wan_utf8_encode($logdata['log_subject']);
+			$logdata['log_body_text'] = wan_utf8_encode($logdata['log_body_text']);
+			$logdata['log_body_html'] = wan_utf8_encode($logdata['log_body_html']);
+			
+			$mailer->set_charset('UTF-8');
+		}
+		else
+		{
+			$logdata['log_subject']   = purge_latin1($logdata['log_subject'], true);
+			$logdata['log_body_text'] = purge_latin1($logdata['log_body_text'], true);
+			$logdata['log_body_html'] = purge_latin1($logdata['log_body_html']);
+		}
+	}
+	
+	$mailer->set_subject($logdata['log_subject']);
 	
 	$body = array(
-		FORMAT_TEXTE => purge_latin1($logdata['log_body_text'], true),
-		FORMAT_HTML  => purge_latin1($logdata['log_body_html'])
+		FORMAT_TEXTE => $logdata['log_body_text'],
+		FORMAT_HTML  => $logdata['log_body_html']
 	);
 	
 	//

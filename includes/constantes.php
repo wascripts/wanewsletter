@@ -47,6 +47,16 @@ define('DEV_INFOS', TRUE);
 define('DISPLAY_ERRORS_IN_BLOCK', TRUE);
 
 //
+// Active/Désactive le passage automatique à l'UTF-8 au moment de l'envoi en présence de 
+// caractères invalides provenant de Windows-1252 dans les newsletters.
+//
+// Si cette constante est placée à TRUE, les caractères en cause subiront une transformation
+// vers un caractère simple ou composé graphiquement proche (voir la fonction purge_latin1()
+// dans le fichier includes/functions.php).
+//
+define('TRANSLITE_INVALID_CHARS', FALSE);
+
+//
 // Tables du script 
 //
 define('ABO_LISTE_TABLE',     $prefixe . 'abo_liste');

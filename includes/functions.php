@@ -918,91 +918,38 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
  * Effectue une translitération sur les caractères interdits provenant de Windows-1252
  * ou les transforme en références d'entité numérique selon que la chaîne est du texte brut ou du HTML
  * 
- * @param string $str        Chaîne à modifier
+ * @param string $data       Chaîne à modifier
  * @param string $translite  Active ou non la translitération
  * 
  * @return string
  */
-function purge_latin1($str, $translite = false)
+function purge_latin1($data, $translite = false)
 {
 	global $lang;
 	
-	if( $lang['CHARSET'] != 'ISO-8859-1' )
+	if( $lang['CHARSET'] == 'ISO-8859-1' )
 	{
-		return $str;
+		$convmap_name = ( $translite == true ) ? 'translite_cp1252' : 'cp1252_to_entity';
+		
+		return strtr($data, $GLOBALS['CONVMAP'][$convmap_name]);
 	}
 	
-	if( $translite == true )
-	{
-		$convmap = array(
-			"\x80" => "euro",    # EURO SIGN
-			"\x82" => ",",       # SINGLE LOW-9 QUOTATION MARK
-			"\x83" => "f",       # LATIN SMALL LETTER F WITH HOOK
-			"\x84" => ",,",      # DOUBLE LOW-9 QUOTATION MARK
-			"\x85" => "...",     # HORIZONTAL ELLIPSIS
-			"\x86" => "?",       # DAGGER
-			"\x87" => "?",       # DOUBLE DAGGER
-			"\x88" => "^",       # MODIFIER LETTER CIRCUMFLEX ACCENT
-			"\x89" => "?",       # PER MILLE SIGN
-			"\x8a" => "S",       # LATIN CAPITAL LETTER S WITH CARON
-			"\x8b" => "?",       # SINGLE LEFT-POINTING ANGLE QUOTATION
-			"\x8c" => "OE",      # LATIN CAPITAL LIGATURE OE
-			"\x8e" => "Z",       # LATIN CAPITAL LETTER Z WITH CARON
-			"\x91" => "'",       # LEFT SINGLE QUOTATION MARK
-			"\x92" => "'",       # RIGHT SINGLE QUOTATION MARK
-			"\x93" => "\"",      # LEFT DOUBLE QUOTATION MARK
-			"\x94" => "\"",      # RIGHT DOUBLE QUOTATION MARK
-			"\x95" => "?",       # BULLET
-			"\x96" => "-",       # EN DASH
-			"\x97" => "--",      # EM DASH
-			"\x98" => "~",       # SMALL TILDE
-			"\x99" => "tm",      # TRADE MARK SIGN
-			"\x9a" => "s",       # LATIN SMALL LETTER S WITH CARON
-			"\x9b" => ">",       # SINGLE RIGHT-POINTING ANGLE QUOTATION
-			"\x9c" => "oe",      # LATIN SMALL LIGATURE OE
-			"\x9e" => "z",       # LATIN SMALL LETTER Z WITH CARON
-			"\x9f" => "Y"        # LATIN CAPITAL LETTER Y WITH DIAERESIS
-		);
-	}
-	else
-	{
-		$convmap = array(
-			"\x80" => "&#8364;",    # EURO SIGN
-			"\x82" => "&#8218;",    # SINGLE LOW-9 QUOTATION MARK
-			"\x83" => "&#402;",     # LATIN SMALL LETTER F WITH HOOK
-			"\x84" => "&#8222;",    # DOUBLE LOW-9 QUOTATION MARK
-			"\x85" => "&#8230;",    # HORIZONTAL ELLIPSIS
-			"\x86" => "&#8224;",    # DAGGER
-			"\x87" => "&#8225;",    # DOUBLE DAGGER
-			"\x88" => "&#710;",     # MODIFIER LETTER CIRCUMFLEX ACCENT
-			"\x89" => "&#8240;",    # PER MILLE SIGN */
-			"\x8a" => "&#352;",     # LATIN CAPITAL LETTER S WITH CARON
-			"\x8b" => "&#8249;",    # SINGLE LEFT-POINTING ANGLE QUOTATION
-			"\x8c" => "&#338;",     # LATIN CAPITAL LIGATURE OE
-			"\x8e" => "&#381;",     # LATIN CAPITAL LETTER Z WITH CARON
-			"\x91" => "&#8216;",    # LEFT SINGLE QUOTATION MARK
-			"\x92" => "&#8217;",    # RIGHT SINGLE QUOTATION MARK
-			"\x93" => "&#8220;",    # LEFT DOUBLE QUOTATION MARK
-			"\x94" => "&#8221;",    # RIGHT DOUBLE QUOTATION MARK
-			"\x95" => "&#8226;",    # BULLET
-			"\x96" => "&#8211;",    # EN DASH
-			"\x97" => "&#8212;",    # EM DASH
-			"\x98" => "&#732;",     # SMALL TILDE
-			"\x99" => "&#8482;",    # TRADE MARK SIGN
-			"\x9a" => "&#353;",     # LATIN SMALL LETTER S WITH CARON
-			"\x9b" => "&#8250;",    # SINGLE RIGHT-POINTING ANGLE QUOTATION
-			"\x9c" => "&#339;",     # LATIN SMALL LIGATURE OE
-			"\x9e" => "&#382;",     # LATIN SMALL LETTER Z WITH CARON
-			"\x9f" => "&#376;"      # LATIN CAPITAL LETTER Y WITH DIAERESIS
-		);
-	}
-	
-	return strtr($str, $convmap);
+	return $data;
 }
 
-function is_utf8($str)
+/**
+ * is_utf8()
+ * 
+ * Détecte si une chaîne est encodée ou non en UTF-8
+ * 
+ * @param string $data       Chaîne à modifier
+ * @param string $translite  Active ou non la translitération
+ * 
+ * @link   http://w3.org/International/questions/qa-forms-utf-8.html
+ * @return string
+ */
+function is_utf8($data)
 {
-	// From http://w3.org/International/questions/qa-forms-utf-8.html
 	return preg_match('/^(?:
 		 [\x09\x0A\x0D\x20-\x7E]            # ASCII
 	   | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
@@ -1012,9 +959,54 @@ function is_utf8($str)
 	   |  \xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
 	   | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
 	   |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
-	)*$/xs', $str);
+	)*$/xs', $data);
 } // function is_utf8
 
+/**
+ * wan_utf8_encode()
+ * 
+ * Encode une chaîne en UTF-8
+ * 
+ * @param string $data
+ * 
+ * @return string
+ */
+function wan_utf8_encode($data)
+{
+	$data = strtr($data, $GLOBALS['CONVMAP']['cp1252_to_entity']);
+	$data = utf8_encode($data);
+	$data = strtr($data, array_flip($GLOBALS['CONVMAP']['utf8_to_entity']));
+	
+	return $data;
+}
+
+/**
+ * wan_utf8_decode()
+ * 
+ * Décode une chaîne en UTF-8
+ * 
+ * @param string $data
+ * 
+ * @return string
+ */
+function wan_utf8_decode($data)
+{
+	$data = strtr($data, $GLOBALS['CONVMAP']['utf8_to_entity']);
+	$data = utf8_decode($data);
+	$data = strtr($data, array_flip($GLOBALS['CONVMAP']['cp1252_to_entity']));
+	
+	return $data;
+}
+
+/**
+ * convert_encoding()
+ * 
+ * Détection d'encodage et conversion vers $charset
+ * 
+ * @param string $data
+ * 
+ * @return string
+ */
 function convert_encoding($data, $charset, $check_bom = true)
 {
 	if( empty($charset) )
@@ -1034,70 +1026,7 @@ function convert_encoding($data, $charset, $check_bom = true)
 	{
 		if( $GLOBALS['lang']['CHARSET'] == 'ISO-8859-1' )
 		{
-			// Conversion caractères illégaux provenant de Windows-1252
-			$convmap = array(
-				"\xe2\x82\xac" => "&#8364;",
-				"\xe2\x80\x9a" => "&#8218;",
-				"\xc6\x92"     => "&#402;",
-				"\xe2\x80\x9e" => "&#8222;",
-				"\xe2\x80\xa6" => "&#8230;",
-				"\xe2\x80\xa0" => "&#8224;",
-				"\xe2\x80\xa1" => "&#8225;",
-				"\xcb\x86"     => "&#710;",
-				"\xe2\x80\xb0" => "&#8240;",
-				"\xc5\xa0"     => "&#352;",
-				"\xe2\x80\xb9" => "&#8249;",
-				"\xc5\x92"     => "&#338;",
-				"\xc5\xbd"     => "&#381;",
-				"\xe2\x80\x98" => "&#8216;",
-				"\xe2\x80\x99" => "&#8217;",
-				"\xe2\x80\x9c" => "&#8220;",
-				"\xe2\x80\x9d" => "&#8221;",
-				"\xe2\x80\xa2" => "&#8226;",
-				"\xe2\x80\x93" => "&#8211;",
-				"\xe2\x80\x94" => "&#8212;",
-				"\xcb\x9c"     => "&#732;",
-				"\xe2\x84\xa2" => "&#8482;",
-				"\xc5\xa1"     => "&#353;",
-				"\xe2\x80\xba" => "&#8250;",
-				"\xc5\x93"     => "&#339;",
-				"\xc5\xbe"     => "&#382;",
-				"\xc5\xb8"     => "&#376;"
-			);
-			
-			$data = utf8_decode(strtr($data, $convmap));
-			
-			$convmap = array(
-				"&#8364;" => "\x80",
-				"&#8218;" => "\x82",
-				"&#402;"  => "\x83",
-				"&#8222;" => "\x84",
-				"&#8230;" => "\x85",
-				"&#8224;" => "\x86",
-				"&#8225;" => "\x87",
-				"&#710;"  => "\x88",
-				"&#8240;" => "\x89",
-				"&#352;"  => "\x8a",
-				"&#8249;" => "\x8b",
-				"&#338;"  => "\x8c",
-				"&#381;"  => "\x8e",
-				"&#8216;" => "\x91",
-				"&#8217;" => "\x92",
-				"&#8220;" => "\x93",
-				"&#8221;" => "\x94",
-				"&#8226;" => "\x95",
-				"&#8211;" => "\x96",
-				"&#8212;" => "\x97",
-				"&#732;"  => "\x98",
-				"&#8482;" => "\x99",
-				"&#353;"  => "\x9a",
-				"&#8250;" => "\x9b",
-				"&#339;"  => "\x9c",
-				"&#382;"  => "\x9e",
-				"&#376;"  => "\x9f"
-			);
-			
-			$data = strtr($data, $convmap);
+			$data = wan_utf8_decode($data);
 		}
 		else if( extension_loaded('mbstring') )
 		{
@@ -1248,6 +1177,96 @@ function formateSize($size)
 // Appel du gestionnaire d'erreur 
 //
 set_error_handler('wanewsletter_handler');
+
+$CONVMAP = array(
+	'cp1252_to_entity' => array(
+		"\x80" => "&#8364;",    # EURO SIGN
+		"\x82" => "&#8218;",    # SINGLE LOW-9 QUOTATION MARK
+		"\x83" => "&#402;",     # LATIN SMALL LETTER F WITH HOOK
+		"\x84" => "&#8222;",    # DOUBLE LOW-9 QUOTATION MARK
+		"\x85" => "&#8230;",    # HORIZONTAL ELLIPSIS
+		"\x86" => "&#8224;",    # DAGGER
+		"\x87" => "&#8225;",    # DOUBLE DAGGER
+		"\x88" => "&#710;",     # MODIFIER LETTER CIRCUMFLEX ACCENT
+		"\x89" => "&#8240;",    # PER MILLE SIGN */
+		"\x8a" => "&#352;",     # LATIN CAPITAL LETTER S WITH CARON
+		"\x8b" => "&#8249;",    # SINGLE LEFT-POINTING ANGLE QUOTATION
+		"\x8c" => "&#338;",     # LATIN CAPITAL LIGATURE OE
+		"\x8e" => "&#381;",     # LATIN CAPITAL LETTER Z WITH CARON
+		"\x91" => "&#8216;",    # LEFT SINGLE QUOTATION MARK
+		"\x92" => "&#8217;",    # RIGHT SINGLE QUOTATION MARK
+		"\x93" => "&#8220;",    # LEFT DOUBLE QUOTATION MARK
+		"\x94" => "&#8221;",    # RIGHT DOUBLE QUOTATION MARK
+		"\x95" => "&#8226;",    # BULLET
+		"\x96" => "&#8211;",    # EN DASH
+		"\x97" => "&#8212;",    # EM DASH
+		"\x98" => "&#732;",     # SMALL TILDE
+		"\x99" => "&#8482;",    # TRADE MARK SIGN
+		"\x9a" => "&#353;",     # LATIN SMALL LETTER S WITH CARON
+		"\x9b" => "&#8250;",    # SINGLE RIGHT-POINTING ANGLE QUOTATION
+		"\x9c" => "&#339;",     # LATIN SMALL LIGATURE OE
+		"\x9e" => "&#382;",     # LATIN SMALL LETTER Z WITH CARON
+		"\x9f" => "&#376;"      # LATIN CAPITAL LETTER Y WITH DIAERESIS
+	),
+	'utf8_to_entity' => array(
+		"\xe2\x82\xac" => "&#8364;",
+		"\xe2\x80\x9a" => "&#8218;",
+		"\xc6\x92"     => "&#402;",
+		"\xe2\x80\x9e" => "&#8222;",
+		"\xe2\x80\xa6" => "&#8230;",
+		"\xe2\x80\xa0" => "&#8224;",
+		"\xe2\x80\xa1" => "&#8225;",
+		"\xcb\x86"     => "&#710;",
+		"\xe2\x80\xb0" => "&#8240;",
+		"\xc5\xa0"     => "&#352;",
+		"\xe2\x80\xb9" => "&#8249;",
+		"\xc5\x92"     => "&#338;",
+		"\xc5\xbd"     => "&#381;",
+		"\xe2\x80\x98" => "&#8216;",
+		"\xe2\x80\x99" => "&#8217;",
+		"\xe2\x80\x9c" => "&#8220;",
+		"\xe2\x80\x9d" => "&#8221;",
+		"\xe2\x80\xa2" => "&#8226;",
+		"\xe2\x80\x93" => "&#8211;",
+		"\xe2\x80\x94" => "&#8212;",
+		"\xcb\x9c"     => "&#732;",
+		"\xe2\x84\xa2" => "&#8482;",
+		"\xc5\xa1"     => "&#353;",
+		"\xe2\x80\xba" => "&#8250;",
+		"\xc5\x93"     => "&#339;",
+		"\xc5\xbe"     => "&#382;",
+		"\xc5\xb8"     => "&#376;"
+	),
+	'translite_cp1252' => array(
+		"\x80" => "euro",
+		"\x82" => ",",
+		"\x83" => "f",
+		"\x84" => ",,",
+		"\x85" => "...",
+		"\x86" => "?",
+		"\x87" => "?",
+		"\x88" => "^",
+		"\x89" => "?",
+		"\x8a" => "S",
+		"\x8b" => "?",
+		"\x8c" => "OE",
+		"\x8e" => "Z",
+		"\x91" => "'",
+		"\x92" => "'",
+		"\x93" => "\"",
+		"\x94" => "\"",
+		"\x95" => "?",
+		"\x96" => "-",
+		"\x97" => "--",
+		"\x98" => "~",
+		"\x99" => "tm",
+		"\x9a" => "s",
+		"\x9b" => ">",
+		"\x9c" => "oe",
+		"\x9e" => "z",
+		"\x9f" => "Y"
+	)
+);
 
 }
 ?>
