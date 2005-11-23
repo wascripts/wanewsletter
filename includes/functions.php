@@ -1028,6 +1028,10 @@ function convert_encoding($data, $charset, $check_bom = true)
 		{
 			$data = wan_utf8_decode($data);
 		}
+		else if( extension_loaded('iconv') )
+		{
+			$data = iconv($charset, $GLOBALS['lang']['CHARSET'] . '//TRANSLIT', $data);
+		}
 		else if( extension_loaded('mbstring') )
 		{
 			$data = mb_convert_encoding($data, $GLOBALS['lang']['CHARSET'], $charset);
