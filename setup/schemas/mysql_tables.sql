@@ -12,9 +12,11 @@ CREATE TABLE wa_abo_liste (
 	liste_id      SMALLINT   NOT NULL DEFAULT 0,
 	format        TINYINT(1) NOT NULL DEFAULT 0,
 	send          TINYINT(1) NOT NULL DEFAULT 0,
-	confirmed     TINYINT(1) NOT NULL DEFAULT 0,
+	register_key  CHAR(20)   NOT NULL DEFAULT '',
 	register_date INTEGER    NOT NULL DEFAULT 0,
-	CONSTRAINT wa_abo_liste_pk PRIMARY KEY (abo_id, liste_id)
+	confirmed     TINYINT(1) NOT NULL DEFAULT 0,
+	CONSTRAINT wa_abo_liste_pk PRIMARY KEY (abo_id, liste_id),
+	CONSTRAINT register_key_idx UNIQUE (register_key)
 ) TYPE=MyISAM;
 
 
