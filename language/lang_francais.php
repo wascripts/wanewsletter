@@ -248,6 +248,7 @@ $lang['Message']['Upload_error_5']          = "Une erreur inconnue est survenue,
 $lang['Message']['Upload_error_6']          = "Le répertoire des fichiers temporaires est inaccessible ou n'existe pas";
 $lang['Message']['Upload_error_7']          = "Échec de l'écriture du fichier sur le disque";
 $lang['Message']['Invalid_filename']        = "Nom de fichier non valide";
+$lang['Message']['Invalid_action']          = "Action non valide";
 $lang['Message']['Invalid_ext']             = "Cette extension de fichier a été interdite";
 $lang['Message']['weight_too_big']          = "Le poids total des fichiers joints excède le maximum autorisé, il ne vous reste que %.2f octets de libre";
 

@@ -39,82 +39,238 @@ class Wanewsletter {
 	var $account       = array();
 	var $hasAccount    = false;
 	var $isRegistered  = false;
-	var $update_stats  = false;
 	var $message       = '';
 	
-	function Wanewsletter($listdata)
-	{
-		$this->listdata    = $listdata;
-		$this->liste_email = ( !empty($listdata['liste_alias']) ) ? $listdata['liste_alias'] : $listdata['sender_email'];
-	}
+	var $mailer;
 	
-	function account_info($email, $pseudo, $code, $action)
+	function Wanewsletter($listdata = null)
 	{
-		$email = trim($email);
-		$this->code = trim($code);
+		global $nl_config, $lang;
 		
-		switch( $this->listdata['liste_format'] )
+		require WAMAILER_DIR . '/class.mailer.php';
+		
+		$mailer =& new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+		
+		if( $nl_config['use_smtp'] )
 		{
-			case FORMAT_MULTIPLE:
-				if( $this->format != FORMAT_TEXTE && $this->format != FORMAT_HTML )
-				{
-					$this->format = FORMAT_TEXTE;
-				}
-				break;
-			
-			case FORMAT_HTML:
-			case FORMAT_TEXTE:
-				$this->format = $this->listdata['liste_format'];
-				break;					
-			
-			default:
-				$this->format = FORMAT_TEXTE;
-				break;
+			$mailer->smtp_path = WAMAILER_DIR . '/';
+			$mailer->use_smtp(
+				$nl_config['smtp_host'],
+				$nl_config['smtp_port'],
+				$nl_config['smtp_user'],
+				$nl_config['smtp_pass']
+			);
 		}
 		
-		$result = check_email($email, $this->listdata['liste_id'], $action);
+		$mailer->correctRpath = !is_disabled_func('ini_set');
+		$mailer->set_charset($lang['CHARSET']);
+		$mailer->set_format(FORMAT_TEXTE);
+		$this->mailer =& $mailer;
 		
-		if( !$result['error'] )
+		if( isset($listdata) )
 		{
-			if( is_array($result['abodata']) )
+			switch( $listdata['liste_format'] )
 			{
-				$this->hasAccount   = true;
-				$this->isRegistered = isset($result['abodata']['confirmed']);
+				case FORMAT_MULTIPLE:
+					if( $this->format != FORMAT_TEXTE && $this->format != FORMAT_HTML )
+					{
+						$this->format = FORMAT_TEXTE;
+					}
+					break;
 				
-				$this->account['abo_id']    = $result['abodata']['abo_id'];
-				$this->account['email']     = $result['abodata']['abo_email'];
-				$this->account['pseudo']    = $result['abodata']['abo_pseudo'];
-				$this->account['code']      = $result['abodata']['abo_register_key'];
-				$this->account['date']      = $result['abodata']['register_date'];
-				$this->account['format']    = $result['abodata']['format'];
-				$this->account['status']    = $result['abodata']['abo_status'];
-			}
-			else
-			{
-				$this->hasAccount = false;
+				case FORMAT_HTML:
+				case FORMAT_TEXTE:
+					$this->format = $listdata['liste_format'];
+					break;					
 				
-				$this->account['abo_id'] = 0;
-				$this->account['email']  = $email;
-				$this->account['pseudo'] = trim($pseudo);
-				$this->account['code']   = generate_key();
-				$this->account['date']   = time();
-				$this->account['format'] = $this->format;
-				$this->account['status'] = ( $this->listdata['confirm_subscribe'] == CONFIRM_NONE ) ? ABO_ACTIF : ABO_INACTIF;
+				default:
+					$this->format = FORMAT_TEXTE;
+					break;
 			}
 			
-			return true;
+			$this->listdata    = $listdata;
+			$this->liste_email = ( !empty($listdata['liste_alias']) ) ? $listdata['liste_alias'] : $listdata['sender_email'];
+		}
+	}
+	
+	function check($action, $email)
+	{
+		global $db, $nl_config, $lang;
+		
+		//
+		// Vérification syntaxique de l'email
+		//
+		if( Mailer::validate_email($email) == false )
+		{
+			return array('error' => true, 'message' => $lang['Message']['Invalid_email']);
+		}
+		
+		//
+		// Vérification de la liste des masques de bannissements
+		//
+		if( $action == 'inscription' )
+		{
+			$sql = "SELECT ban_email
+				FROM " . BANLIST_TABLE . "
+				WHERE liste_id = " . $this->listdata['liste_id'];
+			if( $result = $db->query($sql) )
+			{
+				while( $row = $db->fetch_array($result) )
+				{
+					if( preg_match('/\b' . str_replace('*', '.*?', $row['ban_email']) . '\b/i', $email) )
+					{
+						return array('error' => true, 'message' => $lang['Message']['Email_banned']);
+					}
+				}
+			}
+		}
+		
+		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
+				a.abo_register_date, a.abo_status, al.format, al.register_key, al.register_date, al.confirmed
+			FROM " . ABONNES_TABLE . " AS a
+				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+					AND al.liste_id = {$this->listdata['liste_id']}
+			WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
+		if( !($result = $db->query($sql)) )
+		{
+			return array('error' => true, 'message' => 'Impossible de tester les tables d\'inscriptions');
+		}
+		
+		if( $abodata = $db->fetch_array($result) )
+		{
+			if( isset($abodata['confirmed']) )
+			{
+				if( $action == 'inscription' && $abodata['confirmed'] == SUBSCRIBE_CONFIRMED )
+				{
+					return array('error' => true, 'message' => $lang['Message']['Allready_reg']);
+				}
+				else if( $action == 'desinscription' && $abodata['confirmed'] == SUBSCRIBE_NOT_CONFIRMED )
+				{
+					return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
+				}
+			}
+			else if( $action != 'inscription' )
+			{
+				return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
+			}
+		}
+		else if( $action != 'inscription' )
+		{
+			return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
+		}
+		
+		if( $nl_config['check_email_mx'] && $abodata === false )
+		{
+			//
+			// Vérification de l'existence d'un Mail eXchanger sur le domaine de l'email, 
+			// et vérification de l'existence du compte associé (La vérification de l'existence du 
+			// compte n'est toutefois pas infaillible, les serveurs smtp refusant parfois le relaying, 
+			// c'est à dire de traiter les demandes émanant d'un entité extérieure à leur réseau, et 
+			// pour une adresse email extérieure à ce réseau)
+			//
+			if( $this->mailer->validate_email_mx($email) == false )
+			{
+				return array('error' => true, 'message' => $lang['Message']['Unrecognized_email']);
+			}
+		}
+		
+		if( is_array($abodata) )
+		{
+			$this->hasAccount   = true;
+			$this->isRegistered = isset($abodata['confirmed']);
+			
+			$this->account['abo_id'] = $abodata['abo_id'];
+			$this->account['email']  = $abodata['abo_email'];
+			$this->account['pseudo'] = $abodata['abo_pseudo'];
+			$this->account['code']   = $abodata['register_key'];
+			$this->account['date']   = $abodata['register_date'];
+			$this->account['format'] = $abodata['format'];
+			$this->account['status'] = $abodata['abo_status'];
 		}
 		else
 		{
-			$this->message = $result['message'];
+			$this->hasAccount = false;
 			
-			return false;
+			$this->account['abo_id'] = 0;
+			$this->account['email']  = $email;
+			$this->account['pseudo'] = '';
+			$this->account['code']   = generate_key(20);
+			$this->account['date']   = time();
+			$this->account['format'] = $this->format;
+			$this->account['status'] = ( $this->listdata['confirm_subscribe'] == CONFIRM_NONE ) ? ABO_ACTIF : ABO_INACTIF;
+		}
+		
+		return array('error' => false, 'abodata' => $abodata);
+	}
+	
+	function do_action($action, $email)
+	{
+		$email  = trim($email);
+		$result = $this->check($action, $email);
+		
+		if( $result['error'] == false )
+		{
+			switch( $action )
+			{
+				case 'inscription':
+					$this->subscribe();
+					break;
+				case 'desinscription':
+					$this->unsubscribe();
+					break;
+				case 'setformat':
+					$this->setformat();
+					break;
+			}
+		}
+		else if( empty($this->message) )
+		{
+			$this->message = $result['message'];
+		}
+	}
+	
+	function check_code($code)
+	{
+		global $db, $lang;
+		
+		$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed, al.register_date, l.liste_id,
+				l.liste_format, l.sender_email, l.liste_alias, l.limitevalidate, l.liste_name,
+				l.return_email, l.form_url, l.liste_sig, l.use_cron, l.confirm_subscribe
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+					AND al.register_key = '" . $db->escape($code) . "'
+				INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id";
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
+		}
+		
+		if( $abodata = $db->fetch_array($result) )
+		{
+			$this->account['abo_id'] = $abodata['abo_id'];
+			$this->account['email']  = $abodata['abo_email'];
+			$this->account['date']   = $abodata['register_date'];
+			$this->account['code']   = $code;
+			$this->listdata = $abodata;
+			
+			if( $abodata['confirmed'] == SUBSCRIBE_NOT_CONFIRMED )
+			{
+				$this->confirm($code);
+			}
+			else
+			{
+				$this->unsubscribe($code);
+			}
+		}
+		else
+		{
+			$this->message = $lang['Message']['Invalid_code'];
 		}
 	}
 	
 	function subscribe()
 	{
-		global $db, $nl_config, $lang, $mailer;
+		global $db, $nl_config, $lang;
 		
 		$db->transaction(START_TRC);
 		
@@ -123,7 +279,7 @@ class Wanewsletter {
 			$sql_data = array(
 				'abo_email'         => $this->account['email'],
 				'abo_pseudo'        => $this->account['pseudo'],
-				'abo_register_key'  => $this->account['code'],
+				'abo_register_key'  => generate_key(),
 				'abo_register_date' => $this->account['date'],
 				'abo_status'        => $this->account['status']
 			);
@@ -151,8 +307,8 @@ class Wanewsletter {
 				$confirmed = SUBSCRIBE_CONFIRMED;
 			}
 			
-			$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, confirmed, register_date) 
-				VALUES({$this->account[abo_id]}, {$this->listdata[liste_id]}, $this->format, $confirmed, " . time() . ")";
+			$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, register_key, register_date, confirmed) 
+				VALUES({$this->account['abo_id']}, {$this->listdata['liste_id']}, $this->format, '{$this->account['code']}', " . time() . ", $confirmed)";
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des abonnés[2]', ERROR);
@@ -165,24 +321,21 @@ class Wanewsletter {
 		if( $this->listdata['confirm_subscribe'] == CONFIRM_ALWAYS || ($this->listdata['confirm_subscribe'] == CONFIRM_ONCE && $this->hasAccount == false) )
 		{
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'welcome_cron2' : 'welcome_form2';
-			$link_action = 'confirmation';
 		}
 		else
 		{
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'welcome_cron1' : 'welcome_form1';
-			$link_action = 'desinscription';
-			
 			$this->alert_admin(true);
 		}
 		
-		$mailer->clear_all();
-		$mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
-		$mailer->set_address($this->account['email']);
-		$mailer->set_subject(sprintf($lang['Subject_email']['Subscribe'], $nl_config['sitename']));
-		$mailer->set_priority(1);
-		$mailer->set_return_path($this->listdata['return_email']);
+		$this->mailer->clear_all();
+		$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+		$this->mailer->set_address($this->account['email']);
+		$this->mailer->set_subject(sprintf($lang['Subject_email']['Subscribe'], $nl_config['sitename']));
+		$this->mailer->set_priority(1);
+		$this->mailer->set_return_path($this->listdata['return_email']);
 		
-		$mailer->use_template($email_tpl, array(
+		$this->mailer->use_template($email_tpl, array(
 			'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
 			'SITENAME' => $nl_config['sitename'],
 			'CODE'     => $this->account['code'],
@@ -192,25 +345,25 @@ class Wanewsletter {
 		
 		if( $this->listdata['use_cron'] )
 		{
-			$mailer->assign_tags(array(
+			$this->mailer->assign_tags(array(
 				'EMAIL_NEWSLETTER' => $this->liste_email
 			));
 		}
 		else
 		{
-			$mailer->assign_tags(array(
-				'LINK' => $this->make_link($link_action)
+			$this->mailer->assign_tags(array(
+				'LINK' => $this->make_link()
 			));
 		}
 		
 		if( $nl_config['enable_profil_cp'] )
 		{
-			$mailer->assign_block_tags('enable_profil_cp', array(
+			$this->mailer->assign_block_tags('enable_profil_cp', array(
 				'LINK_PROFIL_CP' => make_script_url('profil_cp.php')
 			));
 		}
 		
-		if( !$mailer->send() )
+		if( !$this->mailer->send() )
 		{
 			$this->message = $lang['Message']['Failed_sending'];
 			return false;
@@ -220,7 +373,7 @@ class Wanewsletter {
 		{
 			if( $this->listdata['confirm_subscribe'] == CONFIRM_NONE )
 			{
-				$this->update_stats = true;
+				$this->update_stats();
 				$message = $lang['Message']['Subscribe_2'];
 			}
 			else
@@ -236,7 +389,7 @@ class Wanewsletter {
 			}
 			else if( $this->listdata['confirm_subscribe'] != CONFIRM_ALWAYS )
 			{
-				$this->update_stats = true;
+				$this->update_stats();
 				$message = $lang['Message']['Subscribe_2'];
 			}
 			else
@@ -248,11 +401,11 @@ class Wanewsletter {
 		$this->message = nl2br($message);
 	}
 	
-	function confirm($time = 0)
+	function confirm($code, $time = 0)
 	{
-		global $db, $nl_config, $lang, $mailer;
+		global $db, $nl_config, $lang;
 		
-		if( $this->code == $this->account['code'] )
+		if( strcmp($code, $this->account['code']) == 0 )
 		{
 			$time = ( empty($time) ) ? time() : $time;
 			$time_limit = ($time - ($this->listdata['limitevalidate'] * 86400));
@@ -260,6 +413,7 @@ class Wanewsletter {
 			if( $this->account['date'] > $time_limit )
 			{
 				$low_priority = ( strncmp(DATABASE, 'mysql', 5) == 0 ) ? 'LOW_PRIORITY' : '';
+				$this->account['code'] = generate_key(20);
 				
 				$db->transaction(START_TRC);
 				
@@ -273,7 +427,8 @@ class Wanewsletter {
 				}
 				
 				$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
-					SET confirmed = " . SUBSCRIBE_CONFIRMED . "
+					SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
+						register_key = '" . $this->account['code'] . "'
 					WHERE liste_id = " . $this->listdata['liste_id'] . "
 						AND abo_id = " . $this->account['abo_id'];
 				if( !$db->query($sql) )
@@ -284,7 +439,7 @@ class Wanewsletter {
 				
 				$db->transaction(END_TRC);
 				
-				$this->update_stats = true;
+				$this->update_stats();
 				$this->alert_admin(true);
 				
 				$this->message = $lang['Message']['Confirm_ok'];
@@ -304,76 +459,67 @@ class Wanewsletter {
 		return false;
 	}
 	
-	function unsubscribe()
+	function unsubscribe($code = '')
 	{
-		global $db, $nl_config, $lang, $mailer;
+		global $db, $nl_config, $lang;
 		
-		if( $this->code != '' )
+		if( !empty($code) )
 		{
-			if( $this->code == $this->account['code'] )
+			$sql = "SELECT COUNT(abo_id) AS num_subscribe
+				FROM " . ABO_LISTE_TABLE . "
+				WHERE abo_id = " . $this->account['abo_id'];
+			if( !($result = $db->query($sql)) )
 			{
-				$sql = "SELECT COUNT(abo_id) AS num_subscribe
-					FROM " . ABO_LISTE_TABLE . "
-					WHERE abo_id = " . $this->account['abo_id'];
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible de vérifier la table de jointure', ERROR);
-					return false;
-				}
-				
-				$num_subscribe = $db->result($result, 0, 'num_subscribe');
-				
-				$db->transaction(START_TRC);
-				
-				$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
-					WHERE liste_id = " . $this->listdata['liste_id'] . "
-						AND abo_id = " . $this->account['abo_id'];
+				trigger_error('Impossible de vérifier la table de jointure', ERROR);
+				return false;
+			}
+			
+			$num_subscribe = $db->result($result, 0, 'num_subscribe');
+			
+			$db->transaction(START_TRC);
+			
+			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
+				WHERE liste_id = " . $this->listdata['liste_id'] . "
+					AND abo_id = " . $this->account['abo_id'];
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible d\'effacer l\'entrée de la table abo_liste', ERROR);
+				return false;
+			}
+			
+			if( $num_subscribe == 1 )
+			{
+				$sql = 'DELETE FROM ' . ABONNES_TABLE . ' 
+					WHERE abo_id = ' . $this->account['abo_id'];
 				if( !$db->query($sql) )
 				{
-					trigger_error('Impossible d\'effacer l\'entrée de la table abo_liste', ERROR);
+					trigger_error('Impossible d\'effacer l\'entrée de la table des abonnés', ERROR);
 					return false;
 				}
 				
-				if( $num_subscribe == 1 )
-				{
-					$sql = 'DELETE FROM ' . ABONNES_TABLE . ' 
-						WHERE abo_id = ' . $this->account['abo_id'];
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible d\'effacer l\'entrée de la table des abonnés', ERROR);
-						return false;
-					}
-					
-					$this->message = $lang['Message']['Unsubscribe_3'];
-				}
-				else
-				{
-					$this->message = $lang['Message']['Unsubscribe_2'];
-				}
-				
-				$db->transaction(END_TRC);
-				$this->alert_admin(false);
-				
-				return true;
+				$this->message = $lang['Message']['Unsubscribe_3'];
 			}
 			else
 			{
-				$this->message = $lang['Message']['Invalid_code'];
-				
-				return false;
+				$this->message = $lang['Message']['Unsubscribe_2'];
 			}
+			
+			$db->transaction(END_TRC);
+			$this->alert_admin(false);
+			
+			return true;
 		}
 		else
 		{
-			$mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
-			$mailer->set_address($this->account['email']);
-			$mailer->set_subject($lang['Subject_email']['Unsubscribe']);
-			$mailer->set_priority(3);
-			$mailer->set_return_path($this->listdata['return_email']);
+			$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+			$this->mailer->set_address($this->account['email']);
+			$this->mailer->set_subject($lang['Subject_email']['Unsubscribe']);
+			$this->mailer->set_priority(3);
+			$this->mailer->set_return_path($this->listdata['return_email']);
 			
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'unsubscribe_cron' : 'unsubscribe_form';
 			
-			$mailer->use_template($email_tpl, array(
+			$this->mailer->use_template($email_tpl, array(
 				'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
 				'SITENAME' => $nl_config['sitename'],
 				'URLSITE'  => $nl_config['urlsite'],
@@ -382,19 +528,19 @@ class Wanewsletter {
 			
 			if( $this->listdata['use_cron'] )
 			{
-				$mailer->assign_tags(array(
+				$this->mailer->assign_tags(array(
 					'EMAIL_NEWSLETTER' => $this->liste_email,
 					'CODE'             => $this->account['code']
 				));
 			}
 			else
 			{
-				$mailer->assign_tags(array(
-					'LINK' => $this->make_link('desinscription')
+				$this->mailer->assign_tags(array(
+					'LINK' => $this->make_link()
 				));
 			}
 			
-			if( !($mailer->send()) )
+			if( !$this->mailer->send() )
 			{
 				$this->message = $lang['Message']['Failed_sending'];
 				
@@ -446,16 +592,16 @@ class Wanewsletter {
 		}
 	}
 	
-	function make_link($action)
+	function make_link()
 	{
-		$prefix = $this->listdata['form_url'] . ( ( strstr($this->listdata['form_url'], '?') ) ? '&' : '?' );
-		
-		return $prefix . 'action=' . $action . '&email=' . rawurlencode($this->account['email']) . '&code=' . $this->account['code'] . '&liste=' . $this->listdata['liste_id'];
+		return $this->listdata['form_url']
+			. (( strstr($this->listdata['form_url'], '?') ) ? '&' : '?')
+			. $this->account['code'];
 	}
 	
 	function alert_admin($new_subscribe)
 	{
-		global $nl_config, $db, $mailer;
+		global $db, $nl_config, $lang;
 		
 		if( $new_subscribe == true )
 		{
@@ -482,12 +628,11 @@ class Wanewsletter {
 		{
 			if( $row = $db->fetch_array($result) )
 			{
-				$mailer->clear_all();
+				$this->mailer->clear_all();
+				$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+				$this->mailer->set_subject($subject);
 				
-				$mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
-				$mailer->set_subject($subject);
-				
-				$mailer->use_template($template, array(
+				$this->mailer->use_template($template, array(
 					'EMAIL'   => $this->account['email'],
 					'LISTE'   => unhtmlspecialchars($this->listdata['liste_name']),
 					'URLSITE' => $nl_config['urlsite'],
@@ -496,17 +641,27 @@ class Wanewsletter {
 				
 				do
 				{
-					$mailer->clear_address();
-					$mailer->set_address($row['admin_email'], $row['admin_login']);
+					$this->mailer->clear_address();
+					$this->mailer->set_address($row['admin_email'], $row['admin_login']);
 					
-					$mailer->assign_tags(array(
+					$this->mailer->assign_tags(array(
 						'USER' => $row['admin_login']
 					));
 					
-					$mailer->send(); // envoi
+					$this->mailer->send(); // envoi
 				}
 				while( $row = $db->fetch_array($result) );
 			}
+		}
+	}
+	
+	function update_stats()
+	{
+		@include WA_ROOTDIR . '/includes/functions.stats.php';
+		
+		if( function_exists('update_stats') )
+		{
+			update_stats($this->listdata);
 		}
 	}
 }

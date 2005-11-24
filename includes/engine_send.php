@@ -164,10 +164,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	// On récupère les infos sur les abonnés destinataires
 	//
-	$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, a.abo_register_key, al.format
+	$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, al.register_key, al.format
 		FROM " . ABONNES_TABLE . " AS a
-			INNER JOIN " . ABO_LISTE_TABLE . " AS al
-			ON al.abo_id = a.abo_id
+			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 				AND al.liste_id  = $listdata[liste_id]
 				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 				AND al.send      = 0
@@ -293,7 +292,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 						'format' => FORMAT_TEXTE,
 						'abo_pseudo' => '',
 						'abo_email'  => $address,
-						'abo_register_key' => '',
+						'register_key' => '',
 						'abo_id'     => -1
 					));
 				}
@@ -304,7 +303,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 						'format' => FORMAT_HTML,
 						'abo_pseudo' => '',
 						'abo_email'  => $address,
-						'abo_register_key' => '',
+						'register_key' => '',
 						'abo_id'     => -1
 					));
 				}
@@ -386,7 +385,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				if( !$listdata['use_cron'] )
 				{
 					$tags_replace = array_merge($tags_replace, array(
-						'WA_CODE'  => $row['abo_register_key'],
+						'WA_CODE'  => $row['register_key'],
 						'WA_EMAIL' => rawurlencode($row['abo_email'])
 					));
 				}
@@ -459,8 +458,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		
 		$sql = "SELECT COUNT(*) AS num_dest, al.send
 			FROM " . ABO_LISTE_TABLE . " AS al
-				INNER JOIN " . ABONNES_TABLE . " AS a
-				ON a.abo_id = al.abo_id
+				INNER JOIN " . ABONNES_TABLE . " AS a ON a.abo_id = al.abo_id
 					AND a.abo_status = " . ABO_ACTIF . "
 			WHERE al.liste_id    = $listdata[liste_id]
 				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
@@ -582,8 +580,7 @@ function newsletter_links($listdata)
 		}
 		else
 		{
-			$tmp_link  = $listdata['form_url'] . ( ( strstr($listdata['form_url'], '?') ) ? '&' : '?' );
-			$tmp_link .= 'action=desinscription&email={WA_EMAIL}&code={WA_CODE}&liste=' . $listdata['liste_id'];
+			$tmp_link = $listdata['form_url'] . ( ( strstr($listdata['form_url'], '?') ) ? '&' : '?' ) . '{WA_CODE}';
 			
 			$link = array(
 				FORMAT_TEXTE => $tmp_link,

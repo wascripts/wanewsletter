@@ -61,97 +61,69 @@ else
 	load_settings();
 }
 
+$action  = ( !empty($_REQUEST['action']) ) ? trim($_REQUEST['action']) : '';
+$email   = ( !empty($_REQUEST['email']) ) ? trim($_REQUEST['email']) : '';
 $message = '';
+$code    = '';
+$liste   = ( isset($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 
-$vararray = array('action', 'email', 'code', 'liste');
-foreach( $vararray AS $varname )
+if( empty($action) && preg_match('/([a-z0-9]{20})(?:&|$)/i', $_SERVER['QUERY_STRING'], $match) )
 {
-	${$varname} = ( !empty($_REQUEST[$varname]) ) ? $_REQUEST[$varname] : '';
+	$code = $match[1];
 }
 
 //
 // Compatibilité avec les version < 2.3.x
 //
-if( strlen($code) == 32 )
+else if( !empty($action) && !empty($email) && strlen($code) == 32 )
 {
 	$code = substr($code, 0, 20);
 }
 
-if( $action != '' )
+if( !empty($action) || !empty($code) )
 {
-	$sql = 'SELECT * FROM ' . LISTE_TABLE . ' 
-		WHERE liste_id = ' . intval($liste);
-	if( !($result = $db->query($sql)) )
+	//
+	// Purge des éventuelles inscriptions dépassées
+	// pour parer au cas d'une réinscription
+	//
+	purge_liste();
+	
+	require WA_ROOTDIR . '/includes/class.form.php';
+	
+	if( !empty($action) )
 	{
-		trigger_error('Impossible d\'obtenir les données sur la liste', ERROR);
-	}
-	else if( $listdata = $db->fetch_array($result) )
-	{
-		//
-		// Purge des éventuelles inscriptions dépassées
-		// pour parer au cas d'une réinscription
-		//
-		purge_liste();
-		
-		require WAMAILER_DIR . '/class.mailer.php';
-		require WA_ROOTDIR . '/includes/class.form.php';
-		include WA_ROOTDIR . '/includes/functions.stats.php';
-		
-		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-		
-		if( $nl_config['use_smtp'] )
+		if( in_array($action, array('inscription', 'setformat', 'desinscription')) )
 		{
-			$mailer->smtp_path = WAMAILER_DIR . '/';
-			$mailer->use_smtp(
-				$nl_config['smtp_host'],
-				$nl_config['smtp_port'],
-				$nl_config['smtp_user'],
-				$nl_config['smtp_pass']
-			);
-		}
-		
-		$mailer->correctRpath = !is_disabled_func('ini_set');
-		
-		$mailer->set_charset($lang['CHARSET']);
-		$mailer->set_format(FORMAT_TEXTE);
-		
-		$wanewsletter = new Wanewsletter($listdata);
-		
-		if( $wanewsletter->account_info($email, '', $code, $action) )
-		{
-			switch( $action )
+			$sql = "SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
+					liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe
+				FROM " . LISTE_TABLE . "
+				WHERE liste_id = " .  $liste;
+			if( !($result = $db->query($sql)) )
 			{
-				case 'inscription':
-					$wanewsletter->subscribe();
-					break;
-				
-				case 'confirmation':
-					$wanewsletter->confirm();
-					break;
-				
-				case 'desinscription':
-					$wanewsletter->unsubscribe();
-					break;
-				
-				case 'setformat':
-					$wanewsletter->setformat();
-					break;
+				trigger_error('Impossible d\'obtenir les données sur la liste', ERROR);
+			}
+			
+			if( $listdata = $db->fetch_array($result) )
+			{
+				$wanewsletter =& new Wanewsletter($listdata);
+				$wanewsletter->message =& $message;
+				$wanewsletter->do_action($action, $email);
+			}
+			else
+			{
+				$message = $lang['Message']['Unknown_list'];
 			}
 		}
-		
-		if( empty($message) )
+		else
 		{
-			$message = $wanewsletter->message;
-		}
-		
-		if( $wanewsletter->update_stats && function_exists('update_stats') )
-		{
-			update_stats($listdata);
+			$message = $lang['Message']['Invalid_action'];
 		}
 	}
 	else
 	{
-		$message = $lang['Message']['Unknown_list'];
+		$wanewsletter =& new Wanewsletter();
+		$wanewsletter->message =& $message;
+		$wanewsletter->check_code($code);
 	}
 }
 
