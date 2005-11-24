@@ -128,7 +128,7 @@ if( $img == 'graph' )
 	//
 	// Récupération des statistiques
 	//
-	$filename = sprintf('%04d_%s_list%d.txt', $year, date('F', $ts), $listdata['liste_id']);
+	$filename = filename_stats($year . '_' . date('F', $ts), $listdata['liste_id']);
 	
 	if( !file_exists(WA_STATSDIR . '/' . $filename) )
 	{

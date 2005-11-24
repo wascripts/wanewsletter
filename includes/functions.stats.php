@@ -39,31 +39,35 @@ define('WA_STATSDIR', WA_ROOTDIR . '/stats', true);
  */
 function convertToRGB($hexColor)
 {
-	$parts    = array();
+	$pattern  = null;
 	$hexColor = strtoupper($hexColor);
+	$length   = strlen($hexColor);
 	
-	if( strlen($hexColor) == 6 )
+	if( $length != 3 && $length != 6 )
 	{
-		preg_match('/^#?([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})$/', $hexColor, $tmp);
-		$parts['red']   = $tmp[1];
-		$parts['green'] = $tmp[2];
-		$parts['blue']  = $tmp[3];
+		$hexColor = 'FFF';
+		$length   = 3;
 	}
-	else if( strlen($hexColor) == 3 )
+	
+	if( $length == 6 )
 	{
-		preg_match('/^#?([[:xdigit:]])([[:xdigit:]])([[:xdigit:]])$/', $hexColor, $tmp);
-		$parts['red']   = $tmp[1] . $tmp[1];
-		$parts['green'] = $tmp[2] . $tmp[2];
-		$parts['blue']  = $tmp[3] . $tmp[3];
+		$pattern = '/^#?([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})$/';
+		$repeat  = 1;
 	}
 	else
 	{
-		$parts['red']   = '0';
-		$parts['green'] = '0';
-		$parts['blue']  = '0';
+		$pattern = '/^#?([[:xdigit:]])([[:xdigit:]])([[:xdigit:]])$/';
+		$repeat  = 2;
 	}
 	
-	return (object)array_map('hexdec', $parts);
+	preg_match($pattern, $hexColor, $tmp);
+	
+	$parts = array();
+	$parts['red']   = str_repeat($tmp[1], $repeat);
+	$parts['green'] = str_repeat($tmp[2], $repeat);
+	$parts['blue']  = str_repeat($tmp[3], $repeat);
+	
+	return (object) array_map('hexdec', $parts);
 }
 
 /**
@@ -78,8 +82,8 @@ function convertToRGB($hexColor)
  */
 function xy_arc($degre, $diametre)
 {
-	$x_arc = (cos($degre * (pi() / 180.0)) * ($diametre / 2));
-	$y_arc = (sin($degre * (pi() / 180.0)) * ($diametre / 2));
+	$x_arc = (cos($degre * (M_PI / 180.0)) * ($diametre / 2));
+	$y_arc = (sin($degre * (M_PI / 180.0)) * ($diametre / 2));
 	
 	return array($x_arc, $y_arc);
 }
@@ -106,7 +110,7 @@ function create_stats($listdata, $month, $year)
 	
 	@set_time_limit(300);
 	
-	$filename = date('Y_F', mktime(0, 0, 0, $month, 1, $year)) . '_list' . $listdata['liste_id'] . '.txt';
+	$filename = filename_stats(date('Y_F', mktime(0, 0, 0, $month, 1, $year)), $listdata['liste_id']);
 	
 	if( $fw = @fopen(WA_STATSDIR . '/' . $filename, 'w') )
 	{
@@ -138,8 +142,10 @@ function create_stats($listdata, $month, $year)
 		
 		return true;
 	}
-	
-	return false;
+	else
+	{
+		return false;
+	}
 }
 
 /**
@@ -160,13 +166,9 @@ function update_stats($listdata)
 		return false;
 	}
 	
-	$filename = date('Y_F') . '_list' . $listdata['liste_id'] . '.txt';
+	$filename = filename_stats(date('Y_F'), $listdata['liste_id']);
 	
-	if( !file_exists(WA_STATSDIR . '/' . $filename) )
-	{
-		return create_stats($listdata, date('m'), date('Y'));
-	}
-	else
+	if( file_exists(WA_STATSDIR . '/' . $filename) )
 	{
 		if( $fp = @fopen(WA_STATSDIR . '/' . $filename, 'r') )
 		{
@@ -176,7 +178,6 @@ function update_stats($listdata)
 			$offset = (date('j') - 1);
 			$stats[$offset] += 1;
 			
-			@chmod(WA_STATSDIR . '/' . $filename, 0666);
 			if( $fw = @fopen(WA_STATSDIR . '/' . $filename, 'w') )
 			{
 				fwrite($fw, implode("\n", $stats));
@@ -187,6 +188,10 @@ function update_stats($listdata)
 		}
 		
 		return false;
+	}
+	else
+	{
+		return create_stats($listdata, date('m'), date('Y'));
 	}
 }
 
@@ -232,11 +237,11 @@ function remove_stats($liste_from, $liste_to = false)
 		}
 		$browse->close();
 		
-		if( $liste_to && count($old_stats) )
+		if( $liste_to !== false && count($old_stats) )
 		{
 			foreach( $old_stats AS $date => $stats_from )
 			{
-				$filename = $date . '_list' . $liste_to . '.txt';
+				$filename = filename_stats($date, $liste_to);
 				
 				if( $fp = @fopen(WA_STATSDIR . '/' . $filename, 'r') )
 				{
@@ -278,6 +283,21 @@ function clean_stats($contents)
 	$contents = preg_replace("/\r\n?/", "\n", trim($contents));
 	
 	return array_map('intval', explode("\n", $contents));
+}
+
+/**
+ * filename_stats()
+ * 
+ * Fonction centrale dédiée au formatage des noms de fichiers de statistiques de Wanewsletter
+ * 
+ * @param string  $date (sous forme year_month; eg: 2005_April)
+ * @param integer $liste_id
+ * 
+ * @return string
+ */
+function filename_stats($date, $liste_id)
+{
+	return sprintf('%s_list%d.txt', $date, $liste_id);
 }
 
 }
