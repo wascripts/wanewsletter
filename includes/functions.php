@@ -312,7 +312,7 @@ BASIC;
 			exit;
 		}
 		
-		if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE )
+		if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
 		{
 			array_push($GLOBALS['_php_errors'], $php_errormsg);
 		}
