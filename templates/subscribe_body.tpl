@@ -2,28 +2,27 @@
 <!--
 var submitted = false;
 
-function check_form(e)
+function check_form(evt)
 {
-	var emailAddr = document.forms['subscribe-form'].elements['email'].value;
+	var emailAddr   = document.forms['subscribe-form'].elements['email'].value;
+	var cancelEvent = null;
 	
 	if( emailAddr.indexOf('@', 1) == -1 || emailAddr.indexOf('.', 1) == -1 ) {
 		window.alert('{L_INVALID_EMAIL}');
-		
-		if( e && e.preventDefault ) { // standard
-			e.preventDefault();
-		} else { // MS
-			window.event.returnValue = false;
-		}
+		cancelEvent = true;
 	} else if( submitted == true ) {
 		window.alert('{L_PAGE_LOADING}');
-		
-		if( e && e.preventDefault ) { // standard
-			e.preventDefault();
+		cancelEvent = true;
+	} else {
+		submitted = true;
+	}
+	
+	if( cancelEvent == true ) {
+		if( evt && typeof(evt.preventDefault) != 'undefined' ) { // standard
+			evt.preventDefault();
 		} else { // MS
 			window.event.returnValue = false;
 		}
-	} else {
-		submitted = true;
 	}
 }
 
@@ -39,7 +38,7 @@ window.onload = function() {
 	
 	<div class="bloc">
 		<label for="email">{L_EMAIL}&#160;:</label>
-		<input type="text" id="email" name="email" maxlength="100" />
+		<input type="text" id="email" name="email" size="26" maxlength="100" />
 	</div>
 	
 	<div class="bloc">
@@ -58,9 +57,9 @@ window.onload = function() {
 		<label><input type="radio" name="action" value="desinscription" /> {L_UNSUBSCRIBE}</label>
 	</div>
 	
-	<div class="center"> <input type="submit" name="wanewsletter" value="{L_VALID_BUTTON}" /> </div>
+	<p class="message">{MESSAGE}</p>
+	
+	<div class="center"><input type="submit" name="wanewsletter" value="{L_VALID_BUTTON}" /></div>
 </fieldset>
 </form>
-
-<p class="message">{MESSAGE}</p>
 

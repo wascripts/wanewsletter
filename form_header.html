@@ -18,27 +18,37 @@
 -->
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
     <meta http-equiv="Content-Script-Type" content="text/javascript" />
     <meta http-equiv="Content-Style-Type" content="text/css" />
     
     <title>Inscription à la liste de diffusion</title>
     
     <meta name="Author" content="Bobe" />
-    <meta name="Editor" content="phpEdit" />
-    <meta name="Copyright" content="phpCodeur (c) 2002-2004" />
+    <meta name="Editor" content="jEdit" />
     
     <style type="text/css" media="screen">
-    form { width: 60%; margin: 30px auto; font-family: Verdana, Arial, sans-serif; font-size: 0.8em; }
+	body { font: .8em "Bitstream Vera Sans", Verdana, Arial, sans-serif; }
     
-    form fieldset       { border: 1px dashed #79C; padding: 10px; }
-    form legend         { background-color: white; padding: 1px 4px; color: black; }
-    form div            { padding: 6px 8px; }
-    form div.bloc label { display: block; float: left; width: 30%; }
-    form div.center     { text-align: center; }
+	form#subscribe-form { width: 60%; margin: 30px auto 15px; }
+    form#subscribe-form fieldset       { border: 1px dashed #79C; padding: 10px; }
+    form#subscribe-form legend         { background-color: white; padding: 1px 4px; color: black; }
+    form#subscribe-form div            { padding: 5px 8px; }
+    form#subscribe-form div.bloc label { display: block; float: left; width: 30%; margin-top: .2em; cursor: pointer; }
+    form#subscribe-form div label      { cursor: pointer; }
+    form#subscribe-form div.center     { text-align: center; }
+	form#subscribe-form p.message      { text-align: center; }
+	
+	form#subscribe-form select,
+	form#subscribe-form input[type="text"] { border: 1px inset silver; }
     
-    label[for] { cursor: pointer; }
-    p.message  { text-align: center; }
+	abbr[title] { cursor: help; }
+	address#footer {
+		margin: 15px auto;
+		text-align: center;
+		font-style: normal;
+		font-size: 11px;
+	}
     </style>
 </head>
 <body>
