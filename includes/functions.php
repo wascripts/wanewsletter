@@ -628,17 +628,17 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  * 
  * @param array $data    Tableau des données
  * 
- * @return void
+ * @return array
  */
 function strip_magic_quotes_gpc(&$data)
 {
 	if( is_array($data) )
 	{
-		foreach( $data AS $key => &$val )
+		foreach( $data AS $key => $val )
 		{
 			if( is_array($val) )
 			{
-				strip_magic_quotes_gpc($val);
+				$data[$key] = strip_magic_quotes_gpc($val);
 			}
 			else if( is_string($val) )
 			{
@@ -646,6 +646,8 @@ function strip_magic_quotes_gpc(&$data)
 			}
 		}
 	}
+	
+	return $data;
 }
 
 /**
