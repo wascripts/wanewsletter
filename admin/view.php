@@ -124,23 +124,20 @@ else if( $mode == 'iframe' )
 					'<\\1"' . WA_ROOTDIR . '/options/show.php?file=\\2&amp;sessid=' . $session->session_id . '"\\3>',
 					$body
 				);
+				
+				echo str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $lang['Label_link'] . ' (lien fictif)</a>', $body);
 			}
 			else
 			{
-				$body = nl2br(active_urls(htmlspecialchars(trim($body), ENT_NOQUOTES)));
+				require WAMAILER_DIR . '/class.mailer.php';
+				
+				$body = Mailer::word_wrap(trim($body), false);
+				$body = active_urls(htmlspecialchars($body, ENT_NOQUOTES));
 				$body = preg_replace('/(\*\w+\*)/', '<strong>\\1</strong>', $body);
 				$body = preg_replace('/(\/\w+\/)/', '<em>\\1</em>', $body);
 				$body = preg_replace('/(_\w+_)/', '<u>\\1</u>', $body);
-			}
-			
-			if( $format != FORMAT_HTML )
-			{
 				$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
-				$output->basic($body);
-			}
-			else
-			{
-				echo str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $lang['Label_link'] . ' (lien fictif)</a>', $body);
+				$output->basic(sprintf('<pre>%s</pre>', $body));
 			}
 		}
 		else

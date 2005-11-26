@@ -86,12 +86,46 @@ function preview(evt)
 {
 	var subject	 = document.forms['send-form'].elements['subject'].value;
 	var preview	 = window.open('about:blank','apercu','width=' + width + ',height=' + height + ',marginleft=2,topmargin=2,left=' + left + ',top=' + top + ',toolbar=0,location=0,directories=0,status=0,scrollbars=1,resizable=0,copyhistory=0,menuBar=0');
-	var rex_link = new RegExp("{LINKS}", "gi");
 	
-	if( evt.target.id == 'preview1' )
-	{
+	if( evt.target.id == 'preview1' ) {
+		
 		var texte = document.forms['send-form'].elements['body_text'].value;
-		texte = texte.replace(rex_link, "http://www.example.org");
+		var CRLF  = new RegExp("\r?\n", "g");
+		var lines = texte.split(CRLF);
+		
+		//
+		// WordWrap
+		//
+		var temp = line = '';
+		var maxlen   = 77;
+		var spacePos = -1;
+		
+		for( var i = 0, j = 0, m = lines.length; i < m; i++ ) {
+			if( lines[i].length > maxlen ) {
+				temp = '';
+				
+				while( lines[i].length > 0 ) {
+					line = lines[i].substr(0, maxlen);
+					
+					if( line.length >= maxlen && (spacePos = line.lastIndexOf(' ')) != -1 ) {
+						line = line.substr(0, spacePos);
+						spacePos++;
+					} else {
+						spacePos = maxlen;
+					}
+					
+					temp += line;
+					temp += "\r\n";
+					
+					lines[i] = lines[i].substr(spacePos, lines[i].length);
+				}
+				
+				lines[i] = temp.substr(0, (temp.length - 2));
+			}
+		}
+		
+		texte = lines.join("\r\n");
+		texte = texte.replace("{LINKS}", "http://www.example.org");
 		texte = texte.replace('<', '&lt;');
 		var boldSpan = new RegExp("(\\*\\w+\\*)", "g");
 		var italicSpan = new RegExp("(/\\w+/)", "g");
@@ -103,24 +137,20 @@ function preview(evt)
 		preview.document.writeln('<!DOCTYPE HTML PUBLIC "-\/\/W3C\/\/DTD HTML 4.01\/\/EN" "http:\/\/www.w3.org\/TR\/html4\/strict.dtd">');
 		preview.document.writeln('<html><head><title>' + subject + '<\/title><\/head>');
 		preview.document.writeln('<body><pre>' + texte + '<\/pre><\/body><\/html>');
-	}
-	else
-	{
+	} else {
 		var texte     = document.forms['send-form'].elements['body_html'].value;
 		var rex_img   = new RegExp("<([^<]+)\"cid:([^\\:*/?<\">|]+)\"([^>]*)?>", "gi");
 		var rex_title = new RegExp("<title>.*</title>", "i");
 		var sessid    = '';
 		
-		for( var i = 0, m = document.forms.length; i < m; i++ )
-		{
-			if( document.forms[i].elements['sessid'] )
-			{
+		for( var i = 0, m = document.forms.length; i < m; i++ ) {
+			if( typeof(document.forms[i].elements['sessid']) != 'undefined' ) {
 				sessid = document.forms[i].elements['sessid'].value;
 				break;
 			}
 		}
 		
-		texte = texte.replace(rex_link, '<a href="http://www.example.org/">Example</a>');
+		texte = texte.replace("{LINKS}", '<a href="http://www.example.org/">Example</a>');
 		texte = texte.replace(rex_img, "<$1\"../options/show.php?file=$2&amp;sessid=" + sessid + "\"$3>");
 		texte = texte.replace(rex_title, '<title>' + subject + '</title>');
 		
@@ -150,7 +180,7 @@ function addLinks(evt)
 		texte.value  = before + '{LINKS}' + after;
 		texte.setSelectionRange(caretPos, caretPos);
 	}
-	else if( texte.createTextRange && texte.caretPos )
+	else if( typeof(texte.createTextRange) != 'undefined' && texte.caretPos )
 	{
 		texte.caretPos.text = '{LINKS}';
 	}

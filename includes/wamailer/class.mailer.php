@@ -1677,8 +1677,13 @@ class Mailer {
 	 * 
 	 * @return string
 	 */
-	function word_wrap($str, $is_header = true)
+	function word_wrap($str, $is_header = true, $maxlen = 78)
 	{
+		if( isset($this) )
+		{
+			$maxlen = $this->maxlen;
+		}
+		
 		if( $is_header )
 		{
 			/**
@@ -1693,21 +1698,21 @@ class Mailer {
 			 * selon les lecteurs d'emails.
 			 */
 			
-			$str = wordwrap($str, $this->maxlen, "\n ", 1);
+			$str = wordwrap($str, $maxlen, "\n ", 1);
 		}
-		else if( strlen($str) > $this->maxlen )
+		else if( strlen($str) > $maxlen )
 		{
 			$lines = explode("\n", $str);
 			$str   = '';
 			foreach( $lines AS $line )
 			{
-				if( strlen($line) > $this->maxlen )
+				if( strlen($line) > $maxlen )
 				{
 					//
 					// wordwrap bouffe les espaces aux endroits où il ajoute un saut de ligne
 					// on réduit la longueur maximale de 1 et on coupe avec <SP>\n
 					//
-					$line = wordwrap($line, ($this->maxlen - 1), " \n");
+					$line = wordwrap($line, ($maxlen - 1), " \n");
 				}
 				
 				$str .= $line . "\n";
