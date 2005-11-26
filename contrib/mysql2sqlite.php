@@ -22,7 +22,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * @version $Id: subscribe.php 148 2005-11-12 15:10:35Z bobe $
+ * @version $Id$
  */
 
 echo "This module has been disabled for security reasons\n";
