@@ -32,9 +32,9 @@ require WA_ROOTDIR . '/newsletter.php';
 
 $list_box = '';
 
-$sql = 'SELECT liste_id, liste_name, liste_format 
-	FROM ' . LISTE_TABLE . '
-	WHERE liste_public = 1';
+$sql = "SELECT liste_id, liste_name, liste_format
+	FROM " . LISTE_TABLE . "
+	WHERE liste_public = " . TRUE;
 if( !($result = $db->query($sql)) )
 {
 	trigger_error('Impossible d\'obtenir la liste des listes de diffusion', ERROR);
@@ -60,7 +60,7 @@ else
 				$f = 'txt &amp; html';
 			}
 			
-			$list_box .= '<option value="' . $row['liste_id'] . '"> - ' . $row['liste_name'] . ' (' . $f . ') - </option>';
+			$list_box .= '<option value="' . $row['liste_id'] . '"> ' . $row['liste_name'] . ' (' . $f . ') </option>';
 		}
 		while( $row = $db->fetch_array($result) );
 	}
@@ -73,8 +73,6 @@ else
 }
 
 $output->send_headers(true);
-
-include WA_ROOTDIR . '/form_header.html';
 
 $output->set_filenames(array(
 	'body' => 'subscribe_body.tpl'
@@ -102,5 +100,4 @@ $output->pparse('body');
 //
 @restore_error_handler();
 
-include WA_ROOTDIR . '/form_footer.html';
 ?>
