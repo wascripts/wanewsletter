@@ -31,12 +31,12 @@ exit(0);
 //
 // Configuration
 //
+define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR', '/home/web/projects/wanewsletter/branche_2.3');
 
-$mysql_prefix = 'mysql_';
-$sqlite_db    = WA_ROOTDIR . '/sql/wanewsletter.db';
-$remove_db    = true;
-$schemas_dir  = WA_ROOTDIR . '/setup/schemas';
+$sqlite_db   = WA_ROOTDIR . '/sql/wanewsletter.sqlite';
+$schemas_dir = WA_ROOTDIR . '/setup/schemas';
+$remove_db   = true;
 //
 // End Of Config
 //
@@ -44,7 +44,7 @@ $schemas_dir  = WA_ROOTDIR . '/setup/schemas';
 require WA_ROOTDIR . '/includes/config.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/sql/sqlite.php';
+require WA_ROOTDIR . '/sql/db_type.php';
 
 //
 // Gestionnaire d'erreur spécifique pour utilisation en ligne de commande
@@ -57,12 +57,13 @@ function wan_cli_error($errno, $errstr, $errfile, $errline)
 		case E_ERROR: $errno = 'Error'; break;
 	}
 	
-	printf("%s : %s at line %d\n", $errno, $errstr, $errline);
+	printf("%s : %s at line %d\n", $errno, strip_tags($errstr), $errline);
 }
 
 set_error_handler('wan_cli_error');
 
 if( php_sapi_name() != 'cli' ) {
+	set_time_limit(0);
 	header('Content-Type: text/plain; charset=ISO-8859-1');
 }
 
@@ -76,19 +77,13 @@ if( $remove_db == true && file_exists($sqlite_db) ) {
 	unlink($sqlite_db);
 }
 
-$sql_connect  = $mysql_prefix . 'connect';
-$sql_selectdb = $mysql_prefix . 'select_db';
-$sql_query    = $mysql_prefix . 'query';
-$sql_fetchrow = $mysql_prefix . 'fetch_array';
-$sql_num_rows = $mysql_prefix . 'num_rows';
-
 //
 // Initialisation de la base de données
 //
-$db =& new sql($sqlite_db);
+$fs = sqlite_open($sqlite_db, 0666, $errstr);
 
-if( !is_resource($db->connect_id) ) {
-	echo "Unable to create SQLite DB\n";
+if( !is_resource($fs) ) {
+	echo "Unable to create SQLite DB ($errstr)\n";
 	exit(0);
 }
 
@@ -101,14 +96,13 @@ $sqldata = file_get_contents($schemas_dir . '/sqlite_tables.sql');
 $queries = make_sql_ary($sqldata, ';');
 
 foreach( $queries AS $query ) {
-	$db->query($query);
+	sqlite_query($fs, $query);
 }
 
 //
 // Injection des données en provenance de la base MySQL
 //
-$sql_connect($dbhost, $dbuser, $dbpassword);
-$sql_selectdb($dbname);
+$db =& new sql($dbhost, $dbuser, $dbpassword, $dbname);
 
 $tableList = array(
 	'wa_abo_liste', 'wa_abonnes', 'wa_admin', 'wa_auth_admin', 'wa_ban_list', 'wa_config',
@@ -118,17 +112,30 @@ $tableList = array(
 foreach( $tableList AS $table ) {
 	$table  = str_replace('wa_', $prefixe, $table);
 	printf("Populate table %s...\n", $table);
+	flush();
 	
-	$result = $sql_query('SELECT * FROM ' . $table);
+	$result = $db->query('SELECT * FROM ' . $table);
 	
-	while( $row = @$sql_fetchrow($result, MYSQL_ASSOC) ) {
-		$db->query_build('INSERT', $table, $row);
+	while( $row = $db->fetch_array($result) ) {
+		
+		$fields = $values = array();
+		
+		foreach( $row AS $fieldname => $value ) {
+			array_push($fields, $fieldname);
+			array_push($values, sqlite_escape_string($value));
+		}
+		
+		sqlite_exec($fs, "INSERT INTO $table (" . implode(', ', $fields) . ") VALUES('" . implode("', '", $values) . "')");
 	}
 	
-	printf("%d rows added.\n", $sql_num_rows($result));
+	printf("%d rows added.\n", $db->num_rows($result));
+	flush();
 }
 
-echo "SQLite database has been successfully initialized!\n";
+sqlite_close($fs);
+$db->close();
+
+echo "\nSQLite database has been successfully initialized!\n";
 exit(0);
 
 
