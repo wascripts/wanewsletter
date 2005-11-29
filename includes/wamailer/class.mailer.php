@@ -2567,7 +2567,7 @@ class Mailer {
 			$attach .= 'Content-ID: <' . $cid . '@Wamailer>' . "\n\n";
 			
 			$this->uncompiled_message[$this->format] = preg_replace(
-				'/<(.+?)"cid:' . preg_quote($filename, '/') . '"([^>]*)?>/i',
+				'/<(.+?)"cid:' . preg_quote($filename, '/') . '"([^>]*)?>/si',
 				'<\\1"cid:' . $cid . '@Wamailer"\\2>',
 				$this->uncompiled_message[$this->format]
 			);

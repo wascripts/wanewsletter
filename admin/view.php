@@ -120,7 +120,7 @@ else if( $mode == 'iframe' )
 			if( $format == FORMAT_HTML )
 			{
 				$body = preg_replace(
-					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/i',
+					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/si',
 					'<\\1"' . WA_ROOTDIR . '/options/show.php?file=\\2&amp;sessid=' . $session->session_id . '"\\3>',
 					$body
 				);
