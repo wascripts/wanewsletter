@@ -74,6 +74,13 @@ class sql {
 	var $sql_time     = 0;
 	
 	/**
+	 * Port de connexion par défaut
+	 * 
+	 * @var integer
+	 */
+	var $dbport       = 3306;
+	
+	/**
 	 * sql::sql()
 	 * 
 	 * Constructeur de classe
@@ -92,20 +99,18 @@ class sql {
 	{
 		$sql_connect = ( $persistent ) ? 'mysqli_pconnect' : 'mysqli_connect';
 		
-		$this->connect_id = @$sql_connect($dbhost, $dbuser, $dbpwd);
-		
-		if( $this->connect_id != false )
+		if( strpos($dbhost, ':') )
 		{
-			$select_db = mysqli_select_db($this->connect_id, $dbname);
-			
-			if( !$select_db )
-			{
-				$this->sql_error['errno']   = mysqli_errno($this->connect_id);
-				$this->sql_error['message'] = mysqli_error($this->connect_id);
-				mysqli_close($this->connect_id);
-			}
+			list($dbhost, $dbport) = explode(':', $dbhost);
 		}
 		else
+		{
+			$dbport = $this->dbport;
+		}
+		
+		$this->connect_id = @$sql_connect($dbhost, $dbuser, $dbpwd, $dbname, $dbport);
+		
+		if( !$this->connect_id )
 		{
 			$this->sql_error['errno']   = mysqli_connect_errno();
 			$this->sql_error['message'] = mysqli_connect_error();
@@ -261,7 +266,7 @@ class sql {
 				if( !$this->trc_started )
 				{
 					$this->trc_started = true;
-					$result = @mysqli_autocommit($this->connect_id, false);
+					$result = mysqli_autocommit($this->connect_id, false);
 				}
 				else
 				{
@@ -274,12 +279,12 @@ class sql {
 				{
 					$this->trc_started = false;
 					
-					if( !($result = @mysqli_commit($this->db_connect_id)) )
+					if( !($result = mysqli_commit($this->db_connect_id)) )
 					{
-						@mysqli_rollback($this->connect_id);
+						mysqli_rollback($this->connect_id);
 					}
 					
-					@mysqli_autocommit($this->connect_id, true);
+					mysqli_autocommit($this->connect_id, true);
 				}
 				else
 				{
@@ -291,8 +296,8 @@ class sql {
 				if( $this->trc_started )
 				{
 					$this->trc_started = false;
-					$result = @mysqli_rollback($this->connect_id);
-					@mysqli_autocommit($this->connect_id, true);
+					$result = mysqli_rollback($this->connect_id);
+					mysqli_autocommit($this->connect_id, true);
 				}
 				else
 				{
@@ -321,7 +326,7 @@ class sql {
 			$tables = implode(', ', $tables);
 		}
 		
-		@mysqli_query('OPTIMIZE TABLE ' . $tables, $this->connect_id);
+		@mysqli_query($this->connect_id, 'OPTIMIZE TABLE ' . $tables);
 	}
 	
 	/**
@@ -341,7 +346,7 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		return ( $result != false ) ? @mysqli_num_rows($result) : false;
+		return ( $result != false ) ? mysqli_num_rows($result) : false;
 	}
 	
 	/**
@@ -354,7 +359,7 @@ class sql {
 	 */
 	function affected_rows()
 	{
-		return ( $this->connect_id != false ) ? @mysqli_affected_rows($this->connect_id) : false;
+		return ( $this->connect_id != false ) ? mysqli_affected_rows($this->connect_id) : false;
 	}
 	
 	/**
@@ -535,7 +540,7 @@ class sql {
 		
 		if( $result != false )
 		{
-			@mysqli_free_result($result);
+			mysqli_free_result($result);
 		}
 	}
 	
