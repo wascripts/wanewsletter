@@ -59,14 +59,15 @@ define('DISABLE_CHECK_LINKS', FALSE);
 
 $listdata = $auth->listdata[$admindata['session_liste']];
 
-$mode = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
-
 $logdata = array();
 $logdata['log_id']        = ( !empty($_REQUEST['id']) ) ? intval($_REQUEST['id']) : 0;
 $logdata['log_subject']   = ( !empty($_POST['subject']) ) ? trim($_POST['subject']) : '';
 $logdata['log_body_text'] = ( !empty($_POST['body_text']) ) ? trim($_POST['body_text']) : '';
 $logdata['log_body_html'] = ( !empty($_POST['body_html']) ) ? trim($_POST['body_html']) : '';
 $logdata['log_status']    = ( !empty($_POST['log_status']) ) ? STATUS_MODEL : STATUS_WRITING;
+
+$mode = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
+$prev_status = ( isset($_POST['prev_status']) ) ? intval($_POST['prev_status']) : $logdata['log_status'];
 
 if( isset($_POST['cancel']) )
 {
@@ -375,6 +376,8 @@ switch( $mode )
 					$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
 					trigger_error($message, MESSAGE);
 				}
+				
+				$prev_status = $logdata['log_status'];
 			}
 		}
 		else
@@ -638,7 +641,6 @@ switch( $mode )
 			
 			if( !$error )
 			{
-				$prev_status    = ( isset($_POST['prev_status']) ) ? $_POST['prev_status'] : 0;
 				$sql_where      = '';
 				$duplicate_log  = false;
 				$duplicate_file = false;
@@ -758,6 +760,7 @@ switch( $mode )
 				}
 				
 				$logdata['log_id'] = $tmp_id;
+				$prev_status = $logdata['log_status'];
 				unset($tmp_id);
 				
 				if( $mode == 'save' || $mode == 'send' )
@@ -1013,7 +1016,7 @@ $output->addLink('section', './envoi.php?mode=progress', $lang['List_send']);
 $output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);
-$output->addHiddenField('prev_status', $logdata['log_status']);
+$output->addHiddenField('prev_status', $prev_status);
 $output->addHiddenField('sessid',      $session->session_id);
 
 $output->page_header();
