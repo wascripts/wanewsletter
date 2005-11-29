@@ -97,7 +97,7 @@ function preview(evt)
 		// WordWrap
 		//
 		var temp = line = '';
-		var maxlen   = 77;
+		var maxlen   = 78;
 		var spacePos = -1;
 		
 		for( var i = 0, j = 0, m = lines.length; i < m; i++ ) {
