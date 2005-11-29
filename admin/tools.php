@@ -319,35 +319,32 @@ switch( $mode )
 			}
 			
 			$contents = '';
-			while( $row = $db->fetch_array($result) )
+			if( $eformat == 'xml' )
 			{
-				if( $eformat == 'xml' )
+				while( $row = $db->fetch_array($result) )
 				{
 					$contents .= "\t<email>".$row['abo_email']."</email>\n";
 				}
-				else
-				{
-					$contents .= ( $contents != '' ) ? $glue : '';
-					$contents .= $row['abo_email'];
-				}
-			}
-			$db->free_result($result);
-			
-			if( $eformat == 'xml' )
-			{
-				$label_format = ( $format == FORMAT_HTML ) ? 'HTML' : 'text';
 				
 				$contents  = '<' . '?xml version="1.0"?' . ">\n"
-					. "<!-- Date : " . gmdate('d/m/Y H:i:s') . " GMT \xe2\x80\x93 Format : $label_format -->\n"
+					. "<!-- Date : " . gmdate('d/m/Y H:i:s') . " GMT - Format : "
+					. (( $format == FORMAT_HTML ) ? 'HTML' : 'text') . " -->\n"
 					. "<Wanliste>\n" . $contents . "</Wanliste>";
 				$mime_type = 'application/xml';
 				$ext = 'xml';
 			}
 			else
 			{
+				while( $row = $db->fetch_array($result) )
+				{
+					$contents .= ( $contents != '' ) ? $glue : '';
+					$contents .= $row['abo_email'];
+				}
+				
 				$mime_type = 'text/plain';
 				$ext = 'txt';
 			}
+			$db->free_result($result);
 			
 			$filename = sprintf('wa_export_%d.%s', $admindata['session_liste'], $ext);
 			
@@ -638,6 +635,7 @@ switch( $mode )
 					return true;
 				} else {
 					$report .= sprintf(\'%s : %s%s\', $email, $lang[\'Message\'][\'Invalid_email\'], WA_EOL);
+					return false;
 				}'
 			));
 			
@@ -656,6 +654,9 @@ switch( $mode )
 			$db->query("DROP INDEX abo_email_idx ON " . ABONNES_TABLE);
 			$db->query("DROP INDEX abo_status_idx ON " . ABONNES_TABLE);
 			
+			//
+			// Traitement des adresses email déjà présentes dans la base de données
+			//
 			while( $abodata = $db->fetch_array($result) )
 			{
 				if( !isset($abodata['confirmed']) ) // N'est pas inscrit à cette liste
@@ -681,6 +682,9 @@ switch( $mode )
 				array_push($emails_ok, $abodata['abo_email']);
 			}
 			
+			//
+			// Traitement des adresses email inconnues
+			//
 			$emails = array_diff($emails, $emails_ok);
 			
 			foreach( $emails AS $email )
