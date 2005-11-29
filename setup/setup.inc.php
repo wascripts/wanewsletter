@@ -239,7 +239,7 @@ $config_file .= "// Ne pas modifier !\n";
 $config_file .= "//\n";
 $config_file .= "define('NL_INSTALLED', true);\n\n";
 $config_file .= "\$dbtype  = '$dbtype';\n\n";
-$config_file .= "\$dbhost  = " .  (($dbtype == 'sqlite') ? "WA_ROOTDIR . '/sql/wanewsletter.db'" : "'$dbhost'") . ";\n";
+$config_file .= "\$dbhost  = " .  (($dbtype == 'sqlite') ? "WA_ROOTDIR . '/sql/wanewsletter.sqlite'" : "'$dbhost'") . ";\n";
 $config_file .= "\$dbuser  = '$dbuser';\n";
 $config_file .= "\$dbpassword = '$dbpassword';\n";
 $config_file .= "\$dbname  = '$dbname';\n\n";

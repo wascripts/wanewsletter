@@ -67,7 +67,7 @@ class HTTP_Client extends HTTP_Main {
 	var $byteLimit    = 0;
 	
 	/**
-	 * Le code de réponse HTTP
+	 * Le code de la réponse HTTP
 	 * 
 	 * @var integer
 	 * @access public
@@ -131,13 +131,15 @@ class HTTP_Client extends HTTP_Main {
 	 * @param string $url
 	 * 
 	 * @access public
+	 * @return void
 	 */
 	function openURL($requestMethod, $url)
 	{
 		$requestMethod = strtoupper($requestMethod);
 		if( !in_array($requestMethod, array('HEAD', 'GET', 'POST')) )
 		{
-			trigger_error("$requestMethod method are not allowed", E_USER_ERROR);
+			//trigger_error("$requestMethod method are not allowed", E_USER_ERROR);
+			return false;
 		}
 		
 		$this->requestMethod = $requestMethod;
@@ -161,6 +163,7 @@ class HTTP_Client extends HTTP_Main {
 	 * @param boolean $override  Écraser la valeur précédente si présente
 	 * 
 	 * @access public
+	 * @return string
 	 */
 	function setRequestHeader($name, $value, $override = true)
 	{
@@ -170,9 +173,10 @@ class HTTP_Client extends HTTP_Main {
 	/**
 	 * Renvoie la valeur de l'en-tête de nom donné
 	 * 
-	 * @param string  $name      Nom de l'en-tête
+	 * @param string $name  Nom de l'en-tête
 	 * 
 	 * @access public
+	 * @return string
 	 */
 	function getResponseHeader($name)
 	{
@@ -187,15 +191,17 @@ class HTTP_Client extends HTTP_Main {
 	/**
 	 * Effectue la requète HTTP à destination de l'URL fournie avec HTTP_Client::openURL()
 	 * 
-	 * @param mixed $postdata  Données à envoyer (si méthode POST utilisée)
+	 * @param mixed  $postdata  Données à envoyer (si méthode POST utilisée)
+	 * @param string $charset   Jeu de caractère/Encodage des données
 	 * 
 	 * @access public
+	 * @return boolean
 	 */
-	function send($postdata = '')
+	function send($postdata = '', $charset = '')
 	{
 		if( empty($this->requestMethod) || empty($this->url) )
 		{
-			trigger_error('No method and/or URL given', E_USER_WARNING);
+			//trigger_error('No method and/or URL given', E_USER_WARNING);
 			return false;
 		}
 		
@@ -217,7 +223,12 @@ class HTTP_Client extends HTTP_Main {
 				unset($tmp);
 			}
 			
-			$this->setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			if( !empty($charset) )
+			{
+				$charset = '; charset=' . $charset;
+			}
+			
+			$this->setRequestHeader('Content-Type', 'application/x-www-form-urlencoded' . $charset);
 			$this->setRequestHeader('Content-Length', strlen($postdata));
 		}
 		else
@@ -241,23 +252,23 @@ class HTTP_Client extends HTTP_Main {
 				$this->errormsg .= ' '.$errstr;
 				$this->debug($this->errormsg);
 			}*/
-			trigger_error($errno . ': ' . $errstr, E_USER_WARNING);
+			//trigger_error($errno . ': ' . $errstr, E_USER_WARNING);
 			return false;
 		}
 		
 		$this->debug('Connect to ' . $this->url->host . "...\r\n\r\n");
 		$path = $this->url->path . (($this->url->query != '') ? '?' . $this->url->query : '');
 		
-		$this->writeSocket($fs, "$this->requestMethod $path HTTP/1.1\r\n");
+		$this->write($fs, "$this->requestMethod $path HTTP/1.1\r\n");
 		foreach( $this->_requestHeaders AS $name => $value )
 		{
 			if( !empty($value) )
 			{
-				$this->writeSocket($fs, $name . ': ' . $value . "\r\n");
+				$this->write($fs, $name . ': ' . $value . "\r\n");
 			}
 		}
-		$this->writeSocket($fs, "Connection: close\r\n");
-		$this->writeSocket($fs, "\r\n" . $postdata);
+		$this->write($fs, "Connection: close\r\n");
+		$this->write($fs, "\r\n" . $postdata);
 		
 		//
 		// Réception des en-têtes de réponse
@@ -284,7 +295,7 @@ class HTTP_Client extends HTTP_Main {
 				}
 				else
 				{
-					trigger_error('Malformed response', E_USER_WARNING);
+					//trigger_error('Malformed response', E_USER_WARNING);
 					return false;
 				}
 			}
@@ -293,7 +304,7 @@ class HTTP_Client extends HTTP_Main {
 				if( strpos($tmp, ':') != false )
 				{
 					$header = strtolower(substr($tmp, 0, strpos($tmp, ':')));
-					$value  = trim(substr($tmp, strpos($tmp, ':')+1));
+					$value  = trim(substr($tmp, strpos($tmp, ':') + 1));
 					$this->responseHeaders .= $tmp;
 					
 					if( $header == 'transfer-encoding' && strtolower($value) == 'chunked' )
@@ -307,7 +318,7 @@ class HTTP_Client extends HTTP_Main {
 				}
 				else
 				{
-					trigger_error('Malformed header', E_USER_WARNING);
+					//trigger_error('Malformed header', E_USER_WARNING);
 					return false;
 				}
 			}
@@ -330,9 +341,9 @@ class HTTP_Client extends HTTP_Main {
 		{
 			$this->_numRedirects++;
 			
-			if( $this->maxRedirects != 0 && $this->_numRedirects > $this->maxRedirects )
+			if( $this->maxRedirects > 0 && $this->_numRedirects > $this->maxRedirects )
 			{
-				trigger_error('Too many redirections', E_USER_WARNING);
+				//trigger_error('Too many redirections', E_USER_WARNING);
 				return false;
 			}
 			
@@ -350,6 +361,12 @@ class HTTP_Client extends HTTP_Main {
 			{
 				if( !preg_match('/^https?:\/\//', $location) )
 				{
+					$query = '';
+					if( strpos($location, '?') )
+					{
+						list($location, $query) = explode('?', $location);
+					}
+					
 					if( substr($location, 0, 1) == '/' )
 					{
 						$path = $location;
@@ -364,89 +381,94 @@ class HTTP_Client extends HTTP_Main {
 					}
 					
 					$this->url->path  = URL_Parser::resolvePath($path);
-					$this->url->query = '';
+					$this->url->query = $query;
 					
-					$location = $this->url->__toString();
+					$location = $this->url;
 				}
 				
 				$this->openURL($this->requestMethod, $location);
 				$this->send($postdata);
 			}
 		}
-		else if( $this->requestMethod != 'HEAD' )
+		else
 		{
-			$data = '';
-			$chunklen = 0;
+			$this->_numRedirects = 0;
 			
-			while( !feof($fs) )
+			if( $this->requestMethod != 'HEAD' )
 			{
-				$tmp = fgets($fs, 1024);
+				$data = '';
+				$chunklen = 0;
 				
-				if( $this->autoDecodeData && $contentChunked == true )
+				while( !feof($fs) )
 				{
-					if( $chunklen == 0 )
+					$tmp = fgets($fs, 1024);
+					
+					if( $this->autoDecodeData && $contentChunked == true )
 					{
-						if( !preg_match('/^([a-f0-9]+)\s*$/mi', $tmp, $match) )
+						if( $chunklen == 0 )
 						{
-							$data .= $tmp;
-							$contentChunked = false;
+							if( !preg_match('/^([a-f0-9]+)\s*$/mi', $tmp, $match) )
+							{
+								$data .= $tmp;
+								$contentChunked = false;
+								
+								continue;
+							}
 							
-							continue;
-						}
-						
-						if( ($chunklen = hexdec($match[1])) == 0 )
-						{
-							break;
-						}
-					}
-					else
-					{
-						$chunklen -= strlen($tmp);
-						
-						if( $chunklen < 0 )
-						{
-							$data .= substr($tmp, 0, $chunklen);
-							$chunklen = 0;
-						}
-						else
-						{
-							$data .= $tmp;
-							if( $chunklen == 0 )
-								fgets($fs, 1024);// On bouffe le prochain CRLF
-							
-							if( $this->byteLimit > 0 && strlen($data) > $this->byteLimit )
+							if( ($chunklen = hexdec($match[1])) == 0 )
 							{
 								break;
 							}
 						}
+						else
+						{
+							$chunklen -= strlen($tmp);
+							
+							if( $chunklen < 0 )
+							{
+								$data .= substr($tmp, 0, $chunklen);
+								$chunklen = 0;
+							}
+							else
+							{
+								$data .= $tmp;
+								if( $chunklen == 0 )
+									fgets($fs, 1024);// On bouffe le prochain CRLF
+								
+								if( $this->byteLimit > 0 && strlen($data) > $this->byteLimit )
+								{
+									break;
+								}
+							}
+						}
 					}
-				}
-				else
-				{
-					$data .= $tmp;
-					
-					if( $contentGziped == false && $this->byteLimit > 0 && strlen($data) > $this->byteLimit )
+					else
 					{
-						break;
+						$data .= $tmp;
+						
+						if( $contentGziped == false && $this->byteLimit > 0 && strlen($data) > $this->byteLimit )
+						{
+							break;
+						}
 					}
 				}
-			}
-			fclose($fs);
-			$this->debug($data);
-			
-			if( $this->autoDecodeData == true && $contentGziped == true && !empty($data) )
-			{
-				// RFC 1952 - Users note on http://www.php.net/manual/en/function.gzencode.php
-				if( strcmp(substr($data, 0, 2), "\x1f\x8b") !== 0 )
+				fclose($fs);
+				$this->debug($data);
+				
+				if( $this->autoDecodeData == true && $contentGziped == true && !empty($data) )
 				{
-					trigger_error('data is not to GZIP format', E_USER_WARNING);
-					return false;
+					// RFC 1952 - Users note on http://www.php.net/manual/en/function.gzencode.php
+					if( strncmp($data, "\x1f\x8b", 2) != 0 )
+					{
+						//trigger_error('data is not to GZIP format', E_USER_WARNING);
+						return false;
+					}
+					
+					$data = gzinflate(substr($data, 10));
 				}
 				
-				$data = gzinflate(substr($data, 10));
+				$this->responseData = $data;
 			}
-			
-			$this->responseData = $data;
 		}
 		
 		$this->debug();
@@ -461,8 +483,9 @@ class HTTP_Client extends HTTP_Main {
 	 * @param string   $str  Données à envoyer
 	 * 
 	 * @access private
+	 * @return void
 	 */
-	function writeSocket($fs, $str)
+	function write($fs, $str)
 	{
 		@fputs($fs, $str);
 		$this->debug($str);

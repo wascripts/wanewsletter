@@ -168,7 +168,7 @@ else
 			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
 		}
 		
-		if( $error == false && !is_resource($db->connect_id) )
+		if( $error == false && !$db->connect_id )
 		{
 			$error = true;
 			$msg_error[] = sprintf($lang['Connect_db_error'], $db->sql_error['message']);
@@ -596,7 +596,7 @@ else
 		
 		if( is_object($db) )
 		{
-			$db->close_connexion();
+			$db->close();
 		}
 		
 		if( !$error )
@@ -612,8 +612,6 @@ else
 			
 			if( $type == 'install' )
 			{
-				@chmod(WA_ROOTDIR . '/includes/config.inc.php', 0666);
-				
 				if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
 				{
 					$output->addHiddenField('dbtype',     $dbtype);
@@ -637,8 +635,6 @@ else
 				
 				fwrite($fw, $config_file);
 				fclose($fw);
-				
-				@chmod(WA_ROOTDIR . '/includes/config.inc.php', 0644);
 			}
 			
 			if( $type == 'install' || $type == 'reinstall' )
@@ -661,13 +657,12 @@ else
 	}
 	
 	require WA_ROOTDIR . '/includes/functions.box.php';
-	$lang_box = lang_box($language);
 	
 	$db_box = '';
 	foreach( $supported_db AS $db_name => $db_infos )
 	{
 		$selected = ( $dbtype == $db_name ) ? ' selected="selected"' : '';
-		$db_box .= '<option value="' . $db_name . '"' . $selected . '> - ' . $db_infos['Name'] . ' - </option>';
+		$db_box .= '<option value="' . $db_name . '"' . $selected . '> ' . $db_infos['Name'] . ' </option>';
 	}
 	
 	if( $urlsite == '' )
@@ -713,7 +708,7 @@ else
 		'EMAIL'     => htmlspecialchars($admin_email),
 		'URLSITE'   => htmlspecialchars($urlsite),
 		'URLSCRIPT' => htmlspecialchars($urlscript),
-		'LANG_BOX'  => $lang_box,
+		'LANG_BOX'  => lang_box($language),
 		
 		'S_HIDDEN_FIELD' => $output->getHiddenFields()
 	));
