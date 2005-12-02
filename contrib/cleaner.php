@@ -1,31 +1,40 @@
 <?php
-/*******************************************************************
- *          
- *          Fichier         :   cleaner.php 
- *          Créé le         :   28 juin 2003 
- *          Dernière modif  :   29 février 2004 
- *          Email           :   wascripts@phpcodeur.net 
+/**
+ * Copyright (c) 2002-2006 Aurélien Maille
  * 
- *              Copyright © 2002-2004 phpCodeur
+ * This file is part of Wanewsletter.
  * 
- *******************************************************************/
-
-/*******************************************************************
- *  This program is free software; you can redistribute it and/or 
- *  modify it under the terms of the GNU General Public License as 
- *  published by the Free Software Foundation; either version 2 of 
- *  the License, or (at your option) any later version. 
- *******************************************************************/
+ * Wanewsletter is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License 
+ * as published by the Free Software Foundation; either version 2 
+ * of the License, or (at your option) any later version.
+ * 
+ * Wanewsletter is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Wanewsletter; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * 
+ * @package Wanewsletter
+ * @author  Bobe <wascripts@phpcodeur.net>
+ * @link    http://phpcodeur.net/wascripts/wanewsletter/
+ * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @version $Id$
+ * 
+ * Recherche les entrées orphelines dans les tables abonnes et abo_liste
+ * et les efface, si demandé.
+ */
 
 //
 // Ceci est un fichier de test ou d'aide lors du développement. 
-// Commentez la ligne suivante uniquement si vous êtes sùr de ce que vous faites !
+// Commentez les lignes suivantes uniquement si vous êtes sùr de ce que vous faites !
 //
-exit('<b>Fichier de développement désactivé</b>');
+echo "This script has been disabled for security reasons\n";
+exit(0);
 
-//
-// Recherche les entrées orphelines dans les tables abonnes et abo_liste, et les efface, si demandé.
-//
 
 define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR',   '..');
@@ -189,5 +198,6 @@ else if( $type == 'files' )
     $output->basic($data);
 }
 
-exit;
+exit(0);
+
 ?>

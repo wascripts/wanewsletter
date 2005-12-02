@@ -23,15 +23,7 @@
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * @version $Id$
- */
-
-//
-// Ceci est un fichier de test ou d'aide lors du développement. 
-// Commentez la ligne suivante uniquement si vous êtes sùr de ce que vous faites !
-//
-//exit('<b>Fichier de développement désactivé</b>');
-
-/**
+ * 
  * @link http://www.cru.fr/listes/atelier/bounce.html
  * 
  * @see RFC 1892 - The Multipart/Report Content Type for the Reporting of Mail System Administrative Messages
@@ -47,14 +39,24 @@
  * d'éventuels actes malveillants.
  */
 
+//
+// Ceci est un fichier de test ou d'aide lors du développement. 
+// Commentez les lignes suivantes uniquement si vous êtes sùr de ce que vous faites !
+//
+echo "This script has been disabled for security reasons\n";
+exit(0);
+
+//
+// Configuration du script
+//
 $pop_server = '';
 $pop_port   = 110; // port du serveur. La valeur par défaut (110) est la plus répandue.
 $pop_user   = '';
 $pop_passwd = '';
 
-require '../tmp/pop_params.php';
-
-### END OF CONFIGURATION ###
+//
+// Fin de la configuration
+//
 
 function process_bounce($deliveryReport)
 {

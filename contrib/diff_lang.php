@@ -23,19 +23,19 @@
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * @version $Id$
+ * 
+ * Affiche les entrées présentes dans le premier fichier de language 
+ * qui ne sont pas présentes dans le deuxième fichier de language.
  */
-
 
 //
 // Ceci est un fichier de test ou d'aide lors du développement. 
-// Commentez la ligne suivante uniquement si vous êtes sùr de ce que vous faites !
+// Commentez les lignes suivantes uniquement si vous êtes sùr de ce que vous faites !
 //
-//exit('<b>Fichier de développement désactivé</b>');
+echo "This script has been disabled for security reasons\n";
+exit(0);
 
-//
-// Affiche les entrées présentes dans le premier fichier de language 
-// qui ne sont pas présentes dans le deuxième fichier de language.
-//
+
 define('WA_ROOTDIR', '..');
 
 $language_dir = WA_ROOTDIR . '/language';
@@ -101,5 +101,6 @@ else
     echo '<p>Aucun index manquant</p>';
 }
 
-exit;
+exit(0);
+
 ?>

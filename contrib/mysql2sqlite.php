@@ -23,16 +23,24 @@
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * @version $Id$
+ * 
+ * Créé une base de données SQLite à partir des données présentes dans des
+ * tables Wanewsletter d'une autre base de données (de type MySQL ou PostgreSQL)
  */
 
-echo "This module has been disabled for security reasons\n";
+//
+// Ceci est un fichier de test ou d'aide lors du développement. 
+// Commentez les lignes suivantes uniquement si vous êtes sùr de ce que vous faites !
+//
+echo "This script has been disabled for security reasons\n";
 exit(0);
+
 
 //
 // Configuration
 //
 define('IN_NEWSLETTER', true);
-define('WA_ROOTDIR', '/home/web/projects/wanewsletter/branche_2.3');
+define('WA_ROOTDIR', '/usr/local/wanewsletter');
 
 $sqlite_db   = WA_ROOTDIR . '/sql/wanewsletter.sqlite';
 $schemas_dir = WA_ROOTDIR . '/setup/schemas';
@@ -96,7 +104,7 @@ $sqldata = file_get_contents($schemas_dir . '/sqlite_tables.sql');
 $queries = make_sql_ary($sqldata, ';');
 
 foreach( $queries AS $query ) {
-	sqlite_query($fs, $query);
+	sqlite_exec($fs, $query);
 }
 
 //
