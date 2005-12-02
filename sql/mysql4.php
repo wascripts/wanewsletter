@@ -279,7 +279,7 @@ class sql {
 				{
 					$this->trc_started = false;
 					
-					if( !($result = mysqli_commit($this->db_connect_id)) )
+					if( !($result = mysqli_commit($this->connect_id)) )
 					{
 						mysqli_rollback($this->connect_id);
 					}
