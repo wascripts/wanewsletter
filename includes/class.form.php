@@ -125,8 +125,8 @@ class Wanewsletter {
 			}
 		}
 		
-		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
-				a.abo_register_date, a.abo_status, al.format, al.register_key, al.register_date, al.confirmed
+		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang,
+				a.abo_status, al.format, al.register_key, al.register_date, al.confirmed
 			FROM " . ABONNES_TABLE . " AS a
 				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id = {$this->listdata['liste_id']}
@@ -138,7 +138,7 @@ class Wanewsletter {
 		
 		if( $abodata = $db->fetch_array($result) )
 		{
-			if( isset($abodata['confirmed']) )
+			if( !is_null($abodata['confirmed']) )
 			{
 				if( $action == 'inscription' && $abodata['confirmed'] == SUBSCRIBE_CONFIRMED )
 				{
@@ -177,7 +177,7 @@ class Wanewsletter {
 		if( is_array($abodata) )
 		{
 			$this->hasAccount   = true;
-			$this->isRegistered = isset($abodata['confirmed']);
+			$this->isRegistered = !is_null($abodata['confirmed']);
 			
 			$this->account['abo_id'] = $abodata['abo_id'];
 			$this->account['email']  = $abodata['abo_email'];
@@ -277,12 +277,20 @@ class Wanewsletter {
 		if( $this->hasAccount == false )
 		{
 			$sql_data = array(
-				'abo_email'         => $this->account['email'],
-				'abo_pseudo'        => $this->account['pseudo'],
-				'abo_register_key'  => generate_key(),
-				'abo_register_date' => $this->account['date'],
-				'abo_status'        => $this->account['status']
+				'abo_email'  => $this->account['email'],
+				'abo_pseudo' => $this->account['pseudo'],
+				'abo_status' => $this->account['status']
 			);
+			
+			@include WA_ROOTDIR . '/includes/tags.inc.php';
+			
+			foreach( $other_tags AS $data )
+			{
+				if( !empty($data['field_name']) && !isset($sql_data[$data['column_name']]) && isset($_REQUEST[$data['field_name']]) )
+				{
+					$sql_data[$data['column_name']] = $_REQUEST[$data['field_name']];
+				}
+			}
 			
 			if( !$db->query_build('INSERT', ABONNES_TABLE, $sql_data) )
 			{

@@ -36,17 +36,22 @@ $t = 0;
 //
 // Placez ici vos tags personnalisés
 //
-// column_name pour le nom de la colonne dans la table prefixe_abonnes et tag_name pour le nom du tag à remplacer
+// - column_name doit contenir le nom de la colonne concernée dans la table prefixe_abonnes
+// - tag_name peut contenir le nom du tag à remplacer dans les newsletters lors des envois
+// - field_name peut contenir le nom du champ de formulaire à réceptionner lors des inscriptions
+//   ou des modifications de compte
 //
 // LINKS, NAME, WA_EMAIL et WA_CODE sont des noms de tag réservés
 //
 
 //$other_tags[$t]['column_name'] = '';
 //$other_tags[$t]['tag_name']    = '';
+//$other_tags[$t]['field_name']  = '';
 //$t++
 
 //$other_tags[$t]['column_name'] = '';
 //$other_tags[$t]['tag_name']    = '';
+//$other_tags[$t]['field_name']  = '';
 //$t++
 
 // etc... Reproduisez les trois lignes si nécessaires.

@@ -44,7 +44,7 @@ if( !$nl_config['enable_profil_cp'] )
 //
 $session = new Session();
 
-function check_login($email, $regkey = '', $passwd = '')
+function check_login($email, $passwd = null)
 {
 	global $db, $other_tags;
 	
@@ -64,16 +64,16 @@ function check_login($email, $regkey = '', $passwd = '')
 		$fields_str = '';
 	}
 	
-	$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
-			a.abo_register_date, a.abo_status, al.format, l.liste_id, l.liste_name, l.sender_email,
+	$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_status,
+			al.format, al.register_key, al.register_date, l.liste_id, l.liste_name, l.sender_email,
 			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias $fields_str
 		FROM " . ABONNES_TABLE . " AS a
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
 		WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
-	if( $regkey != '' && $passwd != '' )
+	if( !is_null($passwd) )
 	{
-		$sql .= " AND ( a.abo_pwd = '$passwd' OR a.abo_register_key = '$regkey' )";
+		$sql .= " AND a.abo_pwd = '" . $db->escape($passwd) . "'";
 	}
 	
 	if( !($result = $db->query($sql)) )
@@ -89,13 +89,16 @@ function check_login($email, $regkey = '', $passwd = '')
 		$abodata['passwd']   = $row['abo_pwd'];
 		$abodata['email']    = $row['abo_email'];
 		$abodata['language'] = $row['abo_lang'];
-		$abodata['regdate']  = $row['abo_register_date'];
-		$abodata['regkey']   = $row['abo_register_key'];
+		$abodata['regdate']  = $row['register_date'];
+		$abodata['regkey']   = $row['register_key'];
 		$abodata['status']   = $row['abo_status'];
 		
 		foreach( $other_tags AS $data )
 		{
-			$abodata[$data['column_name']] = $row[$data['column_name']];
+			if( isset($row[$data['column_name']]) )
+			{
+				$abodata[$data['column_name']] = $row[$data['column_name']];
+			}
 		}
 		
 		$abodata['listes'] = array();
@@ -141,7 +144,7 @@ if( $mode != 'login' && $mode != 'sendkey' )
 		}
 		else
 		{
-			$abodata = check_login($data['email'], $data['key'], $data['key']);
+			$abodata = check_login($data['email'], $data['key']);
 			if( !is_array($abodata) )
 			{
 				$mode = 'login';
@@ -167,7 +170,7 @@ switch( $mode )
 		{
 			$regkey = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
 			
-			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey, md5($regkey))) )
+			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, md5($regkey))) )
 			{
 				if( $abodata['status'] == ABO_ACTIF )
 				{
@@ -333,9 +336,9 @@ switch( $mode )
 				
 				foreach( $other_tags AS $data )
 				{
-					if( !empty($_POST[$data['column_name']]) )
+					if( !empty($data['field_name']) && !isset($sql_data[$data['column_name']]) && !empty($_POST[$data['column_name']]) )
 					{
-						$sql_data[$data['column_name']] = trim($_POST[$data['column_name']]);
+						$sql_data[$data['column_name']] = $_POST[$data['column_name']];
 					}
 				}
 				
@@ -374,7 +377,10 @@ switch( $mode )
 		
 		foreach( $other_tags AS $data )
 		{
-			$output->assign_var($data['tag_name'], htmlspecialchars($abodata[$data['column_name']]));
+			if( isset($abodata[$data['column_name']]) )
+			{
+				$output->assign_var($data['tag_name'], htmlspecialchars($abodata[$data['column_name']]));
+			}
 		}
 		
 		if( $abodata['passwd'] != '' )
@@ -529,8 +535,7 @@ switch( $mode )
 				}
 				else
 				{
-					$tmp_link  = $listdata['form_url'] . ( ( strstr($listdata['form_url'], '?') ) ? '&' : '?' );
-					$tmp_link .= 'action=desinscription&email={EMAIL}&code={CODE}&liste=' . $listdata['liste_id'];
+					$tmp_link  = $listdata['form_url'] . ( ( strstr($listdata['form_url'], '?') ) ? '&' : '?' ) . '{CODE}';
 					
 					if( $format == FORMAT_TEXTE )
 					{

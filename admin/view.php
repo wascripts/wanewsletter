@@ -181,17 +181,18 @@ else if( $mode == 'abonnes' )
 	//
 	// Si la fonction de recherche est sollicitée 
 	//
-	$abo_confirmed  = SUBSCRIBE_CONFIRMED;
-	$sql_search     = '';
-	$search_keyword = ( !empty($_REQUEST['keyword']) ) ? trim($_REQUEST['keyword']) : '';
-	$search_date    = ( !empty($_REQUEST['days']) ) ? intval($_REQUEST['days']) : 0;
+	$abo_confirmed   = SUBSCRIBE_CONFIRMED;
+	$sql_search      = '';
+	$sql_search_date = '';
+	$search_keyword  = ( !empty($_REQUEST['keyword']) ) ? trim($_REQUEST['keyword']) : '';
+	$search_date     = ( !empty($_REQUEST['days']) ) ? intval($_REQUEST['days']) : 0;
 	
 	if( $search_keyword != '' || $search_date )
 	{
 		if( strlen($search_keyword) > 1 )
 		{
 			$get_string .= '&amp;keyword=' . htmlspecialchars(urlencode($search_keyword));
-			$sql_search .= ' AND a.abo_email LIKE \'' . $db->escape(str_replace('*', '%', urldecode($search_keyword))) . '\' ';
+			$sql_search  = 'WHERE a.abo_email LIKE \'' . $db->escape(str_replace('*', '%', urldecode($search_keyword))) . '\' ';
 		}
 		
 		if( $search_date != 0 )
@@ -204,7 +205,7 @@ else if( $mode == 'abonnes' )
 			}
 			else
 			{
-				$sql_search .= ' AND a.abo_register_date >= ' . (time() - ($search_date * 86400)) . ' ';
+				$sql_search_date = ' AND al.register_date >= ' . (time() - ($search_date * 86400)) . ' ';
 			}
 		}
 		
@@ -217,13 +218,13 @@ else if( $mode == 'abonnes' )
 	//
 	// Classement
 	//
-	if( $sql_type == 'abo_email' || $sql_type == 'abo_register_date' || $sql_type == 'format' )
+	if( $sql_type == 'abo_email' || $sql_type == 'register_date' || $sql_type == 'format' )
 	{
 		$get_string .='&amp;type=' . $sql_type;
 	}
 	else
 	{
-		$sql_type = 'abo_register_date';
+		$sql_type = 'register_date';
 	}
 	
 	if( $sql_order == 'ASC' || $sql_order == 'DESC' )
@@ -247,13 +248,11 @@ else if( $mode == 'abonnes' )
 	{
 		$liste_ids = $auth->check_auth(AUTH_VIEW);
 		
-		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
-				a.abo_register_date, a.abo_status, al.liste_id, al.format
+		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_email, al.register_date, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al
 				ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
-					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 			WHERE a.abo_id = $abo_id";
 		if( !($result = $db->query($sql)) )
 		{
@@ -282,9 +281,10 @@ else if( $mode == 'abonnes' )
 				'U_GOTO_LIST'         => sessid('./view.php?mode=abonnes' . $get_string . $get_page),
 				'S_ABO_PSEUDO'        => ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : '<b>' . $lang['No_data'] . '</b>',
 				'S_ABO_EMAIL'         => $row['abo_email'],
-				'S_ABO_ID'            => $row['abo_id'],
-				'S_REGISTER_DATE'     => convert_time($nl_config['date_format'], $row['abo_register_date'])
+				'S_ABO_ID'            => $row['abo_id']
 			));
+			
+			$register_date = time();
 			
 			do
 			{
@@ -307,8 +307,15 @@ else if( $mode == 'abonnes' )
 					'CHOICE_FORMAT' => $format,
 					'U_VIEW_LISTE'  => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
 				));
+				
+				if( $row['register_date'] < $register_date )
+				{
+					$register_date = $row['register_date'];
+				}
 			}
 			while( $row = $db->fetch_array($result) );
+			
+			$output->assign_var('S_REGISTER_DATE', convert_time($nl_config['date_format'], $register_date));
 			
 			$output->pparse('body');
 			$output->page_footer();
@@ -405,13 +412,11 @@ else if( $mode == 'abonnes' )
 			}
 		}
 		
-		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_register_key,
-				a.abo_register_date, a.abo_status, al.liste_id, al.format
+		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_email, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al
 				ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
-					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 			WHERE a.abo_id = $abo_id";
 		if( !($result = $db->query($sql)) )
 		{
@@ -649,8 +654,7 @@ else if( $mode == 'abonnes' )
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al
 			ON al.abo_id = a.abo_id
 				AND al.liste_id  = $listdata[liste_id]
-				AND al.confirmed = $abo_confirmed
-		WHERE a.abo_status = " . ABO_ACTIF . $sql_search;
+				AND al.confirmed = $abo_confirmed $sql_search_date $sql_search";
 	if( !($result = $db->query($sql)) )
 	{
 		trigger_error('Impossible d\'obtenir le nombre d\'abonnés', ERROR);
@@ -660,13 +664,12 @@ else if( $mode == 'abonnes' )
 	
 	if( $total_abo > 0 )
 	{
-		$sql = "SELECT a.abo_id, a.abo_email, a.abo_register_date, al.format
+		$sql = "SELECT a.abo_id, a.abo_email, al.register_date, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al
 				ON al.abo_id = a.abo_id
 					AND al.liste_id  = $listdata[liste_id]
-					AND al.confirmed = $abo_confirmed
-			WHERE a.abo_status = " . ABO_ACTIF . " $sql_search
+					AND al.confirmed = $abo_confirmed $sql_search_date $sql_search
 			ORDER BY $sql_type " . $sql_order;
 		if( !($result = $db->query($sql, $start, $abo_per_page)) )
 		{
@@ -753,7 +756,7 @@ else if( $mode == 'abonnes' )
 		'KEYWORD'              => htmlspecialchars($search_keyword),
 		'SEARCH_DAYS_BOX'      => $search_days_box,
 		'SELECTED_TYPE_EMAIL'  => ( $sql_type == 'abo_email' ) ? ' selected="selected"' : '',
-		'SELECTED_TYPE_DATE'   => ( $sql_type == 'abo_register_date' ) ? ' selected="selected"' : '',
+		'SELECTED_TYPE_DATE'   => ( $sql_type == 'register_date' ) ? ' selected="selected"' : '',
 		'SELECTED_TYPE_FORMAT' => ( $sql_type == 'format' ) ? ' selected="selected"' : '',
 		'SELECTED_ORDER_ASC'   => ( $sql_order == 'ASC' ) ? ' selected="selected"' : '',
 		'SELECTED_ORDER_DESC'  => ( $sql_order == 'DESC' ) ? ' selected="selected"' : '',
@@ -793,7 +796,7 @@ else if( $mode == 'abonnes' )
 			$output->assign_block_vars('aborow', array(
 				'TD_CLASS'          => ( !($i % 2) ) ? 'row1' : 'row2',
 				'ABO_EMAIL'         => $aborow[$i]['abo_email'],
-				'ABO_REGISTER_DATE' => convert_time($nl_config['date_format'], $aborow[$i]['abo_register_date']),
+				'ABO_REGISTER_DATE' => convert_time($nl_config['date_format'], $aborow[$i]['register_date']),
 				'U_VIEW'            => sessid('./view.php?mode=abonnes&amp;action=view&amp;id=' . $aborow[$i]['abo_id'] . $get_string . $get_page)
 			));
 			

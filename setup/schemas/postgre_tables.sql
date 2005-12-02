@@ -33,14 +33,12 @@ CREATE TABLE wa_abo_liste (
 -- Structure de la table "wa_abonnes"
 -- 
 CREATE TABLE wa_abonnes (
-	abo_id            INTEGER      NOT NULL DEFAULT nextval('wa_abonnes_id_seq'::text),
-	abo_pseudo        VARCHAR(30)  NOT NULL DEFAULT '',
-	abo_pwd           VARCHAR(32)  NOT NULL DEFAULT '',
-	abo_email         VARCHAR(255) NOT NULL DEFAULT '',
-	abo_lang          VARCHAR(30)  NOT NULL DEFAULT '',
-	abo_register_key  VARCHAR(32)  NOT NULL DEFAULT '',
-	abo_register_date INTEGER      NOT NULL DEFAULT 0,
-	abo_status        SMALLINT     NOT NULL DEFAULT 0,
+	abo_id     INTEGER      NOT NULL DEFAULT nextval('wa_abonnes_id_seq'::text),
+	abo_pseudo VARCHAR(30)  NOT NULL DEFAULT '',
+	abo_pwd    VARCHAR(32)  NOT NULL DEFAULT '',
+	abo_email  VARCHAR(255) NOT NULL DEFAULT '',
+	abo_lang   VARCHAR(30)  NOT NULL DEFAULT '',
+	abo_status SMALLINT     NOT NULL DEFAULT 0,
 	CONSTRAINT wa_abonnes_pk PRIMARY KEY (abo_id),
 	CONSTRAINT abo_email_idx UNIQUE (abo_email)
 );

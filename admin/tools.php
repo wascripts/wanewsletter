@@ -692,10 +692,8 @@ switch( $mode )
 				$db->transaction(START_TRC);
 				
 				$sql_data = array();
-				$sql_data['abo_email']         = $email;
-				$sql_data['abo_register_key']  = generate_key(32, false);
-				$sql_data['abo_register_date'] = $current_time;
-				$sql_data['abo_status']        = ABO_ACTIF;
+				$sql_data['abo_email']  = $email;
+				$sql_data['abo_status'] = ABO_ACTIF;
 				
 				if( !$db->query_build('INSERT', ABONNES_TABLE, $sql_data) )
 				{
