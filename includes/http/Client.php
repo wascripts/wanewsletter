@@ -40,15 +40,25 @@ class HTTP_Client extends HTTP_Main {
 	 * @var integer
 	 * @access public
 	 */
-	var $timeout      = 5;
+	var $timeout         = 5;
+	
+	/**
+	 * Suivre ou non les éventuelles redirections HTTP
+	 * 
+	 * @var boolean
+	 * @access public
+	 */
+	var $followRedirects = true;
 	
 	/**
 	 * Nombre maximum de redirections HTTP à suivre successivement avant d'abandonner
+	 * Si cet attribut est positionné à 0, il n'y a pas de limitation au nombre de
+	 * redirections suivies
 	 * 
 	 * @var integer
 	 * @access public
 	 */
-	var $maxRedirects = 10;// 0 = illimité, -1 = ne pas suivre les redirections
+	var $maxRedirects    = 10;
 	
 	/**
 	 * Décoder automatiquement si contenu reçu par morceau (chunked) ou compressé (gzippé)
@@ -56,7 +66,7 @@ class HTTP_Client extends HTTP_Main {
 	 * @var boolean
 	 * @access public
 	 */
-	var $autoDecodeData = true;
+	var $autoDecodeData  = true;
 	
 	/**
 	 * Nombre d'octet maximum à récupérer (0 == pas de limite)
@@ -64,7 +74,7 @@ class HTTP_Client extends HTTP_Main {
 	 * @var integer
 	 * @access public
 	 */
-	var $byteLimit    = 0;
+	var $byteLimit       = 0;
 	
 	/**
 	 * Le code de la réponse HTTP
@@ -110,7 +120,7 @@ class HTTP_Client extends HTTP_Main {
 	 * @var integer
 	 * @access private
 	 */
-	var $_numRedirects    = 0;
+	var $_numRedirects   = 0;
 	
 	/**
 	 * En-têtes HTTP de la requète
@@ -118,7 +128,7 @@ class HTTP_Client extends HTTP_Main {
 	 * @var array
 	 * @access private
 	 */
-	var $_requestHeaders  = array(
+	var $_requestHeaders = array(
 		'Host'       => '',
 		'User-Agent' => 'HTTP_Client PHP class',
 		'Accept'     => '*/*'
@@ -337,7 +347,7 @@ class HTTP_Client extends HTTP_Main {
 			HTTP_STATUS_SEE_OTHER,
 			HTTP_STATUS_TEMPORARY_REDIRECT
 		);
-		if( $this->maxRedirects != -1 && in_array($this->responseCode, $redirectStatus) )
+		if( $this->followRedirects == true && in_array($this->responseCode, $redirectStatus) )
 		{
 			$this->_numRedirects++;
 			
