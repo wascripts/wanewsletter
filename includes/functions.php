@@ -1179,11 +1179,6 @@ function formateSize($size)
 	return sprintf("%s\xA0%s", wa_number_format($size), $lsize);
 }
 
-//
-// Appel du gestionnaire d'erreur 
-//
-set_error_handler('wanewsletter_handler');
-
 $CONVMAP = array(
 	'cp1252_to_entity' => array(
 		"\x80" => "&#8364;",    # EURO SIGN

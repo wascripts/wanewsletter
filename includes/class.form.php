@@ -316,7 +316,7 @@ class Wanewsletter {
 			}
 			
 			$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, register_key, register_date, confirmed) 
-				VALUES({$this->account['abo_id']}, {$this->listdata['liste_id']}, $this->format, '{$this->account['code']}', " . time() . ", $confirmed)";
+				VALUES({$this->account['abo_id']}, {$this->listdata['liste_id']}, $this->format, '{$this->account['code']}', {$this->account['date']}, $confirmed)";
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des abonnés[2]', ERROR);

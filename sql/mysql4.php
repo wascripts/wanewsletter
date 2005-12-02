@@ -540,7 +540,7 @@ class sql {
 		
 		if( $result != false )
 		{
-			mysqli_free_result($result);
+			@mysqli_free_result($result);
 		}
 	}
 	

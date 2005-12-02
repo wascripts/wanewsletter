@@ -68,6 +68,11 @@ require WA_ROOTDIR . '/includes/class.output.php';
 require WA_ROOTDIR . '/sql/db_type.php';
 
 //
+// Appel du gestionnaire d'erreur 
+//
+set_error_handler('wanewsletter_handler');
+
+//
 // Désactivation de magic_quotes_runtime + 
 // magic_quotes_gpc et ajout éventuel des backslashes 
 //
