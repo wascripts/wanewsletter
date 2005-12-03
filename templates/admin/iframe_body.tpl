@@ -1,5 +1,5 @@
 <div class="bloc">
-	<h2 id="view">{L_SUBJECT}&#160;: &#160; {SUBJECT}</h2>
+	<h2 id="view">{L_SUBJECT}&#160;: {SUBJECT}</h2>
 	
 	<table class="content">
 		<tr>
@@ -10,6 +10,11 @@
 		<tr>
 			<td class="row1">
 				<span class="m-texte">{L_NUMDEST}&#160;: {S_NUMDEST}</span>
+				<span class="m-texte" style="float: right; margin-top: -16px;">
+					<a href="{U_EXPORT}" title="{L_EXPORT_T}">
+						<img src="../templates/images/archive.png" alt="{L_EXPORT}" />
+					</a>
+				</span>
 			</td>
 		</tr>
 	</table>

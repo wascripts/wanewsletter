@@ -34,7 +34,7 @@ $action    = ( !empty($_REQUEST['action']) ) ? $_REQUEST['action'] : '';
 $page_id   = ( !empty($_REQUEST['page']) ) ? intval($_REQUEST['page']) : 1;
 $sql_type  = ( !empty($_REQUEST['type']) ) ? trim($_REQUEST['type']) : '';
 $sql_order = ( !empty($_REQUEST['order']) ) ? trim($_REQUEST['order']) : '';
-$mode_ary  = array('liste', 'log', 'abonnes', 'download', 'iframe');
+$mode_ary  = array('liste', 'log', 'abonnes', 'download', 'iframe', 'export');
 
 if( !in_array($mode, $mode_ary) )
 {
@@ -81,6 +81,104 @@ if( $mode == 'download' )
 	$file_id = ( !empty($_GET['fid']) ) ? intval($_GET['fid']) : 0;
 	$attach  = new Attach();
 	$attach->download_file($file_id);
+}
+
+else if( $mode == 'export' )
+{
+	$archive_name = 'newsletter.tar';
+	$compressed   = null;
+	$mime_type    = 'application/x-tar';
+	
+	if( extension_loaded('zlib') )
+	{
+		$archive_name .= '.gz';
+		$compressed    = 'gz';
+		$mime_type     = 'application/x-gzip';
+	}
+	
+	$log_id = ( !empty($_GET['id']) ) ? intval($_GET['id']) : 0;
+	
+	$sql = "SELECT log_subject, log_body_text, log_body_html
+		FROM " . LOG_TABLE . "
+		WHERE log_id = " . $log_id;
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir les données de l\'archive', ERROR);
+	}
+	
+	if( $db->num_rows($result) == 0 )
+	{
+		trigger_error('log_not_exists', ERROR);
+	}
+	
+	$logdata = $db->fetch_array($result);
+	
+	if( chdir(WA_TMPDIR) == false )
+	{
+		trigger_error(sprintf($lang['Message']['Chdir_error'], WA_TMPDIR), ERROR);
+	}
+	
+	@include 'Archive/Tar.php';
+	
+	if( !class_exists('Archive_Tar') )
+	{
+		//
+		// Le paquet PEAR Archive_Tar n'est pas installé ou n'est pas présent
+		// dans le chemin d'inclusion
+		//
+		trigger_error('Archive_tar_needed', MESSAGE);
+	}
+	
+	$archive = new Archive_Tar($archive_name, $compressed);
+	$archive->setErrorHandling(PEAR_ERROR_TRIGGER, ERROR);
+	
+	if( !file_exists('newsletter') )
+	{
+		mkdir('newsletter');
+	}
+	
+	if( !file_exists('newsletter/files') )
+	{
+		mkdir('newsletter/files');
+	}
+	
+	$fw = fopen('newsletter/newsletter.txt', 'wb');
+	fwrite($fw, $logdata['log_body_text']);
+	fclose($fw);
+	
+	$fw = fopen('newsletter/newsletter.html', 'wb');
+	fwrite($fw, $logdata['log_body_html']);
+	fclose($fw);
+	
+	$files = array('newsletter/newsletter.txt', 'newsletter/newsletter.html');
+	
+	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+		FROM " . JOINED_FILES_TABLE . " AS jf
+			INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+				AND l.log_id   = $log_id
+		ORDER BY jf.file_real_name ASC";
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir la liste des fichiers joints au log', ERROR);
+	}
+	
+	while( $row = $db->fetch_array($result) )
+	{
+		copy(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $row['file_physical_name'], 'newsletter/files/' . $row['file_real_name']);
+		array_push($files, 'newsletter/files/' . $row['file_real_name']);
+	}
+	
+	$archive->create($files);
+	
+	foreach( $files AS $file )
+	{
+		unlink($file);
+	}
+	
+	require WA_ROOTDIR . '/includes/class.attach.php';
+	
+	Attach::send_file($archive_name, $mime_type, implode('', file($archive_name)));
 }
 
 //
@@ -1919,11 +2017,14 @@ else if( $mode == 'log' )
 			$output->assign_vars(array(
 				'L_SUBJECT'  => $lang['Log_subject'],
 				'L_NUMDEST'  => $lang['Log_numdest'],
+				'L_EXPORT_T' => $lang['Export_nl'],
+				'L_EXPORT'   => $lang['Export'],
 				
 				'SUBJECT'    => htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
 				'S_NUMDEST'  => $logdata['log_numdest'],
 				'S_CODEBASE' => $nl_config['urlsite'] . $nl_config['path'] . 'admin/',
-				'U_FRAME'    => sessid('./view.php?mode=iframe&amp;id=' . $log_id . '&amp;format=' . $format)
+				'U_FRAME'    => sessid('./view.php?mode=iframe&amp;id=' . $log_id . '&amp;format=' . $format),
+				'U_EXPORT'   => sessid('./view.php?mode=export&amp;id=' . $log_id)
 			));
 			
 			if( $listdata['liste_format'] == FORMAT_MULTIPLE )
