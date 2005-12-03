@@ -22,8 +22,6 @@
 	
 	<meta name="Author" content="Bobe" />
 	<meta name="Editor" content="jEdit" />
-	<meta name="Copyright" content="phpCodeur (c) 2002-2005" />
-	<meta name="Robots" content="noindex, nofollow, none" />
 	
 	<link rel="stylesheet" type="text/css" href="../templates/wanewsletter.css" media="screen" title="Wanewsletter thème" />
 	
@@ -34,28 +32,32 @@
 	
 	function specialSQLite(db_box)
 	{
-		var disable, value;
+		var fields = db_box.form.elements;
+		
 		if( db_box.options[db_box.selectedIndex].value == 'sqlite' )
 		{
-			disable = true;
-			value   = lang['unused'];
-			db_box.form.elements['dbpassword'].type = 'text';
+			fields['dbhost'].disabled = true;
+			fields['dbhost'].value    = lang['unused'];
+			fields['dbname'].disabled = true;
+			fields['dbname'].value    = lang['unused'];
+			fields['dbuser'].disabled = true;
+			fields['dbuser'].value    = lang['unused'];
+			fields['dbpassword'].type = 'text';
+			fields['dbpassword'].disabled = true;
+			fields['dbpassword'].value = lang['unused'];
 		}
 		else
 		{
-			disable = false;
-			value   = '';
-			db_box.form.elements['dbpassword'].type = 'password';
+			fields['dbhost'].disabled = false;
+			fields['dbhost'].value    = fields['dbhost'].defaultValue;
+			fields['dbname'].disabled = false;
+			fields['dbname'].value    = fields['dbname'].defaultValue;
+			fields['dbuser'].disabled = false;
+			fields['dbuser'].value    = fields['dbuser'].defaultValue;
+			fields['dbpassword'].type = 'password';
+			fields['dbpassword'].disabled = false;
+			fields['dbpassword'].value = fields['dbpassword'].defaultValue;
 		}
-		
-		db_box.form.elements['dbhost'].disabled = disable;
-		db_box.form.elements['dbhost'].value    = value;
-		db_box.form.elements['dbname'].disabled = disable;
-		db_box.form.elements['dbname'].value    = value;
-		db_box.form.elements['dbuser'].disabled = disable;
-		db_box.form.elements['dbuser'].value    = value;
-		db_box.form.elements['dbpassword'].disabled = disable;
-		db_box.form.elements['dbpassword'].value = value;
 	}
 	
 	window.onload = function() {
@@ -82,79 +84,79 @@
 <form method="post" action="./install.php">
 <div id="global">
 	
-	<!-- BEGIN welcome -->
-	<div class="bloc"><p>{welcome.L_WELCOME}</p></div>
+	<!-- BEGIN install -->
+	<div class="bloc"><p>{install.L_WELCOME}</p></div>
 	
 	<div class="bloc">
-	<h2>{welcome.TITLE_DATABASE}</h2>
+	<h2>{install.TITLE_DATABASE}</h2>
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"><label for="dbtype">{welcome.L_DBTYPE}&#160;:</label></td>
-			<td class="medrow2"><select id="dbtype" name="dbtype" onchange="specialSQLite(this);">{welcome.DB_BOX}</select></td>
+			<td class="medrow1"><label for="dbtype">{install.L_DBTYPE}&#160;:</label></td>
+			<td class="medrow2"><select id="dbtype" name="dbtype" onchange="specialSQLite(this);">{install.DB_BOX}</select></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="dbhost">{welcome.L_DBHOST}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="dbhost" name="dbhost" size="30" value="{welcome.DBHOST}" class="text" /> </td>
+			<td class="medrow1"><label for="dbhost">{install.L_DBHOST}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="dbhost" name="dbhost" size="30" value="{install.DBHOST}" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="dbname">{welcome.L_DBNAME}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="dbname" name="dbname" size="30" value="{welcome.DBNAME}" class="text" /> </td>
+			<td class="medrow1"><label for="dbname">{install.L_DBNAME}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="dbname" name="dbname" size="30" value="{install.DBNAME}" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="dbuser">{welcome.L_DBUSER}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="dbuser" name="dbuser" size="30" value="{welcome.DBUSER}" class="text" /> </td>
+			<td class="medrow1"><label for="dbuser">{install.L_DBUSER}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="dbuser" name="dbuser" size="30" value="{install.DBUSER}" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="dbpassword">{welcome.L_DBPWD}&#160;:</label></td>
-			<td class="medrow2"><input type="password" id="dbpassword" name="dbpassword" size="30" class="text" /> </td>
+			<td class="medrow1"><label for="dbpassword">{install.L_DBPWD}&#160;:</label></td>
+			<td class="medrow2"><input type="password" id="dbpassword" name="dbpassword" size="30" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="prefixe">{welcome.L_PREFIXE}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="prefixe" name="prefixe" size="10" value="{welcome.PREFIXE}" class="text" /></td>
+			<td class="medrow1"><label for="prefixe">{install.L_PREFIXE}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="prefixe" name="prefixe" size="10" value="{install.PREFIXE}" class="text" /></td>
 		</tr>
 	</table>
 	
-	<h2>{welcome.TITLE_ADMIN}</h2>
+	<h2>{install.TITLE_ADMIN}</h2>
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"> <label for="language">{welcome.L_DEFAULT_LANG}&#160;:</label> </td>
-			<td class="medrow2"> {welcome.LANG_BOX} </td>
+			<td class="medrow1"><label for="language">{install.L_DEFAULT_LANG}&#160;:</label></td>
+			<td class="medrow2">{install.LANG_BOX}</td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="admin_login">{welcome.L_LOGIN}&#160;:</label> </td>
-			<td class="medrow2"> <input type="text" id="admin_login" name="admin_login" size="30" value="{welcome.LOGIN}" maxlength="20" class="text" /> </td>
+			<td class="medrow1"><label for="admin_login">{install.L_LOGIN}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" size="30" value="{install.LOGIN}" maxlength="20" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="admin_pass">{welcome.L_PASS}&#160;:</label> </td>
-			<td class="medrow2"> <input type="password" id="admin_pass" name="admin_pass" size="25" maxlength="25" class="text" /> </td>
+			<td class="medrow1"><label for="admin_pass">{install.L_PASS}&#160;:</label></td>
+			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" size="25" maxlength="25" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="confirm_pass">{welcome.L_PASS_CONF}&#160;:</label> </td>
-			<td class="medrow2"> <input type="password" id="confirm_pass" name="confirm_pass" size="25" maxlength="25" class="text" /> </td>
+			<td class="medrow1"><label for="confirm_pass">{install.L_PASS_CONF}&#160;:</label></td>
+			<td class="medrow2"><input type="password" id="confirm_pass" name="confirm_pass" size="25" maxlength="25" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="admin_email">{welcome.L_EMAIL}&#160;:</label> </td>
-			<td class="medrow2"> <input type="text" id="admin_email" name="admin_email" size="30" value="{welcome.EMAIL}" maxlength="100" class="text" /> </td>
+			<td class="medrow1"><label for="admin_email">{install.L_EMAIL}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="admin_email" name="admin_email" size="30" value="{install.EMAIL}" maxlength="100" class="text" /></td>
 		</tr>
 	</table>
 	
-	<h2>{welcome.TITLE_DIVERS}</h2>
+	<h2>{install.TITLE_DIVERS}</h2>
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"> <label for="urlsite">{welcome.L_URLSITE}&#160;:</label><br /><span class="m-texte">{L_URLSITE_NOTE}</span> </td>
-			<td class="medrow2"> <input type="text" id="urlsite" name="urlsite" size="30" value="{welcome.URLSITE}" maxlength="100" class="text" /> </td>
+			<td class="medrow1"><label for="urlsite">{install.L_URLSITE}&#160;:</label><br /><span class="m-texte">{L_URLSITE_NOTE}</span></td>
+			<td class="medrow2"><input type="text" id="urlsite" name="urlsite" size="30" value="{install.URLSITE}" maxlength="100" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="urlscript">{welcome.L_URLSCRIPT}&#160;:</label><br /><span class="m-texte">{L_URLSCRIPT_NOTE}</span> </td>
-			<td class="medrow2"> <input type="text" id="urlscript" name="urlscript" size="30" value="{welcome.URLSCRIPT}" maxlength="100" class="text" /> </td>
+			<td class="medrow1"><label for="urlscript">{install.L_URLSCRIPT}&#160;:</label><br /><span class="m-texte">{L_URLSCRIPT_NOTE}</span></td>
+			<td class="medrow2"><input type="text" id="urlscript" name="urlscript" size="30" value="{install.URLSCRIPT}" maxlength="100" class="text" /></td>
 		</tr>
 	</table>
 	
-	<div class="bottom"> {welcome.S_HIDDEN_FIELD}
-		<input type="submit" name="start" value="{welcome.L_BUTTON_START}" class="pbutton" />
+	<div class="bottom">{install.S_HIDDEN_FIELD}
+		<input type="submit" name="start" value="{install.L_START_BUTTON}" class="pbutton" />
 	</div>
 	
 	</div>
@@ -168,32 +170,20 @@
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"> <label for="admin_login">{reinstall.L_LOGIN}&#160;:</label> </td>
-			<td class="medrow2"> <input type="text" id="admin_login" name="admin_login" maxlength="25" size="25" class="text" /> </td>
+			<td class="medrow1"><label for="admin_login">{reinstall.L_LOGIN}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" maxlength="25" size="25" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="admin_pass">{reinstall.L_PASS}&#160;:</label> </td>
-			<td class="medrow2"> <input type="password" id="admin_pass" name="admin_pass" maxlength="25" size="25" class="text" /> </td>
-		</tr>
-		<tr>
-			<td class="medrow1"> <label for="type">{reinstall.L_SELECT_TYPE}&#160;:</label> </td>
-			<td class="medrow2"> <select id="type" name="type"><option value="reinstall"> - {reinstall.L_TYPE_REINSTALL} - </option><option value="update" selected="selected"> - {reinstall.L_TYPE_UPDATE} - </option></select> </td>
+			<td class="medrow1"><label for="admin_pass">{reinstall.L_PASS}&#160;:</label> </td>
+			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" maxlength="25" size="25" class="text" /></td>
 		</tr>
 	</table>
 	
-	<div class="bottom"> {welcome.S_HIDDEN_FIELD}
-		<input type="submit" name="confirm" value="{reinstall.L_CONF_BUTTON}" class="pbutton" />
+	<div class="bottom">{install.S_HIDDEN_FIELD}
+		<input type="submit" name="confirm" value="{reinstall.L_START_BUTTON}" class="pbutton" />
 	</div>
 	</div>
 	<!-- END reinstall -->
-	
-	<!-- BEGIN result -->
-	<div class="bloc">
-	<h2>{result.L_TITLE}</h2>
-	
-	<p>{result.MSG_RESULT}</p>
-	</div>
-	<!-- END result -->
 	
 	<!-- BEGIN download_file -->
 	<div class="bloc">
@@ -216,7 +206,7 @@
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
 phpCodeur</a> &copy; 2002&#8211;2005 | WAnewsletter {NEW_VERSION} {TRANSLATE}<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
-licence <acronym title="General Public Licence" xml:lang="en" lang="en">GPL</acronym></a>
+licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>
 
 </body>
