@@ -487,6 +487,27 @@ class sql {
 	}
 	
 	/**
+	 * sql::result_seek()
+	 * 
+	 * Déplace le pointeur interne de résultat
+	 * 
+	 * @param integer  $row     Numéro de la ligne de résultat
+	 * @param resource $result  Ressource de résultat de requète
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function result_seek($row, $result = false)
+	{
+		if( !$result )
+		{
+			$result = $this->query_result;
+		}
+		
+		return ( $result != false ) ? sqlite_seek($result, $row) : false;
+	}
+	
+	/**
 	 * sql::next_id()
 	 * 
 	 * Retourne l'identifiant généré par la dernière requête INSERT
@@ -542,7 +563,16 @@ class sql {
 		if( $this->connect_id != false )
 		{
 			$this->transaction(END_TRC);
-			sqlite_close($this->connect_id);
+			
+			$result = @sqlite_close($this->connect_id);
+			$this->connect_id   = null;
+			$this->query_result = null;
+			
+			return $result;
+		}
+		else
+		{
+			return false;
 		}
 	}
 }

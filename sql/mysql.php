@@ -102,7 +102,7 @@ class sql {
 			{
 				$this->sql_error['errno']   = mysql_errno($this->connect_id);
 				$this->sql_error['message'] = mysql_error($this->connect_id);
-				mysql_close($this->connect_id);
+				$this->close($this->connect_id);
 			}
 		}
 		else
@@ -496,6 +496,27 @@ class sql {
 	}
 	
 	/**
+	 * sql::result_seek()
+	 * 
+	 * Déplace le pointeur interne de résultat
+	 * 
+	 * @param integer  $row     Numéro de la ligne de résultat
+	 * @param resource $result  Ressource de résultat de requète
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function result_seek($row, $result = false)
+	{
+		if( !$result )
+		{
+			$result = $this->query_result;
+		}
+		
+		return ( $result != false ) ? mysql_data_seek($result, $row) : false;
+	}
+	
+	/**
 	 * sql::next_id()
 	 * 
 	 * Retourne l'identifiant généré par la dernière requête INSERT
@@ -561,7 +582,11 @@ class sql {
 			$this->free_result($this->query_result);
 			$this->transaction(END_TRC);
 			
-			return mysql_close($this->connect_id);
+			$result = @mysql_close($this->connect_id);
+			$this->connect_id   = null;
+			$this->query_result = null;
+			
+			return $result;
 		}
 		else
 		{

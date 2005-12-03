@@ -142,9 +142,9 @@ class sql {
 		}
 		
 		$this->connect_id = @$sql_connect($login_str);
-		if( $this->connect_id == false )
+		if( !$this->connect_id )
 		{
-			$this->sql_error['message'] = $GLOBALS['php_errormsg'];
+			$this->sql_error['message'] = @$php_errormsg;
 		}
 	}
 	
@@ -550,6 +550,27 @@ class sql {
 	}
 	
 	/**
+	 * sql::result_seek()
+	 * 
+	 * Déplace le pointeur interne de résultat
+	 * 
+	 * @param integer  $row     Numéro de la ligne de résultat
+	 * @param resource $result  Ressource de résultat de requète
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function result_seek($row, $result = false)
+	{
+		if( !$result )
+		{
+			$result = $this->query_result;
+		}
+		
+		return ( $result != false ) ? pg_result_seek($result, $row) : false;
+	}
+	
+	/**
 	 * sql::next_id()
 	 * 
 	 * Retourne l'identifiant généré par la dernière requête INSERT
@@ -626,7 +647,11 @@ class sql {
 			$this->free_result($this->query_result);
 			$this->transaction(END_TRC);
 			
-			return pg_close($this->connect_id);
+			$result = @pg_close($this->connect_id);
+			$this->connect_id   = null;
+			$this->query_result = null;
+			
+			return $result;
 		}
 		else
 		{
