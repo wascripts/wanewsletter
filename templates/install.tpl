@@ -85,7 +85,7 @@
 <div id="global">
 	
 	<!-- BEGIN install -->
-	<div class="bloc"><p>{install.L_WELCOME}</p></div>
+	<div class="bloc"><p>{install.L_EXPLAIN}</p></div>
 	
 	<div class="bloc">
 	<h2>{install.TITLE_DATABASE}</h2>
@@ -155,7 +155,7 @@
 		</tr>
 	</table>
 	
-	<div class="bottom">{install.S_HIDDEN_FIELD}
+	<div class="bottom">
 		<input type="submit" name="start" value="{install.L_START_BUTTON}" class="pbutton" />
 	</div>
 	
@@ -163,7 +163,7 @@
 	<!-- END welcome -->
 	
 	<!-- BEGIN reinstall -->
-	<div class="bloc"><p>{reinstall.L_EXPLAIN_REINSTALL}</p></div>
+	<div class="bloc"><p>{reinstall.L_EXPLAIN}</p></div>
 	
 	<div class="bloc">
 	<h2>{PAGE_TITLE}</h2>
@@ -171,7 +171,7 @@
 	<table class="content">
 		<tr>
 			<td class="medrow1"><label for="admin_login">{reinstall.L_LOGIN}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" maxlength="25" size="25" class="text" /></td>
+			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" value="{reinstall.LOGIN}" maxlength="25" size="25" class="text" /></td>
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="admin_pass">{reinstall.L_PASS}&#160;:</label> </td>
@@ -179,8 +179,8 @@
 		</tr>
 	</table>
 	
-	<div class="bottom">{install.S_HIDDEN_FIELD}
-		<input type="submit" name="confirm" value="{reinstall.L_START_BUTTON}" class="pbutton" />
+	<div class="bottom">
+		<input type="submit" name="start" value="{reinstall.L_START_BUTTON}" class="pbutton" />
 	</div>
 	</div>
 	<!-- END reinstall -->
@@ -197,6 +197,7 @@
 	</div>
 	<!-- END download_file -->
 	
+	<input type="hidden" name="prev_language" value="{S_PREV_LANGUAGE}" />
 </div>
 </form>
 

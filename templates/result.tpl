@@ -3,8 +3,8 @@
 	Copyright (c) 2002-2006 Aurélien Maille
 	
 	Wanewsletter is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License 
-	as published by the Free Software Foundation; either version 2 
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
 	of the License, or (at your option) any later version.
 	
 	Wanewsletter is distributed in the hope that it will be useful,
@@ -22,8 +22,6 @@
 	
 	<meta name="Author" content="Bobe" />
 	<meta name="Editor" content="jEdit" />
-	<meta name="Copyright" content="phpCodeur (c) 2002-2005" />
-	<meta name="Robots" content="noindex, nofollow, none" />
 	
 	<link rel="stylesheet" type="text/css" href="../templates/wanewsletter.css" media="screen" title="Wanewsletter thème" />
 </head>
@@ -37,43 +35,13 @@
 	<h1>{PAGE_TITLE}</h1>
 </div>
 
-{ERROR_BOX}
-
-<form method="post" action="./update.php">
 <div id="global">
-	
-	<!-- BEGIN welcome -->
-	<div class="bloc"><p>{welcome.L_EXPLAIN_UPDATE}</p></div>
-	
 	<div class="bloc">
-	<h2>{PAGE_TITLE}</h2>
+	<h2>{L_TITLE}</h2>
 	
-	<table class="content">
-		<tr>
-			<td class="medrow1"> <label for="admin_login">{welcome.L_LOGIN}&#160;:</label> </td>
-			<td class="medrow2"> <input type="text" id="admin_login" name="admin_login" maxlength="30" size="30" class="text" /> </td>
-		</tr>
-		<tr>
-			<td class="medrow1"> <label for="admin_pass">{welcome.L_PASS}&#160;:</label> </td>
-			<td class="medrow2"> <input type="password" id="admin_pass" name="admin_pass" maxlength="30" size="30" class="text" /> </td>
-		</tr>
-	</table>
-	
-	<div class="bottom">
-		<input type="submit" name="start_update" value="{welcome.L_UPDATE_BUTTON}" class="pbutton" />
+	<p>{MSG_RESULT}</p>
 	</div>
-	</div>
-	<!-- END welcome -->
-	
-	<!-- BEGIN result -->
-	<div class="bloc">
-	<h2>{result.L_TITLE}</h2>
-	
-	<p>{result.MSG_RESULT}</p>
-	</div>
-	<!-- END result -->
 </div>
-</form>
 
 <hr />
 

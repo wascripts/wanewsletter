@@ -25,7 +25,7 @@
  * @version $Id$
  */
 
-if( !defined('IN_INSTALL') && !defined('IN_UPDATE') )
+if( !defined('IN_INSTALL') && !defined('IN_UPGRADE') )
 {
 	exit('<b>No hacking</b>');
 }
@@ -34,46 +34,73 @@ define('WA_ROOTDIR',   '..');
 define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
 define('SCHEMAS_DIR',  WA_ROOTDIR . '/setup/schemas');
 
-function msg_result($str, $is_query = false)
+function message($message)
 {
-	global $db, $lang, $output, $type;
+	global $lang, $output, $new_version;
 	
-	if( $is_query )
+	if( !empty($lang['Message'][$message]) )
 	{
-		if( $type == 'update' )
-		{
-			$message = $lang['Error_in_update'];
-		}
-		else
-		{
-			$message = $lang['Error_in_install'];
-		}
-		
-		$title   = '<span style="color: #FF3333;">' . $lang['Title']['error'] . '</span>';
-		$message = sprintf($message, $db->sql_error['message'], $str);
+		$message = $lang['Message'][$message];
+	}
+	
+	$output->send_headers();
+	
+	$output->set_filenames( array(
+		'body' => 'result.tpl'
+	));
+	
+	if( defined('IN_INSTALL') )
+	{
+		$l_title = ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'];
 	}
 	else
 	{
-		if( $type == 'update' )
-		{
-			$title = $lang['Result_update'];
-		}
-		else
-		{
-			$title = $lang['Result_install'];
-		}
-		
-		$message = $str;
-		
-		if( !empty($lang['Message'][$str]) )
-		{
-			$message = $lang['Message'][$str];
-		}
+		$l_title = $lang['Title']['upgrade'];
 	}
 	
-	$output->assign_block_vars('result', array(
-		'L_TITLE'    => $title,
-		'MSG_RESULT' => nl2br($message)
+	$output->assign_vars(array(
+		'PAGE_TITLE'   => $l_title,
+		'CONTENT_LANG' => $lang['CONTENT_LANG'],
+		'CONTENT_DIR'  => $lang['CONTENT_DIR'],
+		'NEW_VERSION'  => $new_version,
+		'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : '',
+		'L_TITLE'      => $lang['Title']['info'],
+		'MSG_RESULT'   => nl2br($message)
+	));
+	
+	$output->pparse('body');
+	exit;
+}
+
+function sql_error()
+{
+	global $db, $lang, $output, $new_version;
+	
+	$output->send_headers();
+	
+	$output->set_filenames( array(
+		'body' => 'result.tpl'
+	));
+	
+	if( defined('IN_INSTALL') )
+	{
+		$l_title = ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'];
+		$message = $lang['Error_in_install'];
+	}
+	else
+	{
+		$l_title = $lang['Title']['upgrade'];
+		$message = $lang['Error_in_upgrade'];
+	}
+	
+	$output->assign_vars(array(
+		'PAGE_TITLE'   => $l_title,
+		'CONTENT_LANG' => $lang['CONTENT_LANG'],
+		'CONTENT_DIR'  => $lang['CONTENT_DIR'],
+		'NEW_VERSION'  => $new_version,
+		'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : '',
+		'L_TITLE'      => $lang['Title']['info'],
+		'MSG_RESULT'   => nl2br(sprintf($message, $db->sql_error['message'], $db->sql_error['query']))
 	));
 	
 	$output->pparse('body');
@@ -95,12 +122,32 @@ function exec_queries($sql_ary, $return_error = false)
 		
 		if( !$result && $return_error )
 		{
-			msg_result($query, true);
+			sql_error();
 		}
 	}
 }
 
 error_reporting(E_ALL);
+
+require WA_ROOTDIR . '/includes/functions.php';
+require WA_ROOTDIR . '/includes/template.php';
+require WA_ROOTDIR . '/includes/class.output.php';
+
+$output = new output(WA_ROOTDIR . '/templates/');
+
+//
+// Désactivation de magic_quotes_runtime + 
+// magic_quotes_gpc et ajout éventuel des backslashes 
+//
+set_magic_quotes_runtime(0);
+
+if( get_magic_quotes_gpc() )
+{
+	strip_magic_quotes_gpc($_GET);
+	strip_magic_quotes_gpc($_POST);
+	strip_magic_quotes_gpc($_COOKIE);
+	strip_magic_quotes_gpc($_REQUEST);
+}
 
 $new_version  = '###VERSION###';
 $default_lang = 'francais';
@@ -156,68 +203,72 @@ $sql_drop = array(
 	'DROP TABLE wa_session'
 );
 
-//
-// Vérification de la version de PHP disponible. Il nous faut la version 4.3.0 minimum
-//
-if( !function_exists('version_compare') )
-{
-	header('Content-Type: text/plain; charset=ISO-8859-1');
-	
-	echo "Désolé mais WAnewsletter $new_version requiert une version de PHP supérieure ou égale à la version 4.1.0";
-	exit;
-}
-
-require WA_ROOTDIR . '/includes/functions.php';
-
-//
-// Désactivation de magic_quotes_runtime + 
-// magic_quotes_gpc et ajout éventuel des backslashes 
-//
-set_magic_quotes_runtime(0);
-
-if( get_magic_quotes_gpc() )
-{
-	strip_magic_quotes_gpc($_GET);
-	strip_magic_quotes_gpc($_POST);
-	strip_magic_quotes_gpc($_COOKIE);
-	strip_magic_quotes_gpc($_REQUEST);
-}
-
-$vararray = array('dbtype', 'dbhost', 'dbuser', 'dbpassword', 'dbname', 'prefixe');
-foreach( $vararray AS $varname )
-{
-	${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
-}
-
-if( $dbtype == '' )
-{
-	$dbtype = 'mysql';
-}
-
-if( $prefixe == '' )
-{
-	$prefixe = 'wa_';
-}
+$prefixe = 'wa_';
+$dbtype  = 'mysql';
+$dbhost  = 'localhost';
+$dbuser  = $dbpassword = $dbname = '';
+$lang    = $datetime = $msg_error = $_php_errors = array();
+$error   = false;
 
 if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
 {
 	@include WA_ROOTDIR . '/includes/config.inc.php';
 }
 
-if( defined('IN_UPDATE') && $dbhost == '' )
+if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
 {
-	plain_error('Aucune version de WAnewsletter ne semble présente, le fichier de configuration est vide');
+	$accept_lang_ary = array_map('trim', explode(',', server_info('HTTP_ACCEPT_LANGUAGE')));
+	
+	foreach( $accept_lang_ary AS $accept_lang )
+	{
+		$accept_lang = strtolower(substr($accept_lang, 0, 2));
+		
+		if( isset($supported_lang[$accept_lang]) && file_exists(WA_ROOTDIR . '/language/lang_' . $supported_lang[$accept_lang] . '.php') )
+		{
+			$language = $supported_lang[$accept_lang];
+			break;
+		}
+	}
 }
-else if( $dbtype == 'mssql' )
+
+require WA_ROOTDIR . '/language/lang_' . $language . '.php';
+
+//
+// Vérification de la version de PHP disponible. Il nous faut la version 4.1.0 minimum
+//
+if( !function_exists('version_compare') )
 {
-	plain_error('Désolé mais le support de SQL Server a été abandonné dans Wanewsletter 2.3
-	// Sorry but the support for SQL Server has been withdrawn in Wanewsletter 2.3');
+	message(sprintf($lang['PHP_version_error'], $new_version));
+}
+
+$vararray = array('dbtype', 'dbhost', 'dbuser', 'dbpassword', 'dbname', 'prefixe');
+foreach( $vararray AS $varname )
+{
+	${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : ${$varname};
+}
+
+$vararray = array('start', 'confirm', 'sendfile');
+foreach( $vararray AS $varname )
+{
+	${$varname} = ( isset($_POST[$varname]) ) ? true : false;
 }
 
 require WA_ROOTDIR . '/includes/constantes.php';
 
+if( !defined('IN_INSTALL') && $dbname == '' )
+{
+	message($lang['Not_installed']);
+}
+else if( $dbtype == 'mssql' )
+{
+	message($lang['mssql_support_end']);
+}
+
+$db_list = '';
 foreach( $supported_db AS $db_name => $db_infos )
 {
+	$db_list .= ', ' . $db_infos['Name'];
+	
 	if( !extension_loaded($db_infos['extension']) )
 	{
 		unset($supported_db[$db_name]);
@@ -226,15 +277,21 @@ foreach( $supported_db AS $db_name => $db_infos )
 
 if( count($supported_db) == 0 )
 {
-	plain_error('Désolé mais WAnewsletter ' . $new_version . ' requiert une base de données MySQL 3.23.x/4.x, PostgreSQL 7.x/8.x et supérieur ou SQLite 2.8.x');
+	message(sprintf($lang['No_db_support'], $new_version, substr($db_list, 2)));
 }
 
-require WA_ROOTDIR . '/includes/template.php';
-require WA_ROOTDIR . '/includes/class.output.php';
+if( isset($supported_db[$dbtype]) )
+{
+	require WA_ROOTDIR . '/sql/' . $dbtype . '.php';
+}
+else if( defined('NL_INSTALLED') || defined('IN_UPGRADE') )
+{
+	plain_error($lang['DB_type_undefined']);
+}
 
 $config_file  = '<' . "?php\n\n";
 $config_file .= "//\n";
-$config_file .= "// Paramêtres d'accés à la base de données\n";
+$config_file .= "// Paramètres d'accès à la base de données\n";
 $config_file .= "// Ne pas modifier !\n";
 $config_file .= "//\n";
 $config_file .= "define('NL_INSTALLED', true);\n\n";
@@ -246,6 +303,14 @@ $config_file .= "\$dbname  = '$dbname';\n\n";
 $config_file .= "\$prefixe = '$prefixe';\n\n";
 $config_file .= '?' . '>';
 
-$output = new output(WA_ROOTDIR . '/templates/');
+//
+// Envoi du fichier au client si demandé
+//
+if( $sendfile == true )
+{
+	require WA_ROOTDIR . '/includes/class.attach.php';
+	
+	Attach::send_file('config.inc.php', 'text/plain', $config_file);
+}
 
 ?>
