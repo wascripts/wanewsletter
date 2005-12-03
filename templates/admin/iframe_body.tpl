@@ -12,7 +12,10 @@
 				<span class="m-texte">{L_NUMDEST}&#160;: {S_NUMDEST}</span>
 				<span class="m-texte" style="float: right; margin-top: -16px;">
 					<a href="{U_EXPORT}" title="{L_EXPORT_T}">
-						<img src="../templates/images/archive.png" alt="{L_EXPORT}" />
+						<img src="../templates/images/archive.png" alt="{L_EXPORT}"
+							onmouseover="this.src = '../templates/images/archive-hover.png';"
+							onmouseout="this.src = '../templates/images/archive.png';"
+						/>
 					</a>
 				</span>
 			</td>
