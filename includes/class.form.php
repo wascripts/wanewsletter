@@ -519,6 +519,35 @@ class Wanewsletter {
 		}
 		else
 		{
+			$this->account['code'] = generate_key(20);
+			
+			$sql_abo_id = "SELECT abo_id
+				FROM " . ABONNES_TABLE . "
+				WHERE LOWER(abo_email) = '" . $db->escape(strtolower($this->account['email'])) . "'";
+			if( DATABASE == 'mysql' )
+			{
+				if( !($result = $db->query($sql)) )
+				{
+					trigger_error('Impossible de récupérer l\'identifiant d\'abonné', ERROR);
+					return false;
+				}
+				
+				$sql_abo_id = $db->result($result, 0, 'abo_id');
+			}
+			else
+			{
+				$sql_abo_id = '(' . $sql_abo_id . ')';
+			}
+			
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
+				SET register_key = '{$this->account['code']}'
+				WHERE abo_id = " . $sql_abo_id;
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible d\'assigner le nouvelle clé d\'enregistrement', ERROR);
+				return false;
+			}
+			
 			$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
 			$this->mailer->set_address($this->account['email']);
 			$this->mailer->set_subject($lang['Subject_email']['Unsubscribe']);
