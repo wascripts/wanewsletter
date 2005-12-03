@@ -140,7 +140,7 @@ if( $process == true ) {
 		
 		imap_close($cid, CL_EXPUNGE);
 	} else {
-		require './mimeDecode.php';
+		require 'Mail/mimeDecode.php';
 		require WAMAILER_DIR . '/class.pop.php';
 		
 		$pop = new Pop();
