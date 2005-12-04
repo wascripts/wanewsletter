@@ -83,6 +83,9 @@ if( $mode == 'download' )
 	$attach->download_file($file_id);
 }
 
+//
+// Mode export : Export d'une archive et de ses fichiers joints via une archive Tarball
+//
 else if( $mode == 'export' )
 {
 	$archive_name = 'newsletter.tar';
@@ -113,7 +116,7 @@ else if( $mode == 'export' )
 	
 	$logdata = $db->fetch_array($result);
 	
-	if( chdir(WA_TMPDIR) == false )
+	if( @chdir(WA_TMPDIR) == false )
 	{
 		trigger_error(sprintf($lang['Message']['Chdir_error'], WA_TMPDIR), ERROR);
 	}
@@ -142,17 +145,9 @@ else if( $mode == 'export' )
 		mkdir('newsletter/files');
 	}
 	
-	$fw = fopen('newsletter/newsletter.txt', 'wb');
-	fwrite($fw, $logdata['log_body_text']);
-	fclose($fw);
-	
-	$fw = fopen('newsletter/newsletter.html', 'wb');
-	fwrite($fw, $logdata['log_body_html']);
-	fclose($fw);
-	
 	$files = array('newsletter/newsletter.txt', 'newsletter/newsletter.html');
 	
-	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+	$sql = "SELECT jf.file_real_name, jf.file_physical_name
 		FROM " . JOINED_FILES_TABLE . " AS jf
 			INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
@@ -163,11 +158,46 @@ else if( $mode == 'export' )
 		trigger_error('Impossible d\'obtenir la liste des fichiers joints au log', ERROR);
 	}
 	
+	//
+	// Copie des fichiers joints dans le répertoire temporaire WA_TMPDIR/newsletter
+	// et remplacement éventuel des références cid: dans la newsletter HTML.
+	//
 	while( $row = $db->fetch_array($result) )
 	{
 		copy(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $row['file_physical_name'], 'newsletter/files/' . $row['file_real_name']);
 		array_push($files, 'newsletter/files/' . $row['file_real_name']);
+		
+		$logdata['log_body_html'] = preg_replace(
+			'/<(.+?)"cid:' . preg_quote($row['file_real_name'], '/') . '"([^>]*)?>/si',
+			'<\\1"files/' . $row['file_real_name'] . '"\\2>',
+			$logdata['log_body_html']
+		);
 	}
+	
+	//
+	// Traitement des caractères invalides provenant de Windows-1252
+	// - Pour le format texte, passage à l'utf-8, pas d'alternative
+	// - Pour le format HTML, transformation des caractères en cause 
+	//   dans leur équivalent en référence d'entité numérique.
+	//
+	if( preg_match('/[\x80-\x9F]/', $logdata['log_body_text']) )
+	{
+		$logdata['log_body_text'] = wan_utf8_encode($logdata['log_body_text']);
+		$logdata['log_body_text'] = "\xEF\xBB\xBF" . $logdata['log_body_text']; // Ajout du BOM
+	}
+	
+	if( preg_match('/[\x80-\x9F]/', $logdata['log_body_html']) )
+	{
+		$logdata['log_body_html'] = purge_latin1($logdata['log_body_html']);
+	}
+	
+	$fw = fopen('newsletter/newsletter.txt', 'wb');
+	fwrite($fw, $logdata['log_body_text']);
+	fclose($fw);
+	
+	$fw = fopen('newsletter/newsletter.html', 'wb');
+	fwrite($fw, $logdata['log_body_html']);
+	fclose($fw);
 	
 	$archive->create($files);
 	
@@ -342,6 +372,9 @@ else if( $mode == 'abonnes' )
 		trigger_error('No_abo_id', MESSAGE);
 	}
 	
+	//
+	// Visualisation du profil d'un abonné
+	//
 	if( $action == 'view' )
 	{
 		$liste_ids = $auth->check_auth(AUTH_VIEW);
@@ -423,6 +456,10 @@ else if( $mode == 'abonnes' )
 			trigger_error('abo_not_exists', MESSAGE);
 		}
 	}
+	
+	//
+	// Édition d'un profil d'abonné
+	//
 	else if( $action == 'edit' )
 	{
 		$liste_ids = $auth->check_auth(AUTH_EDIT);
@@ -577,6 +614,10 @@ else if( $mode == 'abonnes' )
 			trigger_error('abo_not_exists', MESSAGE);
 		}
 	}
+	
+	//
+	// Suppression d'un ou plusieurs profils abonnés
+	//
 	else if( $action == 'delete' )
 	{
 		$email_list = ( !empty($_POST['email_list']) ) ? $_POST['email_list'] : '';
@@ -960,6 +1001,9 @@ else if( $mode == 'liste' )
 		trigger_error('Not_' . $auth->auth_ary[$auth_type], MESSAGE);
 	}
 	
+	//
+	// Ajout ou édition d'une liste
+	//
 	if( $action == 'add' || $action == 'edit' )
 	{
 		$vararray = array(
@@ -1200,6 +1244,11 @@ else if( $mode == 'liste' )
 		
 		$output->page_footer();
 	}
+	
+	//
+	// Suppression d'une liste avec transvasement éventuel des abonnés
+	// et archives vers une autre liste
+	//
 	else if( $action == 'delete' )
 	{
 		if( isset($_POST['confirm']) )
@@ -1511,6 +1560,10 @@ else if( $mode == 'liste' )
 			$output->page_footer();
 		}
 	}
+	
+	//
+	// Purge (suppression des inscriptions non confirmées et dont la date de validité est dépassée)
+	//
 	else if( $action == 'purge' )
 	{
 		$abo_deleted = purge_liste($listdata['liste_id'], $listdata['limitevalidate'], $listdata['purge_freq']);
@@ -1711,6 +1764,9 @@ else if( $mode == 'log' )
 	
 	$log_id = ( !empty($_GET['id']) ) ? intval($_GET['id']) : 0;
 	
+	//
+	// Suppression d'une archive
+	//
 	if( $action == 'delete' )
 	{
 		$log_ids = ( !empty($_POST['log_id']) && is_array($_POST['log_id']) ) ? array_map('intval', $_POST['log_id']) : array();
