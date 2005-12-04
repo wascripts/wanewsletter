@@ -28,7 +28,7 @@
 if( !defined('CLASS_SQL_INC') ) {
 
 define('CLASS_SQL_INC', true);
-define('DATABASE', 'postgre');
+define('DATABASE', 'postgres');
 
 class sql {
 	/**
@@ -72,14 +72,6 @@ class sql {
 	 * @var string
 	 */
 	var $sql_time     = 0;
-	
-	/**
-	 * Numéro de résultat
-	 * 
-	 * @var integer
-	 * @see fetch_* methods
-	 */
-	var $row_id       = array();
 	
 	/**
 	 * Dernière table où a été effectué une insertion de données
@@ -267,19 +259,16 @@ class sql {
 		$this->sql_time += ($endtime - $curtime);
 		$this->queries++;
 		
-		if( $this->query_result != false )
-		{
-			$this->row_id[$this->query_result] = 0;
-			$this->sql_error = array('errno' => 0, 'message' => '', 'query' => '');
-			
-			
-		}
-		else
+		if( !$this->query_result )
 		{
 			$this->sql_error['message'] = @pg_errormessage($this->connect_id);
 			$this->sql_error['query']   = $query;
 			
 			$this->transaction('ROLLBACK');
+		}
+		else
+		{
+			$this->sql_error = array('errno' => 0, 'message' => '', 'query' => '');
 		}
 		
 		return $this->query_result;
@@ -417,15 +406,7 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		$row = @pg_fetch_row($result, $this->row_id[$result]);
-		
-		if( $row )
-		{
-			$this->row_id[$result]++;
-			return $row;
-		}
-		
-		return false;
+		return ( $result != false ) ? @pg_fetch_row($result) : false;
 	}
 	
 	/**
@@ -446,15 +427,7 @@ class sql {
 			$result = $this->query_result;
 		}
 		
-		$row = @pg_fetch_array($result, $this->row_id[$result], PGSQL_ASSOC);
-		
-		if( $row )
-		{
-			$this->row_id[$result]++;
-			return $row;
-		}
-		
-		return false;
+		return ( $result != false ) ? @pg_fetch_array($result, null, PGSQL_ASSOC) : false;
 	}
 	
 	/**
@@ -475,10 +448,9 @@ class sql {
 		}
 		
 		$rowset = array();
-		while( $row = @pg_fetch_array($result, $this->row_id[$result], PGSQL_ASSOC) )
+		while( $row = @pg_fetch_array($result, null, PGSQL_ASSOC) )
 		{
-			$rowset[] = $row;
-			$this->row_id[$result]++;
+			array_push($rowset, $row);
 		}
 		
 		return $rowset;
@@ -537,15 +509,15 @@ class sql {
 	 * @access public
 	 * @return mixed
 	 */
-	function result($result, $row_id, $field = '')
+	function result($result, $row, $field = '')
 	{
 		if( $field != '' )
 		{
-			return @pg_result($result, $row_id, $field);
+			return @pg_result($result, $row, $field);
 		}
 		else
 		{
-			return @pg_result($result, $row_id);
+			return @pg_result($result, $row);
 		}
 	}
 	

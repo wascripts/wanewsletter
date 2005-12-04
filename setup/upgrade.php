@@ -1,28 +1,28 @@
 <?php
 /**
  * Copyright (c) 2002-2006 Aurélien Maille
- *
+ * 
  * This file is part of Wanewsletter.
- *
+ * 
  * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- *
+ * 
  * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
+ * 
  * @package Wanewsletter
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * @version $Id: setup.inc.php 239 2005-11-29 14:13:20Z bobe $
+ * @version $Id$
  */
 
 define('IN_UPGRADE', true);
@@ -72,9 +72,6 @@ if( file_exists(WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php
 {
 	require WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php';
 }
-
-$new_version = '2.3-beta1';
-$old_config['version'] = '2.2.8';// temp
 
 if( !preg_match('/^(2\.[0-2])[-.0-9a-zA-Z]+$/', $old_config['version'], $match) )
 {
@@ -521,7 +518,7 @@ if( $start )
 				case '2.2-Beta2':
 					switch( DATABASE )
 					{
-						case 'postgre':
+						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 								RENAME COLUMN smtp_user TO smtp_user_old,
 								RENAME COLUMN smtp_pass TO smtp_pass_old";
@@ -622,7 +619,7 @@ if( $start )
 					
 					switch( DATABASE )
 					{
-						case 'postgre':
+						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
 								ADD COLUMN liste_numlogs SMALLINT NOT NULL DEFAULT 0";
 							$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
@@ -684,7 +681,7 @@ if( $start )
 				case '2.2-RC2b':
 					switch( DATABASE )
 					{
-						case 'postgre':
+						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 								ADD COLUMN enable_profil_cp SMALLINT NOT NULL DEFAULT 0";
 							$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
@@ -727,7 +724,7 @@ if( $start )
 				case '2.2-RC3':
 					switch( DATABASE )
 					{
-						case 'postgre':
+						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 								ADD COLUMN ftp_port SMALLINT NOT NULL DEFAULT 21";
 							break;
@@ -760,11 +757,11 @@ if( $start )
 					
 					switch( DATABASE )
 					{
-						case 'postgre':
-							$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index ON " . ABONNES_TABLE;
-							$sql_update[] = "DROP INDEX admin_id_wa_auth_admin_index ON " . AUTH_ADMIN_TABLE;
-							$sql_update[] = "DROP INDEX liste_id_wa_log_index ON " . LOG_TABLE;
-							$sql_update[] = "DROP INDEX log_status_wa_log_index ON " . LOG_TABLE;
+						case 'postgres':
+							$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index";
+							$sql_update[] = "DROP INDEX admin_id_wa_auth_admin_index";
+							$sql_update[] = "DROP INDEX liste_id_wa_log_index";
+							$sql_update[] = "DROP INDEX log_status_wa_log_index";
 							$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
 								RENAME COLUMN email_new_inscrit email_new_subscribe";
 							$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
@@ -778,8 +775,9 @@ if( $start )
 						default:
 							$sql_update[] = "DROP INDEX abo_status ON " . ABONNES_TABLE;
 							$sql_update[] = "DROP INDEX admin_id ON " . AUTH_ADMIN_TABLE;
-							$sql_update[] = "DROP INDEX liste_id ON " . LOG_TABLE;
-							$sql_update[] = "DROP INDEX log_status ON " . LOG_TABLE;
+							$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
+								DROP INDEX liste_id,
+								DROP INDEX log_status";
 							$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
 								CHANGE email_new_inscrit email_new_subscribe TINYINT(1) NOT NULL DEFAULT 0,
 								ADD COLUMN email_unsubscribe TINYINT(1) NOT NULL DEFAULT 0";
@@ -789,6 +787,10 @@ if( $start )
 								ADD COLUMN liste_public TINYINT(1) NOT NULL DEFAULT 1 AFTER liste_name";
 							break;
 					}
+					
+					$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
+						DROP COLUMN abo_register_key,
+						DROP COLUMN abo_register_date";
 					
 					$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
 						ADD COLUMN register_key CHAR(20) DEFAULT NULL,
@@ -821,15 +823,30 @@ if( $start )
 						}
 					}
 					
-					$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
-						DROP COLUMN abo_register_key,
-						DROP COLUMN abo_register_date";
-					$sql_update[] = "CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)";
-					$sql_update[] = "CREATE UNIQUE INDEX abo_email_idx ON " . ABONNES_TABLE . " (abo_email)";
-					$sql_update[] = "CREATE UNIQUE INDEX register_key_idx ON " . ABO_LISTE_TABLE . " (register_key)";
-					$sql_update[] = "CREATE INDEX admin_id_idx ON " . AUTH_ADMIN_TABLE . " (admin_id)";
-					$sql_update[] = "CREATE INDEX liste_id_idx ON " . LOG_TABLE . " (liste_id)";
-					$sql_update[] = "CREATE INDEX log_status_idx ON " . LOG_TABLE . " (log_status)";
+					if( DATABASE == 'postgres' )
+					{
+						$db->query("ALTER TABLE " . ABO_LISTE_TABLE . "
+							ADD CONSTRAINT register_key_idx UNIQUE (register_key)");
+						$db->query("ALTER TABLE " . ABONNES_TABLE . "
+							ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
+						$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
+						$sql_update[] = "CREATE INDEX admin_id_idx ON " . AUTH_ADMIN_TABLE . " (admin_id)";
+						$sql_update[] = "CREATE INDEX liste_id_idx ON " . LOG_TABLE . " (liste_id)";
+						$sql_update[] = "CREATE INDEX log_status_idx ON " . LOG_TABLE . " (log_status)";
+					}
+					else
+					{
+						$db->query("ALTER TABLE " . ABO_LISTE_TABLE . "
+							ADD UNIQUE register_key_idx (register_key)");
+						$db->query("ALTER TABLE " . ABONNES_TABLE . "
+							ADD UNIQUE abo_email_idx (abo_email),
+							ADD INDEX abo_status_idx (abo_status)");
+						$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
+							ADD INDEX admin_id_idx (admin_id)";
+						$db->query("ALTER TABLE " . LOG_TABLE . "
+							ADD INDEX liste_id_idx (liste_id),
+							ADD INDEX log_status_idx (log_status)");
+					}
 					break;
 				
 				default:
@@ -842,27 +859,20 @@ if( $start )
 			exec_queries($sql_update, true);
 		}
 		
-		if( $branche != '2.2' )
+		//
+		// Modification fichier de configuration +
+		// Affichage message de résultat
+		//
+		if( $fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w') )
 		{
-			//
-			// Modification fichier de configuration +
-			// Affichage message de résultat
-			//
-			if( $fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w') )
-			{
-				fwrite($fw, $config_file);
-				fclose($fw);
-				
-				$config = true;
-			}
-			else
-			{
-				$config = false;
-			}
+			fwrite($fw, $config_file);
+			fclose($fw);
+			
+			$config = true;
 		}
 		else
 		{
-			$config = true;
+			$config = false;
 		}
 		
 		//
@@ -872,13 +882,13 @@ if( $start )
 		if( $config == true )
 		{
 			$message = sprintf($lang['Success_upgrade'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>');
-			message($message);
 		}
 		else
 		{
 			$message = sprintf($lang['Success_without_config2'], htmlspecialchars($config_file));
-			message($message);
 		}
+		
+		message($message, $lang['Result_upgrade']);
 	}
 }
 

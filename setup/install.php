@@ -194,7 +194,7 @@ if( $start )
 		//
 		@set_time_limit(300);
 		
-		if( $type == 'reinstall' )
+		if( defined('NL_INSTALLED') )
 		{
 			$sql_drop = str_replace('/wa_/', $prefixe, $sql_drop);
 			
@@ -219,11 +219,12 @@ if( $start )
 				admin_lang  = '$language'
 			WHERE admin_id = 1";
 		$sql_data[] = "UPDATE " . CONFIG_TABLE . "
-			SET urlsite  = '" . $db->escape($urlsite) . "',
-				path     = '" . $db->escape($urlscript) . "',
-				language = '$language',
+			SET urlsite     = '" . $db->escape($urlsite) . "',
+				path        = '" . $db->escape($urlscript) . "',
+				cookie_path = '" . $db->escape($urlscript) . "',
+				language    = '$language',
 				mailing_startdate = " . time() . ",
-				version  = '$new_version'";
+				version     = '$new_version'";
 		$sql_data[] = "UPDATE " . LISTE_TABLE . "
 			SET liste_startdate = " . time() . "
 			WHERE liste_id = 1";
@@ -259,17 +260,7 @@ if( $start )
 			fclose($fw);
 		}
 		
-		$msg_result = nl2br(sprintf($lang['Result_install'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>'));
-		
-		$output->assign_block_vars('result', array(
-			'L_TITLE'    => $lang['Success_install'],
-			'MSG_RESULT' => nl2br(sprintf($msg_result, '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>'))
-		));
-		
-		$output->pparse('body');
-		exit;
-		
-		message($msg_result, $l_title);
+		message(nl2br(sprintf($lang['Success_install'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>')), $lang['Result_install']);
 	}
 }
 

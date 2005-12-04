@@ -34,7 +34,7 @@ define('WA_ROOTDIR',   '..');
 define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
 define('SCHEMAS_DIR',  WA_ROOTDIR . '/setup/schemas');
 
-function message($message)
+function message($message, $l_title = null)
 {
 	global $lang, $output, $new_version;
 	
@@ -49,13 +49,16 @@ function message($message)
 		'body' => 'result.tpl'
 	));
 	
-	if( defined('IN_INSTALL') )
+	if( is_null($l_title) )
 	{
-		$l_title = ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'];
-	}
-	else
-	{
-		$l_title = $lang['Title']['upgrade'];
+		if( defined('IN_INSTALL') )
+		{
+			$l_title = ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'];
+		}
+		else
+		{
+			$l_title = $lang['Title']['upgrade'];
+		}
 	}
 	
 	$output->assign_vars(array(
@@ -149,7 +152,7 @@ if( get_magic_quotes_gpc() )
 	strip_magic_quotes_gpc($_REQUEST);
 }
 
-$new_version  = '###VERSION###';
+$new_version  = '2.3-dev';//'###VERSION###';
 $default_lang = 'francais';
 
 $supported_lang = array(
@@ -172,9 +175,9 @@ $supported_db = array(
 		'delimiter'    => ';',
 		'delimiter2'   => ';'
 	),
-	'postgre' => array(
+	'postgres' => array(
 		'Name'         => 'PostgreSQL 7.x/8.x',
-		'prefixe_file' => 'postgre',
+		'prefixe_file' => 'postgres',
 		'extension'    => 'pgsql',
 		'delimiter'    => ';',
 		'delimiter2'   => ';'
@@ -262,6 +265,10 @@ if( !defined('IN_INSTALL') && $dbname == '' )
 else if( $dbtype == 'mssql' )
 {
 	message($lang['mssql_support_end']);
+}
+else if( $dbtype == 'postgre' )
+{
+	$dbtype == 'postgres';
 }
 
 $db_list = '';

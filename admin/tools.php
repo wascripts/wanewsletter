@@ -30,7 +30,8 @@ define('IN_NEWSLETTER', true);
 require './pagestart.php';
 
 //
-// Compression éventuelle des données et réglage du mime-type en conséquence
+// Compression éventuelle des données et réglage du mime-type et du
+// nom de fichier en conséquence.
 //
 function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 {
@@ -164,6 +165,7 @@ switch( $mode )
 		{
 			trigger_error(sprintf($lang['Message']['SQLite_restore'], wa_realpath($dbhost)), MESSAGE);
 		}
+		
 		//
 		// Les modules de sauvegarde et restauration 
 		// supportent actuellement MySQL 3.x ou 4.x, et PostgreSQL
@@ -210,6 +212,9 @@ else if( $admindata['session_liste'] )
 	$listdata = $auth->listdata[$admindata['session_liste']];
 }
 
+//
+// Affichage de la boîte de sélection des modules
+//
 if( !isset($_POST['submit']) )
 {
 	if( $mode != 'backup' && $mode != 'restore' )
@@ -307,8 +312,7 @@ switch( $mode )
 			
 			$sql = "SELECT a.abo_email 
 				FROM " . ABONNES_TABLE . " AS a
-					INNER JOIN " . ABO_LISTE_TABLE . " AS al
-					ON al.abo_id = a.abo_id
+					INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 						AND al.liste_id  = $listdata[liste_id]
 						AND al.format    = $format
 						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
@@ -323,13 +327,14 @@ switch( $mode )
 			{
 				while( $row = $db->fetch_array($result) )
 				{
-					$contents .= "\t<email>".$row['abo_email']."</email>\n";
+					$contents .= "\t<email>$row[abo_email]</email>\n";
 				}
 				
-				$contents  = '<' . '?xml version="1.0"?' . ">\n"
-					. "<!-- Date : " . gmdate('d/m/Y H:i:s') . " GMT - Format : "
-					. (( $format == FORMAT_HTML ) ? 'HTML' : 'text') . " -->\n"
-					. "<Wanliste>\n" . $contents . "</Wanliste>";
+				$format = ( $format == FORMAT_HTML ) ? 'HTML' : 'text';
+				$contents  = '<' . '?xml version="1.0"?' . ">\n";
+				$contents .= "<!-- Date : " . gmdate('d/m/Y H:i:s') . " GMT - Format : $format -->\n";
+				$contents .= "<Wanliste>\n" . $contents . "</Wanliste>\n";
+				
 				$mime_type = 'application/xml';
 				$ext = 'xml';
 			}
@@ -651,8 +656,20 @@ switch( $mode )
 				trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
 			}
 			
-			$db->query("DROP INDEX abo_email_idx ON " . ABONNES_TABLE);
-			$db->query("DROP INDEX abo_status_idx ON " . ABONNES_TABLE);
+			//
+			// Suppression des index et contrainte d'unicité. Les insertions seront plus rapides
+			//
+			if( DATABASE == 'postgres' )
+			{
+				$db->query("ALTER TABLE " . ABONNES_TABLE . " DROP CONSTRAINT abo_email_idx");
+				$db->query("DROP INDEX abo_status_idx");
+			}
+			else if( strncmp(DATABASE, 'mysql', 5) == 0 )
+			{
+				$db->query("ALTER TABLE " . ABONNES_TABLE . "
+					DROP INDEX abo_email_idx,
+					DROP INDEX abo_status_idx");
+			}
 			
 			//
 			// Traitement des adresses email déjà présentes dans la base de données
@@ -718,8 +735,20 @@ switch( $mode )
 				fake_header(true);
 			}
 			
-			$db->query("CREATE UNIQUE INDEX abo_email_idx ON " . ABONNES_TABLE . " (abo_email)");
-			$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
+			//
+			// Remise en place des index et contrainte d'unicité précédemment supprimés
+			//
+			if( DATABASE == 'postgres' )
+			{
+				$db->query("ALTER TABLE " . ABONNES_TABLE . " ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
+				$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
+			}
+			else if( strncmp(DATABASE, 'mysql', 5) == 0 )
+			{
+				$db->query("ALTER TABLE " . ABONNES_TABLE . "
+					ADD UNIQUE abo_email_idx (abo_email),
+					ADD INDEX abo_status_idx (abo_status)");
+			}
 			
 			//
 			// Selon que des emails ont été refusés ou pas, affichage du message correspondant 
