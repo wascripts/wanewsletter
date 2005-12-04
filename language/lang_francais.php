@@ -259,7 +259,7 @@ $lang['Message']['Inactive_account']        = "Votre compte est actuellement ina
 $lang['Message']['IDs_sended']              = "Vos identifiants vous ont été envoyés par email";
 $lang['Message']['Logs_sent']               = "Les newsletters sélectionnées ont été envoyées à votre adresse: %s";
 $lang['Message']['Archive_tar_needed']      = "Le module d'export nécessite la présence du paquet <abbr title=\"PHP Extension and Application Repository\" xml:lang=\"en\" lang=\"en\">PEAR</abbr> <q>Archive_Tar</q>. Consultez la documentation pour plus de détails.";
-$lang['Message']['Chdir_error']             = "Impossible de se placer dans le répertoire %s (erreur sur chdir())";
+$lang['Message']['Chdir_error']             = "Impossible de configurer le répertoire courant sur %s (erreur avec chdir())";
 
 
 //
@@ -368,7 +368,7 @@ $lang['Total_newsletters']          = "Un total de <b>%1\$d</b> newsletters ont 
 $lang['Total_newsletter']           = "Un total de <b>%1\$d</b> newsletter a été envoyée, soit <b>%2\$s</b> newsletters par mois";
 $lang['No_newsletter_sended']       = "Aucune newsletter n'a encore été envoyée";
 $lang['Dbsize']                     = "Taille de la base de données (tables du script)";
-$lang['Total_Filesize']             = "Espace disque occupé par les fichiers sur le serveur (pièces jointes et statistiques)";
+$lang['Total_Filesize']             = "Espace disque occupé par les fichiers (pièces jointes et statistiques)";
 
 
 //
@@ -630,19 +630,20 @@ $lang['Camembert_title']            = "Les parts des différentes listes par rapp
 //
 // Installation du script
 //
-$lang['Welcome_in_install']         = "Bienvenue dans le script d'installation de WAnewsletter. \nCe script nécessite une version de php <b>supérieure ou égale à 4.1.0</b>.\nAvant de continuer l'installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l'installation";
-$lang['Welcome_in_upgrade']         = "Bienvenue dans le script de mise à jour de WAnewsletter. \nVous disposez actuellement de la version %s de WAnewsletter.\n Par mesure de sécurité, il est <strong>fortement conseillé</strong> de faire une sauvegarde des tables du script avant de procéder à la mise à jour.";
-$lang['Warning_reinstall']          = "<b>Attention !</b> WAnewsletter semble déja installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d'administrateur. \nAttention, toutes les données de l'installation précédente seront définitivement perdues.";
+$lang['Welcome_in_install']         = "Bienvenue dans le script d'installation de Wanewsletter. \nCe script nécessite une version de php <b>supérieure ou égale à 4.1.0</b>.\nAvant de continuer l'installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l'installation";
+$lang['Welcome_in_upgrade']         = "Bienvenue dans le script de mise à jour de Wanewsletter. \nVous disposez actuellement de la version %s de Wanewsletter.\n Par mesure de sécurité, il est <strong>fortement conseillé</strong> de faire une sauvegarde des tables du script avant de procéder à la mise à jour.";
+$lang['Warning_reinstall']          = "<b>Attention !</b> Wanewsletter semble déja installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d'administrateur. \nAttention, toutes les données de l'installation précédente seront définitivement perdues.";
 $lang['Start_install']              = "Démarrer l'installation";
 $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['Result_install']             = "Résultat de l'installation";
 $lang['Result_upgrade']             = "Résultat de la mise à jour";
-$lang['PHP_version_error']          = "Désolé mais WAnewsletter %s requiert une version de PHP supérieure ou égale à la version 4.1.0";
-$lang['Not_installed']              = "Aucune version de WAnewsletter ne semble présente, le fichier de configuration est vide";
-$lang['mssql_support_end']          = "Désolé mais le support de SQL Server a été abandonné dans Wanewsletter 2.3";
-$lang['No_db_support']              = "Désolé mais WAnewsletter %s requiert une base de données %s";
+$lang['File_config_unwritable']     = "Le fichier config.inc.php n'est pas accessible en écriture, vous devez donner les droits d'accès en écriture à ce fichier le temps de la mise à jour";
+$lang['PHP_version_error']          = "Désolé mais Wanewsletter %s requiert une version de PHP supérieure ou égale à la version 4.1.0";
+$lang['Not_installed']              = "Aucune version de Wanewsletter ne semble présente, le fichier de configuration est vide ou absent du serveur";
+$lang['mssql_support_end']          = "Désolé mais le support de SQL Server a été retiré dans Wanewsletter 2.3";
+$lang['No_db_support']              = "Désolé mais Wanewsletter %s requiert une base de données %s";
 $lang['Connect_db_error']           = "Impossible de se connecter à la base de données (%s)";
-$lang['sqldir_perms_problem']       = "Pour utiliser une base de données SQLite avec Wanewsletter, vous devez rendre accessible en lecture et écriture le répertoire sql/";
+$lang['sqldir_perms_problem']       = "Pour utiliser Wanewsletter avec une base de données SQLite, vous devez rendre accessible en lecture et écriture le répertoire sql/";
 $lang['DB_type_undefined']          = "Le type de base de données n'est pas défini !";
 
 $lang['Success_install']            = "L'installation s'est bien déroulée.\nVous pouvez maintenant accéder à l'administration en cliquant %sici%s";
@@ -651,8 +652,8 @@ $lang['Success_without_config']     = "L'opération s'est bien effectuée mais le 
 $lang['Success_without_config2']    = "L'opération s'est bien effectuée mais le fichier de configuration n'a pu être modifié.\nVeuillez remplacer le contenu du fichier config.inc.php par ce qui suit : \n\n<pre>%s</pre>";
 $lang['Error_in_install']           = "Une erreur s'est produite durant l'installation.\n\nL'erreur est : %s\nLa requète est : %s";
 $lang['Error_in_upgrade']           = "Une erreur s'est produite durant la mise à jour.\n\nL'erreur est : %s\nLa requète est : %s";
-$lang['Upgrade_not_required']       = "Aucune mise à jour n'est nécessaire pour votre version actuelle de WAnewsletter";
-$lang['Unknown_version']            = "Version inconnue, la mise à jour ne peut continuer.\nSi vous souhaitez faire une mise à jour à partir d'une version 2.2.x, utilisez le fichier install.php";
+$lang['Upgrade_not_required']       = "Aucune mise à jour n'est nécessaire pour votre version actuelle de Wanewsletter";
+$lang['Unknown_version']            = "Version inconnue, la mise à jour ne peut continuer.";
 
 $lang['dbtype']                     = "Type de base de données";
 $lang['dbhost']                     = "Nom du serveur de base de données";

@@ -861,7 +861,7 @@ if( $start )
 					break;
 				
 				default:
-					message($lang['Update_not_required']);
+					message($lang['Upgrade_not_required']);
 					break;
 			}
 			
@@ -869,7 +869,7 @@ if( $start )
 		}
 		else if( WA_BRANCHE == '2.3' )
 		{
-			message($lang['Update_not_required']);
+			message($lang['Upgrade_not_required']);
 		}
 		
 		//
