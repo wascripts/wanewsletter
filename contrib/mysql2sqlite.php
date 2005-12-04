@@ -40,7 +40,7 @@ exit(0);
 // Configuration
 //
 define('IN_NEWSLETTER', true);
-define('WA_ROOTDIR', '/usr/local/wanewsletter');
+define('WA_ROOTDIR', '..');
 
 $sqlite_db   = WA_ROOTDIR . '/sql/wanewsletter.sqlite';
 $schemas_dir = WA_ROOTDIR . '/setup/schemas';
@@ -48,6 +48,8 @@ $remove_db   = true;
 //
 // End Of Config
 //
+
+chdir(dirname(__FILE__));
 
 require WA_ROOTDIR . '/includes/config.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
@@ -110,30 +112,43 @@ foreach( $queries AS $query ) {
 //
 // Injection des données en provenance de la base MySQL
 //
-$db =& new sql($dbhost, $dbuser, $dbpassword, $dbname);
+$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
 
 $tableList = array(
 	'wa_abo_liste', 'wa_abonnes', 'wa_admin', 'wa_auth_admin', 'wa_ban_list', 'wa_config',
 	'wa_forbidden_ext', 'wa_joined_files', 'wa_liste', 'wa_log', 'wa_log_files'
 );
+$tableList = str_replace('wa_', $prefixe, $tableList);
 
 foreach( $tableList AS $table ) {
-	$table  = str_replace('wa_', $prefixe, $table);
 	printf("Populate table %s...\n", $table);
 	flush();
 	
-	$result = $db->query('SELECT * FROM ' . $table);
+	$fields = array();
+	$result = sqlite_query($fs, "PRAGMA table_info($table)");
+	
+	for( $i = 0, $m = sqlite_num_rows($result); $i < $m; $i++ ) {
+		sqlite_seek($result, $i);
+		array_push($fields, sqlite_column($result, 'name'));
+	}
+	$fields = implode(', ', $fields);
+	
+	$result = $db->query("SELECT $fields FROM $table");
 	
 	while( $row = $db->fetch_array($result) ) {
+		$values = array();
 		
-		$fields = $values = array();
-		
-		foreach( $row AS $fieldname => $value ) {
-			array_push($fields, $fieldname);
-			array_push($values, sqlite_escape_string($value));
+		foreach( $row AS $value ) {
+			if( is_null($value) ) {
+				$value = 'NULL';
+			} else {
+				$value = "'" . sqlite_escape_string($value) . "'";
+			}
+			
+			array_push($values, $value);
 		}
 		
-		sqlite_exec($fs, "INSERT INTO $table (" . implode(', ', $fields) . ") VALUES('" . implode("', '", $values) . "')");
+		sqlite_exec($fs, "INSERT INTO $table ($fields) VALUES(" . implode(", ", $values) . ")");
 	}
 	
 	printf("%d rows added.\n", $db->num_rows($result));
