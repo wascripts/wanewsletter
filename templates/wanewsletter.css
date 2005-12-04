@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2002-2006 Aur?lien Maille
+ * Copyright (c) 2002-2006 Aurélien Maille
  * 
  * This file is part of Wanewsletter.
  * 
@@ -290,8 +290,8 @@ code, samp, var { font-family: "Courier new", Courier, Monospace; font-size: 1em
 /*
  * Citations
  */
-q:lang(fr)  { quotes: "«\00A0" "\00A0»"; }
-q:lang(en)  { quotes: "?" "?" "?" "?"; }
+q:lang(fr)  { quotes: "\00AB\00A0" "\00A0\00BB" "\2039\00A0" "\00A0\203A"; }
+q:lang(en)  { quotes: "\201C" "\201D" "\2018" "\2019"; }
 q::before   { content: open-quote; }
 q::after    { content: close-quote; }
 
@@ -322,7 +322,7 @@ form#smallbox label {
 	font-weight: normal;
 }
 
-/* Bo?te de s?lection de liste */
+/* Boîte de sélection de liste */
 #liste option[value="0"]:first-child,
 #admin_id option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
 
@@ -357,9 +357,9 @@ input[type="file"]  { font-size: .8em; font-weight: normal; color: black; }
 input[type="radio"] { vertical-align: sub; }
 
 /*
-  Malgr? la propri?t? font-family dans body, textarea n'en tient pas compte, 
-  que ce soit dans un navigateur gecko ou IE :?/
-  On red?clare...
+  Malgré la propriété font-family dans body, textarea n'en tient pas compte, 
+  que ce soit dans un navigateur gecko ou IE :¬/
+  On redéclare...
 */
 textarea   { font-family: Verdana, Arial, Helvetica, sans-serif; }
 input.text { text-indent: 2px; }
