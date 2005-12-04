@@ -376,14 +376,14 @@ class output extends Template {
 	 */
 	function page_footer()
 	{
-		global $nl_config, $db, $lang, $starttime;
+		global $db, $lang, $starttime;
 		
 		$this->set_filenames(array(
 			'footer' => 'footer.tpl'
 		));
 		
 		$this->assign_vars( array(
-			'VERSION'   => $nl_config['version'], 
+			'VERSION'   => WA_VERSION, 
 			'TRANSLATE' => ( !empty($lang['TRANSLATE']) ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 		));
 		

@@ -24,11 +24,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * @version $Id$
  * 
- * Vous pouez très facilement modifier WAnewsletter dans une autre
- * langue.
- * Pour cela, il vous suffit de traduire ce qui se trouve entre
+ * Vous pouvez très facilement traduire Wanewsletter dans une autre langue.
+ * Il vous suffit pour cela de traduire ce qui se trouve entre
  * guillemets. Attention, ne touchez pas à la partie $lang['....']
- *
+ * 
  * des %1\$s, %s, %d ou autre signe de ce genre signifient qu'ils
  * vont être remplacés par un contenu variable. Placez les de façon
  * adéquat dans la phrase mais ne les enlevez pas.
@@ -633,7 +632,7 @@ $lang['Camembert_title']            = "Les parts des différentes listes par rapp
 //
 $lang['Welcome_in_install']         = "Bienvenue dans le script d'installation de WAnewsletter. \nCe script nécessite une version de php <b>supérieure ou égale à 4.1.0</b>.\nAvant de continuer l'installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l'installation";
 $lang['Welcome_in_upgrade']         = "Bienvenue dans le script de mise à jour de WAnewsletter. \nVous disposez actuellement de la version %s de WAnewsletter.\n Par mesure de sécurité, il est <strong>fortement conseillé</strong> de faire une sauvegarde des tables du script avant de procéder à la mise à jour.";
-$lang['Warning_reinstall']          = "<b>Attention !</b> WAnewsletter semble déja installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d'admin. \nAttention, toutes les données de l'installation précédente seront définitivement perdues.";
+$lang['Warning_reinstall']          = "<b>Attention !</b> WAnewsletter semble déja installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d'administrateur. \nAttention, toutes les données de l'installation précédente seront définitivement perdues.";
 $lang['Start_install']              = "Démarrer l'installation";
 $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['Result_install']             = "Résultat de l'installation";
@@ -643,7 +642,7 @@ $lang['Not_installed']              = "Aucune version de WAnewsletter ne semble 
 $lang['mssql_support_end']          = "Désolé mais le support de SQL Server a été abandonné dans Wanewsletter 2.3";
 $lang['No_db_support']              = "Désolé mais WAnewsletter %s requiert une base de données %s";
 $lang['Connect_db_error']           = "Impossible de se connecter à la base de données (%s)";
-$lang['sqldir_perms_problem']       = "Pour utiliser une base de données SQLite avec Wanewsletter, vous devez rendre accessible en lecture et écriture le répertoire sql/ ainsi que le fichier wanewsletter.db qui s'y trouve";
+$lang['sqldir_perms_problem']       = "Pour utiliser une base de données SQLite avec Wanewsletter, vous devez rendre accessible en lecture et écriture le répertoire sql/";
 $lang['DB_type_undefined']          = "Le type de base de données n'est pas défini !";
 
 $lang['Success_install']            = "L'installation s'est bien déroulée.\nVous pouvez maintenant accéder à l'administration en cliquant %sici%s";

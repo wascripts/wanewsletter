@@ -17,8 +17,8 @@ INSERT INTO wa_auth_admin (admin_id, liste_id, auth_view, auth_edit, auth_del, a
 -- 
 -- Configuration de base
 -- 
-INSERT INTO wa_config (sitename, urlsite, path, date_format, session_length, language, cookie_name, cookie_path, upload_path, max_filesize, engine_send, gd_img_type, version) 
-	VALUES('Yourdomaine', 'http://www.yourdomaine.com', '/', 'd M Y H:i', 3600, 'francais', 'wanewsletter', '/', 'upload/', 80000, 1, 'png', '2.3.x');
+INSERT INTO wa_config (sitename, urlsite, path, date_format, session_length, language, cookie_name, cookie_path, upload_path, max_filesize, engine_send, gd_img_type) 
+	VALUES('Yourdomaine', 'http://www.yourdomaine.com', '/', 'd M Y H:i', 3600, 'francais', 'wanewsletter', '/', 'upload/', 80000, 1, 'png');
 
 
 -- 

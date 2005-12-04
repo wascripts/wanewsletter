@@ -1093,7 +1093,7 @@ switch( $mode )
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql 
 			//
-			$contents = $backup->header($dbhost, $dbname, 'WAnewsletter ' . $nl_config['version']);
+			$contents = $backup->header($dbhost, $dbname, 'Wanewsletter ' . WA_VERSION);
 			
 			fake_header(false);
 			

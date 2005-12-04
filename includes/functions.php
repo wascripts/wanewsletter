@@ -1056,13 +1056,13 @@ function convert_encoding($data, $charset, $check_bom = true)
  */
 function http_get_contents($URL, &$errstr)
 {
-	global $nl_config, $lang;
+	global $lang;
 	
 	require WA_ROOTDIR . '/includes/http/Client.php';
 	
 	$client =& new HTTP_Client();
 	$client->openURL('HEAD', $URL);
-	$client->setRequestHeader('User-Agent', "Wanewsletter $nl_config[version]");
+	$client->setRequestHeader('User-Agent', 'Wanewsletter ' . WA_VERSION);
 	$client->setRequestHeader('Accept-Encoding', 'gzip');
 	
 	if( $client->send() == false )

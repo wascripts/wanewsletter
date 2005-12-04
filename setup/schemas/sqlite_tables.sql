@@ -115,8 +115,7 @@ CREATE TABLE wa_config (
 	gd_img_type       VARCHAR(5)   NOT NULL DEFAULT '',
 	check_email_mx    INTEGER      NOT NULL DEFAULT 0,
 	enable_profil_cp  INTEGER      NOT NULL DEFAULT 0,
-	mailing_startdate INTEGER      NOT NULL DEFAULT 0,
-	version           VARCHAR(10)  NOT NULL DEFAULT ''
+	mailing_startdate INTEGER      NOT NULL DEFAULT 0
 );
 
 

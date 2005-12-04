@@ -100,7 +100,7 @@ class sql {
 		
 		$this->connect_id = @$sql_connect($dbpath, 0666, $errorstr);
 		
-		if( $this->connect_id != false )
+		if( is_resource($this->connect_id) )
 		{
 			$this->query('PRAGMA short_column_names = 1');
 			$this->query('PRAGMA case_sensitive_like = 0');
@@ -218,7 +218,7 @@ class sql {
 		$curtime = explode(' ', microtime());
 		$curtime = $curtime[0] + $curtime[1] - $starttime;
 		
-		$this->query_result = sqlite_query($this->connect_id, $query);
+		$this->query_result = @sqlite_query($this->connect_id, $query);
 		
 		$endtime = explode(' ', microtime());
 		$endtime = $endtime[0] + $endtime[1] - $starttime;
@@ -228,8 +228,8 @@ class sql {
 		
 		if( !$this->query_result )
 		{
-			$this->sql_error['errno']   = @sqlite_last_error($this->connect_id);
-			$this->sql_error['message'] = @sqlite_error_string($this->sql_error['errno']);
+			$this->sql_error['errno']   = sqlite_last_error($this->connect_id);
+			$this->sql_error['message'] = sqlite_error_string($this->sql_error['errno']);
 			$this->sql_error['query']   = $query;
 		}
 		else

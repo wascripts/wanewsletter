@@ -40,6 +40,7 @@ foreach( $vararray AS $varname )
 
 $confirm_pass = ( $confirm_pass != '' ) ? md5($confirm_pass) : '';
 $language     = ( $language != '' ) ? $language : $default_lang;
+$sqlite_db    = WA_ROOTDIR . '/sql/wanewsletter.sqlite';
 
 $output->set_filenames( array(
 	'body' => 'install.tpl'
@@ -59,7 +60,7 @@ if( defined('NL_INSTALLED') )
 		plain_error(sprintf($lang['Connect_db_error'], $db->sql_error['message']));
 	}
 	
-	$sql = "SELECT language, urlsite, path, version FROM " . CONFIG_TABLE;
+	$sql = "SELECT language, urlsite, path FROM " . CONFIG_TABLE;
 	if( !($result = $db->query($sql)) )
 	{
 		plain_error('Impossible d\'obtenir la configuration du script');
@@ -67,7 +68,6 @@ if( defined('NL_INSTALLED') )
 	
 	$old_config = $db->fetch_array($result);
 	
-	$old_version = $old_config['version'];
 	$urlsite     = $old_config['urlsite'];
 	$urlscript   = $old_config['path'];
 	$language    = $old_config['language'];
@@ -81,7 +81,7 @@ $output->assign_vars( array(
 	'PAGE_TITLE'   => ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-	'NEW_VERSION'  => $new_version,
+	'NEW_VERSION'  => WA_NEW_VERSION,
 	'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 ));
 
@@ -121,10 +121,13 @@ if( $start )
 	{
 		if( $dbtype == 'sqlite' )
 		{
-			$sqlite_db = WA_ROOTDIR . '/sql/wanewsletter.sqlite';
-			
-			if( is_writable(WA_ROOTDIR . '/sql') && is_readable($sqlite_db) && is_writable($sqlite_db) )
+			if( is_writable(dirname($sqlite_db)) )
 			{
+				if( file_exists($sqlite_db) )
+				{
+					unlink($sqlite_db);
+				}
+				
 				$db = new sql($sqlite_db);
 			}
 			else
@@ -156,7 +159,7 @@ if( $start )
 	
 	if( !$error )
 	{
-		if( $dbname == '' || $prefixe == '' || $admin_login == '' )
+		if( ($dbtype != 'sqlite' && $dbname == '') || $prefixe == '' || $admin_login == '' )
 		{
 			$error = true;
 			$msg_error[] = $lang['Message']['fields_empty'];
@@ -223,8 +226,7 @@ if( $start )
 				path        = '" . $db->escape($urlscript) . "',
 				cookie_path = '" . $db->escape($urlscript) . "',
 				language    = '$language',
-				mailing_startdate = " . time() . ",
-				version     = '$new_version'";
+				mailing_startdate = " . time();
 		$sql_data[] = "UPDATE " . LISTE_TABLE . "
 			SET liste_startdate = " . time() . "
 			WHERE liste_id = 1";

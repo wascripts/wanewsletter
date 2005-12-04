@@ -33,6 +33,14 @@ $confirm = ( isset($_POST['confirm']) ) ? true : false;
 $admin_login = ( !empty($_POST['admin_login']) ) ? trim($_POST['admin_login']) : '';
 $admin_pass  = ( !empty($_POST['admin_pass']) ) ? trim($_POST['admin_pass']) : '';
 
+//
+// Compatibilité avec les versions < 2.1.2
+//
+if( !defined('NL_INSTALLED') && isset($dbhost) && !isset($_REQUEST['dbhost']) )
+{
+	define('NL_INSTALLED', true);
+}
+
 if( !defined('NL_INSTALLED') )
 {
 	plain_error("Wanewsletter ne semble pas installé");
@@ -68,17 +76,22 @@ while( $row = $db->fetch_array($result) )
 	}
 }
 
+if( !defined('WA_VERSION') ) // compatibilité avec les version < 2.3
+{
+	define('WA_VERSION', $old_config['version']);
+}
+
 if( file_exists(WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php') )
 {
 	require WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php';
 }
 
-if( !preg_match('/^(2\.[0-2])[-.0-9a-zA-Z]+$/', $old_config['version'], $match) )
+if( !preg_match('/^(2\.[0-3])[-.0-9a-zA-Z]+$/', WA_VERSION, $match) )
 {
 	message($lang['Unknown_version']);
 }
 
-$branche = $match[1];
+define('WA_BRANCHE', $match[1]);
 
 $output->set_filenames( array(
 	'body' => 'upgrade.tpl'
@@ -90,7 +103,7 @@ $output->assign_vars( array(
 	'PAGE_TITLE'   => $lang['Title']['upgrade'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-	'NEW_VERSION'  => $new_version,
+	'NEW_VERSION'  => WA_NEW_VERSION,
 	'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 ));
 
@@ -102,9 +115,9 @@ if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
 
 if( $start )
 {
-	if( $branche == '2.0' || $branche == '2.1' )
+	if( WA_BRANCHE == '2.0' || WA_BRANCHE == '2.1' )
 	{
-		if( $branche == '2.1' )
+		if( WA_BRANCHE == '2.1' )
 		{
 			$field_level = 'level';
 		}
@@ -119,7 +132,7 @@ if( $start )
 				AND passwd = '" . md5($admin_pass) . "'
 				AND $field_level >= " . ADMIN;
 	}
-	else if( $branche == '2.2' )
+	else if( WA_BRANCHE == '2.2' || WA_BRANCHE == '2.3' )
 	{
 		$sql = "SELECT COUNT(*)
 			FROM " . ADMIN_TABLE . "
@@ -160,7 +173,7 @@ if( $start )
 			$sql_create[$match[1]] = $query;
 		}
 		
-		if( $branche == '2.0' || $branche == '2.1' )
+		if( WA_BRANCHE == '2.0' || WA_BRANCHE == '2.1' )
 		{
 			//
 			// Reconstruction de la table de configuration
@@ -203,12 +216,13 @@ if( $start )
 			//
 			$sql_update = array();
 			
-			switch( $old_config['version'] )
+			switch( WA_VERSION )
 			{
 				case '2.0Beta':
 				case '2.0.0':
 				case '2.0.1':
-					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . " MODIFY COLUMN session_id CHAR(32) NOT NULL default ''";
+					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+						MODIFY COLUMN session_id CHAR(32) NOT NULL DEFAULT ''";
 					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . " TYPE=HEAP";
 					
 				case '2.0.2':
@@ -239,7 +253,7 @@ if( $start )
 			//
 			$sql_update = array();
 			
-			if( $branch == '2.0' )
+			if( WA_BRANCHE == '2.0' )
 			{
 				$sql_update[] = $sql_create['auth_admin'];
 				$field_level = 'droits';
@@ -249,8 +263,8 @@ if( $start )
 				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
 					ADD COLUMN auth_ban    TINYINT(1) NOT NULL DEFAULT 0,
 					ADD COLUMN auth_attach TINYINT(1) NOT NULL DEFAULT 0,
-					ADD COLUMN cc_admin    SMALLINT   NOT NULL DEFAULT 0,
-					ADD INDEX (admin_id)";
+					ADD COLUMN cc_admin    TINYINT(1) NOT NULL DEFAULT 0,
+					ADD INDEX admin_id_idx (admin_id)";
 				$field_level = 'level';
 			}
 			
@@ -275,10 +289,12 @@ if( $start )
 				admin_dateformat = '" . $db->escape($old_config['date_format']) . "',
 				email_new_subscribe = 0";
 			
-			if( $branch == '2.0' )
+			if( WA_BRANCHE == '2.0' )
 			{
-				$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_level = 1 WHERE admin_level = 2";
-				$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_level = 2 WHERE admin_level = 3";
+				$sql_update[] = "UPDATE " . ADMIN_TABLE . "
+					SET admin_level = 1 WHERE admin_level = 2";
+				$sql_update[] = "UPDATE " . ADMIN_TABLE . "
+					SET admin_level = 2 WHERE admin_level = 3";
 			}
 			
 			exec_queries($sql_update, true);
@@ -288,9 +304,9 @@ if( $start )
 			//
 			$sql_update = array();
 			$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-				CHANGE nom liste_name VARCHAR(100) NOT NULL default '',
-				CHANGE choix_format liste_format TINYINT(1) NOT NULL default 1,
-				CHANGE email_confirm confirm_subscribe TINYINT(1) NOT NULL default 0,
+				CHANGE nom liste_name VARCHAR(100) NOT NULL DEFAULT '',
+				CHANGE choix_format liste_format TINYINT(1) NOT NULL DEFAULT 1,
+				CHANGE email_confirm confirm_subscribe TINYINT(1) NOT NULL DEFAULT 0,
 				ADD COLUMN liste_public SMALLINT NOT NULL DEFAULT 1 AFTER liste_name,
 				ADD COLUMN sender_email VARCHAR(250) NOT NULL DEFAULT '' AFTER liste_format,
 				ADD COLUMN return_email VARCHAR(250) NOT NULL DEFAULT '' AFTER sender_email,
@@ -338,8 +354,8 @@ if( $start )
 				
 				$sql_update[] = "UPDATE " . LISTE_TABLE . "
 					SET liste_name      = '" . $db->escape(htmlspecialchars($row['liste_name'])) . "',
-						sender_email    = '$old_config[sender_email]',
-						return_email    = '$old_config[return_email]',
+						sender_email    = '" . $db->escape($old_config['sender_email']) . "',
+						return_email    = '" . $db->escape($old_config['return_email']) . "',
 						liste_sig       = '" . $db->escape($old_config['signature']) . "',
 						auto_purge      = '$old_config[auto_purge]',
 						purge_freq      = '$old_config[purge_freq]',
@@ -349,7 +365,7 @@ if( $start )
 					WHERE liste_id = " . $row['liste_id'];
 			}
 			
-			if( $branch == '2.1' )
+			if( WA_BRANCHE == '2.1' )
 			{
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . " DROP COLUMN email_new_inscrit";
 			}
@@ -369,12 +385,13 @@ if( $start )
 			
 			$sql_update = array();
 			$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
-				CHANGE sujet log_subject VARCHAR(100) NOT NULL default '',
-				CHANGE body_html log_body_html TEXT NOT NULL default '',
-				CHANGE body_text log_body_text TEXT NOT NULL default '',
-				CHANGE date log_date INTEGER NOT NULL default 0,
-				CHANGE send log_status TINYINT(1) NOT NULL default 0,
-				ADD INDEX (liste_id), ADD INDEX (log_status)";
+				CHANGE sujet log_subject VARCHAR(100) NOT NULL DEFAULT '',
+				CHANGE body_html log_body_html TEXT NOT NULL DEFAULT '',
+				CHANGE body_text log_body_text TEXT NOT NULL DEFAULT '',
+				CHANGE date log_date INTEGER NOT NULL DEFAULT 0,
+				CHANGE send log_status TINYINT(1) NOT NULL DEFAULT 0,
+				ADD INDEX liste_id_idx (liste_id),
+				ADD INDEX log_status_idx (log_status)";
 			$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
 				ADD COLUMN log_numdest SMALLINT NOT NULL DEFAULT 0";
 			$sql_update[] = "ALTER TABLE " . LOG_TABLE . " DROP COLUMN attach";
@@ -439,46 +456,46 @@ if( $start )
 			
 			exec_queries($sql_update, true);
 			
-			$abo_ary = array();
-			
-			$total_abo = count($aborow);
-			for( $i = 0; $i < $total_abo; $i++ )
+			$abo_liste = array();
+			for( $i = 0, $m = count($aborow); $i < $m; $i++ )
 			{
-				if( !isset($abo_ary[$aborow[$i]['email']]) )
+				if( !isset($abo_liste[$aborow[$i]['email']]) )
 				{
-					$abo_ary[$aborow[$i]['email']] = array();
+					$abo_liste[$aborow[$i]['email']] = array();
 					
-					$abo_ary[$aborow[$i]['email']]['code']   = $aborow[$i]['code'];
-					$abo_ary[$aborow[$i]['email']]['date']   = $aborow[$i]['date'];
-					$abo_ary[$aborow[$i]['email']]['status'] = $aborow[$i]['actif'];
-					$abo_ary[$aborow[$i]['email']]['listes'] = array();
+					$abo_liste[$aborow[$i]['email']]['code']   = $aborow[$i]['code'];
+					$abo_liste[$aborow[$i]['email']]['date']   = $aborow[$i]['date'];
+					$abo_liste[$aborow[$i]['email']]['status'] = $aborow[$i]['actif'];
+					$abo_liste[$aborow[$i]['email']]['listes'] = array();
 				}
 				
-				$abo_ary[$aborow[$i]['email']]['listes'][$aborow[$i]['liste_id']] = array(
+				$abo_liste[$aborow[$i]['email']]['listes'][$aborow[$i]['liste_id']] = array(
 					'format' => $aborow[$i]['format'],
 					'send'   => ( !empty($aborow[$i]['send']) ) ? $aborow[$i]['send'] : 0
 				);
 			}
 			
-			foreach( $abo_ary AS $email => $data )
+			foreach( $abo_liste AS $email => $data )
 			{
-				$sql = "INSERT INTO " . ABONNES_TABLE . " (abo_email, abo_lang, abo_register_key, abo_register_date, abo_status)
-					VALUES('" . $db->escape($email) . "', '$language', '" . $db->escape($data['code']) . "', " . $data['date'] . ", " . $data['status'] . ")";
+				$sql = "INSERT INTO " . ABONNES_TABLE . " (abo_email, abo_pwd, abo_lang, abo_status)
+					VALUES('" . $db->escape($email) . "', '" . md5($data['code']) . "', '$language', " . $data['status'] . ")";
 				exec_queries($sql, true);
 				
 				$abo_id = $db->next_id();
 				$sql_update = array();
 				
+				$data['code'] = ( $data['status'] == ABO_INACTIF ) ? '\'' . substr($data['code'], 0, 20) . '\'' : 'NULL';
+				
 				foreach( $data['listes'] AS $liste_id => $listdata )
 				{
-					$sql_update[] = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, send)
-						VALUES($abo_id, $liste_id, $listdata[format], $listdata[send])";
+					$sql_update[] = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, send, register_key, register_date, confirmed)
+						VALUES($abo_id, $liste_id, $listdata[format], $listdata[send], $data[code], $data[date], $data[status])";
 				}
 				
 				exec_queries($sql_update, true);
 			}
 			
-			unset($aborow, $abo_ary);
+			unset($aborow, $abo_liste);
 			
 			//
 			// Mise à jour de la table des logs
@@ -502,17 +519,12 @@ if( $start )
 			}
 			
 			exec_queries($sql_update, true);
-			
-			// END
-			$sql = "UPDATE " . CONFIG_TABLE . " SET version = '$new_version'";
-			
-			exec_queries($sql, true);
 		}
-		else if( $branche == '2.2' )
+		else if( WA_BRANCHE == '2.2' )
 		{
 			$sql_update = array();
 			
-			switch( $old_config['version'] )
+			switch( WA_VERSION )
 			{
 				case '2.2-Beta':
 				case '2.2-Beta2':
@@ -753,39 +765,38 @@ if( $start )
 				case '2.2.6':
 				case '2.2.7':
 				case '2.2.8':
-					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . " DROP COLUMN hebergeur";
+					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
+						DROP COLUMN hebergeur, DROP COLUMN version";
 					
-					switch( DATABASE )
+					if( DATABASE == 'postgres' )
 					{
-						case 'postgres':
-							$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index";
-							$sql_update[] = "DROP INDEX admin_id_wa_auth_admin_index";
-							$sql_update[] = "DROP INDEX liste_id_wa_log_index";
-							$sql_update[] = "DROP INDEX log_status_wa_log_index";
-							$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
-								RENAME COLUMN email_new_inscrit email_new_subscribe";
-							$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
-								ADD COLUMN email_unsubscribe SMALLINT NOT NULL DEFAULT 0";
-							$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
-								ADD COLUMN cc_admin SMALLINT NOT NULL DEFAULT 0";
-							$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-								ADD COLUMN liste_public SMALLINT NOT NULL DEFAULT 1";
-							break;
-						
-						default:
-							$sql_update[] = "DROP INDEX abo_status ON " . ABONNES_TABLE;
-							$sql_update[] = "DROP INDEX admin_id ON " . AUTH_ADMIN_TABLE;
-							$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
-								DROP INDEX liste_id,
-								DROP INDEX log_status";
-							$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
-								CHANGE email_new_inscrit email_new_subscribe TINYINT(1) NOT NULL DEFAULT 0,
-								ADD COLUMN email_unsubscribe TINYINT(1) NOT NULL DEFAULT 0";
-							$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
-								ADD COLUMN cc_admin TINYINT(1) NOT NULL DEFAULT 0";
-							$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-								ADD COLUMN liste_public TINYINT(1) NOT NULL DEFAULT 1 AFTER liste_name";
-							break;
+						$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index";
+						$sql_update[] = "DROP INDEX admin_id_wa_auth_admin_index";
+						$sql_update[] = "DROP INDEX liste_id_wa_log_index";
+						$sql_update[] = "DROP INDEX log_status_wa_log_index";
+						$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
+							RENAME COLUMN email_new_inscrit email_new_subscribe";
+						$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
+							ADD COLUMN email_unsubscribe SMALLINT NOT NULL DEFAULT 0";
+						$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
+							ADD COLUMN cc_admin SMALLINT NOT NULL DEFAULT 0";
+						$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
+							ADD COLUMN liste_public SMALLINT NOT NULL DEFAULT 1";
+					}
+					else
+					{
+						$sql_update[] = "DROP INDEX abo_status ON " . ABONNES_TABLE;
+						$sql_update[] = "DROP INDEX admin_id ON " . AUTH_ADMIN_TABLE;
+						$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
+							DROP INDEX liste_id,
+							DROP INDEX log_status";
+						$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
+							CHANGE email_new_inscrit email_new_subscribe TINYINT(1) NOT NULL DEFAULT 0,
+							ADD COLUMN email_unsubscribe TINYINT(1) NOT NULL DEFAULT 0";
+						$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
+							ADD COLUMN cc_admin TINYINT(1) NOT NULL DEFAULT 0";
+						$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
+							ADD COLUMN liste_public TINYINT(1) NOT NULL DEFAULT 1 AFTER liste_name";
 					}
 					
 					$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
@@ -825,27 +836,27 @@ if( $start )
 					
 					if( DATABASE == 'postgres' )
 					{
-						$db->query("ALTER TABLE " . ABO_LISTE_TABLE . "
-							ADD CONSTRAINT register_key_idx UNIQUE (register_key)");
-						$db->query("ALTER TABLE " . ABONNES_TABLE . "
-							ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
-						$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
+						$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
+							ADD CONSTRAINT register_key_idx UNIQUE (register_key)";
+						$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
+							ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)";
+						$sql_update[] = "CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)";
 						$sql_update[] = "CREATE INDEX admin_id_idx ON " . AUTH_ADMIN_TABLE . " (admin_id)";
 						$sql_update[] = "CREATE INDEX liste_id_idx ON " . LOG_TABLE . " (liste_id)";
 						$sql_update[] = "CREATE INDEX log_status_idx ON " . LOG_TABLE . " (log_status)";
 					}
 					else
 					{
-						$db->query("ALTER TABLE " . ABO_LISTE_TABLE . "
-							ADD UNIQUE register_key_idx (register_key)");
-						$db->query("ALTER TABLE " . ABONNES_TABLE . "
+						$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
+							ADD UNIQUE register_key_idx (register_key)";
+						$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 							ADD UNIQUE abo_email_idx (abo_email),
-							ADD INDEX abo_status_idx (abo_status)");
+							ADD INDEX abo_status_idx (abo_status)";
 						$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
 							ADD INDEX admin_id_idx (admin_id)";
-						$db->query("ALTER TABLE " . LOG_TABLE . "
+						$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
 							ADD INDEX liste_id_idx (liste_id),
-							ADD INDEX log_status_idx (log_status)");
+							ADD INDEX log_status_idx (log_status)";
 					}
 					break;
 				
@@ -854,9 +865,11 @@ if( $start )
 					break;
 			}
 			
-			$sql_update[] = "UPDATE " . CONFIG_TABLE . " SET version = '$new_version'";
-			
 			exec_queries($sql_update, true);
+		}
+		else if( WA_BRANCHE == '2.3' )
+		{
+			message($lang['Update_not_required']);
 		}
 		
 		//
@@ -893,7 +906,7 @@ if( $start )
 }
 
 $output->assign_block_vars('upgrade', array(
-	'L_EXPLAIN'      => nl2br(sprintf($lang['Welcome_in_upgrade'], $old_config['version'])),
+	'L_EXPLAIN'      => nl2br(sprintf($lang['Welcome_in_upgrade'], WA_VERSION)),
 	'L_LOGIN'        => $lang['Login'],
 	'L_PASS'         => $lang['Password'],
 	'L_START_BUTTON' => $lang['Start_upgrade']

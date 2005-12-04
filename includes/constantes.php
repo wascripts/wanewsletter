@@ -57,22 +57,6 @@ define('DISPLAY_ERRORS_IN_BLOCK', TRUE);
 define('TRANSLITE_INVALID_CHARS', FALSE);
 
 //
-// Tables du script 
-//
-define('ABO_LISTE_TABLE',     $prefixe . 'abo_liste');
-define('ABONNES_TABLE',       $prefixe . 'abonnes');
-define('ADMIN_TABLE',         $prefixe . 'admin');
-define('AUTH_ADMIN_TABLE',    $prefixe . 'auth_admin');
-define('BANLIST_TABLE',       $prefixe . 'ban_list');
-define('CONFIG_TABLE',        $prefixe . 'config');
-define('JOINED_FILES_TABLE',  $prefixe . 'joined_files');
-define('FORBIDDEN_EXT_TABLE', $prefixe . 'forbidden_ext');
-define('LISTE_TABLE',         $prefixe . 'liste');
-define('LOG_TABLE',           $prefixe . 'log');
-define('LOG_FILES_TABLE',     $prefixe . 'log_files');
-define('SESSIONS_TABLE',      $prefixe . 'session');
-
-//
 // Codes des messages d'erreur et d'information 
 //
 define('CRITICAL_ERROR', E_USER_WARNING);
