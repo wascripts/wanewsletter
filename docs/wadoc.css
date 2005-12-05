@@ -1,16 +1,20 @@
 /**
- * This program is free software; you can redistribute it and/or
+ * Copyright (c) 2002-2006 Aurélien Maille
+ * 
+ * This file is part of Wanewsletter.
+ * 
+ * Wanewsletter is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License 
  * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
- * This program is distributed in the hope that it will be useful,
+ * Wanewsletter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with Wanewsletter; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * 
  * @package Wanewsletter
@@ -21,13 +25,8 @@
  */
 
 html,
-body { background-color: #003B78; color: white; }
-body {
-	margin: 0;
-	border: none;
-	padding: 0;
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-}
+body { background-color: #003B78; font-family: Verdana, Arial, sans-serif; color: white; }
+body { margin: 0; padding: 0; }
 
 a img { border: none; }
 hr    { display: none; }
@@ -42,10 +41,10 @@ h1, div#page, address#footer {
 h1, address#footer { padding: 0.3em; text-align: center; }
 
 h1             { font-weight: normal; font-size: 1.2em; }
-address#footer { font-weight: bold; font-style: normal; font-size: 0.6em; }
+address#footer { font-weight: bold; font-style: normal; font-size: .6em; }
 
 #preface, .bloc { margin: 1em 2.5%; }
-#preface        { text-align: left; font-size: 0.7em; }
+#preface        { text-align: left; font-size: .7em; }
 .bloc           { border: 1px solid #084A6B; }
 
 .bloc h2 {
@@ -58,22 +57,27 @@ address#footer { font-weight: bold; font-style: normal; font-size: 0.6em; }
 	color: #FAFAFA;
 }
 
+div#page { counter-reset: item; }
+div#page .bloc h2[id]::before {
+	content: counter(item, decimal) ".\00A0";
+	counter-increment: item;
+}
+
 .bloc h3 {
 	background-color: transparent;
-	margin: 0;
-	padding: 1.5em 1.4em .5em;
-	text-align: left;
+	margin: 1.2em 20px .6em;
 	font-weight: normal;
 	font-size: .8em;
 	color: #25F;
 }
 
 .bloc p {
-	margin: 1em 1.6em;
+	margin: 12px 20px;
 	padding: 0;
 	text-align: justify;
 	font-size: .8em;
 	line-height: 1.5em;
+	font-family: "Bitstream Vera Sans", Verdana, Arial, sans-serif;
 }
 
 .bloc p.date {
@@ -81,17 +85,18 @@ address#footer { font-weight: bold; font-style: normal; font-size: 0.6em; }
 }
 
 ul, ol {
-	margin: 20px;
-	padding: 0 3em;
-	text-align: left;
+	margin: 20px 40px;
+	padding: 0;
 	font-size: .8em;
 	line-height: 1.4em;
 }
 
 ul ul { font-size: 1em; }
-ul li { margin: 3px 0; }
-ul.sommaire ul { margin-top: 10px; margin-bottom: 20px; }
-ol { list-style-type: upper-roman; }
+li { margin: 2px 0; }
+ol { list-style-type: decimal; }
+ul>li { list-style-type: none; }
+ul>li::before { display: marker; content: "\2013\00A0"; }
+div#sommaire ol { margin: 20px 60px; }
 
 a { text-decoration: none; }
 
@@ -105,13 +110,15 @@ a:hover {
 	color: #F52;
 }
 
-abbr[title], acronym[title] {
-	border-bottom: 1px dotted;
-}
+/*
+ * Citations
+ */
+q:lang(fr)  { quotes: "\00AB\00A0" "\00A0\00BB" "\2039\00A0" "\00A0\203A"; }
+q:lang(en)  { quotes: "\201C" "\201D" "\2018" "\2019"; }
+q::before   { content: open-quote; }
+q::after    { content: close-quote; }
 
-abbr[title]:hover, acronym[title]:hover {
-	cursor: help;
-}
+abbr[title] { border-bottom: 1px dotted; cursor: help; }
 
 code, kbd, samp { font-family: "Courier New", Courier, monospace; font-size: 1em; }
 
@@ -128,14 +135,8 @@ pre {
 	font-family: Courier, "Courier New", monospace !important;
 }
 
-div#page { counter-reset: item; }
-div#page h2[id]::before {
-	content: counter(item, upper-roman) ".\00A0";
-	counter-increment: item;
-}
-
 /*
-	Couleurs du code php colorisï¿½
+	Couleurs du code php colorisé
 */
 span.hl-bg      { background-color: inherit; color: white; }
 span.hl-comment { background-color: inherit; color: #F90; }

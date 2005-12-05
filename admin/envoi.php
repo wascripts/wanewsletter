@@ -733,7 +733,7 @@ switch( $mode )
 						switch( DATABASE )
 						{
 							case 'mysql':
-							case 'mysql4':
+							case 'mysqli':
 								$sql_values[] = '(' . $tmp_id . ', ' . $row['file_id'] . ')';
 								break;
 							

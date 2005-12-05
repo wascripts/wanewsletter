@@ -28,7 +28,7 @@
 if( !defined('CLASS_SQL_INC') ) {
 
 define('CLASS_SQL_INC', true);
-define('DATABASE', 'mysql4');
+define('DATABASE', 'mysqli');
 
 class sql {
 	/**

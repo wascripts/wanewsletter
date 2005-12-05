@@ -182,7 +182,7 @@ if( count($liste_ids) > 0 )
 switch( DATABASE )
 {
 	case 'mysql':
-	case 'mysql4':
+	case 'mysqli':
 		$sql = 'SHOW TABLE STATUS FROM ' . $dbname;
 		if( $result = $db->query($sql) )
 		{

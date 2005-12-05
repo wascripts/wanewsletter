@@ -50,7 +50,7 @@ define('SESSIONS_TABLE',      $prefixe . 'session');
 switch( $dbtype )
 {
 	case 'mysql':
-	case 'mysql4':
+	case 'mysqli':
 	case 'postgres':
 	case 'sqlite':
 		require WA_ROOTDIR . '/sql/' . $dbtype . '.php';

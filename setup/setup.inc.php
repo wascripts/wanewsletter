@@ -169,7 +169,7 @@ $supported_db = array(
 		'delimiter'    => ';',
 		'delimiter2'   => ';'
 	),
-	'mysql4' => array(
+	'mysqli' => array(
 		'Name'         => 'MySQL 4.1.x',
 		'prefixe_file' => 'mysql',
 		'extension'    => 'mysqli',

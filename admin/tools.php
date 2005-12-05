@@ -841,7 +841,7 @@ switch( $mode )
 					switch( DATABASE )
 					{
 						case 'mysql':
-						case 'mysql4':
+						case 'mysqli':
 							$sql_values[] = "($listdata[liste_id], '" . $db->escape($pattern) . "')";
 							break;
 						
@@ -955,7 +955,7 @@ switch( $mode )
 						switch( DATABASE )
 						{
 							case 'mysql':
-							case 'mysql4':
+							case 'mysqli':
 								$sql_values[] = "($listdata[liste_id], '$ext')";
 								break;
 							
