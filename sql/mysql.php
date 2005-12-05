@@ -720,7 +720,7 @@ class sql_backup {
 		{
 			$contents .= 'CREATE TABLE ' . $quote . $tabledata['name'] . $quote . ' (' . $this->eol;
 			
-			if( !($result = $db->query('SHOW FIELDS FROM ' . $quote . $tabledata['name'] . $quote)) )
+			if( !($result = $db->query('SHOW COLUMNS FROM ' . $quote . $tabledata['name'] . $quote)) )
 			{
 				trigger_error('Impossible d\'obtenir les noms des colonnes de la table', ERROR);
 			}
@@ -734,15 +734,15 @@ class sql_backup {
 				}
 				
 				$contents .= "\t" . $quote . $row['Field'] . $quote . ' ' . $row['Type'];
-				$contents .= ( !empty($row['Default']) ) ? ' DEFAULT \'' . $row['Default'] . '\'' : '';
 				$contents .= ( $row['Null'] != 'YES' ) ? ' NOT NULL' : '';
+				$contents .= ( !is_null($row['Default']) ) ? ' DEFAULT \'' . $row['Default'] . '\'' : ' DEFAULT NULL';
 				$contents .= ( $row['Extra'] != '' ) ? ' ' . $row['Extra'] : '';
 				
 				$end_line = true;
 			}
 			$db->free_result($result);
 			
-			if( !($result = $db->query('SHOW KEYS FROM ' . $quote . $tabledata['name'] . $quote)) )
+			if( !($result = $db->query('SHOW INDEX FROM ' . $quote . $tabledata['name'] . $quote)) )
 			{
 				trigger_error('Impossible d\'obtenir les clés de la table', ERROR);
 			}
@@ -762,7 +762,7 @@ class sql_backup {
 					$index[$name] = array();
 				}
 				
-				$index[$name][] = $quote . $row['Column_name'] . $quote;
+				$index[$name][] = $row['Column_name'];
 			}
 			$db->free_result($result);
 			
@@ -772,15 +772,15 @@ class sql_backup {
 				
 				if( $var == 'PRIMARY' )
 				{
-					$contents .= 'PRIMARY KEY';
+					$contents .= 'CONSTRAINT PRIMARY KEY';
 				}
-				else if( ereg('^unique=(.+)$', $var, $regs) )
+				else if( preg_match('/^unique=(.+)$/', $var, $match) )
 				{
-					$contents .= 'UNIQUE ' . $quote . $regs[1] . $quote;
+					$contents .= 'CONSTRAINT ' . $quote . $match[1] . $quote . ' UNIQUE';
 				}
 				else
 				{
-					$contents .= 'KEY ' . $quote . $var . $quote;
+					$contents .= 'INDEX ' . $quote . $var . $quote;
 				}
 				
 				$contents .= ' (' . $quote . implode($quote . ', ' . $quote, $columns) . $quote . ')';
@@ -838,7 +838,7 @@ class sql_backup {
 				
 				foreach( $row AS $key => $value )
 				{
-					if( !isset($value) )
+					if( is_null($value) )
 					{
 						$row[$key] = 'NULL';
 					}
