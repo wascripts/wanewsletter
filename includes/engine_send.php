@@ -48,11 +48,38 @@ include WA_ROOTDIR . '/includes/tags.inc.php';
  * 
  * @access private
  * 
- * @return void
+ * @return string
  */
 function launch_sending($listdata, $logdata, $supp_address = array())
 {
-	global $nl_config, $db, $dbhost, $dbuser, $dbpassword, $dbname, $lang, $mailer, $other_tags;
+	global $nl_config, $db, $dbhost, $dbuser, $dbpassword, $dbname, $lang, $other_tags;
+	
+	require WAMAILER_DIR . '/class.mailer.php';
+	
+	//
+	// Initialisation de la classe mailer
+	//
+	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+	
+	if( $nl_config['use_smtp'] )
+	{
+		$mailer->smtp_path = WAMAILER_DIR . '/';
+		$mailer->use_smtp(
+			$nl_config['smtp_host'],
+			$nl_config['smtp_port'],
+			$nl_config['smtp_user'],
+			$nl_config['smtp_pass']
+		);
+	}
+	
+	$mailer->correctRpath = !is_disabled_func('ini_set');
+	$mailer->set_charset($lang['CHARSET']);
+	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+	
+	if( $listdata['return_email'] != '' )
+	{
+		$mailer->set_return_path($listdata['return_email']);
+	}
 	
 	//
 	// On traite les données de la newsletter à envoyer
@@ -160,6 +187,26 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	{
 		$fields_str = '';
 	}
+	
+	//
+	// Adresses supplémentaires à mettre en destinataires
+	//
+	$sql = "SELECT a.admin_email
+		FROM " . ADMIN_TABLE . " AS a
+			INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
+				AND aa.cc_admin = " . TRUE;
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
+	}
+	
+	while( $row = $db->fetch_array($result) )
+	{
+		array_push($supp_address, $row['admin_email']);
+	}
+	$db->free_result($result);
+	
+	$supp_address = array_unique($supp_address); // Au cas où...
 	
 	//
 	// On récupère les infos sur les abonnés destinataires
@@ -419,7 +466,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	else
 	{
-		trigger_error('No_subscribers', MESSAGE);
+		trigger_error('No_subscribers', ERROR);
 	}
 	
 	//
@@ -450,7 +497,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			//
 			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
 			
-			if( !is_resource($db->connect_id) || !$db->query($sql) )
+			if( !$db->connect_id || !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
 			}
@@ -490,7 +537,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	{
 		$message = sprintf($lang['Message']['Success_send'], $nl_config['emails_sended'], $sended, ($sended + $no_send));
 		
-		if( !defined('IN_CRON') )
+		if( !defined('IN_COMMANDLINE') )
 		{
 			if( !empty($_GET['step']) && $_GET['step'] == 'auto' )
 			{
@@ -503,9 +550,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	else
 	{
-		$sql = "UPDATE " . LOG_TABLE . " 
-			SET log_status = " . STATUS_SENDED . ", 
-				log_numdest = $sended 
+		$sql = "UPDATE " . LOG_TABLE . "
+			SET log_status = " . STATUS_SENDED . ",
+				log_numdest = $sended
 			WHERE log_id = " . $logdata['log_id'];
 		if( !$db->query($sql) )
 		{
@@ -515,22 +562,22 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			//
 			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
 			
-			if( !is_resource($db->connect_id) || !$db->query($sql) )
+			if( !$db->connect_id || !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
 			}
 		}
 		
-		$sql = "UPDATE " . ABO_LISTE_TABLE . " 
-			SET send = 0 
+		$sql = "UPDATE " . ABO_LISTE_TABLE . "
+			SET send = 0
 			WHERE liste_id = " . $listdata['liste_id'];
 		if( !$db->query($sql) )
 		{
 			trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
 		}
 		
-		$sql = "UPDATE " . LISTE_TABLE . " 
-			SET liste_numlogs = liste_numlogs + 1 
+		$sql = "UPDATE " . LISTE_TABLE . "
+			SET liste_numlogs = liste_numlogs + 1
 			WHERE liste_id = " . $listdata['liste_id'];
 		if( !$db->query($sql) )
 		{
@@ -540,7 +587,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		$message = sprintf($lang['Message']['Success_send_finish'], $sended);
 	}
 	
-	trigger_error(nl2br($message), MESSAGE);
+	return $message;
 }
 
 /**

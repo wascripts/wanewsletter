@@ -63,14 +63,35 @@ if( !defined('NL_INSTALLED') )
 
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/includes/template.php';
-require WA_ROOTDIR . '/includes/class.output.php';
 require WA_ROOTDIR . '/sql/db_type.php';
 
 //
 // Appel du gestionnaire d'erreur 
 //
-set_error_handler('wanewsletter_handler');
+if( defined('IN_COMMANDLINE') )
+{
+	//
+	// Compatibilité avec PHP < 4.3.0 et PHP en CGI
+	//
+	if( version_compare(phpversion(), '4.3.0', '<') == true || php_sapi_name() != 'cli' )
+	{
+		define('STDIN',  fopen('php://stdin', 'r'));
+		define('STDOUT', fopen('php://stdout', 'w'));
+		define('STDERR', fopen('php://stderr', 'w'));
+	}
+	
+	register_shutdown_function(create_function('',
+		'fclose(STDIN); fclose(STDOUT); fclose(STDERR); return true;'));
+	
+	set_error_handler('wan_cli_handler');
+}
+else
+{
+	require WA_ROOTDIR . '/includes/template.php';
+	require WA_ROOTDIR . '/includes/class.output.php';
+	
+	set_error_handler('wan_web_handler');
+}
 
 //
 // Désactivation de magic_quotes_runtime + 

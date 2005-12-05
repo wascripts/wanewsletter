@@ -129,16 +129,21 @@ function Location($url)
  */
 function load_settings($admindata = array())
 {
-	global $nl_config, $db, $lang, $datetime, $output;
+	global $nl_config, $db, $lang, $datetime;
 	
-	$template_path = WA_ROOTDIR . '/templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
-	
-	$output = new output($template_path);
-	$output->addScript(WA_ROOTDIR . '/templates/DOM-Compat/DOM-Compat.js');
-	
-	if( defined('IN_ADMIN') )
+	if( !defined('IN_COMMANDLINE') )
 	{
-		$output->addScript(WA_ROOTDIR . '/templates/admin/admin.js');
+		global $output;
+		
+		$template_path = WA_ROOTDIR . '/templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
+		
+		$output = new output($template_path);
+		$output->addScript(WA_ROOTDIR . '/templates/DOM-Compat/DOM-Compat.js');
+		
+		if( defined('IN_ADMIN') )
+		{
+			$output->addScript(WA_ROOTDIR . '/templates/admin/admin.js');
+		}
 	}
 	
 	if( !is_array($admindata) )
@@ -175,9 +180,9 @@ function load_settings($admindata = array())
 }
 
 /**
- * wanewsletter_handler()
+ * wan_web_handler()
  * 
- * Gestionnaire d'erreur personnalisé du script 
+ * Gestionnaire d'erreur personnalisé du script (en sortie http)
  * 
  * @param integer $errno      Code de l'erreur
  * @param string  $errstr     Texte proprement dit de l'erreur
@@ -186,7 +191,7 @@ function load_settings($admindata = array())
  * 
  * @return void
  */
-function wanewsletter_handler($errno, $errstr, $errfile, $errline)
+function wan_web_handler($errno, $errstr, $errfile, $errline)
 {
 	global $db, $output, $lang, $message, $php_errormsg;
 	
@@ -320,6 +325,64 @@ BASIC;
 		{
 			echo '<p>' . $php_errormsg . '</p>';
 		}
+	}
+}
+
+/**
+ * wan_cli_handler()
+ * 
+ * Gestionnaire d'erreur personnalisé du script (en ligne de commande)
+ * 
+ * @param integer $errno      Code de l'erreur
+ * @param string  $errstr     Texte proprement dit de l'erreur
+ * @param string  $errfile    Fichier où s'est produit l'erreur
+ * @param integer $errline    Numéro de la ligne 
+ * 
+ * @return void
+ */
+function wan_cli_handler($errno, $errstr, $errfile, $errline)
+{
+	global $db, $lang;
+	
+	if( !empty($lang['Message'][$errstr]) )
+	{
+		$errstr = $lang['Message'][$errstr];
+	}
+	
+	$errstr  = strip_tags($errstr);
+	$errstr .= ' in ' . basename($errfile) . ' on line ' . $errline;
+	
+	if( !empty($db->sql_error['message']) )
+	{
+		$errstr .= "\n";
+		$errstr .= 'SQL query: ' . $db->sql_error['query'] . "\n";
+		$errstr .= 'SQL errno: ' . $db->sql_error['errno'] . "\n";
+		$errstr .= 'SQL error: ' . $db->sql_error['message'] . "\n\n";
+	}
+	
+	//
+	// Dans le cas d'une fonction précédée par @, error_reporting() 
+	// retournera 0, dans ce cas, pas d'affichage d'erreur
+	//
+	$display_error = error_reporting(E_ALL);
+	
+	if( preg_match('/\.UTF-?8/', getenv('LANG')) ) // Au cas où le terminal utilise l'encodage utf-8
+	{
+		$errstr = wan_utf8_encode($errstr);
+	}
+	
+	if( $errno == MESSAGE )
+	{
+		fputs(STDOUT, $errstr . "\n");
+	}
+	else if( $errno != E_STRICT && ( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) ) )
+	{
+		fputs(STDERR, 'Error: ' . $errstr . "\n");
+	}
+	
+	if( $errno == CRITICAL_ERROR )
+	{
+		exit(0);
 	}
 }
 

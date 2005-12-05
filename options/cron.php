@@ -30,14 +30,15 @@ define('IN_CRON',       true);
 define('WA_ROOTDIR',    '..');
 
 require WA_ROOTDIR . '/start.php';
-require WAMAILER_DIR . '/class.mailer.php';
 
 load_settings();
 
 $mode     = ( !empty($_REQUEST['mode']) ) ? trim($_REQUEST['mode']) : '';
 $liste_id = ( !empty($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 
-$sql = 'SELECT * FROM ' . LISTE_TABLE . ' 
+$sql = 'SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
+		liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe
+	FROM ' . LISTE_TABLE . ' 
 	WHERE liste_id = ' . $liste_id;
 if( !($result = $db->query($sql)) )
 {
@@ -60,26 +61,6 @@ if( $listdata = $db->fetch_array($result) )
 	//
 	@set_time_limit(1200);
 	
-	//
-	// Initialisation de la classe mailer
-	//
-	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-	
-	if( $nl_config['use_smtp'] )
-	{
-		$mailer->smtp_path = WAMAILER_DIR . '/';
-		$mailer->use_smtp(
-			$nl_config['smtp_host'],
-			$nl_config['smtp_port'],
-			$nl_config['smtp_user'],
-			$nl_config['smtp_pass']
-		);
-	}
-	
-	$mailer->correctRpath = !is_disabled_func('ini_set');
-	$mailer->set_charset($lang['CHARSET']);
-	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
-	
 	if( $mode == 'send' )
 	{
 		require WA_ROOTDIR . '/includes/engine_send.php';
@@ -93,11 +74,7 @@ if( $listdata = $db->fetch_array($result) )
 			trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 		}
 		
-		if( $row = $db->fetch_array($result) )
-		{
-			$logdata = $row;
-		}
-		else
+		if( !($logdata = $db->fetch_array($result)) )
 		{
 			trigger_error('No_log_to_send', MESSAGE);
 		}
@@ -119,23 +96,51 @@ if( $listdata = $db->fetch_array($result) )
 		//
 		// On lance l'envoi
 		//
-		launch_sending($listdata, $logdata);
+		$message = launch_sending($listdata, $logdata);
+		
+		trigger_error(nl2br($message), MESSAGE);
 	}
 	else if( $mode == 'validate' )
 	{
-		$cpt = 0;
-		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel 
-		$mailer->set_format(FORMAT_TEXTE);
-		
+		require WAMAILER_DIR . '/class.mailer.php';
+		require WAMAILER_DIR . '/class.pop.php';
 		require WA_ROOTDIR . '/includes/class.form.php';
-		require WA_ROOTDIR . '/includes/class.pop.php';
 		require WA_ROOTDIR . '/includes/functions.validate.php';
 		include WA_ROOTDIR . '/includes/functions.stats.php';
 		
-		$wan = new Wanewsletter($listdata);
-		$pop = new Pop();
+		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel
+		
+		//
+		// Initialisation de la classe mailer
+		//
+		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+		
+		if( $nl_config['use_smtp'] )
+		{
+			$mailer->smtp_path = WAMAILER_DIR . '/';
+			$mailer->use_smtp(
+				$nl_config['smtp_host'],
+				$nl_config['smtp_port'],
+				$nl_config['smtp_user'],
+				$nl_config['smtp_pass']
+			);
+		}
+		
+		$mailer->correctRpath = !is_disabled_func('ini_set');
+		$mailer->set_charset($lang['CHARSET']);
+		$mailer->set_format(FORMAT_TEXTE);
+		$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+		
+		if( $listdata['return_email'] != '' )
+		{
+			$mailer->set_return_path($listdata['return_email']);
+		}
+		
+		$wan =& new Wanewsletter($listdata);
+		$pop =& new Pop();
 		$pop->connect($listdata['pop_host'], $listdata['pop_port'], $listdata['pop_user'], $listdata['pop_pass']);
 		
+		$cpt = 0;
 		$total    = $pop->stat_box();
 		$mail_box = $pop->list_mail();
 		
@@ -187,52 +192,29 @@ if( $listdata = $db->fetch_array($result) )
 			}
 			
 			$code = $pop->contents[$mail_id]['message'];
-			if( $action != 'inscription' && strlen($code) != 32 )
+			if( strlen($code) == 32 ) // Compatibilité avec versions < 2.3
 			{
-				continue;
+				$code = substr($code, 0, 20);
 			}
 			
-			if( $wan->account_info($email, $pseudo, $code, $action) )
+			if( $action == 'inscription' || $action == 'setformat' || ($action == 'desinscription' && empty($code)) )
 			{
-				switch( $action )
+				$wan->do_action($action, $email);
+			}
+			else
+			{
+				if( empty($headers['date']) || ($time = strtotime($headers['date'])) === -1 )
 				{
-					case 'desinscription':
-						$wan->unsubscribe();
-						break;
-					
-					case 'confirmation':
-						if( empty($headers['date']) || ($time = strtotime($headers['date'])) === -1 )
-						{
-							$time = time();
-						}
-						
-						$wan->confirm($time);
-						break;
-					
-					case 'inscription':
-						$wan->subscribe();
-						break;
-					
-					case 'setformat':
-						$wan->setformat();
-						break;
-					
-					default:
-						$pop->delete_mail($mail_id);
-						continue 2;
-						break;
+					$time = time();
 				}
+				
+				$wan->check_code($code, $time);
 			}
 			
 			//
 			// On supprime l'email maintenant devenu inutile
 			//
 			$pop->delete_mail($mail_id);
-			
-			if( $wan->update_stats )
-			{
-				update_stats($listdata);
-			}
 			
 			$cpt++;
 			
@@ -248,12 +230,12 @@ if( $listdata = $db->fetch_array($result) )
 	}
 	else
 	{
-		trigger_error('No valid mode specified', MESSAGE);
+		trigger_error('No valid mode specified', ERROR);
 	}
 }
 else
 {
-	exit('Unknown_list');
+	trigger_error('Unknown_list', ERROR);
 }
 
 ?>

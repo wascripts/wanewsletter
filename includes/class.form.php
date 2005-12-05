@@ -229,7 +229,7 @@ class Wanewsletter {
 		}
 	}
 	
-	function check_code($code)
+	function check_code($code, $time = null)
 	{
 		global $db, $lang;
 		
@@ -255,7 +255,7 @@ class Wanewsletter {
 			
 			if( $abodata['confirmed'] == SUBSCRIBE_NOT_CONFIRMED )
 			{
-				$this->confirm($code);
+				$this->confirm($code, $time);
 			}
 			else
 			{
@@ -409,13 +409,13 @@ class Wanewsletter {
 		$this->message = nl2br($message);
 	}
 	
-	function confirm($code, $time = 0)
+	function confirm($code, $time = null)
 	{
 		global $db, $nl_config, $lang;
 		
 		if( strcmp($code, $this->account['code']) == 0 )
 		{
-			$time = ( empty($time) ) ? time() : $time;
+			$time = ( is_null($time) ) ? time() : $time;
 			$time_limit = ($time - ($this->listdata['limitevalidate'] * 86400));
 			
 			if( $this->account['date'] > $time_limit )

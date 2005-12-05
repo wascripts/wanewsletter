@@ -484,12 +484,12 @@ if( $start )
 				$abo_id = $db->next_id();
 				$sql_update = array();
 				
-				$data['code'] = ( $data['status'] == ABO_INACTIF ) ? '\'' . substr($data['code'], 0, 20) . '\'' : 'NULL';
+				$data['code'] = substr($data['code'], 0, 20);
 				
 				foreach( $data['listes'] AS $liste_id => $listdata )
 				{
 					$sql_update[] = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, send, register_key, register_date, confirmed)
-						VALUES($abo_id, $liste_id, $listdata[format], $listdata[send], $data[code], $data[date], $data[status])";
+						VALUES($abo_id, $liste_id, $listdata[format], $listdata[send], '$data[code]', $data[date], $data[status])";
 				}
 				
 				exec_queries($sql_update, true);
@@ -799,10 +799,6 @@ if( $start )
 							ADD COLUMN liste_public TINYINT(1) NOT NULL DEFAULT 1 AFTER liste_name";
 					}
 					
-					$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
-						DROP COLUMN abo_register_key,
-						DROP COLUMN abo_register_date";
-					
 					$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
 						ADD COLUMN register_key CHAR(20) DEFAULT NULL,
 						ADD COLUMN register_date INTEGER NOT NULL DEFAULT 0,
@@ -819,12 +815,10 @@ if( $start )
 					{
 						$sql = "UPDATE " . ABO_LISTE_TABLE . "
 							SET register_date = $row[abo_register_date],
-								confirmed     = $row[abo_status]";
-						if( $row['abo_status'] == ABO_INACTIF )
-						{
-							$sql .= ", register_key = '" . substr($row['abo_register_key'], 0, 20) . "'";
-						}
-						$db->query($sql . " WHERE abo_id = $row[abo_id]");
+								confirmed     = $row[abo_status],
+								register_key  = '" . substr($row['abo_register_key'], 0, 20) . "'
+							WHERE abo_id = " . $row['abo_id'];
+						$db->query($sql);
 						
 						if( empty($row['abo_pwd']) )
 						{
@@ -833,6 +827,10 @@ if( $start )
 								WHERE abo_id = $row[abo_id]");
 						}
 					}
+					
+					$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
+						DROP COLUMN abo_register_key,
+						DROP COLUMN abo_register_date";
 					
 					if( DATABASE == 'postgres' )
 					{

@@ -931,7 +931,6 @@ if( $mode == 'progress' )
 		trigger_error('Not_auth_send', MESSAGE);
 	}
 	
-	require WAMAILER_DIR . '/class.mailer.php';
 	require WA_ROOTDIR . '/includes/engine_send.php';
 	
 	//
@@ -949,62 +948,11 @@ if( $mode == 'progress' )
 	@set_time_limit(1200);
 	
 	//
-	// Initialisation de la classe mailer
-	//
-	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-	
-	if( $nl_config['use_smtp'] )
-	{
-		$mailer->smtp_path = WAMAILER_DIR . '/';
-		$mailer->use_smtp(
-			$nl_config['smtp_host'],
-			$nl_config['smtp_port'],
-			$nl_config['smtp_user'],
-			$nl_config['smtp_pass']
-		);
-	}
-	
-	$mailer->correctRpath = !is_disabled_func('ini_set');
-	
-	$mailer->set_charset($lang['CHARSET']);
-	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
-	
-	if( $listdata['return_email'] != '' )
-	{
-		$mailer->set_return_path($listdata['return_email']);
-	}
-	
-	//
-	// Adresses supplémentaires à mettre en destinataires
-	//
-	$supp_address = array();
-	
-	if( $listdata['cc_admin'] )
-	{
-		array_push($supp_address, $admindata['admin_email']);
-	}
-	
-	$sql = "SELECT a.admin_email
-		FROM " . ADMIN_TABLE . " AS a
-			INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
-				AND aa.cc_admin = " . TRUE . "
-		WHERE a.admin_id <> " . $admindata['admin_id'];
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-	}
-	
-	while( $row = $db->fetch_array($result) )
-	{
-		array_push($supp_address, $row['admin_email']);
-	}
-	
-	$supp_address = array_unique($supp_address); // Normalement, il n'y a pas de doublons mais au cas où...
-	
-	//
 	// On lance l'envoi
 	//
-	launch_sending($listdata, $logdata, $supp_address);
+	$message = launch_sending($listdata, $logdata, $supp_address);
+	
+	trigger_error(nl2br($message), MESSAGE);
 }
 
 $subject   = htmlspecialchars($logdata['log_subject']);
