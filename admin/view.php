@@ -381,8 +381,7 @@ else if( $mode == 'abonnes' )
 		
 		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_email, al.register_date, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
-				INNER JOIN " . ABO_LISTE_TABLE . " AS al
-				ON al.abo_id = a.abo_id
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
 			WHERE a.abo_id = $abo_id";
 		if( !($result = $db->query($sql)) )
@@ -530,7 +529,8 @@ else if( $mode == 'abonnes' )
 					{
 						$sql = "UPDATE " . ABO_LISTE_TABLE . "
 							SET format = $format
-							WHERE abo_id = $abo_id AND liste_id IN(" . implode(', ', $sql_ids) . ")";
+							WHERE abo_id = $abo_id
+								AND liste_id IN(" . implode(', ', $sql_ids) . ")";
 						if( !$db->query($sql) )
 						{
 							trigger_error('Impossible de mettre à jour la table abo_liste', ERROR);
@@ -549,8 +549,7 @@ else if( $mode == 'abonnes' )
 		
 		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_email, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
-				INNER JOIN " . ABO_LISTE_TABLE . " AS al
-				ON al.abo_id = a.abo_id
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
 			WHERE a.abo_id = $abo_id";
 		if( !($result = $db->query($sql)) )
@@ -597,11 +596,10 @@ else if( $mode == 'abonnes' )
 				if( $auth->listdata[$row['liste_id']]['liste_format'] == FORMAT_MULTIPLE )
 				{
 					$output->assign_block_vars('listerow', array(
-						'LISTE_NAME'    => $auth->listdata[$row['liste_id']]['liste_name'],
-						'FORMAT_BOX'    => format_box('format[' . $row['liste_id'] . ']', $row['format'], false, false, true),
-						'U_VIEW_LISTE'  => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
+						'LISTE_NAME'   => $auth->listdata[$row['liste_id']]['liste_name'],
+						'FORMAT_BOX'   => format_box('format[' . $row['liste_id'] . ']', $row['format'], false, false, true),
+						'U_VIEW_LISTE' => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
 					));
-					$format = ' (' . $lang['Choice_Format'] . '&#160;: ' . (( $row['format'] == FORMAT_HTML ) ? 'html' : 'texte') . ')';
 				}
 			}
 			while( $row = $db->fetch_array($result) );
@@ -734,8 +732,7 @@ else if( $mode == 'abonnes' )
 				
 				$sql = "SELECT a.abo_id
 					FROM " . ABONNES_TABLE . " AS a
-						INNER JOIN " . ABO_LISTE_TABLE . " AS al
-						ON al.abo_id = a.abo_id
+						INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 							AND al.liste_id = $listdata[liste_id]
 					WHERE a.abo_email IN($sql_list)";
 				if( !($result = $db->query($sql)) )
@@ -790,8 +787,7 @@ else if( $mode == 'abonnes' )
 	
 	$sql = "SELECT COUNT(a.abo_id) AS total_abo
 		FROM " . ABONNES_TABLE . " AS a
-			INNER JOIN " . ABO_LISTE_TABLE . " AS al
-			ON al.abo_id = a.abo_id
+			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 				AND al.liste_id  = $listdata[liste_id]
 				AND al.confirmed = $abo_confirmed $sql_search_date $sql_search";
 	if( !($result = $db->query($sql)) )
@@ -805,8 +801,7 @@ else if( $mode == 'abonnes' )
 	{
 		$sql = "SELECT a.abo_id, a.abo_email, al.register_date, al.format
 			FROM " . ABONNES_TABLE . " AS a
-				INNER JOIN " . ABO_LISTE_TABLE . " AS al
-				ON al.abo_id = a.abo_id
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id  = $listdata[liste_id]
 					AND al.confirmed = $abo_confirmed $sql_search_date $sql_search
 			ORDER BY $sql_type " . $sql_order;
