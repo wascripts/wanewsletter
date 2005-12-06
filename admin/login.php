@@ -33,45 +33,29 @@ require './pagestart.php';
 $simple_header = TRUE;
 
 $mode     = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
-$redirect = ( !empty($_REQUEST['redirect']) ) ? trim($_REQUEST['redirect']) : '';
+$redirect = ( !empty($_REQUEST['redirect']) ) ? trim($_REQUEST['redirect']) : 'index.php';
 
-if( $mode == 'login' )
+//
+// Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
+//
+if( $mode == 'login' && !$session->is_logged_in )
 {
-	//
-	// Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
-	//
+	$login     = ( !empty($_POST['login']) ) ? trim($_POST['login']) : '';
+	$passwd    = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
+	$autologin = ( !empty($_POST['autologin']) ) ? TRUE : FALSE;
+	
+	$session->login($login, md5($passwd), $autologin);
+	
 	if( !$session->is_logged_in )
 	{
-		$login     = ( !empty($_POST['login']) ) ? trim($_POST['login']) : '';
-		$passwd    = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
-		$autologin = ( !empty($_POST['autologin']) ) ? TRUE : FALSE;
-		
-		$session->login($login, md5($passwd), $autologin);
+		$error = TRUE;
+		$msg_error[] = $lang['Message']['Error_login'];
 	}
-	
-	//
-	// L'utilisateur est connecté ?
-	// Dans ce cas, on le redirige vers la page demandée, ou vers l'accueil de l'administration par défaut
-	//
-	if( $session->is_logged_in )
-	{
-		if( $redirect != '' )
-		{
-			$redirect = rawurldecode($redirect);
-			list($redirect_path) = explode('?', $redirect);
-			$redirect = ( file_exists(wa_realpath($redirect_path)) ) ? $redirect : 'index.php';
-		}
-		else
-		{
-			$redirect = 'index.php';
-		}
-		
-		Location($redirect);
-	}
-	
-	$error = TRUE;
-	$msg_error[] = $lang['Message']['Error_login'];
 }
+
+//
+// Déconnexion de l'administration
+//
 else if( $mode == 'logout' )
 {
 	if( $session->is_logged_in )
@@ -83,9 +67,18 @@ else if( $mode == 'logout' )
 	$msg_error[] = $lang['Message']['Success_logout'];
 }
 
+//
+// L'utilisateur est connecté ?
+// Dans ce cas, on le redirige vers la page demandée, ou vers l'accueil de l'administration par défaut
+//
+if( $session->is_logged_in )
+{
+	Location($redirect);
+}
+
 if( !empty($redirect) )
 {
-	$output->addHiddenField('redirect', rawurlencode(htmlspecialchars($redirect)));
+	$output->addHiddenField('redirect', htmlspecialchars($redirect));
 }
 
 $output->page_header();
