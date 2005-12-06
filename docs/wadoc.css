@@ -27,9 +27,7 @@
 html,
 body { background-color: #003B78; font-family: Verdana, Arial, sans-serif; color: white; }
 body { margin: 0; padding: 0; }
-
-a img { border: none; }
-hr    { display: none; }
+hr   { display: none; }
 
 h1, div#page, address#footer {
 	background-color: #DDD;
@@ -38,65 +36,74 @@ h1, div#page, address#footer {
 	color: black;
 }
 
-h1, address#footer { padding: 0.3em; text-align: center; }
+h1, address#footer { padding: .3em; text-align: center; }
 
-h1             { font-weight: normal; font-size: 1.2em; }
-address#footer { font-weight: bold; font-style: normal; font-size: .6em; }
+h1              { font-weight: normal; font-size: 1.2em; }
+address#footer  { font-weight: bold; font-style: normal; font-size: .6em; }
+#preface,
+div#page .bloc  { margin: 1em 2.5%; text-align: left; font-size: .8em; }
+div#page .bloc  { border: 1px solid #084A6B; }
 
-#preface, .bloc { margin: 1em 2.5%; }
-#preface        { text-align: left; font-size: .7em; }
-.bloc           { border: 1px solid #084A6B; }
+#address {
+	width: 12em;
+	margin: 12px 20px;
+	border: 1px solid #084A6B;
+	padding: .25em .8em;
+	line-height: 1.4em;
+	text-align: left;
+	font-style: normal;
+	font-size: 1.1em;
+}
 
-.bloc h2 {
+div#page .bloc h2 {
 	height: 22px;
-	background: #003B78 url("../templates/images/head.png") repeat-x top;
+	background: #003B78 url("../templates/images/head.png") repeat-x scroll top left;
 	margin: 0;
 	padding-top: 5px;
 	text-align: center;
-	font-size: 0.8em;
+	font-size: 1em;
 	color: #FAFAFA;
 }
 
 div#page { counter-reset: item; }
-div#page .bloc h2[id]::before {
+div#page .bloc[id] h2::before {
 	content: counter(item, decimal) ".\00A0";
 	counter-increment: item;
 }
 
-.bloc h3 {
+div#page .bloc h3 {
 	background-color: transparent;
 	margin: 1.2em 20px .6em;
 	font-weight: normal;
-	font-size: .8em;
+	font-size: 1em;
 	color: #25F;
 }
 
-.bloc p {
+div#page .bloc p {
 	margin: 12px 20px;
 	padding: 0;
 	text-align: justify;
-	font-size: .8em;
 	line-height: 1.5em;
 	font-family: "Bitstream Vera Sans", Verdana, Arial, sans-serif;
 }
 
-.bloc p.date {
-	padding: 1em 1.5em;
-}
+div#page .bloc p.date { padding: 1em 1.5em; }
 
 ul, ol {
 	margin: 20px 40px;
 	padding: 0;
-	font-size: .8em;
 	line-height: 1.4em;
 }
 
-ul ul { font-size: 1em; }
 li { margin: 2px 0; }
 ol { list-style-type: decimal; }
 ul>li { list-style-type: none; }
 ul>li::before { display: marker; content: "\2013\00A0"; }
-div#sommaire ol { margin: 20px 60px; }
+ol#toc { margin: 20px 60px; }
+
+ul.sommaire li { list-style-type: disc; }
+ul.sommaire li li { list-style-type: circle; }
+ul.sommaire li::before { content: normal; }
 
 a { text-decoration: none; }
 
@@ -128,11 +135,11 @@ pre {
 	overflow: auto;
 	background-color: #FAFAFA;
 	border: 1px dashed #A4A6A8;
-	margin: 0.4em 1em;
-	padding: 0.4em;
+	margin: .4em 1em;
+	padding: .4em;
 	text-align: left;
-	font-weight: normal; font-size: 0.8em; line-height: 1.2em;
-	font-family: Courier, "Courier New", monospace !important;
+	font: normal 1em/1.2em "Courier New", Courier, monospace;
+	color: black;
 }
 
 /*
