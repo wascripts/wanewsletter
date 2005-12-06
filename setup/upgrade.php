@@ -449,6 +449,7 @@ if( $start )
 			}
 			
 			$aborow = $db->fetch_rowset($result);
+			$db->free_result($result);
 			
 			$sql_update	  = array();
 			$sql_update[] = "DROP TABLE " . ABONNES_TABLE;
@@ -484,16 +485,34 @@ if( $start )
 				$abo_id = $db->next_id();
 				$sql_update = array();
 				
-				$data['code'] = substr($data['code'], 0, 20);
+				$data['code'] = ( $data['status'] == ABO_INACTIF ) ? '\'' . substr($data['code'], 0, 20) . '\'' : 'NULL';
 				
 				foreach( $data['listes'] AS $liste_id => $listdata )
 				{
 					$sql_update[] = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, send, register_key, register_date, confirmed)
-						VALUES($abo_id, $liste_id, $listdata[format], $listdata[send], '$data[code]', $data[date], $data[status])";
+						VALUES($abo_id, $liste_id, $listdata[format], $listdata[send], $data[code], $data[date], $data[status])";
 				}
 				
 				exec_queries($sql_update, true);
 			}
+			
+			$sql = "SELECT abo_id, liste_id
+				FROM " . ABO_LISTE_TABLE . "
+				WHERE register_key IS NULL";
+			if( !($result = $db->query($sql)) )
+			{
+				sql_error();
+			}
+			
+			while( $row = $db->fetch_array($result) )
+			{
+				$sql = "UPDATE " . ABO_LISTE_TABLE . "
+					SET register_key = '" . generate_key(20, false) . "'
+					WHERE liste_id = $row[liste_id]
+						AND abo_id = " . $row['abo_id'];
+				$db->query($sql);
+			}
+			$db->free_result($result);
 			
 			unset($aborow, $abo_liste);
 			
@@ -804,6 +823,8 @@ if( $start )
 						ADD COLUMN register_date INTEGER NOT NULL DEFAULT 0,
 						ADD COLUMN confirmed SMALLINT NOT NULL DEFAULT 0";
 					
+					exec_queries($sql_update, true);
+					
 					$sql = "SELECT abo_id, abo_register_key, abo_pwd, abo_register_date, abo_status
 						FROM " . ABONNES_TABLE;
 					if( !($result = $db->query($sql)) )
@@ -815,10 +836,12 @@ if( $start )
 					{
 						$sql = "UPDATE " . ABO_LISTE_TABLE . "
 							SET register_date = $row[abo_register_date],
-								confirmed     = $row[abo_status],
-								register_key  = '" . substr($row['abo_register_key'], 0, 20) . "'
-							WHERE abo_id = " . $row['abo_id'];
-						$db->query($sql);
+								confirmed     = $row[abo_status]";
+						if( $row['abo_status'] == ABO_INACTIF )
+						{
+							$sql .= ", register_key = '" . substr($row['abo_register_key'], 0, 20) . "'";
+						}
+						$db->query($sql . " WHERE abo_id = " . $row['abo_id']);
 						
 						if( empty($row['abo_pwd']) )
 						{
@@ -827,7 +850,27 @@ if( $start )
 								WHERE abo_id = $row[abo_id]");
 						}
 					}
+					$db->free_result($result);
 					
+					$sql = "SELECT abo_id, liste_id
+						FROM " . ABO_LISTE_TABLE . "
+						WHERE register_key IS NULL";
+					if( !($result = $db->query($sql)) )
+					{
+						sql_error();
+					}
+					
+					while( $row = $db->fetch_array($result) )
+					{
+						$sql = "UPDATE " . ABO_LISTE_TABLE . "
+							SET register_key = '" . generate_key(20, false) . "'
+							WHERE liste_id = $row[liste_id]
+								AND abo_id = " . $row['abo_id'];
+						$db->query($sql);
+					}
+					$db->free_result($result);
+					
+					$sql_update = array();
 					$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 						DROP COLUMN abo_register_key,
 						DROP COLUMN abo_register_date";

@@ -95,7 +95,7 @@ else
 
 //
 // Désactivation de magic_quotes_runtime + 
-// magic_quotes_gpc et ajout éventuel des backslashes 
+// magic_quotes_gpc et retrait éventuel des backslashes 
 //
 set_magic_quotes_runtime(0);
 

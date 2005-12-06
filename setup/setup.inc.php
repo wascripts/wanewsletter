@@ -141,7 +141,7 @@ $output = new output(WA_ROOTDIR . '/templates/');
 
 //
 // Désactivation de magic_quotes_runtime + 
-// magic_quotes_gpc et ajout éventuel des backslashes 
+// magic_quotes_gpc et retrait éventuel des backslashes 
 //
 set_magic_quotes_runtime(0);
 
@@ -259,7 +259,7 @@ foreach( $vararray AS $varname )
 
 require WA_ROOTDIR . '/includes/constantes.php';
 
-if( !defined('IN_INSTALL') && $dbname == '' )
+if( !defined('IN_INSTALL') && empty($dbname) )
 {
 	message($lang['Not_installed']);
 }
@@ -269,7 +269,11 @@ else if( $dbtype == 'mssql' )
 }
 else if( $dbtype == 'postgre' )
 {
-	$dbtype == 'postgres';
+	$dbtype = 'postgres';
+}
+else if( $dbtype == 'mysql4' )
+{
+	$dbtype = 'mysqli';
 }
 
 $db_list = '';
