@@ -950,7 +950,7 @@ if( $mode == 'progress' )
 	//
 	// On lance l'envoi
 	//
-	$message = launch_sending($listdata, $logdata, $supp_address);
+	$message = launch_sending($listdata, $logdata);
 	
 	trigger_error(nl2br($message), MESSAGE);
 }
