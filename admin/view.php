@@ -1177,7 +1177,7 @@ else if( $mode == 'liste' )
 			'L_TITLE_CRON'         => $lang['Title']['cron'],
 			'L_EXPLAIN'            => nl2br($lang['Explain']['liste']),
 			'L_EXPLAIN_PURGE'      => nl2br($lang['Explain']['purge']),
-			'L_EXPLAIN_CRON'       => nl2br(sprintf($lang['Explain']['cron'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#6">', '</a>')),
+			'L_EXPLAIN_CRON'       => nl2br(sprintf($lang['Explain']['cron'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p5">', '</a>')),
 			'L_LISTE_NAME'         => $lang['Liste_name'],
 			'L_LISTE_PUBLIC'       => $lang['Liste_public'],
 			'L_AUTH_FORMAT'        => $lang['Auth_format'],

@@ -30,13 +30,16 @@ body { margin: 0; padding: 0; }
 hr   { display: none; }
 
 h1, div#page, address#footer {
+	width: 80%;
+	max-width: 1000px;
+	min-width: 700px;
 	background-color: #DDD;
-	margin: 20px;
+	margin: 20px auto;
 	border: 1px solid black;
 	color: black;
 }
 
-h1, address#footer { padding: .3em; text-align: center; }
+h1, address#footer { padding: .3em 0; text-align: center; }
 
 h1              { font-weight: normal; font-size: 1.2em; }
 address#footer  { font-weight: bold; font-style: normal; font-size: .6em; }
@@ -135,8 +138,8 @@ pre {
 	overflow: auto;
 	background-color: #FAFAFA;
 	border: 1px dashed #A4A6A8;
-	margin: .4em 1em;
-	padding: .4em;
+	margin: .5em 2em;
+	padding: .5em;
 	text-align: left;
 	font: normal 1em/1.2em "Courier New", Courier, monospace;
 	color: black;

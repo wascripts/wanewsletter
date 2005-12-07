@@ -38,9 +38,9 @@
 $lang['General_title']              = "Mailing List Administration";
 
 $lang['Title']['accueil']           = "General information about the newsletter";
-$lang['Title']['install']           = "WAnewsletter Install";
-$lang['Title']['upgrade']           = "WAnewsletter Upgrade";
-$lang['Title']['reinstall']         = "WAnewsletter re-install";
+$lang['Title']['install']           = "Wanewsletter Install";
+$lang['Title']['upgrade']           = "Wanewsletter Upgrade";
+$lang['Title']['reinstall']         = "Wanewsletter re-install";
 $lang['Title']['database']          = "Database access";
 $lang['Title']['admin']             = "Administration";
 $lang['Title']['error']             = "Error !";
@@ -66,7 +66,7 @@ $lang['Title']['cron']              = "Cron option";
 $lang['Title']['logs']              = "List of newsletters sent to this mailing list";
 $lang['Title']['abo']               = "Subscribers list for this mailing list";
 $lang['Title']['stats']             = "Mailing lists statistics";
-$lang['Title']['tools']             = "WAnewsletter tools";
+$lang['Title']['tools']             = "Wanewsletter tools";
 $lang['Title']['export']            = "Export email adresses";
 $lang['Title']['import']            = "Import email adresses";
 $lang['Title']['ban']               = "Banned emails management";
@@ -356,7 +356,7 @@ $lang['Lost_key']                   = "I lost my code or my password";
 //
 // Page d'accueil
 //
-$lang['Explain']['accueil']         = "Welcome to the WAnewsletter administration. We thank you for choosing WAnewsletter as your newsletter/mailing list solution.\n The administration page will allow you to manage your mailing lists in a very simple manner. \nYou can come back to this page at all times by clicking on the WAnewsletter logo located at the top left of the screen.";
+$lang['Explain']['accueil']         = "Welcome to the Wanewsletter administration. We thank you for choosing Wanewsletter as your newsletter/mailing list solution.\n The administration page will allow you to manage your mailing lists in a very simple manner. \nYou can come back to this page at all times by clicking on the Wanewsletter logo located at the top left of the screen.";
 $lang['Registered_subscribers']     = "There are <b>%1\$d</b> subscribers, with an average of <b>%2\$s</b> new subscribers per day";
 $lang['Registered_subscriber']      = "There is <b>1</b> subscriber, with an average of <b>%2\$s</b> new subscribers per day";
 $lang['No_registered_subscriber']   = "There are no subscribers at the moment";
@@ -547,7 +547,7 @@ $lang['Explain']['unban']           = "To un-ban an email address, or part of an
 $lang['Explain']['forbid_ext']      = "To prohibit multiple file extensions at the same time, separate them with a comma";
 $lang['Explain']['reallow_ext']     = "To reauthorize one or more extensions, use the proper keyboard/mouse combination on your computer and browser";
 $lang['Explain']['backup']          = "This module will allow you to back up the script's tables, or other specified tables, if any.\nYou can decide whether you want to back up everything, or only the structure and data, and have the file compressed (following available options and libraries installed on the server).\nFinally, you can either download the file, or have the script store it on the server, in which case the file will be saved in the script's temporary files folder";
-$lang['Explain']['restore']         = "This module will allow you to restore the script's tables previously backed up by WAnewsletter, or with any database manager.\nIf file upload is not authorized on your server, you can specify a file previously uploaded with ftp by indicating its path (relative to the script's root)";
+$lang['Explain']['restore']         = "This module will allow you to restore the script's tables previously backed up by Wanewsletter, or with any database manager.\nIf file upload is not authorized on your server, you can specify a file previously uploaded with ftp by indicating its path (relative to the script's root)";
 $lang['Explain']['generator']       = "Here you must enter the absolute address where the form's data will be transmitted (usually the address where the form itself is located)";
 $lang['Explain']['code_html']       = "Put this code at the address that you have/will indicate in the mailing list configuration";
 $lang['Explain']['code_php']        = "You must put this code at the form's destination address (proviously input). The file must have the .php extension !\nThe script will take care of finding the canonical path to put in the \$waroot variable. However, if it is not right, you must indicate the right path yourself (the path must be relative, not absolute)";

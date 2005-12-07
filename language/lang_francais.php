@@ -38,9 +38,9 @@
 $lang['General_title']              = "Administration des listes de diffusion";
 
 $lang['Title']['accueil']           = "Informations générales sur la newsletter";
-$lang['Title']['install']           = "Installation de WAnewsletter";
-$lang['Title']['upgrade']           = "Mise à jour de WAnewsletter";
-$lang['Title']['reinstall']         = "Réinstallation de WAnewsletter";
+$lang['Title']['install']           = "Installation de Wanewsletter";
+$lang['Title']['upgrade']           = "Mise à jour de Wanewsletter";
+$lang['Title']['reinstall']         = "Réinstallation de Wanewsletter";
 $lang['Title']['database']          = "Accès base de données";
 $lang['Title']['admin']             = "Administration";
 $lang['Title']['error']             = "Erreur !";
@@ -66,7 +66,7 @@ $lang['Title']['cron']              = "Option cron";
 $lang['Title']['logs']              = "Liste des newsletters envoyées à cette liste";
 $lang['Title']['abo']               = "Liste des abonnés de cette liste de diffusion";
 $lang['Title']['stats']             = "Statistiques des listes de diffusion";
-$lang['Title']['tools']             = "Outils WAnewsletter";
+$lang['Title']['tools']             = "Outils Wanewsletter";
 $lang['Title']['export']            = "Exporter des adresses emails";
 $lang['Title']['import']            = "Importer des adresses emails";
 $lang['Title']['ban']               = "Gestion des emails bannis";
@@ -356,7 +356,7 @@ $lang['Lost_key']                   = "J'ai perdu mon code ou mon mot de passe";
 //
 // Page d'accueil
 //
-$lang['Explain']['accueil']         = "Bienvenue sur l'administration de WAnewsletter, nous vous remercions d'avoir choisi WAnewsletter comme solution de newsletter/mailing liste.\n L'administration vous permet de contrôler vos listes de diffusion de façon très simple. \nVous pouvez à tout moment retourner sur cette page en cliquant sur le logo WAnewsletter en haut à gauche de l'écran.";
+$lang['Explain']['accueil']         = "Bienvenue sur l'administration de Wanewsletter, nous vous remercions d'avoir choisi Wanewsletter comme solution de newsletter/mailing liste.\n L'administration vous permet de contrôler vos listes de diffusion de façon très simple. \nVous pouvez à tout moment retourner sur cette page en cliquant sur le logo Wanewsletter en haut à gauche de l'écran.";
 $lang['Registered_subscribers']     = "Il y a au total <b>%1\$d</b> inscrits, soit <b>%2\$s</b> nouveaux inscrits par jour";
 $lang['Registered_subscriber']      = "Il y a au total <b>1</b> inscrit, soit <b>%2\$s</b> nouveaux inscrits par jour";
 $lang['No_registered_subscriber']   = "Il n'y a aucun inscrit pour l'instant";

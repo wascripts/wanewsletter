@@ -791,7 +791,7 @@ switch( $mode )
 		
 		$output->assign_vars(array(
 			'L_TITLE_IMPORT'   => $lang['Title']['import'],
-			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'], MAX_IMPORT, '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#4">', '</a>')),
+			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'], MAX_IMPORT, '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p3">', '</a>')),
 			'L_GLUE'           => $lang['Char_glue'],
 			'L_FILE_LOCAL'     => $lang['File_local'],
 			'L_VALID_BUTTON'   => $lang['Button']['valid'],

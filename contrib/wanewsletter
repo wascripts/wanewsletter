@@ -127,8 +127,8 @@ WANSHELL;
 Usage: $argv[0] [options]
 
 Envois:
-  -p NUM, --process-send  Lance un envoi
-  -a, --all               Ignorer les réglages d'envoi par flôts
+  -pNUM, --process-send=NUM  Lance un envoi
+  -a, --all                  Ignorer les réglages d'envoi par flôt
 
 Divers:
   -h, --help     Affiche la présente aide
@@ -157,13 +157,7 @@ WANSHELL;
 		$nl_config['emails_sended'] = 0;
 	}
 	
-	else if( preg_match('/^--import-news=(.+)$/', $argv[$i], $match) )
-	{
-		echo "This feature is not yet implemented!\n";
-		exit(0);
-	}
-	
-	else if( preg_match('/^--import-mail=(.+)$/', $argv[$i], $match) )
+	else if( preg_match('/^--import-(mail|news)(?:=(.+))?$/', $argv[$i], $match) )
 	{
 		echo "This feature is not yet implemented!\n";
 		exit(0);

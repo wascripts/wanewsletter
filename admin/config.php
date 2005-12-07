@@ -249,7 +249,7 @@ $output->assign_vars( array(
 	'L_EXPLAIN'                 => nl2br($lang['Explain']['config']),
 	'L_EXPLAIN_COOKIES'         => nl2br($lang['Explain']['config_cookies']),
 	'L_EXPLAIN_JOINED_FILES'    => nl2br($lang['Explain']['config_files']),
-	'L_EXPLAIN_EMAIL'           => nl2br(sprintf($lang['Explain']['config_email'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#10">', '</a>')),
+	'L_EXPLAIN_EMAIL'           => nl2br(sprintf($lang['Explain']['config_email'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p9">', '</a>')),
 	
 	'L_DEFAULT_LANG'            => $lang['Default_lang'],
 	'L_SITENAME'                => $lang['Sitename'],
@@ -269,7 +269,7 @@ $output->assign_vars( array(
 	'L_MAX_FILESIZE_NOTE'       => nl2br($lang['Max_filesize_note']),
 	'L_OCTETS'                  => $lang['Octets'],
 	'L_CHECK_EMAIL'             => $lang['Check_email'],
-	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#12">', '</a>')),
+	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p11">', '</a>')),
 	'L_EMAILS_SENDED'           => $lang['Emails_paquet'],
 	'L_EMAILS_SENDED_NOTE'      => nl2br($lang['Emails_paquet_note']),
 	'L_USE_SMTP'                => $lang['Use_smtp'],
