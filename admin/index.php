@@ -252,7 +252,7 @@ if( $num_temp > 1 )
 }
 else if( $num_temp == 1 )
 {
-	$l_num_temp = sprintf($lang['Tmp_subscriber'], $num_temp);
+	$l_num_temp = $lang['Tmp_subscriber'];
 }
 else
 {
@@ -274,7 +274,7 @@ if( $num_logs > 0 )
 	}
 	else
 	{
-		$l_num_logs = sprintf($lang['Total_newsletter'], $num_logs, wa_number_format($num_logs/$month));
+		$l_num_logs = sprintf($lang['Total_newsletter'], wa_number_format($num_logs/$month));
 	}
 	
 	$output->assign_block_vars('switch_last_newsletter', array(

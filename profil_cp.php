@@ -44,7 +44,7 @@ if( !$nl_config['enable_profil_cp'] )
 //
 $session = new Session();
 
-function check_login($email, $passwd = null)
+function check_login($email, $regkey = null, $passwd = null)
 {
 	global $db, $other_tags;
 	
@@ -71,11 +71,6 @@ function check_login($email, $passwd = null)
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
 		WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
-	if( !is_null($passwd) )
-	{
-		$sql .= " AND a.abo_pwd = '" . $db->escape($passwd) . "'";
-	}
-	
 	if( !($result = $db->query($sql)) )
 	{
 		trigger_error('Impossible de récupérer les données de l\'abonné', CRITICAL_ERROR);
@@ -83,6 +78,23 @@ function check_login($email, $passwd = null)
 	
 	if( $row = $db->fetch_array($result) )
 	{
+		if( !is_null($passwd) && strcmp($row['abo_pwd'], $passwd) != 0 )
+		{
+			$sql = "SELECT COUNT(*) AS testpass
+				FROM " . ABO_LISTE_TABLE . "
+				WHERE register_key = '" . $db->escape($regkey) . "'
+					AND abo_id = " . $row['abo_id'];
+			if( !($res = $db->query($sql)) )
+			{
+				trigger_error('Impossible de tester le mot de passe de l\'abonné', CRITICAL_ERROR);
+			}
+			
+			if( $db->result($res, 0, 'testpass') == 0 )
+			{
+				return false;
+			}
+		}
+		
 		$abodata = array();
 		$abodata['id']       = $row['abo_id'];
 		$abodata['pseudo']   = $row['abo_pseudo'];
@@ -144,7 +156,7 @@ if( $mode != 'login' && $mode != 'sendkey' )
 		}
 		else
 		{
-			$abodata = check_login($data['email'], $data['key']);
+			$abodata = check_login($data['email'], $data['key'], $data['key']);
 			if( !is_array($abodata) )
 			{
 				$mode = 'login';
@@ -170,7 +182,7 @@ switch( $mode )
 		{
 			$regkey = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
 			
-			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, md5($regkey))) )
+			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey, md5($regkey))) )
 			{
 				if( $abodata['status'] == ABO_ACTIF )
 				{
@@ -202,7 +214,9 @@ switch( $mode )
 			'L_LOGIN'        => $lang['Account_login'],
 			'L_PASS'         => $lang['Account_pass'],
 			'L_SENDKEY'      => $lang['Lost_key'],
-			'L_VALID_BUTTON' => $lang['Button']['valid']
+			'L_VALID_BUTTON' => $lang['Button']['valid'],
+			
+			'S_LOGIN' => htmlspecialchars($email)
 		));
 		
 		$output->pparse('body');

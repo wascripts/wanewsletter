@@ -207,11 +207,7 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 			}
 			
-			if( $row = $db->fetch_array($result) )
-			{
-				$logdata = $row;
-			}
-			else
+			if( !($logdata = $db->fetch_array($result)) )
 			{
 				$output->redirect('envoi.php?mode=progress', 4);
 				

@@ -9,7 +9,7 @@
 	<table class="content">
 		<tr>
 			<td class="row1"> <label for="email">{L_LOGIN}&#160;:</label> </td>
-			<td class="row1"> <input type="text" id="email" name="email" maxlength="250" size="30" class="text" /> </td>
+			<td class="row1"> <input type="text" id="email" name="email" value="{S_LOGIN}" maxlength="250" size="30" class="text" /> </td>
 		</tr>
 		<tr>
 			<td class="row1"> <label for="passwd">{L_PASS}&#160;:</label> </td>
