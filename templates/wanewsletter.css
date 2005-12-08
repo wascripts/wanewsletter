@@ -285,6 +285,14 @@ a:hover              { background-color: transparent; font-size: inherit; color:
 .m-texte { font-size: .75em; }
 .s-texte { font-size: .65em; }
 
+.warning {
+	background-color: #FDC;
+	margin: 1em 2.5%;
+	border: 1px solid #D00;
+	padding: .2em;
+	color: #600;
+}
+
 code, samp, var { font-family: "Courier new", Courier, Monospace; font-size: 1em; }
 
 /*

@@ -16,6 +16,10 @@
 </div>
 </form>
 
+<!-- BEGIN statsdir_error -->
+<p class="warning"><strong>{statsdir_error.MESSAGE}</strong></p>
+<!-- END statsdir_error -->
+
 <div class="stats">
 	<img src="{U_IMG_GRAPH}" alt="" title="{L_IMG_GRAPH}" />
 </div>

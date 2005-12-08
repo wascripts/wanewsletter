@@ -491,6 +491,17 @@ $output->assign_vars(array(
 	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 ));
 
+//
+// Affichons un message d'alerte au cas où le répertoire de statistiques n'est pas
+// accessible en écriture.
+//
+if( !is_writable(WA_STATSDIR) )
+{
+	$output->assign_block_vars('statsdir_error', array(
+		'MESSAGE' => $lang['Stats_dir_not_writable']
+	));
+}
+
 $output->pparse('body');
 
 $output->page_footer();
