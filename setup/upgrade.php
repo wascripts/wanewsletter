@@ -906,7 +906,19 @@ if( $start )
 		}
 		else if( WA_BRANCHE == '2.3' )
 		{
-			message($lang['Upgrade_not_required']);
+			$sql_update = array();
+			
+			switch( WA_VERSION )
+			{
+				case '2.3-beta1':
+					break;
+				
+				default:
+					message($lang['Upgrade_not_required']);
+					break;
+			}
+			
+			exec_queries($sql_update, true);
 		}
 		
 		//
@@ -923,7 +935,7 @@ if( $start )
 			$output->addHiddenField('prefixe',    $prefixe);
 			
 			$output->assign_block_vars('download_file', array(
-				'L_TITLE'         => $lang['Result_install'],
+				'L_TITLE'         => $lang['Result_upgrade'],
 				'L_DL_BUTTON'     => $lang['Button']['dl'],
 				
 				'MSG_RESULT'      => nl2br($lang['Success_without_config']),						
