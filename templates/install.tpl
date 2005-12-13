@@ -192,7 +192,7 @@
 	<p>{download_file.MSG_RESULT}</p>
 	
 	<div class="bottom"> {download_file.S_HIDDEN_FIELDS}
-		<input type="submit" name="send_file" value="{download_file.L_DL_BUTTON}" class="pbutton" />
+		<input type="submit" name="sendfile" value="{download_file.L_DL_BUTTON}" class="pbutton" />
 	</div>
 	</div>
 	<!-- END download_file -->
@@ -204,8 +204,8 @@
 <hr />
 
 <address id="footer">
-Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de WAnewsletter">
-phpCodeur</a> &copy; 2002&#8211;2005 | WAnewsletter {NEW_VERSION} {TRANSLATE}<br />
+Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
+phpCodeur</a> &copy; 2002&#8211;2005 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>

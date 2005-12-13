@@ -29,7 +29,6 @@ define('IN_UPGRADE', true);
 
 require './setup.inc.php';
 
-$confirm = ( isset($_POST['confirm']) ) ? true : false;
 $admin_login = ( !empty($_POST['admin_login']) ) ? trim($_POST['admin_login']) : '';
 $admin_pass  = ( !empty($_POST['admin_pass']) ) ? trim($_POST['admin_pass']) : '';
 
@@ -76,7 +75,10 @@ while( $row = $db->fetch_array($result) )
 	}
 }
 
-if( !defined('WA_VERSION') ) // compatibilité avec les version < 2.3
+//
+// Compatibilité avec les versions < 2.3
+//
+if( !defined('WA_VERSION') )
 {
 	define('WA_VERSION', $old_config['version']);
 }
@@ -106,12 +108,6 @@ $output->assign_vars( array(
 	'NEW_VERSION'  => WA_NEW_VERSION,
 	'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 ));
-
-if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
-{
-	$error = true;
-	$msg_error[] = $lang['File_config_unwritable'];
-}
 
 if( $start )
 {
@@ -180,7 +176,7 @@ if( $start )
 			//
 			$old_config['engine_send']   = ( !empty($old_config['engine_send']) ) ? $old_config['engine_send'] : ENGINE_BCC;
 			$old_config['emails_sended'] = ( !empty($old_config['emails_sended']) ) ? $old_config['emails_sended'] : 0;
-			$old_config['date_format']   = ( !empty($old_config['date_format']) ) ? addslashes($old_config['date_format']) : 'j F Y H:i';
+			$old_config['date_format']   = ( !empty($old_config['date_format']) ) ? $old_config['date_format'] : 'j F Y H:i';
 			$old_config['sender_email']  = ( !empty($old_config['sender_email']) ) ? $old_config['sender_email'] : $old_config['emailadmin'];
 			$old_config['return_email']  = ( !empty($old_config['return_path_email']) ) ? $old_config['return_path_email'] : '';
 			$old_config['signature']     = strip_tags($old_config['signature']);
@@ -917,30 +913,35 @@ if( $start )
 		// Modification fichier de configuration +
 		// Affichage message de résultat
 		//
-		if( $fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w') )
+		if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
 		{
-			fwrite($fw, $config_file);
-			fclose($fw);
+			$output->addHiddenField('dbtype',     $dbtype);
+			$output->addHiddenField('dbhost',     $dbhost);
+			$output->addHiddenField('dbuser',     $dbuser);
+			$output->addHiddenField('dbpassword', $dbpassword);
+			$output->addHiddenField('dbname',     $dbname);
+			$output->addHiddenField('prefixe',    $prefixe);
 			
-			$config = true;
+			$output->assign_block_vars('download_file', array(
+				'L_TITLE'         => $lang['Result_install'],
+				'L_DL_BUTTON'     => $lang['Button']['dl'],
+				
+				'MSG_RESULT'      => nl2br($lang['Success_without_config']),						
+				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+			));
+			
+			$output->pparse('body');
+			exit;
 		}
-		else
-		{
-			$config = false;
-		}
+		
+		fwrite($fw, $config_file);
+		fclose($fw);
 		
 		//
 		// Modification fichier de configuration +
 		// Affichage message de résultat
 		//
-		if( $config == true )
-		{
-			$message = sprintf($lang['Success_upgrade'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>');
-		}
-		else
-		{
-			$message = sprintf($lang['Success_without_config2'], htmlspecialchars($config_file));
-		}
+		$message = sprintf($lang['Success_upgrade'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>');
 		
 		message($message, $lang['Result_upgrade']);
 	}

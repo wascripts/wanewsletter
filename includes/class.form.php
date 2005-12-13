@@ -526,7 +526,7 @@ class Wanewsletter {
 				WHERE LOWER(abo_email) = '" . $db->escape(strtolower($this->account['email'])) . "'";
 			if( DATABASE == 'mysql' )
 			{
-				if( !($result = $db->query($sql)) )
+				if( !($result = $db->query($sql_abo_id)) )
 				{
 					trigger_error('Impossible de récupérer l\'identifiant d\'abonné', ERROR);
 					return false;

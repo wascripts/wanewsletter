@@ -638,7 +638,6 @@ $lang['Start_install']              = "Démarrer l'installation";
 $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['Result_install']             = "Résultat de l'installation";
 $lang['Result_upgrade']             = "Résultat de la mise à jour";
-$lang['File_config_unwritable']     = "Le fichier config.inc.php n'est pas accessible en écriture, vous devez donner les droits d'accès en écriture à ce fichier le temps de la mise à jour";
 $lang['PHP_version_error']          = "Désolé mais Wanewsletter %s requiert une version de PHP supérieure ou égale à la version 4.1.0";
 $lang['Not_installed']              = "Aucune version de Wanewsletter ne semble présente, le fichier de configuration est vide ou absent du serveur";
 $lang['mssql_support_end']          = "Désolé mais le support de SQL Server a été retiré dans Wanewsletter 2.3";
@@ -649,8 +648,7 @@ $lang['DB_type_undefined']          = "Le type de base de données n'est pas défi
 
 $lang['Success_install']            = "L'installation s'est bien déroulée.\nVous pouvez maintenant accéder à l'administration en cliquant %sici%s";
 $lang['Success_upgrade']            = "La mise à jour s'est bien déroulée.\nVous pouvez maintenant accéder à l'administration en cliquant %sici%s";
-$lang['Success_without_config']     = "L'opération s'est bien effectuée mais le fichier de configuration n'a pu être créé.\nVous pouvez le télécharger et l'uploader par vos propres moyens sur le serveur dans le dossier includes/ du script.";
-$lang['Success_without_config2']    = "L'opération s'est bien effectuée mais le fichier de configuration n'a pu être modifié.\nVeuillez remplacer le contenu du fichier config.inc.php par ce qui suit : \n\n<pre>%s</pre>";
+$lang['Success_without_config']     = "L'opération s'est bien effectuée mais le fichier de configuration n'a pu être créé.\nVous pouvez le télécharger et l'uploader par vos propres moyens sur le serveur dans le répertoire includes/ du script.";
 $lang['Error_in_install']           = "Une erreur s'est produite durant l'installation.\n\nL'erreur est : %s\nLa requète est : %s";
 $lang['Error_in_upgrade']           = "Une erreur s'est produite durant la mise à jour.\n\nL'erreur est : %s\nLa requète est : %s";
 $lang['Upgrade_not_required']       = "Aucune mise à jour n'est nécessaire pour votre version actuelle de Wanewsletter";
