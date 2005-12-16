@@ -1050,7 +1050,10 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	//
 	if( FILE_UPLOADS_ON )
 	{
-		$output->assign_block_vars('joined_files.upload_input', array());
+		$output->assign_block_vars('joined_files.upload_input', array(
+			'L_MAXIMUM_SIZE' => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
+			'MAX_FILE_SIZE'  => MAX_FILE_SIZE
+		));
 	}
 	
 	//

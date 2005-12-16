@@ -322,6 +322,7 @@ $lang['Page_loading']               = "Please wait while the page is loading";
 $lang['Label_link']                 = "To unsubscribe";
 $lang['Account_login']              = "Enter the email address of your account";
 $lang['Account_pass']               = "Password or code of your account";
+$lang['Maximum_size']               = "Maximum size: %s";
 
 $lang['Click_return_index']         = "Click %shere%s to return to the home page";
 $lang['Click_return_back']          = "Click %shere%s to go back to the previous page";

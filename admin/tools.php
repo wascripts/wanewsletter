@@ -818,7 +818,9 @@ switch( $mode )
 			// Affichage du champ file pour importation
 			//
 			$output->assign_block_vars('upload_file', array(
-				'L_FILE_UPLOAD' => $lang['File_upload']
+				'L_FILE_UPLOAD'  => $lang['File_upload'],
+				'L_MAXIMUM_SIZE' => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
+				'MAX_FILE_SIZE'  => MAX_FILE_SIZE
 			));
 		}
 		
@@ -1361,7 +1363,9 @@ switch( $mode )
 			// Affichage du champ file pour importation
 			//
 			$output->assign_block_vars('upload_file', array(
-				'L_FILE_UPLOAD' => $lang['File_upload_restore']
+				'L_FILE_UPLOAD' => $lang['File_upload_restore'],
+				'L_MAXIMUM_SIZE' => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
+				'MAX_FILE_SIZE'  => MAX_FILE_SIZE
 			));
 		}
 		

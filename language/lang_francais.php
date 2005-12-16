@@ -322,6 +322,7 @@ $lang['Page_loading']               = "Veuillez patienter pendant le chargement 
 $lang['Label_link']                 = "Se désinscrire";
 $lang['Account_login']              = "Entrez l'adresse email de votre compte";
 $lang['Account_pass']               = "Mot de passe ou code de votre compte";
+$lang['Maximum_size']               = "Taille maximum: %s";
 
 $lang['Click_return_index']         = "Cliquez %sici%s pour retourner sur l'accueil";
 $lang['Click_return_back']          = "Cliquez %sici%s pour retourner sur la page précédente";

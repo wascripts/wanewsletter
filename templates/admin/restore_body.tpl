@@ -8,8 +8,14 @@
 		</tr>
 		<!-- BEGIN upload_file -->
 		<tr>
-			<td class="row1"><label for="file_upload">{upload_file.L_FILE_UPLOAD}&#160;:</label></td>
-			<td class="row2"><input type="file" id="file_upload" name="file_upload" size="25" /></td>
+			<td class="row1">
+				<label for="file_upload">{upload_file.L_FILE_UPLOAD}&#160;:</label><br />
+				<span class="m-texte">({upload_file.L_MAXIMUM_SIZE})</span>
+			</td>
+			<td class="row2">
+				<input type="hidden" name="MAX_FILE_SIZE" value="{upload_file.MAX_FILE_SIZE}" />
+				<input type="file" id="file_upload" name="file_upload" size="25" />
+			</td>
 		</tr>
 		<!-- END upload_file -->
 		<tr>

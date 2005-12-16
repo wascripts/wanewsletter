@@ -1191,7 +1191,13 @@ function http_get_contents($URL, &$errstr)
  */
 function wa_number_format($number, $decimals = 2)
 {
-	return number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
+	$number = number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
+	if( substr($number, -2) == '00' )
+	{
+		$number = substr($number, 0, -3);
+	}
+	
+	return $number;
 }
 
 /**

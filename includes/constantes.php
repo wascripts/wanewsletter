@@ -163,11 +163,55 @@ else
 //
 if( config_status('file_uploads') )
 {
+	function get_integer_byte_value($size)
+	{
+		if( preg_match('/^([0-9]+)([KMG])$/i', $size, $match) )
+		{
+			switch( strtoupper($match[2]) )
+			{
+				case 'K':
+					$size = ($match[1] * 1024);
+					break;
+				
+				case 'M':
+					$size = ($match[1] * 1024 * 1024);
+					break;
+				
+				case 'G': // Since php 5.1.0
+					$size = ($match[1] * 1024 * 1024 * 1024);
+					break;
+			}
+		}
+		else
+		{
+			$size = intval($size);
+		}
+		
+		return $size;
+	}
+	
+	if( !($filesize = @ini_get('upload_max_filesize')) )
+	{
+        $filesize = '2M'; // 2 Méga-Octets
+    }
+	$upload_max_size = get_integer_byte_value($filesize);
+	
+    if( $postsize = @ini_get('post_max_size') )
+	{
+        $postsize = get_integer_byte_value($postsize);
+        if( $postsize < $upload_max_size )
+		{
+            $upload_max_size = $postsize;
+        }
+    }
+	
 	define('FILE_UPLOADS_ON', TRUE);
+	define('MAX_FILE_SIZE',   $upload_max_size);
 }
 else
 {
 	define('FILE_UPLOADS_ON', FALSE);
+	define('MAX_FILE_SIZE',   0);
 }
 
 //

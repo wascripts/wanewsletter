@@ -76,7 +76,11 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 		</tr>
 		<!-- BEGIN upload_input -->
 		<tr>
-			<td class="row2"><input type="file" name="join_file" size="30" /></td>
+			<td class="row2">
+				<input type="hidden" name="MAX_FILE_SIZE" value="{joined_files.upload_input.MAX_FILE_SIZE}" />
+				<input type="file" name="join_file" size="30" />
+				<span class="m-texte">({joined_files.upload_input.L_MAXIMUM_SIZE})</span>
+			</td>
 		</tr>
 		<!-- END upload_input -->
 		<!-- BEGIN select_box -->
