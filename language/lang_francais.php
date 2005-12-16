@@ -81,6 +81,7 @@ $lang['Title']['Show_popup']        = "Aperçu de %s";
 $lang['Title']['profil_cp']         = "Panneau de gestion de compte";
 $lang['Title']['sendkey']           = "Recevoir vos identifiants";
 $lang['Title']['archives']          = "Archives des listes de diffusion";
+$lang['Title']['sendpass']          = "Générer un nouveau mot de passe";
 
 
 //
@@ -193,6 +194,7 @@ $lang['Message']['Not_auth_ban']            = "Vous n'êtes pas autorisé à effect
 $lang['Message']['Not_auth_attach']         = "Vous n'êtes pas autorisé à joindre des fichiers ou à voir les fichiers joints de cette liste de diffusion";
 
 $lang['Message']['Error_login']             = "Login ou mot de passe incorrect !";
+$lang['Message']['Error_sendpass']          = "Login ou email incorrect !";
 $lang['Message']['Bad_confirm_pass']        = "Nouveau mot de passe et confirmation de mot de passe sont différents";
 $lang['Message']['bad_ftp_param']           = "La connexion au serveur ftp n'a pu être établie, vérifiez vos paramètres \n(%s)";
 $lang['Message']['bad_smtp_param']          = "La connexion au serveur smtp n'a pu être établie, vérifiez vos paramètres \n(%s)";
@@ -323,6 +325,7 @@ $lang['Label_link']                 = "Se désinscrire";
 $lang['Account_login']              = "Entrez l'adresse email de votre compte";
 $lang['Account_pass']               = "Mot de passe ou code de votre compte";
 $lang['Maximum_size']               = "Taille maximum: %s";
+$lang['Lost_password']              = "Mot de passe perdu ?";
 
 $lang['Click_return_index']         = "Cliquez %sici%s pour retourner sur l'accueil";
 $lang['Click_return_back']          = "Cliquez %sici%s pour retourner sur la page précédente";
@@ -330,7 +333,6 @@ $lang['Click_return_form']          = "Cliquez %sici%s pour retourner au formula
 $lang['Click_start_send']           = "Cliquez %sici%s si vous souhaitez démarrer l'envoi maintenant";
 $lang['Click_resend_auto']          = "Cliquez %sici%s pour continuer l'envoi de façon automatique";
 $lang['Click_resend_manuel']        = "Cliquez %sici%s pour envoyer un autre flot d'emails";
-
 
 //
 // Sujets de divers emails envoyés
@@ -351,7 +353,6 @@ $lang['Welcome_profil_cp']          = "Bienvenue sur le panneau de gestion de vo
 $lang['Explain']['editprofile']     = "Ici, vous avez la possibilité de modifier les données de votre compte.\nVous pouvez renseigner votre prénom ou pseudo pour personnaliser les newsletters que vous recevrez (selon les réglages de l'administrateur). Vous pouvez également mettre un mot de passe à votre compte, ce qui sera plus simple à taper que le code de votre compte.";
 $lang['Explain']['sendkey']         = "Si vous avez perdu les identifiants de votre compte, vous pouvez demander à ce qu'ils vous soient renvoyés par email";
 $lang['Explain']['archives']        = "Vous pouvez, à partir de cette page, demander à recevoir les précédentes newsletters envoyées aux listes de diffusion auxquelles vous êtes inscrit.\nAttention, pour chaque newsletter sélectionnée, vous recevrez un email.";
-$lang['Lost_key']                   = "J'ai perdu mon code ou mon mot de passe";
 
 
 //

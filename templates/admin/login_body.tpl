@@ -14,7 +14,8 @@
 		<tr>
 			<td colspan="2" class="row-full">
 				<input type="checkbox" id="autologin" name="autologin" value="1" />
-				<label for="autologin">{L_AUTOLOGIN}</label>
+				<label for="autologin">{L_AUTOLOGIN}</label><br />
+				<span class="m-texte"><a href="login.php?mode=sendpass">{L_LOST_PASSWORD}</a></span>
 			</td>
 		</tr>
 	</table>

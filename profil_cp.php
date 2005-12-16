@@ -213,7 +213,7 @@ switch( $mode )
 			'TITLE'          => $lang['Module']['login'],
 			'L_LOGIN'        => $lang['Account_login'],
 			'L_PASS'         => $lang['Account_pass'],
-			'L_SENDKEY'      => $lang['Lost_key'],
+			'L_SENDKEY'      => $lang['Lost_password'],
 			'L_VALID_BUTTON' => $lang['Button']['valid'],
 			
 			'S_LOGIN' => htmlspecialchars($email)

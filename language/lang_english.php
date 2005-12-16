@@ -81,6 +81,7 @@ $lang['Title']['Show_popup']        = "Preview of %s";
 $lang['Title']['profil_cp']         = "Panel of management of account";
 $lang['Title']['sendkey']           = "Receive your identifiers";
 $lang['Title']['archives']          = "logs of the mailing lists";
+$lang['Title']['sendpass']          = "Generate a new password";
 
 
 //
@@ -193,6 +194,7 @@ $lang['Message']['Not_auth_ban']            = "You are not authorized to make mo
 $lang['Message']['Not_auth_attach']         = "You are not authorized to attach files or view attached files in this mailing list";
 
 $lang['Message']['Error_login']             = "Incorrect login or password !";
+$lang['Message']['Error_sendpass']          = "incorrect login or email !";
 $lang['Message']['Bad_confirm_pass']        = "The new password and confirmed password are not the same";
 $lang['Message']['bad_ftp_param']           = "The connexion to the ftp server could not be established, please check your settings \n(%s)";
 $lang['Message']['bad_smtp_param']          = "The connexion to the smtp server could not be established, please check your settings \n(%s)";
@@ -323,6 +325,7 @@ $lang['Label_link']                 = "To unsubscribe";
 $lang['Account_login']              = "Enter the email address of your account";
 $lang['Account_pass']               = "Password or code of your account";
 $lang['Maximum_size']               = "Maximum size: %s";
+$lang['Lost_password']              = "Lost password?";
 
 $lang['Click_return_index']         = "Click %shere%s to return to the home page";
 $lang['Click_return_back']          = "Click %shere%s to go back to the previous page";
@@ -330,7 +333,6 @@ $lang['Click_return_form']          = "Click %shere%s to go back to the form";
 $lang['Click_start_send']           = "Click %shere%s if you wish to start the sending now";
 $lang['Click_resend_auto']          = "Click %shere%s to continue with automatic sendings";
 $lang['Click_resend_manuel']        = "Click %shere%s to send another packet of emails";
-
 
 //
 // Sujets de divers emails envoyés
@@ -351,7 +353,6 @@ $lang['Welcome_profil_cp']          = "Welcome on the manage panel of your accou
 $lang['Explain']['editprofile']     = "Here, you have the possibility to modify the data of your account.\nYou can inform your first name or pseudo to personalize the newsletters which you will receive (according to the settings of the administrator). You can also put a password to your account, what will be simpler to type than the code of your account.";
 $lang['Explain']['sendkey']         = "If you lost the identifiers of your account, you can ask them to be sent back to you by email";
 $lang['Explain']['archives']        = "You can ask to receive the previous newsletters sent to the mailing lists to which you are registered.\nBe careful, for each newsletter selected, you will receive an email.";
-$lang['Lost_key']                   = "I lost my code or my password";
 
 
 //

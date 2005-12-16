@@ -374,6 +374,7 @@ class Session {
 			}
 		}
 		
+		$this->is_logged_in = FALSE;
 		$this->send_cookie('sessid', '', $current_time - 31536000);
 		$this->send_cookie('data', '', $current_time - 31536000);
 	}
