@@ -154,20 +154,18 @@ $lang['Message']['Invalid_date']            = "Désolé, la date de confirmation e
 $lang['Message']['Invalid_code']            = "Code invalide !";
 $lang['Message']['Failed_sending2']         = "L'email n'a pu être envoyé ! %s";
 
-$lang['Message']['Success_export']          = "L'exportation des emails a été effectuée avec succés. \nVous trouverez le fichier de sauvegarde dans le dossier des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
+$lang['Message']['Success_export']          = "L'exportation des emails a été effectuée avec succés. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
 $lang['Message']['Success_import']          = "Les emails ont été importés avec succés";
 $lang['Message']['Success_import2']         = "L'importation s'est effectuée avec succés mais certains emails ont été refusés";
 $lang['Message']['Success_import3']         = "L'importation s'est effectuée avec succés mais certains emails ont été refusés. \nCliquez %sici%s pour télécharger le rapport (N'oubliez pas de supprimer le fichier du serveur par la suite)";
 $lang['Message']['Success_modif']           = "Les modifications ont été effectuées avec succés";
-$lang['Message']['Success_backup']          = "La sauvegarde des tables a été effectuée avec succés. \nVous trouverez le fichier de sauvegarde dans le dossier des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
+$lang['Message']['Success_backup']          = "La sauvegarde des tables a été effectuée avec succés. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
 $lang['Message']['Success_restore']         = "La restauration des données a été effectuée avec succés";
 $lang['Message']['Success_logout']          = "Vous avez été déconnecté de l'administration";
 $lang['Message']['Success_purge']           = "La purge a été effectuée avec succés (%d abonné(s) supprimé(s))";
 $lang['Message']['Success_send']            = "L'envoi partiel a été effectué avec succés à <b>%d</b> abonnés.\nLa lettre de diffusion a été envoyée jusqu'à présent à <b>%d</b> abonnés sur un total de <b>%d</b>";
 $lang['Message']['Success_send_finish']     = "Envoi terminé avec succés.\nCette lettre de diffusion a été envoyée à un total de <b>%d</b> abonnés";
 $lang['Message']['Success_operation']       = "L'opération a été effectuée avec succés";
-$lang['Message']['SQLite_backup']           = "Pour faire une sauvegarde de votre base de données SQLite, il vous suffit de récupérer via FTP le fichier <samp>%s</samp>";
-$lang['Message']['SQLite_restore']          = "Pour restaurer votre base de données SQLite, il vous suffit simplement de replacer le fichier de données à l'emplacement suivant: <samp>%s</samp>";
 
 $lang['Message']['Profile_updated']         = "Le profil a été mis à jour avec succés";
 $lang['Message']['Admin_added']             = "L'utilisateur a été ajouté avec succés, il va recevoir par email ses identifiants de connexion";
@@ -229,14 +227,14 @@ $lang['Message']['Unaccess_host']           = "L'hôte %s semble inaccessible act
 $lang['Message']['Not_found_at_url']        = "Le fichier ne semble pas présent à l'url indiquée";
 $lang['Message']['No_data_at_url']          = "Aucune donnée disponible sur le fichier";
 
-$lang['Message']['tmp_dir_not_writable']    = "Le dossier des fichiers temporaires du script (tmp/ par défaut) n'existe pas ou n'est pas accessible en écriture";
-$lang['Message']['stats_dir_not_writable']  = "Le dossier des statistiques du script (stats/ par défaut) n'existe pas ou n'est pas accessible en écriture";
+$lang['Message']['tmp_dir_not_writable']    = "Le répertoire des fichiers temporaires du script (tmp/ par défaut) n'existe pas ou n'est pas accessible en écriture";
+$lang['Message']['stats_dir_not_writable']  = "Le répertoire des statistiques du script (stats/ par défaut) n'existe pas ou n'est pas accessible en écriture";
 $lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (setup/schemas/)";
 
 $lang['Message']['Ftp_unable_connect']      = "Impossible de se connecter au serveur ftp";
 $lang['Message']['Ftp_error_login']         = "L'authentification auprès du serveur ftp a échoué";
 $lang['Message']['Ftp_error_mode']          = "Impossible de changer le mode du serveur";
-$lang['Message']['Ftp_error_path']          = "Impossible d'accéder au dossier spécifié";
+$lang['Message']['Ftp_error_path']          = "Impossible d'accéder au répertoire spécifié";
 $lang['Message']['Ftp_error_put']           = "Impossible d'uploader le fichier sur le serveur ftp";
 $lang['Message']['Ftp_error_get']           = "Impossible de récupérer le fichier du serveur ftp";
 $lang['Message']['Ftp_error_del']           = "Impossible de supprimer le fichier du serveur ftp";
@@ -378,7 +376,7 @@ $lang['Total_Filesize']             = "Espace disque occupé par les fichiers (pi
 //
 $lang['Explain']['config']          = "Le formulaire ci-dessous vous permet de configurer tous les aspects du script";
 $lang['Explain']['config_cookies']  = "Ces paramètres vous permettent de régler les cookies utilisés par le script. \nSi vous n'êtes pas sùr de vous, laissez les paramètres par défaut";
-$lang['Explain']['config_files']    = "Vous avez la possibilité de joindre des fichiers à vos envois de newsletters. \nPour ce faire, le script offre deux options. Le plus simple est de stocker les fichiers sur le serveur, dans le dossier défini comme répertoire de stockage (le dossier en question doit être accessible en écriture). \nSi, pour une raison ou une autre, cela n'est pas rendu possible sur votre serveur, le script a la possibilité de stocker les fichiers sur un serveur <acronym title=\"File Transfert Protocol\" xml:lang=\"en\">ftp</acronym>.\n Vous devez alors entrer les paramètres d'accès au serveur ftp en question.";
+$lang['Explain']['config_files']    = "Vous avez la possibilité de joindre des fichiers à vos envois de newsletters. \nPour ce faire, le script offre deux options. Le plus simple est de stocker les fichiers sur le serveur, dans le répertoire défini comme répertoire de stockage (le répertoire en question doit être accessible en écriture). \nSi, pour une raison ou une autre, cela n'est pas rendu possible sur votre serveur, le script a la possibilité de stocker les fichiers sur un serveur <acronym title=\"File Transfert Protocol\" xml:lang=\"en\">ftp</acronym>.\n Vous devez alors entrer les paramètres d'accès au serveur ftp en question.";
 $lang['Explain']['config_email']    = "Ces paramètres vous permettent de configurer les méthodes d'envois d'emails à utiliser. \nLe premier moteur prend comme destinataire l'adresse email de la newsletter elle-même, avec les destinataires en copie cachée. Le deuxième moteur est un peu plus lourd mais envoie un email pour chaque abonné (ce dernier sera automatiquement utilisé si l'hébergeur est <strong>Online</strong>).\n Si, pour une raison quelconque, votre serveur ne dispose pas de fonction mail() ou dérivé, vous avez la possibilité d'utiliser un serveur <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> précis en indiquant les paramètres d'accès au script. \nAttention cependant, certaines restrictions peuvent survenir dans ce cas précis. Référez vous, pour plus de précisions, à la %sfaq du script%s.";
 $lang['Explain']['config_stats']    = "Le script dispose d'un petit module de statistique. Celui ci demande que la librairie GD soit installée sur votre serveur pour fonctionner. \nSi la librairie GD n'est pas installée, il est recommandé de désactiver le module de statistiques pour éviter des traitement de données superflus par le script.";
 
@@ -406,7 +404,7 @@ $lang['Ftp_port']                   = "Port de connexion";
 $lang['Ftp_port_note']              = "La valeur par défaut conviendra la plupart du temps";
 $lang['Ftp_pasv']                   = "Serveur ftp en mode passif";
 $lang['Ftp_pasv_note']              = "(Mode actif ou passif)";
-$lang['Ftp_path']                   = "Chemin vers le dossier de stockage des fichiers";
+$lang['Ftp_path']                   = "Chemin vers le répertoire de stockage des fichiers";
 $lang['Ftp_user']                   = "Nom d'utilisateur";
 $lang['Ftp_pass']                   = "Mot de passe";
 $lang['Check_email']                = "Vérification approfondie des emails à l'inscription";
@@ -548,7 +546,7 @@ $lang['Explain']['ban']             = "Vous pouvez bannir un email entier, de ty
 $lang['Explain']['unban']           = "Pour débannir un email ou fragment d'email, utilisez la combinaison clavier/souris appropriée à votre ordinateur et votre navigateur";
 $lang['Explain']['forbid_ext']      = "Pour interdire plusieurs extensions de fichiers en même temps, séparez les par une virgule";
 $lang['Explain']['reallow_ext']     = "Pour réautoriser une ou plusieurs extensions, utilisez la combinaison clavier/souris appropriée à votre ordinateur et votre navigateur";
-$lang['Explain']['backup']          = "Ce module vous permet de sauvegarder les tables du script, ainsi que d'éventuelles autres tables spécifiées, s'il y en a.\nVous pouvez décider de sauvegarder tout, uniquement la structure ou les données, et vous pouvez demander à ce que le fichier soit compressé (selon les options disponibles et librairies installées sur le serveur).\nEnfin, vous pouvez soit télécharger directement le fichier, ou demander au script de le stocker sur le serveur, auquel cas, le fichier sera créé dans le dossier des fichiers temporaires du script";
+$lang['Explain']['backup']          = "Ce module vous permet de sauvegarder les tables du script, ainsi que d'éventuelles autres tables spécifiées, s'il y en a.\nVous pouvez décider de sauvegarder tout, uniquement la structure ou les données, et vous pouvez demander à ce que le fichier soit compressé (selon les options disponibles et librairies installées sur le serveur).\nEnfin, vous pouvez soit télécharger directement le fichier, ou demander au script de le stocker sur le serveur, auquel cas, le fichier sera créé dans le répertoire des fichiers temporaires du script";
 $lang['Explain']['restore']         = "Ce module vous permet de restaurer les tables du script à l'aide d'une sauvegarde générée par wanewsletter ou un quelconque gestionnaire de bases de données.\nSi l'upload de fichier n'est pas autorisé sur le serveur, vous avez toutefois la possibilité de spécifier un fichier précédemment uploadé via ftp en indiquant son chemin (relatif à la racine du script)";
 $lang['Explain']['generator']       = "Vous devez entrer ici l'adresse absolue ou les données du formulaire seront reçues (en général, l'adresse où se trouvera le formulaire lui même)";
 $lang['Explain']['code_html']       = "Placez ce code à l'adresse que vous avez/allez indiquer dans la configuration de la liste de diffusion";
@@ -586,7 +584,7 @@ $lang['Target_form']                = "URL de réception du formulaire";
 // Page : Envoi des newsletters
 //
 $lang['Explain']['send']            = "Le formulaire d'envoi vous permet de rédiger vos newsletters, de les envoyer, les sauvegarder ou les supprimer, de joindre des fichiers joints..\nSi vous utiliser le deuxième moteur d'envoi, vous pouvez, à l'instar de <code>{LINKS}</code>, placer <code>{NAME}</code> dans le texte, pour afficher le nom de l'abonné si celui ci l'a indiqué.\n\nSi vous créez un modèle réutilisable et que vous lancez l'envoi sans avoir sauvegardé, le modèle sera sauvegardé et une copie sera créée pour les archives. Si vous avez créé un modèle, vous pouvez le recharger, le modifier puis sauvegarder les changements. Toutefois, si vous faites cela en modifiant le statut de la newsletter, une copie sera créée et les modifications seront sauvegardées dessus et non sur le modèle";
-$lang['Explain']['join']            = "Vous pouvez ici joindre des fichiers à votre newsletter (attention à ne pas trop alourdir votre newsletter)\nSi l'upload de fichier n'est pas autorisé sur le serveur, vous pourrez indiquer un fichier distant (ex&thinsp;: <samp>http://www.domaine.com/rep/image.gif</samp>) ou un fichier manuellement uploadé dans le dossier des fichiers joints\nVous pouvez également utiliser un des fichiers joints dans une autre newsletter de cette liste";
+$lang['Explain']['join']            = "Vous pouvez ici joindre des fichiers à votre newsletter (attention à ne pas trop alourdir votre newsletter)\nSi l'upload de fichier n'est pas autorisé sur le serveur, vous pourrez indiquer un fichier distant (ex&thinsp;: <samp>http://www.domaine.com/rep/image.gif</samp>) ou un fichier manuellement uploadé dans le répertoire des fichiers joints\nVous pouvez également utiliser un des fichiers joints dans une autre newsletter de cette liste";
 $lang['Explain']['text']            = "Rédigez ici votre newsletter au format texte. N'oubliez pas de placer le lien de désinscription, soit en cliquant sur le bouton dédié s'il est disponible, soit en ajoutant manuellement le tag <code>{LINKS}</code> dans votre newsletter";
 $lang['Explain']['html']            = "Rédigez ici votre newsletter au format html. N'oubliez pas de placer le lien de désinscription , soit en cliquant sur le bouton dédié s'il est disponible, soit en ajoutant manuellement le tag <code>{LINKS}</code> dans votre newsletter (le lien sera au format html)\nSi vous voulez utiliser un des fichiers joints (une image, un son...) dans la newsletter html, placer au lieu de l'adresse du fichier cid:nom_du_fichier\n\n<em>Exemple&thinsp;:</em>\n\nVous avez uploadé l'image image1.gif et désirez l'utiliser dans une balise image de la newsletter html, vous placerez alors la balise img avec pour l'attribut src : cid:image1.gif ( <code>&lt;img src=\"cid:image1.gif\" alt=\"texte alternatif\" /&gt;</code> )";
 

@@ -626,10 +626,13 @@ class sql_backup {
 	 */
 	function header($dbhost, $dbname, $toolname = '')
 	{
+		global $db;
+		
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname MySQL Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		$contents .= "-- Serveur  : $dbhost" . $this->eol;
+		$contents .= "-- Host     : $dbhost" . $this->eol;
+		$contents .= "-- Server   : " . mysql_get_server_info($db->connect_id) . $this->eol;
 		$contents .= "-- Database : $dbname" . $this->eol;
 		$contents .= '-- Date     : ' . date('d/m/Y H:i:s') . $this->eol;
 		$contents .= '-- ' . $this->eol;
@@ -664,6 +667,7 @@ class sql_backup {
 		{
 			$tables[$row[0]] = $row[1];
 		}
+		$db->free_result($result);
 		
 		return $tables;
 	}
@@ -697,7 +701,7 @@ class sql_backup {
 		//
 		// La requète 'SHOW CREATE TABLE' est disponible à partir de MySQL 3.23.20
 		//
-		if( version_compare(mysql_get_server_info(), '3.23.20', '>=') == true )
+		if( version_compare(mysql_get_server_info($db->connect_id), '3.23.20', '>=') == true )
 		{
 			if( !($result = $db->query('SHOW CREATE TABLE `' . $tabledata['name'] . '`')) )
 			{
@@ -824,17 +828,16 @@ class sql_backup {
 			$contents .= '-- ' . $this->eol;
 			
 			$fields = array();
-			$num_fields = $db->num_fields($result);
-			for( $j = 0; $j < $num_fields; $j++ )
+			for( $j = 0, $n = $db->num_fields($result); $j < $n; $j++ )
 			{
 				$fields[] = $db->field_name($j, $result);
 			}
 			
-			$columns_list = implode($quote . ', ' . $quote, $fields);
+			$fields = implode($quote . ', ' . $quote, $fields);
 			
 			do
 			{
-				$contents .= 'INSERT INTO ' . $quote . $tablename . $quote . ' (' . $quote . $columns_list . $quote . ') VALUES';
+				$contents .= 'INSERT INTO ' . $quote . $tablename . $quote . ' (' . $quote . $fields . $quote . ') VALUES';
 				
 				foreach( $row AS $key => $value )
 				{
@@ -842,7 +845,7 @@ class sql_backup {
 					{
 						$row[$key] = 'NULL';
 					}
-					else if( !is_numeric($value) )
+					else
 					{
 						$row[$key] = '\'' . $db->escape($value) . '\'';
 					}

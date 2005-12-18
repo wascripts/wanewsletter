@@ -166,8 +166,6 @@ $lang['Message']['Success_purge']           = "The purge operation has been succ
 $lang['Message']['Success_send']            = "The partial sending has been successfully carried out to <b>%d</b> subscribers.\nThe newsletter has been sent until now to <b>%d</b> subscribers on a total of <b>%d</b>";
 $lang['Message']['Success_send_finish']     = "Sending successfully finished.\nThis newsletter has been sent to a total of <b>%d</b> subscribers";
 $lang['Message']['Success_operation']       = "The operation has been successfully carried out";
-$lang['Message']['SQLite_backup']           = "To make a backup of your SQLite database, you just have to get the file <samp>%s</samp> via FTP";
-$lang['Message']['SQLite_restore']          = "To restore your SQLite database, you just have to replace the data file situated at: <samp>%s</samp>";
 
 $lang['Message']['Profile_updated']         = "The profils has been successfully updated";
 $lang['Message']['Admin_added']             = "The user has been successfully added.  He will receive his login information by email.";

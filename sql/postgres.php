@@ -659,10 +659,21 @@ class sql_backup {
 	 */
 	function header($dbhost, $dbname, $toolname = '')
 	{
+		global $db;
+		
+		$result = $db->query("SELECT VERSION()");
+		
 		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
 		$contents .= "  $toolname PostgreSQL Dump" . $this->eol;
 		$contents .= $this->eol;
-		$contents .= "  Serveur  : $dbhost" . $this->eol;
+		$contents .= "  Host     : $dbhost" . $this->eol;
+		
+		if( $db->num_rows($result) > 0 )
+		{
+			$server_info = $db->result($result, 0, 0);
+			$contents .= "  Server   : " . $server_info . $this->eol;
+		}
+		
 		$contents .= "  Database : $dbname" . $this->eol;
 		$contents .= '  Date     : ' . date('d/m/Y H:i:s') . $this->eol;
 		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
@@ -981,25 +992,24 @@ class sql_backup {
 			$contents .= ' ------------------------------------------------------------ */' . $this->eol;
 			
 			$fields = array();
-			$num_fields = $db->num_fields($result);
-			for( $j = 0; $j < $num_fields; $j++ )
+			for( $j = 0, $n = $db->num_fields($result); $j < $n; $j++ )
 			{
 				$fields[] = $db->field_name($j, $result);
 			}
 			
-			$columns_list = implode(', ', $fields);
+			$fields = implode(', ', $fields);
 			
 			do
 			{
-				$contents .= "INSERT INTO $tablename ($columns_list) VALUES";
+				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
 				foreach( $row AS $key => $value )
 				{
-					if( !isset($value) )
+					if( is_null($value) )
 					{
 						$row[$key] = 'NULL';
 					}
-					else if( !is_numeric($value) )
+					else
 					{
 						$row[$key] = '\'' . $db->escape($value) . '\'';
 					}

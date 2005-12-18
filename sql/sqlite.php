@@ -575,6 +575,185 @@ class sql {
 			return false;
 		}
 	}
+}// fin de la classe
+
+class sql_backup {
+	/**
+	 * Fin de ligne
+	 * 
+	 * @var boolean
+	 * @access public
+	 */
+	var $eol = "\n";
+	
+	/**
+	 * sql_backup::header()
+	 * 
+	 * Génération de l'en-tête du fichier de sauvegarde
+	 * 
+	 * @param string $dbhost    Hôte de la base de données
+	 * @param string $dbname    Nom de la base de données
+	 * @param string $toolname  Nom de l'outil utilisé pour générer la sauvegarde
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function header($dbhost, $dbname, $toolname = '')
+	{
+		global $db;
+		
+		$contents  = '-- ' . $this->eol;
+		$contents .= "-- $toolname SQLite Dump" . $this->eol;
+		$contents .= '-- ' . $this->eol;
+		$contents .= "-- Host       : " . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown') . $this->eol;
+		$contents .= "-- SQLite lib : " . sqlite_libversion() . $this->eol;
+		$contents .= "-- Database   : " . basename($dbhost) . $this->eol;
+		$contents .= '-- Date       : ' . date('d/m/Y H:i:s') . $this->eol;
+		$contents .= '-- ' . $this->eol;
+		$contents .= $this->eol;
+		
+		return $contents;
+	}
+	
+	/**
+	 * sql_backup::get_tables()
+	 * 
+	 * Retourne la liste des tables présentes dans la base de données considérée
+	 * 
+	 * @param string $dbname
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function get_tables($dbname)
+	{
+		global $db;
+		
+		if( !($result = $db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) )
+		{
+			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
+		}
+		
+		$tables = array();
+		while( $row = $db->fetch_row($result) )
+		{
+			$tables[$row[0]] = '';
+		}
+		
+		return $tables;
+	}
+	
+	/**
+	 * sql_backup::get_table_structure()
+	 * 
+	 * Retourne la structure d'une table de la base de données sous forme de requète SQL de type DDL
+	 * 
+	 * @param array   $tabledata    Informations sur la table (provenant de self::get_tables())
+	 * @param boolean $drop_option  Ajouter une requète de suppression conditionnelle de table
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function get_table_structure($tabledata, $drop_option)
+	{
+		global $db;
+		
+		$contents  = '-- ' . $this->eol;
+		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= '-- ' . $this->eol;
+		
+		if( $drop_option )
+		{
+			$contents .= 'DROP TABLE ' . $tabledata['name'] . ';' . $this->eol;
+		}
+		
+		$sql = "SELECT sql, type
+			FROM sqlite_master
+			WHERE tbl_name = '$tabledata[name]'
+				AND sql IS NOT NULL";
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
+		}
+		
+		$indexes = '';
+		while( $row = $db->fetch_array($result) )
+		{
+			if( $row['type'] == 'table' )
+			{
+				$create_table = str_replace(',', ',' . $this->eol, $row['sql']) . ';' . $this->eol;
+			}
+			else
+			{
+				$indexes .= $row['sql'] . ';' . $this->eol;
+			}
+		}
+		
+		$contents .= $create_table . $indexes;
+		
+		return $contents;
+	}
+	
+	/**
+	 * sql_backup::get_table_data()
+	 * 
+	 * Retourne les données d'une table de la base de données sous forme de requètes SQL de type DML
+	 * 
+	 * @param string $tablename  Nom de la table à considérer
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function get_table_data($tablename)
+	{
+		global $db;
+		
+		$contents = '';
+		
+		$sql = 'SELECT * FROM ' . $tablename;
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
+		}
+		
+		if( $row = $db->fetch_row($result) )
+		{
+			$contents  = $this->eol;
+			$contents .= '-- ' . $this->eol;
+			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
+			$contents .= '-- ' . $this->eol;
+			
+			$fields = array();
+			for( $j = 0, $n = $db->num_fields($result); $j < $n; $j++ )
+			{
+				$fields[] = $db->field_name($j, $result);
+			}
+			
+			$fields = implode(', ', $fields);
+			
+			do
+			{
+				$contents .= "INSERT INTO $tablename ($fields) VALUES";
+				
+				foreach( $row AS $key => $value )
+				{
+					if( is_null($value) )
+					{
+						$row[$key] = 'NULL';
+					}
+					else
+					{
+						$row[$key] = '\'' . $db->escape($value) . '\'';
+					}
+				}
+				
+				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
+			}
+			while( $row = $db->fetch_row($result) );
+		}
+		
+		return $contents;
+	}
 }
 
 }
