@@ -120,7 +120,7 @@ function exec_queries($sql_ary, $return_error = false)
 		$sql_ary = array($sql_ary);
 	}
 	
-	foreach( $sql_ary AS $query )
+	foreach( $sql_ary as $query )
 	{
 		$result = $db->query($query);
 		
@@ -223,7 +223,7 @@ if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
 {
 	$accept_lang_ary = array_map('trim', explode(',', server_info('HTTP_ACCEPT_LANGUAGE')));
 	
-	foreach( $accept_lang_ary AS $accept_lang )
+	foreach( $accept_lang_ary as $accept_lang )
 	{
 		$accept_lang = strtolower(substr($accept_lang, 0, 2));
 		
@@ -246,13 +246,13 @@ if( !function_exists('version_compare') )
 }
 
 $vararray = array('dbtype', 'dbhost', 'dbuser', 'dbpassword', 'dbname', 'prefixe');
-foreach( $vararray AS $varname )
+foreach( $vararray as $varname )
 {
 	${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : ${$varname};
 }
 
 $vararray = array('start', 'confirm', 'sendfile');
-foreach( $vararray AS $varname )
+foreach( $vararray as $varname )
 {
 	${$varname} = ( isset($_POST[$varname]) ) ? true : false;
 }
@@ -277,7 +277,7 @@ else if( $dbtype == 'mysql4' )
 }
 
 $db_list = '';
-foreach( $supported_db AS $db_name => $db_infos )
+foreach( $supported_db as $db_name => $db_infos )
 {
 	$db_list .= ', ' . $db_infos['Name'];
 	
@@ -294,7 +294,7 @@ if( count($supported_db) == 0 )
 
 if( isset($supported_db[$dbtype]) )
 {
-	require WA_ROOTDIR . '/sql/db_type.php';
+	require WA_ROOTDIR . '/includes/sql/db_type.php';
 }
 else if( defined('NL_INSTALLED') || defined('IN_UPGRADE') )
 {
@@ -309,7 +309,7 @@ $config_file .= "//\n";
 $config_file .= "define('NL_INSTALLED', true);\n";
 $config_file .= "define('WA_VERSION',   '" . WA_NEW_VERSION . "');\n\n";
 $config_file .= "\$dbtype  = '$dbtype';\n\n";
-$config_file .= "\$dbhost  = " .  (($dbtype == 'sqlite') ? "WA_ROOTDIR . '/sql/wanewsletter.sqlite'" : "'$dbhost'") . ";\n";
+$config_file .= "\$dbhost  = " .  (($dbtype == 'sqlite') ? "WA_ROOTDIR . '/includes/sql/wanewsletter.sqlite'" : "'$dbhost'") . ";\n";
 $config_file .= "\$dbuser  = '$dbuser';\n";
 $config_file .= "\$dbpassword = '$dbpassword';\n";
 $config_file .= "\$dbname  = '$dbname';\n\n";

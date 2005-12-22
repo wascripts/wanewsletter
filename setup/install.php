@@ -33,14 +33,14 @@ $vararray = array(
 	'language', 'prev_language', 'admin_login', 'admin_email', 'admin_pass', 
 	'confirm_pass', 'urlsite', 'urlscript'
 );
-foreach( $vararray AS $varname )
+foreach( $vararray as $varname )
 {
 	${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
 }
 
 $confirm_pass = ( $confirm_pass != '' ) ? md5($confirm_pass) : '';
 $language     = ( $language != '' ) ? $language : $default_lang;
-$sqlite_db    = WA_ROOTDIR . '/sql/wanewsletter.sqlite';
+$sqlite_db    = WA_ROOTDIR . '/includes/sql/wanewsletter.sqlite';
 
 $output->set_filenames( array(
 	'body' => 'install.tpl'

@@ -42,7 +42,7 @@ exit(0);
 define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR', '..');
 
-$sqlite_db   = WA_ROOTDIR . '/sql/wanewsletter.sqlite';
+$sqlite_db   = WA_ROOTDIR . '/includes/sql/wanewsletter.sqlite';
 $schemas_dir = WA_ROOTDIR . '/setup/schemas';
 $remove_db   = true;
 //
@@ -54,7 +54,7 @@ chdir(dirname(__FILE__));
 require WA_ROOTDIR . '/includes/config.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/sql/db_type.php';
+require WA_ROOTDIR . '/includes/sql/db_type.php';
 
 //
 // Gestionnaire d'erreur spécifique pour utilisation en ligne de commande
@@ -105,7 +105,7 @@ chmod($sqlite_db, 0666);
 $sqldata = file_get_contents($schemas_dir . '/sqlite_tables.sql');
 $queries = make_sql_ary($sqldata, ';');
 
-foreach( $queries AS $query ) {
+foreach( $queries as $query ) {
 	sqlite_exec($fs, $query);
 }
 
@@ -120,7 +120,7 @@ $tableList = array(
 );
 $tableList = str_replace('wa_', $prefixe, $tableList);
 
-foreach( $tableList AS $table ) {
+foreach( $tableList as $table ) {
 	printf("Populate table %s...\n", $table);
 	flush();
 	
@@ -138,7 +138,7 @@ foreach( $tableList AS $table ) {
 	while( $row = $db->fetch_array($result) ) {
 		$values = array();
 		
-		foreach( $row AS $value ) {
+		foreach( $row as $value ) {
 			if( is_null($value) ) {
 				$value = 'NULL';
 			} else {

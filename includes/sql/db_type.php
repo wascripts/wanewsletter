@@ -53,7 +53,7 @@ switch( $dbtype )
 	case 'mysqli':
 	case 'postgres':
 	case 'sqlite':
-		require WA_ROOTDIR . '/sql/' . $dbtype . '.php';
+		require WA_ROOTDIR . '/includes/sql/' . $dbtype . '.php';
 		break;
 	
 	default:
