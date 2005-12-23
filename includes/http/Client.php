@@ -225,7 +225,7 @@ class HTTP_Client extends HTTP_Main {
 			if( is_array($postdata) )
 			{
 				$tmp = '';
-				foreach( $postdata AS $name => $value )
+				foreach( $postdata as $name => $value )
 				{
 					$tmp .= '&' . $name . '=' . rawurlencode($value);
 				}
@@ -270,7 +270,7 @@ class HTTP_Client extends HTTP_Main {
 		$path = $this->url->path . (($this->url->query != '') ? '?' . $this->url->query : '');
 		
 		$this->write($fs, "$this->requestMethod $path HTTP/1.1\r\n");
-		foreach( $this->_requestHeaders AS $name => $value )
+		foreach( $this->_requestHeaders as $name => $value )
 		{
 			if( !empty($value) )
 			{

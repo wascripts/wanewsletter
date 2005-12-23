@@ -25,559 +25,690 @@
  * @version $Id$
  */
 
-if( !defined('CLASS_SQL_INC') ) {
+if( !defined('_INC_CLASS_WADB') ) {
 
-define('CLASS_SQL_INC', true);
-define('DATABASE', 'sqlite');
+define('_INC_CLASS_WADB', true);
 
-/**
- * @todo
- * - Attention à l'encodage
- * Si sqlite_libencoding() retourne UTF-8, faire une conversion vers le charset de 
- * configuration de Wanewsletter ?
- */
-class sql {
+define('SQL_INSERT', 1);
+define('SQL_UPDATE', 2);
+define('SQL_DELETE', 3);
+
+define('SQL_FETCH_NUM',   SQLITE_NUM);
+define('SQL_FETCH_ASSOC', SQLITE_ASSOC);
+define('SQL_FETCH_BOTH',  SQLITE_BOTH);
+
+class Wadb {
+	
 	/**
-	 * Ressource de connexion
+	 * Connexion à la base de données
 	 * 
 	 * @var resource
+	 * @access private
 	 */
-	var $connect_id   = '';
+	var $link;
 	
 	/**
-	 * Ressource de résultat
-	 * 
-	 * @var resource
-	 */
-	var $query_result = '';
-	
-	/**
-	 * Transaction en cours ou non
-	 * 
-	 * @var integer
-	 */
-	var $trc_started  = 0;
-	
-	/**
-	 * Retours d'erreur (code et message)
-	 * 
-	 * @var array
-	 */
-	var $sql_error    = array('errno' => '', 'message' => '', 'query' => '');
-	
-	/**
-	 * Nombre de requètes effectuées depuis le lancement du script
-	 * 
-	 * @var integer
-	 */
-	var $queries      = 0;
-	
-	/**
-	 * Temps d'exécution du script affecté au traitement des requètes SQL
+	 * Nom de la base de données
 	 * 
 	 * @var string
-	 */
-	var $sql_time     = 0;
-	
-	/**
-	 * sql::sql()
-	 * 
-	 * Constructeur de classe
-	 * Initialise la connexion à la base de données
-	 * 
-	 * @param string  $dbhost      Hôte de la base de données
-	 * @param string  $dbuser      Nom d'utilisateur
-	 * @param string  $dbpwd       Mot de passe
-	 * @param string  $dbname      Nom de la base de données
-	 * @param boolean $persistent  Connexion persistante ou non
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function sql($dbpath, $dbuser = null, $dbpwd = null, $dbname = null, $persistent = false)
-	{
-		$sql_connect = ( $persistent ) ? 'sqlite_popen' : 'sqlite_open';
-		
-		$this->connect_id = @$sql_connect($dbpath, 0666, $errorstr);
-		
-		if( is_resource($this->connect_id) )
-		{
-			$this->query('PRAGMA short_column_names = 1');
-			$this->query('PRAGMA case_sensitive_like = 0');
-		}
-		else
-		{
-			$this->sql_error['message'] = $errorstr;
-		}
-	}
-	
-	/**
-	 * sql::prepare_value()
-	 * 
-	 * Prépare une valeur pour son insertion dans la base de données
-	 * (Dans la pratique, échappe les caractères potentiellement dangeureux)
-	 * 
-	 * @param mixed $value
-	 * 
 	 * @access private
-	 * @return mixed
 	 */
-	function prepare_value($value)
-	{
-		if( is_bool($value) || preg_match('/^[0-9]+$/', $value) )
-		{
-			$tmp = intval($value);
-		}
-		else
-		{
-			$tmp = '\'' . $this->escape($value) . '\'';
-		}
-		
-		return $tmp;
-	}
+	var $dbname;
 	
 	/**
-	 * sql::query_build()
+	 * Options de connexion
 	 * 
-	 * Construit une requète de type INSERT, UPDATE ou DELETE à partir
-	 * des diverses données fournies
+	 * @var resource
+	 * @access private
+	 */
+	var $options = array();
+	
+	/**
+	 * Code d'erreur
 	 * 
-	 * @param string $query_type  Type de requète (peut valoir INSERT, UPDATE ou DELETE)
-	 * @param string $table       Table sur laquelle effectuer la requète
-	 * @param array  $query_data  Tableau des données à insérer. Le tableau a la structure suivante:
-	 *                            array(column_name => column_value[, column_name => column_value])
-	 * @param string $sql_where   Chaîne de condition
+	 * @var integer
+	 * @access public
+	 */
+	var $errno = 0;
+	
+	/**
+	 * Message d'erreur
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $error = '';
+	
+	/**
+	 * Dernière requète SQL exécutée (en cas d'erreur seulement)
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $query = '';
+	
+	/**
+	 * Nombre de requètes SQL exécutées depuis le début de la connexion
+	 * 
+	 * @var integer
+	 * @access private
+	 */
+	var $queries = 0;
+	
+	/**
+	 * Durée totale d'exécution des requètes SQL
+	 * 
+	 * @var string
+	 * @access private
+	 */
+	var $sqltime = 0;
+	
+	/**
+	 * Version de la librairie SQLite
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $libVersion = '';
+	
+	/**
+	 * Constructeur de classe
+	 * 
+	 * @param string $dbname   Nom de la base de données
+	 * @param array  $options  Options de connexion/utilisation
 	 * 
 	 * @access public
-	 * @return string
 	 */
-	function query_build($query_type, $table, $query_data, $sql_where = '')
+	function Wadb($sqlite_db, $options = null)
 	{
-		$fields = $values = array();
-		
-		foreach( $query_data AS $field => $value )
-		{
-			array_push($fields, $field);
-			array_push($values, $this->prepare_value($value));
-		}
-		
-		if( $query_type == 'INSERT' )
-		{
-			$query_string  = 'INSERT INTO ' . $table . ' ';
-			$query_string .= '(' . implode(', ', $fields) . ') VALUES(' . implode(', ', $values) . ')';
-		}
-		else if( $query_type == 'UPDATE' )
-		{
-			$query_string  = 'UPDATE ' . $table . ' SET ';
-			for( $i = 0; $i < count($fields); $i++ )
-			{
-				$query_string .= ( $i > 0 ) ? ', ' : '';
-				$query_string .= $fields[$i] . ' = ' . $values[$i];
+		if( file_exists($sqlite_db) ) {
+			if( !is_readable($sqlite_db) ) {
+				trigger_error("SQLite database isn't readable!", E_USER_WARNING);
 			}
+		}
+		else if( !is_writable(dirname($sqlite_db)) ) {
+			trigger_error(dirname($sqlite_db) . " isn't writable. Cannot create "
+				. basename($sqlite_db) . " database", E_USER_WARNING);
+		}
+		
+		$connect = 'sqlite_open';
+		
+		if( is_array($options) ) {
+			$this->options = $options;
 			
-			if( is_array($sql_where) && count($sql_where) )
-			{
-				$tmp = array(); 
-				foreach( $sql_where AS $field => $value )
-				{
-					$tmp[] = $field . ' = ' . $this->prepare_value($value);
-				}
-				
-				$query_string .= ' WHERE ' . implode(' AND ', $tmp);
+			if( !empty($options['persistent']) ) {
+				$connect = 'sqlite_popen';
 			}
 		}
 		
-		return $this->query($query_string);
+		if( $this->link = $connect($sqlite_db, 0666, $this->error) ) {
+			sqlite_exec($this->link, 'PRAGMA short_column_names = 1');
+			sqlite_exec($this->link, 'PRAGMA case_sensitive_like = 0');
+			
+			ini_set('sqlite.assoc_case', '0');
+			$this->libVersion = sqlite_libversion();
+			
+//			if( !empty($this->options['charset']) ) {
+//				$this->encoding($this->options['charset']);
+//			}
+		}
 	}
 	
 	/**
-	 * sql::query()
+	 * Connexion à la base de données
 	 * 
-	 * Effectue une requète à destination de la base de données et retourne le résultat
-	 * En cas d'erreur, la méthode stocke les informations d'erreur dans sql::sql_error
-	 * et retourne false
-	 * 
-	 * @param string  $query  La requète SQL à exécuter
-	 * @param integer $start  Réupére les lignes de résultat à partir de la position $start
-	 * @param integer $limit  Limite le nombre de résultat à retourner
-	 * 
-	 * @access public
-	 * @return resource
-	 */
-	function query($query, $start = null, $limit = null)
-	{
-		global $starttime;
-		
-		unset($this->query_result);
-		
-		if( isset($start) && !empty($limit) )
-		{
-			$query .= ' LIMIT ' . $start . ', ' . $limit;
-		}
-		
-		$curtime = explode(' ', microtime());
-		$curtime = $curtime[0] + $curtime[1] - $starttime;
-		
-		$this->query_result = @sqlite_query($this->connect_id, $query);
-		
-		$endtime = explode(' ', microtime());
-		$endtime = $endtime[0] + $endtime[1] - $starttime;
-		
-		$this->sql_time += ($endtime - $curtime);
-		$this->queries++;
-		
-		if( !$this->query_result )
-		{
-			$this->sql_error['errno']   = sqlite_last_error($this->connect_id);
-			$this->sql_error['message'] = sqlite_error_string($this->sql_error['errno']);
-			$this->sql_error['query']   = $query;
-		}
-		else
-		{
-			$this->sql_error = array('errno' => '', 'message' => '', 'query' => '');
-		}
-		
-		return $this->query_result;
-	}
-	
-	/**
-	 * sql::transaction()
-	 * 
-	 * Gestion des transactions
-	 * 
-	 * @param integer $transaction
+	 * @param array $infos    Informations de connexion
+	 * @param array $options  Options de connexion/utilisation
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
-	function transaction($transaction)
+	function connect($infos = null, $options = null)
 	{
-		switch($transaction)
-		{
-			case START_TRC:
-				if( !$this->trc_started )
-				{
-					$this->trc_started = true;
-					$result = @sqlite_exec($this->connect_id, 'BEGIN');
-				}
-				else
-				{
-					$result = true;
-				}
-				break;
+		if( is_array($options) ) {
+			$this->options = $options;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * @access public
+	 * @return boolean
+	 */
+	function isConnected()
+	{
+		return !is_null($this->link);
+	}
+	
+	/**
+	 * Renvoie le jeu de caractères courant utilisé.
+	 * Si l'argument $encoding est fourni, il est utilisé pour définir
+	 * le nouveau jeu de caractères de la connexion en cours
+	 * 
+	 * @param string $encoding
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function encoding($encoding = null)
+	{
+		if( !is_null($encoding) ) {
+			trigger_error("Setting encoding isn't supported by SQLite", E_USER_WARNING);
+		}
+		
+		return sqlite_libencoding();
+	}
+	
+	/**
+	 * Exécute une requète sur la base de données
+	 * 
+	 * @param string $query
+	 * 
+	 * @access public
+	 * @return mixed
+	 */
+	function query($query)
+	{
+		$curtime = array_sum(explode(' ', microtime()));
+		$result  = sqlite_query($this->link, $query);
+		$endtime = array_sum(explode(' ', microtime()));
+		
+		$this->sqltime += ($endtime - $curtime);
+		$this->queries++;
+		
+		if( !$result ) {
+			$this->errno = sqlite_last_error($this->link);
+			$this->error = sqlite_error_string($this->errno);
+			$this->query = $query;
 			
-			case END_TRC:
-				if( $this->trc_started )
-				{
-					$this->trc_started = false;
-					
-					if( !($result = @sqlite_exec($this->connect_id, 'COMMIT')) )
-					{
-						@sqlite_exec($this->connect_id, 'ROLLBACK');
-					}
-				}
-				else
-				{
-					$result = true;
-				}
-				break;
+			$this->rollBack();
+		}
+		else {
+			$this->errno = 0;
+			$this->error = '';
+			$this->query = '';
 			
-			case 'ROLLBACK':
-				if( $this->trc_started )
-				{
-					$this->trc_started = false;
-					$result = @sqlite_exec($this->connect_id, 'ROLLBACK');
-				}
-				else
-				{
-					$result = true;
-				}
-				break;
+			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
+				$result = new WadbResult($this->link, $result);
+			}
 		}
 		
 		return $result;
 	}
 	
 	/**
-	 * sql::check()
+	 * Construit une requète de type INSERT ou UPDATE à partir des diverses données fournies
 	 * 
-	 * Optimisation des tables
-	 * 
-	 * @param mixed $tables  Nom de la table ou tableau de noms de table à optimiser
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function check($tables)
-	{
-		if( !is_array($tables) )
-		{
-			$tables = array($tables); 
-		}
-		
-		foreach( $tables AS $tablename )
-		{
-			@sqlite_exec($this->connect_id, 'VACUUM ' . $tablename); 
-		}
-	}
-	
-	/**
-	 * sql::num_rows()
-	 * 
-	 * Nombre de lignes retournées
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
+	 * @param string $type      Type de requète (peut valoir INSERT ou UPDATE)
+	 * @param string $table     Table sur laquelle effectuer la requète
+	 * @param array  $data      Tableau des données à insérer. Le tableau a la structure suivante:
+	 *                          array(column_name => column_value[, column_name => column_value])
+	 * @param array $sql_where  Chaîne de condition
 	 * 
 	 * @access public
 	 * @return mixed
 	 */
-	function num_rows($result = false)
+	function build($type, $table, $data, $sql_where = null)
 	{
-		if( !$result )
-		{
-			$result = $this->query_result;
+		$fields = $values = array();
+		
+		foreach( $data as $field => $value ) {
+			if( is_bool($value) ) {
+				$value = intval($value);
+			}
+			else if( !is_int($value) && !is_float($value) ) {
+				$value = '\'' . $this->escape($value) . '\'';
+			}
+			
+			array_push($fields, $this->quote($field));
+			array_push($values, $value);
 		}
 		
-		return ( $result != false ) ? sqlite_num_rows($result) : false;
-	}
-	
-	/**
-	 * sql::affected_rows()
-	 * 
-	 * Nombre de lignes affectées par la dernière requète DML
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function affected_rows()
-	{
-		return ( $this->connect_id != false ) ? sqlite_changes($this->connect_id) : false;
-	}
-	
-	/**
-	 * sql::fetch_row()
-	 * 
-	 * Retourne un tableau indexé numériquement correspondant à la ligne de résultat courante
-	 * et déplace le pointeur de lecture des résultats
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function fetch_row($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
+		if( $type == SQL_INSERT ) {
+			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
+		}
+		else if( $type == SQL_UPDATE ) {
+			
+			$query = 'UPDATE ' . $table . ' SET ';
+			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
+				$query .= $fields[$i] . ' = ' . $values[$i] . ', ';
+			}
+			
+			$query = substr($query, 0, -2);
+			
+			if( is_array($sql_where) && count($sql_where) > 0 ) {
+				$query .= ' WHERE ';
+				foreach( $sql_where as $field => $value ) {
+					if( is_bool($value) ) {
+						$value = intval($value);
+					}
+					else if( !is_int($value) && !is_float($value) ) {
+						$value = '\'' . $this->escape($value) . '\'';
+					}
+					
+					$query .= sprintf('%s = %s AND ', $this->quote($field), $value);
+				}
+				
+				$query = substr($query, 0, -5);
+			}
 		}
 		
-		return ( $result != false ) ? @sqlite_fetch_array($result, SQLITE_NUM) : false;
+		return $this->query($query);
 	}
 	
 	/**
-	 * sql::fetch_array()
+	 * Protège un nom de base, de table ou de colonne en prévision de son utilisation
+	 * dans une requète
 	 * 
-	 * Retourne un tableau associatif correspondant à la ligne de résultat courante
-	 * et déplace le pointeur de lecture des résultats
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function fetch_array($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? @sqlite_fetch_array($result, SQLITE_ASSOC) : false;
-	}
-	
-	/**
-	 * sql::fetch_rowset()
-	 * 
-	 * Retourne un tableau bi-dimensionnel correspondant à toutes les lignes de résultat
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function fetch_rowset($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? @sqlite_fetch_all($result, SQLITE_ASSOC) : false;
-	}
-	
-	/**
-	 * sql::num_fields()
-	 * 
-	 * Retourne le nombre de champs dans le résultat
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function num_fields($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? sqlite_num_fields($result) : false;
-	}
-	
-	/**
-	 * sql::field_name()
-	 * 
-	 * Retourne le nom de la colonne à l'index $offset dans le résultat
-	 * 
-	 * @param integer  $offset  Position de la colonne dans le résultat
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function field_name($offset, $result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? sqlite_field_name($result, $offset) : false;
-	}
-	
-	/**
-	 * sql::result()
-	 * 
-	 * Retourne la valeur d'une colonne dans une ligne de résultat donnée
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * @param integer  $row     Numéro de la ligne de résultat
-	 * @param string   $field   Nom de la colonne
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function result($result, $row, $field = '')
-	{
-		sqlite_seek($result, $row);
-		
-		if( $field != '' )
-		{
-			$r = sqlite_column($result, $field);
-		}
-		else
-		{
-			$r = sqlite_current($result);
-			$r = $r[0];
-		}
-		
-		return $r;
-	}
-	
-	/**
-	 * sql::result_seek()
-	 * 
-	 * Déplace le pointeur interne de résultat
-	 * 
-	 * @param integer  $row     Numéro de la ligne de résultat
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function result_seek($row, $result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? sqlite_seek($result, $row) : false;
-	}
-	
-	/**
-	 * sql::next_id()
-	 * 
-	 * Retourne l'identifiant généré par la dernière requête INSERT
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function next_id()
-	{
-		return ( $this->connect_id != false ) ? sqlite_last_insert_rowid($this->connect_id) : false;
-	}
-	
-	/**
-	 * sql::free_result()
-	 * 
-	 * Libère le résultat de la mémoire (méthode inutile dans le cas de SQLite)
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function free_result($result = false)
-	{
-		// Nothing
-	}
-	
-	/**
-	 * sql::escape()
-	 * 
-	 * Échappe une chaîne de caractère en prévision de son insertion dans la base de données
-	 * 
-	 * @param string $str
+	 * @param string $name
 	 * 
 	 * @access public
 	 * @return string
 	 */
-	function escape($str)
+	function quote($name)
 	{
-		return sqlite_escape_string($str);
+		return '[' . $name . ']';
 	}
 	
 	/**
-	 * sql::close()
+	 * @param mixed $tables  Nom de table ou tableau de noms de table
 	 * 
-	 * Clôt la connexion à la base de données
+	 * @access public
+	 * @return void
+	 */
+	function vacuum($tables)
+	{
+		if( !is_array($tables) ) {
+			$tables = array($tables); 
+		}
+		
+		foreach( $tables as $tablename ) {
+			sqlite_exec($this->link, 'VACUUM ' . $tablename);
+		}
+	}
+	
+	/**
+	 * Démarre le mode transactionnel
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function beginTransaction()
+	{
+		return sqlite_exec($this->link, 'BEGIN');
+	}
+	
+	/**
+	 * Envoie une commande COMMIT à la base de données pour validation de la
+	 * transaction courante
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function commit()
+	{
+		if( !($result = sqlite_exec($this->link, 'COMMIT')) )
+		{
+			sqlite_exec($this->link, 'ROLLBACK');
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * Envoie une commande ROLLBACK à la base de données pour annulation de la
+	 * transaction courante
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function rollBack()
+	{
+		return sqlite_exec($this->link, 'ROLLBACK');
+	}
+	
+	/**
+	 * Renvoie le nombre de lignes affectées par la dernière requète DML
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function affectedRows()
+	{
+		return sqlite_changes($this->link);
+	}
+	
+	/**
+	 * Retourne l'identifiant généré automatiquement par la dernière requète
+	 * INSERT sur la base de données
+	 * 
+	 * @access public
+	 * @return integer
+	 */
+	function lastInsertId()
+	{
+		return sqlite_last_insert_rowid($this->link);
+	}
+	
+	/**
+	 * Échappe une chaîne en prévision de son insertion dans une requète sur
+	 * la base de données
+	 * 
+	 * @param string $string
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function escape($string)
+	{
+		return sqlite_escape_string($string);
+	}
+	
+	/**
+	 * Vérifie l'état de la connexion courante et effectue si besoin une reconnexion
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function ping()
+	{
+		return sqlite_open($this->dbname, 0666);
+	}
+	
+	/**
+	 * Ferme la connexion à la base de données
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
 	function close()
 	{
-		if( $this->connect_id != false )
-		{
-			$this->transaction(END_TRC);
-			
-			$result = @sqlite_close($this->connect_id);
-			$this->connect_id   = null;
-			$this->query_result = null;
+		if( !is_null($this->link) ) {
+			@$this->commit();
+			$result = sqlite_close($this->link);
+			$this->link = null;
 			
 			return $result;
 		}
-		else
-		{
+		else {
+			return true;
+		}
+	}
+	
+	/**
+	 * Destructeur de classe
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function __destruct()
+	{
+		$this->close();
+	}
+}
+
+class WadbResult {
+	
+	/**
+	 * Connexion à la base de données
+	 * 
+	 * @var resource
+	 * @access private
+	 */
+	var $link;
+	
+	/**
+	 * Ressource de résultat de requète
+	 * 
+	 * @var resource
+	 * @access private
+	 */
+	var $result;
+	
+	/**
+	 * Nombre de lignes renvoyées par la requète
+	 * 
+	 * @var resource
+	 * @access private
+	 */
+	var $_count = 0;
+	
+	/**
+	 * Mode de récupération des données
+	 * 
+	 * @var integer
+	 * @access private
+	 */
+	var $fetchMode;
+	
+	/**
+	 * Constructeur de classe
+	 * 
+	 * @param resource $link    Ressource de connexion à la base de données
+	 * @param resource $result  Ressource de résultat de requète
+	 * 
+	 * @access public
+	 */
+	function WadbResult($link, $result)
+	{
+		$this->link   = $link;
+		$this->result = $result;
+		$this->_count = sqlite_num_rows($result);
+		$this->fetchMode = SQLITE_BOTH;
+	}
+	
+	/**
+	 * Renvoie le nombre de lignes du résultat
+	 * 
+	 * @access public
+	 * @return integer
+	 */
+	function count()
+	{
+		return $this->_count;
+	}
+	
+	/**
+	 * Renvoie la ligne suivante dans le jeu de résultat
+	 * 
+	 * @param integer $mode  Mode de récupération des données
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function fetch($mode = null)
+	{
+		if( is_null($mode) ) {
+			$mode = $this->fetchMode;
+		}
+		
+		return sqlite_fetch_array($this->result, $mode);
+	}
+	
+	/**
+	 * Renvoie sous forme d'objet la ligne suivante dans le jeu de résultat
+	 * 
+	 * @access public
+	 * @return object
+	 */
+	function fetchObject()
+	{
+		return sqlite_fetch_object($this->result);
+	}
+	
+	/**
+	 * Renvoie un tableau de toutes les lignes du jeu de résultat
+	 * 
+	 * @param integer $mode  Mode de récupération des données
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function fetchAll($mode = null)
+	{
+		if( is_null($mode) ) {
+			$mode = $this->fetchMode;
+		}
+		
+		return sqlite_fetch_all($this->result, $mode);
+	}
+	
+	/**
+	 * Retourne le contenu de la colonne pour l'index ou le nom donné
+	 * à l'index courant dans le jeu de résultat.
+	 * Ne déplace PAS le pointeur de résultat
+	 * 
+	 * @param mixed $column  Index ou nom de la colonne
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function column($column)
+	{
+		return sqlite_column($this->result, $column);
+	}
+	
+	/**
+	 * Renvoie la ligne courante dans le jeu de résultat.
+	 * Ne déplace PAS le pointeur de résultat
+	 * 
+	 * @param integer $mode  Mode de récupération des données
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function current($mode = null)
+	{
+		if( is_null($mode) ) {
+			$mode = $this->fetchMode;
+		}
+		
+		return sqlite_current($this->result, $mode);
+	}
+	
+	/**
+	 * Configure le mode de récupération par défaut
+	 * 
+	 * @param integer $mode  Mode de récupération des données
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function setFetchMode($mode)
+	{
+		if( in_array($mode, array(SQLITE_NUM, SQLITE_ASSOC, SQLITE_BOTH)) ) {
+			$this->fetchMode = $mode;
+			return true;
+		}
+		else {
+			trigger_error("Invalid fetch mode", E_USER_WARNING);
 			return false;
 		}
 	}
-}// fin de la classe
+	
+	/**
+	 * Place le pointeur de résultat à la première position
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function rewind()
+	{
+		return sqlite_rewind($this->result);
+	}
+	
+	/**
+	 * Place le pointeur de résultat à la position précédente
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function prev()
+	{
+		return sqlite_prev($this->result);
+	}
+	
+	/**
+	 * Place le pointeur de résultat à la position suivante
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function next()
+	{
+		return sqlite_next($this->result);
+	}
+	
+	/**
+	 * Place le pointeur de résultat à la position $offset
+	 * 
+	 * @param integer $offset
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function seek($offset)
+	{
+		return sqlite_seek($this->result, $offset);
+	}
+	
+	/**
+	 * Indique si une ligne précédente est disponible dans le jeu de résultat
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function hasPrev()
+	{
+		return sqlite_has_prev($this->result);
+	}
+	
+	/**
+	 * Indique si une ligne suivante est disponible dans le jeu de résultat
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function hasMore()
+	{
+		return sqlite_has_more($this->result);
+	}
+	
+	/**
+	 * Libère la mémoire allouée
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function free()
+	{
+		unset($this->result);
+		return true;
+	}
+	
+	/**
+	 * Destructeur de classe
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function __destruct()
+	{
+		$this->free();
+	}
+}
 
-class sql_backup {
+class WadbBackup {
+	
+	/**
+	 * Informations concernant la base de données
+	 * 
+	 * @var array
+	 * @access private
+	 */
+	var $infos = array();
+	
 	/**
 	 * Fin de ligne
 	 * 
@@ -587,18 +718,26 @@ class sql_backup {
 	var $eol = "\n";
 	
 	/**
-	 * sql_backup::header()
+	 * Constructeur de classe
 	 * 
+	 * @param array $infos  Informations concernant la base de données
+	 * 
+	 * @access public
+	 */
+	function WadbBackup($infos)
+	{
+		$this->infos = $infos;
+	}
+	
+	/**
 	 * Génération de l'en-tête du fichier de sauvegarde
 	 * 
-	 * @param string $dbhost    Hôte de la base de données
-	 * @param string $dbname    Nom de la base de données
 	 * @param string $toolname  Nom de l'outil utilisé pour générer la sauvegarde
 	 * 
 	 * @access public
 	 * @return string
 	 */
-	function header($dbhost, $dbname, $toolname = '')
+	function header($toolname = '')
 	{
 		global $db;
 		
@@ -606,9 +745,9 @@ class sql_backup {
 		$contents .= "-- $toolname SQLite Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= "-- Host       : " . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown') . $this->eol;
-		$contents .= "-- SQLite lib : " . sqlite_libversion() . $this->eol;
-		$contents .= "-- Database   : " . basename($dbhost) . $this->eol;
-		$contents .= '-- Date       : ' . date('d/m/Y H:i:s') . $this->eol;
+		$contents .= "-- SQLite lib : " . $db->libVersion . $this->eol;
+		$contents .= "-- Database   : " . basename($this->infos['dbname']) . $this->eol;
+		$contents .= '-- Date       : ' . date('d/m/Y H:i:s O') . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
@@ -616,16 +755,12 @@ class sql_backup {
 	}
 	
 	/**
-	 * sql_backup::get_tables()
-	 * 
 	 * Retourne la liste des tables présentes dans la base de données considérée
-	 * 
-	 * @param string $dbname
 	 * 
 	 * @access public
 	 * @return array
 	 */
-	function get_tables($dbname)
+	function get_tables()
 	{
 		global $db;
 		
@@ -635,17 +770,16 @@ class sql_backup {
 		}
 		
 		$tables = array();
-		while( $row = $db->fetch_row($result) )
+		while( $result->hasMore() )
 		{
-			$tables[$row[0]] = '';
+			$row = $result->fetch();
+			$tables[$row['tbl_name']] = '';
 		}
 		
 		return $tables;
 	}
 	
 	/**
-	 * sql_backup::get_table_structure()
-	 * 
 	 * Retourne la structure d'une table de la base de données sous forme de requète SQL de type DDL
 	 * 
 	 * @param array   $tabledata    Informations sur la table (provenant de self::get_tables())
@@ -677,8 +811,9 @@ class sql_backup {
 		}
 		
 		$indexes = '';
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
 			if( $row['type'] == 'table' )
 			{
 				$create_table = str_replace(',', ',' . $this->eol, $row['sql']) . ';' . $this->eol;
@@ -695,8 +830,6 @@ class sql_backup {
 	}
 	
 	/**
-	 * sql_backup::get_table_data()
-	 * 
 	 * Retourne les données d'une table de la base de données sous forme de requètes SQL de type DML
 	 * 
 	 * @param string $tablename  Nom de la table à considérer
@@ -716,7 +849,7 @@ class sql_backup {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $row = $db->fetch_row($result) )
+		if( $result->count() > 0 )
 		{
 			$contents  = $this->eol;
 			$contents .= '-- ' . $this->eol;
@@ -724,18 +857,20 @@ class sql_backup {
 			$contents .= '-- ' . $this->eol;
 			
 			$fields = array();
-			for( $j = 0, $n = $db->num_fields($result); $j < $n; $j++ )
+			for( $j = 0, $n = sqlite_num_fields($result->result); $j < $n; $j++ )
 			{
-				$fields[] = $db->field_name($j, $result);
+				$fields[] = sqlite_field_name($result->result, $j);
 			}
 			
 			$fields = implode(', ', $fields);
 			
 			do
 			{
+				$row = $result->fetch(SQL_FETCH_ASSOC);
+				
 				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
-				foreach( $row AS $key => $value )
+				foreach( $row as $key => $value )
 				{
 					if( is_null($value) )
 					{
@@ -749,7 +884,7 @@ class sql_backup {
 				
 				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
 			}
-			while( $row = $db->fetch_row($result) );
+			while( $result->hasMore() );
 		}
 		
 		return $contents;

@@ -58,12 +58,14 @@ if( !$db->connect_id )
 $sql = "SELECT * FROM " . CONFIG_TABLE;
 if( !($result = $db->query($sql)) )
 {
-	plain_error("Impossible d'obtenir la configuration du script :\n" . $db->sql_error['message']);
+	plain_error("Impossible d'obtenir la configuration du script :\n" . $db->error);
 }
 
 $old_config = array();
-while( $row = $db->fetch_array($result) )
+while( $result->hasMore() )
 {
+	$row = $result->fetch(SQL_FETCH_ASSOC);
+	
 	if( !isset($row['nom']) )
 	{
 		$old_config = $row;
@@ -138,7 +140,7 @@ if( $start )
 	}
 	
 	$res = $db->query($sql);
-	if( $db->result($res, 0) == 0 )
+	if( $res->column(0) == 0 )
 	{
 		$error = true;
 		$msg_error[] = $lang['Message']['Error_login'];
@@ -162,7 +164,7 @@ if( $start )
 		
 		$sql_create = make_sql_ary(implode('', file($sql_create)), $supported_db[$dbtype]['delimiter'], $prefixe);
 		
-		foreach( $sql_create AS $query )
+		foreach( $sql_create as $query )
 		{
 			preg_match('/' . $prefixe . '([[:alnum:]_-]+)/i', $query, $match);
 			
@@ -193,7 +195,7 @@ if( $start )
 			$sql = "SELECT MIN(date) FROM " . ABONNES_TABLE;
 			if( $result = $db->query($sql) )
 			{
-				$startdate = $db->result($result, 0, 0);
+				$startdate = $result->column(0);
 			}
 			
 			if( !$startdate )
@@ -331,8 +333,9 @@ if( $start )
 			}
 			
 			$num_logs_ary = array();
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
 				$num_logs_ary[$row['liste_id']] = $row['numlogs'];
 			}
 			
@@ -344,8 +347,9 @@ if( $start )
 			
 			$sql_update = array();
 			
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
 				$numlogs = ( !empty($num_logs_ary[$row['liste_id']]) ) ? $num_logs_ary[$row['liste_id']] : 0;
 				
 				$sql_update[] = "UPDATE " . LISTE_TABLE . "
@@ -377,7 +381,8 @@ if( $start )
 				sql_error();
 			}
 			
-			$logrow = $db->fetch_rowset($result);
+			$logrow = $result->fetchAll();
+			$result->free();
 			
 			$sql_update = array();
 			$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
@@ -420,7 +425,7 @@ if( $start )
 						VALUES('" . $db->escape($files[$j]) . "', '" . $db->escape($files[$j]) . "', " . intval($filesize) . ", '" . $db->escape($mime_type) . "')";
 					if( $db->query($sql) )
 					{
-						$file_id = $db->next_id();
+						$file_id = $db->lastInsertId();
 						
 						$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id)
 							VALUES(" . $logrow[$i]['log_id'] . ", $file_id)";
@@ -444,8 +449,8 @@ if( $start )
 				sql_error();
 			}
 			
-			$aborow = $db->fetch_rowset($result);
-			$db->free_result($result);
+			$aborow = $result->fetchAll();
+			$result->free();
 			
 			$sql_update	  = array();
 			$sql_update[] = "DROP TABLE " . ABONNES_TABLE;
@@ -472,18 +477,18 @@ if( $start )
 				);
 			}
 			
-			foreach( $abo_liste AS $email => $data )
+			foreach( $abo_liste as $email => $data )
 			{
 				$sql = "INSERT INTO " . ABONNES_TABLE . " (abo_email, abo_pwd, abo_lang, abo_status)
 					VALUES('" . $db->escape($email) . "', '" . md5($data['code']) . "', '$language', " . $data['status'] . ")";
 				exec_queries($sql, true);
 				
-				$abo_id = $db->next_id();
+				$abo_id = $db->lastInsertId();
 				$sql_update = array();
 				
 				$data['code'] = ( $data['status'] == ABO_INACTIF ) ? '\'' . substr($data['code'], 0, 20) . '\'' : 'NULL';
 				
-				foreach( $data['listes'] AS $liste_id => $listdata )
+				foreach( $data['listes'] as $liste_id => $listdata )
 				{
 					$sql_update[] = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, send, register_key, register_date, confirmed)
 						VALUES($abo_id, $liste_id, $listdata[format], $listdata[send], $data[code], $data[date], $data[status])";
@@ -500,15 +505,16 @@ if( $start )
 				sql_error();
 			}
 			
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
 				$sql = "UPDATE " . ABO_LISTE_TABLE . "
 					SET register_key = '" . generate_key(20, false) . "'
 					WHERE liste_id = $row[liste_id]
 						AND abo_id = " . $row['abo_id'];
 				$db->query($sql);
 			}
-			$db->free_result($result);
+			$result->free();
 			
 			unset($aborow, $abo_liste);
 			
@@ -526,8 +532,9 @@ if( $start )
 				sql_error();
 			}
 			
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
 				$sql_update[] = "UPDATE " . LOG_TABLE . "
 					SET log_numdest = $row[num_dest]
 					WHERE liste_id = " . $row['liste_id'];
@@ -543,7 +550,7 @@ if( $start )
 			{
 				case '2.2-Beta':
 				case '2.2-Beta2':
-					switch( DATABASE )
+					switch( SQL_DRIVER )
 					{
 						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
@@ -607,9 +614,10 @@ if( $start )
 					}
 					
 					$abonnes_id = array();
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
-						$abonnes_id[] = $row['abo_id'];
+						$abonnes_id[] = $result->column('abo_id');
+						$result->next();
 					}
 					
 					$sql = "SELECT abo_id
@@ -621,9 +629,10 @@ if( $start )
 					}
 					
 					$abo_liste_id = array();
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
-						$abo_liste_id[] = $row['abo_id'];
+						$abo_liste_id[] = $result->column('abo_id');
+						$result->next();
 					}
 					
 					$diff_1 = array_diff($abonnes_id, $abo_liste_id);
@@ -644,7 +653,7 @@ if( $start )
 							WHERE abo_id IN(" . implode(', ', $diff_2) . ")";
 					}
 					
-					switch( DATABASE )
+					switch( SQL_DRIVER )
 					{
 						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
@@ -682,8 +691,9 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
+						$row = $result->fetch();
 						$sql_update[] = "UPDATE " . LISTE_TABLE . "
 							SET liste_numlogs = " . $row['numlogs'] . "
 							WHERE liste_id = " . $row['liste_id'];
@@ -698,15 +708,16 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
+						$row = $result->fetch();
 						$sql_update[] = "UPDATE " . LOG_TABLE . "
 							SET log_numdest = " . $row['num_dest'] . "
 							WHERE liste_id = " . $row['liste_id'];
 					}
 				
 				case '2.2-RC2b':
-					switch( DATABASE )
+					switch( SQL_DRIVER )
 					{
 						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
@@ -736,8 +747,9 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
+						$row = $result->fetch();
 						if( $row['num_abo'] == $row['num_send'] )
 						{
 							$sql_update[] = "UPDATE " . ABO_LISTE_TABLE . "
@@ -749,7 +761,7 @@ if( $start )
 					$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_lang = '$language'";
 					
 				case '2.2-RC3':
-					switch( DATABASE )
+					switch( SQL_DRIVER )
 					{
 						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
@@ -783,7 +795,7 @@ if( $start )
 					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 						DROP COLUMN hebergeur, DROP COLUMN version";
 					
-					if( DATABASE == 'postgres' )
+					if( SQL_DRIVER == 'postgres' )
 					{
 						$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index";
 						$sql_update[] = "DROP INDEX admin_id_wa_auth_admin_index";
@@ -828,8 +840,10 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
+						$row = $result->fetch();
+						
 						$sql = "UPDATE " . ABO_LISTE_TABLE . "
 							SET register_date = $row[abo_register_date],
 								confirmed     = $row[abo_status]";
@@ -846,7 +860,7 @@ if( $start )
 								WHERE abo_id = $row[abo_id]");
 						}
 					}
-					$db->free_result($result);
+					$result->free();
 					
 					$sql = "SELECT abo_id, liste_id
 						FROM " . ABO_LISTE_TABLE . "
@@ -856,22 +870,23 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
+						$row = $result->fetch();
 						$sql = "UPDATE " . ABO_LISTE_TABLE . "
 							SET register_key = '" . generate_key(20, false) . "'
 							WHERE liste_id = $row[liste_id]
 								AND abo_id = " . $row['abo_id'];
 						$db->query($sql);
 					}
-					$db->free_result($result);
+					$result->free();
 					
 					$sql_update = array();
 					$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 						DROP COLUMN abo_register_key,
 						DROP COLUMN abo_register_date";
 					
-					if( DATABASE == 'postgres' )
+					if( SQL_DRIVER == 'postgres' )
 					{
 						$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
 							ADD CONSTRAINT register_key_idx UNIQUE (register_key)";

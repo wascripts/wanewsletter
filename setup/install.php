@@ -53,11 +53,11 @@ if( $start && $language != $prev_language )
 
 if( defined('NL_INSTALLED') )
 {
-	$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+	$db = WaDatabase($dsn);
 	
-	if( !$db->connect_id )
+	if( !$db->isConnected() )
 	{
-		plain_error(sprintf($lang['Connect_db_error'], $db->sql_error['message']));
+		plain_error(sprintf($lang['Connect_db_error'], $db->error));
 	}
 	
 	$sql = "SELECT language, urlsite, path FROM " . CONFIG_TABLE;
@@ -66,7 +66,7 @@ if( defined('NL_INSTALLED') )
 		plain_error('Impossible d\'obtenir la configuration du script');
 	}
 	
-	$old_config = $db->fetch_array($result);
+	$old_config = $result->fetch(SQL_FETCH_ASSOC);
 	
 	$urlsite     = $old_config['urlsite'];
 	$urlscript   = $old_config['path'];
@@ -99,8 +99,9 @@ if( $start )
 			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($admin_login)) . "'";
 		if( $result = $db->query($sql) )
 		{
-			if( $row = $db->fetch_array($result) )
+			if( $result->count() > 0 )
 			{
+				$row = $result->fetch();
 				if( md5($admin_pass) == $row['admin_pwd'] && $row['admin_level'] == ADMIN )
 				{
 					$login        = true;
@@ -128,7 +129,7 @@ if( $start )
 					unlink($sqlite_db);
 				}
 				
-				$db = new sql($sqlite_db);
+				$db = WaDatabase('sqlite:' . $sqlite_db);
 			}
 			else
 			{
@@ -138,13 +139,13 @@ if( $start )
 		}
 		else
 		{
-			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+			$db = WaDatabase($dsn);
 		}
 		
-		if( !$error && !$db->connect_id )
+		if( !$error && !$db->isConnected() )
 		{
 			$error = true;
-			$msg_error[] = sprintf($lang['Connect_db_error'], $db->sql_error['message']);
+			$msg_error[] = sprintf($lang['Connect_db_error'], $db->error);
 		}
 	}
 	
@@ -271,7 +272,7 @@ if( !defined('NL_INSTALLED') )
 	require WA_ROOTDIR . '/includes/functions.box.php';
 	
 	$db_box = '';
-	foreach( $supported_db AS $db_name => $db_infos )
+	foreach( $supported_db as $db_name => $db_infos )
 	{
 		$selected = ( $dbtype == $db_name ) ? ' selected="selected"' : '';
 		$db_box .= '<option value="' . $db_name . '"' . $selected . '> ' . $db_infos['Name'] . ' </option>';

@@ -56,7 +56,9 @@ $remove_abo  = true; // Suppression des abonnés ?
 //
 
 if( $remove_abo == true ) {
-	switch( DATABASE ) {
+	$db->beginTransaction();
+	
+	switch( SQL_DRIVER ) {
 		case 'mysql':
 			$sql = "SELECT abo_id 
 				FROM " . ABO_LISTE_TABLE . " AS al 
@@ -66,15 +68,15 @@ if( $remove_abo == true ) {
 				trigger_error('Impossible d\'obtenir la liste des abonnés de cette liste', ERROR);
 			}
 			
-			if( $row = $db->fetch_array($result) )
+			if( $result->count() > 0 )
 			{
 				$abo_ids = array();
 				
-				do
+				while( $result->hasMore() )
 				{
-					array_push($abo_ids, $row['abo_id']);
+					array_push($abo_ids, $result->column('abo_id'));
+					$result->next();
 				}
-				while( $row = $db->fetch_array($result) );
 				
 				$sql = "SELECT abo_id 
 					FROM " . ABO_LISTE_TABLE . " 
@@ -86,15 +88,15 @@ if( $remove_abo == true ) {
 					trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
 				}
 				
-				if( $row = $db->fetch_array($result) )
+				if( $result->count() > 0 )
 				{
 					$abo_ids = array();
 					
-					do
+					while( $result->hasMore() )
 					{
-						array_push($abo_ids, $row['abo_id']);
+						array_push($abo_ids, $result->column('abo_id'));
+						$result->next();
 					}
-					while( $row = $db->fetch_array($result) );
 					
 					$sql = "DELETE FROM " . ABONNES_TABLE . " 
 						WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
@@ -132,6 +134,8 @@ if( $remove_abo == true ) {
 	{
 		trigger_error('Impossible de supprimer les entrées de la table abo_liste', ERROR);
 	}
+	
+	$db->commit();
 }
 
 if( $remove_logs == true ) {
@@ -144,10 +148,13 @@ if( $remove_logs == true ) {
 	}
 	
 	$log_ids = array();
-	while( $row = $db->fetch_array($result) )
+	while( $result->hasMore() )
 	{
-		array_push($log_ids, $row['log_id']);
+		array_push($log_ids, $result->column('log_id'));
+		$result->next();
 	}
+	
+	$db->beginTransaction();
 	
 	require WA_ROOTDIR . '/includes/class.attach.php';
 	
@@ -160,6 +167,8 @@ if( $remove_logs == true ) {
 	{
 		trigger_error('Impossible de supprimer les entrées de la table des logs', ERROR);
 	}
+	
+	$db->commit();
 }
 
 ?>

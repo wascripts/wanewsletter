@@ -69,12 +69,6 @@ if( !defined('E_STRICT') ) // Compatibilité PHP5
 }
 
 //
-// Codes transactions pour les DB qui les supportent 
-//
-define('START_TRC', 1);
-define('END_TRC',   2);
-
-//
 // Formats d'emails 
 //
 define('FORMAT_TEXTE',    1);

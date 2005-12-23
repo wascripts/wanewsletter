@@ -75,7 +75,7 @@ if( isset($_POST['cancel']) )
 }
 
 $vararray = array('send', 'progress', 'save', 'delete', 'attach', 'unattach');
-foreach( $vararray AS $varname )
+foreach( $vararray as $varname )
 {
 	if( isset($_REQUEST[$varname]) )
 	{
@@ -115,8 +115,8 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir la liste d\'appartenance du log', ERROR);
 			}
 			
-			$liste_id   = $db->result($result, 0, 'liste_id');
-			$log_status = $db->result($result, 0, 'log_status');
+			$liste_id   = $result->column('liste_id');
+			$log_status = $result->column('log_status');
 			
 			if( $log_status != STATUS_STANDBY )
 			{
@@ -131,9 +131,9 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
 			}
 			
-			$sended = $db->result($result, 0, 'sended');
+			$sended = $result->column('sended');
 			
-			$db->transaction(START_TRC);
+			$db->beginTransaction();
 			
 			$sql = "UPDATE " . LOG_TABLE . "
 				SET log_status  = " . STATUS_SENDED . ",
@@ -160,7 +160,7 @@ switch( $mode )
 				trigger_error('Impossible de mettre à jour la table des listes', ERROR);
 			}
 			
-			$db->transaction(END_TRC);
+			$db->commit();
 			
 			trigger_error('Send_canceled', MESSAGE);
 		}
@@ -207,7 +207,7 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 			}
 			
-			if( !($logdata = $db->fetch_array($result)) )
+			if( $result->count() == 0 )
 			{
 				$output->redirect('envoi.php?mode=progress', 4);
 				
@@ -215,6 +215,8 @@ switch( $mode )
 				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=progress') . '">', '</a>');
 				trigger_error($message, MESSAGE);
 			}
+			
+			$logdata = $result->fetch();
 		}
 		else
 		{
@@ -228,8 +230,10 @@ switch( $mode )
 			}
 			
 			$data = array();
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
+				
 				if( !isset($data[$row['liste_id']]) )
 				{
 					$data[$row['liste_id']] = array(0, 0, 't' => 0);
@@ -248,7 +252,7 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
 			}
 			
-			if( $db->num_rows($result) == 0 )
+			if( $result->count() == 0 )
 			{
 				$output->redirect('envoi.php', 4);
 				
@@ -273,8 +277,10 @@ switch( $mode )
 				'L_LOAD_LOG'    => $lang['Load_log']
 			));
 			
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
+				
 				$output->assign_block_vars('logrow', array(
 					'LOG_ID'       => $row['log_id'],
 					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
@@ -327,7 +333,7 @@ switch( $mode )
 						{
 							preg_match_all('/<meta[^>]+>/si', $match_head[1], $match_meta, PREG_SET_ORDER);
 							
-							foreach( $match_meta AS $meta )
+							foreach( $match_meta as $meta )
 							{
 								if( preg_match('/http-equiv=("|\')Content-Type\\1/si', $meta[0])
 									&& preg_match('/content=("|\').+?;\s*charset=([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
@@ -364,7 +370,7 @@ switch( $mode )
 					trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 				}
 				
-				if( !($logdata = $db->fetch_array($result)) )
+				if( $result->count() == 0 )
 				{
 					$output->redirect('envoi.php?mode=load', 4);
 					
@@ -373,6 +379,7 @@ switch( $mode )
 					trigger_error($message, MESSAGE);
 				}
 				
+				$logdata = $result->fetch();
 				$prev_status = $logdata['log_status'];
 			}
 		}
@@ -388,12 +395,14 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
 			}
 			
-			if( $row = $db->fetch_array($result) )
+			if( $result->count() > 0 )
 			{
 				$log_box = '<select name="id">';
 				
-				do
+				while( $result->hasMore() )
 				{
+					$row = $result->fetch();
+					
 					if( $row['log_status'] == STATUS_MODEL )
 					{
 						$status = '[' . $lang['Model'] . ']';
@@ -410,7 +419,6 @@ switch( $mode )
 						$style, $row['log_id'], htmlspecialchars(cut_str($row['log_subject'], 40)), $status
 					);
 				}
-				while( $row = $db->fetch_array($result) );
 				
 				$log_box .= '</select>';
 			}
@@ -489,7 +497,7 @@ switch( $mode )
 		
 		if( isset($_POST['confirm']) )
 		{
-			$db->transaction(START_TRC);
+			$db->beginTransaction();
 			
 			$sql = 'DELETE FROM ' . LOG_TABLE . ' 
 				WHERE log_id = ' . $logdata['log_id'];
@@ -503,12 +511,12 @@ switch( $mode )
 			$attach = new Attach();
 			$attach->delete_joined_files(true, $logdata['log_id']);
 			
-			$db->transaction(END_TRC);
+			$db->commit();
 			
 			//
 			// Optimisation des tables
 			//
-			$db->check(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
+			$db->vacuum(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
 			
 			$output->redirect('./envoi.php', 4);
 			
@@ -609,8 +617,9 @@ switch( $mode )
 					}
 					
 					$files = $files_error = array();
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
+						$row = $result->fetch();
 						if( $row['log_id'] == $logdata['log_id'] )
 						{
 							$files[] = $row['file_real_name'];
@@ -675,22 +684,22 @@ switch( $mode )
 				
 				if( empty($tmp_id) )
 				{
-					$sql_type  = 'INSERT';
+					$sql_type  = SQL_INSERT;
 				}
 				else
 				{
-					$sql_type  = 'UPDATE';
+					$sql_type  = SQL_UPDATE;
 					$sql_where = array('log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']);
 				}
 				
-				if( !$db->query_build($sql_type, LOG_TABLE, $logdata, $sql_where) )
+				if( !$db->build($sql_type, LOG_TABLE, $logdata, $sql_where) )
 				{
 					trigger_error('Impossible de sauvegarder la newsletter', ERROR);
 				}
 				
 				if( $sql_type == 'INSERT' )
 				{
-					$tmp_id = $db->next_id();
+					$tmp_id = $db->lastInsertId();
 				}
 				
 				//
@@ -701,12 +710,12 @@ switch( $mode )
 					$handle_id = $tmp_id;
 					$logdata['log_status'] = STATUS_STANDBY;
 					
-					if( !$db->query_build('INSERT', LOG_TABLE, $logdata) )
+					if( !$db->build(SQL_INSERT, LOG_TABLE, $logdata) )
 					{
 						trigger_error('Impossible de dupliquer la newsletter', ERROR);
 					}
 					
-					$tmp_id = $db->next_id();
+					$tmp_id = $db->lastInsertId();
 				}
 				
 				//
@@ -724,9 +733,11 @@ switch( $mode )
 					
 					$sql_values = array();
 					
-					while( $row = $db->fetch_array($result) )
+					while( $result->hasMore() )
 					{
-						switch( DATABASE )
+						$row = $result->fetch();
+						
+						switch( SQL_DRIVER )
 						{
 							case 'mysql':
 							case 'mysqli':
@@ -736,7 +747,7 @@ switch( $mode )
 							default:
 								$sqldata = array('log_id' => $tmp_id, 'file_id' => $row['file_id']);
 								
-								if( !$db->query_build('INSERT', LOG_FILES_TABLE, $sqldata) )
+								if( !$db->build(SQL_INSERT, LOG_FILES_TABLE, $sqldata) )
 								{
 									trigger_error('Impossible de dupliquer les fichiers joints', ERROR);
 								}
@@ -852,7 +863,7 @@ switch( $mode )
 			//
 			// Optimisation des tables
 			//
-			$db->check(array(LOG_FILES_TABLE, JOINED_FILES_TABLE));
+			$db->vacuum(array(LOG_FILES_TABLE, JOINED_FILES_TABLE));
 		}
 		break;
 }
@@ -885,8 +896,10 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	//
 	// On dispatches les données selon que le fichier appartient à la newsletter en cours ou non.
 	//
-	while( $row = $db->fetch_array($result) )
+	while( $result->hasMore() )
 	{
+		$row = $result->fetch();
+		
 		if( $row['log_id'] == $logdata['log_id'] )
 		{
 			$logdata['joined_files'][] = $row;
@@ -901,7 +914,7 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 		}
 	}
 	
-	foreach( $other_files AS $tmp_id => $row )
+	foreach( $other_files as $tmp_id => $row )
 	{
 		if( !in_array($tmp_id, $joined_files_id) )
 		{

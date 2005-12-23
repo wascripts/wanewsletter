@@ -177,25 +177,30 @@ if( $process_send == true )
 		trigger_error('Impossible de récupérer les informations sur cette liste', CRITICAL_ERROR);
 	}
 	
-	if( !($listdata = $db->fetch_array($result)) )
+	if( $result->count() == 0 )
 	{
 		trigger_error('Unknown_list', CRITICAL_ERROR);
 	}
 	
+	$listdata = $result->fetch();
+	
 	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 		FROM " . LOG_TABLE . "
 		WHERE liste_id = $listdata[liste_id]
-			AND log_status = " . STATUS_STANDBY;
-	if( !($result = $db->query($sql, 0, 1)) ) // on récupère le dernier log en statut d'envoi
+			AND log_status = " . STATUS_STANDBY . "
+		LIMIT 1 OFFSET 0";
+	if( !($result = $db->query($sql)) ) // on récupère le dernier log en statut d'envoi
 	{
 		trigger_error('Impossible d\'obtenir les données sur ce log', CRITICAL_ERROR);
 	}
 	
-	if( !($logdata = $db->fetch_array($result)) )
+	if( $result->count() == 0 )
 	{
 		echo $lang['Message']['No_log_to_send'] . "\n";
 		exit(0);
 	}
+	
+	$logdata = $result->fetch();
 	
 	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 		FROM " . JOINED_FILES_TABLE . " AS jf
@@ -209,7 +214,7 @@ if( $process_send == true )
 		trigger_error('Impossible d\'obtenir la liste des fichiers joints', CRITICAL_ERROR);
 	}
 	
-	$logdata['joined_files'] = $db->fetch_rowset($result);
+	$logdata['joined_files'] = $result->fetchAll();
 	
 	//
 	// On lance l'envoi

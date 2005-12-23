@@ -43,10 +43,12 @@ else
 {
 	$list_box = '<select id="liste" name="liste">';
 	
-	if( $row = $db->fetch_array($result) )
+	if( $result->count() > 0 )
 	{
-		do
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
+			
 			if( $row['liste_format'] == FORMAT_TEXTE )
 			{
 				$f = 'txt';
@@ -62,7 +64,6 @@ else
 			
 			$list_box .= '<option value="' . $row['liste_id'] . '"> ' . $row['liste_name'] . ' (' . $f . ') </option>';
 		}
-		while( $row = $db->fetch_array($result) );
 	}
 	else
 	{

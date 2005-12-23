@@ -104,8 +104,9 @@ class Auth {
 		}
 		
 		$tmp_ary = array();
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
 			$tmp_ary[$row['liste_id']] = $row;
 		}
 		
@@ -138,7 +139,7 @@ class Auth {
 		if( !$liste_id )
 		{
 			$liste_id_ary = array();
-			foreach( $this->listdata AS $liste_id => $auth_list )
+			foreach( $this->listdata as $liste_id => $auth_list )
 			{
 				if( $admindata['admin_level'] == ADMIN || !empty($auth_list[$auth_name]) )
 				{

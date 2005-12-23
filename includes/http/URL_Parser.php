@@ -138,7 +138,7 @@ class URL_Parser {
 		{
 			$urlinfo = parse_url($url);
 			
-			foreach( $urlinfo AS $key => $value )
+			foreach( $urlinfo as $key => $value )
 			{
 				switch( $key )
 				{

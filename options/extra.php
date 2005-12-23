@@ -39,7 +39,7 @@ if( count($liste_ids) > 0 )
 {
 	$liste_ids = implode(', ', $liste_ids);
 	
-	if( DATABASE != 'mysql' ) // Et parce que SQLite ne supporte pas COUNT(DISTINCT(...))
+	if( SQL_DRIVER != 'mysql' ) // Et parce que SQLite ne supporte pas COUNT(DISTINCT(...))
 	{
 		$sql = "SELECT COUNT(a.abo_id) AS num_subscribe
 			FROM " . ABONNES_TABLE . " AS a
@@ -63,7 +63,7 @@ if( count($liste_ids) > 0 )
 	}
 	
 	$result = $db->query($sql);
-	$data   = $db->result($result, 0, 'num_subscribe');
+	$data   = $result->column('num_subscribe');
 }
 else
 {

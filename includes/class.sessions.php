@@ -193,13 +193,13 @@ class Session {
 			'session_liste' => $liste
 		);
 		
-		if( $this->session_id == '' || !$db->query_build('UPDATE', SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id))
-			|| $db->affected_rows() == 0 )
+		if( $this->session_id == '' || !$db->build(SQL_UPDATE, SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id))
+			|| $db->affectedRows() == 0 )
 		{
 			$this->new_session = TRUE;
 			$this->session_id  = $sql_data['session_id'] = generate_key();
 			
-			if( !$db->query_build('INSERT', SESSIONS_TABLE, $sql_data) )
+			if( !$db->build(SQL_INSERT, SESSIONS_TABLE, $sql_data) )
 			{
 				trigger_error('Impossible de démarrer une nouvelle session', CRITICAL_ERROR);
 			}
@@ -262,10 +262,7 @@ class Session {
 			$sql = "DELETE FROM " . SESSIONS_TABLE . "
 				WHERE session_time < $expiry_time
 					AND session_id != '{$this->session_id}'";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les sessions périmées', CRITICAL_ERROR);
-			}
+			$db->query($sql);
 		}
 		
 		if( $this->session_id != '' )
@@ -286,7 +283,7 @@ class Session {
 				trigger_error('Impossible de récupérer les infos sur la session et l\'utilisateur', CRITICAL_ERROR);
 			}
 			
-			if( $row = $db->fetch_array($result) )
+			if( $row = $result->fetch() )
 			{
 				//
 				// Comparaison des ip pour éviter la substitution des sessions 
@@ -413,7 +410,7 @@ class Session {
 			trigger_error('Impossible d\'obtenir les données sur cet utilisateur', CRITICAL_ERROR);
 		}
 		
-		if( ($admindata = $db->fetch_array($result)) && $admindata['admin_pwd'] == $admin_pwd )
+		if( ($admindata = $result->fetch()) && $admindata['admin_pwd'] == $admin_pwd )
 		{
 			return $this->open($admindata, $autologin);
 		}

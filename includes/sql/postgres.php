@@ -5,8 +5,8 @@
  * This file is part of Wanewsletter.
  * 
  * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
+ * modify it under the terms of the GNU General Public License 
+ * as published by the Free Software Foundation; either version 2 
  * of the License, or (at your option) any later version.
  * 
  * Wanewsletter is distributed in the hope that it will be useful,
@@ -25,541 +25,409 @@
  * @version $Id$
  */
 
-if( !defined('CLASS_SQL_INC') ) {
+if( !defined('_INC_CLASS_WADB') ) {
 
-define('CLASS_SQL_INC', true);
-define('DATABASE', 'postgres');
+define('_INC_CLASS_WADB', true);
 
-class sql {
+define('SQL_INSERT', 1);
+define('SQL_UPDATE', 2);
+define('SQL_DELETE', 3);
+
+define('SQL_FETCH_NUM',   PGSQL_NUM);
+define('SQL_FETCH_ASSOC', PGSQL_ASSOC);
+define('SQL_FETCH_BOTH',  PGSQL_BOTH);
+
+/*
+TODO : protéger un nom de colonne
+affected_rows() semble ne pouvoir être appelée qu'une fois par résultat
+*/
+
+class Wadb {
+	
 	/**
-	 * Ressource de connexion
+	 * Connexion à la base de données
 	 * 
 	 * @var resource
-	 */
-	var $connect_id   = '';
-	
-	/**
-	 * Ressource de résultat
-	 * 
-	 * @var resource
-	 */
-	var $query_result = '';
-	
-	/**
-	 * Transaction en cours ou non
-	 * 
-	 * @var integer
-	 */
-	var $trc_started  = 0;
-	
-	/**
-	 * Retours d'erreur (code et message)
-	 * 
-	 * @var array
-	 */
-	var $sql_error    = array('errno' => '', 'message' => '', 'query' => '');
-	
-	/**
-	 * Nombre de requètes effectuées depuis le lancement du script
-	 * 
-	 * @var integer
-	 */
-	var $queries      = 0;
-	
-	/**
-	 * Temps d'exécution du script affecté au traitement des requètes SQL
-	 * 
-	 * @var string
-	 */
-	var $sql_time     = 0;
-	
-	/**
-	 * Dernière table où a été effectué une insertion de données
-	 * 
-	 * @var string
-	 */
-	var $last_insert_table = '';
-	
-	/**
-	 * Port de connexion par défaut
-	 * 
-	 * @var integer
-	 */
-	var $dbport       = 5432;
-	
-	/**
-	 * sql::sql()
-	 * 
-	 * Constructeur de classe
-	 * Initialise la connexion à la base de données
-	 * 
-	 * @param string  $dbhost      Hôte de la base de données
-	 * @param string  $dbuser      Nom d'utilisateur
-	 * @param string  $dbpwd       Mot de passe
-	 * @param string  $dbname      Nom de la base de données
-	 * @param boolean $persistent  Connexion persistante ou non
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function sql($dbhost, $dbuser, $dbpwd, $dbname, $persistent = false)
-	{
-		$sql_connect = ( $persistent ) ? 'pg_pconnect' : 'pg_connect';
-		
-		$login_str = '';
-		
-		if( strpos($dbhost, ':') )
-		{
-			list($dbhost, $dbport) = explode(':', $dbhost);
-			$login_str .= "host='$dbhost' port='$dbport' ";
-		}
-		else if( !empty($dbhost) )
-		{
-			$login_str .= "host='$dbhost' port='" . $this->dbport . "' ";
-		}
-		
-		if( $dbname != '' )
-		{
-			$login_str .= "dbname='$dbname' ";
-		}
-		
-		if( $dbuser != '' )
-		{
-			$login_str .= "user='$dbuser' ";
-		}
-		
-		if( $dbpwd != '' )
-		{
-			$login_str .= "password='$dbpwd' ";
-		}
-		
-		$this->connect_id = @$sql_connect($login_str);
-		if( !$this->connect_id )
-		{
-			$this->sql_error['message'] = @$php_errormsg;
-		}
-	}
-	
-	/**
-	 * sql::prepare_value()
-	 * 
-	 * Prépare une valeur pour son insertion dans la base de données
-	 * (Dans la pratique, échappe les caractères potentiellement dangeureux)
-	 * 
-	 * @param mixed $value
-	 * 
 	 * @access private
-	 * @return mixed
 	 */
-	function prepare_value($value)
-	{
-		if( is_bool($value) || preg_match('/^[0-9]+$/', $value) )
-		{
-			$tmp = intval($value);
-		}
-		else
-		{
-			$tmp = '\'' . $this->escape($value) . '\'';
-		}
-		
-		return $tmp;
-	}
+	var $link;
 	
 	/**
-	 * sql::query_build()
+	 * Nom de la base de données
 	 * 
-	 * Construit une requète de type INSERT, UPDATE ou DELETE à partir
-	 * des diverses données fournies
+	 * @var string
+	 * @access private
+	 */
+	var $dbname;
+	
+	/**
+	 * Options de connexion
 	 * 
-	 * @param string $query_type  Type de requète (peut valoir INSERT, UPDATE ou DELETE)
-	 * @param string $table       Table sur laquelle effectuer la requète
-	 * @param array  $query_data  Tableau des données à insérer. Le tableau a la structure suivante:
-	 *                            array(column_name => column_value[, column_name => column_value])
-	 * @param string $sql_where   Chaîne de condition
+	 * @var resource
+	 * @access private
+	 */
+	var $options = array();
+	
+	/**
+	 * Code d'erreur
+	 * 
+	 * @var integer
+	 * @access public
+	 */
+	var $errno = 0;
+	
+	/**
+	 * Message d'erreur
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $error = '';
+	
+	/**
+	 * Dernière requète SQL exécutée (en cas d'erreur seulement)
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $query = '';
+	
+	/**
+	 * Nombre de requètes SQL exécutées depuis le début de la connexion
+	 * 
+	 * @var integer
+	 * @access private
+	 */
+	var $queries = 0;
+	
+	/**
+	 * Durée totale d'exécution des requètes SQL
+	 * 
+	 * @var string
+	 * @access private
+	 */
+	var $sqltime = 0;
+	
+	/**
+	 * Version du serveur
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $serverVersion = '';
+	
+	/**
+	 * Version du client
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $clientVersion = '';
+	
+	var $_result;
+	var $lastInsertTable;
+	
+	/**
+	 * Constructeur de classe
+	 * 
+	 * @param string $dbname   Nom de la base de données
+	 * @param array  $options  Options de connexion/utilisation
 	 * 
 	 * @access public
-	 * @return string
 	 */
-	function query_build($query_type, $table, $query_data, $sql_where = '')
+	function Wadb($dbname, $options = null)
 	{
-		$fields = $values = array();
+		$this->dbname = $dbname;
 		
-		foreach( $query_data AS $field => $value )
-		{
-			array_push($fields, $field);
-			array_push($values, $this->prepare_value($value));
+		if( is_array($options) ) {
+			$this->options = $options;
 		}
-		
-		if( $query_type == 'INSERT' )
-		{
-			$query_string  = 'INSERT INTO ' . $table . ' ';
-			$query_string .= '(' . implode(', ', $fields) . ') VALUES(' . implode(', ', $values) . ')';
-		}
-		else if( $query_type == 'UPDATE' )
-		{
-			$query_string  = 'UPDATE ' . $table . ' SET ';
-			for( $i = 0; $i < count($fields); $i++ )
-			{
-				$query_string .= ( $i > 0 ) ? ', ' : '';
-				$query_string .= $fields[$i] . ' = ' . $values[$i];
-			}
-			
-			if( is_array($sql_where) && count($sql_where) )
-			{
-				$ary = array();
-				foreach( $sql_where AS $field => $value )
-				{
-					$ary[] = $field . ' = ' . $this->prepare_value($value);
-				}
-				
-				$query_string .= ' WHERE ' . implode(' AND ', $ary);
-			}
-		}
-		
-		return $this->query($query_string);
 	}
 	
 	/**
-	 * sql::query()
+	 * Connexion à la base de données
 	 * 
-	 * Effectue une requète à destination de la base de données et retourne le résultat
-	 * En cas d'erreur, la méthode stocke les informations d'erreur dans sql::sql_error
-	 * et retourne false
-	 * 
-	 * @param string  $query  La requète SQL à exécuter
-	 * @param integer $start  Réupére les lignes de résultat à partir de la position $start
-	 * @param integer $limit  Limite le nombre de résultat à retourner
-	 * 
-	 * @access public
-	 * @return resource
-	 */
-	function query($query, $start = null, $limit = null)
-	{
-		global $starttime;
-		
-		unset($this->query_result);
-		
-		if( isset($start) && !empty($limit) )
-		{
-			$query .= ' LIMIT ' . $limit . ' OFFSET ' . $start;
-		}
-		else if( preg_match("/^INSERT[\t\r\n ]+INTO[\t\r\n ]+([a-z0-9_-]+)/si", $query, $match) )
-		{
-			$this->last_insert_table = $match[1];
-		}
-		
-		$curtime = explode(' ', microtime());
-		$curtime = $curtime[0] + $curtime[1] - $starttime;
-		
-		$this->query_result = @pg_exec($this->connect_id, $query);
-		
-		$endtime = explode(' ', microtime());
-		$endtime = $endtime[0] + $endtime[1] - $starttime;
-		
-		$this->sql_time += ($endtime - $curtime);
-		$this->queries++;
-		
-		if( !$this->query_result )
-		{
-			$this->sql_error['message'] = @pg_errormessage($this->connect_id);
-			$this->sql_error['query']   = $query;
-			
-			$this->transaction('ROLLBACK');
-		}
-		else
-		{
-			$this->sql_error = array('errno' => 0, 'message' => '', 'query' => '');
-		}
-		
-		return $this->query_result;
-	}
-	
-	/**
-	 * sql::transaction()
-	 * 
-	 * Gestion des transactions
-	 * 
-	 * @param integer $transaction
+	 * @param array $infos    Informations de connexion
+	 * @param array $options  Options de connexion/utilisation
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
-	function transaction($transaction)
+	function connect($infos = null, $options = null)
 	{
-		switch($transaction)
-		{
-			case START_TRC:
-				if( !$this->trc_started )
-				{
-					$this->trc_started = true;
-					$result = @pg_exec($this->connect_id, 'BEGIN');
-				}
-				else
-				{
-					$result = true;
-				}
-				break;
-				
-			case END_TRC:
-				if( $this->trc_started )
-				{
-					$this->trc_started = false;
-					
-					if( !($result = @pg_exec($this->connect_id, 'COMMIT')) )
-					{
-						@pg_exec($this->connect_id, 'ROLLBACK');
+		$connectString = "dbname='$this->dbname' ";
+		
+		if( is_array($infos) ) {
+			foreach( array('host', 'username', 'passwd', 'port') as $info ) {
+				if( isset($infos[$info]) ) {
+					if( $info == 'username' ) {
+						$connectString .= "user='$infos[$info]' ";
+					}
+					else if( $info == 'passwd' ) {
+						$connectString .= "password='$infos[$info]' ";
+					}
+					else {
+						$connectString .= "$info='$infos[$info]' ";
 					}
 				}
-				else
-				{
-					$result = true;
-				}
-				break;
-				
-			case 'ROLLBACK':
-				if( $this->trc_started )
-				{
-					$this->trc_started = false;
-					$result = @pg_exec($this->connect_id, 'ROLLBACK');
-				}
-				else
-				{
-					$result = true;
-				}
-				break;
+			}
+		}
+		
+		$connect = 'pg_connect';
+		
+		if( is_array($options) ) {
+			$this->options = array_merge($this->options, $options);
+			
+			if( !empty($this->options['persistent']) ) {
+				$connect = 'pg_pconnect';
+			}
+		}
+		
+		if( !($this->link = $connect($connectString)) || pg_connection_status($this->link) !== PGSQL_CONNECTION_OK ) {
+			$this->error = @$php_errormsg;
+			$this->link  = null;
+		}
+		else {
+			$res = pg_query($db, "SELECT VERSION() AS version");
+			$this->serverVersion = pg_fetch_result($res, 0, 'version');
+			
+			if( function_exists('pg_version') ) {
+				$tmp = pg_version($this->link);
+				$this->clientVersion = $tmp['client'];
+			}
+			
+			if( !empty($this->options['charset']) ) {
+				$this->encoding($this->options['charset']);
+			}
+		}
+	}
+	
+	/**
+	 * @access public
+	 * @return boolean
+	 */
+	function isConnected()
+	{
+		return !is_null($this->link);
+	}
+	
+	/**
+	 * Renvoie le jeu de caractères courant utilisé.
+	 * Si l'argument $encoding est fourni, il est utilisé pour définir
+	 * le nouveau jeu de caractères de la connexion en cours
+	 * 
+	 * @param string $encoding
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function encoding($encoding = null)
+	{
+		$curEncoding = pg_client_encoding($this->link);
+		
+		if( !is_null($encoding) ) {
+			pg_set_client_encoding($this->link, $encoding);
+		}
+		
+		return $curEncoding;
+	}
+	
+	/**
+	 * Exécute une requète sur la base de données
+	 * 
+	 * @param string $query
+	 * 
+	 * @access public
+	 * @return mixed
+	 */
+	function query($query)
+	{
+		if( preg_match('/^INSERT\s+INTO\s+([^\s]+)\s+/i', $query, $match) ) {
+			$this->lastInsertTable = $match[1];
+		}
+		
+		$curtime = array_sum(explode(' ', microtime()));
+		$result  = pg_query($this->link, $query);
+		$endtime = array_sum(explode(' ', microtime()));
+		
+		$this->sqltime += ($endtime - $curtime);
+		$this->queries++;
+		$this->_result  = $result;
+		
+		if( !$result ) {
+			$this->error = pg_last_error($this->link);
+			$this->query = $query;
+			
+			$this->rollBack();
+		}
+		else {
+			$this->error = '';
+			$this->query = '';
+			
+			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
+				$result = new WadbResult($this->link, $result);
+			}
 		}
 		
 		return $result;
 	}
 	
 	/**
-	 * sql::check()
+	 * Construit une requète de type INSERT ou UPDATE à partir des diverses données fournies
 	 * 
-	 * Optimisation des tables
+	 * @param string $type      Type de requète (peut valoir INSERT ou UPDATE)
+	 * @param string $table     Table sur laquelle effectuer la requète
+	 * @param array  $data      Tableau des données à insérer. Le tableau a la structure suivante:
+	 *                          array(column_name => column_value[, column_name => column_value])
+	 * @param array $sql_where  Chaîne de condition
 	 * 
-	 * @param mixed $tables  Nom de la table ou tableau de noms de table à optimiser
+	 * @access public
+	 * @return mixed
+	 */
+	function build($type, $table, $data, $sql_where = null)
+	{
+		$fields = $values = array();
+		
+		foreach( $data as $field => $value ) {
+			if( is_bool($value) ) {
+				$value = intval($value);
+			}
+			else if( !is_int($value) && !is_float($value) ) {
+				$value = '\'' . $this->escape($value) . '\'';
+			}
+			
+			array_push($fields, $this->quote($field));
+			array_push($values, $value);
+		}
+		
+		if( $type == SQL_INSERT ) {
+			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
+		}
+		else if( $type == SQL_UPDATE ) {
+			
+			$query = 'UPDATE ' . $table . ' SET ';
+			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
+				$query .= $fields[$i] . ' = ' . $values[$i] . ', ';
+			}
+			
+			$query = substr($query, 0, -2);
+			
+			if( is_array($sql_where) && count($sql_where) > 0 ) {
+				$query .= ' WHERE ';
+				foreach( $sql_where as $field => $value ) {
+					if( is_bool($value) ) {
+						$value = intval($value);
+					}
+					else if( !is_int($value) && !is_float($value) ) {
+						$value = '\'' . $this->escape($value) . '\'';
+					}
+					
+					$query .= sprintf('%s = %s AND ', $this->quote($field), $value);
+				}
+				
+				$query = substr($query, 0, -5);
+			}
+		}
+		
+		return $this->query($query);
+	}
+	
+	/**
+	 * Protège un nom de base, de table ou de colonne en prévision de son utilisation
+	 * dans une requète
+	 * 
+	 * @param string $name
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function quote($name)
+	{
+		return $name;
+	}
+	
+	/**
+	 * @param mixed $tables  Nom de table ou tableau de noms de table
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function check($tables)
+	function vacuum($tables)
 	{
-		if( !is_array($tables) )
-		{
+		if( !is_array($tables) ) {
 			$tables = array($tables);
 		}
 		
-		foreach( $tables AS $tablename )
-		{
-			@pg_exec($this->connect_id, 'VACUUM ' . $tablename);
+		foreach( $tables as $tablename ) {
+			pg_query($this->link, 'VACUUM ' . $tablename);
 		}
 	}
 	
 	/**
-	 * sql::num_rows()
-	 * 
-	 * Nombre de lignes retournées
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function num_rows($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? @pg_numrows($result) : false;
-	}
-	
-	/**
-	 * sql::affected_rows()
-	 * 
-	 * Nombre de lignes affectées par la dernière requète DML
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function affected_rows()
-	{
-		return ( $this->query_result != false ) ? @pg_cmdtuples($this->query_result) : false;
-	}
-	
-	/**
-	 * sql::fetch_row()
-	 * 
-	 * Retourne un tableau indexé numériquement correspondant à la ligne de résultat courante
-	 * et déplace le pointeur de lecture des résultats
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function fetch_row($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? @pg_fetch_row($result) : false;
-	}
-	
-	/**
-	 * sql::fetch_array()
-	 * 
-	 * Retourne un tableau associatif correspondant à la ligne de résultat courante
-	 * et déplace le pointeur de lecture des résultats
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function fetch_array($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? @pg_fetch_array($result, null, PGSQL_ASSOC) : false;
-	}
-	
-	/**
-	 * sql::fetch_rowset()
-	 * 
-	 * Retourne un tableau bi-dimensionnel correspondant à toutes les lignes de résultat
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function fetch_rowset($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		$rowset = array();
-		while( $row = @pg_fetch_array($result, null, PGSQL_ASSOC) )
-		{
-			array_push($rowset, $row);
-		}
-		
-		return $rowset;
-	}
-	
-	/**
-	 * sql::num_fields()
-	 * 
-	 * Retourne le nombre de champs dans le résultat
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function num_fields($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? @pg_numfields($result) : false;
-	}
-	
-	/**
-	 * sql::field_name()
-	 * 
-	 * Retourne le nom de la colonne à l'index $offset dans le résultat
-	 * 
-	 * @param integer  $offset  Position de la colonne dans le résultat
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function field_name($offset, $result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? @pg_fieldname($result, $offset) : false;
-	}
-	
-	/**
-	 * sql::result()
-	 * 
-	 * Retourne la valeur d'une colonne dans une ligne de résultat donnée
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * @param integer  $row     Numéro de la ligne de résultat
-	 * @param string   $field   Nom de la colonne
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function result($result, $row, $field = '')
-	{
-		if( $field != '' )
-		{
-			return @pg_result($result, $row, $field);
-		}
-		else
-		{
-			return @pg_result($result, $row);
-		}
-	}
-	
-	/**
-	 * sql::result_seek()
-	 * 
-	 * Déplace le pointeur interne de résultat
-	 * 
-	 * @param integer  $row     Numéro de la ligne de résultat
-	 * @param resource $result  Ressource de résultat de requète
+	 * Démarre le mode transactionnel
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
-	function result_seek($row, $result = false)
+	function beginTransaction()
 	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		return ( $result != false ) ? pg_result_seek($result, $row) : false;
+		return pg_query($this->link, 'BEGIN');
 	}
 	
 	/**
-	 * sql::next_id()
-	 * 
-	 * Retourne l'identifiant généré par la dernière requête INSERT
+	 * Envoie une commande COMMIT à la base de données pour validation de la
+	 * transaction courante
 	 * 
 	 * @access public
-	 * @return mixed
+	 * @return boolean
 	 */
-	function next_id()
+	function commit()
 	{
-		if( $this->query_result != false )
-		{
-			$query = "SELECT currval('" . $this->last_insert_table . "_id_seq') AS last_value";
-			$result_next_id =  @pg_exec($this->connect_id, $query);
-			if( $result_next_id )
-			{
-				$row_next_id = @pg_fetch_array($result_next_id, 0, PGSQL_ASSOC);
-				return ( $row_next_id ) ? $row_next_id['last_value'] : false;
+		if( !($result = pg_query($this->link, 'COMMIT')) ) {
+			pg_query($this->link, 'ROLLBACK');
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * Envoie une commande ROLLBACK à la base de données pour annulation de la
+	 * transaction courante
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function rollBack()
+	{
+		return pg_query($this->link, 'ROLLBACK');
+	}
+	
+	/**
+	 * Renvoie le nombre de lignes affectées par la dernière requète DML
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function affectedRows()
+	{
+		return pg_affected_rows($this->_result);
+	}
+	
+	/**
+	 * Retourne l'identifiant généré automatiquement par la dernière requète
+	 * INSERT sur la base de données
+	 * 
+	 * @access public
+	 * @return integer
+	 */
+	function lastInsertId()
+	{
+		if( !is_null($this->lastInsertTable) ) {
+			$result = pg_query($this->link, "SELECT currval('{$this->lastInsertTable}_id_seq') AS lastId");
+			$this->lastInsertTable = null;
+			
+			if( is_resource($result) ) {
+				return pg_fetch_result($result, 0, 'lastId');
 			}
 		}
 		
@@ -567,76 +435,361 @@ class sql {
 	}
 	
 	/**
-	 * sql::free_result()
+	 * Échappe une chaîne en prévision de son insertion dans une requète sur
+	 * la base de données
 	 * 
-	 * Libère le résultat de la mémoire
-	 * 
-	 * @param resource $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function free_result($result = false)
-	{
-		if( !$result )
-		{
-			$result = $this->query_result;
-		}
-		
-		if( $result != false )
-		{
-			@pg_freeresult($result);
-		}
-	}
-	
-	/**
-	 * sql::escape()
-	 * 
-	 * Échappe une chaîne de caractère en prévision de son insertion dans la base de données
-	 * 
-	 * @param string $str
+	 * @param string $string
 	 * 
 	 * @access public
 	 * @return string
 	 */
-	function escape($str)
+	function escape($string)
 	{
-		return str_replace("'", "''", str_replace('\\', '\\\\', $str));
+		return pg_escape_string($string);
 	}
 	
 	/**
-	 * sql::close()
+	 * Vérifie l'état de la connexion courante et effectue si besoin une reconnexion
 	 * 
-	 * Clôt la connexion à la base de données
+	 * @access public
+	 * @return boolean
+	 */
+	function ping()
+	{
+		return pg_ping($this->link);
+	}
+	
+	/**
+	 * Ferme la connexion à la base de données
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
 	function close()
 	{
-		if( $this->connect_id != false )
-		{
-			$this->free_result($this->query_result);
-			$this->transaction(END_TRC);
-			
-			$result = @pg_close($this->connect_id);
-			$this->connect_id   = null;
-			$this->query_result = null;
+		if( !is_null($this->link) ) {
+			@$this->commit();
+			$result = pg_close($this->link);
+			$this->link = null;
 			
 			return $result;
 		}
-		else
-		{
-			return false;
+		else {
+			return true;
 		}
+	}
+	
+	/**
+	 * Destructeur de classe
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function __destruct()
+	{
+		$this->close();
 	}
 }
 
-//
-// PostgreSQL
-// - Basé sur phpPgAdmin 2.4.2
-//
-class sql_backup {
+class WadbResult {
+	
+	/**
+	 * Connexion à la base de données
+	 * 
+	 * @var resource
+	 * @access private
+	 */
+	var $link;
+	
+	/**
+	 * Ressource de résultat de requète
+	 * 
+	 * @var resource
+	 * @access private
+	 */
+	var $result;
+	
+	/**
+	 * Index courant dans le jeu de résultats
+	 * 
+	 * @var integer
+	 * @access public
+	 */
+	var $offset = 0;
+	
+	/**
+	 * Nombre de lignes renvoyées par la requète
+	 * 
+	 * @var resource
+	 * @access private
+	 */
+	var $_count = 0;
+	
+	/**
+	 * Mode de récupération des données
+	 * 
+	 * @var integer
+	 * @access private
+	 */
+	var $fetchMode;
+	
+	/**
+	 * Constructeur de classe
+	 * 
+	 * @param resource $link    Ressource de connexion à la base de données
+	 * @param resource $result  Ressource de résultat de requète
+	 * 
+	 * @access public
+	 */
+	function WadbResult($link, $result)
+	{
+		$this->link   = $link;
+		$this->result = $result;
+		$this->_count = pg_num_rows($result);
+		$this->fetchMode = PGSQL_BOTH;
+	}
+	
+	/**
+	 * Renvoie le nombre de lignes du résultat
+	 * 
+	 * @access public
+	 * @return integer
+	 */
+	function count()
+	{
+		return $this->_count;
+	}
+	
+	/**
+	 * Renvoie la ligne suivante dans le jeu de résultat
+	 * 
+	 * @param integer $mode  Mode de récupération des données
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function fetch($mode = null)
+	{
+		if( is_null($mode) ) {
+			$mode = $this->fetchMode;
+		}
+		
+		return pg_fetch_array($this->result, $this->offset++, $mode);
+	}
+	
+	/**
+	 * Renvoie sous forme d'objet la ligne suivante dans le jeu de résultat
+	 * 
+	 * @access public
+	 * @return object
+	 */
+	function fetchObject()
+	{
+		$this->offset++;
+		return pg_fetch_object($this->result);
+	}
+	
+	/**
+	 * Renvoie un tableau de toutes les lignes du jeu de résultat
+	 * 
+	 * @param integer $mode  Mode de récupération des données
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function fetchAll($mode = null)
+	{
+		if( is_null($mode) ) {
+			$mode = $this->fetchMode;
+		}
+		
+		$rowset = array();
+		for( $i = 0; $i < $this->_count; $i++ ) {
+			array_push($rowset, $this->fetch($mode));
+		}
+		
+		return $rowset;
+	}
+	
+	/**
+	 * Retourne le contenu de la colonne pour l'index ou le nom donné
+	 * à l'index courant dans le jeu de résultat.
+	 * Ne déplace PAS le pointeur de résultat
+	 * 
+	 * @param mixed $column  Index ou nom de la colonne
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function column($column)
+	{
+		return pg_fetch_result($this->result, $this->offset, $column);
+	}
+	
+	/**
+	 * Renvoie la ligne courante dans le jeu de résultat.
+	 * Ne déplace PAS le pointeur de résultat
+	 * 
+	 * @param integer $mode  Mode de récupération des données
+	 * 
+	 * @access public
+	 * @return array
+	 */
+	function current($mode = null)
+	{
+		if( is_null($mode) ) {
+			$mode = $this->fetchMode;
+		}
+		
+		$row = pg_fetch_array($this->result, $this->offset, $mode);
+		pg_result_seek($this->result, $this->offset);
+		
+		return $row;
+	}
+	
+	/**
+	 * Configure le mode de récupération par défaut
+	 * 
+	 * @param integer $mode  Mode de récupération des données
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function setFetchMode($mode)
+	{
+		if( in_array($mode, array(PGSQL_NUM, PGSQL_ASSOC, PGSQL_BOTH)) ) {
+			$this->fetchMode = $mode;
+			return true;
+		}
+		else {
+			trigger_error("Invalid fetch mode", E_USER_WARNING);
+			return false;
+		}
+	}
+	
+	/**
+	 * Place le pointeur de résultat à la première position
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function rewind()
+	{
+		if( $this->_count > 0 ) {
+			$this->offset = 0;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Place le pointeur de résultat à la position précédente
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function prev()
+	{
+		if( $this->offset > 0 ) {
+			$this->offset--;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Place le pointeur de résultat à la position suivante
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function next()
+	{
+		if( $this->offset < $this->_count ) {
+			$this->offset++;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Place le pointeur de résultat à la position $offset
+	 * 
+	 * @param integer $offset
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function seek($offset)
+	{
+		$this->offset = $offset;
+		return pg_result_seek($this->result, $offset);
+	}
+	
+	/**
+	 * Indique si une ligne précédente est disponible dans le jeu de résultat
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function hasPrev()
+	{
+		return ( $this->offset > 0 ) ? true : false;
+	}
+	
+	/**
+	 * Indique si une ligne suivante est disponible dans le jeu de résultat
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function hasMore()
+	{
+		return ( $this->offset < $this->_count ) ? true : false;
+	}
+	
+	/**
+	 * Libère la mémoire allouée
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function free()
+	{
+		return @pg_free_result($this->result);
+	}
+	
+	/**
+	 * Destructeur de classe
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function __destruct()
+	{
+		$this->free();
+	}
+}
+
+/**
+ * Basé sur phpPgAdmin 2.4.2
+ */
+class WadbBackup {
+	
+	/**
+	 * Informations concernant la base de données
+	 * 
+	 * @var array
+	 * @access private
+	 */
+	var $infos = array();
+	
 	/**
 	 * Fin de ligne
 	 * 
@@ -646,36 +799,36 @@ class sql_backup {
 	var $eol = "\n";
 	
 	/**
-	 * sql_backup::header()
+	 * Constructeur de classe
 	 * 
+	 * @param array $infos  Informations concernant la base de données
+	 * 
+	 * @access public
+	 */
+	function WadbBackup($infos)
+	{
+		$this->infos = $infos;
+	}
+	
+	/**
 	 * Génération de l'en-tête du fichier de sauvegarde
 	 * 
-	 * @param string $dbhost    Hôte de la base de données
-	 * @param string $dbname    Nom de la base de données
 	 * @param string $toolname  Nom de l'outil utilisé pour générer la sauvegarde
 	 * 
 	 * @access public
 	 * @return string
 	 */
-	function header($dbhost, $dbname, $toolname = '')
+	function header($toolname = '')
 	{
 		global $db;
-		
-		$result = $db->query("SELECT VERSION()");
 		
 		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
 		$contents .= "  $toolname PostgreSQL Dump" . $this->eol;
 		$contents .= $this->eol;
-		$contents .= "  Host     : $dbhost" . $this->eol;
-		
-		if( $db->num_rows($result) > 0 )
-		{
-			$server_info = $db->result($result, 0, 0);
-			$contents .= "  Server   : " . $server_info . $this->eol;
-		}
-		
-		$contents .= "  Database : $dbname" . $this->eol;
-		$contents .= '  Date     : ' . date('d/m/Y H:i:s') . $this->eol;
+		$contents .= "  Host     : " . $this->infos['host'] . $this->eol;
+		$contents .= "  Server   : " . $db->serverVersion . $this->eol;
+		$contents .= "  Database : " . $this->infos['dbname'] . $this->eol;
+		$contents .= '  Date     : ' . date('d/m/Y H:i:s O') . $this->eol;
 		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
 		$contents .= $this->eol;
 		
@@ -683,16 +836,12 @@ class sql_backup {
 	}
 	
 	/**
-	 * sql_backup::get_tables()
-	 * 
 	 * Retourne la liste des tables présentes dans la base de données considérée
-	 * 
-	 * @param string $dbname
 	 * 
 	 * @access public
 	 * @return array
 	 */
-	function get_tables($dbname)
+	function get_tables()
 	{
 		global $db;
 		
@@ -706,18 +855,16 @@ class sql_backup {
 		}
 		
 		$tables = array();
-		while( $row = $db->fetch_row($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
 			$tables[$row[0]] = '';
 		}
-		$db->free_result($result);
 		
 		return $tables;
 	}
 	
 	/**
-	 * sql_backup::get_sequences()
-	 * 
 	 * Retourne une chaîne de requète pour la regénération des séquences
 	 * 
 	 * @param boolean $drop_option  Ajouter une requète de suppression conditionnelle de séquence
@@ -733,22 +880,24 @@ class sql_backup {
 			FROM pg_class 
 			WHERE NOT relname ~ 'pg_.*' AND relkind ='S' 
 			ORDER BY relname";
-		if( !($result_seq = $db->query($sql)) )
+		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible de récupérer les séquences', ERROR);
 		}
 		
-		$num_seq = $db->num_rows($result_seq);
+		$num_seq = $result->count();
 		
 		$contents = '';
 		
 		for( $i = 0; $i < $num_seq; $i++ )
 		{
-			$sequence = $db->result($result_seq, $i, 'relname');
-			$result   = $db->query('SELECT * FROM ' . $sequence);
+			$result->seek($i);
+			$sequence = $result->column('relname');
+			$result_seq = $db->query('SELECT * FROM ' . $sequence);
 			
-			if( $row = $db->fetch_array($result) )
+			if( $result_seq->count() > 0 )
 			{
+				$row = $result_seq->fetch();
 				if( $drop_option )
 				{
 					$contents .= "DROP SEQUENCE $sequence;" . $this->eol;
@@ -767,8 +916,6 @@ class sql_backup {
 	}
 	
 	/**
-	 * sql_backup::get_table_structure()
-	 * 
 	 * Retourne la structure d'une table de la base de données sous forme de requète SQL de type DDL
 	 * 
 	 * @param array   $tabledata    Informations sur la table (provenant de self::get_tables())
@@ -811,8 +958,10 @@ class sql_backup {
 		
 		$contents .= 'CREATE TABLE ' . $tabledata['name'] . ' (' . $this->eol;
 		
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
+			
 			$sql = "SELECT d.adsrc AS rowdefault 
 				FROM pg_attrdef d, pg_class c 
 				WHERE (c.relname = '" . $tabledata['name'] . "') 
@@ -820,7 +969,7 @@ class sql_backup {
 					AND d.adnum = " . $row['attnum'];
 			if( $res = $db->query($sql) )
 			{
-				$row['rowdefault'] = $db->result($res, 0, 'rowdefault');
+				$row['rowdefault'] = $res->column('rowdefault');
 			}
 			else
 			{
@@ -879,8 +1028,10 @@ class sql_backup {
 		$primary_key = '';
 		$index_rows	 = array();
 		
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
+			
 			if( $row['primary_key'] == 't' )
 			{
 				$primary_key .= ( ( $primary_key != '' ) ? ', ' : '' ) . $row['column_name'];
@@ -909,7 +1060,7 @@ class sql_backup {
 		$index_create = '';
 		if( count($index_rows) )
 		{
-			foreach( $index_rows AS $idx_name => $props )
+			foreach( $index_rows as $idx_name => $props )
 			{
 				$props['column_names'] = ereg_replace(', $', '', $props['column_names']);
 				$index_create .= 'CREATE ' . $props['unique'] . " INDEX $idx_name ON " . $tabledata['name'] . " (" . $props['column_names'] . ');' . $this->eol;
@@ -944,8 +1095,9 @@ class sql_backup {
 		//
 		// Add the constraints to the sql file.
 		//
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
 			$contents .= 'CONSTRAINT ' . $row['index_name'] . ' CHECK ' . $row['rcsrc'] . ',' . $this->eol;
 		}
 		
@@ -963,8 +1115,6 @@ class sql_backup {
 	}
 	
 	/**
-	 * sql_backup::get_table_data()
-	 * 
 	 * Retourne les données d'une table de la base de données sous forme de requètes SQL de type DML
 	 * 
 	 * @param string $tablename  Nom de la table à considérer
@@ -984,7 +1134,7 @@ class sql_backup {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $row = $db->fetch_row($result) )
+		if( $result->count() > 0 )
 		{
 			$contents  = $this->eol;
 			$contents .= '/* ------------------------------------------------------------ ' . $this->eol;
@@ -992,18 +1142,20 @@ class sql_backup {
 			$contents .= ' ------------------------------------------------------------ */' . $this->eol;
 			
 			$fields = array();
-			for( $j = 0, $n = $db->num_fields($result); $j < $n; $j++ )
+			for( $j = 0, $n = pg_num_fields($result->result); $j < $n; $j++ )
 			{
-				$fields[] = $db->field_name($j, $result);
+				$fields[] = pg_field_name($result->result, $j);
 			}
 			
 			$fields = implode(', ', $fields);
 			
 			do
 			{
+				$row = $result->fetch(SQL_FETCH_ASSOC);
+				
 				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
-				foreach( $row AS $key => $value )
+				foreach( $row as $key => $value )
 				{
 					if( is_null($value) )
 					{
@@ -1017,9 +1169,9 @@ class sql_backup {
 				
 				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
 			}
-			while( $row = $db->fetch_row($result) );
+			while( $result->hasMore() );
 		}
-		$db->free_result($result);
+		$result->free();
 		
 		return $contents;
 	}

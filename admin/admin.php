@@ -79,7 +79,7 @@ if( $mode == 'adduser' )
 				trigger_error('Impossible de tester le login', ERROR);
 			}
 			
-			if( $db->result($result, 0, 'login_test') > 0 )
+			if( $result->column('login_test') > 0 )
 			{
 				$error = TRUE;
 				$msg_error[] = $lang['Message']['Double_login'];
@@ -104,7 +104,7 @@ if( $mode == 'adduser' )
 			$sql_data['admin_dateformat'] = $nl_config['date_format'];
 			$sql_data['admin_level']      = USER;
 			
-			if( !$db->query_build('INSERT', ADMIN_TABLE, $sql_data) )
+			if( !$db->build(SQL_INSERT, ADMIN_TABLE, $sql_data) )
 			{
 				trigger_error('Impossible d\'ajouter le nouvel administrateur', ERROR);
 			}
@@ -188,7 +188,7 @@ else if( $mode == 'deluser' )
 	
 	if( isset($_POST['confirm']) )
 	{
-		$db->transaction(START_TRC);
+		$db->beginTransaction();
 		
 		$sql = "DELETE FROM " . ADMIN_TABLE . " 
 			WHERE admin_id = " . $admin_id;
@@ -204,12 +204,12 @@ else if( $mode == 'deluser' )
 			trigger_error('Impossible de supprimer les permissions de l\'administrateur', ERROR);
 		}
 		
-		$db->transaction(END_TRC);
+		$db->commit();
 		
 		//
 		// Optimisation des tables
 		//
-		$db->check(array(ADMIN_TABLE, AUTH_ADMIN_TABLE));
+		$db->vacuum(array(ADMIN_TABLE, AUTH_ADMIN_TABLE));
 		
 		$output->redirect('./admin.php', 6);
 		
@@ -259,7 +259,7 @@ if( isset($_POST['submit']) )
 	}
 	
 	$vararray = array('current_pass', 'new_pass', 'confirm_pass', 'email', 'dateformat', 'language');
-	foreach( $vararray AS $varname )
+	foreach( $vararray as $varname )
 	{
 		${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
 	}
@@ -329,7 +329,7 @@ if( isset($_POST['submit']) )
 			$sql_data['admin_level'] = ( $_POST['admin_level'] == ADMIN ) ? ADMIN : USER;
 		}
 		
-		if( !$db->query_build('UPDATE', ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id)) )
+		if( !$db->build(SQL_UPDATE, ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id)) )
 		{
 			trigger_error('Impossible de mettre le profil à jour', ERROR);
 		}
@@ -339,7 +339,7 @@ if( isset($_POST['submit']) )
 			$auth_data = ( $admindata['admin_id'] == $admin_id ) ? $auth->listdata : $auth->read_data($admin_id);
 			$liste_ids = ( !empty($_POST['liste_id']) && is_array($_POST['liste_id']) ) ? $_POST['liste_id'] : array();
 			
-			foreach( $auth->auth_ary AS $auth_name )
+			foreach( $auth->auth_ary as $auth_name )
 			{
 				${$auth_name . '_ary'} = ( !empty($_POST[$auth_name]) ) ? $_POST[$auth_name] : array();
 			}
@@ -348,7 +348,7 @@ if( isset($_POST['submit']) )
 			{
 				$sql_data = array();
 				
-				foreach( $auth->auth_ary AS $auth_name )
+				foreach( $auth->auth_ary as $auth_name )
 				{
 					$sql_data[$auth_name] = ${$auth_name . '_ary'}[$i];
 				}
@@ -358,7 +358,7 @@ if( isset($_POST['submit']) )
 					$sql_data['admin_id'] = $admin_id;
 					$sql_data['liste_id'] = $liste_ids[$i];
 					
-					if( !$db->query_build('INSERT', AUTH_ADMIN_TABLE, $sql_data) )
+					if( !$db->build(SQL_INSERT, AUTH_ADMIN_TABLE, $sql_data) )
 					{
 						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des permissions', ERROR);
 					}
@@ -366,7 +366,7 @@ if( isset($_POST['submit']) )
 				else
 				{
 					$sql_where = array('admin_id' => $admin_id, 'liste_id' => $liste_ids[$i]);
-					if( !$db->query_build('UPDATE', AUTH_ADMIN_TABLE, $sql_data, $sql_where) )
+					if( !$db->build(SQL_UPDATE, AUTH_ADMIN_TABLE, $sql_data, $sql_where) )
 					{
 						trigger_error('Impossible de mettre à jour la table des permissions', ERROR);
 					}
@@ -384,7 +384,7 @@ if( isset($_POST['submit']) )
 				trigger_error('Impossible de récupérer le pseudo de cet utilisateur', ERROR);
 			}
 			
-			$pseudo = $db->result($result, 0, 0);
+			$pseudo = $result->column('admin_login');
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			
@@ -441,9 +441,9 @@ if( $admindata['admin_level'] == ADMIN )
 			WHERE admin_id = " . $admin_id;
 		if( $result = $db->query($sql) )
 		{
-			if( $row = $db->fetch_array($result) )
+			if( $result->count() > 0 )
 			{
-				$current_admin = $row;
+				$current_admin = $result->fetch();
 			}
 		}
 	}
@@ -462,16 +462,16 @@ if( $admindata['admin_level'] == ADMIN )
 		trigger_error('Impossible d\'obtenir la liste des administrateurs', ERROR);
 	}
 	
-	if( $row = $db->fetch_array($result) )
+	if( $result->count() > 0 )
 	{
 		$admin_box  = '<select id="admin_id" name="admin_id">';
 		$admin_box .= '<option value="0">' . $lang['Choice_user'] . '</option>';
 		
-		do 
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
 			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
 		}
-		while( $row = $db->fetch_array($result) );
 		
 		$admin_box .= '</select>';
 	}
@@ -562,7 +562,7 @@ if( $admindata['admin_level'] == ADMIN )
 		'SELECTED_USER'   => ( $current_admin['admin_level'] == USER ) ? ' selected="selected"' : ''
 	));
 	
-	foreach( $listdata AS $listrow )
+	foreach( $listdata as $listrow )
 	{
 		$output->assign_block_vars('admin_options.auth', array(
 			'LISTE_NAME'      => $listrow['liste_name'],

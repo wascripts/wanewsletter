@@ -57,7 +57,7 @@ function lang_box($default_lang = '')
 		asort($lang_ary);
 		
 		$lang_box = '<select id="language" name="language">';
-		foreach( $lang_ary AS $lang_name )
+		foreach( $lang_ary as $lang_name )
 		{
 			$selected  = ( $default_lang == $lang_name ) ? ' selected="selected"' : '';
 			$lang_box .= sprintf('<option value="%1$s"%2$s>%1$s</option>', $lang_name, $selected);

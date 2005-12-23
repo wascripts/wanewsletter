@@ -47,7 +47,7 @@ if( isset($_POST['cancel']) )
 }
 
 $vararray = array('purge', 'edit', 'delete');
-foreach( $vararray AS $varname )
+foreach( $vararray as $varname )
 {
 	if( isset($_POST[$varname]) )
 	{
@@ -109,12 +109,12 @@ else if( $mode == 'export' )
 		trigger_error('Impossible d\'obtenir les données de l\'archive', ERROR);
 	}
 	
-	if( $db->num_rows($result) == 0 )
+	if( $result->count() == 0 )
 	{
 		trigger_error('log_not_exists', ERROR);
 	}
 	
-	$logdata = $db->fetch_array($result);
+	$logdata = $result->fetch();
 	
 	if( @chdir(WA_TMPDIR) == false )
 	{
@@ -162,8 +162,10 @@ else if( $mode == 'export' )
 	// Copie des fichiers joints dans le répertoire temporaire WA_TMPDIR/newsletter
 	// et remplacement éventuel des références cid: dans la newsletter HTML.
 	//
-	while( $row = $db->fetch_array($result) )
+	while( $result->hasMore() )
 	{
+		$row = $result->fetch();
+		
 		copy(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $row['file_physical_name'], 'newsletter/files/' . $row['file_real_name']);
 		array_push($files, 'newsletter/files/' . $row['file_real_name']);
 		
@@ -201,7 +203,7 @@ else if( $mode == 'export' )
 	
 	$archive->create($files);
 	
-	foreach( $files AS $file )
+	foreach( $files as $file )
 	{
 		unlink($file);
 	}
@@ -239,8 +241,9 @@ else if( $mode == 'iframe' )
 		$output->basic('Impossible d\'obtenir les données sur ce log');
 	}
 	
-	if( $row = $db->fetch_array($result) )
+	if( $result->count() > 0 )
 	{
+		$row  = $result->fetch();
 		$body = $row[$body_type];
 		
 		if( strlen($body) )
@@ -389,8 +392,10 @@ else if( $mode == 'abonnes' )
 			trigger_error('Impossible d\'obtenir les données sur cet abonné', ERROR);
 		}
 		
-		if( $row = $db->fetch_array($result) )
+		if( $result->count() > 0 )
 		{
+			$row = $result->fetch();
+			
 			$output->page_header();
 			
 			$output->set_filenames(array(
@@ -443,7 +448,7 @@ else if( $mode == 'abonnes' )
 					$register_date = $row['register_date'];
 				}
 			}
-			while( $row = $db->fetch_array($result) );
+			while( $result->hasMore() && ($row = $result->fetch()) );
 			
 			$output->assign_var('S_REGISTER_DATE', convert_time($nl_config['date_format'], $register_date));
 			
@@ -486,9 +491,10 @@ else if( $mode == 'abonnes' )
 				}
 				
 				$tmp_ids = array();
-				while( $row = $db->fetch_array($result) )
+				while( $result->hasMore() )
 				{
-					array_push($tmp_ids, $row['liste_id']);
+					array_push($tmp_ids, $result->column('liste_id'));
+					$result->next();
 				}
 				
 				$result_ids = array_intersect($liste_ids, $tmp_ids);
@@ -506,7 +512,7 @@ else if( $mode == 'abonnes' )
 					'abo_pseudo' => ( !empty($_POST['pseudo']) ) ? strip_tags(trim($_POST['pseudo'])) : ''
 				);
 				
-				if( !$db->query_build('UPDATE', ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id)) )
+				if( !$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id)) )
 				{
 					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
 				}
@@ -515,7 +521,7 @@ else if( $mode == 'abonnes' )
 				
 				$update = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 				
-				foreach( $formatList AS $liste_id => $format )
+				foreach( $formatList as $liste_id => $format )
 				{
 					if( in_array($format, array(FORMAT_TEXTE, FORMAT_HTML)) && $auth->check_auth(AUTH_EDIT, $liste_id) )
 					{
@@ -523,7 +529,7 @@ else if( $mode == 'abonnes' )
 					}
 				}
 				
-				foreach( $update AS $format => $sql_ids )
+				foreach( $update as $format => $sql_ids )
 				{
 					if( count($sql_ids) > 0 )
 					{
@@ -557,9 +563,11 @@ else if( $mode == 'abonnes' )
 			trigger_error('Impossible d\'obtenir les données sur cet abonné', ERROR);
 		}
 		
-		if( $row = $db->fetch_array($result) )
+		if( $result->count() > 0 )
 		{
 			require WA_ROOTDIR . '/includes/functions.box.php';
+			
+			$row = $result->fetch();
 			
 			$output->addHiddenField('id', $row['abo_id']);
 			$output->addHiddenField('action', 'edit');
@@ -602,7 +610,7 @@ else if( $mode == 'abonnes' )
 					));
 				}
 			}
-			while( $row = $db->fetch_array($result) );
+			while( $result->hasMore() && ($row = $result->fetch()) );
 			
 			$output->pparse('body');
 			$output->page_footer();
@@ -634,9 +642,9 @@ else if( $mode == 'abonnes' )
 		
 		if( isset($_POST['confirm']) )
 		{
-			$db->transaction(START_TRC);
+			$db->beginTransaction();
 			
-			switch( DATABASE )
+			switch( SQL_DRIVER )
 			{
 				case 'mysql':
 					$sql = "SELECT abo_id
@@ -646,15 +654,15 @@ else if( $mode == 'abonnes' )
 						HAVING COUNT(abo_id) = 1";
 					if( $result = $db->query($sql) )
 					{
-						if( $row = $db->fetch_array($result) )
+						if( $result->count() > 0 )
 						{
 							$abo_ids2 = array();
 							
-							do
+							while( $result->hasMore() )
 							{
-								array_push($abo_ids2, $row['abo_id']);
+								array_push($abo_ids2, $result->column('abo_id'));
+								$result->next();
 							}
-							while( $row = $db->fetch_array($result) );
 							
 							$sql = "DELETE FROM " . ABONNES_TABLE . " 
 								WHERE abo_id IN(" . implode(', ', $abo_ids2) . ")";
@@ -690,11 +698,12 @@ else if( $mode == 'abonnes' )
 				trigger_error('Impossible de supprimer les entrées de la table abo_liste', ERROR);
 			}
 			
-			$db->transaction(END_TRC);
+			$db->commit();
+			
 			//
 			// Optimisation des tables
 			//
-			$db->check(array(ABONNES_TABLE, ABO_LISTE_TABLE));
+			$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE));
 			
 			$output->redirect('./view.php?mode=abonnes', 4);
 			
@@ -740,20 +749,21 @@ else if( $mode == 'abonnes' )
 					trigger_error('Impossible d\'obtenir les ID des adresses email entrées', ERROR);
 				}
 				
-				if( $db->num_rows($result) == 0 )
+				if( $result->count() == 0 )
 				{
 					$output->redirect('./view.php?mode=abonnes', 4);
 					trigger_error('No_abo_email', MESSAGE);
 				}
 				
-				while( $row = $db->fetch_array($result) )
+				while( $result->hasMore() )
 				{
-					$output->addHiddenField('id[]', $row['abo_id']);
+					$output->addHiddenField('id[]', $result->column('abo_id'));
+					$result->next();
 				}
 			}
 			else
 			{
-				foreach( $abo_ids AS $abo_id )
+				foreach( $abo_ids as $abo_id )
 				{
 					$output->addHiddenField('id[]', $abo_id);
 				}
@@ -795,7 +805,7 @@ else if( $mode == 'abonnes' )
 		trigger_error('Impossible d\'obtenir le nombre d\'abonnés', ERROR);
 	}
 	
-	$total_abo = $db->result($result, 0, 'total_abo');
+	$total_abo = $result->column('total_abo');
 	
 	if( $total_abo > 0 )
 	{
@@ -804,13 +814,14 @@ else if( $mode == 'abonnes' )
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id  = $listdata[liste_id]
 					AND al.confirmed = $abo_confirmed $sql_search_date $sql_search
-			ORDER BY $sql_type " . $sql_order;
-		if( !($result = $db->query($sql, $start, $abo_per_page)) )
+			ORDER BY $sql_type " . $sql_order . "
+			LIMIT $abo_per_page OFFSET $start";
+		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir la liste des abonnés', ERROR);
 		}
 		
-		$aborow = $db->fetch_rowset($result);
+		$aborow = $result->fetchAll();
 		
 		$total_pages = ceil($total_abo / $abo_per_page);
 		if( $page_id > 1 )
@@ -1005,7 +1016,7 @@ else if( $mode == 'liste' )
 			'liste_name', 'sender_email', 'return_email', 'form_url', 'liste_sig', 
 			'pop_host', 'pop_user', 'pop_pass', 'liste_alias'
 		);
-		foreach( $vararray AS $varname )
+		foreach( $vararray as $varname )
 		{
 			${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
 		}
@@ -1024,7 +1035,7 @@ else if( $mode == 'liste' )
 			'liste_format', 'confirm_subscribe', 'liste_public',
 			'limitevalidate', 'auto_purge', 'purge_freq', 'use_cron', 'pop_port'
 		);
-		foreach( $vararray2 AS $varname )
+		foreach( $vararray2 as $varname )
 		{
 			if( isset($_POST[$varname]) )
 			{
@@ -1107,30 +1118,30 @@ else if( $mode == 'liste' )
 				$liste_name = htmlspecialchars($liste_name);
 				$vararray   = array_merge($vararray, $vararray2);
 				
-				foreach( $vararray AS $varname )
+				foreach( $vararray as $varname )
 				{
 					$sql_data[$varname] = ${$varname};
 				}
 				
 				if( $action == 'add' )
 				{
-					$sql_type = 'INSERT';
+					$sql_type = SQL_INSERT;
 					$sql_data['liste_startdate'] = time();
 				}
 				else
 				{
-					$sql_type = 'UPDATE';
+					$sql_type = SQL_UPDATE;
 					$sql_where['liste_id'] = $listdata['liste_id'];
 				}
 				
-				if( !$db->query_build($sql_type, LISTE_TABLE, $sql_data, $sql_where) )
+				if( !$db->build($sql_type, LISTE_TABLE, $sql_data, $sql_where) )
 				{
 					trigger_error('Impossible de mettre à jour la table des listes', ERROR);
 				}
 				
 				if( $action == 'add' )
 				{
-					$new_liste_id = $db->next_id();
+					$new_liste_id = $db->lastInsertId();
 					
 					$sql = "UPDATE " . SESSIONS_TABLE . " 
 						SET session_liste = $new_liste_id 
@@ -1154,7 +1165,7 @@ else if( $mode == 'liste' )
 			$listdata['liste_name'] = unhtmlspecialchars($listdata['liste_name']);
 			$vararray = array_merge($vararray, $vararray2);
 			
-			foreach( $vararray AS $varname )
+			foreach( $vararray as $varname )
 			{
 				${$varname} = $listdata[$varname];
 			}
@@ -1250,7 +1261,7 @@ else if( $mode == 'liste' )
 		{
 			$liste_id = ( !empty($_POST['liste_id']) ) ? intval($_POST['liste_id']) : 0;
 			
-			$db->transaction(START_TRC);
+			$db->beginTransaction();
 			
 			$sql = "DELETE FROM " . AUTH_ADMIN_TABLE . " 
 				WHERE liste_id = " . $listdata['liste_id'];
@@ -1261,10 +1272,9 @@ else if( $mode == 'liste' )
 			
 			if( isset($_POST['delete_all']) )
 			{
-				switch( DATABASE )
+				switch( SQL_DRIVER )
 				{
 					case 'mysql':
-						
 						$sql = "SELECT abo_id 
 							FROM " . ABO_LISTE_TABLE . " AS al 
 							WHERE liste_id = " . $listdata['liste_id'];
@@ -1273,15 +1283,15 @@ else if( $mode == 'liste' )
 							trigger_error('Impossible d\'obtenir la liste des abonnés de cette liste', ERROR);
 						}
 						
-						if( $row = $db->fetch_array($result) )
+						if( $result->count() > 0 )
 						{
 							$abo_ids = array();
 							
-							do
+							while( $result->hasMore() )
 							{
-								array_push($abo_ids, $row['abo_id']);
+								array_push($abo_ids, $result->column('abo_id'));
+								$result->next();
 							}
-							while( $row = $db->fetch_array($result) );
 							
 							$sql = "SELECT abo_id 
 								FROM " . ABO_LISTE_TABLE . " 
@@ -1293,15 +1303,15 @@ else if( $mode == 'liste' )
 								trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
 							}
 							
-							if( $row = $db->fetch_array($result) )
+							if( $result->count() > 0 )
 							{
 								$abo_ids = array();
 								
-								do
+								while( $result->hasMore() )
 								{
-									array_push($abo_ids, $row['abo_id']);
+									array_push($abo_ids, $result->column('abo_id'));
+									$result->next();
 								}
-								while( $row = $db->fetch_array($result) );
 								
 								$sql = "DELETE FROM " . ABONNES_TABLE . " 
 									WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
@@ -1349,9 +1359,10 @@ else if( $mode == 'liste' )
 				}
 				
 				$log_ids = array();
-				while( $row = $db->fetch_array($result) )
+				while( $result->hasMore() )
 				{
-					array_push($log_ids, $row['log_id']);
+					array_push($log_ids, $result->column('log_id'));
+					$result->next();
 				}
 				
 				require WA_ROOTDIR . '/includes/class.attach.php';
@@ -1376,7 +1387,7 @@ else if( $mode == 'liste' )
 					trigger_error('No_liste_id', ERROR);
 				}
 				
-				switch( DATABASE )
+				switch( SQL_DRIVER )
 				{
 					case 'mysql':
 						$sql = "SELECT abo_id 
@@ -1387,15 +1398,15 @@ else if( $mode == 'liste' )
 							trigger_error('Impossible d\'obtenir la liste des abonnés', ERROR);
 						}
 						
-						if( $row = $db->fetch_array($result) )
+						if( $result->count() > 0 )
 						{
 							$abo_ids = array();
 							
-							do
+							while( $result->hasMore() )
 							{
-								array_push($abo_ids, $row['abo_id']);
+								array_push($abo_ids, $result->column('abo_id'));
+								$result->next();
 							}
-							while( $row = $db->fetch_array($result) );
 							
 							$sql = "SELECT abo_id 
 								FROM " . ABO_LISTE_TABLE . " 
@@ -1406,15 +1417,15 @@ else if( $mode == 'liste' )
 								trigger_error('Impossible d\'obtenir la liste des abonnés[2]', ERROR);
 							}
 							
-							if( $row = $db->fetch_array($result) )
+							if( $result->count() > 0 )
 							{
 								$abo_ids2 = array();
 								
-								do
+								while( $result->hasMore() )
 								{
-									array_push($abo_ids2, $row['abo_id']);
+									array_push($abo_ids2, $result->column('abo_id'));
+									$result->next();
 								}
-								while( $row = $db->fetch_array($result) );
 								
 								$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
 									WHERE abo_id IN(" . implode(', ', $abo_ids2) . ") 
@@ -1491,12 +1502,12 @@ else if( $mode == 'liste' )
 				trigger_error('Impossible de supprimer l\'entrée de la table des listes', ERROR);
 			}
 			
-			$db->transaction(END_TRC);
+			$db->commit();
 			
 			//
 			// Optimisation des tables
 			//
-			$db->check(array(ABONNES_TABLE, ABO_LISTE_TABLE, LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE, LISTE_TABLE));
+			$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE, LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE, LISTE_TABLE));
 			
 			$output->redirect('./index.php', 4);
 			
@@ -1509,7 +1520,7 @@ else if( $mode == 'liste' )
 			$list_box     = '';
 			$liste_ids = $auth->check_auth(AUTH_VIEW);
 			
-			foreach( $auth->listdata AS $liste_id => $data )
+			foreach( $auth->listdata as $liste_id => $data )
 			{
 				if( in_array($liste_id, $liste_ids) && $liste_id != $listdata['liste_id'] )
 				{
@@ -1586,8 +1597,10 @@ else if( $mode == 'liste' )
 		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
 	}
 	
-	while( $row = $db->fetch_array($result) )
+	while( $result->hasMore() )
 	{
+		$row = $result->fetch();
+		
 		if( $row['confirmed'] == SUBSCRIBE_CONFIRMED )
 		{
 			$num_inscrits = $row['num_abo'];
@@ -1610,9 +1623,9 @@ else if( $mode == 'liste' )
 		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
 	}
 	
-	if( $row = $db->fetch_array($result) )
+	if( $result->count() > 0 )
 	{
-		$last_log = $row['last_log'];
+		$last_log = $result->column('last_log');
 	}
 	
 	switch( $listdata['liste_format'] )
@@ -1774,7 +1787,7 @@ else if( $mode == 'log' )
 		
 		if( isset($_POST['confirm']) )
 		{
-			$db->transaction(START_TRC);
+			$db->beginTransaction();
 			
 			$sql = "DELETE FROM " . LOG_TABLE . " 
 				WHERE log_id IN(" . implode(', ', $log_ids) . ")";
@@ -1788,12 +1801,12 @@ else if( $mode == 'log' )
 			$attach = new Attach();
 			$attach->delete_joined_files(true, $log_ids);
 			
-			$db->transaction(END_TRC);
+			$db->commit();
 			
 			//
 			// Optimisation des tables
 			//
-			$db->check(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
+			$db->vacuum(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
 			
 			$output->redirect('./view.php?mode=log', 4);
 			
@@ -1808,7 +1821,7 @@ else if( $mode == 'log' )
 			$output->addHiddenField('action', 'delete');
 			$output->addHiddenField('sessid', $session->session_id);
 			
-			foreach( $log_ids AS $log_id )
+			foreach( $log_ids as $log_id )
 			{
 				$output->addHiddenField('log_id[]', $log_id);
 			}
@@ -1871,7 +1884,7 @@ else if( $mode == 'log' )
 		trigger_error('Impossible d\'obtenir le nombre de logs', ERROR);
 	}
 	
-	$total_logs = $db->result($result, 0, 'total_logs');
+	$total_logs = $result->column('total_logs');
 	
 	$logdata  = '';
 	$logrow   = array();
@@ -1883,14 +1896,17 @@ else if( $mode == 'log' )
 			FROM " . LOG_TABLE . "
 			WHERE log_status = " . STATUS_SENDED . "
 				AND liste_id = $listdata[liste_id]
-			ORDER BY $sql_type " . $sql_order;
-		if( !($result = $db->query($sql, $start, $log_per_page)) )
+			ORDER BY $sql_type " . $sql_order . "
+			LIMIT $log_per_page OFFSET $start";
+		if( !($result = $db->query($sql)) )
 		{
 			trigger_error('Impossible d\'obtenir la liste des logs', ERROR);
 		}
 		
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
+			
 			if( $action == 'view' && $log_id == $row['log_id'] )
 			{
 				$logdata = $row;
@@ -1912,8 +1928,9 @@ else if( $mode == 'log' )
 		}
 		
 		$files_count = array();
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
 			$files_count[$row['log_id']] = $row['num_files'];
 		}
 		
@@ -1962,7 +1979,7 @@ else if( $mode == 'log' )
 				trigger_error('Impossible d\'obtenir la liste des fichiers joints au log', ERROR);
 			}
 			
-			$logdata['joined_files'] = $db->fetch_rowset($result);
+			$logdata['joined_files'] = $result->fetchAll();
 		}
 	}
 	

@@ -47,7 +47,7 @@ function diff_lang($tab_1, $tab_2)
 {
     $new_tab = array();
     
-    foreach( $tab_1 AS $varname => $varval )
+    foreach( $tab_1 as $varname => $varval )
     {
         if( is_array($varval) )
         {

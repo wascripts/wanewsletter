@@ -37,12 +37,12 @@ $starttime = array_sum(explode(' ', microtime()));
 //
 // Intialisation des variables pour éviter toute injection malveillante de code 
 //
-$simple_header = $error = FALSE;
+$simple_header = $error = false;
 $nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = $_php_errors = array();
-$output = NULL;
-$dbtype = $dbhost = $dbuser = $dbpassword = $dbname = $prefixe = '';
+$output = null;
+$dsn = $prefixe = '';
 
-include WA_ROOTDIR . '/includes/config.inc.php';
+@include WA_ROOTDIR . '/includes/config.inc.php';
 
 if( !defined('NL_INSTALLED') )
 {
@@ -63,7 +63,7 @@ if( !defined('NL_INSTALLED') )
 
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/sql/db_type.php';
+require WA_ROOTDIR . '/includes/wadb_init.php';
 
 //
 // Appel du gestionnaire d'erreur 
@@ -111,9 +111,9 @@ if( get_magic_quotes_gpc() )
 //
 // Intialisation de la connexion à la base de données 
 //
-$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+$db = WaDatabase($dsn);
 
-if( !$db->connect_id )
+if( !$db->isConnected() )
 {
 	trigger_error('<b>Impossible de se connecter à la base de données</b>', CRITICAL_ERROR);
 }
@@ -127,7 +127,7 @@ if( !($result = $db->query($sql)) )
 	trigger_error('Impossible d\'obtenir la configuration de la newsletter', CRITICAL_ERROR);
 }
 
-$nl_config = $db->fetch_array($result);
+$nl_config = $result->fetch(SQL_FETCH_ASSOC);
 
 //
 // Purge 'automatique' des listes (comptes non activés au-delà du temps limite)

@@ -43,7 +43,7 @@ if( count($liste_ids) > 0 )
 	$sql_abo_ids = "SELECT DISTINCT(abo_id)
 		FROM " . ABO_LISTE_TABLE . "
 		WHERE liste_id IN($sql_liste_ids)";
-	if( DATABASE == 'mysql' )
+	if( SQL_DRIVER == 'mysql' )
 	{
 		if( !($result = $db->query($sql_abo_ids)) )
 		{
@@ -52,11 +52,12 @@ if( count($liste_ids) > 0 )
 		
 		$abo_ids = array();
 		
-		if( $db->num_rows() > 0 )
+		if( $result->count() > 0 )
 		{
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
-				array_push($abo_ids, $row['abo_id']);
+				array_push($abo_ids, $result->column('abo_id'));
+				$result->next();
 			}
 		}
 		else
@@ -76,8 +77,10 @@ if( count($liste_ids) > 0 )
 		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
 	}
 	
-	while( $row = $db->fetch_array($result) )
+	while( $result->hasMore() )
 	{
+		$row = $result->fetch();
+		
 		if( $row['abo_status'] == ABO_ACTIF )
 		{
 			$num_inscrits = $row['num_abo'];
@@ -99,9 +102,9 @@ if( count($liste_ids) > 0 )
 		trigger_error('Impossible d\'obtenir le nombre de logs envoyés', ERROR);
 	}
 	
-	if( $row = $db->fetch_array($result) )
+	if( $result->count() > 0 )
 	{
-		$num_logs = $row['num_logs'];
+		$num_logs = $result->column('num_logs');
 	}
 	
 	//
@@ -116,9 +119,9 @@ if( count($liste_ids) > 0 )
 		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
 	}
 	
-	if( $row = $db->fetch_array($result) )
+	if( $result->count() > 0 )
 	{
-		$last_log = $row['last_log'];
+		$last_log = $result->column('last_log');
 	}
 	
 	//
@@ -130,7 +133,7 @@ if( count($liste_ids) > 0 )
 			ON l.log_id = lf.log_id
 				AND l.liste_id IN($sql_liste_ids)";
 	
-	if( DATABASE == 'mysql' )
+	if( SQL_DRIVER == 'mysql' )
 	{
 		if( !($result = $db->query($sql_file_ids)) )
 		{
@@ -139,11 +142,12 @@ if( count($liste_ids) > 0 )
 		
 		$file_ids = array();
 		
-		if( $db->num_rows() > 0 )
+		if( $result->count() > 0 )
 		{
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
-				array_push($file_ids, $row['file_id']);
+				array_push($file_ids, $result->column('file_id'));
+				$result->next();
 			}
 		}
 		else
@@ -158,7 +162,7 @@ if( count($liste_ids) > 0 )
 		FROM " . JOINED_FILES_TABLE . " AS jf
 		WHERE jf.file_id IN($sql_file_ids)";
 	$result   = $db->query($sql);
-	$filesize = $db->result($result, 0, 'totalsize');
+	$filesize = $result->column('totalsize');
 	
 	if( file_exists(WA_ROOTDIR . '/stats') && is_readable(WA_ROOTDIR . '/stats') )
 	{
@@ -179,17 +183,21 @@ if( count($liste_ids) > 0 )
 // Poids des tables du script 
 // (excepté la table des sessions)
 //
-switch( DATABASE )
+list($infos) = parseDSN($dsn);
+
+switch( SQL_DRIVER )
 {
 	case 'mysql':
 	case 'mysqli':
-		$sql = 'SHOW TABLE STATUS FROM ' . $dbname;
+		$sql = 'SHOW TABLE STATUS FROM ' . $infos['dbname'];
 		if( $result = $db->query($sql) )
 		{
 			$dbsize = 0;
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
 				$add = false;
+				
 				if( $prefixe != '' )
 				{
 					if( $row['Name'] != SESSIONS_TABLE && preg_match('/^' . $prefixe . '/', $row['Name']) )
@@ -215,7 +223,7 @@ switch( DATABASE )
 		break;
 	
 	case 'sqlite':
-		$dbsize = filesize($dbhost);
+		$dbsize = filesize($infos['dbname']);
 		break;
 	
 	default:

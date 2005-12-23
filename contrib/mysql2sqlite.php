@@ -54,7 +54,7 @@ chdir(dirname(__FILE__));
 require WA_ROOTDIR . '/includes/config.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/includes/sql/db_type.php';
+require WA_ROOTDIR . '/includes/wadb_init.php';
 
 //
 // Gestionnaire d'erreur spécifique pour utilisation en ligne de commande
@@ -112,7 +112,7 @@ foreach( $queries as $query ) {
 //
 // Injection des données en provenance de la base MySQL
 //
-$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+$db = WaDatabase($dsn);
 
 $tableList = array(
 	'wa_abo_liste', 'wa_abonnes', 'wa_admin', 'wa_auth_admin', 'wa_ban_list', 'wa_config',
@@ -135,7 +135,8 @@ foreach( $tableList as $table ) {
 	
 	$result = $db->query("SELECT $fields FROM $table");
 	
-	while( $row = $db->fetch_array($result) ) {
+	while( $result->hasMore() ) {
+		$row = $result->fetch();
 		$values = array();
 		
 		foreach( $row as $value ) {
@@ -151,7 +152,7 @@ foreach( $tableList as $table ) {
 		sqlite_exec($fs, "INSERT INTO $table ($fields) VALUES(" . implode(", ", $values) . ")");
 	}
 	
-	printf("%d rows added.\n", $db->num_rows($result));
+	printf("%d rows added.\n", $result->count());
 	flush();
 }
 

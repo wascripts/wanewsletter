@@ -59,11 +59,13 @@ $sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_m
 	WHERE $sql_where";
 if( !($result = $db->query($sql)) )
 {
-	plain_error('Impossible de récupérer les données sur le fichier : ' . $db->sql_error['message']);
+	plain_error('Impossible de récupérer les données sur le fichier : ' . $db->error);
 }
 
-if( $filedata = $db->fetch_array($result) )
+if( $result->count() > 0 )
 {
+	$filedata = $result->fetch();
+	
 	if( $nl_config['use_ftp'] )
 	{
 		require WA_ROOTDIR . '/includes/class.attach.php';

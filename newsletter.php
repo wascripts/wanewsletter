@@ -103,7 +103,7 @@ if( !empty($action) || !empty($code) )
 				trigger_error('Impossible d\'obtenir les données sur la liste', ERROR);
 			}
 			
-			if( $listdata = $db->fetch_array($result) )
+			if( $listdata = $result->fetch() )
 			{
 				$wanewsletter =& new Wanewsletter($listdata);
 				$wanewsletter->message =& $message;

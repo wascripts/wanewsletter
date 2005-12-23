@@ -64,7 +64,7 @@ function process_bounce($deliveryReport)
 	$body   = preg_replace("/\r\n?/", "\n", $body);
 	$lines  = explode("\n", $body);
 	
-	foreach( $lines AS $line ) {
+	foreach( $lines as $line ) {
 		if( $pos = strpos($line, ':') ) {
 			$name = strtolower(substr($line, 0, $pos));
 			$value = trim(substr($line, $pos + 1));
@@ -90,7 +90,7 @@ function process_bounce($deliveryReport)
 				WHERE abo_email = '" . $db->escape($match[1]) . "'";
 			$result = $db->query($sql);
 			
-			$abo_id = $db->result($result, 0, 'abo_id');
+			$abo_id = $result->column('abo_id');
 			
 			$sql = "DELETE FROM " . ABONNES_TABLE . " WHERE abo_id = " . $abo_id;
 			$db->query($sql);
@@ -106,7 +106,7 @@ define('WA_ROOTDIR',    '..');
 require WA_ROOTDIR . '/start.php';
 
 $process = false;
-foreach( $_SERVER['argv'] AS $arg ) {
+foreach( $_SERVER['argv'] as $arg ) {
 	if( $arg == '--process' || $arg == 'process=true' ) {
 		$process = true;
 	}
@@ -118,7 +118,7 @@ if( $process == true ) {
 		
 		$mail_box = imap_sort($cid, SORTDATE, 1);
 		
-		foreach( $mail_box AS $mail_id ) {
+		foreach( $mail_box as $mail_id ) {
 			$email = imap_fetchstructure($cid, $mail_id);
 			
 			if( $email->type == TYPEMULTIPART && isset($email->parts[1]) && $email->parts[1]->type == TYPEMESSAGE
@@ -150,7 +150,7 @@ if( $process == true ) {
 		$mail_box = $pop->list_mail();
 		$deleted_mails = array();
 		
-		foreach( $mail_box AS $mail_id => $mail_size ) {
+		foreach( $mail_box as $mail_id => $mail_size ) {
 			$headers = $pop->contents[$mail_id]['headers'];
 			$message = $pop->contents[$mail_id]['message'];
 			
@@ -176,7 +176,7 @@ if( $process == true ) {
 	$output  = "Opération effectuée avec succés\n";
 	$output .= count($deleted_mails) . " compte(s) supprimé(s) pour cause d'adresse non valide.\n\n";
 	
-	foreach( $deleted_mails AS $mail )
+	foreach( $deleted_mails as $mail )
 	{
 		$output .= ' - ' . $mail . "\n";
 	}
@@ -217,8 +217,9 @@ if( $process == true ) {
 	</tr>
 <?php
 	
-	if( is_resource($result) ) {
-		while( $row = $db->fetch_array($result) ) {
+	if( $result != false && $result->count() > 0 ) {
+		while( $result->hasMore() ) {
+			$row = $result->fetch();
 			echo <<<DATA
 	<tr>
 		<td>$row[abo_id]</td>

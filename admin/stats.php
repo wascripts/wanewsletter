@@ -278,14 +278,15 @@ if( $img == 'camembert' )
 	}
 	
 	$tmpdata = array();
-	while( $row = $db->fetch_array($result) )
+	while( $result->hasMore() )
 	{
+		$row = $result->fetch();
 		$tmpdata[$row['liste_id']] = $row['num_inscrits'];
 	}
 	
 	$total_inscrits = 0;
 	$listes = array();
-	foreach( $liste_ids AS $liste_id )
+	foreach( $liste_ids as $liste_id )
 	{
 		$liste_name   = cut_str(unhtmlspecialchars($auth->listdata[$liste_id]['liste_name']), 30);
 		$num_inscrits = ( !empty($tmpdata[$liste_id]) ) ? $tmpdata[$liste_id] : 0;
@@ -322,7 +323,7 @@ if( $img == 'camembert' )
 	
 	$color = array();
 	$colorList = array('F80', '0A0', '0BC', '30C', '608', 'C03');
-	foreach( $colorList AS $hexColor )
+	foreach( $colorList as $hexColor )
 	{
 		$tmp = convertToRGB($hexColor);
 		$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);

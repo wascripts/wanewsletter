@@ -129,7 +129,7 @@ function Location($url)
  */
 function load_settings($admindata = array())
 {
-	global $nl_config, $db, $lang, $datetime;
+	global $nl_config, $lang, $datetime;
 	
 	if( !defined('IN_COMMANDLINE') )
 	{
@@ -204,11 +204,11 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 	
 	if( ( $errno == CRITICAL_ERROR || $errno == ERROR ) && ( defined('IN_ADMIN') || defined('IN_CRON') || DEBUG_MODE ) )
 	{
-		if( !empty($db->sql_error['message']) )
+		if( !empty($db->error) )
 		{
-			$debug_text .= '<b>SQL query</b>&#160;:<br /> ' . nl2br($db->sql_error['query']) . "<br /><br />\n";
-			$debug_text .= '<b>SQL errno</b>&#160;: ' . $db->sql_error['errno'] . "<br />\n";
-			$debug_text .= '<b>SQL error</b>&#160;: ' . $db->sql_error['message'] . "<br />\n<br />\n";
+			$debug_text .= '<b>SQL query</b>&#160;:<br /> ' . nl2br($db->query) . "<br /><br />\n";
+			$debug_text .= '<b>SQL errno</b>&#160;: ' . $db->errno . "<br />\n";
+			$debug_text .= '<b>SQL error</b>&#160;: ' . $db->error . "<br />\n<br />\n";
 		}
 		
 		$debug_text .= '<b>Fichier</b>&#160;: ' . basename($errfile) . " \n<b>Ligne</b>&#160;: " . $errline . '<br />';
@@ -352,12 +352,12 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 	$errstr  = strip_tags($errstr);
 	$errstr .= ' in ' . basename($errfile) . ' on line ' . $errline;
 	
-	if( !empty($db->sql_error['message']) )
+	if( !empty($db->error) )
 	{
 		$errstr .= "\n";
-		$errstr .= 'SQL query: ' . $db->sql_error['query'] . "\n";
-		$errstr .= 'SQL errno: ' . $db->sql_error['errno'] . "\n";
-		$errstr .= 'SQL error: ' . $db->sql_error['message'] . "\n\n";
+		$errstr .= 'SQL query: ' . $db->query . "\n";
+		$errstr .= 'SQL errno: ' . $db->errno . "\n";
+		$errstr .= 'SQL error: ' . $db->error . "\n\n";
 	}
 	
 	//
@@ -537,7 +537,7 @@ function convert_time($dateformat, $timestamp)
 		
 		$search = $replace = array();
 		
-		foreach( $datetime AS $orig_word => $repl_word )
+		foreach( $datetime as $orig_word => $repl_word )
 		{
 			array_push($search,  '/\b' . $orig_word . '\b/i');
 			array_push($replace, $repl_word);
@@ -577,15 +577,16 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			trigger_error('Impossible d\'obtenir les listes de diffusion à purger', ERROR);
 		}
 		
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
 			$total_entries_deleted += purge_liste($row['liste_id'], $row['limitevalidate'], $row['purge_freq']);
 		}
 		
 		//
 		// Optimisation des tables
 		//
-		$db->check(array(ABONNES_TABLE, ABO_LISTE_TABLE));
+		$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE));
 		
 		return $total_entries_deleted;
 	}
@@ -602,19 +603,20 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 		}
 		
 		$abo_ids = array();
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
-			array_push($abo_ids, $row['abo_id']);
+			array_push($abo_ids, $result->column('abo_id'));
+			$result->next();
 		}
-		$db->free_result($result);
+		$result->free();
 		
 		if( ($num_abo_deleted = count($abo_ids)) > 0 )
 		{
 			$sql_abo_ids = implode(', ', $abo_ids);
 			
-			$db->transaction(START_TRC);
+			$db->beginTransaction();
 			
-			switch( DATABASE )
+			switch( SQL_DRIVER )
 			{
 				case 'mysql':
 					$sql = "SELECT abo_id
@@ -624,15 +626,15 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 						HAVING COUNT(abo_id) = 1";
 					if( $result = $db->query($sql) )
 					{
-						if( $row = $db->fetch_array($result) )
+						if( $result->count() > 0 )
 						{
 							$abo_ids = array();
 							
-							do
+							while( $result->hasMore() )
 							{
-								array_push($abo_ids, $row['abo_id']);
+								array_push($abo_ids, $result->column('abo_id'));
+								$result->next();
 							}
-							while( $row = $db->fetch_array($result) );
 							
 							$sql = "DELETE FROM " . ABONNES_TABLE . " 
 								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
@@ -668,7 +670,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 				trigger_error('Impossible de supprimer les entrées de la table abo_liste', ERROR);
 			}
 			
-			$db->transaction(END_TRC);
+			$db->commit();
 		}
 		
 		$sql = "UPDATE " . LISTE_TABLE . " 
@@ -697,7 +699,7 @@ function strip_magic_quotes_gpc(&$data)
 {
 	if( is_array($data) )
 	{
-		foreach( $data AS $key => $val )
+		foreach( $data as $key => $val )
 		{
 			if( is_array($val) )
 			{

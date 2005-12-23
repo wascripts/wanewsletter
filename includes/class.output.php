@@ -394,8 +394,8 @@ class output extends Template {
 			
 			$this->assign_block_vars('dev_infos', array(
 				'TIME_TOTAL' => sprintf('%.8f', $totaltime),
-				'TIME_PHP'   => sprintf('%.3f', $totaltime - $db->sql_time),
-				'TIME_SQL'   => sprintf('%.3f', $db->sql_time),
+				'TIME_PHP'   => sprintf('%.3f', $totaltime - $db->sqltime),
+				'TIME_SQL'   => sprintf('%.3f', $db->sqltime),
 				'QUERIES'    => $db->queries
 			));
 		}
@@ -404,7 +404,7 @@ class output extends Template {
 		{
 			$this->assign_block_vars('php_errors', array());
 			
-			foreach( $GLOBALS['_php_errors'] AS $php_error )
+			foreach( $GLOBALS['_php_errors'] as $php_error )
 			{
 				$this->assign_block_vars('php_errors.item', array(
 					'TEXT' => $php_error
@@ -698,7 +698,7 @@ BASIC;
 			}
 		}
 		
-		foreach( $auth->listdata AS $liste_id => $data )
+		foreach( $auth->listdata as $liste_id => $data )
 		{
 			if( in_array($liste_id, $liste_id_ary) )
 			{

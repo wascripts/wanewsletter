@@ -52,7 +52,7 @@ include WA_ROOTDIR . '/includes/tags.inc.php';
  */
 function launch_sending($listdata, $logdata, $supp_address = array())
 {
-	global $nl_config, $db, $dbhost, $dbuser, $dbpassword, $dbname, $lang, $other_tags;
+	global $nl_config, $db, $lang, $other_tags;
 	
 	require WAMAILER_DIR . '/class.mailer.php';
 	
@@ -178,7 +178,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	if( count($other_tags) > 0 )
 	{
 		$fields_str = '';
-		foreach( $other_tags AS $data )
+		foreach( $other_tags as $data )
 		{
 			$fields_str .= 'a.' . $data['column_name'] . ', ';
 		}
@@ -200,11 +200,12 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
 	}
 	
-	while( $row = $db->fetch_array($result) )
+	while( $result->hasMore() )
 	{
-		array_push($supp_address, $row['admin_email']);
+		array_push($supp_address, $result->column('admin_email'));
+		$result->next();
 	}
-	$db->free_result($result);
+	$result->free();
 	
 	$supp_address = array_unique($supp_address); // Au cas où...
 	
@@ -218,12 +219,17 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 				AND al.send      = 0
 		WHERE a.abo_status = " . ABO_ACTIF;
-	if( !($result = $db->query($sql, 0, $nl_config['emails_sended'])) )
+	if( $nl_config['emails_sended'] > 0 )
+	{
+		$sql .= " LIMIT $nl_config[emails_sended] OFFSET 0";
+	}
+	
+	if( !($result = $db->query($sql)) )
 	{
 		trigger_error('Impossible d\'obtenir la liste des adresses emails', ERROR);
 	}
 	
-	if( $row = $db->fetch_array($result) )
+	if( $result->count() > 0 )
 	{
 		fake_header(false);
 		
@@ -234,15 +240,16 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		{
 			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			
-			do
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
+				
 				array_push($abo_ids, $row['abo_id']);
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				array_push($abonnes[$abo_format], $row['abo_email']);
 				
 				fake_header(true);
 			}
-			while( $row = $db->fetch_array($result) );
 			
 			if( $listdata['liste_format'] != FORMAT_HTML )
 			{
@@ -261,7 +268,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			$tags_replace = array('NAME' => '');
 			if( count($other_tags) > 0 )
 			{
-				foreach( $other_tags AS $data )
+				foreach( $other_tags as $data )
 				{
 					$tags_replace[$data['tag_name']] = '';
 				}
@@ -331,7 +338,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			$mailerHTML->set_message($body[FORMAT_HTML]);
 			
 			$supp_address_ok = array();
-			foreach( $supp_address AS $address )
+			foreach( $supp_address as $address )
 			{
 				if( $listdata['liste_format'] != FORMAT_HTML )
 				{
@@ -356,7 +363,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				}
 			}
 			
-			do
+			while( ($result->hasMore() && $row = $result->fetch()) || ($row = array_pop($supp_address_ok)) != null )
 			{
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				
@@ -411,7 +418,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( count($other_tags) > 0 )
 				{
-					foreach( $other_tags AS $data )
+					foreach( $other_tags as $data )
 					{
 						if( isset($row[$data['column_name']]) )
 						{
@@ -447,7 +454,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				fake_header(true);
 			}
-			while( ($row = $db->fetch_array($result)) != false || ($row = array_pop($supp_address_ok)) != null );
 			
 			//
 			// Aucun email envoyé, il y a manifestement un problème, on affiche le message d'erreur
@@ -462,7 +468,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			trigger_error('Unknown_engine', ERROR);
 		}
 		
-		$db->free_result($result);
+		$result->free();
 	}
 	else
 	{
@@ -474,7 +480,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	if( $nl_config['use_ftp'] )
 	{
-		foreach( $tmp_files AS $filename )
+		foreach( $tmp_files as $filename )
 		{
 			$attach->remove_file($filename);
 		}
@@ -495,9 +501,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
 			// On initialise une nouvelle connexion
 			//
-			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+			$db->ping();
 			
-			if( !$db->connect_id || !$db->query($sql) )
+			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
 			}
@@ -515,8 +521,10 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			trigger_error('Impossible d\'obtenir le nombre d\'envois restants à faire', ERROR);
 		}
 		
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
+			$row = $result->fetch();
+			
 			if( $row['send'] == 1 )
 			{
 				$sended = $row['num_dest'];
@@ -526,7 +534,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				$no_send = $row['num_dest'];
 			}
 		}
-		$db->free_result($result);
+		$result->free();
 	}
 	else
 	{
@@ -560,9 +568,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
 			// On initialise une nouvelle connexion
 			//
-			$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+			$db->ping();
 			
-			if( !$db->connect_id || !$db->query($sql) )
+			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
 			}

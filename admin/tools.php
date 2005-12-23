@@ -157,7 +157,7 @@ switch( $mode )
 	
 	case 'backup':
 	case 'restore':
-		if( !class_exists('sql_backup') )
+		if( !class_exists('WadbBackup') )
 		{
 			trigger_error('Database_unsupported', MESSAGE);
 		}
@@ -217,7 +217,7 @@ if( !isset($_POST['submit']) )
 	}
 	
 	$tools_box = '<select id="mode" name="mode">';
-	foreach( $tools_ary AS $tool_name )
+	foreach( $tools_ary as $tool_name )
 	{
 		$selected = ( $mode == $tool_name ) ? ' selected="selected"' : '';
 		$tools_box .= sprintf("<option value=\"%s\"%s> %s </option>\n\t", $tool_name, $selected, $lang['Title'][$tool_name]);
@@ -312,9 +312,10 @@ switch( $mode )
 			$contents = '';
 			if( $eformat == 'xml' )
 			{
-				while( $row = $db->fetch_array($result) )
+				while( $result->hasMore() )
 				{
-					$contents .= "\t<email>$row[abo_email]</email>\n";
+					$contents .= sprintf("\t<email>%s</email>\n", $result->column('abo_email'));
+					$result->next();
 				}
 				
 				$format = ( $format == FORMAT_HTML ) ? 'HTML' : 'text';
@@ -327,16 +328,17 @@ switch( $mode )
 			}
 			else
 			{
-				while( $row = $db->fetch_array($result) )
+				while( $result->hasMore() )
 				{
 					$contents .= ( $contents != '' ) ? $glue : '';
-					$contents .= $row['abo_email'];
+					$contents .= $result->column('abo_email');
+					$result->next();
 				}
 				
 				$mime_type = 'text/plain';
 				$ext = 'txt';
 			}
-			$db->free_result($result);
+			$result->free();
 			
 			$filename = sprintf('wa_export_%d.%s', $admindata['session_liste'], $ext);
 			
@@ -553,7 +555,7 @@ switch( $mode )
 					$xml = simplexml_load_string($list_tmp);
 					$xml = $xml->xpath('/Wanliste/email');
 					
-					foreach( $xml AS $email )
+					foreach( $xml as $email )
 					{
 						array_push($emails, "$email");
 					}
@@ -646,12 +648,12 @@ switch( $mode )
 			//
 			// Suppression des index et contrainte d'unicité. Les insertions seront plus rapides
 			//
-			if( DATABASE == 'postgres' )
+			if( SQL_DRIVER == 'postgres' )
 			{
 				$db->query("ALTER TABLE " . ABONNES_TABLE . " DROP CONSTRAINT abo_email_idx");
 				$db->query("DROP INDEX abo_status_idx");
 			}
-			else if( strncmp(DATABASE, 'mysql', 5) == 0 )
+			else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
 			{
 				$db->query("ALTER TABLE " . ABONNES_TABLE . "
 					DROP INDEX abo_email_idx,
@@ -661,8 +663,10 @@ switch( $mode )
 			//
 			// Traitement des adresses email déjà présentes dans la base de données
 			//
-			while( $abodata = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$abodata = $result->fetch();
+				
 				if( !isset($abodata['confirmed']) ) // N'est pas inscrit à cette liste
 				{
 					$sql_data = array();
@@ -673,7 +677,7 @@ switch( $mode )
 					$sql_data['register_date'] = $current_time;
 					$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 					
-					if( !$db->query_build('INSERT', ABO_LISTE_TABLE, $sql_data) )
+					if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
 					{
 						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
 					}
@@ -691,33 +695,33 @@ switch( $mode )
 			//
 			$emails = array_diff($emails, $emails_ok);
 			
-			foreach( $emails AS $email )
+			foreach( $emails as $email )
 			{
-				$db->transaction(START_TRC);
+				$db->beginTransaction();
 				
 				$sql_data = array();
 				$sql_data['abo_email']  = $email;
 				$sql_data['abo_status'] = ABO_ACTIF;
 				
-				if( !$db->query_build('INSERT', ABONNES_TABLE, $sql_data) )
+				if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
 				{
 					trigger_error('Impossible d\'ajouter un nouvel abonné dans la table des abonnés', ERROR);
 				}
 				
 				$sql_data = array();
-				$sql_data['abo_id']        = $db->next_id();
+				$sql_data['abo_id']        = $db->lastInsertId();
 				$sql_data['liste_id']      = $listdata['liste_id'];
 				$sql_data['format']        = $format;
 				$sql_data['register_key']  = generate_key(20, false);
 				$sql_data['register_date'] = $current_time;
 				$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
 				
-				if( !$db->query_build('INSERT', ABO_LISTE_TABLE, $sql_data) )
+				if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
 				{
 					trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
 				}
 				
-				$db->transaction(END_TRC);
+				$db->commit();
 				
 				fake_header(true);
 			}
@@ -725,12 +729,12 @@ switch( $mode )
 			//
 			// Remise en place des index et contrainte d'unicité précédemment supprimés
 			//
-			if( DATABASE == 'postgres' )
+			if( SQL_DRIVER == 'postgres' )
 			{
 				$db->query("ALTER TABLE " . ABONNES_TABLE . " ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
 				$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
 			}
-			else if( strncmp(DATABASE, 'mysql', 5) == 0 )
+			else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
 			{
 				$db->query("ALTER TABLE " . ABONNES_TABLE . "
 					ADD UNIQUE abo_email_idx (abo_email),
@@ -825,9 +829,9 @@ switch( $mode )
 				$pattern_ary = array_map('trim', explode(',', $pattern));
 				$sql_values  = array();
 				
-				foreach( $pattern_ary AS $pattern )
+				foreach( $pattern_ary as $pattern )
 				{
-					switch( DATABASE )
+					switch( SQL_DRIVER )
 					{
 						case 'mysql':
 						case 'mysqli':
@@ -868,7 +872,7 @@ switch( $mode )
 				//
 				// Optimisation des tables
 				//
-				$db->check(BANLIST_TABLE);
+				$db->vacuum(BANLIST_TABLE);
 			}
 			
 			$output->redirect('./tools.php?mode=ban', 4);
@@ -888,13 +892,13 @@ switch( $mode )
 		}
 		
 		$unban_email_box = '<select id="unban_list_id" name="unban_list_id[]" multiple="multiple" size="10">';
-		if( $row = $db->fetch_array($result) )
+		if( $result->count() > 0 )
 		{
-			do
-			{		
+			while( $result->hasMore() )
+			{
+				$row = $result->fetch();
 				$unban_email_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['ban_id'], $row['ban_email']);
 			}
-			while( $row = $db->fetch_array($result) );
 		}
 		else
 		{
@@ -935,13 +939,13 @@ switch( $mode )
 				$ext_ary	= array_map('trim', explode(',', $ext_list));
 				$sql_values = array();
 				
-				foreach( $ext_ary AS $ext )
+				foreach( $ext_ary as $ext )
 				{
 					$ext = strtolower($ext);
 					
 					if( preg_match('/^[\w_-]+$/', $ext) )
 					{
-						switch( DATABASE )
+						switch( SQL_DRIVER )
 						{
 							case 'mysql':
 							case 'mysqli':
@@ -983,7 +987,7 @@ switch( $mode )
 				//
 				// Optimisation des tables
 				//
-				$db->check(FORBIDDEN_EXT_TABLE);
+				$db->vacuum(FORBIDDEN_EXT_TABLE);
 			}
 			
 			$output->redirect('./tools.php?mode=attach', 4);
@@ -1003,13 +1007,13 @@ switch( $mode )
 		}
 		
 		$reallow_ext_box = '<select id="ext_list_id" name="ext_list_id[]" multiple="multiple" size="10">';
-		if( $row = $db->fetch_array($result) )
+		if( $result->count() > 0 )
 		{
-			do
-			{		
+			while( $result->hasMore() )
+			{
+				$row = $result->fetch();
 				$reallow_ext_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['fe_id'], $row['fe_ext']);
 			}
-			while( $row = $db->fetch_array($result) );
 		}
 		else
 		{
@@ -1045,16 +1049,18 @@ switch( $mode )
 			JOINED_FILES_TABLE, FORBIDDEN_EXT_TABLE, LISTE_TABLE, LOG_TABLE, LOG_FILES_TABLE, SESSIONS_TABLE
 		);
 		
+		list($infos) = parseDSN($dsn);
+		
 		$tables      = array();
 		$tables_plus = ( !empty($_POST['tables_plus']) ) ? array_map('trim', $_POST['tables_plus']) : array();
 		$backup_type = ( isset($_POST['backup_type']) ) ? intval($_POST['backup_type']) : 0;
 		$drop_option = ( !empty($_POST['drop_option']) ) ? true : false;
 		
-		$backup = new sql_backup();
+		$backup = new WadbBackup($infos);
 		$backup->eol = WA_EOL;
-		$tables_ary  = $backup->get_tables($dbname);
+		$tables_ary  = $backup->get_tables();
 		
-		foreach( $tables_ary AS $tablename => $tabletype )
+		foreach( $tables_ary as $tablename => $tabletype )
 		{
 			if( !isset($_POST['submit']) )
 			{
@@ -1082,11 +1088,11 @@ switch( $mode )
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql 
 			//
-			$contents = $backup->header($dbhost, $dbname, 'Wanewsletter ' . WA_VERSION);
+			$contents = $backup->header('Wanewsletter ' . WA_VERSION);
 			
 			fake_header(false);
 			
-			foreach( $tables AS $tabledata )
+			foreach( $tables as $tabledata )
 			{
 				if( $backup_type != 2 )// save complète ou structure uniquement
 				{
@@ -1168,7 +1174,7 @@ switch( $mode )
 			}
 			
 			$tables_box = '<select id="tables_plus" name="tables_plus[]" multiple="multiple" size="' . $total_tables . '">';
-			foreach( $tables_plus AS $table_name )
+			foreach( $tables_plus as $table_name )
 			{
 				$tables_box .= sprintf("<option value=\"%1\$s\">%1\$s</option>\n\t", $table_name);
 			}
@@ -1310,18 +1316,18 @@ switch( $mode )
 			
 			$queries = make_sql_ary($data, ';');
 			
-			$db->transaction(START_TRC);
+			$db->beginTransaction();
 			
 			fake_header(false);
 			
-			foreach( $queries AS $query )
+			foreach( $queries as $query )
 			{
 				$db->query($query) || trigger_error('Erreur sql lors de la restauration', ERROR);
 				
 				fake_header(true);
 			}
 			
-			$db->transaction(END_TRC);
+			$db->commit();
 			
 			trigger_error('Success_restore', MESSAGE);
 		}

@@ -133,7 +133,7 @@ function create_stats($listdata, $month, $year)
 				WHERE a.abo_status = " . ABO_ACTIF;
 			if( $result = $db->query($sql) )
 			{
-				$stats[$i] = $db->result($result, 0, 'num_abo');
+				$stats[$i] = $result->column('num_abo');
 			}
 		}
 		
@@ -239,7 +239,7 @@ function remove_stats($liste_from, $liste_to = false)
 		
 		if( $liste_to !== false && count($old_stats) )
 		{
-			foreach( $old_stats AS $date => $stats_from )
+			foreach( $old_stats as $date => $stats_from )
 			{
 				$filename = filename_stats($date, $liste_to);
 				

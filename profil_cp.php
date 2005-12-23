@@ -54,7 +54,7 @@ function check_login($email, $regkey = null, $passwd = null)
 	if( count($other_tags) > 0 )
 	{
 		$fields_str = '';
-		foreach( $other_tags AS $data )
+		foreach( $other_tags as $data )
 		{
 			$fields_str .= ', a.' . $data['column_name'];
 		}
@@ -76,7 +76,7 @@ function check_login($email, $regkey = null, $passwd = null)
 		trigger_error('Impossible de récupérer les données de l\'abonné', CRITICAL_ERROR);
 	}
 	
-	if( $row = $db->fetch_array($result) )
+	if( $row = $result->fetch() )
 	{
 		if( !is_null($passwd) && strcmp($row['abo_pwd'], $passwd) != 0 )
 		{
@@ -89,7 +89,7 @@ function check_login($email, $regkey = null, $passwd = null)
 				trigger_error('Impossible de tester le mot de passe de l\'abonné', CRITICAL_ERROR);
 			}
 			
-			if( $db->result($res, 0, 'testpass') == 0 )
+			if( $res->column('testpass') == 0 )
 			{
 				return false;
 			}
@@ -105,7 +105,7 @@ function check_login($email, $regkey = null, $passwd = null)
 		$abodata['regkey']   = $row['register_key'];
 		$abodata['status']   = $row['abo_status'];
 		
-		foreach( $other_tags AS $data )
+		foreach( $other_tags as $data )
 		{
 			if( isset($row[$data['column_name']]) )
 			{
@@ -119,7 +119,7 @@ function check_login($email, $regkey = null, $passwd = null)
 		{
 			$abodata['listes'][$row['liste_id']] = $row;
 		}
-		while( $row = $db->fetch_array($result) );
+		while( $row = $result->fetch() );
 		
 		return $abodata;
 	}
@@ -303,7 +303,7 @@ switch( $mode )
 		if( isset($_POST['submit']) )
 		{
 			$vararray = array('pseudo', 'language', 'current_pass', 'new_pass', 'confirm_pass');
-			foreach( $vararray AS $varname )
+			foreach( $vararray as $varname )
 			{
 				${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
 			}
@@ -348,7 +348,7 @@ switch( $mode )
 					$sql_data['abo_pwd'] = md5($new_pass);
 				}
 				
-				foreach( $other_tags AS $data )
+				foreach( $other_tags as $data )
 				{
 					if( !empty($data['field_name']) && !isset($sql_data[$data['column_name']]) && !empty($_POST[$data['column_name']]) )
 					{
@@ -356,7 +356,7 @@ switch( $mode )
 					}
 				}
 				
-				if( !$db->query_build('UPDATE', ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id'])) )
+				if( !$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id'])) )
 				{
 					trigger_error('Impossible de mettre le profil à jour', ERROR);
 				}
@@ -389,7 +389,7 @@ switch( $mode )
 			'LANG_BOX' => lang_box($abodata['language'])
 		));
 		
-		foreach( $other_tags AS $data )
+		foreach( $other_tags as $data )
 		{
 			if( isset($abodata[$data['column_name']]) )
 			{
@@ -413,7 +413,7 @@ switch( $mode )
 			$listlog = ( !empty($_POST['log']) ) ? (array) $_POST['log'] : array();
 			
 			$sql_log_id = array();
-			foreach( $listlog AS $liste_id => $logs )
+			foreach( $listlog as $liste_id => $logs )
 			{
 				if( isset($abodata['listes'][$liste_id]) )
 				{
@@ -437,9 +437,9 @@ switch( $mode )
 			}
 			
 			$files = array();
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
-				$files[$row['log_id']][] = $row;
+				$files[$row['log_id']][] = $result->fetch();
 			}
 			
 			$sql = "SELECT liste_id, log_id, log_subject, log_body_text, log_body_html 
@@ -452,6 +452,7 @@ switch( $mode )
 			}
 			
 			require WAMAILER_DIR . '/class.mailer.php';
+			require WA_ROOTDIR . '/includes/class.attach.php';
 			
 			//
 			// Initialisation de la classe mailer
@@ -483,8 +484,10 @@ switch( $mode )
 			
 			$lang['CHARSET'] = strtoupper($lang['CHARSET']);
 			
-			while( $row = $db->fetch_array($result) )
+			while( $result->hasMore() )
 			{
+				$row = $result->fetch();
+				
 				$listdata = $abodata['listes'][$row['liste_id']];
 				$format   = $abodata['listes'][$row['liste_id']]['format'];
 				
@@ -573,7 +576,6 @@ switch( $mode )
 					$total_files = count($files[$row['log_id']]);
 					$tmp_files	 = array();
 					
-					require WA_ROOTDIR . '/includes/class.attach.php';
 					$attach = new Attach();
 					
 					hasCidReferences($body, $refs);
@@ -634,7 +636,7 @@ switch( $mode )
 				
 				if( count($other_tags) > 0 )
 				{
-					foreach( $other_tags AS $data )
+					foreach( $other_tags as $data )
 					{
 						if( $abodata[$data['column_name']] != '' )
 						{
@@ -675,7 +677,7 @@ switch( $mode )
 		}
 		
 		$liste_ids = array();
-		foreach( $abodata['listes'] AS $liste_id => $listdata )
+		foreach( $abodata['listes'] as $liste_id => $listdata )
 		{
 			array_push($liste_ids, $liste_id);
 		}
@@ -690,9 +692,9 @@ switch( $mode )
 			trigger_error('Impossible de récupérer la liste des archives', ERROR);
 		}
 		
-		while( $row = $db->fetch_array($result) )
+		while( $result->hasMore() )
 		{
-			$abodata['listes'][$row['liste_id']]['archives'][] = $row;
+			$abodata['listes'][$row['liste_id']]['archives'][] = $result->fetch();
 		}
 		
 		$output->addHiddenfield('mode', 'archives');
@@ -711,7 +713,7 @@ switch( $mode )
 			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 		));
 		
-		foreach( $abodata['listes'] AS $liste_id => $listdata )
+		foreach( $abodata['listes'] as $liste_id => $listdata )
 		{
 			if( !isset($abodata['listes'][$liste_id]['archives']) )
 			{

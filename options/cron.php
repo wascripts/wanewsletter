@@ -45,8 +45,10 @@ if( !($result = $db->query($sql)) )
 	trigger_error('Impossible de récupérer les informations sur cette liste', ERROR);
 }
 
-if( $listdata = $db->fetch_array($result) )
+if( $result->count() > 0 )
 {
+	$listdata = $result->fetch();
+	
 	//
 	// On règle le script pour ignorer une déconnexion du client et 
 	// poursuivre l'envoi du flot d'emails jusqu'à son terme. 
@@ -68,16 +70,19 @@ if( $listdata = $db->fetch_array($result) )
 		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 			FROM " . LOG_TABLE . "
 			WHERE liste_id = $listdata[liste_id]
-				AND log_status = " . STATUS_STANDBY;
-		if( !($result = $db->query($sql, 0, 1)) ) // on récupère le dernier log en statut d'envoi
+				AND log_status = " . STATUS_STANDBY . "
+			LIMIT 1 OFFSET 0";
+		if( !($result = $db->query($sql)) ) // on récupère le dernier log en statut d'envoi
 		{
 			trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 		}
 		
-		if( !($logdata = $db->fetch_array($result)) )
+		if( $result->count() == 0 )
 		{
 			trigger_error('No_log_to_send', MESSAGE);
 		}
+		
+		$logdata = $result->fetch();
 		
 		$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 			FROM " . JOINED_FILES_TABLE . " AS jf
@@ -91,7 +96,7 @@ if( $listdata = $db->fetch_array($result) )
 			trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
 		}
 		
-		$logdata['joined_files'] = $db->fetch_rowset($result);
+		$logdata['joined_files'] = $result->fetchAll();
 		
 		//
 		// On lance l'envoi
@@ -144,7 +149,7 @@ if( $listdata = $db->fetch_array($result) )
 		$total    = $pop->stat_box();
 		$mail_box = $pop->list_mail();
 		
-		foreach( $mail_box AS $mail_id => $mail_size )
+		foreach( $mail_box as $mail_id => $mail_size )
 		{
 			$headers = $pop->parse_headers($mail_id);
 			

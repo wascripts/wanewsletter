@@ -45,7 +45,7 @@ if( !($result = $db->query($sql)) )
 	trigger_error('Impossible de récupérer la configuration du script', ERROR);
 }
 
-$old_config = $db->fetch_array($result);
+$old_config = $result->fetch(SQL_FETCH_ASSOC);
 $move_files = false;
 
 if( isset($_POST['submit']) )
@@ -54,7 +54,7 @@ if( isset($_POST['submit']) )
 	require WA_ROOTDIR . '/includes/functions.validate.php';
 	
 	$new_config = array();
-	foreach( $old_config AS $name => $value )
+	foreach( $old_config as $name => $value )
 	{
 		$new_config[$name] = ( isset($_POST[$name]) ) ? trim($_POST[$name]) : $value;
 	}
@@ -189,7 +189,7 @@ if( isset($_POST['submit']) )
 	
 	if( !$error )
 	{
-		if( !$db->query_build('UPDATE', CONFIG_TABLE, $new_config) )
+		if( !$db->build(SQL_UPDATE, CONFIG_TABLE, $new_config) )
 		{
 			trigger_error('Impossible de mettre à jour la configuration', ERROR);
 		}
