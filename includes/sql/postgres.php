@@ -90,7 +90,7 @@ class Wadb {
 	 * @var string
 	 * @access public
 	 */
-	var $query = '';
+	var $lastQuery = '';
 	
 	/**
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
@@ -256,13 +256,13 @@ class Wadb {
 		
 		if( !$result ) {
 			$this->error = pg_last_error($this->link);
-			$this->query = $query;
+			$this->lastQuery = $query;
 			
 			$this->rollBack();
 		}
 		else {
 			$this->error = '';
-			$this->query = '';
+			$this->lastQuery = '';
 			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
 				$result = new WadbResult($this->link, $result);
@@ -849,16 +849,14 @@ class WadbBackup {
 			FROM pg_tables 
 			WHERE tablename NOT LIKE 'pg%' 
 			ORDER BY tablename";
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
 		}
 		
 		$tables = array();
-		while( $result->hasMore() )
-		{
+		while( $result->hasMore() ) {
 			$row = $result->fetch();
-			$tables[$row[0]] = '';
+			$tables[$row['tablename']] = '';
 		}
 		
 		return $tables;
@@ -880,8 +878,7 @@ class WadbBackup {
 			FROM pg_class 
 			WHERE NOT relname ~ 'pg_.*' AND relkind ='S' 
 			ORDER BY relname";
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible de récupérer les séquences', ERROR);
 		}
 		
@@ -889,24 +886,20 @@ class WadbBackup {
 		
 		$contents = '';
 		
-		for( $i = 0; $i < $num_seq; $i++ )
-		{
+		for( $i = 0; $i < $num_seq; $i++ ) {
 			$result->seek($i);
 			$sequence = $result->column('relname');
 			$result_seq = $db->query('SELECT * FROM ' . $sequence);
 			
-			if( $result_seq->count() > 0 )
-			{
+			if( $result_seq->count() > 0 ) {
 				$row = $result_seq->fetch();
-				if( $drop_option )
-				{
+				if( $drop_option ) {
 					$contents .= "DROP SEQUENCE $sequence;" . $this->eol;
 				}
 				
 				$contents .= 'CREATE SEQUENCE ' . $sequence . ' start ' . $row['last_value'] . ' increment ' . $row['increment_by'] . ' maxvalue ' . $row['max_value'] . ' minvalue ' . $row['min_value'] . ' cache ' . $row['cache_value'] . '; ' . $this->eol;
 				
-				if( $row['last_value'] > 1 && $backup_type != 1 )
-				{
+				if( $row['last_value'] > 1 && $backup_type != 1 ) {
 					$contents .= 'SELECT NEXTVALE(\'' . $sequence . '\'); ' . $this->eol;
 				}
 			}
@@ -938,8 +931,7 @@ class WadbBackup {
 		$contents .= '  Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
 		
-		if( $drop_option )
-		{
+		if( $drop_option ) {
 			$contents .= 'DROP TABLE IF EXISTS ' . $tabledata['name'] . ';' . $this->eol;
 		}
 		
@@ -951,15 +943,13 @@ class WadbBackup {
 				AND a.attrelid = c.oid 
 				AND a.atttypid = t.oid 
 			ORDER BY a.attnum";
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tabledata['name'], ERROR);
 		}
 		
 		$contents .= 'CREATE TABLE ' . $tabledata['name'] . ' (' . $this->eol;
 		
-		while( $result->hasMore() )
-		{
+		while( $result->hasMore() ) {
 			$row = $result->fetch();
 			
 			$sql = "SELECT d.adsrc AS rowdefault 
@@ -967,39 +957,32 @@ class WadbBackup {
 				WHERE (c.relname = '" . $tabledata['name'] . "') 
 					AND (c.oid = d.adrelid) 
 					AND d.adnum = " . $row['attnum'];
-			if( $res = $db->query($sql) )
-			{
+			if( $res = $db->query($sql) ) {
 				$row['rowdefault'] = $res->column('rowdefault');
 			}
-			else
-			{
+			else {
 				unset($row['rowdefault']);
 			}
 			
-			if( $row['type'] == 'bpchar' )
-			{
+			if( $row['type'] == 'bpchar' ) {
 				// Internally stored as bpchar, but isn't accepted in a CREATE TABLE statement.
 				$row['type'] = 'char';
 			}
 			
 			$contents .= ' ' . $row['field'] . ' ' . $row['type'];
 			
-			if( eregi('char', $row['type']) && $row['lengthvar'] > 0 )
-			{
+			if( eregi('char', $row['type']) && $row['lengthvar'] > 0 ) {
 				$contents .= '(' . ($row['lengthvar'] - 4) . ')';
 			}
-			else if( eregi('numeric', $row['type']) )
-			{
+			else if( eregi('numeric', $row['type']) ) {
 				$contents .= sprintf('(%s,%s)', (($row['lengthvar'] >> 16) & 0xffff), (($row['lengthvar'] - 4) & 0xffff));
 			}
 			
-			if (!empty($row['rowdefault']))
-			{
+			if (!empty($row['rowdefault'])) {
 				$contents .= ' DEFAULT \'' . $row['rowdefault'] . '\'';
 			}
 			
-			if ($row['notnull'] == 't')
-			{
+			if ($row['notnull'] == 't') {
 				$contents .= ' NOT NULL';
 			}
 			
@@ -1020,25 +1003,21 @@ class WadbBackup {
 				AND (ta.attrelid = i.indrelid) 
 				AND (ta.attnum = i.indkey[ia.attnum-1]) 
 			ORDER BY index_name, tab_name, column_name";
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible de récupérer les clés primaires et unique de la table ' . $tabledata['name'], ERROR);
 		}
 		
 		$primary_key = '';
 		$index_rows	 = array();
 		
-		while( $result->hasMore() )
-		{
+		while( $result->hasMore() ) {
 			$row = $result->fetch();
 			
-			if( $row['primary_key'] == 't' )
-			{
+			if( $row['primary_key'] == 't' ) {
 				$primary_key .= ( ( $primary_key != '' ) ? ', ' : '' ) . $row['column_name'];
 				$primary_key_name = $row['index_name'];
 			}
-			else
-			{
+			else {
 				//
 				// We have to store this all this info because it is possible to have a multi-column key...
 				// we can loop through it again and build the statement
@@ -1046,29 +1025,25 @@ class WadbBackup {
 				$index_rows[$row['index_name']]['table']  = $tabledata['name'];
 				$index_rows[$row['index_name']]['unique'] = ($row['unique_key'] == 't') ? ' UNIQUE ' : '';
 				
-				if( empty($index_rows[$row['index_name']]['column_names']) )
-				{
+				if( empty($index_rows[$row['index_name']]['column_names']) ) {
 					$index_rows[$row['index_name']]['column_names'] = $row['column_name'] . ', ';
 				}
-				else
-				{
+				else {
 					$index_rows[$row['index_name']]['column_names'] .= $row['column_name'] . ', ';
 				}
 			}
 		}
+		$result->free();
 		
 		$index_create = '';
-		if( count($index_rows) )
-		{
-			foreach( $index_rows as $idx_name => $props )
-			{
-				$props['column_names'] = ereg_replace(', $', '', $props['column_names']);
+		if( count($index_rows) ) {
+			foreach( $index_rows as $idx_name => $props ) {
+				$props['column_names'] = substr($props['column_names'], 0, -2);
 				$index_create .= 'CREATE ' . $props['unique'] . " INDEX $idx_name ON " . $tabledata['name'] . " (" . $props['column_names'] . ');' . $this->eol;
 			}
 		}
 		
-		if( !empty($primary_key) )
-		{
+		if( !empty($primary_key) ) {
 			$contents .= "CONSTRAINT $primary_key_name PRIMARY KEY ($primary_key)," . $this->eol;
 		}
 		
@@ -1087,27 +1062,25 @@ class WadbBackup {
 						AND c.rcsrc = pg_relcheck.rcsrc 
 						AND c.rcrelid = i.inhparent
 				)";
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible de récupérer les clauses de contraintes de la table ' . $tabledata['name'], ERROR);
 		}
 		
 		//
 		// Add the constraints to the sql file.
 		//
-		while( $result->hasMore() )
-		{
+		while( $result->hasMore() ) {
 			$row = $result->fetch();
 			$contents .= 'CONSTRAINT ' . $row['index_name'] . ' CHECK ' . $row['rcsrc'] . ',' . $this->eol;
 		}
 		
-		$contents = ereg_replace(',' . $this->eol . '$', '', $contents);
-		$index_create = ereg_replace(',' . $this->eol . '$', '', $index_create);
+		$len = strlen(',' . $this->eol);
+		$contents = substr($contents, 0, -$len);
+		$index_create = substr($contents, 0, -$index_create);
 		
 		$contents .= $this->eol . ');' . $this->eol;
 		
-		if( !empty($index_create) )
-		{
+		if( !empty($index_create) ) {
 			$contents .= $this->eol . $index_create;
 		}
 		
@@ -1129,40 +1102,33 @@ class WadbBackup {
 		$contents = '';
 		
 		$sql = 'SELECT * FROM ' . $tablename;
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $result->count() > 0 )
-		{
+		if( $result->count() > 0 ) {
 			$contents  = $this->eol;
 			$contents .= '/* ------------------------------------------------------------ ' . $this->eol;
 			$contents .= '  Contenu de la table ' . $tablename . ' ' . $this->eol;
 			$contents .= ' ------------------------------------------------------------ */' . $this->eol;
 			
 			$fields = array();
-			for( $j = 0, $n = pg_num_fields($result->result); $j < $n; $j++ )
-			{
+			for( $j = 0, $n = pg_num_fields($result->result); $j < $n; $j++ ) {
 				$fields[] = pg_field_name($result->result, $j);
 			}
 			
 			$fields = implode(', ', $fields);
 			
-			do
-			{
+			do {
 				$row = $result->fetch(SQL_FETCH_ASSOC);
 				
 				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
-				foreach( $row as $key => $value )
-				{
-					if( is_null($value) )
-					{
+				foreach( $row as $key => $value ) {
+					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
-					else
-					{
+					else {
 						$row[$key] = '\'' . $db->escape($value) . '\'';
 					}
 				}

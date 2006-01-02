@@ -3,15 +3,12 @@
 function fixObjectStyle() {
 	var objs = window.document.getElementsByTagName('object');
 	
-	for( var i = 0, m = objs.length; i < m; i++ )
-	{
-		if( typeof(objs[i].body) == 'undefined' )
-		{
+	for( var i = 0, m = objs.length; i < m; i++ ) {
+		if( typeof(objs[i].body) == 'undefined' ) {
 			break;
 		}
 		
-		if( objs[i].type != null && objs[i].type.substr(0, 5) == 'image' )
-		{
+		if( objs[i].type != null && objs[i].type.substr(0, 5) == 'image' ) {
 			objs[i].body.style.border   = 'none';
 			objs[i].body.style.margin   = '0';
 			objs[i].body.style.padding  = '0';

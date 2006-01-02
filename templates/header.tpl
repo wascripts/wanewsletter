@@ -27,7 +27,7 @@
 	
 	<meta name="Author" content="Bobe" />
 	<meta name="Editor" content="jEdit" />
-	<meta name="Copyright" content="phpCodeur (c) 2002-2005" />
+	<meta name="Copyright" content="phpCodeur (c) 2002-2006" />
 	<meta name="Robots" content="noindex, nofollow, none" />
 	
 	<link rel="stylesheet" type="text/css" href="./templates/wanewsletter.css" media="screen" title="Wanewsletter thème" />

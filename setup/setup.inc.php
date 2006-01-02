@@ -104,7 +104,7 @@ function sql_error()
 		'NEW_VERSION'  => WA_NEW_VERSION,
 		'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : '',
 		'L_TITLE'      => $lang['Title']['info'],
-		'MSG_RESULT'   => nl2br(sprintf($message, $db->error, $db->query))
+		'MSG_RESULT'   => nl2br(sprintf($message, $db->error, $db->lastQuery))
 	));
 	
 	$output->pparse('body');

@@ -206,7 +206,7 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 	{
 		if( !empty($db->error) )
 		{
-			$debug_text .= '<b>SQL query</b>&#160;:<br /> ' . nl2br($db->query) . "<br /><br />\n";
+			$debug_text .= '<b>SQL query</b>&#160;:<br /> ' . nl2br($db->lastQuery) . "<br /><br />\n";
 			$debug_text .= '<b>SQL errno</b>&#160;: ' . $db->errno . "<br />\n";
 			$debug_text .= '<b>SQL error</b>&#160;: ' . $db->error . "<br />\n<br />\n";
 		}
@@ -355,7 +355,7 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 	if( !empty($db->error) )
 	{
 		$errstr .= "\n";
-		$errstr .= 'SQL query: ' . $db->query . "\n";
+		$errstr .= 'SQL query: ' . $db->lastQuery . "\n";
 		$errstr .= 'SQL errno: ' . $db->errno . "\n";
 		$errstr .= 'SQL error: ' . $db->error . "\n\n";
 	}

@@ -85,7 +85,7 @@ class Wadb {
 	 * @var string
 	 * @access public
 	 */
-	var $query = '';
+	var $lastQuery = '';
 	
 	/**
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
@@ -258,14 +258,14 @@ class Wadb {
 		if( !$result ) {
 			$this->errno = mysql_errno($this->link);
 			$this->error = mysql_error($this->link);
-			$this->query = $query;
+			$this->lastQuery = $query;
 			
 			$this->rollBack();
 		}
 		else {
 			$this->errno = 0;
 			$this->error = '';
-			$this->query = '';
+			$this->lastQuery = '';
 			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
 				$result = new WadbResult($this->link, $result);
@@ -849,16 +849,14 @@ class WadbBackup {
 	{
 		global $db;
 		
-		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $db->quote($this->infos['dbname']))) )
-		{
+		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $db->quote($this->infos['dbname']))) ) {
 			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
 		}
 		
 		$tables = array();
-		while( $result->hasMore() )
-		{
+		while( $result->hasMore() ) {
 			$row = $result->fetch();
-			$tables[$row[0]] = $row[1];
+			$tables[$row['Name']] = ( isset($row['Engine']) ) ? $row['Engine'] : $row['Type'];
 		}
 		
 		return $tables;
@@ -881,43 +879,35 @@ class WadbBackup {
 		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		
-		if( $drop_option )
-		{
+		if( $drop_option ) {
 			$contents .= 'DROP TABLE IF EXISTS ' . $db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
 		//
 		// La requète 'SHOW CREATE TABLE' est disponible à partir de MySQL 3.23.20
 		//
-		if( version_compare($db->serverVersion, '3.23.20', '<') )
-		{
-			if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) )
-			{
+		if( version_compare($db->serverVersion, '3.23.20', '<') ) {
+			if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) ) {
 				trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
 			}
 			
 			$create_table = $result->column('Create Table');
-			$create_table = preg_replace("/(\r\n?)|\n/", $this->eol, $create_table);
-			$contents .= $create_table;
+			$result->free();
 			
-			$result->free($result);
+			$contents .= preg_replace("/(\r\n?)|\n/", $this->eol, $create_table);
 		}
-		else
-		{
+		else {
 			$contents .= 'CREATE TABLE ' . $db->quote($tabledata['name']) . ' (' . $this->eol;
 			
-			if( !($result = $db->query('SHOW COLUMNS FROM ' . $db->quote($tabledata['name']))) )
-			{
+			if( !($result = $db->query('SHOW COLUMNS FROM ' . $db->quote($tabledata['name']))) ) {
 				trigger_error('Impossible d\'obtenir les noms des colonnes de la table', ERROR);
 			}
 			
 			$end_line = false;
-			while( $result->hasMore() )
-			{
+			while( $result->hasMore() ) {
 				$row = $result->fetch();
 				
-				if( $end_line )
-				{
+				if( $end_line ) {
 					$contents .= ',' . $this->eol;
 				}
 				
@@ -930,24 +920,20 @@ class WadbBackup {
 			}
 			$result->free();
 			
-			if( !($result = $db->query('SHOW INDEX FROM ' . $db->quote($tabledata['name']))) )
-			{
+			if( !($result = $db->query('SHOW INDEX FROM ' . $db->quote($tabledata['name']))) ) {
 				trigger_error('Impossible d\'obtenir les clés de la table', ERROR);
 			}
 			
 			$index = array();
-			while( $result->hasMore() )
-			{
+			while( $result->hasMore() ) {
 				$row = $result->fetch();
 				$name = $row['Key_name'];
 				
-				if( $name != 'PRIMARY' && $row['Non_unique'] == 0 )
-				{
+				if( $name != 'PRIMARY' && $row['Non_unique'] == 0 ) {
 					$name = 'unique=' . $name;
 				}
 				
-				if( !isset($index[$name]) )
-				{
+				if( !isset($index[$name]) ) {
 					$index[$name] = array();
 				}
 				
@@ -955,20 +941,16 @@ class WadbBackup {
 			}
 			$result->free();
 			
-			foreach( $index as $var => $columns )
-			{
+			foreach( $index as $var => $columns ) {
 				$contents .= ',' . $this->eol . "\t";
 				
-				if( $var == 'PRIMARY' )
-				{
+				if( $var == 'PRIMARY' ) {
 					$contents .= 'CONSTRAINT PRIMARY KEY';
 				}
-				else if( preg_match('/^unique=(.+)$/', $var, $match) )
-				{
+				else if( preg_match('/^unique=(.+)$/', $var, $match) ) {
 					$contents .= 'CONSTRAINT ' . $db->quote($match[1]) . ' UNIQUE';
 				}
-				else
-				{
+				else {
 					$contents .= 'INDEX ' . $db->quote($var);
 				}
 				
@@ -996,41 +978,34 @@ class WadbBackup {
 		$contents = '';
 		
 		$sql = 'SELECT * FROM ' . $db->quote($tablename);
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $result->count() > 0 )
-		{
+		if( $result->count() > 0 ) {
 			$contents  = $this->eol;
 			$contents .= '-- ' . $this->eol;
 			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
 			$contents .= '-- ' . $this->eol;
 			
 			$fields = array();
-			for( $j = 0, $n = mysql_num_fields($result->result); $j < $n; $j++ )
-			{
+			for( $j = 0, $n = mysql_num_fields($result->result); $j < $n; $j++ ) {
 				$data = mysql_fetch_field($result->result, $j);
 				$fields[] = $db->quote($data->name);
 			}
 			
 			$fields = implode(', ', $fields);
 			
-			do
-			{
+			do {
 				$row = $result->fetch(SQL_FETCH_ASSOC);
 				
 				$contents .= 'INSERT INTO ' . $db->quote($tablename) . " ($fields) VALUES";
 				
-				foreach( $row as $key => $value )
-				{
-					if( is_null($value) )
-					{
+				foreach( $row as $key => $value ) {
+					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
-					else
-					{
+					else {
 						$row[$key] = '\'' . $db->escape($value) . '\'';
 					}
 				}

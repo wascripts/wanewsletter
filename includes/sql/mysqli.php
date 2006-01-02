@@ -85,7 +85,7 @@ class Wadb {
 	 * @var string
 	 * @access public
 	 */
-	var $query = '';
+	var $lastQuery = '';
 	
 	/**
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
@@ -210,7 +210,7 @@ class Wadb {
 		}
 		
 		if( $charsetSupport && !is_null($encoding) ) {
-			$this->query("SET NAMES '$encoding'");
+			$this->query("SET NAMES $encoding");
 		}
 		
 		return $curEncoding;
@@ -236,14 +236,14 @@ class Wadb {
 		if( !$result ) {
 			$this->errno = mysqli_errno($this->link);
 			$this->error = mysqli_error($this->link);
-			$this->query = $query;
+			$this->lastQuery = $query;
 			
 			$this->rollBack();
 		}
 		else {
 			$this->errno = 0;
 			$this->error = '';
-			$this->query = '';
+			$this->lastQuery = '';
 			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
 				$result = new WadbResult($this->link, $result);
@@ -821,16 +821,14 @@ class WadbBackup {
 	{
 		global $db;
 		
-		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $db->quote($this->infos['dbname']))) )
-		{
+		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $db->quote($this->infos['dbname']))) ) {
 			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
 		}
 		
 		$tables = array();
-		while( $result->hasMore() )
-		{
+		while( $result->hasMore() ) {
 			$row = $result->fetch();
-			$tables[$row[0]] = $row[1];
+			$tables[$row['Name']] = ( isset($row['Engine']) ) ? $row['Engine'] : $row['Type'];
 		}
 		
 		return $tables;
@@ -853,28 +851,23 @@ class WadbBackup {
 		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		
-		if( $drop_option )
-		{
+		if( $drop_option ) {
 			$contents .= 'DROP TABLE IF EXISTS ' . $db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
-		if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) )
-		{
+		if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) ) {
 			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
 		}
 		
 		$create_table = $result->column('Create Table');
-		$create_table = preg_replace("/(\r\n?)|\n/", $this->eol, $create_table);
 		$result->free();
 		
-		$contents .= $create_table . ';' . $this->eol;
+		$contents .= preg_replace("/(\r\n?)|\n/", $this->eol, $create_table) . ';' . $this->eol;
 		
 		return $contents;
 	}
 	
 	/**
-	 * sql_backup::get_table_data()
-	 * 
 	 * Retourne les données d'une table de la base de données sous forme de requètes SQL de type DML
 	 * 
 	 * @param string $tablename  Nom de la table à considérer
@@ -889,41 +882,34 @@ class WadbBackup {
 		$contents = '';
 		
 		$sql = 'SELECT * FROM ' . $db->quote($tablename);
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $result->count() > 0 )
-		{
+		if( $result->count() > 0 ) {
 			$contents  = $this->eol;
 			$contents .= '-- ' . $this->eol;
 			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
 			$contents .= '-- ' . $this->eol;
 			
 			$fields = array();
-			for( $j = 0, $n = mysqli_num_fields($result->result); $j < $n; $j++ )
-			{
+			for( $j = 0, $n = mysqli_num_fields($result->result); $j < $n; $j++ ) {
 				$data = mysqli_fetch_field_direct($result->result, $j);
 				$fields[] = $db->quote($data->name);
 			}
 			
 			$fields = implode(', ', $fields);
 			
-			do
-			{
+			do {
 				$row = $result->fetch(SQL_FETCH_ASSOC);
 				
 				$contents .= 'INSERT INTO ' . $db->quote($tablename) . " ($fields) VALUES";
 				
-				foreach( $row as $key => $value )
-				{
-					if( is_null($value) )
-					{
+				foreach( $row as $key => $value ) {
+					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
-					else
-					{
+					else {
 						$row[$key] = '\'' . $db->escape($value) . '\'';
 					}
 				}

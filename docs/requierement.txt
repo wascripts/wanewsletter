@@ -36,6 +36,6 @@ paramètre charlist de
 
 ////////////////////////////////
 
-Script WAnewsletter fonctionnel sur des versions de php >= 4.1.0 (>= 4.2.0 pour PostgreSQL)
+Script WAnewsletter fonctionnel sur des versions de php ≥ 4.1.0 (≥ 4.2.0 pour PostgreSQL)
 
-MySQL 3.23.x et supérieur, PostgreSQL >= 7.2 ou SQLite 2.8.x
+MySQL ≥ 3.23, PostgreSQL ≥ 7.2, ou SQLite ≥ 2.8.x

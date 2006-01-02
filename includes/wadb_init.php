@@ -144,6 +144,22 @@ function parseDSN($dsn)
 		}
 	}
 	
+	if( $infos['driver'] == 'sqlite' ) {
+		
+		if( file_exists($dbname) ) {
+			$fp = fopen($dbname, 'rb');
+			$info = fread($fp, 15);
+			fclose($fp);
+			
+			if( strcmp($info, 'SQLite format 3') == 0 ) {
+				$infos['driver'] = 'sqlite_pdo';
+			}
+		}
+		else if( extension_loaded('pdo') && extension_loaded('pdo_sqlite') ) {
+			$infos['driver'] = 'sqlite_pdo';
+		}
+	}
+	
 	return array($infos, $options);
 }
 
@@ -167,7 +183,7 @@ function WaDatabase($dsn)
 	
 	$db = new Wadb($infos['dbname'], $options);
 	
-	if( SQL_DRIVER != 'sqlite' ) {
+	if( strncmp(SQL_DRIVER, 'sqlite', 6) != 0 ) {
 		$infos['username'] = $infos['user'];
 		$infos['passwd']   = $infos['pass'];
 		

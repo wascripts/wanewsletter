@@ -85,7 +85,7 @@ class Wadb {
 	 * @var string
 	 * @access public
 	 */
-	var $query = '';
+	var $lastQuery = '';
 	
 	/**
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
@@ -220,14 +220,14 @@ class Wadb {
 		if( !$result ) {
 			$this->errno = sqlite_last_error($this->link);
 			$this->error = sqlite_error_string($this->errno);
-			$this->query = $query;
+			$this->lastQuery = $query;
 			
 			$this->rollBack();
 		}
 		else {
 			$this->errno = 0;
 			$this->error = '';
-			$this->query = '';
+			$this->lastQuery = '';
 			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
 				$result = new WadbResult($this->link, $result);
@@ -764,14 +764,12 @@ class WadbBackup {
 	{
 		global $db;
 		
-		if( !($result = $db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) )
-		{
+		if( !($result = $db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) ) {
 			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
 		}
 		
 		$tables = array();
-		while( $result->hasMore() )
-		{
+		while( $result->hasMore() ) {
 			$row = $result->fetch();
 			$tables[$row['tbl_name']] = '';
 		}
@@ -796,8 +794,7 @@ class WadbBackup {
 		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		
-		if( $drop_option )
-		{
+		if( $drop_option ) {
 			$contents .= 'DROP TABLE ' . $tabledata['name'] . ';' . $this->eol;
 		}
 		
@@ -805,21 +802,17 @@ class WadbBackup {
 			FROM sqlite_master
 			WHERE tbl_name = '$tabledata[name]'
 				AND sql IS NOT NULL";
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
 		}
 		
 		$indexes = '';
-		while( $result->hasMore() )
-		{
+		while( $result->hasMore() ) {
 			$row = $result->fetch();
-			if( $row['type'] == 'table' )
-			{
+			if( $row['type'] == 'table' ) {
 				$create_table = str_replace(',', ',' . $this->eol, $row['sql']) . ';' . $this->eol;
 			}
-			else
-			{
+			else {
 				$indexes .= $row['sql'] . ';' . $this->eol;
 			}
 		}
@@ -844,40 +837,33 @@ class WadbBackup {
 		$contents = '';
 		
 		$sql = 'SELECT * FROM ' . $tablename;
-		if( !($result = $db->query($sql)) )
-		{
+		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $result->count() > 0 )
-		{
+		if( $result->count() > 0 ) {
 			$contents  = $this->eol;
 			$contents .= '-- ' . $this->eol;
 			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
 			$contents .= '-- ' . $this->eol;
 			
 			$fields = array();
-			for( $j = 0, $n = sqlite_num_fields($result->result); $j < $n; $j++ )
-			{
+			for( $j = 0, $n = sqlite_num_fields($result->result); $j < $n; $j++ ) {
 				$fields[] = sqlite_field_name($result->result, $j);
 			}
 			
 			$fields = implode(', ', $fields);
 			
-			do
-			{
+			do {
 				$row = $result->fetch(SQL_FETCH_ASSOC);
 				
 				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
-				foreach( $row as $key => $value )
-				{
-					if( is_null($value) )
-					{
+				foreach( $row as $key => $value ) {
+					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
-					else
-					{
+					else {
 						$row[$key] = '\'' . $db->escape($value) . '\'';
 					}
 				}

@@ -34,8 +34,7 @@
 	{
 		var fields = db_box.form.elements;
 		
-		if( db_box.options[db_box.selectedIndex].value == 'sqlite' )
-		{
+		if( db_box.options[db_box.selectedIndex].value == 'sqlite' ) {
 			fields['dbhost'].disabled = true;
 			fields['dbhost'].value    = lang['unused'];
 			fields['dbname'].disabled = true;
@@ -46,8 +45,7 @@
 			fields['dbpassword'].disabled = true;
 			fields['dbpassword'].value = lang['unused'];
 		}
-		else
-		{
+		else {
 			fields['dbhost'].disabled = false;
 			fields['dbhost'].value    = fields['dbhost'].defaultValue;
 			fields['dbname'].disabled = false;
@@ -205,7 +203,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&#8211;2005 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
+phpCodeur</a> &copy; 2002&#8211;2006 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>
