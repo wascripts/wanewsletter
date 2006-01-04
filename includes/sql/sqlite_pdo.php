@@ -587,7 +587,7 @@ class WadbResult {
 	 */
 	function fetchObject()
 	{
-		// trier et garder uniquement les clés associatives
+		$this->sort($row, PDO_FETCH_ASSOC);
 		return (object) $this->result[$this->offset++];
 	}
 	

@@ -51,10 +51,8 @@ else
 
 $sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 	FROM " . JOINED_FILES_TABLE . " AS jf
-		INNER JOIN " . LOG_FILES_TABLE . " AS lf
-		ON lf.file_id = jf.file_id
-		INNER JOIN " . LOG_TABLE . " AS l
-		ON l.log_id = lf.log_id
+		INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+		INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 			AND l.liste_id = $listdata[liste_id]
 	WHERE $sql_where";
 if( !($result = $db->query($sql)) )
@@ -79,7 +77,7 @@ if( $result->count() > 0 )
 	}
 	
 	$data   = '';
-	$is_svg = (strstr($filedata['file_mimetype'], 'image/svg+xml'));
+	$is_svg = (strcasecmp($filedata['file_mimetype'], 'image/svg+xml') == 0);
 	
 	if( $mode != 'popup' || $is_svg == true )
 	{
@@ -101,15 +99,12 @@ if( $result->count() > 0 )
 			
 			if( preg_match('/<(?:[^:]+:)?svg([^>]+)>/', $data, $match) )
 			{
-				preg_match('/width=("|\')(.+?)\\1/', $match[1], $match_w);
-				preg_match('/height=("|\')(.+?)\\1/', $match[1], $match_h);
-				
-				if( isset($match_w) && is_numeric($match_w[2]) )
+				if( preg_match('/width=("|\')([0-9]+)\\1/', $match[1], $match_w) )
 				{
 					$width = $match_w[2];
 				}
 				
-				if( isset($match_h) && is_numeric($match_h[2]) )
+				if( preg_match('/height=("|\')([0-9]+)\\1/', $match[1], $match_h) )
 				{
 					$height = $match_h[2];
 				}
