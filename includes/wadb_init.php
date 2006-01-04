@@ -146,8 +146,8 @@ function parseDSN($dsn)
 	
 	if( $infos['driver'] == 'sqlite' ) {
 		
-		if( file_exists($dbname) ) {
-			$fp = fopen($dbname, 'rb');
+		if( file_exists($infos['dbname']) ) {
+			$fp = fopen($infos['dbname'], 'rb');
 			$info = fread($fp, 15);
 			fclose($fp);
 			

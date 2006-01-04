@@ -22,7 +22,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * @version $Id$
+ * @version $Id: mysql2sqlite.php 281 2005-12-23 23:09:13Z bobe $
  * 
  * Créé une base de données SQLite à partir des données présentes dans des
  * tables Wanewsletter d'une autre base de données (de type MySQL ou PostgreSQL)
@@ -90,10 +90,11 @@ if( $remove_db == true && file_exists($sqlite_db) ) {
 //
 // Initialisation de la base de données
 //
-$fs = sqlite_open($sqlite_db, 0666, $errstr);
-
-if( !is_resource($fs) ) {
-	echo "Unable to create SQLite DB ($errstr)\n";
+try {
+	$pdo = new PDO('sqlite:' . $sqlite_db);
+}
+catch( PDOException $e ) {
+	printf("Unable to create SQLite DB (%s)\n", $e->getMessage());
 	exit(0);
 }
 
@@ -106,7 +107,7 @@ $sqldata = file_get_contents($schemas_dir . '/sqlite_tables.sql');
 $queries = make_sql_ary($sqldata, ';');
 
 foreach( $queries as $query ) {
-	sqlite_exec($fs, $query);
+	$pdo->query($query);
 }
 
 //
@@ -125,11 +126,10 @@ foreach( $tableList as $table ) {
 	flush();
 	
 	$fields = array();
-	$result = sqlite_query($fs, "PRAGMA table_info($table)");
+	$result = $pdo->query("PRAGMA table_info($table)");
 	
-	for( $i = 0, $m = sqlite_num_rows($result); $i < $m; $i++ ) {
-		sqlite_seek($result, $i);
-		array_push($fields, sqlite_column($result, 'name'));
+	while( $row = $result->fetch() ) {
+		array_push($fields, $row['name']);
 	}
 	$fields = implode(', ', $fields);
 	
@@ -144,20 +144,20 @@ foreach( $tableList as $table ) {
 			if( is_null($value) ) {
 				$value = 'NULL';
 			} else {
-				$value = "'" . sqlite_escape_string($value) . "'";
+				$value = $pdo->quote($value);
 			}
 			
 			array_push($values, $value);
 		}
 		
-		sqlite_exec($fs, "INSERT INTO $table ($fields) VALUES(" . implode(", ", $values) . ")");
+		$pdo->query("INSERT INTO $table ($fields) VALUES(" . implode(", ", $values) . ")\n");
 	}
 	
 	printf("%d rows added.\n", $result->count());
 	flush();
 }
 
-sqlite_close($fs);
+unset($pdo);
 $db->close();
 
 echo "\nSQLite database has been successfully initialized!\n";

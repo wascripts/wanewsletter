@@ -223,6 +223,7 @@ switch( SQL_DRIVER )
 		break;
 	
 	case 'sqlite':
+	case 'sqlite_pdo':
 		$dbsize = filesize($infos['dbname']);
 		break;
 	
