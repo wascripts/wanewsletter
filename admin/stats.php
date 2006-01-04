@@ -455,7 +455,8 @@ $m_list = '';
 
 do
 {
-	$y_list .= sprintf("\n\t<option value=\"%1\$d\">%1\$d</option>", $y);
+	$selected = ( $y == $year ) ? ' selected="selected"' : '';
+	$y_list .= sprintf("\n\t<option value=\"%1\$d\"%2\$s>%1\$d</option>", $y, $selected);
 	
 }
 while( --$y >= date('Y', $listdata['liste_startdate']) );
