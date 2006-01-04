@@ -22,7 +22,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * @version $Id: functions.stats.php 247 2005-12-02 18:31:23Z bobe $
+ * @version $Id$
  */
 
 if( !defined('_INC_WADB_INIT') ) {

@@ -22,7 +22,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * @version $Id: newsletter.php 230 2005-11-24 23:52:02Z bobe $
+ * @version $Id$
  * 
  * Certaines parties sont reprises de SQLiteManager 1.2.0RC1
  */
