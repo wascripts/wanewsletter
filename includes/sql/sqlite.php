@@ -254,7 +254,10 @@ class Wadb {
 		$fields = $values = array();
 		
 		foreach( $data as $field => $value ) {
-			if( is_bool($value) ) {
+			if( is_null($value) ) {
+				$value = 'NULL';
+			}
+			else if( is_bool($value) ) {
 				$value = intval($value);
 			}
 			else if( !is_int($value) && !is_float($value) ) {
@@ -280,7 +283,10 @@ class Wadb {
 			if( is_array($sql_where) && count($sql_where) > 0 ) {
 				$query .= ' WHERE ';
 				foreach( $sql_where as $field => $value ) {
-					if( is_bool($value) ) {
+					if( is_null($value) ) {
+						$value = 'NULL';
+					}
+					else if( is_bool($value) ) {
 						$value = intval($value);
 					}
 					else if( !is_int($value) && !is_float($value) ) {

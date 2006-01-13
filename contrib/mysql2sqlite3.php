@@ -143,7 +143,8 @@ foreach( $tableList as $table ) {
 		foreach( $row as $value ) {
 			if( is_null($value) ) {
 				$value = 'NULL';
-			} else {
+			}
+			else {
 				$value = $pdo->quote($value);
 			}
 			
