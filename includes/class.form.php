@@ -69,27 +69,13 @@ class Wanewsletter {
 		
 		if( isset($listdata) )
 		{
-			switch( $listdata['liste_format'] )
-			{
-				case FORMAT_MULTIPLE:
-					if( $this->format != FORMAT_TEXTE && $this->format != FORMAT_HTML )
-					{
-						$this->format = FORMAT_TEXTE;
-					}
-					break;
-				
-				case FORMAT_HTML:
-				case FORMAT_TEXTE:
-					$this->format = $listdata['liste_format'];
-					break;					
-				
-				default:
-					$this->format = FORMAT_TEXTE;
-					break;
-			}
-			
 			$this->listdata    = $listdata;
 			$this->liste_email = ( !empty($listdata['liste_alias']) ) ? $listdata['liste_alias'] : $listdata['sender_email'];
+			
+			if( $listdata['liste_format'] == FORMAT_TEXTE || $listdata['liste_format'] == FORMAT_HTML )
+			{
+				$this->format = $listdata['liste_format'];
+			}
 		}
 	}
 	
@@ -208,8 +194,14 @@ class Wanewsletter {
 		return array('error' => false, 'abodata' => $abodata);
 	}
 	
-	function do_action($action, $email)
+	function do_action($action, $email, $format = null)
 	{
+		if( $this->listdata['liste_format'] == FORMAT_MULTIPLE && !is_null($format)
+			&& in_array($format, array(FORMAT_TEXTE, FORMAT_HTML)) )
+		{
+			$this->format = $format;
+		}
+		
 		$email  = trim($email);
 		$result = $this->check($action, $email);
 		

@@ -63,9 +63,10 @@ else
 
 $action  = ( !empty($_REQUEST['action']) ) ? trim($_REQUEST['action']) : '';
 $email   = ( !empty($_REQUEST['email']) ) ? trim($_REQUEST['email']) : '';
+$format  = ( isset($_REQUEST['format']) ) ? intval($_REQUEST['format']) : 0;
+$liste   = ( isset($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 $message = '';
 $code    = '';
-$liste   = ( isset($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 
 if( empty($action) && preg_match('/([a-z0-9]{20})(?:&|$)/i', $_SERVER['QUERY_STRING'], $match) )
 {
@@ -107,7 +108,7 @@ if( !empty($action) || !empty($code) )
 			{
 				$wanewsletter =& new Wanewsletter($listdata);
 				$wanewsletter->message =& $message;
-				$wanewsletter->do_action($action, $email);
+				$wanewsletter->do_action($action, $email, $format);
 			}
 			else
 			{

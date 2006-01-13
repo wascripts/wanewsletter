@@ -17,7 +17,7 @@
 	Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 -->
 <!-- $Id$ -->
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 	<meta http-equiv="Content-Script-Type" content="text/javascript" />
@@ -64,17 +64,20 @@
 		if( emailAddr.indexOf('@', 1) == -1 || emailAddr.indexOf('.', 1) == -1 ) {
 			window.alert('{L_INVALID_EMAIL}');
 			cancelEvent = true;
-		} else if( submitted == true ) {
+		}
+		else if( submitted == true ) {
 			window.alert('{L_PAGE_LOADING}');
 			cancelEvent = true;
-		} else {
+		}
+		else {
 			submitted = true;
 		}
 		
 		if( cancelEvent == true ) {
 			if( evt && typeof(evt.preventDefault) != 'undefined' ) { // standard
 				evt.preventDefault();
-			} else { // MS
+			}
+			else { // MS
 				window.event.returnValue = false;
 			}
 		}
@@ -121,7 +124,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&#8211;2005 | Wanewsletter<br />
+phpCodeur</a> &copy; 2002&#8211;2006 | Wanewsletter<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>
