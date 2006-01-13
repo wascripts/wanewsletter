@@ -448,22 +448,16 @@ $output->set_filenames( array(
 	'body' => 'stats_body.tpl'
 ));
 
-$y = date('Y');
-$m = date('n');
 $y_list = '';
 $m_list = '';
 
-do
-{
-	$selected = ( $y == $year ) ? ' selected="selected"' : '';
-	$y_list .= sprintf("\n\t<option value=\"%1\$d\"%2\$s>%1\$d</option>", $y, $selected);
-	
-}
-while( --$y >= date('Y', $listdata['liste_startdate']) );
+$y = date('Y', $listdata['liste_startdate']);
+$n = date('n', $listdata['liste_startdate']);
+$c = date('Y');
 
-if( $y == (date('Y') - 1) )
+if( $y == $c )
 {
-	$n = date('n', $listdata['liste_startdate']);
+	$m = date('n');
 }
 else
 {
@@ -471,11 +465,17 @@ else
 	$n = 1;
 }
 
-for(; $m >= $n; $m-- )
+for(; $y <= $c; $y++ )
 {
-	$selected = ( $m == $month ) ? ' selected="selected"' : '';
-	$m_list  .= sprintf("\n\t<option value=\"%d\"%s>%s</option>", $m, $selected,
-		convert_time('F', mktime(0, 0, 0, $m, 1, $y)));
+	$selected = ( $y == $year ) ? ' selected="selected"' : '';
+	$y_list .= sprintf("\n\t<option value=\"%1\$d\"%2\$s>%1\$d</option>", $y, $selected);
+}
+
+for(; $n <= $m; $n++ )
+{
+	$selected = ( $n == $month ) ? ' selected="selected"' : '';
+	$m_list  .= sprintf("\n\t<option value=\"%d\"%s>%s</option>", $n, $selected,
+		convert_time('F', mktime(0, 0, 0, $n, 1, $y)));
 }
 
 $output->assign_vars(array(

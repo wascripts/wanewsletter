@@ -48,10 +48,10 @@ div#page .bloc  { margin: 1em 2.5%; text-align: left; font-size: .8em; }
 div#page .bloc  { border: 1px solid #084A6B; }
 
 #address {
-	width: 12em;
+	width: 15em;
 	margin: 12px 20px;
 	border: 1px solid #084A6B;
-	padding: .25em .8em;
+	padding: .25em .6em;
 	line-height: 1.4em;
 	text-align: left;
 	font-style: normal;
