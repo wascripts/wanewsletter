@@ -34,6 +34,7 @@ $simple_header = TRUE;
 
 $mode     = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
 $redirect = ( !empty($_REQUEST['redirect']) ) ? trim($_REQUEST['redirect']) : 'index.php';
+$redirect = preg_replace('/(\?|&)sessid=[a-zA-Z0-9]{32}/', '', $redirect);
 
 //
 // Mot de passe perdu
