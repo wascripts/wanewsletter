@@ -173,9 +173,6 @@ class Wanewsletter {
 			$this->account['abo_id'] = $abodata['abo_id'];
 			$this->account['email']  = $abodata['abo_email'];
 			$this->account['pseudo'] = $abodata['abo_pseudo'];
-			$this->account['code']   = $abodata['register_key'];
-			$this->account['date']   = $abodata['register_date'];
-			$this->account['format'] = $abodata['format'];
 			$this->account['status'] = $abodata['abo_status'];
 		}
 		else
@@ -185,10 +182,20 @@ class Wanewsletter {
 			$this->account['abo_id'] = 0;
 			$this->account['email']  = $email;
 			$this->account['pseudo'] = '';
+			$this->account['status'] = ( $this->listdata['confirm_subscribe'] == CONFIRM_NONE ) ? ABO_ACTIF : ABO_INACTIF;
+		}
+		
+		if( $this->isRegistered )
+		{
+			$this->account['code']   = $abodata['register_key'];
+			$this->account['date']   = $abodata['register_date'];
+			$this->account['format'] = $abodata['format'];
+		}
+		else
+		{
 			$this->account['code']   = generate_key(20);
 			$this->account['date']   = time();
 			$this->account['format'] = $this->format;
-			$this->account['status'] = ( $this->listdata['confirm_subscribe'] == CONFIRM_NONE ) ? ABO_ACTIF : ABO_INACTIF;
 		}
 		
 		return array('error' => false, 'abodata' => $abodata);
@@ -248,6 +255,7 @@ class Wanewsletter {
 			
 			$this->account['abo_id'] = $abodata['abo_id'];
 			$this->account['email']  = $abodata['abo_email'];
+			$this->account['status'] = $abodata['abo_status'];
 			$this->account['date']   = $abodata['register_date'];
 			$this->account['code']   = $code;
 			
@@ -274,7 +282,7 @@ class Wanewsletter {
 		
 		$db->beginTransaction();
 		
-		if( $this->hasAccount == false )
+		if( !$this->hasAccount )
 		{
 			$sql_data = array(
 				'abo_email'  => $this->account['email'],
@@ -301,16 +309,16 @@ class Wanewsletter {
 			$this->account['abo_id'] = $db->lastInsertId();
 		}
 		
-		if( $this->isRegistered == false )
+		if( !$this->isRegistered )
 		{
 			$confirmed = SUBSCRIBE_NOT_CONFIRMED;
 			
-			if( $this->hasAccount == false && $this->listdata['confirm_subscribe'] == CONFIRM_NONE )
+			if( !$this->hasAccount && $this->listdata['confirm_subscribe'] == CONFIRM_NONE )
 			{
 				$confirmed = SUBSCRIBE_CONFIRMED;
 			}
 			
-			if( $this->hasAccount == true && $this->account['status'] == ABO_ACTIF && $this->listdata['confirm_subscribe'] != CONFIRM_ALWAYS )
+			if( $this->hasAccount && $this->account['status'] == ABO_ACTIF && $this->listdata['confirm_subscribe'] != CONFIRM_ALWAYS )
 			{
 				$confirmed = SUBSCRIBE_CONFIRMED;
 			}
@@ -326,7 +334,7 @@ class Wanewsletter {
 		
 		$db->commit();
 		
-		if( $this->listdata['confirm_subscribe'] == CONFIRM_ALWAYS || ($this->listdata['confirm_subscribe'] == CONFIRM_ONCE && $this->hasAccount == false) )
+		if( $this->listdata['confirm_subscribe'] == CONFIRM_ALWAYS || ($this->listdata['confirm_subscribe'] == CONFIRM_ONCE && !$this->hasAccount) )
 		{
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'welcome_cron2' : 'welcome_form2';
 		}
@@ -377,7 +385,7 @@ class Wanewsletter {
 			return false;
 		}
 		
-		if( $this->hasAccount == false )
+		if( !$this->hasAccount )
 		{
 			if( $this->listdata['confirm_subscribe'] == CONFIRM_NONE )
 			{
@@ -391,7 +399,7 @@ class Wanewsletter {
 		}
 		else
 		{
-			if( $this->isRegistered == true )
+			if( $this->isRegistered )
 			{
 				$message = sprintf($lang['Message']['Reg_not_confirmed'], $this->listdata['limitevalidate']);
 			}
@@ -421,28 +429,58 @@ class Wanewsletter {
 			if( $this->account['date'] > $time_limit )
 			{
 				$low_priority = ( strncmp(SQL_DRIVER, 'mysql', 5) == 0 ) ? 'LOW_PRIORITY' : '';
-				$this->account['code'] = generate_key(20);
 				
 				$db->beginTransaction();
 				
-				$sql = "UPDATE $low_priority " . ABONNES_TABLE . "
-					SET abo_status = " . ABO_ACTIF . "
-					WHERE abo_id = " . $this->account['abo_id'];
-				if( !$db->query($sql) )
+				if( $this->account['status'] == ABO_INACTIF )
 				{
-					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-					return false;
+					$sql = "UPDATE $low_priority " . ABONNES_TABLE . "
+						SET abo_status = " . ABO_ACTIF . "
+						WHERE abo_id = " . $this->account['abo_id'];
+					if( !$db->query($sql) )
+					{
+						trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+						return false;
+					}
+					
+					$sql = "SELECT liste_id
+						FROM " . ABO_LISTE_TABLE . "
+						WHERE confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
+							AND abo_id = " . $this->account['abo_id'];
+					if( !($result = $db->query($sql)) )
+					{
+						trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+						return false;
+					}
+					
+					while( $result->hasMore() )
+					{
+						$row = $result->fetch();
+						
+						$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
+							SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
+								register_key = '" . generate_key(20) . "'
+							WHERE liste_id = " . $row['liste_id'] . "
+								AND abo_id = " . $this->account['abo_id'];
+						if( !$db->query($sql) )
+						{
+							trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+							return false;
+						}
+					}
 				}
-				
-				$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
-					SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
-						register_key = '" . $this->account['code'] . "'
-					WHERE liste_id = " . $this->listdata['liste_id'] . "
-						AND abo_id = " . $this->account['abo_id'];
-				if( !$db->query($sql) )
+				else
 				{
-					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-					return false;
+					$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
+						SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
+							register_key = '" . generate_key(20) . "'
+						WHERE liste_id = " . $this->listdata['liste_id'] . "
+							AND abo_id = " . $this->account['abo_id'];
+					if( !$db->query($sql) )
+					{
+						trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+						return false;
+					}
 				}
 				
 				$db->commit();
