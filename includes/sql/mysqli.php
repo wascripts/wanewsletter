@@ -53,12 +53,12 @@ class Wadb {
 	 * @var string
 	 * @access private
 	 */
-	var $dbname;
+	var $dbname = '';
 	
 	/**
 	 * Options de connexion
 	 * 
-	 * @var resource
+	 * @var array
 	 * @access private
 	 */
 	var $options = array();
@@ -91,15 +91,15 @@ class Wadb {
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
 	 * 
 	 * @var integer
-	 * @access private
+	 * @access public
 	 */
 	var $queries = 0;
 	
 	/**
 	 * Durée totale d'exécution des requètes SQL
 	 * 
-	 * @var string
-	 * @access private
+	 * @var integer
+	 * @access public
 	 */
 	var $sqltime = 0;
 	
@@ -449,7 +449,7 @@ class Wadb {
 	function close()
 	{
 		if( !is_null($this->link) ) {
-			$this->commit();
+			$this->rollBack();
 			$result = mysqli_close($this->link);
 			$this->link = null;
 			

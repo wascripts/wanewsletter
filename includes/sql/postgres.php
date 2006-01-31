@@ -58,12 +58,12 @@ class Wadb {
 	 * @var string
 	 * @access private
 	 */
-	var $dbname;
+	var $dbname = '';
 	
 	/**
 	 * Options de connexion
 	 * 
-	 * @var resource
+	 * @var array
 	 * @access private
 	 */
 	var $options = array();
@@ -96,15 +96,15 @@ class Wadb {
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
 	 * 
 	 * @var integer
-	 * @access private
+	 * @access public
 	 */
 	var $queries = 0;
 	
 	/**
 	 * Durée totale d'exécution des requètes SQL
 	 * 
-	 * @var string
-	 * @access private
+	 * @var integer
+	 * @access public
 	 */
 	var $sqltime = 0;
 	
@@ -188,7 +188,7 @@ class Wadb {
 			$this->link  = null;
 		}
 		else {
-			$res = pg_query($db, "SELECT VERSION() AS version");
+			$res = pg_query($this->link, "SELECT VERSION() AS version");
 			$this->serverVersion = pg_fetch_result($res, 0, 'version');
 			
 			if( function_exists('pg_version') ) {
@@ -474,7 +474,7 @@ class Wadb {
 	function close()
 	{
 		if( !is_null($this->link) ) {
-			@$this->commit();
+			@$this->rollBack();
 			$result = pg_close($this->link);
 			$this->link = null;
 			

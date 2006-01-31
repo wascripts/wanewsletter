@@ -24,7 +24,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * @version $Id$
  * 
- * Certaines parties sont reprises de SQLiteManager 1.2.0RC1
+ * Certaines parties sont inspirées de SQLiteManager 1.2.0RC1
  */
 
 if( !defined('_INC_CLASS_WADB') ) {
@@ -71,12 +71,12 @@ class Wadb {
 	 * @var string
 	 * @access private
 	 */
-	var $dbname;
+	var $dbname = '';
 	
 	/**
 	 * Options de connexion
 	 * 
-	 * @var resource
+	 * @var array
 	 * @access private
 	 */
 	var $options = array();
@@ -109,15 +109,15 @@ class Wadb {
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
 	 * 
 	 * @var integer
-	 * @access private
+	 * @access public
 	 */
 	var $queries = 0;
 	
 	/**
 	 * Durée totale d'exécution des requètes SQL
 	 * 
-	 * @var string
-	 * @access private
+	 * @var integer
+	 * @access public
 	 */
 	var $sqltime = 0;
 	
@@ -578,9 +578,14 @@ class WadbResult {
 			$mode = $this->fetchMode;
 		}
 		
-		$row = $this->result[$this->offset];
-		$this->offset++;
-		$this->sort($row, $mode);
+		if( isset($this->result[$this->offset]) ) {
+			$row = $this->result[$this->offset];
+			$this->offset++;
+			$this->sort($row, $mode);
+		}
+		else {
+			$row = false;
+		}
 		
 		return $row;
 	}
@@ -593,9 +598,17 @@ class WadbResult {
 	 */
 	function fetchObject()
 	{
-		$row = $this->result[$this->offset++];
-		$this->sort($row, PDO_FETCH_ASSOC);
-		return (object) $row;
+		if( isset($this->result[$this->offset]) ) {
+			$row = $this->result[$this->offset];
+			$this->offset++;
+			$this->sort($row, PDO_FETCH_ASSOC);
+			$row = (object) $row;
+		}
+		else {
+			$row = false;
+		}
+		
+		return $row;
 	}
 	
 	/**

@@ -53,12 +53,12 @@ class Wadb {
 	 * @var string
 	 * @access private
 	 */
-	var $dbname;
+	var $dbname = '';
 	
 	/**
 	 * Options de connexion
 	 * 
-	 * @var resource
+	 * @var array
 	 * @access private
 	 */
 	var $options = array();
@@ -91,15 +91,15 @@ class Wadb {
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
 	 * 
 	 * @var integer
-	 * @access private
+	 * @access public
 	 */
 	var $queries = 0;
 	
 	/**
 	 * Durée totale d'exécution des requètes SQL
 	 * 
-	 * @var string
-	 * @access private
+	 * @var integer
+	 * @access public
 	 */
 	var $sqltime = 0;
 	
@@ -201,14 +201,15 @@ class Wadb {
 	/**
 	 * Renvoie le jeu de caractères courant utilisé.
 	 * Si l'argument $encoding est fourni, il est utilisé pour définir
-	 * le nouveau jeu de caractères de la connexion en cours
+	 * le nouveau jeu de caractères de la connexion en cours.
+	 * Utilisable uniquement avec MySQL >= 4.1.1
 	 * 
 	 * @param string $encoding
 	 * 
 	 * @access public
 	 * @return string
 	 */
-	function encoding($charset = null)
+	function encoding($encoding = null)
 	{
 		$charsetSupport = version_compare($this->serverVersion, '4.1.1', '>=');
 		
@@ -480,7 +481,7 @@ class Wadb {
 	function close()
 	{
 		if( !is_null($this->link) ) {
-			$this->commit();
+			$this->rollBack();
 			$result = mysql_close($this->link);
 			$this->link = null;
 			
