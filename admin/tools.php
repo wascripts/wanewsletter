@@ -1314,7 +1314,7 @@ switch( $mode )
 				trigger_error($message, MESSAGE);
 			}
 			
-			$queries = make_sql_ary($data, ';');
+			$queries = make_sql_ary($data);
 			
 			$db->beginTransaction();
 			

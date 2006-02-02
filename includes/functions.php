@@ -887,12 +887,11 @@ function fake_header($in_loop)
  * renvoie un tableau avec une requète par entrée
  * 
  * @param string $input        Contenu du fichier .sql
- * @param string $delimiter    Délimiteur entre chaque requète (en général -> ; )
  * @param string $prefixe      Préfixe des tables à mettre à la place du prefixe par défaut
  * 
  * @return array
  */
-function make_sql_ary($input, $delimiter, $prefixe = '')
+function make_sql_ary($input, $prefixe = '')
 {
 	$tmp            = '';
 	$output         = array();
@@ -933,10 +932,10 @@ function make_sql_ary($input, $delimiter, $prefixe = '')
 			
 			if( ( !$between_quotes && !($unescaped_quotes % 2) ) || ( $between_quotes && ($unescaped_quotes % 2) ) )
 			{
-				if( preg_match('/' . $delimiter . '\s*$/i', $lines[$i]) )
+				if( preg_match('/;\s*$/i', $lines[$i]) )
 				{
 					$lines[$i] = ( $tmp != '' ) ? rtrim($lines[$i]) : trim($lines[$i]);
-					$output[]  = $tmp . substr($lines[$i], 0, -(strlen($delimiter)));
+					$output[]  = $tmp . substr($lines[$i], 0, -1);
 					$tmp = '';
 				}
 				else

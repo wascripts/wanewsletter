@@ -40,7 +40,7 @@ foreach( $vararray as $varname )
 
 $confirm_pass = ( $confirm_pass != '' ) ? md5($confirm_pass) : '';
 $language     = ( $language != '' ) ? $language : $default_lang;
-$sqlite_db    = WA_ROOTDIR . '/includes/sql/wanewsletter.sqlite';
+$sqlite_db    = WA_ROOTDIR . '/includes/sql/wanewsletter.sqlite'; // TODO : Rendre modifiable lors de l'installation!
 
 $output->set_filenames( array(
 	'body' => 'install.tpl'
@@ -68,9 +68,9 @@ if( defined('NL_INSTALLED') )
 	
 	$old_config = $result->fetch(SQL_FETCH_ASSOC);
 	
-	$urlsite     = $old_config['urlsite'];
-	$urlscript   = $old_config['path'];
-	$language    = $old_config['language'];
+	$urlsite    = $old_config['urlsite'];
+	$urlscript  = $old_config['path'];
+	$language   = $old_config['language'];
 }
 
 require WA_ROOTDIR . '/language/lang_' . $language . '.php';
@@ -120,15 +120,10 @@ if( $start )
 	}
 	else
 	{
-		if( $dbtype == 'sqlite' )
+		if( $infos['driver'] == 'sqlite' )
 		{
 			if( is_writable(dirname($sqlite_db)) )
 			{
-				if( file_exists($sqlite_db) )
-				{
-					unlink($sqlite_db);
-				}
-				
 				$db = WaDatabase('sqlite:' . $sqlite_db);
 			}
 			else
@@ -137,9 +132,14 @@ if( $start )
 				$msg_error[] = $lang['sqldir_perms_problem'];
 			}
 		}
-		else
+		else if( !empty($dsn) )
 		{
 			$db = WaDatabase($dsn);
+		}
+		else
+		{
+			$error = true;
+			$msg_error[] = sprintf($lang['Connect_db_error'], 'Invalid DB name');
 		}
 		
 		if( !$error && !$db->isConnected() )
@@ -149,7 +149,7 @@ if( $start )
 		}
 	}
 	
-	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$dbtype]['prefixe_file'] . '_tables.sql';
+	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$infos['driver']]['prefixe_file'] . '_tables.sql';
 	$sql_data   = SCHEMAS_DIR . '/data.sql';
 	
 	if( !is_readable($sql_create) || !is_readable($sql_data) )
@@ -160,7 +160,7 @@ if( $start )
 	
 	if( !$error )
 	{
-		if( ($dbtype != 'sqlite' && $dbname == '') || $prefixe == '' || $admin_login == '' )
+		if( ($infos['driver'] != 'sqlite' && $infos['dbname'] == '') || $prefixe == '' || $admin_login == '' )
 		{
 			$error = true;
 			$msg_error[] = $lang['Message']['fields_empty'];
@@ -208,13 +208,13 @@ if( $start )
 		//
 		// Création des tables du script 
 		//
-		$sql_create = make_sql_ary(implode('', file($sql_create)), $supported_db[$dbtype]['delimiter'], $prefixe);
+		$sql_create = make_sql_ary(implode('', file($sql_create)), $prefixe);
 		exec_queries($sql_create, true);
 		
 		//
 		// Insertion des données de base 
 		//
-		$sql_data = make_sql_ary(implode('', file($sql_data)), $supported_db[$dbtype]['delimiter2'], $prefixe);
+		$sql_data = make_sql_ary(implode('', file($sql_data)), $prefixe);
 		
 		$sql_data[] = "UPDATE " . ADMIN_TABLE . "
 			SET admin_login = '" . $db->escape($admin_login) . "',
@@ -240,11 +240,11 @@ if( $start )
 		{
 			if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
 			{
-				$output->addHiddenField('dbtype',     $dbtype);
-				$output->addHiddenField('dbhost',     $dbhost);
-				$output->addHiddenField('dbuser',     $dbuser);
-				$output->addHiddenField('dbpassword', $dbpassword);
-				$output->addHiddenField('dbname',     $dbname);
+				$output->addHiddenField('dbtype',     $infos['driver']);
+				$output->addHiddenField('dbhost',     $infos['host']);
+				$output->addHiddenField('dbuser',     $infos['user']);
+				$output->addHiddenField('dbpassword', $infos['pass']);
+				$output->addHiddenField('dbname',     $infos['dbname']);
 				$output->addHiddenField('prefixe',    $prefixe);
 				
 				$output->assign_block_vars('download_file', array(
@@ -272,10 +272,10 @@ if( !defined('NL_INSTALLED') )
 	require WA_ROOTDIR . '/includes/functions.box.php';
 	
 	$db_box = '';
-	foreach( $supported_db as $db_name => $db_infos )
+	foreach( $supported_db as $name => $data )
 	{
-		$selected = ( $dbtype == $db_name ) ? ' selected="selected"' : '';
-		$db_box .= '<option value="' . $db_name . '"' . $selected . '> ' . $db_infos['Name'] . ' </option>';
+		$selected = ( $infos['driver'] == $name ) ? ' selected="selected"' : '';
+		$db_box .= '<option value="' . $name . '"' . $selected . '> ' . $data['Name'] . ' </option>';
 	}
 	
 	if( $urlsite == '' )
@@ -311,9 +311,9 @@ if( !defined('NL_INSTALLED') )
 		'L_START_BUTTON'    => $lang['Start_install'],
 		
 		'DB_BOX'    => $db_box,
-		'DBHOST'    => htmlspecialchars($dbhost),
-		'DBNAME'    => htmlspecialchars($dbname),
-		'DBUSER'    => htmlspecialchars($dbuser),
+		'DBHOST'    => htmlspecialchars($infos['host']),
+		'DBNAME'    => htmlspecialchars($infos['dbname']),
+		'DBUSER'    => htmlspecialchars($infos['user']),
 		'PREFIXE'   => htmlspecialchars($prefixe),
 		'LOGIN'     => htmlspecialchars($admin_login),
 		'EMAIL'     => htmlspecialchars($admin_email),

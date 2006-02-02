@@ -633,7 +633,7 @@ $lang['Stats_dir_not_writable']     = "Le répertoire <samp>stats/</samp> ne semb
 //
 $lang['Welcome_in_install']         = "Bienvenue dans le script d'installation de Wanewsletter. \nCe script nécessite une version de php <b>supérieure ou égale à 4.1.0</b>.\nAvant de continuer l'installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l'installation";
 $lang['Welcome_in_upgrade']         = "Bienvenue dans le script de mise à jour de Wanewsletter. \nVous disposez actuellement de la version %s de Wanewsletter.\n Par mesure de sécurité, il est <strong>fortement conseillé</strong> de faire une sauvegarde des tables du script avant de procéder à la mise à jour.";
-$lang['Warning_reinstall']          = "<b>Attention !</b> Wanewsletter semble déjà installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d'administrateur. \nAttention, toutes les données de l'installation précédente seront définitivement perdues.";
+$lang['Warning_reinstall']          = "<b>Attention !</b> Wanewsletter semble déjà installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d'administrateur. \nAttention, toutes les données de l'installation précédente seront définitivement perdues.\n Si vous souhaitez plutôt effectuer une mise à jour d'une installation existante, utilisez le script upgrade.php";
 $lang['Start_install']              = "Démarrer l'installation";
 $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['Result_install']             = "Résultat de l'installation";

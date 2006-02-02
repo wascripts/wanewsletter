@@ -104,7 +104,7 @@ chmod($sqlite_db, 0666);
 // Création de la structure de base
 //
 $sqldata = file_get_contents($schemas_dir . '/sqlite_tables.sql');
-$queries = make_sql_ary($sqldata, ';');
+$queries = make_sql_ary($sqldata);
 
 foreach( $queries as $query ) {
 	$pdo->query($query);

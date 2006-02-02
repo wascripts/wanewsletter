@@ -56,9 +56,12 @@ function createDSN($infos, $options = null)
 	if( $infos['driver'] == 'mysqli' ) {
 		$infos['driver'] = 'mysql';
 	}
+	else if( $infos['driver'] == 'sqlite_pdo' ) {
+		$infos['driver'] = 'sqlite';
+	}
 	
 	$dsn = $infos['driver'] . ':';
-	if( isset($infos['host']) ) {
+	if( !empty($infos['host']) ) {
 		$dsn .= '//';
 		if( isset($infos['user']) ) {
 			$dsn .= rawurlencode($infos['user']);
@@ -146,7 +149,7 @@ function parseDSN($dsn)
 	
 	if( $infos['driver'] == 'sqlite' ) {
 		
-		if( file_exists($infos['dbname']) && is_readable($infos['dbname']) ) {
+		if( file_exists($infos['dbname']) && is_readable($infos['dbname']) && filesize($infos['dbname']) > 0 ) {
 			$fp = fopen($infos['dbname'], 'rb');
 			$info = fread($fp, 15);
 			fclose($fp);
@@ -184,8 +187,8 @@ function WaDatabase($dsn)
 	$db = new Wadb($infos['dbname'], $options);
 	
 	if( strncmp(SQL_DRIVER, 'sqlite', 6) != 0 ) {
-		$infos['username'] = $infos['user'];
-		$infos['passwd']   = $infos['pass'];
+		$infos['username'] = isset($infos['user']) ? $infos['user'] : null;
+		$infos['passwd']   = isset($infos['pass']) ? $infos['pass'] : null;
 		
 		$db->connect($infos, $options);
 	}

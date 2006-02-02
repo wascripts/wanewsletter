@@ -633,7 +633,7 @@ $lang['Stats_dir_not_writable']     = "The <samp>stats/</samp> directory doesn't
 //
 $lang['Welcome_in_install']         = "Welcome to Wanewsletter's install script. \nThis script requires php version <b>4.1.0 or higher</b>.\nBefore continuing the installation, please read the %sreadme%s file, it contains important instructions to make the installation work properly";
 $lang['Welcome_in_upgrade']         = "Welcome to Wanewsletter's upgrade script. \nYou currently have Wanewsletter version %s installed.\n For security reasons, it is <strong>strongly advisable</strong> to make a backup of the script's tables before proceeding with the upgrade.";
-$lang['Warning_reinstall']          = "<b>Caution !</b> Wanewsletter seems to be already installed. \nIf you wish to reinstall the script, enter your admin login and password. \nAttention, all of your data will be lost if you make a reinstallation of the script.";
+$lang['Warning_reinstall']          = "<b>Caution !</b> Wanewsletter seems to be already installed. \nIf you wish to reinstall the script, enter your admin login and password. \nAttention, all of your data will be lost if you make a reinstallation of the script. \n if you wish to do an upgrade, use the script upgrade.php";
 $lang['Start_install']              = "Launch install";
 $lang['Start_upgrade']              = "Launch upgrade";
 $lang['Result_install']             = "Install result";

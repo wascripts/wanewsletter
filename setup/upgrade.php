@@ -45,11 +45,11 @@ if( !defined('NL_INSTALLED') )
 	plain_error("Wanewsletter ne semble pas installé");
 }
 
-$db = new sql($dbhost, $dbuser, $dbpassword, $dbname);
+$db = WaDatabase($dsn);
 
-if( !$db->connect_id )
+if( !$db->isConnected() )
 {
-	plain_error('Impossible de se connecter à la base de données');
+	plain_error(sprintf($lang['Connect_db_error'], $db->error));
 }
 
 //
@@ -162,11 +162,11 @@ if( $start )
 		//
 		@set_time_limit(1200);
 		
-		$sql_create = make_sql_ary(implode('', file($sql_create)), $supported_db[$dbtype]['delimiter'], $prefixe);
+		$sql_create = make_sql_ary(implode('', file($sql_create)), $prefixe);
 		
 		foreach( $sql_create as $query )
 		{
-			preg_match('/' . $prefixe . '([[:alnum:]_-]+)/i', $query, $match);
+			preg_match('/CREATE TABLE ' . $prefixe . '([[:alnum:]_-]+)/i', $query, $match);
 			
 			$sql_create[$match[1]] = $query;
 		}
@@ -240,7 +240,7 @@ if( $start )
 					$sql_update[] = $sql_create['forbidden_ext'];
 					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
 						ADD COLUMN session_ip CHAR(8) NOT NULL DEFAULT '',
-						ADD COLUMN session_liste TINYINT(3) NOT NULL DEFAULT 0";
+						ADD COLUMN session_liste SMALLINT NOT NULL DEFAULT 0";
 					break;
 			}
 			
@@ -281,7 +281,7 @@ if( $start )
 				ADD COLUMN admin_lang VARCHAR(30) NOT NULL DEFAULT '' AFTER admin_email,
 				ADD COLUMN admin_dateformat VARCHAR(20) NOT NULL DEFAULT '' AFTER admin_lang,
 				ADD COLUMN email_new_subscribe TINYINT(1) NOT NULL DEFAULT 0,
-				ADD COLUMN email_unsubscribe SMALLINT NOT NULL DEFAULT 0";
+				ADD COLUMN email_unsubscribe TINYINT(1) NOT NULL DEFAULT 0";
 			$sql_update[] = "UPDATE " . ADMIN_TABLE . "
 				SET admin_lang = '" . $old_config['language'] . "',
 				admin_dateformat = '" . $db->escape($old_config['date_format']) . "',
@@ -305,7 +305,7 @@ if( $start )
 				CHANGE nom liste_name VARCHAR(100) NOT NULL DEFAULT '',
 				CHANGE choix_format liste_format TINYINT(1) NOT NULL DEFAULT 1,
 				CHANGE email_confirm confirm_subscribe TINYINT(1) NOT NULL DEFAULT 0,
-				ADD COLUMN liste_public SMALLINT NOT NULL DEFAULT 1 AFTER liste_name,
+				ADD COLUMN liste_public TINYINT(1) NOT NULL DEFAULT 1 AFTER liste_name,
 				ADD COLUMN sender_email VARCHAR(250) NOT NULL DEFAULT '' AFTER liste_format,
 				ADD COLUMN return_email VARCHAR(250) NOT NULL DEFAULT '' AFTER sender_email,
 				ADD COLUMN liste_sig TEXT NOT NULL DEFAULT '',
@@ -942,11 +942,11 @@ if( $start )
 		//
 		if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
 		{
-			$output->addHiddenField('dbtype',     $dbtype);
-			$output->addHiddenField('dbhost',     $dbhost);
-			$output->addHiddenField('dbuser',     $dbuser);
-			$output->addHiddenField('dbpassword', $dbpassword);
-			$output->addHiddenField('dbname',     $dbname);
+			$output->addHiddenField('dbtype',     $infos['driver']);
+			$output->addHiddenField('dbhost',     $infos['host']);
+			$output->addHiddenField('dbuser',     $infos['user']);
+			$output->addHiddenField('dbpassword', $infos['pass']);
+			$output->addHiddenField('dbname',     $infos['dbname']);
 			$output->addHiddenField('prefixe',    $prefixe);
 			
 			$output->assign_block_vars('download_file', array(

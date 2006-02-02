@@ -131,9 +131,12 @@ function exec_queries($sql_ary, $return_error = false)
 	}
 }
 
+require '/home/web/projects/wanewsletter/branche_2.3/tmp/debug_error.php';
+
 error_reporting(E_ALL);
 
 require WA_ROOTDIR . '/includes/functions.php';
+require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/template.php';
 require WA_ROOTDIR . '/includes/class.output.php';
 
@@ -154,8 +157,8 @@ if( get_magic_quotes_gpc() )
 }
 
 define('WA_NEW_VERSION', '###VERSION###');
-$default_lang = 'francais';
 
+$default_lang   = 'francais';
 $supported_lang = array(
 	'fr' => 'francais',
 	'en' => 'english'
@@ -163,32 +166,24 @@ $supported_lang = array(
 
 $supported_db = array(
 	'mysql' => array(
-		'Name'         => 'MySQL 3.23.x/4.0.x',
+		'Name'         => 'MySQL 3.23.x, 4.0.x',
 		'prefixe_file' => 'mysql',
-		'extension'    => 'mysql',
-		'delimiter'    => ';',
-		'delimiter2'   => ';'
+		'extension'    => 'mysql'
 	),
 	'mysqli' => array(
-		'Name'         => 'MySQL 4.1.x',
+		'Name'         => 'MySQL 4.1.x, 5.x',
 		'prefixe_file' => 'mysql',
-		'extension'    => 'mysqli',
-		'delimiter'    => ';',
-		'delimiter2'   => ';'
+		'extension'    => 'mysqli'
 	),
 	'postgres' => array(
-		'Name'         => 'PostgreSQL 7.x/8.x',
+		'Name'         => 'PostgreSQL &#8805; 7.2, 8.x',
 		'prefixe_file' => 'postgres',
-		'extension'    => 'pgsql',
-		'delimiter'    => ';',
-		'delimiter2'   => ';'
+		'extension'    => 'pgsql'
 	),
 	'sqlite' => array(
-		'Name'         => 'SQLite 2.8.x',
+		'Name'         => 'SQLite &#8805; 2.8, 3.x',
 		'prefixe_file' => 'sqlite',
-		'extension'    => 'sqlite',
-		'delimiter'    => ';',
-		'delimiter2'   => ';'
+		'extension'    => 'sqlite | (pdo, pdo_sqlite)'
 	)
 );
 
@@ -207,11 +202,11 @@ $sql_drop = array(
 	'DROP TABLE wa_session'
 );
 
-$prefixe = 'wa_';
-$dbtype  = 'mysql';
-$dbuser  = $dbpassword = $dbname = '';
+$dsn = '';
 $lang    = $datetime = $msg_error = $_php_errors = array();
 $error   = false;
+$prefixe = ( !empty($_POST['prefixe']) ) ? trim($_POST['prefixe']) : 'wa_';
+$infos   = array('driver' => 'mysql', 'host' => '', 'user' => '', 'pass' => '', 'dbname' => '');
 
 if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
 {
@@ -235,6 +230,7 @@ if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
 }
 
 require WA_ROOTDIR . '/language/lang_' . $language . '.php';
+require WA_ROOTDIR . '/includes/wadb_init.php';
 
 //
 // Vérification de la version de PHP disponible. Il nous faut la version 4.1.0 minimum
@@ -244,45 +240,64 @@ if( !function_exists('version_compare') )
 	message(sprintf($lang['PHP_version_error'], WA_NEW_VERSION));
 }
 
-$vararray = array('dbtype', 'dbhost', 'dbuser', 'dbpassword', 'dbname', 'prefixe');
-foreach( $vararray as $varname )
+if( !empty($dsn) )
 {
-	${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : ${$varname};
+	list($infos) = parseDSN($dsn);
 }
 
-$vararray = array('start', 'confirm', 'sendfile');
-foreach( $vararray as $varname )
+$infos['driver'] = ( !empty($_POST['dbtype']) ) ? trim($_POST['dbtype']) : $infos['driver'];
+$infos['host']   = ( !empty($_POST['dbhost']) ) ? trim($_POST['dbhost']) : $infos['host'];
+$infos['user']   = ( !empty($_POST['dbuser']) ) ? trim($_POST['dbuser']) : $infos['user'];
+$infos['pass']   = ( !empty($_POST['dbpassword']) ) ? trim($_POST['dbpassword']) : $infos['pass'];
+$infos['dbname'] = ( !empty($_POST['dbname']) ) ? trim($_POST['dbname']) : $infos['dbname'];
+
+foreach( array('start', 'confirm', 'sendfile') as $varname )
 {
 	${$varname} = ( isset($_POST[$varname]) ) ? true : false;
 }
-
-require WA_ROOTDIR . '/includes/constantes.php';
 
 if( !defined('IN_INSTALL') && empty($dbname) )
 {
 	message($lang['Not_installed']);
 }
-else if( $dbtype == 'mssql' )
+else if( $infos['driver'] == 'mssql' )
 {
 	message($lang['mssql_support_end']);
 }
-else if( $dbtype == 'postgre' )
+else if( $infos['driver'] == 'postgre' )
 {
-	$dbtype = 'postgres';
+	$infos['driver'] = 'postgres';
 }
-else if( $dbtype == 'mysql4' )
+else if( $infos['driver'] == 'mysql4' )
 {
-	$dbtype = 'mysqli';
+	$infos['driver'] = 'mysqli';
+}
+
+//
+// Le support de PostgreSQL dans Wanewsletter nécessite PHP >= 4.2.0
+//
+if( version_compare(phpversion(), '4.2.0', '<') )
+{
+	unset($supported_db['postgres']);
+}
+
+//
+// SQLite est un cas particulier car peut nécessiter la présence de deux extensions.
+// On fait le traitement avant la boucle
+//
+if( !extension_loaded('sqlite') && ( !extension_loaded('pdo') || !extension_loaded('pdo_sqlite') ) )
+{
+	unset($supported_db['sqlite']);
 }
 
 $db_list = '';
-foreach( $supported_db as $db_name => $db_infos )
+foreach( $supported_db as $name => $data )
 {
-	$db_list .= ', ' . $db_infos['Name'];
+	$db_list .= ', ' . $data['Name'];
 	
-	if( !extension_loaded($db_infos['extension']) )
+	if( $name != 'sqlite' && !extension_loaded($data['extension']) )
 	{
-		unset($supported_db[$db_name]);
+		unset($supported_db[$name]);
 	}
 }
 
@@ -291,20 +306,15 @@ if( count($supported_db) == 0 )
 	message(sprintf($lang['No_db_support'], WA_NEW_VERSION, substr($db_list, 2)));
 }
 
-if( isset($supported_db[$dbtype]) )
-{
-	require WA_ROOTDIR . '/includes/sql/db_type.php';
-}
-else if( defined('NL_INSTALLED') || defined('IN_UPGRADE') )
+if( !isset($supported_db[$infos['driver']]) && ( defined('NL_INSTALLED') || defined('IN_UPGRADE') ) )
 {
 	plain_error($lang['DB_type_undefined']);
 }
 
-$infos = array(
-	// TODO !!
-);
-
-$dsn = createDSN($infos);
+if( !empty($infos['dbname']) ) // TODO : Problème dans le cas de SQLite ($infos['dbname'] vide)
+{
+	$dsn = createDSN($infos);
+}
 
 $config_file  = '<' . "?php\n\n";
 $config_file .= "//\n";
