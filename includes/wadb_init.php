@@ -61,7 +61,12 @@ function createDSN($infos, $options = null)
 	}
 	
 	$dsn = $infos['driver'] . ':';
-	if( !empty($infos['host']) ) {
+	
+	if( $infos['driver'] != 'sqlite' ) {
+		if( empty($infos['host']) ) {
+			$infos['host'] = 'localhost';
+		}
+		
 		$dsn .= '//';
 		if( isset($infos['user']) ) {
 			$dsn .= rawurlencode($infos['user']);

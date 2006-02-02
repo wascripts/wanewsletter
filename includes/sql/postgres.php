@@ -37,11 +37,6 @@ define('SQL_FETCH_NUM',   PGSQL_NUM);
 define('SQL_FETCH_ASSOC', PGSQL_ASSOC);
 define('SQL_FETCH_BOTH',  PGSQL_BOTH);
 
-/*
-TODO : protéger un nom de colonne
-affected_rows() semble ne pouvoir être appelée qu'une fois par résultat
-*/
-
 class Wadb {
 	
 	/**
@@ -124,7 +119,20 @@ class Wadb {
 	 */
 	var $clientVersion = '';
 	
-	var $_result;
+	/**
+	 * Nombre de lignes affectées par la dernière requète DML
+	 * 
+	 * @var integer
+	 * @access private
+	 */
+	var $_affectedRows = 0;
+	
+	/**
+	 * Nom de la dernière table sur laquelle a été effectué une requète INSERT (nécessaire pour Wadb::lastInsertId())
+	 * 
+	 * @var string
+	 * @access private
+	 */
 	var $lastInsertTable;
 	
 	/**
@@ -252,7 +260,6 @@ class Wadb {
 		
 		$this->sqltime += ($endtime - $curtime);
 		$this->queries++;
-		$this->_result  = $result;
 		
 		if( !$result ) {
 			$this->error = pg_last_error($this->link);
@@ -263,6 +270,11 @@ class Wadb {
 		else {
 			$this->error = '';
 			$this->lastQuery = '';
+			
+			if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) ) {
+				$this->_affectedRows = @pg_affected_rows($result);
+				$result = true;
+			}
 			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
 				$result = new WadbResult($this->link, $result);
@@ -349,7 +361,7 @@ class Wadb {
 	 */
 	function quote($name)
 	{
-		return $name;
+		return '"' . str_replace('"', '""', $name) . '"';
 	}
 	
 	/**
@@ -416,7 +428,7 @@ class Wadb {
 	 */
 	function affectedRows()
 	{
-		return pg_affected_rows($this->_result);
+		return $this->_affectedRows;
 	}
 	
 	/**
