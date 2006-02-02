@@ -199,9 +199,13 @@ if( $start )
 		
 		if( defined('NL_INSTALLED') )
 		{
-			$sql_drop = str_replace('/wa_/', $prefixe, $sql_drop);
+			exec_queries(str_replace('wa_', $prefixe, $sql_drop_table));
 			
-			exec_queries($sql_drop);
+			if( strncmp(SQL_DRIVER, 'mysql', 5) !== 0 )
+			{
+				exec_queries(str_replace('wa_', $prefixe, $sql_drop_index));
+				exec_queries(str_replace('wa_', $prefixe, $sql_drop_sequence));
+			}
 		}
 		
 		//

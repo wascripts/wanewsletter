@@ -180,7 +180,7 @@ $supported_db = array(
 	)
 );
 
-$sql_drop = array(
+$sql_drop_table = array(
 	'DROP TABLE wa_abo_liste',
 	'DROP TABLE wa_abonnes',
 	'DROP TABLE wa_admin',
@@ -193,6 +193,23 @@ $sql_drop = array(
 	'DROP TABLE wa_log',
 	'DROP TABLE wa_log_files',
 	'DROP TABLE wa_session'
+);
+
+$sql_drop_index = array(
+	'DROP INDEX abo_status_idx',
+	'DROP INDEX admin_id_idx',
+	'DROP INDEX liste_id_idx',
+	'DROP INDEX log_status_idx'
+);
+
+$sql_drop_sequence = array(
+	'DROP SEQUENCE wa_abonnes_id_seq',
+	'DROP SEQUENCE wa_admin_id_seq',
+	'DROP SEQUENCE wa_ban_id_seq',
+	'DROP SEQUENCE wa_forbidden_ext_id_seq',
+	'DROP SEQUENCE wa_joined_files_id_seq',
+	'DROP SEQUENCE wa_liste_id_seq',
+	'DROP SEQUENCE wa_log_id_seq'
 );
 
 $dsn = '';
