@@ -40,7 +40,6 @@ foreach( $vararray as $varname )
 
 $confirm_pass = ( $confirm_pass != '' ) ? md5($confirm_pass) : '';
 $language     = ( $language != '' ) ? $language : $default_lang;
-$sqlite_db    = WA_ROOTDIR . '/includes/sql/wanewsletter.sqlite'; // TODO : Rendre modifiable lors de l'installation!
 
 $output->set_filenames( array(
 	'body' => 'install.tpl'
@@ -122,9 +121,9 @@ if( $start )
 	{
 		if( $infos['driver'] == 'sqlite' )
 		{
-			if( is_writable(dirname($sqlite_db)) )
+			if( is_writable(dirname($infos['dbname'])) )
 			{
-				$db = WaDatabase('sqlite:' . $sqlite_db);
+				$db = WaDatabase($dsn);
 			}
 			else
 			{
@@ -160,7 +159,7 @@ if( $start )
 	
 	if( !$error )
 	{
-		if( ($infos['driver'] != 'sqlite' && $infos['dbname'] == '') || $prefixe == '' || $admin_login == '' )
+		if( $infos['dbname'] == '' || $prefixe == '' || $admin_login == '' )
 		{
 			$error = true;
 			$msg_error[] = $lang['Message']['fields_empty'];
@@ -240,12 +239,12 @@ if( $start )
 		{
 			if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
 			{
-				$output->addHiddenField('dbtype',     $infos['driver']);
-				$output->addHiddenField('dbhost',     $infos['host']);
-				$output->addHiddenField('dbuser',     $infos['user']);
-				$output->addHiddenField('dbpassword', $infos['pass']);
-				$output->addHiddenField('dbname',     $infos['dbname']);
-				$output->addHiddenField('prefixe',    $prefixe);
+				$output->addHiddenField('driver',  $infos['driver']);
+				$output->addHiddenField('host',    $infos['host']);
+				$output->addHiddenField('user',    $infos['user']);
+				$output->addHiddenField('pass',    $infos['pass']);
+				$output->addHiddenField('dbname',  $infos['dbname']);
+				$output->addHiddenField('prefixe', $prefixe);
 				
 				$output->assign_block_vars('download_file', array(
 					'L_TITLE'         => $lang['Result_install'],

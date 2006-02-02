@@ -35,32 +35,32 @@
 		var fields = db_box.form.elements;
 		
 		if( db_box.options[db_box.selectedIndex].value == 'sqlite' ) {
-			fields['dbhost'].disabled = true;
-			fields['dbhost'].value    = lang['unused'];
+			fields['host'].disabled   = true;
+			fields['host'].value      = lang['unused'];
 			fields['dbname'].disabled = true;
 			fields['dbname'].value    = lang['unused'];
-			fields['dbuser'].disabled = true;
-			fields['dbuser'].value    = lang['unused'];
-			fields['dbpassword'].type = 'text';
-			fields['dbpassword'].disabled = true;
-			fields['dbpassword'].value = lang['unused'];
+			fields['user'].disabled   = true;
+			fields['user'].value      = lang['unused'];
+			fields['pass'].type       = 'text';
+			fields['pass'].disabled   = true;
+			fields['pass'].value      = lang['unused'];
 		}
 		else {
-			fields['dbhost'].disabled = false;
-			fields['dbhost'].value    = fields['dbhost'].defaultValue;
+			fields['host'].disabled   = false;
+			fields['host'].value      = fields['host'].defaultValue;
 			fields['dbname'].disabled = false;
 			fields['dbname'].value    = fields['dbname'].defaultValue;
-			fields['dbuser'].disabled = false;
-			fields['dbuser'].value    = fields['dbuser'].defaultValue;
-			fields['dbpassword'].type = 'password';
-			fields['dbpassword'].disabled = false;
-			fields['dbpassword'].value = fields['dbpassword'].defaultValue;
+			fields['user'].disabled   = false;
+			fields['user'].value      = fields['user'].defaultValue;
+			fields['pass'].type       = 'password';
+			fields['pass'].disabled   = false;
+			fields['pass'].value      = fields['pass'].defaultValue;
 		}
 	}
 	
 	window.onload = function() {
 		var SQLiteBox;
-		if( (SQLiteBox = document.getElementById('dbtype')) != null ) {
+		if( (SQLiteBox = document.getElementById('driver')) != null ) {
 			specialSQLite(SQLiteBox);
 		}
 	};
@@ -90,24 +90,24 @@
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"><label for="dbtype">{install.L_DBTYPE}&#160;:</label></td>
-			<td class="medrow2"><select id="dbtype" name="dbtype" onchange="specialSQLite(this);">{install.DB_BOX}</select></td>
+			<td class="medrow1"><label for="driver">{install.L_DBTYPE}&#160;:</label></td>
+			<td class="medrow2"><select id="driver" name="driver" onchange="specialSQLite(this);">{install.DB_BOX}</select></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="dbhost">{install.L_DBHOST}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="dbhost" name="dbhost" size="30" value="{install.DBHOST}" class="text" /></td>
+			<td class="medrow1"><label for="host">{install.L_DBHOST}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="host" name="host" size="30" value="{install.DBHOST}" class="text" /></td>
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="dbname">{install.L_DBNAME}&#160;:</label></td>
 			<td class="medrow2"><input type="text" id="dbname" name="dbname" size="30" value="{install.DBNAME}" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="dbuser">{install.L_DBUSER}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="dbuser" name="dbuser" size="30" value="{install.DBUSER}" class="text" /></td>
+			<td class="medrow1"><label for="user">{install.L_DBUSER}&#160;:</label></td>
+			<td class="medrow2"><input type="text" id="user" name="user" size="30" value="{install.DBUSER}" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="dbpassword">{install.L_DBPWD}&#160;:</label></td>
-			<td class="medrow2"><input type="password" id="dbpassword" name="dbpassword" size="30" class="text" /></td>
+			<td class="medrow1"><label for="pass">{install.L_DBPWD}&#160;:</label></td>
+			<td class="medrow2"><input type="password" id="pass" name="pass" size="30" class="text" /></td>
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="prefixe">{install.L_PREFIXE}&#160;:</label></td>

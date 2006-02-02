@@ -146,7 +146,7 @@ if( $start )
 		$msg_error[] = $lang['Message']['Error_login'];
 	}
 	
-	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$dbtype]['prefixe_file'] . '_tables.sql';
+	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$infos['driver']]['prefixe_file'] . '_tables.sql';
 	
 	if( !is_readable($sql_create) )
 	{
@@ -942,12 +942,12 @@ if( $start )
 		//
 		if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
 		{
-			$output->addHiddenField('dbtype',     $infos['driver']);
-			$output->addHiddenField('dbhost',     $infos['host']);
-			$output->addHiddenField('dbuser',     $infos['user']);
-			$output->addHiddenField('dbpassword', $infos['pass']);
-			$output->addHiddenField('dbname',     $infos['dbname']);
-			$output->addHiddenField('prefixe',    $prefixe);
+			$output->addHiddenField('driver',  $infos['driver']);
+			$output->addHiddenField('host',    $infos['host']);
+			$output->addHiddenField('user',    $infos['user']);
+			$output->addHiddenField('pass',    $infos['pass']);
+			$output->addHiddenField('dbname',  $infos['dbname']);
+			$output->addHiddenField('prefixe', $prefixe);
 			
 			$output->assign_block_vars('download_file', array(
 				'L_TITLE'         => $lang['Result_upgrade'],

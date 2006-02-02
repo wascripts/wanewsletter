@@ -111,6 +111,9 @@ if( get_magic_quotes_gpc() )
 //
 // Intialisation de la connexion à la base de données 
 //
+list($infos) = parseDSN($dsn);
+define('SQL_DRIVER', $infos['driver']);
+
 $db = WaDatabase($dsn);
 
 if( !$db->isConnected() )

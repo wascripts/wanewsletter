@@ -60,32 +60,35 @@ function createDSN($infos, $options = null)
 		$infos['driver'] = 'sqlite';
 	}
 	
-	$dsn = $infos['driver'] . ':';
+	$connect = '';
 	
-	if( $infos['driver'] != 'sqlite' ) {
+	if( isset($infos['user']) ) {
+		$connect .= rawurlencode($infos['user']);
+		
+		if( isset($infos['pass']) ) {
+			$connect .= ':' . rawurlencode($infos['pass']);
+		}
+		
+		$connect .= '@';
+		
 		if( empty($infos['host']) ) {
 			$infos['host'] = 'localhost';
 		}
-		
-		$dsn .= '//';
-		if( isset($infos['user']) ) {
-			$dsn .= rawurlencode($infos['user']);
-			
-			if( isset($infos['pass']) ) {
-				$dsn .= ':' . rawurlencode($infos['pass']);
-			}
-			
-			$dsn .= '@';
-		}
-		
-		$dsn .= rawurlencode($infos['host']);
-		if( isset($infos['port']) ) {
-			$dsn .= ':' . intval($infos['port']);
-		}
-		$dsn .= '/';
 	}
 	
-	$dsn .= $infos['dbname'];
+	if( !empty($infos['host']) ) {
+		$connect .= rawurlencode($infos['host']);
+		if( isset($infos['port']) ) {
+			$connect .= ':' . intval($infos['port']);
+		}
+	}
+	
+	if( !empty($connect) ) {
+		$dsn = sprintf('%s://%s/%s', $infos['driver'], $connect, $infos['dbname']);
+	}
+	else {
+		$dsn = sprintf('%s:%s', $infos['driver'], $infos['dbname']);
+	}
 	
 	if( is_array($options) ) {
 		$dsn .= '?';
@@ -137,7 +140,7 @@ function parseDSN($dsn)
 			case 'path':
 				$infos['dbname'] = rawurldecode($value);
 				
-				if( $infos['driver'] != 'sqlite' ) {
+				if( $infos['driver'] != 'sqlite' && isset($infos['host']) ) {
 					$infos['dbname'] = ltrim($infos['dbname'], '/');
 				}
 				break;
@@ -185,13 +188,11 @@ function WaDatabase($dsn)
 	
 	list($infos, $options) = $tmp;
 	
-	define('SQL_DRIVER', $infos['driver']);
-	
 	require WA_ROOTDIR . "/includes/sql/$infos[driver].php";
 	
 	$db = new Wadb($infos['dbname'], $options);
 	
-	if( strncmp(SQL_DRIVER, 'sqlite', 6) != 0 ) {
+	if( strncmp($infos['driver'], 'sqlite', 6) != 0 ) {
 		$infos['username'] = isset($infos['user']) ? $infos['user'] : null;
 		$infos['passwd']   = isset($infos['pass']) ? $infos['pass'] : null;
 		

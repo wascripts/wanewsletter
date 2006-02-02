@@ -131,8 +131,6 @@ function exec_queries($sql_ary, $return_error = false)
 	}
 }
 
-require '/home/web/projects/wanewsletter/branche_2.3/tmp/debug_error.php';
-
 error_reporting(E_ALL);
 
 require WA_ROOTDIR . '/includes/functions.php';
@@ -166,24 +164,19 @@ $supported_lang = array(
 
 $supported_db = array(
 	'mysql' => array(
-		'Name'         => 'MySQL 3.23.x, 4.0.x',
+		'Name'         => 'MySQL &#8805; 3.23.x, 4.x, 5.x',
 		'prefixe_file' => 'mysql',
-		'extension'    => 'mysql'
-	),
-	'mysqli' => array(
-		'Name'         => 'MySQL 4.1.x, 5.x',
-		'prefixe_file' => 'mysql',
-		'extension'    => 'mysqli'
+		'extension'    => (extension_loaded('mysql') || extension_loaded('mysqli'))
 	),
 	'postgres' => array(
 		'Name'         => 'PostgreSQL &#8805; 7.2, 8.x',
 		'prefixe_file' => 'postgres',
-		'extension'    => 'pgsql'
+		'extension'    => extension_loaded('pgsql')
 	),
 	'sqlite' => array(
 		'Name'         => 'SQLite &#8805; 2.8, 3.x',
 		'prefixe_file' => 'sqlite',
-		'extension'    => 'sqlite | (pdo, pdo_sqlite)'
+		'extension'    => (extension_loaded('sqlite') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
 	)
 );
 
@@ -206,7 +199,9 @@ $dsn = '';
 $lang    = $datetime = $msg_error = $_php_errors = array();
 $error   = false;
 $prefixe = ( !empty($_POST['prefixe']) ) ? trim($_POST['prefixe']) : 'wa_';
-$infos   = array('driver' => 'mysql', 'host' => '', 'user' => '', 'pass' => '', 'dbname' => '');
+$infos   = array('driver' => 'mysql', 'host' => null, 'user' => null, 'pass' => null, 'dbname' => null);
+
+$dbtype = $dbhost = $dbuser = $dbpassword = $dbname = ''; // Compatibilité avec wanewsletter < 2.3-beta2
 
 if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
 {
@@ -245,11 +240,22 @@ if( !empty($dsn) )
 	list($infos) = parseDSN($dsn);
 }
 
-$infos['driver'] = ( !empty($_POST['dbtype']) ) ? trim($_POST['dbtype']) : $infos['driver'];
-$infos['host']   = ( !empty($_POST['dbhost']) ) ? trim($_POST['dbhost']) : $infos['host'];
-$infos['user']   = ( !empty($_POST['dbuser']) ) ? trim($_POST['dbuser']) : $infos['user'];
-$infos['pass']   = ( !empty($_POST['dbpassword']) ) ? trim($_POST['dbpassword']) : $infos['pass'];
-$infos['dbname'] = ( !empty($_POST['dbname']) ) ? trim($_POST['dbname']) : $infos['dbname'];
+//
+// Compatibilité avec les version antérieures à 2.3-beta2 (début utilisation des DSN)
+//
+else if( !defined('WA_VERSION') || WA_VERSION === '2.3-beta1' )
+{
+	$infos['driver'] = !empty($dbtype) ? $dbtype : $infos['driver'];
+	$infos['host']   = !empty($dbhost) ? $dbhost : null;
+	$infos['user']   = !empty($dbuser) ? $dbuser : null;
+	$infos['pass']   = !empty($dbpassword) ? $dbpassword : null;
+	$infos['dbname'] = !empty($dbname) ? $dbname : null;
+}
+
+foreach( array('driver', 'host', 'user', 'pass', 'dbname') as $varname )
+{
+	$infos[$varname] = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : @$infos[$varname];
+}
 
 foreach( array('start', 'confirm', 'sendfile') as $varname )
 {
@@ -270,8 +276,10 @@ else if( $infos['driver'] == 'postgre' )
 }
 else if( $infos['driver'] == 'mysql4' )
 {
-	$infos['driver'] = 'mysqli';
+	$infos['driver'] = 'mysql';
 }
+
+define('SQL_DRIVER', $infos['driver']);
 
 //
 // Le support de PostgreSQL dans Wanewsletter nécessite PHP >= 4.2.0
@@ -281,21 +289,12 @@ if( version_compare(phpversion(), '4.2.0', '<') )
 	unset($supported_db['postgres']);
 }
 
-//
-// SQLite est un cas particulier car peut nécessiter la présence de deux extensions.
-// On fait le traitement avant la boucle
-//
-if( !extension_loaded('sqlite') && ( !extension_loaded('pdo') || !extension_loaded('pdo_sqlite') ) )
-{
-	unset($supported_db['sqlite']);
-}
-
 $db_list = '';
 foreach( $supported_db as $name => $data )
 {
 	$db_list .= ', ' . $data['Name'];
 	
-	if( $name != 'sqlite' && !extension_loaded($data['extension']) )
+	if( $data['extension'] === false )
 	{
 		unset($supported_db[$name]);
 	}
@@ -311,7 +310,12 @@ if( !isset($supported_db[$infos['driver']]) && ( defined('NL_INSTALLED') || defi
 	plain_error($lang['DB_type_undefined']);
 }
 
-if( !empty($infos['dbname']) ) // TODO : Problème dans le cas de SQLite ($infos['dbname'] vide)
+if( empty($infos['dbname']) && $infos['driver'] == 'sqlite' )
+{
+	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/includes/sql') . '/wanewsletter.sqlite';
+}
+
+if( !empty($infos['dbname']) )
 {
 	$dsn = createDSN($infos);
 }
