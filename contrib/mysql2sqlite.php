@@ -136,9 +136,10 @@ foreach( $tableList as $table ) {
 	$result = $db->query("SELECT $fields FROM $table");
 	$result->setFetchMode(SQL_FETCH_NUM);
 	
-	while( $result->hasMore() ) {
-		$row = $result->fetch();
+	$numrows = 0;
+	while( $row = $result->fetch() ) {
 		$values = array();
+		$numrows++;
 		
 		foreach( $row as $value ) {
 			if( is_null($value) ) {
@@ -154,7 +155,7 @@ foreach( $tableList as $table ) {
 		sqlite_exec($fs, "INSERT INTO $table ($fields) VALUES(" . implode(", ", $values) . ")");
 	}
 	
-	printf("%d rows added.\n", $result->count());
+	printf("%d rows added.\n", $numrows);
 	flush();
 }
 

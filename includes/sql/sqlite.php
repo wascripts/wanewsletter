@@ -473,14 +473,6 @@ class WadbResult {
 	var $result;
 	
 	/**
-	 * Nombre de lignes renvoyées par la requète
-	 * 
-	 * @var resource
-	 * @access private
-	 */
-	var $_count = 0;
-	
-	/**
 	 * Mode de récupération des données
 	 * 
 	 * @var integer
@@ -500,19 +492,7 @@ class WadbResult {
 	{
 		$this->link   = $link;
 		$this->result = $result;
-		$this->_count = sqlite_num_rows($result);
 		$this->fetchMode = SQLITE_BOTH;
-	}
-	
-	/**
-	 * Renvoie le nombre de lignes du résultat
-	 * 
-	 * @access public
-	 * @return integer
-	 */
-	function count()
-	{
-		return $this->_count;
 	}
 	
 	/**
@@ -562,8 +542,7 @@ class WadbResult {
 	
 	/**
 	 * Retourne le contenu de la colonne pour l'index ou le nom donné
-	 * à l'index courant dans le jeu de résultat.
-	 * Ne déplace PAS le pointeur de résultat
+	 * à l'index suivant dans le jeu de résultat.
 	 * 
 	 * @param mixed $column  Index ou nom de la colonne
 	 * 
@@ -572,25 +551,9 @@ class WadbResult {
 	 */
 	function column($column)
 	{
-		return sqlite_column($this->result, $column);
-	}
-	
-	/**
-	 * Renvoie la ligne courante dans le jeu de résultat.
-	 * Ne déplace PAS le pointeur de résultat
-	 * 
-	 * @param integer $mode  Mode de récupération des données
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function current($mode = null)
-	{
-		if( is_null($mode) ) {
-			$mode = $this->fetchMode;
-		}
+		$row = sqlite_fetch_array($this->result);
 		
-		return sqlite_current($this->result, $mode);
+		return ($row != false && isset($row[$column])) ? $row[$column] : false;
 	}
 	
 	/**
@@ -611,74 +574,6 @@ class WadbResult {
 			trigger_error("Invalid fetch mode", E_USER_WARNING);
 			return false;
 		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la première position
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function rewind()
-	{
-		return sqlite_rewind($this->result);
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position précédente
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function prev()
-	{
-		return sqlite_prev($this->result);
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position suivante
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function next()
-	{
-		return sqlite_next($this->result);
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position $offset
-	 * 
-	 * @param integer $offset
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function seek($offset)
-	{
-		return sqlite_seek($this->result, $offset);
-	}
-	
-	/**
-	 * Indique si une ligne précédente est disponible dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function hasPrev()
-	{
-		return sqlite_has_prev($this->result);
-	}
-	
-	/**
-	 * Indique si une ligne suivante est disponible dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function hasMore()
-	{
-		return sqlite_has_more($this->result);
 	}
 	
 	/**
@@ -775,8 +670,7 @@ class WadbBackup {
 		}
 		
 		$tables = array();
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
+		while( $row = $result->fetch() ) {
 			$tables[$row['tbl_name']] = '';
 		}
 		
@@ -813,8 +707,7 @@ class WadbBackup {
 		}
 		
 		$indexes = '';
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
+		while( $row = $result->fetch() ) {
 			if( $row['type'] == 'table' ) {
 				$create_table = str_replace(',', ',' . $this->eol, $row['sql']) . ';' . $this->eol;
 			}
@@ -847,7 +740,9 @@ class WadbBackup {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $result->count() > 0 ) {
+		$result->setFetchMode(SQL_FETCH_ASSOC);
+		
+		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
 			$contents .= '-- ' . $this->eol;
 			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
@@ -861,8 +756,6 @@ class WadbBackup {
 			$fields = implode(', ', $fields);
 			
 			do {
-				$row = $result->fetch(SQL_FETCH_ASSOC);
-				
 				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
 				foreach( $row as $key => $value ) {
@@ -876,7 +769,7 @@ class WadbBackup {
 				
 				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
 			}
-			while( $result->hasMore() );
+			while( $row = $result->fetch() );
 		}
 		
 		return $contents;

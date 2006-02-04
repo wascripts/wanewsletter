@@ -278,9 +278,8 @@ if( $img == 'camembert' )
 	}
 	
 	$tmpdata = array();
-	while( $result->hasMore() )
+	while( $row = $result->fetch() )
 	{
-		$row = $result->fetch();
 		$tmpdata[$row['liste_id']] = $row['num_inscrits'];
 	}
 	

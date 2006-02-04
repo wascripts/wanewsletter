@@ -55,7 +55,7 @@ if( $mode == 'sendpass' )
 			trigger_error('Impossible d\'obtenir les informations du compte', CRITICAL_ERROR);
 		}
 		
-		if( $result->count() == 0 )
+		if( !($admin_id = $result->column('admin_id')) )
 		{
 			$error = TRUE;
 			$msg_error[] = $lang['Message']['Error_sendpass'];
@@ -99,7 +99,7 @@ if( $mode == 'sendpass' )
 			
 			$db->query("UPDATE " . ADMIN_TABLE . "
 				SET admin_pwd = '" . md5($new_password) . "'
-				WHERE admin_id = " . $result->column('admin_id'));
+				WHERE admin_id = " . $admin_id);
 			
 			trigger_error('IDs_sended', MESSAGE);
 		}

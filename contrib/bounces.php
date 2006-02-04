@@ -217,9 +217,8 @@ if( $process == true ) {
 	</tr>
 <?php
 	
-	if( $result != false && $result->count() > 0 ) {
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
+	if( $result != false ) {
+		while( $row = $result->fetch() ) {
 			echo <<<DATA
 	<tr>
 		<td>$row[abo_id]</td>

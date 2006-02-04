@@ -382,12 +382,24 @@ class output extends Template {
 			'footer' => 'footer.tpl'
 		));
 		
+		$dev_infos = (defined('DEV_INFOS') && DEV_INFOS == true);
+		
+		if( $dev_infos )
+		{
+			list($infos) = parseDSN($GLOBALS['dsn']);
+			$version = WA_VERSION . ' (' . $infos['driver'] . ')';
+		}
+		else
+		{
+			$version = WA_VERSION;
+		}
+		
 		$this->assign_vars( array(
-			'VERSION'   => WA_VERSION, 
+			'VERSION'   => $version,
 			'TRANSLATE' => ( !empty($lang['TRANSLATE']) ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 		));
 		
-		if( defined('DEV_INFOS') && DEV_INFOS == TRUE )
+		if( $dev_infos )
 		{
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);

@@ -577,9 +577,8 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			trigger_error('Impossible d\'obtenir les listes de diffusion à purger', ERROR);
 		}
 		
-		while( $result->hasMore() )
+		while( $row = $result->fetch() )
 		{
-			$row = $result->fetch();
 			$total_entries_deleted += purge_liste($row['liste_id'], $row['limitevalidate'], $row['purge_freq']);
 		}
 		
@@ -603,10 +602,9 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 		}
 		
 		$abo_ids = array();
-		while( $result->hasMore() )
+		while( $abo_id = $result->column('abo_id') )
 		{
-			array_push($abo_ids, $result->column('abo_id'));
-			$result->next();
+			array_push($abo_ids, $abo_id);
 		}
 		$result->free();
 		
@@ -626,16 +624,14 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 						HAVING COUNT(abo_id) = 1";
 					if( $result = $db->query($sql) )
 					{
-						if( $result->count() > 0 )
+						$abo_ids = array();
+						while( $abo_id = $result->column('abo_id') )
 						{
-							$abo_ids = array();
-							
-							while( $result->hasMore() )
-							{
-								array_push($abo_ids, $result->column('abo_id'));
-								$result->next();
-							}
-							
+							array_push($abo_ids, $abo_id);
+						}
+						
+						if( count($abo_ids) > 0 )
+						{
 							$sql = "DELETE FROM " . ABONNES_TABLE . " 
 								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
 							if( !$db->query($sql) )

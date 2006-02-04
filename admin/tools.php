@@ -312,27 +312,24 @@ switch( $mode )
 			$contents = '';
 			if( $eformat == 'xml' )
 			{
-				while( $result->hasMore() )
+				while( $email = $result->column('abo_email') )
 				{
-					$contents .= sprintf("\t<email>%s</email>\n", $result->column('abo_email'));
-					$result->next();
+					$contents .= sprintf("\t<email>%s</email>\n", $email);
 				}
 				
 				$format = ( $format == FORMAT_HTML ) ? 'HTML' : 'text';
-				$contents  = '<' . '?xml version="1.0"?' . ">\n";
-				$contents .= "<!-- Date : " . gmdate('d/m/Y H:i:s') . " GMT - Format : $format -->\n";
-				$contents .= "<Wanliste>\n" . $contents . "</Wanliste>\n";
+				$contents  = '<' . '?xml version="1.0"?' . ">\n"
+					. "<!-- Date : " . date('d/m/Y H:i:s O') . " - Format : $format -->\n"
+					. "<Wanliste>\n" . $contents . "</Wanliste>\n";
 				
 				$mime_type = 'application/xml';
 				$ext = 'xml';
 			}
 			else
 			{
-				while( $result->hasMore() )
+				while( $email = $result->column('abo_email') )
 				{
-					$contents .= ( $contents != '' ) ? $glue : '';
-					$contents .= $result->column('abo_email');
-					$result->next();
+					$contents .= (( $contents != '' ) ? $glue : '') . $email;
 				}
 				
 				$mime_type = 'text/plain';
@@ -663,10 +660,8 @@ switch( $mode )
 			//
 			// Traitement des adresses email déjà présentes dans la base de données
 			//
-			while( $result->hasMore() )
+			while( $abodata = $result->fetch() )
 			{
-				$abodata = $result->fetch();
-				
 				if( !isset($abodata['confirmed']) ) // N'est pas inscrit à cette liste
 				{
 					$sql_data = array();
@@ -892,13 +887,13 @@ switch( $mode )
 		}
 		
 		$unban_email_box = '<select id="unban_list_id" name="unban_list_id[]" multiple="multiple" size="10">';
-		if( $result->count() > 0 )
+		if( $row = $result->fetch() )
 		{
-			while( $result->hasMore() )
+			do
 			{
-				$row = $result->fetch();
 				$unban_email_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['ban_id'], $row['ban_email']);
 			}
+			while( $row = $result->fetch() );
 		}
 		else
 		{
@@ -1007,13 +1002,13 @@ switch( $mode )
 		}
 		
 		$reallow_ext_box = '<select id="ext_list_id" name="ext_list_id[]" multiple="multiple" size="10">';
-		if( $result->count() > 0 )
+		if( $row = $result->fetch() )
 		{
-			while( $result->hasMore() )
+			do
 			{
-				$row = $result->fetch();
 				$reallow_ext_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['fe_id'], $row['fe_ext']);
 			}
+			while( $row = $result->fetch() );
 		}
 		else
 		{

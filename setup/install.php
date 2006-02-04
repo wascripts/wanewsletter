@@ -98,9 +98,8 @@ if( $start )
 			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($admin_login)) . "'";
 		if( $result = $db->query($sql) )
 		{
-			if( $result->count() > 0 )
+			if( $row = $result->fetch() )
 			{
-				$row = $result->fetch();
 				if( md5($admin_pass) == $row['admin_pwd'] && $row['admin_level'] == ADMIN )
 				{
 					$login        = true;

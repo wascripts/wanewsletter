@@ -481,7 +481,7 @@ class Wadb {
 	function close()
 	{
 		if( !is_null($this->link) ) {
-			$this->rollBack();
+			@$this->rollBack();
 			$result = mysql_close($this->link);
 			$this->link = null;
 			
@@ -523,22 +523,6 @@ class WadbResult {
 	var $result;
 	
 	/**
-	 * Index courant dans le jeu de résultats
-	 * 
-	 * @var integer
-	 * @access public
-	 */
-	var $offset = 0;
-	
-	/**
-	 * Nombre de lignes renvoyées par la requète
-	 * 
-	 * @var resource
-	 * @access private
-	 */
-	var $_count = 0;
-	
-	/**
 	 * Mode de récupération des données
 	 * 
 	 * @var integer
@@ -558,19 +542,7 @@ class WadbResult {
 	{
 		$this->link   = $link;
 		$this->result = $result;
-		$this->_count = mysql_num_rows($result);
 		$this->fetchMode = MYSQL_BOTH;
-	}
-	
-	/**
-	 * Renvoie le nombre de lignes du résultat
-	 * 
-	 * @access public
-	 * @return integer
-	 */
-	function count()
-	{
-		return $this->_count;
 	}
 	
 	/**
@@ -587,7 +559,6 @@ class WadbResult {
 			$mode = $this->fetchMode;
 		}
 		
-		$this->offset++;
 		return mysql_fetch_array($this->result, $mode);
 	}
 	
@@ -599,7 +570,6 @@ class WadbResult {
 	 */
 	function fetchObject()
 	{
-		$this->offset++;
 		return mysql_fetch_object($this->result);
 	}
 	
@@ -618,8 +588,8 @@ class WadbResult {
 		}
 		
 		$rowset = array();
-		for( $i = 0; $i < $this->_count; $i++ ) {
-			array_push($rowset, $this->fetch($mode));
+		while( $row = $this->fetch($mode) ) {
+			array_push($rowset, $row);
 		}
 		
 		return $rowset;
@@ -627,8 +597,7 @@ class WadbResult {
 	
 	/**
 	 * Retourne le contenu de la colonne pour l'index ou le nom donné
-	 * à l'index courant dans le jeu de résultat.
-	 * Ne déplace PAS le pointeur de résultat
+	 * à l'index suivant dans le jeu de résultat.
 	 * 
 	 * @param mixed $column  Index ou nom de la colonne
 	 * 
@@ -637,28 +606,9 @@ class WadbResult {
 	 */
 	function column($column)
 	{
-		return mysql_result($this->result, $this->offset, $column);
-	}
-	
-	/**
-	 * Renvoie la ligne courante dans le jeu de résultat.
-	 * Ne déplace PAS le pointeur de résultat
-	 * 
-	 * @param integer $mode  Mode de récupération des données
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function current($mode = null)
-	{
-		if( is_null($mode) ) {
-			$mode = $this->fetchMode;
-		}
+		$row = mysqli_fetch_array($this->result);
 		
-		$row = mysql_fetch_array($this->result, $mode);
-		mysql_data_seek($this->result, $this->offset);
-		
-		return $row;
+		return ($row != false && isset($row[$column])) ? $row[$column] : false;
 	}
 	
 	/**
@@ -679,93 +629,6 @@ class WadbResult {
 			trigger_error("Invalid fetch mode", E_USER_WARNING);
 			return false;
 		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la première position
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function rewind()
-	{
-		if( $this->_count > 0 ) {
-			$this->offset = 0;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position précédente
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function prev()
-	{
-		if( $this->offset > 0 ) {
-			$this->offset--;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position suivante
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function next()
-	{
-		if( $this->offset < $this->_count ) {
-			$this->offset++;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position $offset
-	 * 
-	 * @param integer $offset
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function seek($offset)
-	{
-		$this->offset = $offset;
-		return mysql_data_seek($this->result, $offset);
-	}
-	
-	/**
-	 * Indique si une ligne précédente est disponible dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function hasPrev()
-	{
-		return ( $this->offset > 0 ) ? true : false;
-	}
-	
-	/**
-	 * Indique si une ligne suivante est disponible dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function hasMore()
-	{
-		return ( $this->offset < $this->_count ) ? true : false;
 	}
 	
 	/**
@@ -861,8 +724,7 @@ class WadbBackup {
 		}
 		
 		$tables = array();
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
+		while( $row = $result->fetch() ) {
 			$tables[$row['Name']] = ( isset($row['Engine']) ) ? $row['Engine'] : $row['Type'];
 		}
 		
@@ -911,9 +773,7 @@ class WadbBackup {
 			}
 			
 			$end_line = false;
-			while( $result->hasMore() ) {
-				$row = $result->fetch();
-				
+			while( $row = $result->fetch() ) {
 				if( $end_line ) {
 					$contents .= ',' . $this->eol;
 				}
@@ -932,8 +792,7 @@ class WadbBackup {
 			}
 			
 			$index = array();
-			while( $result->hasMore() ) {
-				$row = $result->fetch();
+			while( $row = $result->fetch() ) {
 				$name = $row['Key_name'];
 				
 				if( $name != 'PRIMARY' && $row['Non_unique'] == 0 ) {
@@ -989,7 +848,9 @@ class WadbBackup {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $result->count() > 0 ) {
+		$result->setFetchMode(SQL_FETCH_ASSOC);
+		
+		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
 			$contents .= '-- ' . $this->eol;
 			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
@@ -1004,8 +865,6 @@ class WadbBackup {
 			$fields = implode(', ', $fields);
 			
 			do {
-				$row = $result->fetch(SQL_FETCH_ASSOC);
-				
 				$contents .= 'INSERT INTO ' . $db->quote($tablename) . " ($fields) VALUES";
 				
 				foreach( $row as $key => $value ) {
@@ -1019,7 +878,7 @@ class WadbBackup {
 				
 				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
 			}
-			while( $result->hasMore() );
+			while( $row = $result->fetch() );
 		}
 		$result->free();
 		

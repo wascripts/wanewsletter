@@ -63,10 +63,9 @@ if( $type == 'subscribers' )
     }
     
     $abonnes_id = array();
-    while( $result->hasMore() )
+    while( $abo_id = $result->column('abo_id') )
     {
-        $abonnes_id[] = $result->column('abo_id');
-		$result->next();
+        array_push($abonnes_id, $abo_id);
     }
     
     $sql = "SELECT abo_id 
@@ -78,10 +77,9 @@ if( $type == 'subscribers' )
     }
     
     $abo_liste_id = array();
-    while( $result->hasMore() )
+    while( $abo_id = $result->column('abo_id') )
     {
-        $abo_liste_id[] = $result->column('abo_id');
-		$result->next();
+		array_push($abo_liste_id, $abo_id);
     }
     
     $diff_1 = array_diff($abonnes_id, $abo_liste_id);
@@ -137,10 +135,9 @@ else if( $type == 'files' )
     }
     
     $jf_id = array();
-    while( $result->hasMore() )
+    while( $id = $result->column('file_id') )
     {
-        $jf_id[] = $result->column('file_id');
-		$result->next();
+        array_push($jf_id, $id);
     }
     
     $sql = "SELECT file_id 
@@ -152,10 +149,9 @@ else if( $type == 'files' )
     }
     
     $lf_id = array();
-    while( $result->hasMore() )
+    while( $id = $result->column('file_id') )
     {
-        $lf_id[] = $result->column('file_id');
-		$result->next();
+        array_push($lf_id, $id);
     }
     
     $diff_1 = array_diff($jf_id, $lf_id);

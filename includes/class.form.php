@@ -101,14 +101,12 @@ class Wanewsletter {
 				WHERE liste_id = " . $this->listdata['liste_id'];
 			if( $result = $db->query($sql) )
 			{
-				while( $result->hasMore() )
+				while( $ban_email = $result->column('ban_email') )
 				{
-					if( preg_match('/\b' . str_replace('*', '.*?', $result->column('ban_email')) . '\b/i', $email) )
+					if( preg_match('/\b' . str_replace('*', '.*?', $ban_email) . '\b/i', $email) )
 					{
 						return array('error' => true, 'message' => $lang['Message']['Email_banned']);
 					}
-					
-					$result->next();
 				}
 			}
 		}
@@ -124,11 +122,8 @@ class Wanewsletter {
 			return array('error' => true, 'message' => 'Impossible de tester les tables d\'inscriptions');
 		}
 		
-		$abodata = false;
-		if( $result->count() > 0 )
+		if( $abodata = $result->fetch() )
 		{
-			$abodata = $result->fetch();
-			
 			if( !is_null($abodata['confirmed']) )
 			{
 				if( $action == 'inscription' && $abodata['confirmed'] == SUBSCRIBE_CONFIRMED )
@@ -249,10 +244,8 @@ class Wanewsletter {
 			trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
 		}
 		
-		if( $result->count() > 0 )
+		if( $abodata = $result->fetch() )
 		{
-			$abodata = $result->fetch();
-			
 			$this->account['abo_id'] = $abodata['abo_id'];
 			$this->account['email']  = $abodata['abo_email'];
 			$this->account['status'] = $abodata['abo_status'];
@@ -453,10 +446,8 @@ class Wanewsletter {
 						return false;
 					}
 					
-					while( $result->hasMore() )
+					while( $row = $result->fetch() )
 					{
-						$row = $result->fetch();
-						
 						$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
 							SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
 								register_key = '" . generate_key(20) . "'
@@ -701,7 +692,7 @@ class Wanewsletter {
 			WHERE a.$fieldname = " . $fieldvalue;
 		if( $result = $db->query($sql) )
 		{
-			if( $result->count() > 0 )
+			if( $row = $result->fetch() )
 			{
 				$this->mailer->clear_all();
 				$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
@@ -714,9 +705,8 @@ class Wanewsletter {
 					'SIG'     => $this->listdata['liste_sig']
 				));
 				
-				while( $result->hasMore() )
+				do
 				{
-					$row = $result->fetch();
 					$this->mailer->clear_address();
 					$this->mailer->set_address($row['admin_email'], $row['admin_login']);
 					
@@ -726,6 +716,7 @@ class Wanewsletter {
 					
 					$this->mailer->send(); // envoi
 				}
+				while( $row = $result->fetch() );
 			}
 		}
 	}

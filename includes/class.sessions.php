@@ -88,7 +88,7 @@ class Session {
 	 * 
 	 * @access private
 	 */
-	var $new_session  = FALSE;
+	var $new_session  = false;
 	
 	/**
 	 * Statut utilisateur connecté/non connecté
@@ -97,7 +97,7 @@ class Session {
 	 * 
 	 * @access private
 	 */
-	var $is_logged_in = FALSE;
+	var $is_logged_in = false;
 	
 	/**
 	 * Session::session()
@@ -196,7 +196,7 @@ class Session {
 		if( $this->session_id == '' || !$db->build(SQL_UPDATE, SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id))
 			|| $db->affectedRows() == 0 )
 		{
-			$this->new_session = TRUE;
+			$this->new_session = true;
 			$this->session_id  = $sql_data['session_id'] = generate_key();
 			
 			if( !$db->build(SQL_INSERT, SESSIONS_TABLE, $sql_data) )
@@ -216,7 +216,7 @@ class Session {
 		$this->send_cookie('data', serialize($sessiondata), $current_time + 31536000);
 		
 		$this->sessid_url   = 'sessid=' . $this->session_id;
-		$this->is_logged_in = TRUE;
+		$this->is_logged_in = true;
 		
 		return $admindata;
 	}
@@ -274,8 +274,7 @@ class Session {
 					a.admin_id, a.admin_login, a.admin_pwd, a.admin_email, a.admin_lang, a.admin_dateformat,
 					a.admin_level, a.email_new_subscribe, a.email_unsubscribe
 				FROM " . SESSIONS_TABLE . " AS s
-					INNER JOIN " . ADMIN_TABLE . " AS a
-					ON a.admin_id = s.admin_id
+					INNER JOIN " . ADMIN_TABLE . " AS a ON a.admin_id = s.admin_id
 				WHERE s.session_id = '{$this->session_id}'
 					AND s.session_start > " . $expiry_time;
 			if( !($result = $db->query($sql)) )
@@ -317,7 +316,7 @@ class Session {
 						}
 					}
 					
-					$this->is_logged_in = TRUE;
+					$this->is_logged_in = true;
 					
 					return $row;
 				}
@@ -334,7 +333,7 @@ class Session {
 		{
 			$admin_id = ( !empty($this->sessiondata['adminid']) ) ? intval($this->sessiondata['adminid']) : 0;
 			
-			return $this->login($admin_id, $this->sessiondata['adminloginkey'], TRUE);
+			return $this->login($admin_id, $this->sessiondata['adminloginkey'], true);
 		}
 		else
 		{
@@ -371,7 +370,7 @@ class Session {
 			}
 		}
 		
-		$this->is_logged_in = FALSE;
+		$this->is_logged_in = false;
 		$this->send_cookie('sessid', '', $current_time - 31536000);
 		$this->send_cookie('data', '', $current_time - 31536000);
 	}

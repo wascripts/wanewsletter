@@ -437,9 +437,9 @@ switch( $mode )
 			}
 			
 			$files = array();
-			while( $result->hasMore() )
+			while( $row = $result->fetch() )
 			{
-				$files[$row['log_id']][] = $result->fetch();
+				$files[$row['log_id']][] = $row;
 			}
 			
 			$sql = "SELECT liste_id, log_id, log_subject, log_body_text, log_body_html 
@@ -484,10 +484,8 @@ switch( $mode )
 			
 			$lang['CHARSET'] = strtoupper($lang['CHARSET']);
 			
-			while( $result->hasMore() )
+			while( $row = $result->fetch() )
 			{
-				$row = $result->fetch();
-				
 				$listdata = $abodata['listes'][$row['liste_id']];
 				$format   = $abodata['listes'][$row['liste_id']]['format'];
 				
@@ -692,9 +690,9 @@ switch( $mode )
 			trigger_error('Impossible de récupérer la liste des archives', ERROR);
 		}
 		
-		while( $result->hasMore() )
+		while( $row = $result->fetch() )
 		{
-			$abodata['listes'][$row['liste_id']]['archives'][] = $result->fetch();
+			$abodata['listes'][$row['liste_id']]['archives'][] = $row;
 		}
 		
 		$output->addHiddenfield('mode', 'archives');

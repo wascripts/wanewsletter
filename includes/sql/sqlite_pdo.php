@@ -44,6 +44,7 @@ if( !defined('PDO_FETCH_NUM') ) {
 	define('PDO_FETCH_NUM',       PDO::FETCH_NUM);
 	define('PDO_FETCH_ASSOC',     PDO::FETCH_ASSOC);
 	define('PDO_FETCH_BOTH',      PDO::FETCH_BOTH);
+	define('PDO_FETCH_OBJ',       PDO::FETCH_OBJ);
 	define('PDO_ATTR_PERSISTENT', PDO::ATTR_PERSISTENT);
 	define('PDO_ATTR_ERRMODE',    PDO::ATTR_ERRMODE);
 	define('PDO_ATTR_CASE',       PDO::ATTR_CASE);
@@ -136,6 +137,14 @@ class Wadb {
 	 * @access private
 	 */
 	var $pdo;
+	
+	/**
+	 * Objet PDOStatement
+	 * 
+	 * @var object
+	 * @access private
+	 */
+	var $result;
 	
 	/**
 	 * Nombre de lignes affectées par la dernière requète DML
@@ -253,6 +262,10 @@ class Wadb {
 	 */
 	function query($query)
 	{
+		if( ($this->result instanceof PDOStatement) ) {
+			$this->result->closeCursor();
+		}
+		
 		$curtime = array_sum(explode(' ', microtime()));
 		$result  = $this->pdo->query($query);
 		$endtime = array_sum(explode(' ', microtime()));
@@ -266,12 +279,16 @@ class Wadb {
 			$this->error = $tmp[2];
 			$this->lastQuery = $query;
 			
-			$this->rollBack();
+			try {
+				$this->rollBack();
+			}
+			catch( PDOException $e ) {}
 		}
 		else {
 			$this->errno = 0;
 			$this->error = '';
 			$this->lastQuery = '';
+			$this->result = $result;
 			
 			if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) ) {
 				$this->_affectedRows = $result->rowCount();
@@ -478,6 +495,11 @@ class Wadb {
 	 */
 	function close()
 	{
+		try {
+			$this->rollBack();
+		}
+		catch( PDOException $e ) {}
+		
 		return true;
 	}
 }
@@ -485,28 +507,12 @@ class Wadb {
 class WadbResult {
 	
 	/**
-	 * Tableau de résultat de requète
+	 * Objet de résultat PDO de requète
 	 * 
-	 * @var array
+	 * @var object
 	 * @access private
 	 */
-	var $result = array();
-	
-	/**
-	 * Index courant dans le jeu de résultats
-	 * 
-	 * @var integer
-	 * @access public
-	 */
-	var $offset = 0;
-	
-	/**
-	 * Nombre de lignes renvoyées par la requète
-	 * 
-	 * @var resource
-	 * @access private
-	 */
-	var $_count = 0;
+	var $result;
 	
 	/**
 	 * Mode de récupération des données
@@ -525,43 +531,8 @@ class WadbResult {
 	 */
 	function WadbResult($result)
 	{
-		$this->result = $result->fetchAll(PDO_FETCH_BOTH);
-		$this->_count = count($this->result);
+		$this->result = $result;
 		$this->fetchMode = PDO_FETCH_BOTH;
-	}
-	
-	/**
-	 * Renvoie le nombre de lignes du résultat
-	 * 
-	 * @access public
-	 * @return integer
-	 */
-	function count()
-	{
-		return $this->_count;
-	}
-	
-	/**
-	 * Trie le tableau de résultat de manière à ne garder que les clés numériques
-	 * ou les clés associatives (sauf si $mode vaut PDO_FETCH_BOTH, auquel cas,
-	 * le tableau n'est pas modifié).
-	 * 
-	 * @access public
-	 * @return integer
-	 */
-	function sort(&$row, $mode)
-	{
-		switch( $mode ) {
-			case PDO_FETCH_NUM:
-				array_walk($row, '_sort_walk_num');
-				$row = array_filter($row, '_sort_filter');
-				break;
-			
-			case PDO_FETCH_ASSOC:
-				array_walk($row, '_sort_walk_assoc');
-				$row = array_filter($row, '_sort_filter');
-				break;
-		}
 	}
 	
 	/**
@@ -578,16 +549,7 @@ class WadbResult {
 			$mode = $this->fetchMode;
 		}
 		
-		if( isset($this->result[$this->offset]) ) {
-			$row = $this->result[$this->offset];
-			$this->offset++;
-			$this->sort($row, $mode);
-		}
-		else {
-			$row = false;
-		}
-		
-		return $row;
+		return $this->result->fetch($mode);
 	}
 	
 	/**
@@ -598,17 +560,7 @@ class WadbResult {
 	 */
 	function fetchObject()
 	{
-		if( isset($this->result[$this->offset]) ) {
-			$row = $this->result[$this->offset];
-			$this->offset++;
-			$this->sort($row, PDO_FETCH_ASSOC);
-			$row = (object) $row;
-		}
-		else {
-			$row = false;
-		}
-		
-		return $row;
+		return $this->result->fetch(PDO_FETCH_OBJ);
 	}
 	
 	/**
@@ -625,18 +577,12 @@ class WadbResult {
 			$mode = $this->fetchMode;
 		}
 		
-		$rowset = array();
-		while( $this->offset < $this->_count ) {
-			array_push($rowset, $this->fetch($mode));
-		}
-		
-		return $rowset;
+		return $this->result->fetchAll($mode);
 	}
 	
 	/**
 	 * Retourne le contenu de la colonne pour l'index ou le nom donné
-	 * à l'index courant dans le jeu de résultat.
-	 * Ne déplace PAS le pointeur de résultat
+	 * à l'index suivant dans le jeu de résultat.
 	 * 
 	 * @param mixed $column  Index ou nom de la colonne
 	 * 
@@ -645,28 +591,9 @@ class WadbResult {
 	 */
 	function column($column)
 	{
-		return $this->result[$this->offset][$column];
-	}
-	
-	/**
-	 * Renvoie la ligne courante dans le jeu de résultat.
-	 * Ne déplace PAS le pointeur de résultat
-	 * 
-	 * @param integer $mode  Mode de récupération des données
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function current($mode = null)
-	{
-		if( is_null($mode) ) {
-			$mode = $this->fetchMode;
-		}
+		$row = $this->result->fetch(PDO_FETCH_BOTH);
 		
-		$row = $this->result[$this->offset];
-		$this->sort($row, $mode);
-		
-		return $row;
+		return ($row != false && isset($row[$column])) ? $row[$column] : false;
 	}
 	
 	/**
@@ -687,98 +614,6 @@ class WadbResult {
 			trigger_error("Invalid fetch mode", E_USER_WARNING);
 			return false;
 		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la première position
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function rewind()
-	{
-		if( $this->_count > 0 ) {
-			$this->offset = 0;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position précédente
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function prev()
-	{
-		if( $this->offset > 0 ) {
-			$this->offset--;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position suivante
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function next()
-	{
-		if( $this->offset < $this->_count ) {
-			$this->offset++;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position $offset
-	 * 
-	 * @param integer $offset
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function seek($offset)
-	{
-		if( $this->offset < $this->_count ) {
-			$this->offset = $offset;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Indique si une ligne précédente est disponible dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function hasPrev()
-	{
-		return ( $this->offset > 0 ) ? true : false;
-	}
-	
-	/**
-	 * Indique si une ligne suivante est disponible dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function hasMore()
-	{
-		return ( $this->offset < $this->_count ) ? true : false;
 	}
 	
 	/**
@@ -875,8 +710,7 @@ class WadbBackup {
 		}
 		
 		$tables = array();
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
+		while( $row = $result->fetch() ) {
 			$tables[$row['tbl_name']] = '';
 		}
 		
@@ -913,8 +747,7 @@ class WadbBackup {
 		}
 		
 		$indexes = '';
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
+		while( $row = $result->fetch() ) {
 			if( $row['type'] == 'table' ) {
 				$create_table = str_replace(',', ',' . $this->eol, $row['sql']) . ';' . $this->eol;
 			}
@@ -947,7 +780,9 @@ class WadbBackup {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $result->count() > 0 ) {
+		$result->setFetchMode(SQL_FETCH_ASSOC);
+		
+		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
 			$contents .= '-- ' . $this->eol;
 			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
@@ -962,8 +797,6 @@ class WadbBackup {
 			$fields = implode(', ', $fields);
 			
 			do {
-				$row = $result->fetch(SQL_FETCH_ASSOC);
-				
 				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
 				foreach( $row as $key => $value ) {
@@ -977,30 +810,11 @@ class WadbBackup {
 				
 				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
 			}
-			while( $result->hasMore() );
+			while( $row = $result->fetch() );
 		}
 		
 		return $contents;
 	}
-}
-
-function _sort_walk_num(&$value, $key)
-{
-	if( !is_integer($key) ) {
-		$value = null;
-	}
-}
-
-function _sort_walk_assoc(&$value, $key)
-{
-	if( is_integer($key) ) {
-		$value = null;
-	}
-}
-
-function _sort_filter($value)
-{
-	return !is_null($value);
 }
 
 }

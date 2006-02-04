@@ -207,7 +207,7 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 			}
 			
-			if( $result->count() == 0 )
+			if( !($logdata = $result->fetch()) )
 			{
 				$output->redirect('envoi.php?mode=progress', 4);
 				
@@ -215,8 +215,6 @@ switch( $mode )
 				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=progress') . '">', '</a>');
 				trigger_error($message, MESSAGE);
 			}
-			
-			$logdata = $result->fetch();
 		}
 		else
 		{
@@ -230,10 +228,8 @@ switch( $mode )
 			}
 			
 			$data = array();
-			while( $result->hasMore() )
+			while( $row = $result->fetch() )
 			{
-				$row = $result->fetch();
-				
 				if( !isset($data[$row['liste_id']]) )
 				{
 					$data[$row['liste_id']] = array(0, 0, 't' => 0);
@@ -252,7 +248,7 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
 			}
 			
-			if( $result->count() == 0 )
+			if( !($row = $result->fetch()) )
 			{
 				$output->redirect('envoi.php', 4);
 				
@@ -277,16 +273,15 @@ switch( $mode )
 				'L_LOAD_LOG'    => $lang['Load_log']
 			));
 			
-			while( $result->hasMore() )
+			do
 			{
-				$row = $result->fetch();
-				
 				$output->assign_block_vars('logrow', array(
 					'LOG_ID'       => $row['log_id'],
 					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
 					'SEND_PERCENT' => wa_number_format(round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2))
 				));
 			}
+			while( $row = $result->fetch() );
 			
 			$output->pparse('body');
 			
@@ -370,7 +365,7 @@ switch( $mode )
 					trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 				}
 				
-				if( $result->count() == 0 )
+				if( !($logdata = $result->fetch()) )
 				{
 					$output->redirect('envoi.php?mode=load', 4);
 					
@@ -379,7 +374,6 @@ switch( $mode )
 					trigger_error($message, MESSAGE);
 				}
 				
-				$logdata = $result->fetch();
 				$prev_status = $logdata['log_status'];
 			}
 		}
@@ -395,14 +389,12 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
 			}
 			
-			if( $result->count() > 0 )
+			if( $row = $result->fetch() )
 			{
 				$log_box = '<select name="id">';
 				
-				while( $result->hasMore() )
+				do
 				{
-					$row = $result->fetch();
-					
 					if( $row['log_status'] == STATUS_MODEL )
 					{
 						$status = '[' . $lang['Model'] . ']';
@@ -419,6 +411,7 @@ switch( $mode )
 						$style, $row['log_id'], htmlspecialchars(cut_str($row['log_subject'], 40)), $status
 					);
 				}
+				while( $row = $result->fetch() );
 				
 				$log_box .= '</select>';
 			}
@@ -617,9 +610,8 @@ switch( $mode )
 					}
 					
 					$files = $files_error = array();
-					while( $result->hasMore() )
+					while( $row = $result->fetch() )
 					{
-						$row = $result->fetch();
 						if( $row['log_id'] == $logdata['log_id'] )
 						{
 							$files[] = $row['file_real_name'];
@@ -733,10 +725,8 @@ switch( $mode )
 					
 					$sql_values = array();
 					
-					while( $result->hasMore() )
+					while( $row = $result->fetch() )
 					{
-						$row = $result->fetch();
-						
 						switch( SQL_DRIVER )
 						{
 							case 'mysql':
@@ -896,10 +886,8 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	//
 	// On dispatches les données selon que le fichier appartient à la newsletter en cours ou non.
 	//
-	while( $result->hasMore() )
+	while( $row = $result->fetch() )
 	{
-		$row = $result->fetch();
-		
 		if( $row['log_id'] == $logdata['log_id'] )
 		{
 			$logdata['joined_files'][] = $row;

@@ -528,22 +528,6 @@ class WadbResult {
 	var $result;
 	
 	/**
-	 * Index courant dans le jeu de résultats
-	 * 
-	 * @var integer
-	 * @access public
-	 */
-	var $offset = 0;
-	
-	/**
-	 * Nombre de lignes renvoyées par la requète
-	 * 
-	 * @var resource
-	 * @access private
-	 */
-	var $_count = 0;
-	
-	/**
 	 * Mode de récupération des données
 	 * 
 	 * @var integer
@@ -563,19 +547,7 @@ class WadbResult {
 	{
 		$this->link   = $link;
 		$this->result = $result;
-		$this->_count = pg_num_rows($result);
 		$this->fetchMode = PGSQL_BOTH;
-	}
-	
-	/**
-	 * Renvoie le nombre de lignes du résultat
-	 * 
-	 * @access public
-	 * @return integer
-	 */
-	function count()
-	{
-		return $this->_count;
 	}
 	
 	/**
@@ -592,7 +564,7 @@ class WadbResult {
 			$mode = $this->fetchMode;
 		}
 		
-		return pg_fetch_array($this->result, $this->offset++, $mode);
+		return pg_fetch_array($this->result, null, $mode);
 	}
 	
 	/**
@@ -603,7 +575,6 @@ class WadbResult {
 	 */
 	function fetchObject()
 	{
-		$this->offset++;
 		return pg_fetch_object($this->result);
 	}
 	
@@ -622,8 +593,8 @@ class WadbResult {
 		}
 		
 		$rowset = array();
-		for( $i = 0; $i < $this->_count; $i++ ) {
-			array_push($rowset, $this->fetch($mode));
+		while( $row = $this->fetch($mode) ) {
+			array_push($rowset, $row);
 		}
 		
 		return $rowset;
@@ -631,8 +602,7 @@ class WadbResult {
 	
 	/**
 	 * Retourne le contenu de la colonne pour l'index ou le nom donné
-	 * à l'index courant dans le jeu de résultat.
-	 * Ne déplace PAS le pointeur de résultat
+	 * à l'index suivant dans le jeu de résultat.
 	 * 
 	 * @param mixed $column  Index ou nom de la colonne
 	 * 
@@ -641,28 +611,7 @@ class WadbResult {
 	 */
 	function column($column)
 	{
-		return pg_fetch_result($this->result, $this->offset, $column);
-	}
-	
-	/**
-	 * Renvoie la ligne courante dans le jeu de résultat.
-	 * Ne déplace PAS le pointeur de résultat
-	 * 
-	 * @param integer $mode  Mode de récupération des données
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function current($mode = null)
-	{
-		if( is_null($mode) ) {
-			$mode = $this->fetchMode;
-		}
-		
-		$row = pg_fetch_array($this->result, $this->offset, $mode);
-		pg_result_seek($this->result, $this->offset);
-		
-		return $row;
+		return pg_fetch_result($this->result, null, $column);
 	}
 	
 	/**
@@ -683,93 +632,6 @@ class WadbResult {
 			trigger_error("Invalid fetch mode", E_USER_WARNING);
 			return false;
 		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la première position
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function rewind()
-	{
-		if( $this->_count > 0 ) {
-			$this->offset = 0;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position précédente
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function prev()
-	{
-		if( $this->offset > 0 ) {
-			$this->offset--;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position suivante
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function next()
-	{
-		if( $this->offset < $this->_count ) {
-			$this->offset++;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Place le pointeur de résultat à la position $offset
-	 * 
-	 * @param integer $offset
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function seek($offset)
-	{
-		$this->offset = $offset;
-		return pg_result_seek($this->result, $offset);
-	}
-	
-	/**
-	 * Indique si une ligne précédente est disponible dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function hasPrev()
-	{
-		return ( $this->offset > 0 ) ? true : false;
-	}
-	
-	/**
-	 * Indique si une ligne suivante est disponible dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function hasMore()
-	{
-		return ( $this->offset < $this->_count ) ? true : false;
 	}
 	
 	/**
@@ -872,8 +734,7 @@ class WadbBackup {
 		}
 		
 		$tables = array();
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
+		while( $row = $result->fetch() ) {
 			$tables[$row['tablename']] = '';
 		}
 		
@@ -900,17 +761,12 @@ class WadbBackup {
 			trigger_error('Impossible de récupérer les séquences', ERROR);
 		}
 		
-		$num_seq = $result->count();
-		
 		$contents = '';
-		
-		for( $i = 0; $i < $num_seq; $i++ ) {
-			$result->seek($i);
-			$sequence = $result->column('relname');
+		while( $sequence = $result->column('relname') ) {
+			
 			$result_seq = $db->query('SELECT * FROM ' . $sequence);
 			
-			if( $result_seq->count() > 0 ) {
-				$row = $result_seq->fetch();
+			if( $row = $result_seq->fetch() ) {
 				if( $drop_option ) {
 					$contents .= "DROP SEQUENCE $sequence;" . $this->eol;
 				}
@@ -967,9 +823,7 @@ class WadbBackup {
 		
 		$contents .= 'CREATE TABLE ' . $tabledata['name'] . ' (' . $this->eol;
 		
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
-			
+		while( $row = $result->fetch() ) {
 			$sql = "SELECT d.adsrc AS rowdefault 
 				FROM pg_attrdef d, pg_class c 
 				WHERE (c.relname = '" . $tabledata['name'] . "') 
@@ -1028,9 +882,7 @@ class WadbBackup {
 		$primary_key = '';
 		$index_rows	 = array();
 		
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
-			
+		while( $row = $result->fetch() ) {
 			if( $row['primary_key'] == 't' ) {
 				$primary_key .= ( ( $primary_key != '' ) ? ', ' : '' ) . $row['column_name'];
 				$primary_key_name = $row['index_name'];
@@ -1087,8 +939,7 @@ class WadbBackup {
 		//
 		// Add the constraints to the sql file.
 		//
-		while( $result->hasMore() ) {
-			$row = $result->fetch();
+		while( $row = $result->fetch() ) {
 			$contents .= 'CONSTRAINT ' . $row['index_name'] . ' CHECK ' . $row['rcsrc'] . ',' . $this->eol;
 		}
 		
@@ -1124,7 +975,9 @@ class WadbBackup {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		if( $result->count() > 0 ) {
+		$result->setFetchMode(SQL_FETCH_ASSOC);
+		
+		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
 			$contents .= '/* ------------------------------------------------------------ ' . $this->eol;
 			$contents .= '  Contenu de la table ' . $tablename . ' ' . $this->eol;
@@ -1138,8 +991,6 @@ class WadbBackup {
 			$fields = implode(', ', $fields);
 			
 			do {
-				$row = $result->fetch(SQL_FETCH_ASSOC);
-				
 				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
 				foreach( $row as $key => $value ) {
@@ -1153,7 +1004,7 @@ class WadbBackup {
 				
 				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
 			}
-			while( $result->hasMore() );
+			while( $row = $result->fetch() );
 		}
 		$result->free();
 		

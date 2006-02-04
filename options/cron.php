@@ -45,10 +45,8 @@ if( !($result = $db->query($sql)) )
 	trigger_error('Impossible de récupérer les informations sur cette liste', ERROR);
 }
 
-if( $result->count() > 0 )
+if( $listdata = $result->fetch() )
 {
-	$listdata = $result->fetch();
-	
 	//
 	// On règle le script pour ignorer une déconnexion du client et 
 	// poursuivre l'envoi du flot d'emails jusqu'à son terme. 
@@ -77,12 +75,10 @@ if( $result->count() > 0 )
 			trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
 		}
 		
-		if( $result->count() == 0 )
+		if( !($logdata = $result->fetch()) )
 		{
 			trigger_error('No_log_to_send', MESSAGE);
 		}
-		
-		$logdata = $result->fetch();
 		
 		$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 			FROM " . JOINED_FILES_TABLE . " AS jf

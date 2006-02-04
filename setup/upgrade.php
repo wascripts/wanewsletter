@@ -62,10 +62,8 @@ if( !($result = $db->query($sql)) )
 }
 
 $old_config = array();
-while( $result->hasMore() )
+while( $row = $result->fetch(SQL_FETCH_ASSOC) )
 {
-	$row = $result->fetch(SQL_FETCH_ASSOC);
-	
 	if( !isset($row['nom']) )
 	{
 		$old_config = $row;
@@ -333,9 +331,8 @@ if( $start )
 			}
 			
 			$num_logs_ary = array();
-			while( $result->hasMore() )
+			while( $row = $result->fetch() )
 			{
-				$row = $result->fetch();
 				$num_logs_ary[$row['liste_id']] = $row['numlogs'];
 			}
 			
@@ -347,9 +344,8 @@ if( $start )
 			
 			$sql_update = array();
 			
-			while( $result->hasMore() )
+			while( $row = $result->fetch() )
 			{
-				$row = $result->fetch();
 				$numlogs = ( !empty($num_logs_ary[$row['liste_id']]) ) ? $num_logs_ary[$row['liste_id']] : 0;
 				
 				$sql_update[] = "UPDATE " . LISTE_TABLE . "
@@ -505,9 +501,8 @@ if( $start )
 				sql_error();
 			}
 			
-			while( $result->hasMore() )
+			while( $row = $result->fetch() )
 			{
-				$row = $result->fetch();
 				$sql = "UPDATE " . ABO_LISTE_TABLE . "
 					SET register_key = '" . generate_key(20, false) . "'
 					WHERE liste_id = $row[liste_id]
@@ -532,9 +527,8 @@ if( $start )
 				sql_error();
 			}
 			
-			while( $result->hasMore() )
+			while( $row = $result->fetch() )
 			{
-				$row = $result->fetch();
 				$sql_update[] = "UPDATE " . LOG_TABLE . "
 					SET log_numdest = $row[num_dest]
 					WHERE liste_id = " . $row['liste_id'];
@@ -614,10 +608,9 @@ if( $start )
 					}
 					
 					$abonnes_id = array();
-					while( $result->hasMore() )
+					while( $abo_id = $result->column('abo_id') )
 					{
-						$abonnes_id[] = $result->column('abo_id');
-						$result->next();
+						array_push($abonnes_id, $abo_id);
 					}
 					
 					$sql = "SELECT abo_id
@@ -629,10 +622,9 @@ if( $start )
 					}
 					
 					$abo_liste_id = array();
-					while( $result->hasMore() )
+					while( $abo_id = $result->column('abo_id') )
 					{
-						$abo_liste_id[] = $result->column('abo_id');
-						$result->next();
+						array_push($abo_liste_id, $abo_id);
 					}
 					
 					$diff_1 = array_diff($abonnes_id, $abo_liste_id);
@@ -691,9 +683,8 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $result->hasMore() )
+					while( $row = $result->fetch() )
 					{
-						$row = $result->fetch();
 						$sql_update[] = "UPDATE " . LISTE_TABLE . "
 							SET liste_numlogs = " . $row['numlogs'] . "
 							WHERE liste_id = " . $row['liste_id'];
@@ -708,9 +699,8 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $result->hasMore() )
+					while( $row = $result->fetch() )
 					{
-						$row = $result->fetch();
 						$sql_update[] = "UPDATE " . LOG_TABLE . "
 							SET log_numdest = " . $row['num_dest'] . "
 							WHERE liste_id = " . $row['liste_id'];
@@ -747,9 +737,8 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $result->hasMore() )
+					while( $row = $result->fetch() )
 					{
-						$row = $result->fetch();
 						if( $row['num_abo'] == $row['num_send'] )
 						{
 							$sql_update[] = "UPDATE " . ABO_LISTE_TABLE . "
@@ -792,6 +781,7 @@ if( $start )
 				case '2.2.6':
 				case '2.2.7':
 				case '2.2.8':
+				case '2.2.9':
 					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 						DROP COLUMN hebergeur, DROP COLUMN version";
 					
@@ -840,10 +830,8 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $result->hasMore() )
+					while( $row = $result->fetch() )
 					{
-						$row = $result->fetch();
-						
 						$sql = "UPDATE " . ABO_LISTE_TABLE . "
 							SET register_date = $row[abo_register_date],
 								confirmed     = $row[abo_status]";
@@ -870,9 +858,8 @@ if( $start )
 						sql_error();
 					}
 					
-					while( $result->hasMore() )
+					while( $row = $result->fetch() )
 					{
-						$row = $result->fetch();
 						$sql = "UPDATE " . ABO_LISTE_TABLE . "
 							SET register_key = '" . generate_key(20, false) . "'
 							WHERE liste_id = $row[liste_id]

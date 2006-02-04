@@ -60,10 +60,8 @@ if( !($result = $db->query($sql)) )
 	plain_error('Impossible de récupérer les données sur le fichier : ' . $db->error);
 }
 
-if( $result->count() > 0 )
+if( $filedata = $result->fetch() )
 {
-	$filedata = $result->fetch();
-	
 	if( $nl_config['use_ftp'] )
 	{
 		require WA_ROOTDIR . '/includes/class.attach.php';

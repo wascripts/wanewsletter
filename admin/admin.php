@@ -220,7 +220,7 @@ else if( $mode == 'deluser' )
 	}
 	else
 	{
-		$output->addHiddenField('mode'	  , 'deluser');
+		$output->addHiddenField('mode'    , 'deluser');
 		$output->addHiddenField('admin_id', $admin_id);
 		$output->addHiddenField('sessid'  , $session->session_id);
 		
@@ -441,10 +441,7 @@ if( $admindata['admin_level'] == ADMIN )
 			WHERE admin_id = " . $admin_id;
 		if( $result = $db->query($sql) )
 		{
-			if( $result->count() > 0 )
-			{
-				$current_admin = $result->fetch();
-			}
+			$current_admin = $result->fetch();
 		}
 	}
 	
@@ -462,16 +459,16 @@ if( $admindata['admin_level'] == ADMIN )
 		trigger_error('Impossible d\'obtenir la liste des administrateurs', ERROR);
 	}
 	
-	if( $result->count() > 0 )
+	if( $row = $result->fetch() )
 	{
 		$admin_box  = '<select id="admin_id" name="admin_id">';
 		$admin_box .= '<option value="0">' . $lang['Choice_user'] . '</option>';
 		
-		while( $result->hasMore() )
+		do
 		{
-			$row = $result->fetch();
 			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
 		}
+		while( $row = $result->fetch() );
 		
 		$admin_box .= '</select>';
 	}

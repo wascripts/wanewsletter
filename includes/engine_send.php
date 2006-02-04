@@ -200,10 +200,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
 	}
 	
-	while( $result->hasMore() )
+	while( $email = $result->column('admin_email') )
 	{
-		array_push($supp_address, $result->column('admin_email'));
-		$result->next();
+		array_push($supp_address, $email);
 	}
 	$result->free();
 	
@@ -229,7 +228,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		trigger_error('Impossible d\'obtenir la liste des adresses emails', ERROR);
 	}
 	
-	if( $result->count() > 0 )
+	if( $row = $result->fetch() )
 	{
 		fake_header(false);
 		
@@ -240,16 +239,15 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		{
 			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			
-			while( $result->hasMore() )
+			do
 			{
-				$row = $result->fetch();
-				
 				array_push($abo_ids, $row['abo_id']);
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				array_push($abonnes[$abo_format], $row['abo_email']);
 				
 				fake_header(true);
 			}
+			while( $row = $result->fetch() );
 			
 			if( $listdata['liste_format'] != FORMAT_HTML )
 			{
@@ -363,7 +361,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				}
 			}
 			
-			while( ($result->hasMore() && $row = $result->fetch()) || ($row = array_pop($supp_address_ok)) != null )
+			do
 			{
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				
@@ -454,6 +452,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				fake_header(true);
 			}
+			while( ($row = $result->fetch()) || ($row = array_pop($supp_address_ok)) != null );
 			
 			//
 			// Aucun email envoyé, il y a manifestement un problème, on affiche le message d'erreur
@@ -521,10 +520,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			trigger_error('Impossible d\'obtenir le nombre d\'envois restants à faire', ERROR);
 		}
 		
-		while( $result->hasMore() )
+		while( $row = $result->fetch() )
 		{
-			$row = $result->fetch();
-			
 			if( $row['send'] == 1 )
 			{
 				$sended = $row['num_dest'];

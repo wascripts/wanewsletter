@@ -104,9 +104,8 @@ class Auth {
 		}
 		
 		$tmp_ary = array();
-		while( $result->hasMore() )
+		while( $row = $result->fetch() )
 		{
-			$row = $result->fetch();
 			$tmp_ary[$row['liste_id']] = $row;
 		}
 		

@@ -551,11 +551,9 @@ class Attach {
 			trigger_error('Impossible de récupérer les données sur ce fichier', ERROR);
 		}
 		
-		if( $result->count() > 0 )
-		{
-			$physical_name = $result->column('file_physical_name');
-		}
-		else
+		$physical_name = $result->column('file_physical_name');
+		
+		if( !$physical_name )
 		{
 			$error = TRUE;
 			$msg_error[] = sprintf($lang['Message']['File_not_exists'], '');
@@ -682,10 +680,8 @@ class Attach {
 			trigger_error('Impossible d\'obtenir les données sur ce fichier', ERROR);
 		}
 		
-		if( $result->count() > 0 )
+		if( $row = $result->fetch() )
 		{
-			$row = $result->fetch();
-			
 			if( $this->use_ftp )
 			{
 				$tmp_filename = $this->ftp_to_tmp($row);
@@ -793,10 +789,9 @@ class Attach {
 				}
 				
 				$file_ids = array();
-				while( $result->hasMore() )
+				while( $file_id = $result->column('file_id') )
 				{
-					array_push($file_ids, $result->column('file_id'));
-					$result->next();
+					array_push($file_ids, $file_id);
 				}
 			}
 			
@@ -815,18 +810,15 @@ class Attach {
 					trigger_error('Impossible d\'obtenir la liste des fichiers à supprimer', ERROR);
 				}
 				
-				if( $result->count() > 0 )
+				$ids = array();
+				while( $row = $result->fetch() )
 				{
-					$ids = array();
-					
-					while( $result->hasMore() )
-					{
-						$row = $result->fetch();
-						
-						array_push($ids,          $row['file_id']);
-						array_push($filename_ary, $row['file_physical_name']);
-					}
-					
+					array_push($ids,          $row['file_id']);
+					array_push($filename_ary, $row['file_physical_name']);
+				}
+				
+				if( count($ids) > 0 )
+				{
 					$sql = "DELETE FROM " . JOINED_FILES_TABLE . " 
 						WHERE file_id IN(" . implode(', ', $ids) . ")";
 					if( !$db->query($sql) )

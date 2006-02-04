@@ -52,13 +52,13 @@ if( count($liste_ids) > 0 )
 		
 		$abo_ids = array();
 		
-		if( $result->count() > 0 )
+		if( $abo_id = $result->column('abo_id') )
 		{
-			while( $result->hasMore() )
+			do
 			{
-				array_push($abo_ids, $result->column('abo_id'));
-				$result->next();
+				array_push($abo_ids, $abo_id);
 			}
+			while( $abo_id = $result->column('abo_id') );
 		}
 		else
 		{
@@ -77,10 +77,8 @@ if( count($liste_ids) > 0 )
 		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
 	}
 	
-	while( $result->hasMore() )
+	while( $row = $result->fetch() )
 	{
-		$row = $result->fetch();
-		
 		if( $row['abo_status'] == ABO_ACTIF )
 		{
 			$num_inscrits = $row['num_abo'];
@@ -102,9 +100,9 @@ if( count($liste_ids) > 0 )
 		trigger_error('Impossible d\'obtenir le nombre de logs envoyés', ERROR);
 	}
 	
-	if( $result->count() > 0 )
+	if( $tmp = $result->column('num_logs') )
 	{
-		$num_logs = $result->column('num_logs');
+		$num_logs = $tmp;
 	}
 	
 	//
@@ -119,9 +117,9 @@ if( count($liste_ids) > 0 )
 		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
 	}
 	
-	if( $result->count() > 0 )
+	if( $tmp = $result->column('last_log') )
 	{
-		$last_log = $result->column('last_log');
+		$last_log = $tmp;
 	}
 	
 	//
@@ -129,8 +127,7 @@ if( count($liste_ids) > 0 )
 	//
 	$sql_file_ids = "SELECT lf.file_id
 		FROM " . LOG_FILES_TABLE . " AS lf
-			INNER JOIN " . LOG_TABLE . " AS l
-			ON l.log_id = lf.log_id
+			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 				AND l.liste_id IN($sql_liste_ids)";
 	
 	if( SQL_DRIVER == 'mysql' )
@@ -142,13 +139,13 @@ if( count($liste_ids) > 0 )
 		
 		$file_ids = array();
 		
-		if( $result->count() > 0 )
+		if( $file_id = $result->column('file_id') )
 		{
-			while( $result->hasMore() )
+			do
 			{
-				array_push($file_ids, $result->column('file_id'));
-				$result->next();
+				array_push($file_ids, $file_id);
 			}
+			while( $file_id = $result->column('file_id') );
 		}
 		else
 		{
@@ -193,9 +190,8 @@ switch( SQL_DRIVER )
 		if( $result = $db->query($sql) )
 		{
 			$dbsize = 0;
-			while( $result->hasMore() )
+			while( $row = $result->fetch() )
 			{
-				$row = $result->fetch();
 				$add = false;
 				
 				if( $prefixe != '' )
