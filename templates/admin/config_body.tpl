@@ -180,10 +180,10 @@ if( typeof(document.styleSheets) != 'undefined' && typeof(document.styleSheets[0
 		<tr>
 			<td class="row1"><label>{choice_engine_send.L_ENGINE_SEND}&#160;:</label></td>
 			<td class="row2">
-				<input type="radio" id="engine_send_bcc" name="engine_send" value="1"{choice_engine_send.CHECKED_ENGINE_BCC} />
-				<label for="engine_send_bcc" class="m-texte">{choice_engine_send.L_ENGINE_BCC}</label><br />
 				<input type="radio" id="engine_send_uniq" name="engine_send" value="2"{choice_engine_send.CHECKED_ENGINE_UNIQ} />
-				<label for="engine_send_uniq" class="m-texte">{choice_engine_send.L_ENGINE_UNIQ}</label>
+				<label for="engine_send_uniq" class="m-texte">{choice_engine_send.L_ENGINE_UNIQ}</label><br />
+				<input type="radio" id="engine_send_bcc" name="engine_send" value="1"{choice_engine_send.CHECKED_ENGINE_BCC} />
+				<label for="engine_send_bcc" class="m-texte">{choice_engine_send.L_ENGINE_BCC}</label>
 			</td>
 		</tr>
 		<!-- END choice_engine_send -->
