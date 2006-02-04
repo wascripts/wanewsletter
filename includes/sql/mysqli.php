@@ -603,11 +603,14 @@ class WadbResult {
 	 * Libère la mémoire allouée
 	 * 
 	 * @access public
-	 * @return boolean
+	 * @return void
 	 */
 	function free()
 	{
-		return @mysqli_free_result($this->result);
+		if( !is_null($this->result) ) {
+			mysqli_free_result($this->result);
+			$this->result = null;
+		}
 	}
 	
 	/**

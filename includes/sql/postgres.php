@@ -638,11 +638,14 @@ class WadbResult {
 	 * Libère la mémoire allouée
 	 * 
 	 * @access public
-	 * @return boolean
+	 * @return void
 	 */
 	function free()
 	{
-		return @pg_free_result($this->result);
+		if( !is_null($this->result) ) {
+			pg_free_result($this->result);
+			$this->result = null;
+		}
 	}
 	
 	/**

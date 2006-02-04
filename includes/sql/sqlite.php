@@ -580,12 +580,11 @@ class WadbResult {
 	 * Libère la mémoire allouée
 	 * 
 	 * @access public
-	 * @return boolean
+	 * @return void
 	 */
 	function free()
 	{
 		unset($this->result);
-		return true;
 	}
 	
 	/**
