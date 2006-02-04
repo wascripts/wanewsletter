@@ -162,6 +162,16 @@ switch( $mode )
 			
 			$db->commit();
 			
+			//
+			// Suppression du fichier lock correspondant s'il existe
+			//
+			$lockfile = sprintf(WA_LOCKFILE, $liste_id);
+			
+			if( file_exists($lockfile) )
+			{
+				unlink($lockfile);
+			}
+			
 			trigger_error('Send_canceled', MESSAGE);
 		}
 		else
@@ -222,32 +232,25 @@ switch( $mode )
 			{
 				$lockfile = sprintf(WA_LOCKFILE, $liste_id);
 				
-				if( file_exists($lockfile) )
+				if( file_exists($lockfile) && filesize($lockfile) > 0 )
 				{
-					if( filesize($lockfile) > 0 )
+					$abo_ids = array_map('trim', file($lockfile));
+					
+					if( count($abo_ids) > 0 )
 					{
-						$fp = fopen($lockfile, 'r');
-						$tmp = fread($fp, filesize($lockfile));
-						fclose($fp);
+						$abo_ids = array_unique(array_map('intval', $abo_ids));
 						
-						$abo_ids = explode("\n", trim($tmp));
-						
-						if( count($abo_ids) > 0 )
+						$sql = "UPDATE " . ABO_LISTE_TABLE . "
+							SET send = 1
+							WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
+								AND liste_id = " . $liste_id;
+						if( !$db->query($sql) )
 						{
-							$abo_ids = array_unique(array_map('intval', $abo_ids));
-							
-							$sql = "UPDATE " . ABO_LISTE_TABLE . "
-								SET send = 1
-								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
-									AND liste_id = " . $liste_id;
-							if( !$db->query($sql) )
-							{
-								trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-							}
+							trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
 						}
 					}
 					
-					unlink($lockfile);
+					fclose(fopen($lockfile, 'w'));
 				}
 			}
 			

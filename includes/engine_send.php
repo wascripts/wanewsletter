@@ -187,13 +187,37 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	$lockfile = sprintf(WA_LOCKFILE, $listdata['liste_id']);
 	
-	if( file_exists($lockfile) && filesize($lockfile) > 0 )
+	//
+	// L'envoi débute juste. On prend en compte les adresses supplémentaires ainsi que
+	// celles des administrateurs ayant activé l'option de réception de copie des envois
+	//
+	if( !file_exists($lockfile) )
 	{
-		$fp = fopen($lockfile, 'r');
-		$tmp = fread($fp, filesize($lockfile));
-		fclose($fp);
+		$sql = "SELECT a.admin_email
+			FROM " . ADMIN_TABLE . " AS a
+				INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
+					AND aa.cc_admin = " . TRUE;
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
+		}
 		
-		$abo_ids = explode("\n", trim($tmp));
+		while( $email = $result->column('admin_email') )
+		{
+			array_push($supp_address, $email);
+		}
+		$result->free();
+		
+		$supp_address = array_unique($supp_address); // Au cas où...
+	}
+	
+	//
+	// L'envoi a démarré au cours d'un "flôt" précédent. On récupère les éventuels
+	// identifiants d'abonnés stockés dans le fichier lock
+	//
+	else if( filesize($lockfile) > 0 )
+	{
+		$abo_ids = array_map('trim', file($lockfile));
 		
 		if( count($abo_ids) > 0 )
 		{
@@ -212,26 +236,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	
 	$fw = fopen($lockfile, 'w');
 	@chmod($lockfile, 0600);
-	
-	//
-	// Adresses supplémentaires à mettre en destinataires
-	//
-	$sql = "SELECT a.admin_email
-		FROM " . ADMIN_TABLE . " AS a
-			INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
-				AND aa.cc_admin = " . TRUE;
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-	}
-	
-	while( $email = $result->column('admin_email') )
-	{
-		array_push($supp_address, $email);
-	}
-	$result->free();
-	
-	$supp_address = array_unique($supp_address); // Au cas où...
+	@flock($fw, LOCK_EX);
 	
 	//
 	// On récupère les infos sur les abonnés destinataires
@@ -501,6 +506,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 		
 		$result->free();
+		
+		@flock($fw, LOCK_UN);
 		fclose($fw);
 	}
 	
@@ -539,8 +546,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 	}
 	
-	unlink($lockfile);
-	
 	$sql = "SELECT COUNT(*) AS num_dest, al.send
 		FROM " . ABO_LISTE_TABLE . " AS al
 			INNER JOIN " . ABONNES_TABLE . " AS a ON a.abo_id = al.abo_id
@@ -568,6 +573,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	
 	if( $no_send > 0 )
 	{
+		fclose(fopen($lockfile, 'w'));
+		
 		$message = sprintf($lang['Message']['Success_send'], $nl_config['emails_sended'], $sended, ($sended + $no_send));
 		
 		if( !defined('IN_COMMANDLINE') )
@@ -583,6 +590,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	else
 	{
+		unlink($lockfile);
+		
 		$sql = "UPDATE " . LOG_TABLE . "
 			SET log_status = " . STATUS_SENDED . ",
 				log_numdest = $sended
