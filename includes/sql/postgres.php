@@ -643,7 +643,7 @@ class WadbResult {
 	function free()
 	{
 		if( !is_null($this->result) ) {
-			pg_free_result($this->result);
+			@pg_free_result($this->result);
 			$this->result = null;
 		}
 	}

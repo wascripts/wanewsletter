@@ -25,11 +25,6 @@
  * @version $Id$
  */
 
-if( !defined('IN_NEWSLETTER') )
-{
-	exit('<b>No hacking</b>');
-}
-
 if( !defined('ENGINE_SEND_INC') ) {
 
 define('ENGINE_SEND_INC', true);
@@ -45,8 +40,6 @@ include WA_ROOTDIR . '/includes/tags.inc.php';
  * @param array $listdata      Tableau des données de la liste concernée
  * @param array $logdata       Tableau des données de la newsletter
  * @param array $supp_address  Adresses de destinataires supplémentaires
- * 
- * @access private
  * 
  * @return string
  */
@@ -92,6 +85,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			$logdata['log_subject']   = wan_utf8_encode($logdata['log_subject']);
 			$logdata['log_body_text'] = wan_utf8_encode($logdata['log_body_text']);
 			$logdata['log_body_html'] = wan_utf8_encode($logdata['log_body_html']);
+			$lang['Label_link']       = wan_utf8_encode($lang['Label_link']);
 			
 			$mailer->set_charset('UTF-8');
 		}
@@ -189,6 +183,37 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	
 	//
+	// Mise à jour de la table abo_liste concernant les envois
+	//
+	$lockfile = sprintf(WA_LOCKFILE, $listdata['liste_id']);
+	
+	if( file_exists($lockfile) && filesize($lockfile) > 0 )
+	{
+		$fp = fopen($lockfile, 'r');
+		$tmp = fread($fp, filesize($lockfile));
+		fclose($fp);
+		
+		$abo_ids = explode("\n", trim($tmp));
+		
+		if( count($abo_ids) > 0 )
+		{
+			$abo_ids = array_unique(array_map('intval', $abo_ids));
+			
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
+				SET send = 1
+				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
+					AND liste_id = " . $listdata['liste_id'];
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+			}
+		}
+	}
+	
+	$fw = fopen($lockfile, 'w');
+	@chmod($lockfile, 0600);
+	
+	//
 	// Adresses supplémentaires à mettre en destinataires
 	//
 	$sql = "SELECT a.admin_email
@@ -228,21 +253,22 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		trigger_error('Impossible d\'obtenir la liste des adresses emails', ERROR);
 	}
 	
+	$abo_ids = array();
+	$format  = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
+	
 	if( $row = $result->fetch() )
 	{
 		fake_header(false);
 		
-		$abo_ids = array();
-		$format  = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
-		
 		if( $nl_config['engine_send'] == ENGINE_BCC )
 		{
 			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
+			$abo_ids = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			
 			do
 			{
-				array_push($abo_ids, $row['abo_id']);
 				$abo_format = ( !$format ) ? $row['format'] : $format;
+				array_push($abo_ids[$abo_format], $row['abo_id']);
 				array_push($abonnes[$abo_format], $row['abo_email']);
 				
 				fake_header(true);
@@ -283,6 +309,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				{
 					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
 				}
+				
+				fwrite($fw, implode("\n", $abo_ids[FORMAT_TEXTE])."\n");
 			}
 			
 			$mailer->clear_address();
@@ -303,7 +331,11 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				{
 					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
 				}
+				
+				fwrite($fw, implode("\n", $abo_ids[FORMAT_HTML])."\n");
 			}
+			
+			$abo_ids = array_merge($abo_ids[FORMAT_TEXTE], $abo_ids[FORMAT_HTML]);
 		}
 		else if( $nl_config['engine_send'] == ENGINE_UNIQ )
 		{
@@ -445,9 +477,10 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				$mailer->assign_tags($tags_replace);
 				
 				// envoi
-				if( $mailer->send() )
+				if( $mailer->send() && $row['abo_id'] != -1 )
 				{
 					array_push($abo_ids, $row['abo_id']);
+					fwrite($fw, "$row[abo_id]\n");
 				}
 				
 				fake_header(true);
@@ -468,10 +501,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 		
 		$result->free();
-	}
-	else
-	{
-		trigger_error('No_subscribers', ERROR);
+		fclose($fw);
 	}
 	
 	//
@@ -488,7 +518,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	
 	$no_send = $sended = 0;
 	
-	if( $nl_config['emails_sended'] > 0 )
+	if( count($abo_ids) > 0 )
 	{
 		$sql = "UPDATE " . ABO_LISTE_TABLE . "
 			SET send = 1
@@ -498,7 +528,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		{
 			//
 			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
-			// On initialise une nouvelle connexion
+			// On tente une nouvelle connexion
 			//
 			$db->ping();
 			
@@ -507,36 +537,34 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
 			}
 		}
-		
-		$sql = "SELECT COUNT(*) AS num_dest, al.send
-			FROM " . ABO_LISTE_TABLE . " AS al
-				INNER JOIN " . ABONNES_TABLE . " AS a ON a.abo_id = al.abo_id
-					AND a.abo_status = " . ABO_ACTIF . "
-			WHERE al.liste_id    = $listdata[liste_id]
-				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-			GROUP BY al.send";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir le nombre d\'envois restants à faire', ERROR);
-		}
-		
-		while( $row = $result->fetch() )
-		{
-			if( $row['send'] == 1 )
-			{
-				$sended = $row['num_dest'];
-			}
-			else
-			{
-				$no_send = $row['num_dest'];
-			}
-		}
-		$result->free();
 	}
-	else
+	
+	unlink($lockfile);
+	
+	$sql = "SELECT COUNT(*) AS num_dest, al.send
+		FROM " . ABO_LISTE_TABLE . " AS al
+			INNER JOIN " . ABONNES_TABLE . " AS a ON a.abo_id = al.abo_id
+				AND a.abo_status = " . ABO_ACTIF . "
+		WHERE al.liste_id    = $listdata[liste_id]
+			AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
+		GROUP BY al.send";
+	if( !($result = $db->query($sql)) )
 	{
-		$sended = count($abo_ids);
+		trigger_error('Impossible d\'obtenir le nombre d\'envois restants à faire', ERROR);
 	}
+	
+	while( $row = $result->fetch() )
+	{
+		if( $row['send'] == 1 )
+		{
+			$sended  = $row['num_dest'];
+		}
+		else
+		{
+			$no_send = $row['num_dest'];
+		}
+	}
+	$result->free();
 	
 	if( $no_send > 0 )
 	{
@@ -601,8 +629,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
  * Fonction renvoyant les liens à placer dans les newsletters, selon les réglages
  * 
  * @param array $listdata  Tableau des données de la liste concernée
- * 
- * @access private
  * 
  * @return array
  */

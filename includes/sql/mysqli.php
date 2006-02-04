@@ -608,7 +608,7 @@ class WadbResult {
 	function free()
 	{
 		if( !is_null($this->result) ) {
-			mysqli_free_result($this->result);
+			@mysqli_free_result($this->result);
 			$this->result = null;
 		}
 	}

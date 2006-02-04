@@ -218,6 +218,39 @@ switch( $mode )
 		}
 		else
 		{
+			foreach( $liste_ids as $liste_id )
+			{
+				$lockfile = sprintf(WA_LOCKFILE, $liste_id);
+				
+				if( file_exists($lockfile) )
+				{
+					if( filesize($lockfile) > 0 )
+					{
+						$fp = fopen($lockfile, 'r');
+						$tmp = fread($fp, filesize($lockfile));
+						fclose($fp);
+						
+						$abo_ids = explode("\n", trim($tmp));
+						
+						if( count($abo_ids) > 0 )
+						{
+							$abo_ids = array_unique(array_map('intval', $abo_ids));
+							
+							$sql = "UPDATE " . ABO_LISTE_TABLE . "
+								SET send = 1
+								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
+									AND liste_id = " . $liste_id;
+							if( !$db->query($sql) )
+							{
+								trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+							}
+						}
+					}
+					
+					unlink($lockfile);
+				}
+			}
+			
 			$sql = "SELECT COUNT(send) AS num, send, liste_id
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")

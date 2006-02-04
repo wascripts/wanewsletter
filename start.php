@@ -159,5 +159,6 @@ if( OPEN_BASEDIR_RESTRICTION && !is_writable(WA_ROOTDIR . '/' . $tmp_name) )
 
 define('WA_TMPDIR',    WA_ROOTDIR . '/' . $tmp_name, true);
 define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
+define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
 
 ?>
