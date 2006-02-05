@@ -128,14 +128,6 @@ class Wadb {
 	var $_affectedRows = 0;
 	
 	/**
-	 * Nom de la dernière table sur laquelle a été effectué une requète INSERT (nécessaire pour Wadb::lastInsertId())
-	 * 
-	 * @var string
-	 * @access private
-	 */
-	var $lastInsertTable;
-	
-	/**
 	 * Constructeur de classe
 	 * 
 	 * @param string $dbname   Nom de la base de données
@@ -250,26 +242,21 @@ class Wadb {
 	 */
 	function query($query)
 	{
-		if( preg_match('/^INSERT\s+INTO\s+([^\s]+)\s+/i', $query, $match) ) {
-			$this->lastInsertTable = $match[1];
-		}
-		
 		$curtime = array_sum(explode(' ', microtime()));
 		$result  = pg_query($this->link, $query);
 		$endtime = array_sum(explode(' ', microtime()));
 		
 		$this->sqltime += ($endtime - $curtime);
+		$this->lastQuery = $query;
 		$this->queries++;
 		
 		if( !$result ) {
 			$this->error = pg_last_error($this->link);
-			$this->lastQuery = $query;
 			
 			$this->rollBack();
 		}
 		else {
 			$this->error = '';
-			$this->lastQuery = '';
 			
 			if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) ) {
 				$this->_affectedRows = @pg_affected_rows($result);
@@ -361,7 +348,7 @@ class Wadb {
 	 */
 	function quote($name)
 	{
-		return '"' . str_replace('"', '""', $name) . '"';
+		return '"' . $name . '"';
 	}
 	
 	/**
@@ -440,9 +427,8 @@ class Wadb {
 	 */
 	function lastInsertId()
 	{
-		if( !is_null($this->lastInsertTable) ) {
-			$result = pg_query($this->link, "SELECT currval('{$this->lastInsertTable}_id_seq') AS lastId");
-			$this->lastInsertTable = null;
+		if( preg_match('/^INSERT\s+INTO\s+([^\s]+)\s+/i', $this->lastQuery, $match) ) {
+			$result = pg_query($this->link, "SELECT currval('{$match[1]}_id_seq') AS lastId");
 			
 			if( is_resource($result) ) {
 				return pg_fetch_result($result, 0, 'lastId');
