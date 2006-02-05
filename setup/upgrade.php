@@ -169,6 +169,38 @@ if( $start )
 			$sql_create[$match[1]] = $query;
 		}
 		
+		//
+		// Nous vérifions tout d'abord si des doublons sont présents dans
+		// la table des abonnés.
+		// Si des doublons sont présents, la mise à jour ne peut continuer.
+		//
+		$fieldname = ( WA_BRANCHE == '2.0' || WA_BRANCHE == '2.1' ) ? 'email' : 'abo_email';
+		
+		$sql = "SELECT $fieldname
+			FROM " . ABONNES_TABLE . "
+			GROUP BY $fieldname
+			HAVING COUNT($fieldname) > 1";
+		if( !($result = $db->query($sql)) )
+		{
+			sql_error();
+		}
+		
+		if( $row = $result->fetch() )
+		{
+			$emails = array();
+			
+			do
+			{
+				array_push($emails, $row[$fieldname]);
+			}
+			while( $row = $result->fetch() );
+			
+			message("Des doublons sont présents dans la table " . ABONNES_TABLE . ",
+			la mise à jour ne peut continuer.
+			Supprimez les doublons en cause puis relancez la mise à jour.
+			Les emails en plusieurs exemplaires sont : " . implode(', ', $emails));
+		}
+		
 		if( WA_BRANCHE == '2.0' || WA_BRANCHE == '2.1' )
 		{
 			//

@@ -279,7 +279,7 @@ foreach( array('start', 'confirm', 'sendfile') as $varname )
 	${$varname} = ( isset($_POST[$varname]) ) ? true : false;
 }
 
-if( !defined('IN_INSTALL') && empty($dbname) )
+if( !defined('IN_INSTALL') && empty($infos['dbname']) )
 {
 	message($lang['Not_installed']);
 }
@@ -291,9 +291,13 @@ else if( $infos['driver'] == 'postgre' )
 {
 	$infos['driver'] = 'postgres';
 }
-else if( $infos['driver'] == 'mysql4' )
+else if( $infos['driver'] == 'mysql4' || $infos['driver'] == 'mysqli' )
 {
 	$infos['driver'] = 'mysql';
+}
+else if( $infos['driver'] == 'sqlite_pdo' )
+{
+	$infos['driver'] = 'sqlite';
 }
 
 define('SQL_DRIVER', $infos['driver']);
@@ -327,14 +331,13 @@ if( !isset($supported_db[$infos['driver']]) && ( defined('NL_INSTALLED') || defi
 	plain_error($lang['DB_type_undefined']);
 }
 
-if( empty($infos['dbname']) && $infos['driver'] == 'sqlite' )
-{
-	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/includes/sql') . '/wanewsletter.sqlite';
-}
-
 if( !empty($infos['dbname']) )
 {
 	$dsn = createDSN($infos);
+}
+else if( $infos['driver'] == 'sqlite' )
+{
+	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/includes/sql') . '/wanewsletter.sqlite';
 }
 
 $config_file  = '<' . "?php\n\n";
