@@ -152,12 +152,16 @@ $lang['Message']['Failed_sending']          = "The email could not be sent !";
 $lang['Message']['Inactive_format']         = "Impossible to change the format";
 $lang['Message']['Invalid_date']            = "Sorry, the confirm date has exceeded";
 $lang['Message']['Invalid_code']            = "Invalid code !";
+$lang['Message']['Invalid_email2']          = "Invalid email address!";
 $lang['Message']['Failed_sending2']         = "The email could not be sent ! %s";
 
 $lang['Message']['Success_export']          = "The emails export operation has been successfully carried out. \nYou will find the the backup file in the script's temporary files folder (Do not forget to delete it after saving it !)";
 $lang['Message']['Success_import']          = "The import operation has been successfully carried out.";
 $lang['Message']['Success_import2']         = "The import operation has been successfully carried out, but a few email addresses were rejected.";
 $lang['Message']['Success_import3']         = "The import operation has been successfully carried out, but a few email addresses were rejected. \nClick %shere%s to download the report. (Do not forget to delete the file from the server after downloading it)";
+$lang['Message']['Success_import4_0']       = "No email has been imported";
+$lang['Message']['Success_import4_1']       = "%d email has been successfully imported";
+$lang['Message']['Success_import4_n']       = "%d emails has been successfully imported";
 $lang['Message']['Success_modif']           = "The modifications have been successfully carried out";
 $lang['Message']['Success_backup']          = "The tables backup has been successfully carried out. \nYou will find the backup file in the script's temporary files folder (Do not forget to delete it after saving it !)";
 $lang['Message']['Success_restore']         = "The data restore operation has been successfully carried out";

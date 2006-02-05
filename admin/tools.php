@@ -625,115 +625,118 @@ switch( $mode )
 				if( Mailer::validate_email($email) ) {
 					return true;
 				} else {
-					$report .= sprintf(\'%s : %s%s\', $email, $lang[\'Message\'][\'Invalid_email\'], WA_EOL);
+					$report .= sprintf(\'%s : %s%s\', $email, $lang[\'Message\'][\'Invalid_email2\'], WA_EOL);
 					return false;
 				}'
 			));
 			
-			$sql_emails = array_map(create_function('$email', 'return $GLOBALS["db"]->escape($email);'), $emails);
-			
-			$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
-				FROM " . ABONNES_TABLE . " AS a
-					LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
-						AND al.liste_id = $listdata[liste_id]
-				WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
-			if( !($result = $db->query($sql)) )
+			if( count($emails) > 0 )
 			{
-				trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
-			}
-			
-			//
-			// Suppression des index et contrainte d'unicité. Les insertions seront plus rapides
-			//
-			if( SQL_DRIVER == 'postgres' )
-			{
-				$db->query("ALTER TABLE " . ABONNES_TABLE . " DROP CONSTRAINT abo_email_idx");
-				$db->query("DROP INDEX abo_status_idx");
-			}
-			else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
-			{
-				$db->query("ALTER TABLE " . ABONNES_TABLE . "
-					DROP INDEX abo_email_idx,
-					DROP INDEX abo_status_idx");
-			}
-			
-			//
-			// Traitement des adresses email déjà présentes dans la base de données
-			//
-			while( $abodata = $result->fetch() )
-			{
-				if( !isset($abodata['confirmed']) ) // N'est pas inscrit à cette liste
+				$sql_emails = array_map(create_function('$email', 'return $GLOBALS["db"]->escape($email);'), $emails);
+				
+				$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
+					FROM " . ABONNES_TABLE . " AS a
+						LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+							AND al.liste_id = $listdata[liste_id]
+					WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
+				if( !($result = $db->query($sql)) )
 				{
+					trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
+				}
+				
+				//
+				// Suppression des index et contrainte d'unicité. Les insertions seront plus rapides
+				//
+				if( SQL_DRIVER == 'postgres' )
+				{
+					$db->query("ALTER TABLE " . ABONNES_TABLE . " DROP CONSTRAINT abo_email_idx");
+					$db->query("DROP INDEX abo_status_idx");
+				}
+				else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
+				{
+					$db->query("ALTER TABLE " . ABONNES_TABLE . "
+						DROP INDEX abo_email_idx,
+						DROP INDEX abo_status_idx");
+				}
+				
+				//
+				// Traitement des adresses email déjà présentes dans la base de données
+				//
+				while( $abodata = $result->fetch() )
+				{
+					if( !isset($abodata['confirmed']) ) // N'est pas inscrit à cette liste
+					{
+						$sql_data = array();
+						$sql_data['abo_id']        = $abodata['abo_id'];
+						$sql_data['liste_id']      = $listdata['liste_id'];
+						$sql_data['format']        = $format;
+						$sql_data['register_key']  = generate_key(20, false);
+						$sql_data['register_date'] = $current_time;
+						$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
+						
+						if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
+						{
+							trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
+						}
+					}
+					else
+					{
+						$report .= sprintf('%s : %s%s', $abodata['abo_email'], $lang['Message']['Allready_reg'], WA_EOL);
+					}
+					
+					array_push($emails_ok, $abodata['abo_email']);
+				}
+				
+				//
+				// Traitement des adresses email inconnues
+				//
+				$emails = array_diff($emails, $emails_ok);
+				
+				foreach( $emails as $email )
+				{
+					$db->beginTransaction();
+					
 					$sql_data = array();
-					$sql_data['abo_id']        = $abodata['abo_id'];
+					$sql_data['abo_email']  = $email;
+					$sql_data['abo_status'] = ABO_ACTIF;
+					
+					if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
+					{
+						trigger_error('Impossible d\'ajouter un nouvel abonné dans la table des abonnés', ERROR);
+					}
+					
+					$sql_data = array();
+					$sql_data['abo_id']        = $db->lastInsertId();
 					$sql_data['liste_id']      = $listdata['liste_id'];
 					$sql_data['format']        = $format;
 					$sql_data['register_key']  = generate_key(20, false);
 					$sql_data['register_date'] = $current_time;
-					$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
+					$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
 					
 					if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
 					{
 						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
 					}
+					
+					$db->commit();
+					
+					fake_header(true);
 				}
-				else
+				
+				//
+				// Remise en place des index et contrainte d'unicité précédemment supprimés
+				//
+				if( SQL_DRIVER == 'postgres' )
 				{
-					$report .= sprintf('%s : %s%s', $abodata['abo_email'], $lang['Message']['Allready_reg'], WA_EOL);
+					$db->query("ALTER TABLE " . ABONNES_TABLE . " ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
+					$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
 				}
-				
-				array_push($emails_ok, $abodata['abo_email']);
-			}
-			
-			//
-			// Traitement des adresses email inconnues
-			//
-			$emails = array_diff($emails, $emails_ok);
-			
-			foreach( $emails as $email )
-			{
-				$db->beginTransaction();
-				
-				$sql_data = array();
-				$sql_data['abo_email']  = $email;
-				$sql_data['abo_status'] = ABO_ACTIF;
-				
-				if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
+				else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
 				{
-					trigger_error('Impossible d\'ajouter un nouvel abonné dans la table des abonnés', ERROR);
+					$db->query("ALTER TABLE " . ABONNES_TABLE . "
+						ADD UNIQUE abo_email_idx (abo_email),
+						ADD INDEX abo_status_idx (abo_status)");
 				}
-				
-				$sql_data = array();
-				$sql_data['abo_id']        = $db->lastInsertId();
-				$sql_data['liste_id']      = $listdata['liste_id'];
-				$sql_data['format']        = $format;
-				$sql_data['register_key']  = generate_key(20, false);
-				$sql_data['register_date'] = $current_time;
-				$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
-				
-				if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-				{
-					trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
-				}
-				
-				$db->commit();
-				
-				fake_header(true);
-			}
-			
-			//
-			// Remise en place des index et contrainte d'unicité précédemment supprimés
-			//
-			if( SQL_DRIVER == 'postgres' )
-			{
-				$db->query("ALTER TABLE " . ABONNES_TABLE . " ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
-				$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
-			}
-			else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
-			{
-				$db->query("ALTER TABLE " . ABONNES_TABLE . "
-					ADD UNIQUE abo_email_idx (abo_email),
-					ADD INDEX abo_status_idx (abo_status)");
 			}
 			
 			//

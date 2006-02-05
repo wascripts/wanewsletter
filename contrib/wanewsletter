@@ -66,10 +66,11 @@ require WA_ROOTDIR . '/start.php';
 
 load_settings();
 
-$argv[0] = basename($argv[0]);
-$version = WA_VERSION;
-
-$process_send = false;
+$argv[0]  = basename($argv[0]);
+$version  = WA_VERSION;
+$emails   = array();
+$liste_id = null;
+$process_send = $import_mail = false;
 
 if( $argc == 1 ) // Aucun argument fourni
 {
@@ -96,7 +97,7 @@ for( $i = 1; $i < $argc; $i++ )
 	{
 		echo <<<WANSHELL
 Wanewsletter $version
-Copyright (c) 2002-2006 phpCodeur
+Copyright (c) 2002-2006 Aurélien Maille
 
 Wanewsletter est un logiciel libre; vous pouvez le redistribuer ou le
 modifier selon les termes de la License Publique Générale de GNU, publiée
@@ -127,13 +128,22 @@ WANSHELL;
 Usage: $argv[0] [options]
 
 Envois:
-  -pNUM, --process-send=NUM  Lance un envoi
+  -pNUM, --process-send=NUM  Lance un envoi avec NUM un id de liste
   -a, --all                  Ignorer les réglages d'envoi par flôt
+  --import-mail=NUM          Importation d'emails avec NUM un id de liste
 
 Divers:
   -h, --help     Affiche la présente aide
   -v, --version  Affiche les informations de version
       --license  Affiche les informations de licence
+
+Exemple d'importation d'emails :
+  $argv[0] --import-mail=1 -- address1@domain.tld address2@domain.tld
+  
+La liste d'adresses peut également être fournie en entrée, les adresses
+dans le fichier étant séparés par des caractères blancs (espace, tabulation
+ou saut de ligne) :
+  $argv[0] --import-mail=1 < /path/to/address_list
 
 
 WANSHELL;
@@ -157,17 +167,33 @@ WANSHELL;
 		$nl_config['emails_sended'] = 0;
 	}
 	
-	else if( preg_match('/^--import-(mail|news)(?:=(.+))?$/', $argv[$i], $match) )
+	else if( preg_match('/^--import-mail=([0-9]+)$/', $argv[$i], $match) )
 	{
-		echo "This feature is not yet implemented!\n";
-		exit(0);
+		$import_mail = true;
+		$liste_id = $match[1];
+		$i++;
+		
+		if( isset($argv[$i]) && $argv[$i] == '--' )
+		{
+			$emails = array_slice($argv, ++$i);
+		}
+		else
+		{
+			$emails = '';
+			while( !feof(STDIN) )
+			{
+				$emails .= fgets(STDIN);
+			}
+			
+			$emails = preg_split('/\s+/', trim($emails));
+		}
+		
+		break;
 	}
 }
 
-if( $process_send == true )
+if( !is_null($liste_id) )
 {
-	require WA_ROOTDIR . '/includes/engine_send.php';
-	
 	$sql = 'SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
 			liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe
 		FROM ' . LISTE_TABLE . ' 
@@ -177,12 +203,15 @@ if( $process_send == true )
 		trigger_error('Impossible de récupérer les informations sur cette liste', CRITICAL_ERROR);
 	}
 	
-	if( $result->count() == 0 )
+	if( !($listdata = $result->fetch()) )
 	{
 		trigger_error('Unknown_list', CRITICAL_ERROR);
 	}
-	
-	$listdata = $result->fetch();
+}
+
+if( $process_send == true )
+{
+	require WA_ROOTDIR . '/includes/engine_send.php';
 	
 	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 		FROM " . LOG_TABLE . "
@@ -194,13 +223,11 @@ if( $process_send == true )
 		trigger_error('Impossible d\'obtenir les données sur ce log', CRITICAL_ERROR);
 	}
 	
-	if( $result->count() == 0 )
+	if( !($logdata = $result->fetch()) )
 	{
 		echo $lang['Message']['No_log_to_send'] . "\n";
 		exit(0);
 	}
-	
-	$logdata = $result->fetch();
 	
 	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 		FROM " . JOINED_FILES_TABLE . " AS jf
@@ -224,8 +251,154 @@ if( $process_send == true )
 	echo strip_tags($message) . "\n";
 	exit(0);
 }
-
-echo "Bienvenue dans l'interface Wanewsletter en ligne de commande!\n";
+else if( $import_mail == true && count($emails) > 0 )
+{
+	require WAMAILER_DIR . '/class.mailer.php';
+	
+	$emails = array_unique($emails);
+	$current_time = time();
+	$emails_ok    = array();
+	
+	//
+	// Vérification syntaxique des emails
+	//
+	$emails = array_filter($emails, create_function('$email',
+		'global $lang;
+		
+		if( Mailer::validate_email($email) ) {
+			return true;
+		} else {
+			printf("%s : %s\n", $email, $lang[\'Message\'][\'Invalid_email2\']);
+			return false;
+		}'
+	));
+	
+	if( count($emails) > 0 )
+	{
+		$counter = 0;
+		$sql_emails = array_map(create_function('$email', 'return $GLOBALS["db"]->escape($email);'), $emails);
+		
+		$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
+			FROM " . ABONNES_TABLE . " AS a
+				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+					AND al.liste_id = $listdata[liste_id]
+			WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible de tester les tables d\'inscriptions', CRITICAL_ERROR);
+		}
+		
+		//
+		// Suppression des index et contrainte d'unicité. Les insertions seront plus rapides
+		//
+		if( SQL_DRIVER == 'postgres' )
+		{
+			$db->query("ALTER TABLE " . ABONNES_TABLE . " DROP CONSTRAINT abo_email_idx");
+			$db->query("DROP INDEX abo_status_idx");
+		}
+		else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
+		{
+			$db->query("ALTER TABLE " . ABONNES_TABLE . "
+				DROP INDEX abo_email_idx,
+				DROP INDEX abo_status_idx");
+		}
+		
+		//
+		// Traitement des adresses email déjà présentes dans la base de données
+		//
+		while( $abodata = $result->fetch() )
+		{
+			if( !isset($abodata['confirmed']) ) // N'est pas inscrit à cette liste
+			{
+				$sql_data = array();
+				$sql_data['abo_id']        = $abodata['abo_id'];
+				$sql_data['liste_id']      = $listdata['liste_id'];
+				$sql_data['format']        = $format;
+				$sql_data['register_key']  = generate_key(20, false);
+				$sql_data['register_date'] = $current_time;
+				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
+				
+				if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
+				{
+					trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', CRITICAL_ERROR);
+				}
+				
+				$counter++;
+			}
+			else
+			{
+				printf("%s : %s\n", $abodata['abo_email'], $lang['Message']['Allready_reg']);
+			}
+			
+			array_push($emails_ok, $abodata['abo_email']);
+		}
+		
+		//
+		// Traitement des adresses email inconnues
+		//
+		$emails = array_diff($emails, $emails_ok);
+		
+		foreach( $emails as $email )
+		{
+			$db->beginTransaction();
+			
+			$sql_data = array();
+			$sql_data['abo_email']  = $email;
+			$sql_data['abo_status'] = ABO_ACTIF;
+			
+			if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
+			{
+				trigger_error('Impossible d\'ajouter un nouvel abonné dans la table des abonnés', CRITICAL_ERROR);
+			}
+			
+			$sql_data = array();
+			$sql_data['abo_id']        = $db->lastInsertId();
+			$sql_data['liste_id']      = $listdata['liste_id'];
+			$sql_data['format']        = $format;
+			$sql_data['register_key']  = generate_key(20, false);
+			$sql_data['register_date'] = $current_time;
+			$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
+			
+			if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
+			{
+				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', CRITICAL_ERROR);
+			}
+			
+			$counter++;
+			$db->commit();
+		}
+		
+		//
+		// Remise en place des index et contrainte d'unicité précédemment supprimés
+		//
+		if( SQL_DRIVER == 'postgres' )
+		{
+			$db->query("ALTER TABLE " . ABONNES_TABLE . " ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
+			$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
+		}
+		else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
+		{
+			$db->query("ALTER TABLE " . ABONNES_TABLE . "
+				ADD UNIQUE abo_email_idx (abo_email),
+				ADD INDEX abo_status_idx (abo_status)");
+		}
+		
+		if( $counter > 1 )
+		{
+			printf($lang['Message']['Success_import4_n'], $counter);
+		}
+		else if( $counter == 1 )
+		{
+			printf($lang['Message']['Success_import4_1'], $counter);
+		}
+		else
+		{
+			echo $lang['Message']['Success_import4_0'];
+		}
+		
+		echo "\n";
+	}
+}
 
 exit(0);
 

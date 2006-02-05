@@ -204,7 +204,7 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 	
 	if( ( $errno == CRITICAL_ERROR || $errno == ERROR ) && ( defined('IN_ADMIN') || defined('IN_CRON') || DEBUG_MODE ) )
 	{
-		if( !empty($db->error) )
+		if( !empty($db->error) && DEBUG_MODE > 0 )
 		{
 			$debug_text .= '<b>SQL query</b>&#160;:<br /> ' . nl2br($db->lastQuery) . "<br /><br />\n";
 			$debug_text .= '<b>SQL errno</b>&#160;: ' . $db->errno . "<br />\n";
@@ -352,7 +352,7 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 	$errstr  = strip_tags($errstr);
 	$errstr .= ' in ' . basename($errfile) . ' on line ' . $errline;
 	
-	if( !empty($db->error) )
+	if( !empty($db->error) && DEBUG_MODE > 0 )
 	{
 		$errstr .= "\n";
 		$errstr .= 'SQL query: ' . $db->lastQuery . "\n";
@@ -375,7 +375,7 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 	{
 		fputs(STDOUT, $errstr . "\n");
 	}
-	else if( $errno != E_STRICT && ( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) ) )
+	else if( $errno != E_STRICT && ( DEBUG_MODE == 3 || $display_error ) )
 	{
 		fputs(STDERR, 'Error: ' . $errstr . "\n");
 	}

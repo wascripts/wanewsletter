@@ -80,9 +80,6 @@ if( defined('IN_COMMANDLINE') )
 		define('STDERR', fopen('php://stderr', 'w'));
 	}
 	
-	register_shutdown_function(create_function('',
-		'fclose(STDIN); fclose(STDOUT); fclose(STDERR); return true;'));
-	
 	set_error_handler('wan_cli_handler');
 }
 else

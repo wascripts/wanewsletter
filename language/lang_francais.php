@@ -152,12 +152,16 @@ $lang['Message']['Failed_sending']          = "L'email n'a pu être envoyé !";
 $lang['Message']['Inactive_format']         = "Impossible de changer de format";
 $lang['Message']['Invalid_date']            = "Désolé, la date de confirmation est dépassée";
 $lang['Message']['Invalid_code']            = "Code invalide !";
+$lang['Message']['Invalid_email2']          = "Adresse email invalide !";
 $lang['Message']['Failed_sending2']         = "L'email n'a pu être envoyé ! %s";
 
 $lang['Message']['Success_export']          = "L'exportation des emails a été effectuée avec succés. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
 $lang['Message']['Success_import']          = "Les emails ont été importés avec succés";
 $lang['Message']['Success_import2']         = "L'importation s'est effectuée avec succés mais certains emails ont été refusés";
 $lang['Message']['Success_import3']         = "L'importation s'est effectuée avec succés mais certains emails ont été refusés. \nCliquez %sici%s pour télécharger le rapport (N'oubliez pas de supprimer le fichier du serveur par la suite)";
+$lang['Message']['Success_import4_0']       = "Aucun email n'a été importé";
+$lang['Message']['Success_import4_1']       = "%d email a été importé avec succés";
+$lang['Message']['Success_import4_n']       = "%d emails ont été importés avec succés";
 $lang['Message']['Success_modif']           = "Les modifications ont été effectuées avec succés";
 $lang['Message']['Success_backup']          = "La sauvegarde des tables a été effectuée avec succés. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
 $lang['Message']['Success_restore']         = "La restauration des données a été effectuée avec succés";
