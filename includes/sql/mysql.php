@@ -606,7 +606,7 @@ class WadbResult {
 	 */
 	function column($column)
 	{
-		$row = mysqli_fetch_array($this->result);
+		$row = mysql_fetch_array($this->result);
 		
 		return ($row != false && isset($row[$column])) ? $row[$column] : false;
 	}
