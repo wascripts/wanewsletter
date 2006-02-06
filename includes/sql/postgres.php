@@ -597,7 +597,9 @@ class WadbResult {
 	 */
 	function column($column)
 	{
-		return pg_fetch_result($this->result, null, $column);
+		$row = pg_fetch_array($this->result);
+		
+		return ($row != false && isset($row[$column])) ? $row[$column] : false;
 	}
 	
 	/**
@@ -677,6 +679,10 @@ class WadbBackup {
 	function WadbBackup($infos)
 	{
 		$this->infos = $infos;
+		
+		if( !isset($this->infos['host']) ) {
+			$this->infos['host'] = 'localhost';
+		}
 	}
 	
 	/**
@@ -738,13 +744,17 @@ class WadbBackup {
 	 * @access public
 	 * @return string
 	 */
-	function get_sequences($drop_option)
+	function get_other_queries($drop_option)
 	{
 		global $db, $backup_type;
 		
-		$sql = "SELECT relname 
-			FROM pg_class 
-			WHERE NOT relname ~ 'pg_.*' AND relkind ='S' 
+		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
+		$contents .= '  Sequences ' . $this->eol;
+		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+		
+		$sql = "SELECT relname
+			FROM pg_class
+			WHERE NOT relname ~ 'pg_.*' AND relkind ='S'
 			ORDER BY relname";
 		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible de récupérer les séquences', ERROR);
@@ -768,7 +778,7 @@ class WadbBackup {
 			}
 		}
 		
-		return $contents;
+		return $contents . $this->eol;
 	}
 	
 	/**
@@ -783,14 +793,8 @@ class WadbBackup {
 	function get_table_structure($tabledata, $drop_option)
 	{
 		global $db;
-	
-		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
-		$contents .= '  Sequences ' . $this->eol;
-		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
-		$contents .= $this->get_sequences($drop_option);
 		
-		$contents .= $this->eol;
-		$contents .= '/* ------------------------------------------------------------ ' . $this->eol;
+		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
 		$contents .= '  Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
 		
@@ -839,8 +843,8 @@ class WadbBackup {
 				$contents .= sprintf('(%s,%s)', (($row['lengthvar'] >> 16) & 0xffff), (($row['lengthvar'] - 4) & 0xffff));
 			}
 			
-			if (!empty($row['rowdefault'])) {
-				$contents .= ' DEFAULT \'' . $row['rowdefault'] . '\'';
+			if( isset($row['rowdefault']) ) {
+				$contents .= ' DEFAULT ' . $row['rowdefault'];
 			}
 			
 			if ($row['notnull'] == 't') {
@@ -868,8 +872,8 @@ class WadbBackup {
 			trigger_error('Impossible de récupérer les clés primaires et unique de la table ' . $tabledata['name'], ERROR);
 		}
 		
-		$primary_key = '';
-		$index_rows	 = array();
+		$primary_key = $primary_key_name = '';
+		$index_rows  = array();
 		
 		while( $row = $result->fetch() ) {
 			if( $row['primary_key'] == 't' ) {
@@ -882,34 +886,42 @@ class WadbBackup {
 				// we can loop through it again and build the statement
 				//
 				$index_rows[$row['index_name']]['table']  = $tabledata['name'];
-				$index_rows[$row['index_name']]['unique'] = ($row['unique_key'] == 't') ? ' UNIQUE ' : '';
+				$index_rows[$row['index_name']]['unique'] = ($row['unique_key'] == 't') ? 'UNIQUE' : '';
 				
-				if( empty($index_rows[$row['index_name']]['column_names']) ) {
-					$index_rows[$row['index_name']]['column_names'] = $row['column_name'] . ', ';
+				if( !isset($index_rows[$row['index_name']]['column_names']) ) {
+					$index_rows[$row['index_name']]['column_names'] = array();
 				}
-				else {
-					$index_rows[$row['index_name']]['column_names'] .= $row['column_name'] . ', ';
-				}
+				
+				$index_rows[$row['index_name']]['column_names'][] = $row['column_name'];
 			}
 		}
 		$result->free();
 		
+		if( !empty($primary_key) ) {
+			$contents .= sprintf("CONSTRAINT %s PRIMARY KEY (%s),", $primary_key_name, $primary_key);
+			$contents .= $this->eol;
+		}
+		
 		$index_create = '';
 		if( count($index_rows) ) {
 			foreach( $index_rows as $idx_name => $props ) {
-				$props['column_names'] = substr($props['column_names'], 0, -2);
-				$index_create .= 'CREATE ' . $props['unique'] . " INDEX $idx_name ON " . $tabledata['name'] . " (" . $props['column_names'] . ');' . $this->eol;
+				$props['column_names'] = implode(', ', $props['column_names']);
+				
+				if( !empty($props['unique']) ) {
+					$contents .= sprintf("CONSTRAINT %s UNIQUE (%s),", $idx_name, $props['column_names']);
+					$contents .= $this->eol;
+				}
+				else {
+					$index_create .= sprintf("CREATE %s INDEX %s ON %s (%s);", $props['unique'], $idx_name, $tabledata['name'], $props['column_names']);
+					$index_create .= $this->eol;
+				}
 			}
-		}
-		
-		if( !empty($primary_key) ) {
-			$contents .= "CONSTRAINT $primary_key_name PRIMARY KEY ($primary_key)," . $this->eol;
 		}
 		
 		//
 		// Generate constraint clauses for CHECK constraints
 		//
-		$sql = "SELECT rcname as index_name, rcsrc 
+/*		$sql = "SELECT rcname as index_name, rcsrc 
 			FROM pg_relcheck, pg_class bc 
 			WHERE rcrelid = bc.oid 
 				AND bc.relname = '" . $tabledata['name'] . "' 
@@ -931,15 +943,13 @@ class WadbBackup {
 		while( $row = $result->fetch() ) {
 			$contents .= 'CONSTRAINT ' . $row['index_name'] . ' CHECK ' . $row['rcsrc'] . ',' . $this->eol;
 		}
-		
+		*/
 		$len = strlen(',' . $this->eol);
 		$contents = substr($contents, 0, -$len);
-		$index_create = substr($contents, 0, -$index_create);
-		
 		$contents .= $this->eol . ');' . $this->eol;
 		
 		if( !empty($index_create) ) {
-			$contents .= $this->eol . $index_create;
+			$contents .= $index_create;
 		}
 		
 		return $contents;

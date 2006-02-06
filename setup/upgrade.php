@@ -195,10 +195,9 @@ if( $start )
 			}
 			while( $row = $result->fetch() );
 			
-			message("Des doublons sont présents dans la table " . ABONNES_TABLE . ",
-			la mise à jour ne peut continuer.
+			message("Des adresses email sont présentes en plusieurs exemplaires dans la table " . ABONNES_TABLE . ", la mise à jour ne peut continuer.
 			Supprimez les doublons en cause puis relancez la mise à jour.
-			Les emails en plusieurs exemplaires sont : " . implode(', ', $emails));
+			Adresses email présentes en plusieurs exemplaires : " . implode(', ', $emails));
 		}
 		
 		if( WA_BRANCHE == '2.0' || WA_BRANCHE == '2.1' )

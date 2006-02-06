@@ -156,7 +156,7 @@ class Wadb {
 				$$info = ( isset($infos[$info]) ) ? $infos[$info] : null;
 				
 				if( $info == 'host' ) {
-					$dbname = $host . ':' . $dbname;
+					$this->dbname = $host . ':' . $this->dbname;
 				}
 			}
 		}
@@ -171,7 +171,7 @@ class Wadb {
 			}
 		}
 		
-		if( !($this->link = $connect($dbname, $username, $passwd)) ) {
+		if( !($this->link = $connect($this->dbname, $username, $passwd)) ) {
 			$this->errno = function_exists('ibase_errcode') ? ibase_errcode() : 0;
 			$this->error = ibase_errmsg();
 			$this->link  = null;
@@ -547,13 +547,10 @@ class WadbResult {
 				$row = ibase_fetch_assoc($this->result, IBASE_TEXT);
 			}
 			else {
-				$tmp = ibase_fetch_object($this->result, IBASE_TEXT);
+				$row = ibase_fetch_object($this->result, IBASE_TEXT);
 				
-				if( $tmp != false ) {
-					$row = (array) $tmp;
-				}
-				else {
-					$row = false;
+				if( $row != false ) {
+					settype($row, 'array');
 				}
 			}
 			

@@ -119,7 +119,7 @@ function parseDSN($dsn)
 	foreach( $dsn_parts as $key => $value ) {
 		switch( $key ) {
 			case 'scheme':
-				if( !in_array($value, array('mysql', 'postgres', 'sqlite')) ) {
+				if( !in_array($value, array('firebird', 'mysql', 'postgres', 'sqlite')) ) {
 					trigger_error("Unsupported database", E_USER_ERROR);
 					return false;
 				}
@@ -190,14 +190,11 @@ function WaDatabase($dsn)
 	
 	require WA_ROOTDIR . "/includes/sql/$infos[driver].php";
 	
-	$db = new Wadb($infos['dbname'], $options);
+	$infos['username'] = isset($infos['user']) ? $infos['user'] : null;
+	$infos['passwd']   = isset($infos['pass']) ? $infos['pass'] : null;
 	
-	if( strncmp($infos['driver'], 'sqlite', 6) != 0 ) {
-		$infos['username'] = isset($infos['user']) ? $infos['user'] : null;
-		$infos['passwd']   = isset($infos['pass']) ? $infos['pass'] : null;
-		
-		$db->connect($infos, $options);
-	}
+	$db = new Wadb($infos['dbname']);
+	$db->connect($infos, $options);
 	
 	return $db;
 }

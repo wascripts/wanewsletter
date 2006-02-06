@@ -584,7 +584,9 @@ class WadbResult {
 	 */
 	function free()
 	{
-		unset($this->result);
+		if( !is_null($this->result) ) {
+			$this->result = null;
+		}
 	}
 	
 	/**
@@ -627,6 +629,10 @@ class WadbBackup {
 	function WadbBackup($infos)
 	{
 		$this->infos = $infos;
+		
+		if( !isset($this->infos['host']) ) {
+			$this->infos['host'] = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown';
+		}
 	}
 	
 	/**
@@ -644,7 +650,7 @@ class WadbBackup {
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname SQLite Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		$contents .= "-- Host       : " . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown') . $this->eol;
+		$contents .= "-- Host       : " . $this->infos['host'] . $this->eol;
 		$contents .= "-- SQLite lib : " . $db->libVersion . $this->eol;
 		$contents .= "-- Database   : " . basename($this->infos['dbname']) . $this->eol;
 		$contents .= '-- Date       : ' . date('d/m/Y H:i:s O') . $this->eol;
@@ -674,6 +680,19 @@ class WadbBackup {
 		}
 		
 		return $tables;
+	}
+	
+	/**
+	 * Utilisable pour l'ajout de requète supplémentaires (séquences, configurations diverses, etc)
+	 * 
+	 * @param boolean $drop_option
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function get_other_queries($drop_option)
+	{
+		return '';
 	}
 	
 	/**

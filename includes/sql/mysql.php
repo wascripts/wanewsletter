@@ -685,6 +685,10 @@ class WadbBackup {
 	function WadbBackup($infos)
 	{
 		$this->infos = $infos;
+		
+		if( !isset($this->infos['host']) ) {
+			$this->infos['host'] = 'localhost';
+		}
 	}
 	
 	/**
@@ -732,6 +736,19 @@ class WadbBackup {
 		}
 		
 		return $tables;
+	}
+	
+	/**
+	 * Utilisable pour l'ajout de requète supplémentaires (séquences, configurations diverses, etc)
+	 * 
+	 * @param boolean $drop_option
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function get_other_queries($drop_option)
+	{
+		return '';
 	}
 	
 	/**

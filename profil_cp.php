@@ -46,7 +46,7 @@ $session = new Session();
 
 function check_login($email, $regkey = null, $passwd = null)
 {
-	global $db, $other_tags;
+	global $db, $nl_config, $other_tags;
 	
 	//
 	// Récupération des champs des tags personnalisés
@@ -120,6 +120,11 @@ function check_login($email, $regkey = null, $passwd = null)
 			$abodata['listes'][$row['liste_id']] = $row;
 		}
 		while( $row = $result->fetch() );
+		
+		if( empty($abodata['language']) )
+		{
+			$abodata['language'] = $nl_config['language'];
+		}
 		
 		return $abodata;
 	}

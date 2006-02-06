@@ -1086,7 +1086,8 @@ switch( $mode )
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql 
 			//
-			$contents = $backup->header('Wanewsletter ' . WA_VERSION);
+			$contents  = $backup->header('Wanewsletter ' . WA_VERSION);
+			$contents .= $backup->get_other_queries($drop_option);
 			
 			fake_header(false);
 			
