@@ -100,14 +100,9 @@ switch( $mode )
 		break;
 	
 	case 'cancel':
-		if( $logdata['log_id'] == 0 )
-		{
-			Location('envoi.php');
-		}
-		
 		if( isset($_POST['confirm']) )
 		{
-			$sql = "SELECT liste_id, log_status
+			$sql = "SELECT log_id, liste_id, log_status
 				FROM " . LOG_TABLE . "
 				WHERE log_id = " . $logdata['log_id'];
 			if( !($result = $db->query($sql)) )
@@ -115,17 +110,14 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir la liste d\'appartenance du log', ERROR);
 			}
 			
-			$liste_id   = $result->column('liste_id');
-			$log_status = $result->column('log_status');
-			
-			if( $log_status != STATUS_STANDBY )
+			if( !($logdata = $result->fetch()) || $logdata['log_status'] != STATUS_STANDBY )
 			{
 				Location('envoi.php');
 			}
 			
 			$sql = "SELECT COUNT(send) AS sended
 				FROM " . ABO_LISTE_TABLE . "
-				WHERE liste_id = $liste_id AND send = 1";
+				WHERE liste_id = $logdata[liste_id] AND send = 1";
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
@@ -146,7 +138,7 @@ switch( $mode )
 			
 			$sql = "UPDATE " . ABO_LISTE_TABLE . "
 				SET send = 0
-				WHERE liste_id = " . $liste_id;
+				WHERE liste_id = " . $logdata['liste_id'];
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
@@ -154,7 +146,7 @@ switch( $mode )
 			
 			$sql = "UPDATE " . LISTE_TABLE . " 
 				SET liste_numlogs = liste_numlogs + 1 
-				WHERE liste_id = " . $liste_id;
+				WHERE liste_id = " . $logdata['liste_id'];
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible de mettre à jour la table des listes', ERROR);
@@ -165,7 +157,7 @@ switch( $mode )
 			//
 			// Suppression du fichier lock correspondant s'il existe
 			//
-			$lockfile = sprintf(WA_LOCKFILE, $liste_id);
+			$lockfile = sprintf(WA_LOCKFILE, $logdata['liste_id']);
 			
 			if( file_exists($lockfile) )
 			{
