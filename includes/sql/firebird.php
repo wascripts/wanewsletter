@@ -25,9 +25,9 @@
  * @version $Id$
  */
 
-if( !defined('_INC_CLASS_WADB') ) {
+if( !defined('_INC_CLASS_WADB_FIREBIRD') ) {
 
-define('_INC_CLASS_WADB', true);
+define('_INC_CLASS_WADB_FIREBIRD', true);
 
 define('SQL_INSERT', 1);
 define('SQL_UPDATE', 2);
@@ -41,7 +41,7 @@ define('SQL_FETCH_BOTH',  3);
  * @access public
  * @status experimental
  */
-class Wadb {
+class Wadb_firebird {
 	
 	/**
 	 * Connexion à la base de données
@@ -131,7 +131,7 @@ class Wadb {
 	 * 
 	 * @access public
 	 */
-	function Wadb($dbname, $options = null)
+	function Wadb_firebird($dbname, $options = null)
 	{
 		$this->dbname = $dbname;
 		
@@ -248,7 +248,7 @@ class Wadb {
 			$this->error = '';
 			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
-				$result = new WadbResult($this->link, $result);
+				$result = new WadbResult_firebird($this->link, $result);
 			}
 			
 			ibase_commit($this->link);// TODO : temp
@@ -484,7 +484,7 @@ class Wadb {
 	}
 }
 
-class WadbResult {
+class WadbResult_firebird {
 	
 	/**
 	 * Connexion à la base de données
@@ -518,7 +518,7 @@ class WadbResult {
 	 * 
 	 * @access public
 	 */
-	function WadbResult($link, $result)
+	function WadbResult_firebird($link, $result)
 	{
 		$this->link   = $link;
 		$this->result = $result;
@@ -609,7 +609,7 @@ class WadbResult {
 	{
 		$row = $this->fetch(SQL_FETCH_BOTH);
 		
-		return ($row != false && isset($row[$column])) ? $row[$column] : false;
+		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
 	
 	/**

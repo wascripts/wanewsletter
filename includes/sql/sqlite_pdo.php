@@ -27,9 +27,9 @@
  * Certaines parties sont inspirées de SQLiteManager 1.2.0RC1
  */
 
-if( !defined('_INC_CLASS_WADB') ) {
+if( !defined('_INC_CLASS_WADB_SQLITE_PDO') ) {
 
-define('_INC_CLASS_WADB', true);
+define('_INC_CLASS_WADB_SQLITE_PDO', true);
 
 define('SQL_INSERT', 1);
 define('SQL_UPDATE', 2);
@@ -56,7 +56,7 @@ define('SQL_FETCH_NUM',   PDO_FETCH_NUM);
 define('SQL_FETCH_ASSOC', PDO_FETCH_ASSOC);
 define('SQL_FETCH_BOTH',  PDO_FETCH_BOTH);
 
-class Wadb {
+class Wadb_sqlite_pdo {
 	
 	/**
 	 * Connexion à la base de données
@@ -157,12 +157,12 @@ class Wadb {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $dbname   Nom de la base de données
-	 * @param array  $options  Options de connexion/utilisation
+	 * @param string $sqlite_db   Base de données SQLite
+	 * @param array  $options     Options de connexion/utilisation
 	 * 
 	 * @access public
 	 */
-	function Wadb($sqlite_db, $options = null)
+	function Wadb_sqlite_pdo($sqlite_db, $options = null)
 	{
 		if( file_exists($sqlite_db) ) {
 			if( !is_readable($sqlite_db) ) {
@@ -278,6 +278,7 @@ class Wadb {
 			$this->errno = $tmp[1];
 			$this->error = $tmp[2];
 			$this->lastQuery = $query;
+			$this->result = null;
 			
 			try {
 				$this->rollBack();
@@ -295,7 +296,7 @@ class Wadb {
 				$result = true;
 			}
 			else {
-				$result = new WadbResult($result);
+				$result = new WadbResult_sqlite_pdo($result);
 			}
 		}
 		
@@ -504,7 +505,7 @@ class Wadb {
 	}
 }
 
-class WadbResult {
+class WadbResult_sqlite_pdo {
 	
 	/**
 	 * Objet de résultat PDO de requète
@@ -529,7 +530,7 @@ class WadbResult {
 	 * 
 	 * @access public
 	 */
-	function WadbResult($result)
+	function WadbResult_sqlite_pdo($result)
 	{
 		$this->result = $result;
 		$this->fetchMode = PDO_FETCH_BOTH;
@@ -593,7 +594,7 @@ class WadbResult {
 	{
 		$row = $this->result->fetch(PDO_FETCH_BOTH);
 		
-		return ($row != false && isset($row[$column])) ? $row[$column] : false;
+		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
 	
 	/**
@@ -641,7 +642,7 @@ class WadbResult {
 	}
 }
 
-class WadbBackup {
+class WadbBackup_sqlite_pdo {
 	
 	/**
 	 * Informations concernant la base de données
@@ -666,7 +667,7 @@ class WadbBackup {
 	 * 
 	 * @access public
 	 */
-	function WadbBackup($infos)
+	function WadbBackup_sqlite_pdo($infos)
 	{
 		$this->infos = $infos;
 		

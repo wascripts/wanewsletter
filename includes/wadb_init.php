@@ -187,13 +187,14 @@ function WaDatabase($dsn)
 	}
 	
 	list($infos, $options) = $tmp;
+	$dbclass = 'Wadb_' . $infos['driver'];
 	
 	require WA_ROOTDIR . "/includes/sql/$infos[driver].php";
 	
 	$infos['username'] = isset($infos['user']) ? $infos['user'] : null;
 	$infos['passwd']   = isset($infos['pass']) ? $infos['pass'] : null;
 	
-	$db = new Wadb($infos['dbname']);
+	$db = new $dbclass($infos['dbname']);
 	$db->connect($infos, $options);
 	
 	return $db;

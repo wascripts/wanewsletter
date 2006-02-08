@@ -157,7 +157,9 @@ switch( $mode )
 	
 	case 'backup':
 	case 'restore':
-		if( !class_exists('WadbBackup') )
+		$backupclass = 'WadbBackup_' . SQL_DRIVER;
+		
+		if( !class_exists($backupclass) )
 		{
 			trigger_error('Database_unsupported', MESSAGE);
 		}
@@ -1054,7 +1056,7 @@ switch( $mode )
 		$backup_type = ( isset($_POST['backup_type']) ) ? intval($_POST['backup_type']) : 0;
 		$drop_option = ( !empty($_POST['drop_option']) ) ? true : false;
 		
-		$backup = new WadbBackup($infos);
+		$backup = new $backupclass($infos);// Voir ligne 160 pour $infos et $backupclass
 		$backup->eol = WA_EOL;
 		$tables_ary  = $backup->get_tables();
 		

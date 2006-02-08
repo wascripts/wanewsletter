@@ -25,9 +25,9 @@
  * @version $Id$
  */
 
-if( !defined('_INC_CLASS_WADB') ) {
+if( !defined('_INC_CLASS_WADB_MYSQL') ) {
 
-define('_INC_CLASS_WADB', true);
+define('_INC_CLASS_WADB_MYSQL', true);
 
 define('SQL_INSERT', 1);
 define('SQL_UPDATE', 2);
@@ -37,7 +37,7 @@ define('SQL_FETCH_NUM',   MYSQL_NUM);
 define('SQL_FETCH_ASSOC', MYSQL_ASSOC);
 define('SQL_FETCH_BOTH',  MYSQL_BOTH);
 
-class Wadb {
+class Wadb_mysql {
 	
 	/**
 	 * Connexion à la base de données
@@ -127,7 +127,7 @@ class Wadb {
 	 * 
 	 * @access public
 	 */
-	function Wadb($dbname, $options = null)
+	function Wadb_mysql($dbname, $options = null)
 	{
 		$this->dbname = $dbname;
 		
@@ -269,7 +269,7 @@ class Wadb {
 			$this->lastQuery = '';
 			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
-				$result = new WadbResult($this->link, $result);
+				$result = new WadbResult_mysql($this->link, $result);
 			}
 		}
 		
@@ -504,7 +504,7 @@ class Wadb {
 	}
 }
 
-class WadbResult {
+class WadbResult_mysql {
 	
 	/**
 	 * Connexion à la base de données
@@ -538,7 +538,7 @@ class WadbResult {
 	 * 
 	 * @access public
 	 */
-	function WadbResult($link, $result)
+	function WadbResult_mysql($link, $result)
 	{
 		$this->link   = $link;
 		$this->result = $result;
@@ -608,7 +608,7 @@ class WadbResult {
 	{
 		$row = mysql_fetch_array($this->result);
 		
-		return ($row != false && isset($row[$column])) ? $row[$column] : false;
+		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
 	
 	/**
@@ -657,7 +657,7 @@ class WadbResult {
 	}
 }
 
-class WadbBackup {
+class WadbBackup_mysql {
 	
 	/**
 	 * Informations concernant la base de données
@@ -682,7 +682,7 @@ class WadbBackup {
 	 * 
 	 * @access public
 	 */
-	function WadbBackup($infos)
+	function WadbBackup_mysql($infos)
 	{
 		$this->infos = $infos;
 		

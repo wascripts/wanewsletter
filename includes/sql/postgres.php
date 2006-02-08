@@ -25,9 +25,9 @@
  * @version $Id$
  */
 
-if( !defined('_INC_CLASS_WADB') ) {
+if( !defined('_INC_CLASS_WADB_POSTGRES') ) {
 
-define('_INC_CLASS_WADB', true);
+define('_INC_CLASS_WADB_POSTGRES', true);
 
 define('SQL_INSERT', 1);
 define('SQL_UPDATE', 2);
@@ -37,7 +37,7 @@ define('SQL_FETCH_NUM',   PGSQL_NUM);
 define('SQL_FETCH_ASSOC', PGSQL_ASSOC);
 define('SQL_FETCH_BOTH',  PGSQL_BOTH);
 
-class Wadb {
+class Wadb_postgres {
 	
 	/**
 	 * Connexion à la base de données
@@ -135,7 +135,7 @@ class Wadb {
 	 * 
 	 * @access public
 	 */
-	function Wadb($dbname, $options = null)
+	function Wadb_postgres($dbname, $options = null)
 	{
 		$this->dbname = $dbname;
 		
@@ -264,7 +264,7 @@ class Wadb {
 			}
 			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
-				$result = new WadbResult($this->link, $result);
+				$result = new WadbResult_postgres($this->link, $result);
 			}
 		}
 		
@@ -495,7 +495,7 @@ class Wadb {
 	}
 }
 
-class WadbResult {
+class WadbResult_postgres {
 	
 	/**
 	 * Connexion à la base de données
@@ -529,7 +529,7 @@ class WadbResult {
 	 * 
 	 * @access public
 	 */
-	function WadbResult($link, $result)
+	function WadbResult_postgres($link, $result)
 	{
 		$this->link   = $link;
 		$this->result = $result;
@@ -599,7 +599,7 @@ class WadbResult {
 	{
 		$row = pg_fetch_array($this->result);
 		
-		return ($row != false && isset($row[$column])) ? $row[$column] : false;
+		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
 	
 	/**
@@ -649,9 +649,9 @@ class WadbResult {
 }
 
 /**
- * Basé sur phpPgAdmin 2.4.2
+ * Certaines parties sont basées sur phpPgAdmin 2.4.2
  */
-class WadbBackup {
+class WadbBackup_postgres {
 	
 	/**
 	 * Informations concernant la base de données
@@ -676,7 +676,7 @@ class WadbBackup {
 	 * 
 	 * @access public
 	 */
-	function WadbBackup($infos)
+	function WadbBackup_postgres($infos)
 	{
 		$this->infos = $infos;
 		
