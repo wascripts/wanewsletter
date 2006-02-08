@@ -28,6 +28,7 @@
 if( !defined('CLASS_SESSION_INC') ) {
 
 define('CLASS_SESSION_INC', true);
+define('ENABLE_HTTP_AUTHENTICATION', TRUE);
 
 /**
  * Class Session
@@ -40,7 +41,6 @@ class Session {
 	 * Ip de l'utilisateur
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $user_ip      = '';
@@ -49,7 +49,6 @@ class Session {
 	 * Chaine éventuelle à ajouter à la fin des urls (contient l'identifiant de session)
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $sessid_url   = '';
@@ -58,7 +57,6 @@ class Session {
 	 * Identifiant de la session
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $session_id   = '';
@@ -67,7 +65,6 @@ class Session {
 	 * Données de la session
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $sessiondata  = array();
@@ -76,7 +73,6 @@ class Session {
 	 * Configuration pour l'envoi des cookies
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $cfg_cookie   = array();
@@ -85,7 +81,6 @@ class Session {
 	 * La session vient elle d'être créée ?
 	 * 
 	 * @var boolean
-	 * 
 	 * @access private
 	 */
 	var $new_session  = false;
@@ -94,14 +89,11 @@ class Session {
 	 * Statut utilisateur connecté/non connecté
 	 * 
 	 * @var boolean
-	 * 
 	 * @access private
 	 */
 	var $is_logged_in = false;
 	
 	/**
-	 * Session::session()
-	 * 
 	 * Intialisation de la classe, récupération de l'ip ..
 	 * 
 	 * @return void
@@ -164,13 +156,12 @@ class Session {
 	}
 	
 	/**
-	 * Session::open()
-	 * 
 	 * Ouverture d'une nouvelle session
 	 * 
 	 * @param array   $admindata    Données utilisateur
 	 * @param boolean $autologin    True si activer l'autoconnexion
 	 * 
+	 * @access public
 	 * @return array
 	 */
 	function open($admindata, $autologin)
@@ -222,12 +213,11 @@ class Session {
 	}
 	
 	/**
-	 * Session::check()
-	 * 
 	 * Vérification de la session et de l'utilisateur
 	 * 
 	 * @param integer $liste    Id de la liste actuellement gérée
 	 * 
+	 * @access public
 	 * @return mixed
 	 */ 
 	function check($liste = 0)
@@ -328,12 +318,58 @@ class Session {
 		//
 		// Connexion automatique 
 		//
+		$autologin = true;
+		$username  = $passwd = $authorization = null;
+		
+		//
+		// Authentification HTTP Basic
+		//
+		if( ENABLE_HTTP_AUTHENTICATION )
+		{
+			if( !empty($_SERVER['PHP_AUTH_USER']) )
+			{
+				$username = $_SERVER['PHP_AUTH_USER'];
+				
+				if( !empty($_SERVER['PHP_AUTH_PW']) )
+				{
+					$passwd = md5($_SERVER['PHP_AUTH_PW']);
+				}
+			}
+			
+			// Cas particulier : PHP en mode CGI
+			else if( !empty($_SERVER['REMOTE_USER']) )
+			{
+				$authorization = $_SERVER['REMOTE_USER'];
+			}
+			else if( !empty($_SERVER['REDIRECT_REMOTE_USER']) )// Dans certains cas de redirections internes
+			{
+				$authorization = $_SERVER['REDIRECT_REMOTE_USER'];
+			}
+			
+			// Cas particulier pour IIS et PHP4, dixit le manuel PHP
+			else if( !empty($_SERVER['HTTP_AUTHORIZATION']) )
+			{
+				$authorization = $_SERVER['HTTP_AUTHORIZATION'];
+			}
+			
+			if( !is_null($authorization) && strncasecmp($authorization, 'Basic ', 6) == 0 )
+			{
+				list($username, $passwd) = explode(':', base64_decode(substr($authorization, 6)));
+			}
+			
+			if( !is_null($username) )
+			{
+				$autologin = false;
+				$this->sessiondata['adminid'] = $username;
+				$this->sessiondata['adminloginkey'] = $passwd;
+			}
+		}
 		
 		if( !empty($this->sessiondata['adminloginkey']) )
 		{
-			$admin_id = ( !empty($this->sessiondata['adminid']) ) ? intval($this->sessiondata['adminid']) : 0;
+			$admin_id = ( !empty($this->sessiondata['adminid']) ) ? $this->sessiondata['adminid'] : 0;
 			
-			return $this->login($admin_id, $this->sessiondata['adminloginkey'], true);
+			return $this->login($admin_id, $this->sessiondata['adminloginkey'], $autologin);
 		}
 		else
 		{
@@ -345,12 +381,11 @@ class Session {
 	}
 	
 	/**
-	 * Session::logout()
-	 * 
 	 * Déconnexion de l'administration
 	 * 
 	 * @param integer $admin_id    Id de l'utilisateur concerné
 	 * 
+	 * @access public
 	 * @return void
 	 */
 	function logout($admin_id)
@@ -376,14 +411,13 @@ class Session {
 	}
 	
 	/**
-	 * Session::login()
-	 * 
 	 * Connexion à l'administration
 	 * 
 	 * @param mixed   $admin_mixed    Id ou pseudo de l'utilisateur concerné
 	 * @param string  $admin_pwd      Mot de passe de l'utilisateur
 	 * @param boolean $autologin      True si autoconnexion demandée
 	 * 
+	 * @access public
 	 * @return mixed
 	 */
 	function login($admin_mixed, $admin_pwd, $autologin)
@@ -418,14 +452,13 @@ class Session {
 	}
 	
 	/**
-	 * Session::send_cookie()
-	 * 
 	 * Envoi des cookies
 	 * 
 	 * @param string  $name           Nom du cookie
 	 * @param string  $cookie_data    Données à insérer dans le cookie
 	 * @param integer $cookie_time    Durée de validité du cookie
 	 * 
+	 * @access public
 	 * @return void
 	 */
 	function send_cookie($name, $cookie_data, $cookie_time)
@@ -441,13 +474,12 @@ class Session {
 	}
 	
 	/**
-	 * Session::encode_ip()
-	 * 
 	 * Encodage des IP pour stockage et comparaisons plus simples 
 	 * Importé de phpBB et modifié 
 	 * 
 	 * @param string $dotquat_ip
 	 * 
+	 * @access public
 	 * @return string
 	 */
 	function encode_ip($dotquad_ip)
@@ -457,13 +489,12 @@ class Session {
 	}
 	
 	/**
-	 * Session::decode_ip()
-	 * 
 	 * Décodage des IP 
 	 * Importé de phpBB et modifié 
 	 * 
 	 * @param string $hex_ip    Ip en hexadécimal
 	 * 
+	 * @access public
 	 * @return string
 	 */
 	function decode_ip($hex_ip)
@@ -476,8 +507,6 @@ class Session {
 }
 
 /**
- * sessid()
- * 
  * Ajout de l'identifiant de session dans l'url si les cookies sont refusés
  * 
  * @param string  $var       Url, texte (si $is_str à true)
