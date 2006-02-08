@@ -184,6 +184,7 @@ $lang['Message']['log_saved']               = "La newsletter a été sauvegardée a
 $lang['Message']['log_ready']               = "La newsletter a été sauvegardée avec succés et est prète à être envoyée";
 $lang['Message']['abo_deleted']             = "Les abonnés ont été supprimés avec succés";
 $lang['Message']['Send_canceled']           = "Opération effectuée. Tous les envois restants pour cette newsletter ont été annulés";
+$lang['Message']['List_is_busy']            = "Une opération est en cours sur cette liste. Veuillez patienter quelques instants et retenter la manipulation";
 
 $lang['Message']['Not_authorized']          = "Vous n'avez pas les permissions suffisantes pour accéder à cette page ou exécuter cette action";
 $lang['Message']['Not_auth_view']           = "Vous n'êtes pas autorisé à visualiser cette liste de diffusion";

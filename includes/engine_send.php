@@ -47,11 +47,62 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 {
 	global $nl_config, $db, $lang, $other_tags;
 	
-	require WAMAILER_DIR . '/class.mailer.php';
+	//
+	// On commence par poser un verrou sur un fichier lock,
+	// il ne faut pas qu'il y ait simultanément plusieurs flôts d'envois
+	// pour une même liste de diffusion.
+	//
+	$lockfile = sprintf(WA_LOCKFILE, $listdata['liste_id']);
+	
+	if( file_exists($lockfile) )
+	{
+		$fp = fopen($lockfile, 'r+');
+		$supp_address = null;// On en tient pas compte, ça l'a déjà été lors du premier flôt
+	}
+	else
+	{
+		$fp = fopen($lockfile, 'w');
+		@chmod($lockfile, 0600);
+	}
+	
+	if( !flock($fp, LOCK_EX|LOCK_NB) )
+	{
+		fclose($fp);
+		trigger_error('List_is_busy', MESSAGE);
+	}
+	
+	if( filesize($lockfile) > 0 )
+	{
+		//
+		// L'envoi a planté au cours d'un "flôt" précédent. On récupère les éventuels
+		// identifiants d'abonnés stockés dans le fichier lock et on met à jour la table
+		//
+		$abo_ids = fread($fp, filesize($lockfile));
+		$abo_ids = array_map('trim', explode("\n", trim($abo_ids)));
+		
+		if( count($abo_ids) > 0 )
+		{
+			$abo_ids = array_unique(array_map('intval', $abo_ids));
+			
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
+				SET send = 1
+				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
+					AND liste_id = " . $listdata['liste_id'];
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+			}
+		}
+		
+		ftruncate($fp, 0);
+		fseek($fp, 0);
+	}
 	
 	//
 	// Initialisation de la classe mailer
 	//
+	require WAMAILER_DIR . '/class.mailer.php';
+	
 	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 	
 	if( $nl_config['use_smtp'] )
@@ -183,15 +234,10 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	
 	//
-	// Mise à jour de la table abo_liste concernant les envois
+	// Si on en est au premier flôt, on récupère également les adresses email
+	// des administrateurs ayant activés l'option de réception de copie
 	//
-	$lockfile = sprintf(WA_LOCKFILE, $listdata['liste_id']);
-	
-	//
-	// L'envoi débute juste. On prend en compte les adresses supplémentaires ainsi que
-	// celles des administrateurs ayant activé l'option de réception de copie des envois
-	//
-	if( !file_exists($lockfile) )
+	if( is_array($supp_address) )
 	{
 		$sql = "SELECT a.admin_email
 			FROM " . ADMIN_TABLE . " AS a
@@ -210,33 +256,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		
 		$supp_address = array_unique($supp_address); // Au cas où...
 	}
-	
-	//
-	// L'envoi a démarré au cours d'un "flôt" précédent. On récupère les éventuels
-	// identifiants d'abonnés stockés dans le fichier lock
-	//
-	else if( filesize($lockfile) > 0 )
-	{
-		$abo_ids = array_map('trim', file($lockfile));
-		
-		if( count($abo_ids) > 0 )
-		{
-			$abo_ids = array_unique(array_map('intval', $abo_ids));
-			
-			$sql = "UPDATE " . ABO_LISTE_TABLE . "
-				SET send = 1
-				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
-					AND liste_id = " . $listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-			}
-		}
-	}
-	
-	$fw = fopen($lockfile, 'w');
-	@chmod($lockfile, 0600);
-	@flock($fw, LOCK_EX);
 	
 	//
 	// On récupère les infos sur les abonnés destinataires
@@ -315,7 +334,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
 				}
 				
-				fwrite($fw, implode("\n", $abo_ids[FORMAT_TEXTE])."\n");
+				fwrite($fp, implode("\n", $abo_ids[FORMAT_TEXTE])."\n");
 			}
 			
 			$mailer->clear_address();
@@ -337,7 +356,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
 				}
 				
-				fwrite($fw, implode("\n", $abo_ids[FORMAT_HTML])."\n");
+				fwrite($fp, implode("\n", $abo_ids[FORMAT_HTML])."\n");
 			}
 			
 			$abo_ids = array_merge($abo_ids[FORMAT_TEXTE], $abo_ids[FORMAT_HTML]);
@@ -485,7 +504,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				if( $mailer->send() && $row['abo_id'] != -1 )
 				{
 					array_push($abo_ids, $row['abo_id']);
-					fwrite($fw, "$row[abo_id]\n");
+					fwrite($fp, "$row[abo_id]\n");
 				}
 				
 				fake_header(true);
@@ -506,9 +525,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 		
 		$result->free();
-		
-		@flock($fw, LOCK_UN);
-		fclose($fw);
 	}
 	
 	//
@@ -571,21 +587,23 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	$result->free();
 	
+	ftruncate($fp, 0);
+	flock($fp, LOCK_UN);
+	fclose($fp);
+	
 	if( $no_send > 0 )
 	{
-		fclose(fopen($lockfile, 'w'));
-		
 		$message = sprintf($lang['Message']['Success_send'], $nl_config['emails_sended'], $sended, ($sended + $no_send));
 		
 		if( !defined('IN_COMMANDLINE') )
 		{
 			if( !empty($_GET['step']) && $_GET['step'] == 'auto' )
 			{
-				Location("envoi.php?progress=true&id=$logdata[log_id]&step=auto");
+				Location("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
 			}
 			
-			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], '<a href="' . sessid('./envoi.php?progress=true&amp;id=' . $logdata['log_id'] . '&amp;step=auto') . '">', '</a>');
-			$message .= '<br /><br />' .  sprintf($lang['Click_resend_manuel'], '<a href="' . sessid('./envoi.php?progress=true&amp;id=' . $logdata['log_id']) . '">', '</a>');
+			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id'] . '&amp;step=auto') . '">', '</a>');
+			$message .= '<br /><br />' .  sprintf($lang['Click_resend_manuel'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id']) . '">', '</a>');
 		}
 	}
 	else

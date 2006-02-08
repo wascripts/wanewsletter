@@ -184,6 +184,7 @@ $lang['Message']['log_saved']               = "The newsletter has been successfu
 $lang['Message']['log_ready']               = "The newsletter has been successfully saved and is ready to be sending";
 $lang['Message']['abo_deleted']             = "The subscribers have been successfully deleted";
 $lang['Message']['Send_canceled']           = "Operation successfully finished. All the remaining sendings for this newsletter have been canceled";
+$lang['Message']['List_is_busy']            = "Une opération est en cours sur cette liste. Veuillez patienter quelques instants et retenter la manipulation";
 
 $lang['Message']['Not_authorized']          = "You do not have sufficient permissions to access this page or to carry out this action";
 $lang['Message']['Not_auth_view']           = "You are not authorized to view this mailing list";
@@ -235,7 +236,7 @@ $lang['Message']['tmp_dir_not_writable']    = "The script's temporary files fold
 $lang['Message']['stats_dir_not_writable']  = "The script's statistics folder (stats/ by default) does not exist or does not have writing permissions set.";
 $lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading ! (setup/schemas/)";
 
-$lang['Message']['Ftp_unable_connect']      = "Impossible to connect to the ftp server";
+$lang['Message']['Ftp_unable_connect']      = "Unable to connect to the ftp server";
 $lang['Message']['Ftp_error_login']         = "Authentification with the ftp server has failed";
 $lang['Message']['Ftp_error_mode']          = "Impossible to change server mode";
 $lang['Message']['Ftp_error_path']          = "Impossible to access the specified folder";

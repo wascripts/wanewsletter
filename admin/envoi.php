@@ -74,7 +74,7 @@ if( isset($_POST['cancel']) )
 	Location('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 }
 
-$vararray = array('send', 'progress', 'save', 'delete', 'attach', 'unattach');
+$vararray = array('send', 'save', 'delete', 'attach', 'unattach');
 foreach( $vararray as $varname )
 {
 	if( isset($_REQUEST[$varname]) )
@@ -125,6 +125,19 @@ switch( $mode )
 			
 			$sended = $result->column('sended');
 			
+			//
+			// Suppression du fichier lock correspondant s'il existe
+			// et qu'aucun envoi n'est en cours.
+			//
+			$lockfile = sprintf(WA_LOCKFILE, $logdata['liste_id']);
+			
+			$fp = fopen($lockfile, (file_exists($lockfile) ? 'r+' : 'w'));
+			if( !flock($fp, LOCK_EX|LOCK_NB) )
+			{
+				fclose($fp);
+				trigger_error('List_is_busy', MESSAGE);
+			}
+			
 			$db->beginTransaction();
 			
 			$sql = "UPDATE " . LOG_TABLE . "
@@ -154,15 +167,9 @@ switch( $mode )
 			
 			$db->commit();
 			
-			//
-			// Suppression du fichier lock correspondant s'il existe
-			//
-			$lockfile = sprintf(WA_LOCKFILE, $logdata['liste_id']);
-			
-			if( file_exists($lockfile) )
-			{
-				unlink($lockfile);
-			}
+			flock($fp, LOCK_UN);
+			fclose($fp);
+			unlink($lockfile);
 			
 			trigger_error('Send_canceled', MESSAGE);
 		}
@@ -226,23 +233,32 @@ switch( $mode )
 				
 				if( file_exists($lockfile) && filesize($lockfile) > 0 )
 				{
-					$abo_ids = array_map('trim', file($lockfile));
+					$fp = fopen($lockfile, 'r+');
 					
-					if( count($abo_ids) > 0 )
+					if( flock($fp, LOCK_EX|LOCK_NB) )
 					{
-						$abo_ids = array_unique(array_map('intval', $abo_ids));
+						$abo_ids = fread($fp, filesize($lockfile));
+						$abo_ids = array_map('trim', explode("\n", trim($abo_ids)));
 						
-						$sql = "UPDATE " . ABO_LISTE_TABLE . "
-							SET send = 1
-							WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
-								AND liste_id = " . $liste_id;
-						if( !$db->query($sql) )
+						if( count($abo_ids) > 0 )
 						{
-							trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+							$abo_ids = array_unique(array_map('intval', $abo_ids));
+							
+							$sql = "UPDATE " . ABO_LISTE_TABLE . "
+								SET send = 1
+								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
+									AND liste_id = " . $liste_id;
+							if( !$db->query($sql) )
+							{
+								trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+							}
 						}
+						
+						ftruncate($fp, 0);
+						flock($fp, LOCK_UN);
 					}
 					
-					fclose(fopen($lockfile, 'w'));
+					fclose($fp);
 				}
 			}
 			
