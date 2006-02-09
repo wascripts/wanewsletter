@@ -84,19 +84,32 @@ if( $mode == 'download' )
 }
 
 //
-// Mode export : Export d'une archive et de ses fichiers joints via une archive Tarball
+// Mode export : Export d'une archive et de ses fichiers joints via une archive Tarball ou zip
 //
 else if( $mode == 'export' )
 {
-	$archive_name = 'newsletter.tar';
-	$compressed   = null;
-	$mime_type    = 'application/x-tar';
+	$compressed = null;
 	
-	if( extension_loaded('zlib') )
+	if( EXPORT_FORMAT == 'Zip' )
 	{
-		$archive_name .= '.gz';
-		$compressed    = 'gz';
-		$mime_type     = 'application/x-gzip';
+		$archive_name = 'newsletter.zip';
+		$mime_type    = 'application/zip';
+		$classname    = 'Archive_Zip';
+		$classfile    = 'Archive/Zip.php';
+	}
+	else
+	{
+		$archive_name = 'newsletter.tar';
+		$mime_type    = 'application/x-tar';
+		$classname    = 'Archive_Tar';
+		$classfile    = 'Archive/Tar.php';
+		
+		if( extension_loaded('zlib') )
+		{
+			$archive_name .= '.gz';
+			$compressed    = 'gz';
+			$mime_type     = 'application/x-gzip';
+		}
 	}
 	
 	$log_id = ( !empty($_GET['id']) ) ? intval($_GET['id']) : 0;
@@ -119,19 +132,19 @@ else if( $mode == 'export' )
 		trigger_error(sprintf($lang['Message']['Chdir_error'], WA_TMPDIR), ERROR);
 	}
 	
-	@include 'Archive/Tar.php';
+	@include $classfile;
 	
-	if( !class_exists('Archive_Tar') )
+	if( !class_exists($classname) )
 	{
 		//
-		// Le paquet PEAR Archive_Tar n'est pas installé ou n'est pas présent
+		// Le paquet PEAR Archive_Tar ou Archive_Zip n'est pas installé ou n'est pas présent
 		// dans le chemin d'inclusion
 		//
-		trigger_error('Archive_tar_needed', MESSAGE);
+		trigger_error(sprintf($lang['Message']['Archive_class_needed'], $classname), MESSAGE);
 	}
 	
-	$archive = new Archive_Tar($archive_name, $compressed);
-	$archive->setErrorHandling(PEAR_ERROR_TRIGGER, ERROR);
+	$archive = new $classname($archive_name, $compressed);
+	//$archive->setErrorHandling(PEAR_ERROR_TRIGGER, ERROR);
 	
 	if( !file_exists('newsletter') )
 	{

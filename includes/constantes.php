@@ -57,6 +57,21 @@ define('DISPLAY_ERRORS_IN_BLOCK', TRUE);
 define('TRANSLITE_INVALID_CHARS', FALSE);
 
 //
+// Format des exportations d'archive
+//
+define('EXPORT_FORMAT', 'Tar'); // Tar ou Zip (Attention, respecter la casse)
+
+//
+// Prise en compte de l'authentification HTTP pour la connexion automatique
+//
+define('ENABLE_HTTP_AUTHENTICATION', TRUE);
+
+
+//
+// Il est recommandé de ne rien modifier au-delà de cette ligne
+//
+
+//
 // Codes des messages d'erreur et d'information 
 //
 define('CRITICAL_ERROR', E_USER_WARNING);

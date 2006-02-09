@@ -263,7 +263,7 @@ $lang['Message']['Profil_cp_disabled']      = "The panel of management of accoun
 $lang['Message']['Inactive_account']        = "Your account is actually inactive, you had to receive an email to activate it.";
 $lang['Message']['IDs_sended']              = "Your identifiers were sent to you by email";
 $lang['Message']['Logs_sent']               = "The selected newsletters were sent at your address: %s";
-$lang['Message']['Archive_tar_needed']      = "The export module needs the <q>Archive_Tar</q> <abbr title=\"PHP Extension and Application Repository\" xml:lang=\"en\" lang=\"en\">PEAR</abbr> package. Please refer to the documentation for more details.";
+$lang['Message']['Archive_class_needed']    = "The export module needs the <q>%s</q> <abbr title=\"PHP Extension and Application Repository\">PEAR</abbr> package. Please refer to the documentation for more details.";
 $lang['Message']['Chdir_error']             = "Unable to set current directory with %s (chdir() error)";
 
 

@@ -28,7 +28,6 @@
 if( !defined('CLASS_SESSION_INC') ) {
 
 define('CLASS_SESSION_INC', true);
-define('ENABLE_HTTP_AUTHENTICATION', TRUE);
 
 /**
  * Class Session
@@ -319,13 +318,14 @@ class Session {
 		// Connexion automatique 
 		//
 		$autologin = true;
-		$username  = $passwd = $authorization = null;
 		
 		//
 		// Authentification HTTP Basic
 		//
 		if( ENABLE_HTTP_AUTHENTICATION )
 		{
+			$username = $passwd = $authorization = null;
+			
 			if( !empty($_SERVER['PHP_AUTH_USER']) )
 			{
 				$username = $_SERVER['PHP_AUTH_USER'];

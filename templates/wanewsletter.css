@@ -346,6 +346,10 @@ input[type="reset"],
 input[type="button"],
 input[type="submit"] { border: 1px outset silver;}
 
+input[type="reset"]:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover { background-color: #D6D8DA; }
+
 input[type="reset"]:active,
 input[type="button"]:active,
 input[type="submit"]:active { border-style: inset; }
