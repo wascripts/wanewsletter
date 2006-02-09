@@ -217,6 +217,26 @@ $sql_drop_sequence = array(
 	'DROP SEQUENCE wa_log_id_seq'
 );
 
+$sql_drop_generator = array(
+	'DROP GENERATOR wa_abonnes_gen',
+	'DROP GENERATOR wa_admin_gen',
+	'DROP GENERATOR wa_ban_list_gen',
+	'DROP GENERATOR wa_forbidden_ext_gen',
+	'DROP GENERATOR wa_joined_files_gen',
+	'DROP GENERATOR wa_liste_gen',
+	'DROP GENERATOR wa_log_gen'
+);
+
+$sql_drop_trigger = array(
+	'DROP TRIGGER wa_abonnes_gen_t',
+	'DROP TRIGGER wa_admin_gen_t',
+	'DROP TRIGGER wa_ban_list_gen_t',
+	'DROP TRIGGER wa_forbidden_ext_gen_t',
+	'DROP TRIGGER wa_joined_files_gen_t',
+	'DROP TRIGGER wa_liste_gen_t',
+	'DROP TRIGGER wa_log_gen_t'
+);
+
 $dsn = '';
 $lang    = $datetime = $msg_error = $_php_errors = array();
 $error   = false;
@@ -248,6 +268,7 @@ if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
 
 require WA_ROOTDIR . '/language/lang_' . $language . '.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';
+require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
 //
 // Vérification de la version de PHP disponible. Il nous faut la version 4.1.0 minimum

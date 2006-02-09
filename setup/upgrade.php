@@ -160,7 +160,7 @@ if( $start )
 		//
 		@set_time_limit(1200);
 		
-		$sql_create = make_sql_ary(implode('', file($sql_create)), $prefixe);
+		$sql_create = parseSQL(implode('', file($sql_create)), $prefixe);
 		
 		foreach( $sql_create as $query )
 		{

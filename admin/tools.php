@@ -1210,6 +1210,8 @@ switch( $mode )
 	case 'restore':
 		if( isset($_POST['submit']) )
 		{
+			require WA_ROOTDIR . '/includes/sql/sqlparser.php';
+			
 			//
 			// On règle le script pour ignorer une déconnexion du client et mener 
 			// la restauration à son terme
@@ -1315,7 +1317,7 @@ switch( $mode )
 				trigger_error($message, MESSAGE);
 			}
 			
-			$queries = make_sql_ary($data);
+			$queries = parseSQL($data);
 			
 			$db->beginTransaction();
 			

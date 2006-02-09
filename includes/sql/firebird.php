@@ -124,6 +124,14 @@ class Wadb_firebird {
 	var $clientVersion = '';
 	
 	/**
+	 * Statut de l'autocommit
+	 * 
+	 * @var boolean
+	 * @access private
+	 */
+	var $autocommit = true;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param string $dbname   Nom de la base de données
@@ -247,11 +255,13 @@ class Wadb_firebird {
 			$this->errno = 0;
 			$this->error = '';
 			
+			if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) && $this->autocommit ) {
+				ibase_commit($this->link);
+			}
+			
 			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
 				$result = new WadbResult_firebird($this->link, $result);
 			}
-			
-			ibase_commit($this->link);// TODO : temp
 		}
 		
 		return $result;
@@ -356,7 +366,7 @@ class Wadb_firebird {
 	 */
 	function beginTransaction()
 	{
-		return true; // TODO
+		$this->autocommit = false;
 	}
 	
 	/**
@@ -372,6 +382,7 @@ class Wadb_firebird {
 			ibase_rollback($this->link);
 		}
 		
+		$this->autocommit = true;
 		return $result;
 	}
 	
@@ -384,6 +395,7 @@ class Wadb_firebird {
 	 */
 	function rollBack()
 	{
+		$this->autocommit = true;
 		return ibase_rollback($this->link);
 	}
 	

@@ -55,6 +55,7 @@ require WA_ROOTDIR . '/includes/config.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';
+require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
 //
 // Gestionnaire d'erreur spécifique pour utilisation en ligne de commande
@@ -104,7 +105,7 @@ chmod($sqlite_db, 0666);
 // Création de la structure de base
 //
 $sqldata = file_get_contents($schemas_dir . '/sqlite_tables.sql');
-$queries = make_sql_ary($sqldata);
+$queries = parseSQL($sqldata);
 
 foreach( $queries as $query ) {
 	$pdo->query($query);

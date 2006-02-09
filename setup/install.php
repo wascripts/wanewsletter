@@ -198,25 +198,30 @@ if( $start )
 		
 		if( defined('NL_INSTALLED') )
 		{
+			exec_queries(str_replace('wa_', $prefixe, $sql_drop_index));
 			exec_queries(str_replace('wa_', $prefixe, $sql_drop_table));
 			
-			if( strncmp(SQL_DRIVER, 'mysql', 5) !== 0 )
+			if( SQL_DRIVER == 'postgres' )
 			{
-				exec_queries(str_replace('wa_', $prefixe, $sql_drop_index));
 				exec_queries(str_replace('wa_', $prefixe, $sql_drop_sequence));
+			}
+			else if( SQL_DRIVER == 'firebird' )
+			{
+				exec_queries(str_replace('wa_', $prefixe, $sql_drop_trigger));
+				exec_queries(str_replace('wa_', $prefixe, $sql_drop_generator));
 			}
 		}
 		
 		//
 		// Création des tables du script 
 		//
-		$sql_create = make_sql_ary(implode('', file($sql_create)), $prefixe);
+		$sql_create = parseSQL(implode('', file($sql_create)), $prefixe);
 		exec_queries($sql_create, true);
 		
 		//
 		// Insertion des données de base 
 		//
-		$sql_data = make_sql_ary(implode('', file($sql_data)), $prefixe);
+		$sql_data = parseSQL(implode('', file($sql_data)), $prefixe);
 		
 		$sql_data[] = "UPDATE " . ADMIN_TABLE . "
 			SET admin_login = '" . $db->escape($admin_login) . "',
