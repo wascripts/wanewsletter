@@ -56,11 +56,13 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	
 	if( file_exists($lockfile) )
 	{
+		$isBeginning = false;
 		$fp = fopen($lockfile, 'r+');
-		$supp_address = null;// On en tient pas compte, ça l'a déjà été lors du premier flôt
+		$supp_address = array();// On en tient pas compte, ça l'a déjà été lors du premier flôt
 	}
 	else
 	{
+		$isBeginning = true;
 		$fp = fopen($lockfile, 'w');
 		@chmod($lockfile, 0600);
 	}
@@ -237,7 +239,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	// Si on en est au premier flôt, on récupère également les adresses email
 	// des administrateurs ayant activés l'option de réception de copie
 	//
-	if( is_array($supp_address) )
+	if( $isBeginning )
 	{
 		$sql = "SELECT a.admin_email
 			FROM " . ADMIN_TABLE . " AS a
@@ -525,6 +527,14 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 		
 		$result->free();
+	}
+	else if( $isBeginning )
+	{
+		//
+		// Aucun abonné dont le champ send soit positionné à 0 et nous sommes au
+		// début de l'envoi. Cette liste ne comporte donc pas encore d'abonné.
+		//
+		trigger_error('No_subscribers', MESSAGE);
 	}
 	
 	//

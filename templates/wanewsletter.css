@@ -365,6 +365,7 @@ input.text, textarea, select {
 	color: black;
 }
 
+p select { font-size: 1em; }
 input[type="file"]  { font-size: .8em; font-weight: normal; color: black; }
 input[type="radio"] { vertical-align: sub; }
 

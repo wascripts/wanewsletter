@@ -319,10 +319,16 @@ switch( $mode )
 			
 			do
 			{
+				$percent = 0;
+				if( isset($data[$row['liste_id']]) )
+				{
+					$percent = wa_number_format(round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2));
+				}
+				
 				$output->assign_block_vars('logrow', array(
 					'LOG_ID'       => $row['log_id'],
 					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
-					'SEND_PERCENT' => wa_number_format(round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2))
+					'SEND_PERCENT' => $percent
 				));
 			}
 			while( $row = $result->fetch() );
@@ -733,7 +739,7 @@ switch( $mode )
 					trigger_error('Impossible de sauvegarder la newsletter', ERROR);
 				}
 				
-				if( $sql_type == 'INSERT' )
+				if( $sql_type == SQL_INSERT )
 				{
 					$tmp_id = $db->lastInsertId();
 				}
