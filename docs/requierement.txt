@@ -29,6 +29,7 @@ $_REQUEST                => 4.1.0
 $_GET, $_POST ..etc ..   => 4.1.0 plus besoin de transvaser les tab $HTTP_*_VARS
 version_compare()        => 4.1.0
 divers pg_*()            => 4.2.0 (voir includes/sql/postgres.php)
+array_change_key_case()  => 4.2.0 includes/sql/firebird.php
 pg_fetch_assoc()         => 4.3.0 (mais non utilisé dans Wanewsletter)
 paramètre charlist de
   trim(), ltrim() et rtrim() => 4.1.0

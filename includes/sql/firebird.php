@@ -170,6 +170,7 @@ class Wadb_firebird {
 		}
 		
 		$connect = 'ibase_connect';
+		$charset = null;
 		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
@@ -177,17 +178,15 @@ class Wadb_firebird {
 			if( !empty($this->options['persistent']) ) {
 				$connect = 'ibase_pconnect';
 			}
+			if( !empty($this->options['charset']) ) {
+				$charset = $this->options['charset'];
+			}
 		}
 		
-		if( !($this->link = $connect($this->dbname, $username, $passwd)) ) {
+		if( !($this->link = $connect($this->dbname, $username, $passwd, $charset)) ) {
 			$this->errno = function_exists('ibase_errcode') ? ibase_errcode() : 0;
 			$this->error = ibase_errmsg();
 			$this->link  = null;
-		}
-		else {
-			if( !empty($this->options['charset']) ) {
-				$this->encoding($this->options['charset']);
-			}
 		}
 	}
 	
@@ -563,6 +562,7 @@ class WadbResult_firebird {
 				
 				if( $row != false ) {
 					settype($row, 'array');
+					$row = array_change_key_case($row, CASE_LOWER);
 				}
 			}
 			
@@ -583,7 +583,12 @@ class WadbResult_firebird {
 	 */
 	function fetchObject()
 	{
-		return ibase_fetch_object($this->result, IBASE_TEXT);
+		$row = ibase_fetch_object($this->result, IBASE_TEXT);
+		settype($row, 'array');
+		$row = array_change_key_case($row, CASE_LOWER);
+		settype($row, 'object');
+		
+		return $row;
 	}
 	
 	/**

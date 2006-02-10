@@ -944,6 +944,7 @@ if( $start )
 			switch( WA_VERSION )
 			{
 				case '2.3-beta1':
+				case '2.3-beta2':
 					break;
 				
 				default:

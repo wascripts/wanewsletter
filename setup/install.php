@@ -198,9 +198,6 @@ if( $start )
 		
 		if( defined('NL_INSTALLED') )
 		{
-			exec_queries(str_replace('wa_', $prefixe, $sql_drop_index));
-			exec_queries(str_replace('wa_', $prefixe, $sql_drop_table));
-			
 			if( SQL_DRIVER == 'postgres' )
 			{
 				exec_queries(str_replace('wa_', $prefixe, $sql_drop_sequence));
@@ -210,6 +207,9 @@ if( $start )
 				exec_queries(str_replace('wa_', $prefixe, $sql_drop_trigger));
 				exec_queries(str_replace('wa_', $prefixe, $sql_drop_generator));
 			}
+			
+			exec_queries(str_replace('wa_', $prefixe, $sql_drop_index));
+			exec_queries(str_replace('wa_', $prefixe, $sql_drop_table));
 		}
 		
 		//
