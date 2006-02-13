@@ -149,7 +149,8 @@ $tmp_name = trim($tmp_name, '/');
 
 if( OPEN_BASEDIR_RESTRICTION && !is_writable(WA_ROOTDIR . '/' . $tmp_name) )
 {
-	trigger_error('tmp_dir_not_writable', MESSAGE);
+	load_settings();
+	$output->message('tmp_dir_not_writable');
 }
 
 define('WA_TMPDIR',    WA_ROOTDIR . '/' . $tmp_name, true);

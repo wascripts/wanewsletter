@@ -74,9 +74,8 @@ define('ENABLE_HTTP_AUTHENTICATION', TRUE);
 //
 // Codes des messages d'erreur et d'information 
 //
-define('CRITICAL_ERROR', E_USER_WARNING);
-define('ERROR',          E_USER_ERROR);
-define('MESSAGE',        E_USER_NOTICE);
+define('CRITICAL_ERROR', E_USER_ERROR);
+define('ERROR',          E_USER_WARNING);
 
 if( !defined('E_STRICT') ) // Compatibilité PHP5
 {

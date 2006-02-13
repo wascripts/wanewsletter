@@ -161,7 +161,7 @@ switch( $mode )
 		
 		if( !class_exists($backupclass) )
 		{
-			trigger_error('Database_unsupported', MESSAGE);
+			$output->message('Database_unsupported');
 		}
 		
 	case 'attach':
@@ -171,7 +171,7 @@ switch( $mode )
 			
 			$message  = $lang['Message']['Not_authorized'];
 			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		
 	case 'generator':
@@ -195,7 +195,7 @@ else if( $admindata['session_liste'] )
 {
 	if( !$auth->check_auth($auth_type, $admindata['session_liste']) )
 	{
-		trigger_error('Not_' . $auth->auth_ary[$auth_type], MESSAGE);
+		$output->message('Not_' . $auth->auth_ary[$auth_type]);
 	}
 	
 	$listdata = $auth->listdata[$admindata['session_liste']];
@@ -289,7 +289,7 @@ switch( $mode )
 		{
 			if( $action == 'store' && !is_writable(WA_TMPDIR) )
 			{
-				trigger_error('tmp_dir_not_writable', MESSAGE);
+				$output->message('tmp_dir_not_writable');
 			}
 			
 			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
@@ -362,7 +362,7 @@ switch( $mode )
 				fwrite($fw, $contents);
 				fclose($fw);
 				
-				trigger_error('Success_export', MESSAGE);
+				$output->message('Success_export');
 			}
 		}
 		
@@ -443,7 +443,7 @@ switch( $mode )
 						
 						$message  = sprintf($lang['Message']['Error_local'], htmlspecialchars($filename));
 						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=import') . '">', '</a>');
-						trigger_error($message, MESSAGE);
+						$output->message($message);
 					}
 				}
 				else
@@ -468,7 +468,7 @@ switch( $mode )
 							$upload_error = 'Upload_error_5';
 						}
 						
-						trigger_error($upload_error, MESSAGE);
+						$output->message($upload_error);
 					}
 					
 					//
@@ -482,21 +482,21 @@ switch( $mode )
 						
 						if( !move_uploaded_file($file_upload['tmp_name'], $tmp_filename) )
 						{
-							trigger_error('Upload_error_5', MESSAGE);
+							$output->message('Upload_error_5');
 						}
 					}
 				}
 				
 				if( !preg_match('/\.(txt|xml|zip|gz|bz2)$/i', $filename, $match) )
 				{
-					trigger_error('Bad_file_type', MESSAGE);
+					$output->message('Bad_file_type');
 				}
 				
 				$file_ext = $match[1];
 				
 				if( ( !$zziplib_loaded && $file_ext == 'zip' ) || ( !$zlib_loaded && $file_ext == 'gz' ) || ( !$bzip2_loaded && $file_ext == 'bz2' ) )
 				{
-					trigger_error('Compress_unsupported', MESSAGE);
+					$output->message('Compress_unsupported');
 				}
 				
 				$list_tmp = decompress_filedata($tmp_filename, $file_ext);
@@ -535,7 +535,7 @@ switch( $mode )
 				
 				$message  = $lang['Message']['No_data_received'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=import') . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				$output->message($message);
 			}
 			
 			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
@@ -583,18 +583,18 @@ switch( $mode )
 					
 					if( !xml_parse($parser, $list_tmp) )
 					{
-						trigger_error(sprintf(
+						$output->message(sprintf(
 							$lang['Message']['Invalid_xml_data'],
 							htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
 							xml_get_current_line_number($parser)
-						), MESSAGE);
+						));
 					}
 					
 					xml_parser_free($parser);
 				}
 				else
 				{
-					trigger_error('Xml_ext_needed', MESSAGE);
+					$output->message('Xml_ext_needed');
 				}
 			}
 			else
@@ -771,7 +771,7 @@ switch( $mode )
 				$message = $lang['Message']['Success_import'];
 			}
 			
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		
 		$output->addHiddenField('sessid', $session->session_id);
@@ -880,7 +880,7 @@ switch( $mode )
 			$message  = $lang['Message']['Success_modif'];
 			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=ban') . '">', '</a>');
 			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		
 		$sql = "SELECT ban_id, ban_email 
@@ -995,7 +995,7 @@ switch( $mode )
 			$message  = $lang['Message']['Success_modif'];
 			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=attach') . '">', '</a>');
 			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		
 		$sql = "SELECT fe_id, fe_ext 
@@ -1082,7 +1082,7 @@ switch( $mode )
 		{
 			if( $action == 'store' && !is_writable(WA_TMPDIR) )
 			{
-				trigger_error('tmp_dir_not_writable', MESSAGE);
+				$output->message('tmp_dir_not_writable');
 			}
 			
 			//
@@ -1134,7 +1134,7 @@ switch( $mode )
 				fwrite($fw, $contents);
 				fclose($fw);
 				
-				trigger_error('Success_backup', MESSAGE);
+				$output->message('Success_backup');
 			}
 		}
 		
@@ -1236,7 +1236,7 @@ switch( $mode )
 						
 						$message  = sprintf($lang['Message']['Error_local'], htmlspecialchars($filename));
 						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=restore') . '">', '</a>');
-						trigger_error($message, MESSAGE);
+						$output->message($message);
 					}
 				}
 				else
@@ -1260,7 +1260,7 @@ switch( $mode )
 							$upload_error = 'Upload_error_5';
 						}
 						
-						trigger_error($upload_error, MESSAGE);
+						$output->message($upload_error);
 					}
 					
 					//
@@ -1274,21 +1274,21 @@ switch( $mode )
 						
 						if( !move_uploaded_file($file_upload['tmp_name'], $tmp_filename) )
 						{
-							trigger_error('Upload_error_5', MESSAGE);
+							$output->message('Upload_error_5');
 						}
 					}
 				}
 				
 				if( !preg_match('/\.(sql|zip|gz|bz2)$/i', $filename, $match) )
 				{
-					trigger_error('Bad_file_type', MESSAGE);
+					$output->message('Bad_file_type');
 				}
 				
 				$file_ext = $match[1];
 				
 				if( ( !$zziplib_loaded && $file_ext == 'zip' ) || ( !$zlib_loaded && $file_ext == 'gz' ) || ( !$bzip2_loaded && $file_ext == 'bz2' ) )
 				{
-					trigger_error('Compress_unsupported', MESSAGE);
+					$output->message('Compress_unsupported');
 				}
 				
 				$data = decompress_filedata($tmp_filename, $file_ext);
@@ -1314,7 +1314,7 @@ switch( $mode )
 				
 				$message  = $lang['Message']['No_data_received'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=restore') . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				$output->message($message);
 			}
 			
 			$queries = parseSQL($data);
@@ -1332,7 +1332,7 @@ switch( $mode )
 			
 			$db->commit();
 			
-			trigger_error('Success_restore', MESSAGE);
+			$output->message('Success_restore');
 		}
 		
 		$output->addHiddenField('sessid', $session->session_id);

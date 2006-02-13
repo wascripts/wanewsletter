@@ -36,7 +36,7 @@ if( !$admindata['session_liste'] )
 
 if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 {
-	trigger_error('Not_auth_view', MESSAGE);
+	$output->message('Not_auth_view');
 }
 
 //
@@ -135,7 +135,7 @@ switch( $mode )
 			if( !flock($fp, LOCK_EX|LOCK_NB) )
 			{
 				fclose($fp);
-				trigger_error('List_is_busy', MESSAGE);
+				$output->message('List_is_busy');
 			}
 			
 			$db->beginTransaction();
@@ -171,7 +171,7 @@ switch( $mode )
 			fclose($fp);
 			unlink($lockfile);
 			
-			trigger_error('Send_canceled', MESSAGE);
+			$output->message('Send_canceled');
 		}
 		else
 		{
@@ -222,7 +222,7 @@ switch( $mode )
 				
 				$message  = $lang['Message']['No_log_found'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=progress') . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				$output->message($message);
 			}
 		}
 		else
@@ -298,7 +298,7 @@ switch( $mode )
 				
 				$message  = $lang['Message']['No_log_to_send'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_form'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				$output->message($message);
 			}
 			
 			$output->page_header();
@@ -355,7 +355,7 @@ switch( $mode )
 					{
 						$message  = $errstr;
 						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-						trigger_error($message, MESSAGE);
+						$output->message($message);
 					}
 					
 					$logdata['log_body_text'] = convert_encoding($result['data'], $result['charset']);
@@ -369,7 +369,7 @@ switch( $mode )
 					{
 						$message  = $errstr;
 						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-						trigger_error($message, MESSAGE);
+						$output->message($message);
 					}
 					
 					if( preg_match('/<head[^>]*>(.+?)<\/head>/is', $result['data'], $match_head) )
@@ -421,7 +421,7 @@ switch( $mode )
 					
 					$message  = $lang['Message']['log_not_exists'];
 					$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-					trigger_error($message, MESSAGE);
+					$output->message($message);
 				}
 				
 				$prev_status = $logdata['log_status'];
@@ -471,7 +471,7 @@ switch( $mode )
 				
 				$message  = $lang['Message']['No_log_to_load'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_form'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				$output->message($message);
 			}
 			
 			$output->addHiddenField('mode',   'load');
@@ -535,7 +535,7 @@ switch( $mode )
 			
 			$message  = $lang['Message']['No_log_id'];
 			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		
 		if( isset($_POST['confirm']) )
@@ -565,7 +565,7 @@ switch( $mode )
 			
 			$message  = $lang['Message']['log_deleted'];
 			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		else
 		{
@@ -825,7 +825,7 @@ switch( $mode )
 						$message .= '<br /><br />' . sprintf($lang['Click_start_send'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id']) . '">', '</a>');
 					}
 					
-					trigger_error($message, MESSAGE);
+					$output->message($message);
 				}
 			}
 		}
@@ -975,7 +975,7 @@ if( $mode == 'progress' )
 {
 	if( !$auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
 	{
-		trigger_error('Not_auth_send', MESSAGE);
+		$output->message('Not_auth_send');
 	}
 	
 	require WA_ROOTDIR . '/includes/engine_send.php';
@@ -999,7 +999,7 @@ if( $mode == 'progress' )
 	//
 	$message = launch_sending($listdata, $logdata);
 	
-	trigger_error(nl2br($message), MESSAGE);
+	$output->message(nl2br($message));
 }
 
 $subject   = htmlspecialchars($logdata['log_subject']);

@@ -77,7 +77,7 @@ if( $listdata = $result->fetch() )
 		
 		if( !($logdata = $result->fetch()) )
 		{
-			trigger_error('No_log_to_send', MESSAGE);
+			$output->message('No_log_to_send');
 		}
 		
 		$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
@@ -99,7 +99,7 @@ if( $listdata = $result->fetch() )
 		//
 		$message = launch_sending($listdata, $logdata);
 		
-		trigger_error(nl2br($message), MESSAGE);
+		$output->message(nl2br($message));
 	}
 	else if( $mode == 'validate' )
 	{
@@ -227,7 +227,7 @@ if( $listdata = $result->fetch() )
 		
 		$pop->quit();
 		
-		trigger_error('Success_operation', MESSAGE);
+		$output->message('Success_operation');
 	}
 	else
 	{

@@ -250,8 +250,7 @@ BASIC;
 			exit;
 			break;
 		
-		case ERROR:			
-		case MESSAGE:
+		case ERROR:
 			if( defined('IN_CRON') )
 			{
 				exit($errstr);
@@ -259,14 +258,7 @@ BASIC;
 			
 			if( !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
 			{
-				if( $errno == ERROR )
-				{
-					$msg_title = '<span style="color: #DD3333;">' . $lang['Title']['error'] . '</span>';
-				}
-				else if( $errno == MESSAGE )
-				{
-					$msg_title = '<span style="color: #33DD33;">' . $lang['Title']['info'] . '</span>';
-				}
+				$title = '<span style="color: #DD3333;">' . $lang['Title']['error'] . '</span>';
 				
 				if( !defined('HEADER_INC') )
 				{
@@ -278,7 +270,7 @@ BASIC;
 				));
 				
 				$output->assign_vars( array(
-					'MSG_TITLE' => $msg_title,
+					'MSG_TITLE' => $title,
 					'MSG_TEXT'  => $errstr
 				));
 				
@@ -371,11 +363,7 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 		$errstr = wan_utf8_encode($errstr);
 	}
 	
-	if( $errno == MESSAGE )
-	{
-		fputs(STDOUT, $errstr . "\n");
-	}
-	else if( $errno != E_STRICT && ( DEBUG_MODE == 3 || $display_error ) )
+	if( $errno != E_STRICT && ( DEBUG_MODE == 3 || $display_error ) )
 	{
 		fputs(STDERR, 'Error: ' . $errstr . "\n");
 	}

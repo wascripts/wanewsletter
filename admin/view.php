@@ -73,7 +73,7 @@ if( $mode == 'download' )
 {
 	if( !$auth->check_auth(AUTH_VIEW, $listdata['liste_id']) )
 	{
-		trigger_error('Not_auth_view', MESSAGE);
+		$output->message('Not_auth_view');
 	}
 	
 	require WA_ROOTDIR . '/includes/class.attach.php';
@@ -140,7 +140,7 @@ else if( $mode == 'export' )
 		// Le paquet PEAR Archive_Tar ou Archive_Zip n'est pas installé ou n'est pas présent
 		// dans le chemin d'inclusion
 		//
-		trigger_error(sprintf($lang['Message']['Archive_class_needed'], $classname), MESSAGE);
+		$output->message(sprintf($lang['Message']['Archive_class_needed'], $classname));
 	}
 	
 	$archive = new $classname($archive_name, $compressed);
@@ -311,7 +311,7 @@ else if( $mode == 'abonnes' )
 	
 	if( !$auth->check_auth($auth_type, $listdata['liste_id']) )
 	{
-		trigger_error('Not_' . $auth->auth_ary[$auth_type], MESSAGE);
+		$output->message('Not_' . $auth->auth_ary[$auth_type]);
 	}
 	
 	$abo_id     = ( !empty($_REQUEST['id']) ) ? intval($_REQUEST['id']) : 0;
@@ -380,7 +380,7 @@ else if( $mode == 'abonnes' )
 	if( ($action == 'view' || $action == 'edit') && !$abo_id )
 	{
 		$output->redirect('./view.php?mode=abonnes', 4);
-		trigger_error('No_abo_id', MESSAGE);
+		$output->message('No_abo_id');
 	}
 	
 	//
@@ -463,7 +463,7 @@ else if( $mode == 'abonnes' )
 		}
 		else
 		{
-			trigger_error('abo_not_exists', MESSAGE);
+			$output->message('abo_not_exists');
 		}
 	}
 	
@@ -509,7 +509,7 @@ else if( $mode == 'abonnes' )
 				//
 				if( count($result_ids) == 0 )
 				{
-					trigger_error('Not_auth_edit', MESSAGE);
+					$output->message('Not_auth_edit');
 				}
 				
 				$sql_data = array(
@@ -554,7 +554,7 @@ else if( $mode == 'abonnes' )
 				$message  = $lang['Message']['Profile_updated'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_abo_profile'],
 					'<a href="' . sessid('./view.php?mode=abonnes&action=view&id=' . $abo_id) . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				$output->message($message);
 			}
 		}
 		
@@ -620,7 +620,7 @@ else if( $mode == 'abonnes' )
 		}
 		else
 		{
-			trigger_error('abo_not_exists', MESSAGE);
+			$output->message('abo_not_exists');
 		}
 	}
 	
@@ -640,7 +640,7 @@ else if( $mode == 'abonnes' )
 		if( $email_list == '' && count($abo_ids) == 0 )
 		{
 			$output->redirect('./view.php?mode=abonnes', 4);
-			trigger_error('No_abo_id', MESSAGE);
+			$output->message('No_abo_id');
 		}
 		
 		if( isset($_POST['confirm']) )
@@ -710,7 +710,7 @@ else if( $mode == 'abonnes' )
 			
 			$message  = $lang['Message']['abo_deleted'];
 			$message .= '<br /><br />' . sprintf($lang['Click_return_abo'], '<a href="' . sessid('./view.php?mode=abonnes') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		else
 		{
@@ -737,7 +737,7 @@ else if( $mode == 'abonnes' )
 				if( $sql_list == '' )
 				{
 					$output->redirect('./view.php?mode=abonnes', 4);
-					trigger_error('No_abo_id', MESSAGE);
+					$output->message('No_abo_id');
 				}
 				
 				$sql = "SELECT a.abo_id
@@ -761,7 +761,7 @@ else if( $mode == 'abonnes' )
 				else
 				{
 					$output->redirect('./view.php?mode=abonnes', 4);
-					trigger_error('No_abo_email', MESSAGE);
+					$output->message('No_abo_email');
 				}
 			}
 			else
@@ -986,7 +986,7 @@ else if( $mode == 'liste' )
 				
 				$message  = $lang['Message']['Not_authorized'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				$output->message($message);
 			}
 			
 			$auth_type = false;
@@ -1007,7 +1007,7 @@ else if( $mode == 'liste' )
 	
 	if( $auth_type && !$auth->check_auth($auth_type, $admindata['session_liste']) )
 	{
-		trigger_error('Not_' . $auth->auth_ary[$auth_type], MESSAGE);
+		$output->message('Not_' . $auth->auth_ary[$auth_type]);
 	}
 	
 	//
@@ -1160,7 +1160,7 @@ else if( $mode == 'liste' )
 				
 				$message  = ( $action == 'add' ) ? $lang['Message']['liste_created'] : $lang['Message']['liste_edited'];
 				$message .= '<br /><br />' . sprintf($lang['Click_return_liste'], '<a href="' . sessid('./view.php?mode=liste') . '">', '</a>');
-				trigger_error($message, MESSAGE);
+				$output->message($message);
 			}
 		}
 		else if( $action == 'edit' )
@@ -1507,7 +1507,7 @@ else if( $mode == 'liste' )
 			
 			$message  = ( isset($_POST['delete_all']) ) ? $lang['Message']['Liste_del_all'] : nl2br($lang['Message']['Liste_del_move']);
 			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		else
 		{
@@ -1572,7 +1572,7 @@ else if( $mode == 'liste' )
 		
 		$message  = sprintf($lang['Message']['Success_purge'], $abo_deleted);
 		$message .= '<br /><br />' . sprintf($lang['Click_return_liste'], '<a href="' . sessid('./view.php?mode=liste') . '">', '</a>');
-		trigger_error($message, MESSAGE); 
+		$output->message($message); 
 	}
 	
 	//
@@ -1759,7 +1759,7 @@ else if( $mode == 'log' )
 	
 	if( !$auth->check_auth($auth_type, $listdata['liste_id']) )
 	{
-		trigger_error('Not_' . $auth->auth_ary[$auth_type], MESSAGE);
+		$output->message('Not_' . $auth->auth_ary[$auth_type]);
 	}
 	
 	$log_id = ( !empty($_GET['id']) ) ? intval($_GET['id']) : 0;
@@ -1774,7 +1774,7 @@ else if( $mode == 'log' )
 		if( count($log_ids) == 0 )
 		{
 			$output->redirect('./view.php?mode=log', 4);
-			trigger_error('No_log_id', MESSAGE);
+			$output->message('No_log_id');
 		}
 		
 		if( isset($_POST['confirm']) )
@@ -1804,7 +1804,7 @@ else if( $mode == 'log' )
 			
 			$message  = $lang['Message']['logs_deleted'];
 			$message .= '<br /><br />' . sprintf($lang['Click_return_logs'], '<a href="' . sessid('./view.php?mode=log') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 		else
 		{

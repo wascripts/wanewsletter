@@ -36,7 +36,7 @@ if( $admindata['admin_level'] != ADMIN )
 	
 	$message  = $lang['Message']['Not_authorized'];
 	$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-	trigger_error($message, MESSAGE);
+	$output->message($message);
 }
 
 $sql = "SELECT * FROM " . CONFIG_TABLE;
@@ -223,7 +223,7 @@ if( isset($_POST['submit']) )
 		}
 		
 		$output->redirect('index.php', 4);
-		trigger_error('Success_modif', MESSAGE);
+		$output->message('Success_modif');
 	}
 }
 else

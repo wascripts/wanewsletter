@@ -667,7 +667,7 @@ class Attach {
 	 */
 	function download_file($file_id)
 	{
-		global $db, $listdata, $lang;
+		global $db, $listdata, $lang, $output;
 		
 		$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 			FROM " . JOINED_FILES_TABLE . " AS jf
@@ -708,7 +708,7 @@ class Attach {
 			$this->send_file($row['file_real_name'], $row['file_mimetype'], $data, $row['file_size']);
 		}
 		
-		trigger_error(sprintf($lang['Message']['File_not_exists'], ''), MESSAGE);
+		$output->message(sprintf($lang['Message']['File_not_exists'], ''));
 	}
 	
 	/**

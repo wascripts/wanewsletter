@@ -36,11 +36,11 @@ require WA_ROOTDIR . '/includes/functions.stats.php';
 //
 if( $nl_config['disable_stats'] )
 {
-	trigger_error('Stats_disabled', MESSAGE);
+	$output->message('Stats_disabled');
 }
 else if( !extension_loaded('gd') )
 {
-	trigger_error('No_gd_lib', MESSAGE);
+	$output->message('No_gd_lib');
 }
 
 $liste_ids = $auth->check_auth(AUTH_VIEW);
@@ -52,7 +52,7 @@ if( !$admindata['session_liste'] )
 
 if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 {
-	trigger_error('Not_auth_view', MESSAGE);
+	$output->message('Not_auth_view');
 }
 
 $listdata = $auth->listdata[$admindata['session_liste']];

@@ -70,7 +70,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	if( !flock($fp, LOCK_EX|LOCK_NB) )
 	{
 		fclose($fp);
-		trigger_error('List_is_busy', MESSAGE);
+		$output->message('List_is_busy');
 	}
 	
 	if( filesize($lockfile) > 0 )
@@ -534,7 +534,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		// Aucun abonné dont le champ send soit positionné à 0 et nous sommes au
 		// début de l'envoi. Cette liste ne comporte donc pas encore d'abonné.
 		//
-		trigger_error('No_subscribers', MESSAGE);
+		$output->message('No_subscribers');
 	}
 	
 	//

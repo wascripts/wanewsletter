@@ -51,7 +51,7 @@ if( ( $mode == 'adduser' || $mode == 'deluser' ) && $admindata['admin_level'] !=
 	
 	$message  = $lang['Message']['Not_authorized'];
 	$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-	trigger_error($message, MESSAGE);
+	$output->message($message);
 }
 
 if( $mode == 'adduser' )
@@ -147,7 +147,7 @@ if( $mode == 'adduser' )
 			$message  = $lang['Message']['Admin_added'];
 			$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php') . '">', '</a>');
 			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			trigger_error($message, MESSAGE);
+			$output->message($message);
 		}
 	}
 	
@@ -183,7 +183,7 @@ else if( $mode == 'deluser' )
 {
 	if( $admindata['admin_id'] == $admin_id )
 	{
-		trigger_error('Owner_account', MESSAGE);
+		$output->message('Owner_account');
 	}
 	
 	if( isset($_POST['confirm']) )
@@ -216,7 +216,7 @@ else if( $mode == 'deluser' )
 		$message  = $lang['Message']['Admin_deleted'];
 		$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php') . '">', '</a>');
 		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		trigger_error($message, MESSAGE);
+		$output->message($message);
 	}
 	else
 	{
@@ -255,7 +255,7 @@ if( isset($_POST['submit']) )
 		
 		$message  = $lang['Message']['Not_authorized'];
 		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		trigger_error($message, MESSAGE);
+		$output->message($message);
 	}
 	
 	$vararray = array('current_pass', 'new_pass', 'confirm_pass', 'email', 'dateformat', 'language');
@@ -423,7 +423,7 @@ if( isset($_POST['submit']) )
 		$message  = $lang['Message']['Profile_updated'];
 		$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php?admin_id=' . $admin_id) . '">', '</a>');
 		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		trigger_error($message, MESSAGE);
+		$output->message($message);
 	}
 }
 

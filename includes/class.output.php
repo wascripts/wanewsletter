@@ -274,7 +274,7 @@ class output extends Template {
 			$this->addLink('chapter', './tools.php?mode=ban',       $lang['Title']['ban']);
 			$this->addLink('chapter', './tools.php?mode=generator', $lang['Title']['generator']);
 			
-			if( $admindata['admin_level'] == ADMIN )
+			if( isset($admindata['admin_level']) && $admindata['admin_level'] == ADMIN )
 			{
 				$this->addLink('chapter', './tools.php?mode=attach' , $lang['Title']['attach']);
 				$this->addLink('chapter', './tools.php?mode=backup' , $lang['Title']['backup']);
@@ -299,7 +299,7 @@ class output extends Template {
 			$page_title = $lang['Title']['profil_cp'];
 		}
 		
-		if( !defined('IN_ADMIN') )
+		if( !defined('IN_ADMIN') || empty($admindata['admin_login']) )
 		{
 			$l_logout = $lang['Module']['logout'];
 		}
@@ -532,6 +532,67 @@ BASIC;
 		exit;
 	}
 	
+	/**
+	 * output::message()
+	 * 
+	 * Affiche de message d'information
+	 * 
+	 * @param string $str
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function message($str)
+	{
+		global $lang, $message, $php_errormsg;
+		
+		if( !empty($lang['Message'][$str]) )
+		{
+			$str = nl2br($lang['Message'][$str]);
+		}
+		
+		if( defined('IN_CRON') )
+		{
+			exit($str);
+		}
+		
+		if( !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
+		{
+			$title = '<span style="color: #33DD33;">' . $lang['Title']['info'] . '</span>';
+			
+			if( !defined('HEADER_INC') )
+			{
+				$this->page_header();
+			}
+			
+			$this->set_filenames(array(
+				'body' => 'message_body.tpl'
+			));
+			
+			$this->assign_vars( array(
+				'MSG_TITLE' => $title,
+				'MSG_TEXT'  => $str
+			));
+			
+			$this->pparse('body');
+			
+			$this->page_footer();
+			exit;
+		}
+		
+		$message = $str;
+	}
+	
+	/**
+	 * output::error_box()
+	 * 
+	 * Génération et affichage de liste d'erreur
+	 * 
+	 * @param string $msg_error
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	function error_box($msg_error)
 	{
 		$error_box = "<ul id=\"errorbox\">\n\t<li> ";
@@ -729,7 +790,7 @@ BASIC;
 					$message .= '<br /><br />' . sprintf($lang['Click_create_liste'], '<a href="' . sessid('./view.php?mode=liste&amp;action=add') . '">', '</a>');
 				}
 				
-				trigger_error($message, MESSAGE);
+				$this->message($message);
 			}
 			
 			return '';
