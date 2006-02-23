@@ -249,7 +249,6 @@ switch( $mode )
 					);
 				}
 				
-				$mailer->correctRpath = !is_disabled_func('ini_set');
 				$mailer->set_charset($lang['CHARSET']);
 				$mailer->set_format(FORMAT_TEXTE);
 				
@@ -475,7 +474,6 @@ switch( $mode )
 				);
 			}
 			
-			$mailer->correctRpath = !is_disabled_func('ini_set');
 			$mailer->set_charset($lang['CHARSET']);
 			
 			if( $abodata['pseudo'] != '' )

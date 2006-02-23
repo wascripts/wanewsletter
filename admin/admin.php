@@ -122,8 +122,6 @@ if( $mode == 'adduser' )
 				);
 			}
 			
-			$mailer->correctRpath = !is_disabled_func('ini_set');
-			
 			$mailer->set_charset($lang['CHARSET']);
 			$mailer->set_format(FORMAT_TEXTE);
 			$mailer->set_from($admindata['admin_email'], $admindata['admin_login']);
@@ -398,8 +396,6 @@ if( isset($_POST['submit']) )
 					$nl_config['smtp_pass']
 				);
 			}
-			
-			$mailer->correctRpath = !is_disabled_func('ini_set');
 			
 			$mailer->set_charset($lang['CHARSET']);
 			$mailer->set_format(FORMAT_TEXTE);

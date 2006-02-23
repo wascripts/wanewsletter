@@ -118,7 +118,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		);
 	}
 	
-	$mailer->correctRpath = !is_disabled_func('ini_set');
 	$mailer->set_charset($lang['CHARSET']);
 	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
 	

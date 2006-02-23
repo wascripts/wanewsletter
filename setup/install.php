@@ -295,8 +295,14 @@ if( !defined('NL_INSTALLED') )
 		$urlscript = preg_replace('/^(.*?)\/setup\/?$/i', '\\1/', dirname(server_info('PHP_SELF')));
 	}
 	
+	$l_explain = nl2br(sprintf($lang['Welcome_in_install'],
+		'<a href="' . WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
+		'<a href="' . WA_ROOTDIR . '/COPYING">', '</a>',
+		'<a href="http://phpcodeur.net/wascripts/GPL">', '</a>'
+	));
+	
 	$output->assign_block_vars('install', array(
-		'L_EXPLAIN'         => nl2br( sprintf($lang['Welcome_in_install'], '<a href="' . WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>')),
+		'L_EXPLAIN'         => $l_explain,
 		'TITLE_DATABASE'    => $lang['Title']['database'],
 		'TITLE_ADMIN'       => $lang['Title']['admin'],
 		'TITLE_DIVERS'      => $lang['Title']['config_divers'],

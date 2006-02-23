@@ -80,7 +80,6 @@ if( $mode == 'sendpass' )
 				);
 			}
 			
-			$mailer->correctRpath = !is_disabled_func('ini_set');
 			$mailer->set_charset($lang['CHARSET']);
 			$mailer->set_format(FORMAT_TEXTE);
 			$mailer->set_from($email);

@@ -124,9 +124,9 @@ p#explain {
 	border-color: black;
 	padding: 0 .8%;
 	line-height: 1.35em;
+	text-align: left;
 	font-weight: normal;
 	font-size: .7em;
-	text-align: justify;
 	color: black;
 }
 
@@ -213,7 +213,7 @@ div.left p, div.right p {
 	background-color: transparent;
 	margin: 0;
 	padding: 1em;
-	text-align: justify;
+	text-align: left;
 	font-weight: normal;
 	font-size: .7em;
 	line-height: 1.2em;
