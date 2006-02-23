@@ -32,25 +32,6 @@ define('WM_HOST_ONLINE',   2);
 define('WM_SMTP_MODE',     3);
 define('WM_SENDMAIL_MODE', 4);
 
-//
-// Version de php sous forme d'entier
-// Vu dans defines_php.lib.php de phpMyAdmin 2.5.0
-//
-$num = 0;
-
-if( preg_match('/^([0-9]{1,2})\.([0-9]{1,2})(?:\.([0-9]{1,2}))?/', phpversion(), $match) )
-{
-	if( !isset($match[3]) )
-	{
-		$match[3] = 0;
-	}
-	
-	$num = (int) sprintf('%d%02d%02d', $match[1], $match[2], $match[3]);
-}
-
-define('WM_PHP_VERSION', $num);
-unset($num);
-
 /**
  * Classe d'envois d'emails
  * 
@@ -77,8 +58,7 @@ class Mailer {
 	/**
 	 * Activation du mode smtp
 	 * 
-	 * @var booleen
-	 * 
+	 * @var boolean
 	 * @access public
 	 */
 	var $smtp_mode             = FALSE;
@@ -90,7 +70,6 @@ class Mailer {
 	 * (la classe smtp doit alors être dans le même dossier que la présente classe)
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $smtp_path             = '';
@@ -99,7 +78,6 @@ class Mailer {
 	 * Variable qui contiendra l'objet smtp
 	 * 
 	 * @var object
-	 * 
 	 * @access public
 	 */
 	var $smtp                  = NULL;
@@ -111,7 +89,6 @@ class Mailer {
 	 * appel à la méthode quit() de la classe smtp : $mailer->smtp->quit(); 
 	 * 
 	 * @var boolean
-	 * 
 	 * @access public
 	 */
 	var $persistent_connection = FALSE;
@@ -123,8 +100,7 @@ class Mailer {
 	/**
 	 * Activation du mode sendmail
 	 * 
-	 * @var booleen
-	 * 
+	 * @var boolean
 	 * @access public
 	 */
 	var $sendmail_mode           = FALSE;
@@ -133,7 +109,6 @@ class Mailer {
 	 * Chemin d'accés à sendmail
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $sendmail_path           = '/usr/sbin/sendmail';
@@ -142,7 +117,6 @@ class Mailer {
 	 * Paramètres de commandes complémentaires
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $sendmail_cmd           = '';
@@ -153,7 +127,6 @@ class Mailer {
 	 * Chemins par défaut pour les modèles d'emails 
 	 *
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $root                   = './';
@@ -162,7 +135,6 @@ class Mailer {
 	 * Extensions des modèles au format texte
 	 *
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $text_tpl_ext           = 'txt';
@@ -171,7 +143,6 @@ class Mailer {
 	 * Extensions des modèles au format html
 	 *
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $html_tpl_ext           = 'html';
@@ -183,7 +154,6 @@ class Mailer {
 	 * 2 ou WM_HOST_ONLINE pour la fonction email() de online
 	 *
 	 * @var integer
-	 * 
 	 * @access public
 	 */
 	var $hebergeur              = WM_HOST_OTHER;
@@ -196,7 +166,6 @@ class Mailer {
 	 * 3 - Multi-format (html affiché, et texte si html pas supporté)
 	 * 
 	 * @var integer
-	 * 
 	 * @access public
 	 */
 	var $format                 = 1;
@@ -205,7 +174,6 @@ class Mailer {
 	 * Adresse de l'expéditeur 
 	 * 
 	 * @var array
-	 * 
 	 * @access public
 	 */
 	var $from                   = array('email' => '', 'name' => '');
@@ -214,7 +182,6 @@ class Mailer {
 	 * Adresse de l'expéditeur (spécifique à Online)
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $from_online            = '';
@@ -223,7 +190,6 @@ class Mailer {
 	 * Adresse de réponse (spécifique à Online)
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $reply_online           = '';
@@ -232,7 +198,6 @@ class Mailer {
 	 * Tableau des destinataires
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $address                = array('To' => array(), 'Cc' => array(), 'Bcc' => array());
@@ -241,7 +206,6 @@ class Mailer {
 	 * Sujet de l'email
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $subject                = '';
@@ -250,7 +214,6 @@ class Mailer {
 	 * Messages non compilés, selon le format
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $uncompiled_message     = array();
@@ -259,7 +222,6 @@ class Mailer {
 	 * Messages alternatifs non compilés, selon le format
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $uncompiled_altmessage  = array();
@@ -268,7 +230,6 @@ class Mailer {
 	 * Messages compilés, selon le format
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $compiled_message       = array();
@@ -277,7 +238,6 @@ class Mailer {
 	 * Tableau des tags à remplacer dans le message
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $tags                   = array();
@@ -286,7 +246,6 @@ class Mailer {
 	 * Tableau des blocks à remplacer dans le message, ainsi que les tags qui leur sont associés
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $block_tags             = array();
@@ -295,7 +254,6 @@ class Mailer {
 	 * "Frontières" utilisées pour séparer les différentes parties de l'email
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $boundary               = array('part0' => array(), 'part1' => array(), 'part2' => array());
@@ -304,7 +262,6 @@ class Mailer {
 	 * Tableau des fichiers attachés
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */ 
 	var $attachfile             = array('path' => array(), 'name' => array(), 'mimetype' => array(), 'disposition' => array());
@@ -313,7 +270,6 @@ class Mailer {
 	 * Tableau des fichiers incorporés (spécifique aux emails au format html)
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $embeddedfile           = array('path' => array(), 'name' => array(), 'mimetype' => array());
@@ -322,7 +278,6 @@ class Mailer {
 	 * Tableau des en-têtes de l'email
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $headers                = array();
@@ -331,7 +286,6 @@ class Mailer {
 	 * Jeu de caractère utilisé dans l'email
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $charset                = 'iso-8859-1';
@@ -341,7 +295,6 @@ class Mailer {
 	 * (7bit, 8bit, quoted-printable, base64 ou binary)
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $encoding               = '8bit';
@@ -350,7 +303,6 @@ class Mailer {
 	 * Longueur maximale des lignes dans l'email, telle que définie dans la rfc2822
 	 * 
 	 * @var integer
-	 * 
 	 * @access private
 	 */
 	var $maxlen                 = 78;
@@ -358,8 +310,7 @@ class Mailer {
 	/**
 	 * IP de l'expéditeur
 	 * 
-	 * @var string $sender_ip
-	 * 
+	 * @var string
 	 * @access public
 	 */
 	var $sender_ip              = '127.0.0.1';
@@ -367,8 +318,7 @@ class Mailer {
 	/**
 	 * Nom du serveur émetteur
 	 * 
-	 * @var string) $server
-	 * 
+	 * @var string
 	 * @access public
 	 */
 	var $server_from            = 'localhost';
@@ -376,8 +326,7 @@ class Mailer {
 	/**
 	 * Activer/désactiver le validateur d'adresse email
 	 * 
-	 * @var booleen
-	 * 
+	 * @var boolean
 	 * @access public
 	 */
 	var $valid_syntax           = FALSE;
@@ -387,8 +336,7 @@ class Mailer {
 	 * S'il est activé, les messages d'erreur s'afficheront directement à l'écran et l'éxécution du script 
 	 * sera interrompu
 	 * 
-	 * @var booleen
-	 * 
+	 * @var boolean
 	 * @access public
 	 */
 	var $debug                  = FALSE;
@@ -398,8 +346,7 @@ class Mailer {
 	 * Cette variable ne doit pas être modifiée, si elle est à false, 
 	 * l'email n'est tout simplement pas envoyé
 	 * 
-	 * @var booleen
-	 * 
+	 * @var boolean
 	 * @access private
 	 */
 	var $statut                 = TRUE; // ne pas modifier !
@@ -408,7 +355,6 @@ class Mailer {
 	 * Variable contenant le dernier message d'erreur
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $msg_error              = '';
@@ -420,36 +366,24 @@ class Mailer {
 	 * Si vous ne savez pas, n'y touchez pas, le script tentera de trouver de lui même.
 	 * 
 	 * @var mixed
-	 * 
 	 * @access public
 	 */
 	var $fix_bug_mail           = NULL;
 	
 	/**
-	 * Certains hébergeurs désactivent la fonction ini_set() et son utilisation provoque 
-	 * l'arrèt du script. Cette variable à false force le script à ne pas utiliser cette 
-	 * fonction.
-	 * 
-	 * @var boolean
-	 * 
-	 * @access public
-	 */
-	var $correctRpath           = TRUE;
-	
-	/**
 	 * Version actuelle de la classe
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
-	var $version                = '2.2';
+	var $version                = '2.3';
 	
 	/**
-	 * Mailer::Mailer()
+	 * Constructeur de classe
 	 * 
 	 * @param string $template_path  Chemin vers les modèles d'emails 
 	 * 
+	 * @access public
 	 * @return void
 	 */
 	function Mailer($template_path = '')
@@ -516,10 +450,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::is_online_host()
-	 * 
 	 * Indique si l'on est sur un serveur de l'hébergeur Online
 	 * 
+	 * @access public
 	 * @return boolean
 	 */
 	function is_online_host()
@@ -528,7 +461,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::use_smtp()
+	 * Initialise un objet Smtp pour utilisation ultérieure
 	 * 
 	 * @param string  $smtp_server  Nom du serveur SMTP
 	 * @param integer $smtp_port    Port de connexion (25 dans la grande majorité des cas)
@@ -537,7 +470,6 @@ class Mailer {
 	 * @param string  $server_from  Serveur émetteur
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function use_smtp($smtp_server = '', $smtp_port = 25, $smtp_user = '', $smtp_pass = '', $server_from = '')
@@ -562,33 +494,27 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::init_smtp()
-	 * 
-	 * Initialise la classe smtp et créé une nouvelle instance de la classe
+	 * Créé une nouvelle instance de la classe
 	 * 
 	 * @param boolean $debug
 	 * 
 	 * @access private
-	 * 
 	 * @return object
 	 */
 	function init_smtp($debug = false)
 	{
 		if( !class_exists('Smtp') )
 		{
-			if( empty($this->smtp_path) )
+			if( isset($this) && !empty($this->smtp_path) )
 			{
-				$this->smtp_path = str_replace('\\', '/', __FILE__);
-				$this->smtp_path = substr($this->smtp_path, 0, (strrpos($this->smtp_path, '/') + 1));
+				$smtp_path = dirname($this->smtp_path);
+			}
+			else
+			{
+				$smtp_path = dirname(__FILE__);
 			}
 			
-			@include($this->smtp_path . 'class.smtp.php');
-			
-			if( !class_exists('Smtp') )
-			{
-				$this->error('Impossible de trouver le fichier class.smtp.php');
-				return false;
-			}
+			require $smtp_path . '/class.smtp.php';
 		}
 		
 		$smtp = new Smtp();
@@ -598,15 +524,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::use_sendmail()
-	 * 
-	 * Paramétrages des variables concernant sendmail
+	 * Paramétrage des variables concernant sendmail
 	 * 
 	 * @param string $sendmail_cmd
 	 * @param string $sendmail_path
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function use_sendmail($sendmail_cmd = '', $sendmail_path = '')
@@ -627,12 +550,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_root()
+	 * Réglages du chemin vers les modèles
 	 * 
 	 * @param string $template_path  Chemin vers les modèles
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function set_root($template_path)
@@ -651,12 +573,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_file()
+	 * Vérifie qu'un répertoire ou fichier existe et est accessible en lecture
 	 * 
 	 * @param string $path  Chemin vers le fichier
 	 * 
 	 * @access private
-	 * 
 	 * @return boolean
 	 */
 	function set_file($path)
@@ -671,13 +592,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::loadfile()
+	 * Retourne le contenu d'un fichier
 	 * 
 	 * @param string  $path         Chemin vers le fichier
 	 * @param boolean $binary_file  On spécifie si on charge un fichier binaire (pour windows)
 	 * 
 	 * @access public
-	 * 
 	 * @return mixed
 	 */
 	function loadfile($path, $binary_file = false)
@@ -697,12 +617,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_format()
-	 * 
 	 * @param mixed $format  Format de l'email
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function set_format($format)
@@ -736,12 +653,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_charset()
-	 * 
 	 * @param string $charset
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function set_charset($charset)
@@ -750,65 +664,58 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::validate_email()
-	 * 
-	 * Vérifie la validité syntaxique d'un email
+	 * Vérifie la validité syntaxique d'une adresse email
 	 * 
 	 * @param string $email
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function validate_email($email)
 	{
-		if( !ereg('^[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+'.
-				  '@'.'[-!#$%&\'*+\\/0-9=?A-Z^_`a-z{|}~]+\.'.
-				  '[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+'.
-				  '[-!#$%&\'*+/0-9=?A-Z^_`a-z{|}~]$', $email) )
-		{
-			return false;
-		}
-		
-		return true;
+		return (bool) preg_match('/^((?(?<!^)\.)[-!#$%&\'*+\/0-9=?a-z^_`{|}~]+)+@'
+			. '((?(?<!@)\.)[a-z]([-a-z0-9]{0,61}[a-z0-9])?)+$/i', $email);
 	}
 	
 	/**
-	 * Mailer::validate_email_mx()
-	 * 
-	 * Vérifie l'existence réelle d'une adresse email (domaine et compte)
-	 * Ne fonctionne pas sous Windows, les fonctions checkdnsrr() et getmxrr() n'y sont pas implantées
-	 * 
-	 * @param string $email
-	 * 
-	 * @access public
+	 * Vérifie si une adresse email N'EST PAS valide (domaine et compte).
+	 * Ceci est différent d'une vérification de validité.
+	 * Le serveur SMTP peut très bien répondre par un 250 ok pour cet email,
+	 * les erreurs d'adressage étant traitées ultérieurement au niveau du
+	 * serveur POP.
 	 * 
 	 * @link http://www.sitepoint.com/article/1051
 	 * @link http://www.zend.com/codex.php?id=449&single=1
 	 * @link http://fr.php.net/getmxrr (troisième User contributed note)
 	 * 
-	 * @return boolean
+	 * @param string $email
+	 * 
+	 * @access public
+	 * @return mixed
 	 */
 	function validate_email_mx($email)
 	{
-		$result_check_mx = false;
+		$result_check_mx = 0;
 		
-		list($account, $domaine) = explode('@', $email);
+		list(, $domain) = explode('@', $email);
 		
 		$mx = array();
 		if( !function_exists('getmxrr') )
 		{
-			exec("nslookup -type=mx $domaine", $lines);
+			exec(sprintf('nslookup -type=mx %s', escapeshellarg($domain)), $lines);
 			
-			$i = 0;
-			foreach( $lines AS $value )
+			$regexp = '/^' . preg_quote($domain) . '\s+(?:(?i)MX\s+)?'
+				. '(preference\s*=\s*([0-9]+),\s*)?'
+				. 'mail\s+exchanger\s*=\s*(?(1)|([0-9]+)\s+)([^ ]+?)\.?$/';
+			
+			foreach( $lines as $value )
 			{
-				if( preg_match('/preference[ ]*=[ ]*([0-9]+),[ ]*mail[ ]*exchanger[ ]*=[ ]*([^ ]+)/', $value, $match) )
+				if( preg_match($regexp, $value, $match) )
 				{
-					$mx[$i][0] = $match[1];
-					$mx[$i][1] = $match[2];
-					
-					$i++;
+					array_push($mx, array(
+						$match[3] === '' ? $match[2] : $match[3],
+						$match[4]
+					));
 				}
 			}
 			
@@ -816,43 +723,41 @@ class Mailer {
 		}
 		else
 		{
-			$result = getmxrr($domaine, $hosts, $weight);
+			$result = getmxrr($domain, $hosts, $weight);
 			
-			$total_hosts = count($hosts);
-			for( $i = 0; $i < $total_hosts; $i++ )
+			for( $i = 0, $m = count($hosts); $i < $m; $i++ )
 			{
-				$mx[$i][0] = $weight[$i];
-				$mx[$i][1] = $hosts[$i];
+				array_push($mx, array($weight[$i], $hosts[$i]));
 			}
 		}
 		
 		if( !$result )
 		{
-			$mx[0][0] = 0;
-			$mx[0][1] = gethostbyname($domaine);
+			array_push($mx, array(0, $domain));
 		}
 		
 		array_multisort($mx);
 		
-// DEBUG
-//		echo '<pre>'; print_r($mx); echo '</pre>';
-//		exit;
+		$smtp = Mailer::init_smtp(false);
 		
-		$smtp = $this->init_smtp(false);
-		
-		foreach( $mx AS $record )
-		{//echo $record[1] . '<br>'; flush();
+		foreach( $mx as $record )
+		{
 			if( $smtp->connect($record[1]) )
 			{
 				if( $smtp->mail_from($email) )
 				{
-					if( $smtp->rcpt_to($email, true) )
+					if( !$smtp->rcpt_to($email, true) )
 					{
-						$result_check_mx = true;
+						$result_check_mx = $smtp->reponse;
 					}
 				}
 				
 				$smtp->quit();
+				break;
+			}
+			else if( !$result )
+			{
+				$result_check_mx = $smtp->msg_error;
 				break;
 			}
 		}
@@ -861,13 +766,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_from()
+	 * Définition du champ expéditeur
 	 * 
 	 * @param string $email_from  Email de l'expéditeur
 	 * @param string $name_from   Personnalisation du nom de l'expéditeur
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function set_from($email_from, $name_from = '')
@@ -885,15 +789,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_address()
-	 * 
-	 * Ancienne méthode set_to()
+	 * Définition des destinataires
 	 * 
 	 * @param mixed  $email_mixed  Email du destinataire ou tableau contenant la liste des destinataires 
 	 * @param string $type         Type de destinataire : to, cc, ou bcc
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function set_address($email_mixed, $type = '')
@@ -906,7 +807,14 @@ class Mailer {
 		
 		if( !is_array($email_mixed) )
 		{
-			$email_mixed = array($email_mixed);
+			if( preg_match('/^([^<]*) <([^>]*)>$/', $email_mixed, $regs) )
+			{
+				$email_mixed = array($regs[1] => $regs[2]);
+			}
+			else
+			{
+				$email_mixed = array($email_mixed);
+			}
 		}
 		
 		foreach( $email_mixed AS $name => $email )
@@ -939,13 +847,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_to()
-	 * 
 	 * Ancienne méthode d'ajout de destinataires, présent pour assurer la compatibilité 
 	 * 
-	 * @param $arg1 : Voir set_address()
-	 * @param $arg2 : Voir set_address()
-	 * 
+	 * @see Mailer::set_address()
 	 * @access public
 	 * @status obsolete
 	 * @return boolean
@@ -956,12 +860,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_subject()
+	 * Définition du sujet de l'email
 	 * 
 	 * @param string $subject  Le sujet de l'email
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function set_subject($subject)
@@ -970,13 +873,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_message()
+	 * Corps de l'email
 	 * 
 	 * @param string $message   Contient le message à envoyer
 	 * @param array  $tags_ary  Variables à remplacer dans le texte
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function set_message($message, $tags_ary = '')
@@ -988,13 +890,13 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_altmessage()
+	 * Alternative texte de l'email (on suppose que set_message() a été appellé
+	 * avec un contenu html)
 	 * 
 	 * @param string $message   Contient le message alternatif
 	 * @param array  $tags_ary  Variables à remplacer dans le texte
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function set_altmessage($message, $tags_ary = '')
@@ -1005,13 +907,10 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::use_template()
-	 * 
 	 * @param string $file      Nom du modèle (sans l'extension)
 	 * @param array  $tags_ary  Variables à remplacer dans le texte
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function use_template($file, $tags_ary = '')
@@ -1042,12 +941,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::assign_tags()
-	 * 
 	 * @param array $tags_ary  Tableau des tags à remplacer dans le message
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function assign_tags($tags_ary)
@@ -1065,13 +961,10 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::assign_block_tags()
-	 * 
 	 * @param string $block_name  Nom du block et des éventuels sous blocks
 	 * @param array  $tags_ary    Tableau des tags à remplacer dans le message
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function assign_block_tags($block_name, $tags_ary = '')
@@ -1094,7 +987,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::attachment()
+	 * Ajout d'un fichier joint
 	 * 
 	 * @param string  $path         Chemin vers le fichier
 	 * @param string  $filename     Nom du fichier
@@ -1103,7 +996,6 @@ class Mailer {
 	 * @param boolean $embedded     true si fichier incorporé dans l'email html
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function attachment($path, $filename = '', $disposition = '', $mime_type = '', $embedded = false)
@@ -1137,10 +1029,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::generate_rand_str()
-	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function generate_rand_str()
@@ -1164,12 +1053,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::mime_type()
+	 * Renvoie le type mime à partir de l'extension de fichier
 	 * 
 	 * @param string $ext  Extension de fichier
 	 * 
 	 * @access public
-	 * 
 	 * @return string
 	 */
 	function mime_type($ext)
@@ -1263,13 +1151,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_reply_to()
+	 * Définition de l'adresse de réponse
 	 * 
 	 * @param string $email_reply  Email de réponse
 	 * @param string $name_reply   Personnalisation
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function set_reply_to($email_reply = '', $name_reply = '')
@@ -1297,12 +1184,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_return_path()
+	 * Définition de l'adresse de retour d'erreurs
 	 * 
 	 * @param string $email_return  Email de retour d'erreur
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function set_return_path($email_return = '')
@@ -1328,13 +1214,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_notify()
+	 * Définition de l'adresse cible pour les notifications de lecture
 	 * 
 	 * @param string $email_notify  Email pour le retour de notification de lecture 
 	 *                                  (par défaut, l'adresse d'envoi est utilisée)
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 * 
 	 */
@@ -1361,12 +1246,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::organization()
-	 * 
 	 * @param string $soc
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function organization($soc)
@@ -1375,12 +1257,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::set_priority()
+	 * Priorité de l'email
 	 * 
 	 * @param mixed $level  Niveau de priorité de l'email
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function set_priority($level)
@@ -1423,13 +1304,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::additionnal_header()
+	 * Ajout d'en-têtes supplémentaires
 	 * 
 	 * @param string $name  Nom de l'entête 
 	 * @param string $body  Contenu de l'entête
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function additionnal_header($name, $body)
@@ -1482,13 +1362,10 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::make_encoding()
-	 * 
 	 * @param string $encoding  Type d'encodage désiré
 	 * @param string $str       Chaîne à encoder
 	 * 
-	 * @access public
-	 * 
+	 * @access private
 	 * @return string
 	 */
 	function make_encoding($encoding, $str)
@@ -1529,14 +1406,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::quoted_printable_encode()
-	 * 
-	 * Encode le texte au format quoted-printable
+	 * Encode le texte en chaîne à guillemets
 	 * 
 	 * @param string $str  Texte à encoder
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function quoted_printable_encode($str)
@@ -1602,13 +1476,10 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::encode_mime_header()
-	 * 
 	 * @param string $body         Contenu de l'entête
 	 * @param string $header_name  Nom de l'entête correspondant
 	 * 
 	 * @access public
-	 * 
 	 * @return string
 	 */
 	function encode_mime_header($body, $header_name)
@@ -1670,11 +1541,10 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::word_wrap()
-	 * 
 	 * @param string  $str
 	 * @param boolean $is_header
 	 * 
+	 * @access public
 	 * @return string
 	 */
 	function word_wrap($str, $is_header = true, $maxlen = 78)
@@ -1723,12 +1593,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::send()
+	 * Envoie de l'email
 	 * 
-	 * @param boolean $do_not_send  true -> affiche l'entête et le corps du message au lieu de l'envoyer 
+	 * @param boolean $do_not_send  true pour retourner l'entête et le corps
+	 *                              du message au lieu d'envoyer l'email
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function send($do_not_send = false)
@@ -1791,17 +1661,20 @@ class Mailer {
 		
 		if( $do_not_send )
 		{
-			header('Content-Type: text/plain; charset="' . $this->charset . '"');
-			
-			echo $headers . "\n\n" . $message;
-			exit;
+			return $headers . "\n\n" . $message;
 		}
 		
 		//
-		// On change la valeur de sendmail_from dans la configuration de php 
-		// pour que le contenu de l'entête Return-Path soit correct
+		// Détection du safe_mode. S'il est activé, on ne pourra pas
+		// régler l'adresse email de retour (return-path) avec le
+		// cinquième argument.
+		// En alternative, utilisation de ini_get() et ini_set() sur
+		// l'option sendmail_from de PHP
 		//
-		if( $this->correctRpath )
+		$safe_mode     = @ini_get('safe_mode');
+		$safe_mode_gid = @ini_get('safe_mode_gid');// Ajout pour free.fr et sa config php exotique
+		
+		if( $safe_mode || $safe_mode_gid )
 		{
 			$old_Rpath = @ini_get('sendmail_from');
 			@ini_set('sendmail_from', $Rpath);
@@ -1810,10 +1683,7 @@ class Mailer {
 		switch( $this->hebergeur )
 		{
 			case WM_HOST_OTHER:
-				$safe_mode     = @ini_get('safe_mode');
-				$safe_mode_gid = @ini_get('safe_mode_gid');// Ajout pour free.fr et sa config php exotique
-				
-				if( WM_PHP_VERSION >= 40005 && empty($safe_mode) && empty($safe_mode_gid) )
+				if( !$safe_mode && !$safe_mode_gid )
 				{
 					$result = @mail($address, $subject, $message, $headers, '-f' . $Rpath);
 				}
@@ -1841,7 +1711,7 @@ class Mailer {
 				break;
 		}
 		
-		if( $this->correctRpath )
+		if( $safe_mode || $safe_mode_gid )
 		{
 			@ini_set('sendmail_from', $old_Rpath);
 		}
@@ -1855,8 +1725,6 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::smtpmail()
-	 * 
 	 * Envoi via la classe smtp
 	 * 
 	 * @param string $address  Adresses des destinataires
@@ -1865,7 +1733,6 @@ class Mailer {
 	 * @param string $Rpath    Adresse d'envoi (définit le return-path)
 	 * 
 	 * @access private
-	 * 
 	 * @return boolean
 	 */
 	function smtpmail($address, $message, $headers, $Rpath)
@@ -1914,8 +1781,6 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::sendmail()
-	 * 
 	 * Envoi via sendmail
 	 * (Je me suis beaucoup inspiré ici de la classe de PEAR concernant l'envoi via sendmail)
 	 * 
@@ -1925,7 +1790,6 @@ class Mailer {
 	 * @param string $Rpath    Adresse d'envoi (définit le return-path)
 	 * 
 	 * @access private
-	 * 
 	 * @return boolean
 	 */
 	function sendmail($address, $message, $headers, $Rpath)
@@ -1987,8 +1851,6 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::get_return_path()
-	 * 
 	 * Retourne l'adresse d'envoi à utiliser dans l'option -f de sendmail 
 	 * ou pour la commande MAIL FROM de SMTP car c'est celle ci qui est utilisée 
 	 * pour forger l'entête return-path
@@ -1996,6 +1858,7 @@ class Mailer {
 	 * S'il est vide, nous utiliserons l'adresse d'expéditeur fournie. 
 	 * Enfin, si celle ci n'a pas été fournie non plus, on utilise la valeur de sendmail_from
 	 * 
+	 * @access private
 	 * @return string
 	 */
 	function get_return_path()
@@ -2018,7 +1881,7 @@ class Mailer {
 				// Pas moyen d'obtenir une adresse à utiliser.
 				// En dernier ressort, nous utilisons une adresse factice
 				//
-				$Rpath = 'wamailer@localhost.org';
+				$Rpath = 'wamailer@localhost';
 			}
 		}
 		
@@ -2026,12 +1889,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::recipients_list()
-	 * 
 	 * Renvoie la liste des destinataires
 	 * 
 	 * @access private
-	 * 
 	 * @return mixed
 	 */
 	function recipients_list()
@@ -2122,15 +1982,6 @@ class Mailer {
 				
 				if( !empty($this->headers['To']) )
 				{
-					//
-					// FIX temporaire
-					// 
-					// http://forum.phpcodeur.net/viewtopic.php?t=2069
-					//
-					if( $this->headers['To'] == 'Undisclosed-recipients:;' )
-					{
-						$this->headers['To'] = $this->from['email'];
-					}
 					$address = $this->headers['To'];
 					$this->headers['To'] = '';
 				}
@@ -2169,12 +2020,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::make_content_info()
-	 * 
 	 * Renvoie les entêtes correspondant au type demandé
 	 * 
 	 * @param string $type
 	 * 
+	 * @access private
 	 * @return string
 	 */
 	function make_content_info($type)
@@ -2219,10 +2069,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::compile_headers()
+	 * Génération du bloc d'en-têtes
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function compile_headers()
@@ -2283,7 +2132,8 @@ class Mailer {
 				continue;
 			}
 			
-			$headers .= $this->word_wrap($name . ': ' . $this->headers[$name]) . "\n";
+			$headers .= $this->word_wrap(sprintf('%s: %s', $name,
+				preg_replace('/(?!\x09|\x20)\r?\n/', '', $this->headers[$name]))) . "\n";
 		}
 		
 		foreach( $this->headers AS $name => $body )
@@ -2293,7 +2143,8 @@ class Mailer {
 				continue;
 			}
 			
-			$headers .= $this->word_wrap($name . ': ' . $body) . "\n";
+			$headers .= $this->word_wrap(sprintf('%s: %s', $name,
+				preg_replace('/(?!\x09|\x20)\r?\n/', '', $body))) . "\n";
 		}
 		
 		if( empty($this->compiled_message[$this->format]) )
@@ -2335,10 +2186,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::compile_message()
+	 * Génération du corps de l'email
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function compile_message()
@@ -2464,12 +2314,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::replace_tags()
-	 * 
 	 * @param string $texte
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function replace_tags($texte)
@@ -2490,12 +2337,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::replace_block_tags()
-	 * 
 	 * @param string $texte
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function replace_block_tags($texte)
@@ -2530,8 +2374,6 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::insert_attach()
-	 * 
 	 * @param string  $path         Chemin vers le fichier
 	 * @param string  $filename     Nom du fichier
 	 * @param string  $mime_type    Type de média du fichier
@@ -2540,7 +2382,6 @@ class Mailer {
 	 * @param boolean $embedded     Si fichier incorporé, true
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function insert_attach($path, $filename, $mime_type, $disposition, $boundary, $embedded)
@@ -2583,10 +2424,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::clear_all()
-	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function clear_all()
@@ -2604,10 +2442,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::clear_from()
-	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function clear_from()
@@ -2620,10 +2455,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::clear_address()
-	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function clear_address()
@@ -2636,10 +2468,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::clear_subject()
-	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function clear_subject()
@@ -2650,10 +2479,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::clear_message()
-	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function clear_message()
@@ -2669,10 +2495,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::clear_attach()
-	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function clear_attach()
@@ -2684,12 +2507,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Mailer::error()
-	 * 
 	 * @param string $msg_error  Le message d'erreur à afficher si mode debug
 	 * 
 	 * @access private
-	 * 
 	 * @return void
 	 */
 	function error($msg_error)

@@ -804,15 +804,12 @@ if( $start )
 				case '2.2.2':
 				case '2.2.3':
 				case '2.2.4':
-					//
-					// On désactive la vérification approfondie des adresses email, pas encore au point...
-					//
-					$sql_update[] = "UPDATE " . CONFIG_TABLE . " SET check_email_mx = 0";
 				case '2.2.5':
 				case '2.2.6':
 				case '2.2.7':
 				case '2.2.8':
 				case '2.2.9':
+				case '2.2.10':
 					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 						DROP COLUMN hebergeur, DROP COLUMN version";
 					

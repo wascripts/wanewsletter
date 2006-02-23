@@ -167,7 +167,7 @@ if( typeof(document.styleSheets) != 'undefined' && typeof(document.styleSheets[0
 		<tr>
 			<td colspan="2" class="explain">{L_EXPLAIN_EMAIL}</td>
 		</tr>
-		<tr style="display: none;">
+		<tr>
 			<td class="row1"><label>{L_CHECK_EMAIL}&#160;:</label><br /><span class="m-texte">{L_CHECK_EMAIL_NOTE}</span></td>
 			<td class="row2">
 				<input type="radio" id="check_email_mx_on" name="check_email_mx" value="1"{CHECKED_CHECK_EMAIL_ON} />

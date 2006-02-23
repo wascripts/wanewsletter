@@ -59,9 +59,6 @@ if( isset($_POST['submit']) )
 		$new_config[$name] = ( isset($_POST[$name]) ) ? trim($_POST[$name]) : $value;
 	}
 	
-	// désactivé temporairement
-	$new_config['check_email_mx'] = 0;
-	
 	if( $new_config['language'] == '' || !validate_lang($new_config['language']) )
 	{
 		$new_config['language'] = $nl_config['language'];
@@ -297,8 +294,8 @@ $output->assign_vars( array(
 	'LENGTH_SESSION'            => $new_config['session_length'],
 	'UPLOAD_PATH'               => $new_config['upload_path'],
 	'MAX_FILESIZE'              => $new_config['max_filesize'],
-	'CHECKED_CHECK_EMAIL_ON'    => ' disabled="disabled"',//( $new_config['check_email_mx'] ) ? ' checked="checked"' : '',
-	'CHECKED_CHECK_EMAIL_OFF'   => ' checked="checked"',//( !$new_config['check_email_mx'] ) ? ' checked="checked"' : '',
+	'CHECKED_CHECK_EMAIL_ON'    => ( $new_config['check_email_mx'] ) ? ' checked="checked"' : '',
+	'CHECKED_CHECK_EMAIL_OFF'   => ( !$new_config['check_email_mx'] ) ? ' checked="checked"' : '',
 	'EMAILS_SENDED'             => $new_config['emails_sended'],
 	'CHECKED_USE_SMTP_ON'       => ( $new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'CHECKED_USE_SMTP_OFF'      => ( !$new_config['use_smtp'] ) ? ' checked="checked"' : '',

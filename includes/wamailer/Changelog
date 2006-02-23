@@ -1,4 +1,29 @@
-﻿Version 2.2
+﻿Version 2.3 (Publiée le ...)
+--------------------
+
+– Correction mineure sur la regexp remplaçant les chaînes cid
+  pour lui faire accepter les balises étalées sur plusieurs lignes
+– Corrections sur le code simulant la fonction getmxrr() sur Windows
+  (voir Mailer::validate_email_mx())
+– Modifications sur la méthode set_address() pour lui faire accepter
+  directement les chaînes 'nom <address@domain.tld>' (contribution de Daniel)
+– La méthode valide_email_mx() peut maintenant être appelée de manière
+  statique
+– La méthode valide_email_mx() renvoie désormais 0 si l’email est valide
+  (état par défaut), ou le message d’erreur retourné par le serveur SMTP
+  dans le cas contraire
+– Remise en place de l’ajout d’un en-tête To: Undisclosed-recipients:;
+  en l’absence de destinataires direct ou en copie non cachée
+– Mise à jour de l’expression rationnelle de la méthode de vérification
+  syntaxique des adresses (Mailer::validate_email())
+– Suppression de la constante WM_PHP_VERSION. Wamailer nécessite
+  désormais PHP ≥ 4.0.5
+– Suppression de l’attribut Mailer::correctRpath
+– Vulnérabilité aux injections d’en-têtes dans certaines méthodes de
+  construction d’en-têtes
+
+
+Version 2.2 (Publiée le 29 octobre 2005)
 --------------------
 
 – Ajustements pour respecter la syntaxe des commentaires phpDoc

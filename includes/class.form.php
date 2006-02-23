@@ -145,7 +145,7 @@ class Wanewsletter {
 			return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
 		}
 		
-		if( $nl_config['check_email_mx'] && $abodata === false )
+		if( $nl_config['check_email_mx'] && $abodata == false )
 		{
 			//
 			// Vérification de l'existence d'un Mail eXchanger sur le domaine de l'email, 
@@ -154,9 +154,10 @@ class Wanewsletter {
 			// c'est à dire de traiter les demandes émanant d'un entité extérieure à leur réseau, et 
 			// pour une adresse email extérieure à ce réseau)
 			//
-			if( $this->mailer->validate_email_mx($email) == false )
+			if( ($response = $this->mailer->validate_email_mx($email)) !== 0 )
 			{
-				return array('error' => true, 'message' => $lang['Message']['Unrecognized_email']);
+				return array('error' => true,
+					'message' => sprintf($lang['Message']['Unrecognized_email'], $response));
 			}
 		}
 		
