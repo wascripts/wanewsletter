@@ -331,7 +331,8 @@ else if( $mode == 'abonnes' )
 		if( strlen($search_keyword) > 1 )
 		{
 			$get_string .= '&amp;keyword=' . htmlspecialchars(urlencode($search_keyword));
-			$sql_search  = 'WHERE a.abo_email LIKE \'' . $db->escape(str_replace('*', '%', urldecode($search_keyword))) . '\' ';
+			$sql_search  = 'WHERE a.abo_email LIKE \''
+				. str_replace('*', '%', addcslashes($db->escape($search_keyword), '%_')) . '\' ';
 		}
 		
 		if( $search_date != 0 )
