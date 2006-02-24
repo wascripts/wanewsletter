@@ -85,7 +85,7 @@ class Wanewsletter {
 		//
 		// Vérification syntaxique de l'email
 		//
-		if( Mailer::validate_email($email) == false )
+		if( !Mailer::validate_email($email) )
 		{
 			return array('error' => true, 'message' => $lang['Message']['Invalid_email']);
 		}
@@ -153,7 +153,7 @@ class Wanewsletter {
 			// c'est à dire de traiter les demandes émanant d'un entité extérieure à leur réseau, et 
 			// pour une adresse email extérieure à ce réseau)
 			//
-			if( ($response = $this->mailer->validate_email_mx($email)) !== 0 )
+			if( !$this->mailer->validate_email_mx($email, $response) )
 			{
 				return array('error' => true,
 					'message' => sprintf($lang['Message']['Unrecognized_email'], $response));

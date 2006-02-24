@@ -1,4 +1,4 @@
-﻿Version 2.3 (Publiée le ...)
+﻿Version 2.3 (Publiée le 24 février 2006)
 --------------------
 
 – Correction mineure sur la regexp remplaçant les chaînes cid
@@ -9,9 +9,9 @@
   directement les chaînes 'nom <address@domain.tld>' (contribution de Daniel)
 – La méthode valide_email_mx() peut maintenant être appelée de manière
   statique
-– La méthode valide_email_mx() renvoie désormais 0 si l’email est valide
-  (état par défaut), ou le message d’erreur retourné par le serveur SMTP
-  dans le cas contraire
+– La méthode valide_email_mx() prend maintenant une variable en
+  deuxième argument qui contiendra le message d'erreur retourné par
+  le serveur SMTP, si erreur il y a.
 – Remise en place de l’ajout d’un en-tête To: Undisclosed-recipients:;
   en l’absence de destinataires direct ou en copie non cachée
 – Mise à jour de l’expression rationnelle de la méthode de vérification

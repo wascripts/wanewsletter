@@ -674,7 +674,7 @@ class Mailer {
 	function validate_email($email)
 	{
 		return (bool) preg_match('/^((?(?<!^)\.)[-!#$%&\'*+\/0-9=?a-z^_`{|}~]+)+@'
-			. '((?(?<!@)\.)[a-z]([-a-z0-9]{0,61}[a-z0-9])?)+$/i', $email);
+			. '((?(?<!@)\.)[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?)+$/i', $email);
 	}
 	
 	/**
@@ -688,14 +688,16 @@ class Mailer {
 	 * @link http://www.zend.com/codex.php?id=449&single=1
 	 * @link http://fr.php.net/getmxrr (troisième User contributed note)
 	 * 
-	 * @param string $email
+	 * @param string $email   Adresse email à vérifier
+	 * @param string $errstr  Passé par référence. Contiendra l'éventuel message
+	 *                        d'erreur retourné par le serveur SMTP
 	 * 
 	 * @access public
-	 * @return mixed
+	 * @return boolean
 	 */
-	function validate_email_mx($email)
+	function validate_email_mx($email, &$errstr)
 	{
-		$result_check_mx = 0;
+		$result_check_mx = true;
 		
 		list(, $domain) = explode('@', $email);
 		
@@ -748,7 +750,8 @@ class Mailer {
 				{
 					if( !$smtp->rcpt_to($email, true) )
 					{
-						$result_check_mx = $smtp->reponse;
+						$errstr = $smtp->reponse;
+						$result_check_mx = false;
 					}
 				}
 				
@@ -757,7 +760,8 @@ class Mailer {
 			}
 			else if( !$result )
 			{
-				$result_check_mx = $smtp->msg_error;
+				$errstr = $smtp->msg_error;
+				$result_check_mx = false;
 				break;
 			}
 		}

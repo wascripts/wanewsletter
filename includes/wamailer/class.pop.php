@@ -20,7 +20,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wamailer/
  * @license http://www.gnu.org/copyleft/lesser.html  GNU Lesser General Public License
- * @version 2.2
+ * @version 2.3
  */
 
 if( !defined('CLASS_POP_INC') )
@@ -52,7 +52,6 @@ class Pop {
 	 * Identifiant de connexion
 	 * 
 	 * @var resource
-	 * 
 	 * @access private
 	 */
 	var $connect_id     = NULL; 
@@ -61,7 +60,6 @@ class Pop {
 	 * Nom ou IP du serveur pop à contacter
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $pop_server     = ''; 
@@ -70,7 +68,6 @@ class Pop {
 	 * Port d'accés (en général, 110)
 	 * 
 	 * @var integer
-	 * 
 	 * @access public
 	 */
 	var $pop_port       = 110; 
@@ -79,7 +76,6 @@ class Pop {
 	 * Nom d'utilisateur du compte
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $pop_user       = ''; 
@@ -88,7 +84,6 @@ class Pop {
 	 * Mot de passe d'accés au compte
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $pop_pass       = ''; 
@@ -97,7 +92,6 @@ class Pop {
 	 * Dernière réponse envoyée par le serveur
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $reponse        = ''; 
@@ -106,7 +100,6 @@ class Pop {
 	 * Tableau contenant les données des emails lus
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $contents       = array(); 
@@ -115,7 +108,6 @@ class Pop {
 	 * Durée maximale d'une tentative de connexion
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $timeout        = 3; 
@@ -124,7 +116,6 @@ class Pop {
 	 * Log contenant le dialogue avec le serveur POP
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $log            = ''; 
@@ -133,7 +124,6 @@ class Pop {
 	 * Variable contenant le dernier message d'erreur
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $msg_error      = ''; 
@@ -143,7 +133,6 @@ class Pop {
 	 * Si activé, le dialogue avec le serveur s'affiche à l'écran, une éventuelle erreur stoppe le script
 	 * 
 	 * @var boolean
-	 * 
 	 * @access public
 	 */
 	var $debug          = FALSE;
@@ -152,7 +141,6 @@ class Pop {
 	 * Sauvegarde du log du dialogue avec le serveur pop dans un fichier texte. 
 	 *
 	 * @var boolean
-	 * 
 	 * @access public
 	 */
 	var $save_log       = FALSE;
@@ -161,7 +149,6 @@ class Pop {
 	 * Écraser les données présentes dans le fichier log si celui ci est présent
 	 *
 	 * @var boolean
-	 * 
 	 * @access public
 	 */
 	var $erase_log      = FALSE;
@@ -170,14 +157,11 @@ class Pop {
 	 * Chemin de stockage du fichier log
 	 *
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $filelog        = './log_pop.txt';
 	
 	/**
-	 * Pop::Pop()
-	 * 
 	 * Si l'argument vaut TRUE, la connexion est établie automatiquement avec les paramètres par défaut 
 	 * de la classe. (On suppose qu'ils ont été préalablement remplacés par les bons paramètres)
 	 * 
@@ -194,8 +178,6 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::connect()
-	 * 
 	 * Etablit la connexion au serveur POP et effectue l'identification
 	 * 
 	 * @param string  $pop_server    Nom ou IP du serveur
@@ -204,7 +186,6 @@ class Pop {
 	 * @param string  $pop_pass      Mot de passe du compte
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function connect($pop_server = '', $pop_port = 110, $pop_user = '', $pop_pass = '')
@@ -250,14 +231,11 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::put_data()
-	 * 
 	 * Envoit les données au serveur
 	 * 
 	 * @param string $input  Données à envoyer
 	 * 
 	 * @access private
-	 * 
 	 * @return void
 	 */
 	function put_data($input)
@@ -274,12 +252,9 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::get_reponse()
-	 * 
 	 * Récupère la réponse du serveur
 	 * 
 	 * @access private
-	 * 
 	 * @return boolean
 	 */
 	function get_reponse()
@@ -306,13 +281,10 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::stat_box()
-	 * 
 	 * Commande STAT
 	 * Renvoie le nombre de messages présent et la taille totale (en octets)
 	 * 
 	 * @access public
-	 * 
 	 * @return array
 	 */
 	function stat_box()
@@ -329,8 +301,6 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::list_mail()
-	 * 
 	 * Commande LIST
 	 * Renvoie un tableau avec leur numéro en index et leur taille pour valeur
 	 * Si un numéro de message est donné, sa taille sera renvoyée
@@ -338,7 +308,6 @@ class Pop {
 	 * @param integer $num  Numéro du message
 	 * 
 	 * @access public
-	 * 
 	 * @return mixed
 	 */
 	function list_mail($num = 0)
@@ -387,8 +356,6 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::read_mail()
-	 * 
 	 * Commande RETR/TOP
 	 * Renvoie un tableau avec leur numéro en index et leur taille pour valeur
 	 * 
@@ -396,7 +363,6 @@ class Pop {
 	 * @param integer $max_line  Nombre maximal de ligne à renvoyer (par défaut, tout le message)
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function read_mail($num, $max_line = 0)
@@ -445,15 +411,12 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::parse_headers()
-	 * 
 	 * Récupère les entêtes de l'email spécifié par $num et renvoi un tableau avec le 
 	 * nom des entêtes et leur valeur
 	 * 
 	 * @param string $str
 	 * 
 	 * @access public
-	 * 
 	 * @return mixed
 	 */
 	function parse_headers($str)
@@ -486,10 +449,9 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::infos_header()
-	 * 
 	 * @param string $str
 	 * 
+	 * @access public
 	 * @return array
 	 */
 	function infos_header($str)
@@ -506,14 +468,11 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::decode_mime_header()
-	 * 
 	 * Décode l'entête donné s'il est encodé
 	 * 
 	 * @param string $str
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function decode_mime_header($str)
@@ -543,8 +502,6 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::extract_files()
-	 * 
 	 * Parse l'email demandé et renvoie des informations sur les fichiers joints éventuels
 	 * Retourne un tableau contenant les données (nom, encodage, données du fichier ..) sur les fichiers joints
 	 * ou false si aucun fichier joint n'est trouvé ou que l'email correspondant à $num n'existe pas.
@@ -631,15 +588,12 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::delete_mail()
-	 * 
 	 * Commande DELE
 	 * Demande au serveur d'effacer le message correspondant au numéro donné
 	 * 
 	 * @param integer $num  Numéro du message
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function delete_mail($num)
@@ -650,13 +604,10 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::reset()
-	 * 
 	 * Commande RSET
 	 * Annule les dernières commandes (effacement ..)
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function reset()
@@ -667,13 +618,10 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::quit()
-	 * 
 	 * Commande QUIT
 	 * Ferme la connexion au serveur
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function quit()
@@ -703,12 +651,9 @@ class Pop {
 	}
 	
 	/**
-	 * Pop::error()
-	 * 
 	 * @param string $msg_error  Le message d'erreur, à afficher si mode debug
 	 * 
 	 * @access private
-	 * 
 	 * @return void
 	 */
 	function error($msg_error)

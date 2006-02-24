@@ -20,7 +20,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wamailer/
  * @license http://www.gnu.org/copyleft/lesser.html  GNU Lesser General Public License
- * @version 2.2
+ * @version 2.3
  */
 
 if( !defined('CLASS_SMTP_INC') )
@@ -56,7 +56,6 @@ class Smtp {
 	 * Identifiant de connexion
 	 * 
 	 * @var array
-	 * 
 	 * @access private
 	 */
 	var $connect_id      = NULL;
@@ -65,7 +64,6 @@ class Smtp {
 	 * Nom ou IP du serveur smtp à contacter
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $smtp_server     = '';
@@ -74,7 +72,6 @@ class Smtp {
 	 * Port d'accés (en général, 25)
 	 * 
 	 * @var integer
-	 * 
 	 * @access public
 	 */
 	var $smtp_port       = 25;
@@ -83,7 +80,6 @@ class Smtp {
 	 * login pour la connexion (seulement si nécessaire)
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $smtp_user       = '';
@@ -92,7 +88,6 @@ class Smtp {
 	 * password pour la connexion (seulement si nécessaire)
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $smtp_pass       = '';
@@ -101,7 +96,6 @@ class Smtp {
 	 * Nom du serveur émetteur
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $server_from     = 'localhost';
@@ -110,7 +104,6 @@ class Smtp {
 	 * Dernière réponse envoyée par le serveur
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $reponse         = '';
@@ -119,7 +112,6 @@ class Smtp {
 	 * Code de la dernière réponse
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $code            = '';
@@ -128,7 +120,6 @@ class Smtp {
 	 * Durée maximale d'une tentative de connexion
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $timeout         = 3;
@@ -137,7 +128,6 @@ class Smtp {
 	 * Variable contenant les divers messages
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $log             = '';
@@ -146,7 +136,6 @@ class Smtp {
 	 * Variable contenant le dernier message d'erreur
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $msg_error       = '';
@@ -156,7 +145,6 @@ class Smtp {
 	 * Si activé, le dialogue avec le serveur s'affiche à l'écran, une éventuelle erreur stoppe le script
 	 * 
 	 * @var boolean
-	 * 
 	 * @access public
 	 */
 	var $debug           = FALSE;
@@ -165,7 +153,6 @@ class Smtp {
 	 * Sauvegarde du log du dialogue avec le serveur smtp dans un fichier texte. 
 	 * 
 	 * @var boolean
-	 * 
 	 * @access public
 	 */
 	var $save_log        = FALSE;
@@ -174,7 +161,6 @@ class Smtp {
 	 * Ecraser les données présentes dans le fichier log si celui ci est présent
 	 * 
 	 * @var boolean
-	 * 
 	 * @access public
 	 */
 	var $erase_log       = FALSE;
@@ -183,14 +169,11 @@ class Smtp {
 	 * Chemin de stockage du fichier log
 	 * 
 	 * @var string
-	 * 
 	 * @access public
 	 */
 	var $filelog         = './log_smtp.txt';
 	
 	/**
-	 * Smtp::Smtp()
-	 * 
 	 * Si l'argument vaut TRUE, la connexion est établie automatiquement avec les paramètres par défaut 
 	 * de la classe. (On suppose qu'ils ont été préalablement remplacés par les bons paramètres)
 	 * 
@@ -207,8 +190,6 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::connect()
-	 * 
 	 * Établit la connexion au serveur SMTP et effectue l'identification
 	 * 
 	 * @param string  $smtp_server  Nom ou IP du serveur
@@ -218,7 +199,6 @@ class Smtp {
 	 * @param string  $server_from  Serveur émetteur
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function connect($smtp_server = '', $smtp_port = 25, $smtp_user = '', $smtp_pass = '', $server_from = '')
@@ -274,12 +254,9 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::authenticate()
-	 * 
 	 * Authentification auprès du serveur, s'il le supporte
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function authenticate()
@@ -306,14 +283,11 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::put_data()
-	 * 
 	 * Envoit les données au serveur
 	 * 
 	 * @param string $input  Données à envoyer
 	 * 
 	 * @access private
-	 * 
 	 * @return void
 	 */
 	function put_data($input)
@@ -330,12 +304,9 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::get_reponse()
-	 * 
 	 * Récupère la réponse du serveur et la parse pour obtenir le code réponse
 	 * 
 	 * @access private
-	 * 
 	 * @return boolean
 	 */
 	function get_reponse()
@@ -389,15 +360,12 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::mail_from()
-	 * 
 	 * Commande MAIL FROM
 	 * Envoi l'adresse email de l'expéditeur au serveur SMTP
 	 * 
 	 * @param string $email_from
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function mail_from($email_from)
@@ -415,8 +383,6 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::rcpt_to()
-	 * 
 	 * Commande RCPT TO
 	 * Envoi une adresse email de destination au serveur
 	 * 
@@ -424,7 +390,6 @@ class Smtp {
 	 * @param boolean $strict (si true, retourne true uniquement si code 250)
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function rcpt_to($email_to, $strict = false)
@@ -442,8 +407,6 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::send()
-	 * 
 	 * Commande DATA
 	 * Envoie le message (entêtes et corps) au serveur et demande l'envoi
 	 * 
@@ -451,7 +414,6 @@ class Smtp {
 	 * @param string $message
 	 * 
 	 * @access public
-	 * 
 	 * @return true
 	 */
 	function send($headers, $message)
@@ -504,12 +466,9 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::noop()
-	 * 
 	 * Envoi la commande NOOP
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function noop()
@@ -524,12 +483,9 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::verify()
-	 * 
 	 * Envoi la commande VRFY
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function verify($str)
@@ -545,13 +501,10 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::quit()
-	 * 
 	 * Commande QUIT
 	 * Ferme la connexion au serveur SMTP
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function quit()
@@ -587,12 +540,9 @@ class Smtp {
 	}
 	
 	/**
-	 * Smtp::error()
-	 * 
 	 * @param string $msg_error  Le message d'erreur, à afficher si mode debug
 	 * 
 	 * @access private
-	 * 
 	 * @return void
 	 */
 	function error($msg_error)
