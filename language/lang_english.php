@@ -232,6 +232,7 @@ $lang['Message']['Unaccess_host']           = "The host %s seems actually unreac
 $lang['Message']['Not_found_at_url']        = "The file does not seems to be at indicated URL";
 $lang['Message']['No_data_at_url']          = "No data available about the file";
 
+$lang['Message']['Cannot_create_dir']       = "Cannot create %s directory";
 $lang['Message']['Dir_not_writable']        = "The directory <samp>%s</samp> doesn't exist or is not writable";
 $lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading ! (setup/schemas/)";
 

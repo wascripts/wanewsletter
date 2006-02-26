@@ -81,7 +81,7 @@ if( isset($_POST['submit']) )
 	
 	if( $new_config['upload_path'] != '/' )
 	{
-		$new_config['upload_path'] = rtrim($new_config['upload_path'], '/') . '/';
+		$new_config['upload_path'] = trim($new_config['upload_path'], '/') . '/';
 		
 		if( $nl_config['use_ftp'] == 0 && $new_config['use_ftp'] == 0
 			&& strcmp($nl_config['upload_path'], $new_config['upload_path']) !== 0 )
@@ -95,7 +95,8 @@ if( isset($_POST['submit']) )
 				if( !mkdir($dest_upload, 0755) )
 				{
 					$error = true;
-					$msg_error[] = 'Cannot create ';
+					$msg_error[] = sprintf($lang['Message']['Cannot_create_dir'],
+						htmlspecialchars(wa_realpath($dest_upload)));
 				}
 			}
 			else if( !is_writable($dest_upload) )

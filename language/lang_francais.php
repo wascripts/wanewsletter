@@ -232,6 +232,7 @@ $lang['Message']['Unaccess_host']           = "L'hôte %s semble inaccessible act
 $lang['Message']['Not_found_at_url']        = "Le fichier ne semble pas présent à l'url indiquée";
 $lang['Message']['No_data_at_url']          = "Aucune donnée disponible sur le fichier";
 
+$lang['Message']['Cannot_create_dir']       = "Impossible de créer le répertoire %s";
 $lang['Message']['Dir_not_writable']        = "Le répertoire <samp>%s</samp> n'existe pas ou n'est pas accessible en écriture";
 $lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (setup/schemas/)";
 
