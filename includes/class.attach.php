@@ -497,6 +497,8 @@ class Attach {
 			//
 			// Tout s'est bien passé, on entre les nouvelles données dans la base de données
 			//
+			$db->beginTransaction();
+			
 			$filedata = array(
 				'file_real_name'     => $filename,
 				'file_physical_name' => ( $upload_mode == 'local' ) ? $tmp_filename : $physical_filename,
@@ -504,7 +506,7 @@ class Attach {
 				'file_mimetype'      => $filetype
 			);
 			
-			if( !$db->query_build(SQL_INSERT, JOINED_FILES_TABLE, $filedata) )
+			if( !$db->build(SQL_INSERT, JOINED_FILES_TABLE, $filedata) )
 			{
 				trigger_error('Impossible d\'insérer les données du fichier dans la base de données', ERROR);
 			}
@@ -517,6 +519,8 @@ class Attach {
 			{
 				trigger_error('Impossible d\'insérer la jointure dans la table log_files', ERROR);
 			}
+			
+			$db->commit();
 		}
 		
 		$this->quit();
@@ -871,7 +875,10 @@ class Attach {
 	 */
 	function remove_file($filename)
 	{
-		@unlink($filename);
+		if( file_exists($filename) )
+		{
+			unlink($filename);
+		}
 	}
 	
 	/**

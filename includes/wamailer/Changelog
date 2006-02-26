@@ -21,6 +21,8 @@
 – Suppression de l’attribut Mailer::correctRpath
 – Vulnérabilité aux injections d’en-têtes dans certaines méthodes de
   construction d’en-têtes
+– Sauts de ligne non précédés d’un retour chariot dans certains cas
+  où ils devraient l’être (Windows only)
 
 
 Version 2.2 (Publiée le 29 octobre 2005)

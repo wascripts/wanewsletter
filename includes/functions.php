@@ -405,6 +405,21 @@ function plain_error($var, $exit = true, $verbose = false)
 }
 
 /**
+ * wanlog()
+ * 
+ * @param string $str  Chaîne d'information ou d'erreur à stocker dans
+ *                     l'historique de Wanewsletter
+ * 
+ * @return void
+ */
+function wanlog($str)
+{
+	if( isset($GLOBALS['_php_errors']) ) {
+		array_push($GLOBALS['_php_errors'], $str);
+	}
+}
+
+/**
  * navigation()
  * 
  * Fonction d'affichage par page.
@@ -679,7 +694,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  * 
  * @return array
  */
-function strip_magic_quotes_gpc(&$data)
+function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 {
 	if( is_array($data) )
 	{
@@ -689,7 +704,7 @@ function strip_magic_quotes_gpc(&$data)
 			{
 				$data[$key] = strip_magic_quotes_gpc($val);
 			}
-			else if( is_string($val) )
+			else if( is_string($val) && (!$isFilesArray || $key != 'tmp_name') )
 			{
 				$data[$key] = stripslashes($val);
 			}
@@ -702,18 +717,18 @@ function strip_magic_quotes_gpc(&$data)
 /**
  * wa_realpath()
  * 
- * @param string $relative_path  Chemin relative à résoudre
+ * @param string $relative_path  Chemin relatif à résoudre
  * 
  * @return string
  */
 function wa_realpath($relative_path)
 {
-	if( !@function_exists('realpath') || !@realpath(WA_ROOTDIR . '/includes/functions.php') )
+	if( !function_exists('realpath') || !($absolute_path = @realpath($relative_path)) )
 	{
 		return $relative_path;
 	}
 	
-	return str_replace('\\', '/', realpath($relative_path));
+	return str_replace('\\', '/', $absolute_path);
 }
 
 /**

@@ -507,7 +507,7 @@ class Mailer {
 		{
 			if( isset($this) && !empty($this->smtp_path) )
 			{
-				$smtp_path = dirname($this->smtp_path);
+				$smtp_path = rtrim($this->smtp_path, '/');
 			}
 			else
 			{
@@ -1687,6 +1687,14 @@ class Mailer {
 		switch( $this->hebergeur )
 		{
 			case WM_HOST_OTHER:
+				if( strncasecmp(PHP_OS, 'Win', 3) === 0 )
+				{
+					$address = preg_replace('/\r\n?|\n/', "\r\n", $address);
+					$subject = preg_replace('/\r\n?|\n/', "\r\n", $subject);
+					$message = preg_replace('/\r\n?|\n/', "\r\n", $message);
+					$headers = preg_replace('/\r\n?|\n/', "\r\n", $headers);
+				}
+				
 				if( !$safe_mode && !$safe_mode_gid )
 				{
 					$result = @mail($address, $subject, $message, $headers, '-f' . $Rpath);
