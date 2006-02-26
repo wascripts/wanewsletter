@@ -162,7 +162,11 @@ class URL_Parser {
 						}
 						else
 						{
-							$this->path = str_replace('\\', '/', dirname($this->path)) . '/' . $value;
+							if( substr($this->path, -1) != '/' )
+							{
+								$this->path = dirname($this->path);
+							}
+							$this->path = str_replace('\\', '/', rtrim($this->path, '/')) . '/' . $value;
 						}
 						$this->path = $this->passToURI($this->resolvePath($this->path));
 						break;

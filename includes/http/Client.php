@@ -387,7 +387,12 @@ class HTTP_Client extends HTTP_Main {
 					}
 					else
 					{
-						$path = str_replace('\\', '/', dirname($this->url->path)) . '/' . $location;
+						$path = $this->url->path;
+						if( substr($path, -1) != '/' )
+						{
+							$path = dirname($path);
+						}
+						$path = str_replace('\\', '/', rtrim($path, '/')) . '/' . $location;
 					}
 					
 					$this->url->path  = URL_Parser::resolvePath($path);

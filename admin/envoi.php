@@ -393,9 +393,9 @@ switch( $mode )
 							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
 						}
 						
-						$result['data'] = preg_replace(
-							'/<(head[^>]*)>/si',
-							"<\\1>\n<base href=\"" . htmlspecialchars(dirname($result['URI'])) . "/\">",
+						$result['URI']  = substr($result['URI'], 0, strrpos($result['URI'], '/'));
+						$result['data'] = preg_replace('/<(head[^>]*)>/si',
+							"<\\1>\n<base href=\"" . htmlspecialchars($result['URI']) . "/\">",
 							$result['data']
 						);
 					}
