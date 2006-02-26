@@ -232,8 +232,7 @@ $lang['Message']['Unaccess_host']           = "L'hôte %s semble inaccessible act
 $lang['Message']['Not_found_at_url']        = "Le fichier ne semble pas présent à l'url indiquée";
 $lang['Message']['No_data_at_url']          = "Aucune donnée disponible sur le fichier";
 
-$lang['Message']['tmp_dir_not_writable']    = "Le répertoire des fichiers temporaires du script (tmp/ par défaut) n'existe pas ou n'est pas accessible en écriture";
-$lang['Message']['stats_dir_not_writable']  = "Le répertoire des statistiques du script (stats/ par défaut) n'existe pas ou n'est pas accessible en écriture";
+$lang['Message']['Dir_not_writable']        = "Le répertoire <samp>%s</samp> n'existe pas ou n'est pas accessible en écriture";
 $lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (setup/schemas/)";
 
 $lang['Message']['Ftp_unable_connect']      = "Impossible de se connecter au serveur ftp";

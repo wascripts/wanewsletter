@@ -289,7 +289,8 @@ switch( $mode )
 		{
 			if( $action == 'store' && !is_writable(WA_TMPDIR) )
 			{
-				$output->message('tmp_dir_not_writable');
+				$output->message(sprintf($lang['Message']['Dir_not_writable'],
+					htmlspecialchars(wa_realpath(WA_TMPDIR))));
 			}
 			
 			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
@@ -1082,7 +1083,8 @@ switch( $mode )
 		{
 			if( $action == 'store' && !is_writable(WA_TMPDIR) )
 			{
-				$output->message('tmp_dir_not_writable');
+				$output->message(sprintf($lang['Message']['Dir_not_writable'],
+					htmlspecialchars(wa_realpath(WA_TMPDIR))));
 			}
 			
 			//

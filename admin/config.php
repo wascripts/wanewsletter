@@ -81,11 +81,29 @@ if( isset($_POST['submit']) )
 	
 	if( $new_config['upload_path'] != '/' )
 	{
-		$new_config['upload_path'] = preg_replace('/^\/?(.*?)\/?$/i', '\\1/', $new_config['upload_path']);
+		$new_config['upload_path'] = rtrim($new_config['upload_path'], '/') . '/';
 		
-		if( $nl_config['use_ftp'] == 0 && $new_config['use_ftp'] == 0 && $nl_config['upload_path'] != $new_config['upload_path'] )
+		if( $nl_config['use_ftp'] == 0 && $new_config['use_ftp'] == 0
+			&& strcmp($nl_config['upload_path'], $new_config['upload_path']) !== 0 )
 		{
 			$move_files = true;
+			$source_upload = WA_ROOTDIR . '/' . $nl_config['upload_path'];
+			$dest_upload   = WA_ROOTDIR . '/' . $new_config['upload_path'];
+			
+			if( !file_exists($dest_upload) )
+			{
+				if( !mkdir($dest_upload, 0755) )
+				{
+					$error = true;
+					$msg_error[] = 'Cannot create ';
+				}
+			}
+			else if( !is_writable($dest_upload) )
+			{
+				$error = true;
+				$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
+					htmlspecialchars(wa_realpath($dest_upload)));
+			}
 		}
 	}
 	
@@ -120,7 +138,7 @@ if( isset($_POST['submit']) )
 		
 		if( $result['error'] )
 		{
-			$error = TRUE;
+			$error = true;
 			$msg_error[] = sprintf(nl2br($lang['Message']['bad_ftp_param']), $result['message']);
 		}
 		else
@@ -156,8 +174,9 @@ if( isset($_POST['submit']) )
 		
 		if( !$result )
 		{
-			$error = TRUE;
-			$msg_error[] = sprintf(nl2br($lang['Message']['bad_smtp_param']), htmlspecialchars($smtp->msg_error));
+			$error = true;
+			$msg_error[] = sprintf(nl2br($lang['Message']['bad_smtp_param']),
+				htmlspecialchars($smtp->msg_error));
 		}
 		else
 		{
@@ -175,8 +194,9 @@ if( isset($_POST['submit']) )
 		
 		if( !is_writable(WA_STATSDIR) )
 		{
-			$error = TRUE;
-			$msg_error[] = $lang['Message']['stats_dir_not_writable'];
+			$error = true;
+			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
+				htmlspecialchars(wa_realpath(WA_STATSDIR)));
 		}
 	}
 	else
@@ -194,32 +214,35 @@ if( isset($_POST['submit']) )
 		//
 		// Déplacement des fichiers joints dans le nouveau dossier de stockage s'il est changé
 		//
-		if( $move_files && !file_exists(substr($new_config['upload_path'], 0, -1)) )
+		if( $move_files )
 		{
-			$result = mkdir(substr($new_config['upload_path'], 0, -1), 0755);
-			
-			if( $result && ($res = opendir($nl_config['upload_path'])) )
+			if( $browse = dir($source_upload) )
 			{
-				while( $entry = readdir($res) )
+				while( ($entry = $browse->read()) !== false )
 				{
-					if( $entry != '.' && $entry != '..' && is_file($nl_config['upload_path'] . $entry) && !ereg('^index\.html?$', $entry) )
+					$source_file = $source_upload . $entry;
+					$dest_file   = $dest_upload . $entry;
+					
+					if( is_file($source_file) )
 					{
 						//
 						// Copie du fichier
 						//
-						copy($nl_config['upload_path'] . $entry, $new_config['upload_path'] . $entry);
-						@chmod($new_config['upload_path'] . $entry, 0644);
-						
-						//
-						// Suppression du fichier de l'ancien répertoire
-						//
-						Attach::remove_file($nl_config['upload_path'] . $entry);
+						if( copy($source_file, $dest_file) )
+						{
+							@chmod($dest_file, 0644);
+							
+							//
+							// Suppression du fichier de l'ancien répertoire
+							//
+							Attach::remove_file($source_file);
+						}
 					}
 				}
+				$browse->close();
 			}
 		}
 		
-		$output->redirect('index.php', 4);
 		$output->message('Success_modif');
 	}
 }
