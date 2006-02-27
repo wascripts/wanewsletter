@@ -311,10 +311,11 @@ class HTTP_Client extends HTTP_Main {
 			}
 			else
 			{
-				if( strpos($tmp, ':') != false )
+				if( strpos($tmp, ':') )
 				{
-					$header = strtolower(substr($tmp, 0, strpos($tmp, ':')));
-					$value  = trim(substr($tmp, strpos($tmp, ':') + 1));
+					list($header, $value) = explode(':', $tmp);
+					$header = strtolower($header);
+					$value  = trim($value);
 					$this->responseHeaders .= $tmp;
 					
 					if( $header == 'transfer-encoding' && strtolower($value) == 'chunked' )
@@ -377,7 +378,7 @@ class HTTP_Client extends HTTP_Main {
 						list($location, $query) = explode('?', $location);
 					}
 					
-					if( substr($location, 0, 1) == '/' )
+					if( $location{0} == '/' )
 					{
 						$path = $location;
 					}
@@ -387,12 +388,7 @@ class HTTP_Client extends HTTP_Main {
 					}
 					else
 					{
-						$path = $this->url->path;
-						if( substr($path, -1) != '/' )
-						{
-							$path = dirname($path);
-						}
-						$path = str_replace('\\', '/', rtrim($path, '/')) . '/' . $location;
+						$path = str_replace('\\', '/', dirname($this->url->path)) . '/' . $location;
 					}
 					
 					$this->url->path  = URL_Parser::resolvePath($path);

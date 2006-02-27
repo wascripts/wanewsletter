@@ -702,7 +702,7 @@ function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 		{
 			if( is_array($val) )
 			{
-				$data[$key] = strip_magic_quotes_gpc($val);
+				$data[$key] = strip_magic_quotes_gpc($val, $isFilesArray);
 			}
 			else if( is_string($val) && (!$isFilesArray || $key != 'tmp_name') )
 			{

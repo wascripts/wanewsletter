@@ -5,7 +5,8 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	
 	if( typeof(document.styleSheets[0].cssRules) != 'undefined' ) {
 		document.styleSheets[0].insertRule('tbody#loadByURL { display: none; }', 0);
-	} else {
+	}
+	else {
 		document.styleSheets[0].addRule('tbody#loadByURL', 'display: none');
 	}
 	
@@ -21,10 +22,12 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 				//
 				if( navigator.userAgent.indexOf('Opera') == -1 && navigator.userAgent.indexOf('MSIE') != -1 ) {
 					displayVal = 'block';
-				} else {
+				}
+				else {
 					displayVal = 'table-row-group';
 				}
-			} else {
+			}
+			else {
 				displayVal = 'none';
 			}
 			

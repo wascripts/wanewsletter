@@ -181,10 +181,10 @@ $lang['Message']['Liste_del_move']          = "The new mailing list has been suc
 $lang['Message']['logs_deleted']            = "The newsletters have been successfully deleted";
 $lang['Message']['log_deleted']             = "The newsletter has been successfully deleted";
 $lang['Message']['log_saved']               = "The newsletter has been successfully saved";
-$lang['Message']['log_ready']               = "The newsletter has been successfully saved and is ready to be sending";
+$lang['Message']['log_ready']               = "The newsletter has been successfully saved and is ready to be sent";
 $lang['Message']['abo_deleted']             = "The subscribers have been successfully deleted";
 $lang['Message']['Send_canceled']           = "Operation successfully finished. All the remaining sendings for this newsletter have been canceled";
-$lang['Message']['List_is_busy']            = "Une opération est en cours sur cette liste. Veuillez patienter quelques instants et retenter la manipulation";
+$lang['Message']['List_is_busy']            = "An operation is currently in progress on this list. Please wait a few seconds before attempting the operation again";
 
 $lang['Message']['Not_authorized']          = "You do not have sufficient permissions to access this page or to carry out this action";
 $lang['Message']['Not_auth_view']           = "You are not authorized to view this mailing list";
@@ -296,7 +296,7 @@ $lang['Other']                      = "Other";
 $lang['Unknown']                    = "Unknown";
 $lang['Choice_liste']               = "Select a list";
 $lang['View_liste']                 = "Manage a list";
-$lang['Admin']                      = "Aministrator";
+$lang['Admin']                      = "Administrator";
 $lang['User']                       = "User";
 $lang['Page_of']                    = "Page <b>%d</b> of <b>%d</b>";
 $lang['Classement']                 = "Sort";
@@ -305,7 +305,7 @@ $lang['By_date']                    = "by date";
 $lang['By_email']                   = "by email";
 $lang['By_format']                  = "by format";
 $lang['By_asc']                     = "ascending";
-$lang['By_desc']                    = "decreasing";
+$lang['By_desc']                    = "descending";
 $lang['Filename']                   = "Filename";
 $lang['Filesize']                   = "Filesize";
 $lang['No_data']                    = "No data";
@@ -435,7 +435,7 @@ $lang['GD_version']                 = "GD library version";
 // Page : Gestion et permissions des admins
 //
 $lang['Explain']['admin']           = "On this panel, you can manage your profile.\nIf you have proper rights, you can also manage others administrators, their profile, their rights, add new administrators, delete...";
-$lang['Click_return_profile']       = "Cliquez %shere%s to return to the profiles management panel";
+$lang['Click_return_profile']       = "Click %shere%s to return to the profiles management panel";
 $lang['Add_user']                   = "Add a user";
 $lang['Del_user']                   = "Delete this user";
 $lang['Del_note']                   = "Caution, this operation is irreversible";
@@ -461,7 +461,7 @@ $lang['Explain']['liste']           = "Here, you can add, modify, delete mailing
 $lang['Explain']['purge']           = "The purge system allows you to automatically clean the subscribers' table by deleting un-activated subscriptions for which the confirmation delay has expired.\nThis option is useless if your list does not require a subscription confirmation.";
 $lang['Explain']['cron']            = "If you want to use the subscription management with cron, fill out the following fields (see %sthe FAQ%s)";
 $lang['Click_create_liste']         = "Click %shere%s to create a mailing list";
-$lang['Click_return_liste']         = "Click %shere%s to return to this list's informations";
+$lang['Click_return_liste']         = "Click %shere%s to return to this list's information page";
 $lang['ID_list']                    = "List's ID";
 $lang['Liste_name']                 = "List name";
 $lang['Liste_public']               = "Public list";
@@ -533,7 +533,7 @@ $lang['No_search_result']           = "The search produced no result";
 $lang['Abo_pseudo']                 = "Subscriber's username";
 $lang['Liste_to_register']          = "This subscriber is registered in the following lists";
 $lang['Fast_deletion']              = "Fast deletion";
-$lang['Fast_deletion_note']         = "Enter one or several addresses emails, separated by a comma, and they will be deleted of the mailing list";
+$lang['Fast_deletion_note']         = "Enter one or several addresses emails, separated by a comma, and they will be deleted from the mailing list";
 $lang['Choice_Format']              = "Chosen format";
 $lang['Warning_email_diff']         = "Be careful, you are going to modify the email address of this subscriber\nDo you wish to continue?";
 $lang['Goto_list']                  = "Return at the subscribers list";
@@ -589,9 +589,9 @@ $lang['Target_form']                = "Form reception URL";
 // Page : Envoi des newsletters
 //
 $lang['Explain']['send']            = "The sending form allows you to write, send, save or delete newsletters, and attach files.\nIf you are using the second send engine, you can insert <code>{NAME}</code> in the text, as you do with <code>{LINKS}</code>, to display the subscriber's name if available.\n\nIf you create a re-usable template, and send a newsletter without having previously saved the template, it will be saved and a copy will be created for archives. If you have previously created a template, you can load it, edit it and save the changes. However, if you do this and change the status of the newsletter, a copy will be created and changes will be saved on the newsletter, not on the template.";
-$lang['Explain']['join']            = "Here yo can attach files to your newsletter (be carefull not to get your newsletter to big)\nIf file upload is not allowed on your server, you can indicate a distant file (e.g&thinsp;: <samp>http://www.domaine.com/rep/picture.gif</samp>) or a file manually uploaded into the dir of joined files\nYou can also use one the files attached to another newsletter of the same mailing list";
+$lang['Explain']['join']            = "Here you can attach files to your newsletter (be carefull not to get your newsletter to big)\nIf file upload is not allowed on your server, you can indicate a distant file (e.g&thinsp;: <samp>http://www.domaine.com/rep/picture.gif</samp>) or a file manually uploaded into the dir of joined files\nYou can also use one the files attached to another newsletter of the same mailing list";
 $lang['Explain']['text']            = "Compose your newsletter in text format here. Do not forget to insert the unsubscribe link, either clicking on the dedicated button if it is available, or by adding manually the tag <code>{LINKS}</code> in your newsletter";
-$lang['Explain']['html']            = "Compose your newsletter in html format here. Do not forget to insert the unsubscribe link, either clicking on the dedicated button if it is available, or by adding manually the tag <code>{LINKS}</code> in your newsletter (the link will be in html format)\nIf you want to use one of the attached files (image, sound...) inside the newsletter, insert cid:file_name instead of the file's address\n\n<em>Example :</em>\n\nYou have uploaded an image named image1.gif and wat to use it inside an image tag in your html newsletter. Put the img tag with src attribute : cid:image1.gif ( <code>&lt;img src=\"cid:image1.gif\" alt=\"Alternative text\" /&gt;</code> )";
+$lang['Explain']['html']            = "Compose your newsletter in html format here. Do not forget to insert the unsubscribe link, either clicking on the dedicated button if it is available, or by adding manually the tag <code>{LINKS}</code> in your newsletter (the link will be in html format)\nIf you want to use one of the attached files (image, sound...) inside the newsletter, insert cid:file_name instead of the file's address\n\n<em>Example :</em>\n\nYou have uploaded an image named image1.gif and want to use it inside an image tag in your html newsletter. Put the img tag with src attribute : cid:image1.gif ( <code>&lt;img src=\"cid:image1.gif\" alt=\"Alternative text\" /&gt;</code> )";
 
 $lang['Select_log_to_load']         = "Select a newsletter to load";
 $lang['Select_log_to_send']         = "Select a newsletter that you want to resend";

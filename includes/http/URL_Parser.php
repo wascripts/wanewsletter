@@ -156,17 +156,13 @@ class URL_Parser {
 						break;
 					
 					case 'path':
-						if( substr($value, 0, 1) == '/' )
+						if( $value{0} == '/' )
 						{
 							$this->path = $value;
 						}
 						else
 						{
-							if( substr($this->path, -1) != '/' )
-							{
-								$this->path = dirname($this->path);
-							}
-							$this->path = str_replace('\\', '/', rtrim($this->path, '/')) . '/' . $value;
+							$this->path = str_replace('\\', '/', dirname($this->path)) . '/' . $value;
 						}
 						$this->path = $this->passToURI($this->resolvePath($this->path));
 						break;
