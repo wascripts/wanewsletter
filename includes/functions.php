@@ -44,11 +44,12 @@ function generate_key($num_char = 32, $use_uniqid = true)
 {
 	if( $use_uniqid == true )
 	{
-		$rand_str = md5( uniqid( rand() ) );
+		srand((double) microtime() * 1000000);
+		$rand_str = md5(uniqid(rand()));
 	}
 	else
 	{
-		$rand_str = md5( microtime() );
+		$rand_str = md5(microtime());
 	}
 	
 	return ( $num_char >= 32 ) ? $rand_str : substr($rand_str, 0, $num_char);
