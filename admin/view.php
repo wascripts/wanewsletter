@@ -272,9 +272,9 @@ else if( $mode == 'iframe' )
 				
 				$body = Mailer::word_wrap(trim($body), false);
 				$body = active_urls(htmlspecialchars($body, ENT_NOQUOTES));
-				$body = preg_replace('/(\*\w+\*)/', '<strong>\\1</strong>', $body);
-				$body = preg_replace('/(\/\w+\/)/', '<em>\\1</em>', $body);
-				$body = preg_replace('/(_\w+_)/', '<u>\\1</u>', $body);
+				$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
+				$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
+				$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
 				$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
 				$output->basic(sprintf('<pre>%s</pre>', $body));
 			}

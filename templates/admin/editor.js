@@ -26,8 +26,7 @@
 
 function make_editor()
 {
-	if( document.getElementById('textarea1') != null )
-	{
+	if( document.getElementById('textarea1') != null ) {
 		var bloc_text = document.forms['send-form'].elements['body_text'];
 		
 		DOM_Events.addListener('click', storeCaret, false, bloc_text);
@@ -38,8 +37,7 @@ function make_editor()
 		make_button(document.getElementById('textarea1'));
 	}
 	
-	if( document.getElementById('textarea2') != null )
-	{
+	if( document.getElementById('textarea2') != null ) {
 		var bloc_html = document.forms['send-form'].elements['body_html'];
 		
 		DOM_Events.addListener('click', storeCaret, false, bloc_html);
@@ -68,7 +66,7 @@ function make_button(bloc)
 	conteneur.appendChild(document.createTextNode('\u00A0'));
 	
 	bouton = bouton.cloneNode(false);
-	bouton.listeners = [];
+	bouton.listeners = [];// sinon, bug de IE
 	bouton.setAttribute('id', 'addLinks' + format);
 	bouton.setAttribute('type', 'button');
 	bouton.setAttribute('value', lang['addlink']);
@@ -110,7 +108,8 @@ function preview(evt)
 					if( line.length >= maxlen && (spacePos = line.lastIndexOf(' ')) != -1 ) {
 						line = line.substr(0, spacePos);
 						spacePos++;
-					} else {
+					}
+					else {
 						spacePos = maxlen;
 					}
 					
@@ -127,17 +126,19 @@ function preview(evt)
 		texte = lines.join("\r\n");
 		texte = texte.replace("{LINKS}", "http://www.example.org");
 		texte = texte.replace('<', '&lt;');
-		var boldSpan = new RegExp("(\\*\\w+\\*)", "g");
-		var italicSpan = new RegExp("(/\\w+/)", "g");
-		var underlineSpan = new RegExp("(_\\w+_)", "g");
-		texte = texte.replace(boldSpan, "<strong>$1</strong>");
-		texte = texte.replace(italicSpan, "<em>$1</em>");
-		texte = texte.replace(underlineSpan, "<u>$1</u>");
+		
+		var boldSpan = new RegExp("(^|\\s)(\\*[^\\r\\n]+?\\*)(?=\\s|$)", "g");
+		var italicSpan = new RegExp("(^|\\s)(/[^\\r\\n]+?/)(?=\\s|$)", "g");
+		var underlineSpan = new RegExp("(^|\\s)(_[^\\r\\n]+?_)(?=\\s|$)", "g");
+		texte = texte.replace(boldSpan, "$1<strong>$2</strong>");
+		texte = texte.replace(italicSpan, "$1<em>$2</em>");
+		texte = texte.replace(underlineSpan, "$1<u>$2</u>");
 		
 		preview.document.writeln('<!DOCTYPE HTML PUBLIC "-\/\/W3C\/\/DTD HTML 4.01\/\/EN" "http:\/\/www.w3.org\/TR\/html4\/strict.dtd">');
 		preview.document.writeln('<html><head><title>' + subject + '<\/title><\/head>');
 		preview.document.writeln('<body><pre>' + texte + '<\/pre><\/body><\/html>');
-	} else {
+	}
+	else {
 		var texte     = document.forms['send-form'].elements['body_html'].value;
 		var rex_img   = new RegExp("<([^<]+)\"cid:([^\\:*/?<\">|]+)\"([^>]*)?>", "gi");
 		var rex_title = new RegExp("<title>.*</title>", "i");
@@ -163,46 +164,40 @@ function preview(evt)
 
 function addLinks(evt)
 {
-	if( evt.target.id == 'addLinks1' )
-	{
+	if( evt.target.id == 'addLinks1' ) {
 		var texte = document.forms['send-form'].elements['body_text'];
 	}
-	else
-	{
+	else {
 		var texte = document.forms['send-form'].elements['body_html'];
 	}
 	
-	if( typeof(texte.selectionStart) != 'undefined' )
-	{
+	if( typeof(texte.selectionStart) != 'undefined' ) {
 		var caretPos = (texte.selectionEnd + 7);// 7 = longueur de la chaîne {LINKS}
 		var before   = (texte.value).substring(0, texte.selectionStart);
 		var after    = (texte.value).substring(texte.selectionStart, texte.textLength);
 		texte.value  = before + '{LINKS}' + after;
 		texte.setSelectionRange(caretPos, caretPos);
 	}
-	else if( typeof(texte.createTextRange) != 'undefined' && texte.caretPos )
-	{
+	else if( typeof(texte.createTextRange) != 'undefined' && texte.caretPos ) {
 		texte.caretPos.text = '{LINKS}';
 	}
-	else
-	{
+	else {
 		texte.value += '{LINKS}\n';
 	}
 	
 	texte.focus();
 }
 
-function storeCaret(evt) {
+function storeCaret(evt)
+{
 	var textEl = evt.target;
 	
-	if( typeof(textEl.createTextRange) != 'undefined' )
-	{
+	if( typeof(textEl.createTextRange) != 'undefined' ) {
 		textEl.caretPos = document.selection.createRange().duplicate();
 	}
 }
 
-if( supportDOM() )
-{
+if( supportDOM() ) {
 	var width  = (window.screen.width - 200);
 	var height = (window.screen.height - 200);
 	var top    = 50;
