@@ -161,7 +161,7 @@ if( count($liste_ids) > 0 )
 	$result   = $db->query($sql);
 	$filesize = $result->column('totalsize');
 	
-	if( file_exists(WA_ROOTDIR . '/stats') && is_readable(WA_ROOTDIR . '/stats') )
+	if( is_readable(WA_ROOTDIR . '/stats') )
 	{
 		$listid = implode('', array_unique($liste_ids));
 		$browse = dir(WA_ROOTDIR . '/stats');

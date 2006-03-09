@@ -1,4 +1,24 @@
-﻿Version 2.3 (Publiée le 24 février 2006)
+﻿Version 2.4 (Publiée le 9 mars 2006)
+--------------------
+
+– Fin de ligne superflue en fin de chaîne encodée en base64
+– La méthode Mailer::quoted_printable_encode() ne respectait pas
+  la RFC 2045 au niveau des longueurs de ligne (78 au lieu de 76
+  caractères)
+– Suppression de la méthode Mailer::generate_rand_str() plus utile
+– Les encodages multi-octets n’étaient pas traités correctement par
+  la méthode Mailer::encode_mime_header() (solution backportée
+  de Wamailer 3.0-dev)
+– Support de l’encodage "B" pour les en-têtes
+– L’en-tête « Organization » est désormais encodé s’il contient des
+  caractères non-ascii
+– Ajout de la propriété $extract_auto (voir la doc)
+– Les attributs délimités par des apostrophes au lieu de guillemets
+  n’étaient pas matchés par la regexp des objets embarqués
+– Diverses corrections et ajustements
+
+
+Version 2.3 (Publiée le 24 février 2006)
 --------------------
 
 – Correction mineure sur la regexp remplaçant les chaînes cid
@@ -32,3 +52,4 @@ Version 2.2 (Publiée le 29 octobre 2005)
 – Switch automatique vers la fonction email() de l’hébergeur Online le cas
   échéant, plus besoin de spécifier manuellement via Mailer::hebergeur
 – Passage à la licence LGPL
+

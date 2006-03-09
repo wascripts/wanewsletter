@@ -31,7 +31,7 @@ Installation
 fonctionnement et les possibilités de celle-ci.
 
   La documentation est également accessible à l’adresse HTTP suivante :
-  http://phpcodeur.net/wascripts/wamailer/doc/2.3/
+  http://phpcodeur.net/wascripts/wamailer/doc/2.4/
 
 
 Licence
@@ -46,5 +46,7 @@ Auteurs
 -------
 
   Développeur    Aurélien Maille <wascripts@phpcodeur.net>
-  Contributeurs  Daniel
+  
+  Contributeurs  freeDani
+                 maxwarch <maximekuil@nordnet.fr>
 

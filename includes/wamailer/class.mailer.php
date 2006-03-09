@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2002-2005 Aurélien Maille
+ * Copyright (c) 2002-2006 Aurélien Maille
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wamailer/
  * @license http://www.gnu.org/copyleft/lesser.html	 GNU Lesser General Public License
- * @version 2.2
+ * @version 2.4
  */
 
 if( !defined('CLASS_MAILER_INC') )
@@ -61,7 +61,7 @@ class Mailer {
 	 * @var boolean
 	 * @access public
 	 */
-	var $smtp_mode             = FALSE;
+	var $smtp_mode             = false;
 	
 	/**
 	 * Chemin vers la classe smtp
@@ -80,7 +80,7 @@ class Mailer {
 	 * @var object
 	 * @access public
 	 */
-	var $smtp                  = NULL;
+	var $smtp                  = null;
 	
 	/**
 	 * Si placé à TRUE, la connexion au serveur SMTP ne sera pas fermée après l'envoi, et sera réutilisée 
@@ -91,7 +91,7 @@ class Mailer {
 	 * @var boolean
 	 * @access public
 	 */
-	var $persistent_connection = FALSE;
+	var $persistent_connection = false;
 	
 	/***************************************************************/
 	
@@ -103,7 +103,7 @@ class Mailer {
 	 * @var boolean
 	 * @access public
 	 */
-	var $sendmail_mode           = FALSE;
+	var $sendmail_mode          = false;
 	
 	/**
 	 * Chemin d'accés à sendmail
@@ -111,7 +111,7 @@ class Mailer {
 	 * @var string
 	 * @access public
 	 */
-	var $sendmail_path           = '/usr/sbin/sendmail';
+	var $sendmail_path          = '/usr/sbin/sendmail';
 	
 	/**
 	 * Paramètres de commandes complémentaires
@@ -176,23 +176,7 @@ class Mailer {
 	 * @var array
 	 * @access public
 	 */
-	var $from                   = array('email' => '', 'name' => '');
-	
-	/**
-	 * Adresse de l'expéditeur (spécifique à Online)
-	 * 
-	 * @var string
-	 * @access public
-	 */
-	var $from_online            = '';
-	
-	/**
-	 * Adresse de réponse (spécifique à Online)
-	 * 
-	 * @var string
-	 * @access public
-	 */
-	var $reply_online           = '';
+	var $sender                 = '';
 	
 	/**
 	 * Tableau des destinataires
@@ -275,6 +259,16 @@ class Mailer {
 	var $embeddedfile           = array('path' => array(), 'name' => array(), 'mimetype' => array());
 	
 	/**
+	 * Extraction automatique des images et autres objets présents dans le
+	 * corps html de l'email et ajout dans le table $embeddedfile
+	 * 
+	 * @see ligne 2178
+	 * @var boolean
+	 * @access public
+	 */
+	var $extract_auto           = false;
+	
+	/**
 	 * Tableau des en-têtes de l'email
 	 * 
 	 * @var array
@@ -298,6 +292,17 @@ class Mailer {
 	 * @access public
 	 */
 	var $encoding               = '8bit';
+	
+	/**
+	 * Utilisé dans la méthode Mailer::encode_mime_header() pour détecter
+	 * les octets de début de séquence dans une chaîne utf-8
+	 * 
+	 * @var array
+	 * @access private
+	 */
+	var $_utf8test              = array(
+		0x80 => 0, 0xE0 => 0xC0, 0xF0 => 0xE0, 0xF8 => 0xF0, 0xFC => 0xF8, 0xFE => 0xFC
+	);
 	
 	/**
 	 * Longueur maximale des lignes dans l'email, telle que définie dans la rfc2822
@@ -329,7 +334,7 @@ class Mailer {
 	 * @var boolean
 	 * @access public
 	 */
-	var $valid_syntax           = FALSE;
+	var $valid_syntax           = false;
 	
 	/**
 	 * Activer/désactiver le mode de débogguage
@@ -339,7 +344,7 @@ class Mailer {
 	 * @var boolean
 	 * @access public
 	 */
-	var $debug                  = FALSE;
+	var $debug                  = false;
 	
 	/**
 	 * Statut du traitement de l'envoi
@@ -349,7 +354,7 @@ class Mailer {
 	 * @var boolean
 	 * @access private
 	 */
-	var $statut                 = TRUE; // ne pas modifier !
+	var $statut                 = true; // ne pas modifier !
 	
 	/**
 	 * Variable contenant le dernier message d'erreur
@@ -368,7 +373,7 @@ class Mailer {
 	 * @var mixed
 	 * @access public
 	 */
-	var $fix_bug_mail           = NULL;
+	var $fix_bug_mail           = null;
 	
 	/**
 	 * Version actuelle de la classe
@@ -376,7 +381,7 @@ class Mailer {
 	 * @var string
 	 * @access private
 	 */
-	var $version                = '2.3';
+	var $version                = '2.4';
 	
 	/**
 	 * Constructeur de classe
@@ -409,9 +414,9 @@ class Mailer {
 		{
 			$this->sender_ip = $_SERVER['REMOTE_ADDR'];
 			
-			if( preg_match('/^(\d+\.\d+\.\d+\.\d+)/', getenv('HTTP_X_FORWARDED_FOR'), $match) ) 
+			if( preg_match('/^\d+\.\d+\.\d+\.\d+/', getenv('HTTP_X_FORWARDED_FOR'), $match) ) 
 			{
-				$private_ip = trim($match[1]);
+				$private_ip = $match[0];
 				
 				/**
 				 * Liens utiles sur les différentes plages d'ip :
@@ -457,22 +462,22 @@ class Mailer {
 	 */
 	function is_online_host()
 	{
-		return !function_exists('mail');
+		return (function_exists('email') && !function_exists('mail'));
 	}
 	
 	/**
 	 * Initialise un objet Smtp pour utilisation ultérieure
 	 * 
-	 * @param string  $smtp_server  Nom du serveur SMTP
-	 * @param integer $smtp_port    Port de connexion (25 dans la grande majorité des cas)
-	 * @param string  $smtp_user    Login d'authentification (si AUTH est supporté par le serveur)
-	 * @param string  $smtp_pass    Password d'authentification (si AUTH est supporté par le serveur)
+	 * @param string  $server  Nom du serveur SMTP
+	 * @param integer $port    Port de connexion (25 dans la grande majorité des cas)
+	 * @param string  $user    Login d'authentification (si AUTH est supporté par le serveur)
+	 * @param string  $pass    Password d'authentification (si AUTH est supporté par le serveur)
 	 * @param string  $server_from  Serveur émetteur
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function use_smtp($smtp_server = '', $smtp_port = 25, $smtp_user = '', $smtp_pass = '', $server_from = '')
+	function use_smtp($server = '', $port = 25, $user = '', $pass = '', $server_from = '')
 	{
 		$this->smtp_mode = true;
 		$this->hebergeur = WM_SMTP_MODE;
@@ -484,10 +489,12 @@ class Mailer {
 			$this->server_from = $smtp->server_from = $server_from;
 		}
 		
-		$vararray = array('smtp_server', 'smtp_port', 'smtp_user', 'smtp_pass');
-		foreach( $vararray AS $varname )
+		foreach( array('server', 'port', 'user', 'pass') as $varname )
 		{
-			$smtp->{$varname} = ( !empty(${$varname}) ) ? ${$varname} : $smtp->{$varname};
+			if( !empty(${$varname}) )
+			{
+				$smtp->{'smtp_'.$varname} = ${$varname};
+			}
 		}
 		
 		$this->smtp = $smtp;
@@ -559,9 +566,9 @@ class Mailer {
 	 */
 	function set_root($template_path)
 	{
-		$template_path = preg_replace('/^(.*?)\/?$/', '\\1', $template_path);
+		$template_path = rtrim($template_path, '/');
 		
-		if( !file_exists($template_path) || !is_dir($template_path) )
+		if( !is_dir($template_path) )
 		{
 			$this->error("set_root() :: Le chemin \"$template_path/\" est incorrect.");
 			return false;
@@ -582,7 +589,7 @@ class Mailer {
 	 */
 	function set_file($path)
 	{
-		if( file_exists($path) && is_readable($path) )
+		if( is_readable($path) )
 		{
 			return true;
 		}
@@ -772,22 +779,27 @@ class Mailer {
 	/**
 	 * Définition du champ expéditeur
 	 * 
-	 * @param string $email_from  Email de l'expéditeur
-	 * @param string $name_from   Personnalisation du nom de l'expéditeur
+	 * @param string $email  Email de l'expéditeur
+	 * @param string $name   Personnalisation du nom de l'expéditeur
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
-	function set_from($email_from, $name_from = '')
+	function set_from($email, $name = '')
 	{
-		if( $this->valid_syntax && !$this->validate_email($email_from) )
+		if( $this->valid_syntax && !$this->validate_email($email) )
 		{
-			$this->error('set_from() :: "' . $email_from . '", cette adresse email n\'est pas valide');
+			$this->error('set_from() :: "' . $email . '", cette adresse email n\'est pas valide');
 			return false;
 		}
 		
-		$this->from['email'] = trim($email_from);
-		$this->from['name']  = trim($name_from);
+		$this->sender = trim($email);
+		$this->headers['From'] = $this->sender;
+		if( $name != '' )
+		{
+			$this->headers['From'] = sprintf('%s <%s>',
+				$this->encode_mime_header($name, 'from', 'phrase'), $this->sender);
+		}
 		
 		return true;
 	}
@@ -811,8 +823,17 @@ class Mailer {
 		
 		if( !is_array($email_mixed) )
 		{
-			if( preg_match('/^([^<]*) <([^>]*)>$/', $email_mixed, $regs) )
+			$email_mixed = trim($email_mixed);
+			if( preg_match('/^([^<]*)<([^>]+)>$/', $email_mixed, $regs) )
 			{
+				if( !empty($regs[1]) )
+				{
+					$regs[1] = trim($regs[1], '"');
+				}
+				else
+				{
+					$regs[1] = 0;
+				}
 				$email_mixed = array($regs[1] => $regs[2]);
 			}
 			else
@@ -821,7 +842,7 @@ class Mailer {
 			}
 		}
 		
-		foreach( $email_mixed AS $name => $email )
+		foreach( $email_mixed as $name => $email )
 		{
 			$email = trim($email);
 			
@@ -831,6 +852,7 @@ class Mailer {
 				return false;
 			}
 			
+			$this->address[$type][] = $email;
 			$name = ( !is_numeric($name) ) ? trim($name) : '';
 			
 			if( !empty($this->headers[$type]) )
@@ -842,9 +864,13 @@ class Mailer {
 				$this->headers[$type] = '';
 			}
 			
-			$this->headers[$type] .= ( ( $name != '' ) ? $this->encode_mime_header('"' . $name . '"', $type) . ' ' : '' ) . '<' . $email . '>';
+			if( $name != '' )
+			{
+				$email = sprintf('%s <%s>',
+					$this->encode_mime_header($name, $type, 'phrase'), $email);
+			}
 			
-			$this->address[$type][] = $email;
+			$this->headers[$type] .= $email;
 		}
 		
 		return true;
@@ -873,51 +899,51 @@ class Mailer {
 	 */
 	function set_subject($subject)
 	{
-		$this->subject = trim($subject);
+		$this->subject = trim($this->encode_mime_header($subject, 'subject'));
 	}
 	
 	/**
 	 * Corps de l'email
 	 * 
-	 * @param string $message   Contient le message à envoyer
-	 * @param array  $tags_ary  Variables à remplacer dans le texte
+	 * @param string $message  Contient le message à envoyer
+	 * @param array  $tags     Variables à remplacer dans le texte
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function set_message($message, $tags_ary = '')
+	function set_message($message, $tags = null)
 	{
 		$this->compiled_message[$this->format]   = '';
-		$this->uncompiled_message[$this->format] = trim($message);
+		$this->uncompiled_message[$this->format] = $message;
 		
-		$this->assign_tags($tags_ary);
+		$this->assign_tags($tags);
 	}
 	
 	/**
 	 * Alternative texte de l'email (on suppose que set_message() a été appellé
 	 * avec un contenu html)
 	 * 
-	 * @param string $message   Contient le message alternatif
-	 * @param array  $tags_ary  Variables à remplacer dans le texte
+	 * @param string $message  Contient le message alternatif
+	 * @param array  $tags     Variables à remplacer dans le texte
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function set_altmessage($message, $tags_ary = '')
+	function set_altmessage($message, $tags = null)
 	{
-		$this->uncompiled_altmessage[$this->format] = trim($message);
+		$this->uncompiled_altmessage[$this->format] = $message;
 		
-		$this->assign_tags($tags_ary);
+		$this->assign_tags($tags);
 	}
 	
 	/**
-	 * @param string $file      Nom du modèle (sans l'extension)
-	 * @param array  $tags_ary  Variables à remplacer dans le texte
+	 * @param string $file  Nom du modèle (sans l'extension)
+	 * @param array  $tags  Variables à remplacer dans le texte
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
-	function use_template($file, $tags_ary = '')
+	function use_template($file, $tags = null)
 	{
 		$this->compiled_message[$this->format] = '';
 		
@@ -939,22 +965,22 @@ class Mailer {
 			$this->uncompiled_message[$this->format] = $this->loadfile($this->root . $file . '.' . $this->html_tpl_ext);
 		}
 		
-		$this->assign_tags($tags_ary);
+		$this->assign_tags($tags);
 		
 		return true;
 	}
 	
 	/**
-	 * @param array $tags_ary  Tableau des tags à remplacer dans le message
+	 * @param array $tags  Tableau des tags à remplacer dans le message
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function assign_tags($tags_ary)
+	function assign_tags($tags)
 	{
-		if( is_array($tags_ary) )
+		if( is_array($tags) )
 		{
-			foreach( $tags_ary AS $key => $val )
+			foreach( $tags as $key => $val )
 			{
 				if( preg_match('/^[[:alnum:]_-]+$/i', $key) )
 				{
@@ -965,25 +991,25 @@ class Mailer {
 	}
 	
 	/**
-	 * @param string $block_name  Nom du block et des éventuels sous blocks
-	 * @param array  $tags_ary    Tableau des tags à remplacer dans le message
+	 * @param string $name  Nom du block et des éventuels sous blocks
+	 * @param array  $tags  Tableau des tags à remplacer dans le message
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function assign_block_tags($block_name, $tags_ary = '')
+	function assign_block_tags($name, $tags = null)
 	{
-		if( preg_match('/^[[:alnum:]_-]+$/i', $block_name) )
+		if( preg_match('/^[[:alnum:]_-]+$/i', $name) )
 		{
-			$this->block_tags[$block_name] = array();
+			$this->block_tags[$name] = array();
 			
-			if( is_array($tags_ary) )
+			if( is_array($tags) )
 			{
-				foreach( $tags_ary AS $key => $val )
+				foreach( $tags as $key => $val )
 				{
 					if( preg_match('/^[[:alnum:]_-]+$/i', $key) )
 					{
-						$this->block_tags[$block_name][$key] = $val;
+						$this->block_tags[$name][$key] = $val;
 					}
 				}
 			}
@@ -1011,12 +1037,14 @@ class Mailer {
 			return false;
 		}
 		
+		$name = ( $filename != '' ) ? $filename : basename($path);
+		
 		if( $embedded )
 		{
 			$offset = count($this->embeddedfile['path']);
 			
 			$this->embeddedfile['path'][$offset]     = $path;
-			$this->embeddedfile['name'][$offset]     = ( $filename != '' ) ? trim($filename) : basename($path);
+			$this->embeddedfile['name'][$offset]     = $name;
 			$this->embeddedfile['mimetype'][$offset] = $mime_type;
 		}
 		else
@@ -1024,36 +1052,12 @@ class Mailer {
 			$offset = count($this->attachfile['path']);
 			
 			$this->attachfile['path'][$offset]        = $path;
-			$this->attachfile['name'][$offset]        = ( $filename != '' ) ? trim($filename) : basename($path);
+			$this->attachfile['name'][$offset]        = $name;
 			$this->attachfile['mimetype'][$offset]    = $mime_type;
 			$this->attachfile['disposition'][$offset] = ( $disposition == 'inline' ) ? 'inline' : 'attachment';
 		}
 		
 		return true; 
-	}
-	
-	/**
-	 * @access private
-	 * @return string
-	 */
-	function generate_rand_str()
-	{
-		$chars = array(
-			'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h', 'I', 'i', 'J', 'j', 
-			'K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'P', 'p', 'Q', 'q', 'R', 'r', 'S', 's', 'T', 't', 
-			'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Y', 'y', 'Z', 'z', '2', '3', '4', '5', '6', '7', '8', '9', '0'
-		);
-		
-		$max_chars = (count($chars) - 1);
-		srand( (double) microtime()*1000000);
-		
-		$rand_str = '';
-		for( $i = 0; $i < 30; $i++ )
-		{
-			$rand_str .= $chars[rand(0, $max_chars)];
-		}
-		
-		return $rand_str;
 	}
 	
 	/**
@@ -1157,62 +1161,67 @@ class Mailer {
 	/**
 	 * Définition de l'adresse de réponse
 	 * 
-	 * @param string $email_reply  Email de réponse
-	 * @param string $name_reply   Personnalisation
+	 * @param string $email  Email de réponse
+	 * @param string $name   Personnalisation
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
-	function set_reply_to($email_reply = '', $name_reply = '')
+	function set_reply_to($email = '', $name = '')
 	{
-		if( $email_reply == '' )
+		if( $email != '' )
 		{
-			$email_reply = $this->from['email'];
-			$name_reply  = $this->from['name'];
+			$email = trim($email);
+			$name  = trim($name);
+			
+			if( $this->valid_syntax && !$this->validate_email($email) )
+			{
+				$this->error('set_reply_to() :: "' . $email . '", cette adresse email n\'est pas valide');
+				return false;
+			}
+			
+			if( $name != '' )
+			{
+				$email = sprintf('%s <%s>',
+					$this->encode_mime_header($name, 'Reply-To', 'phrase'), $email);
+			}
 		}
 		else
 		{
-			$email_reply = trim($email_reply);
-			$name_reply  = trim($name_reply);
-			
-			if( $this->valid_syntax && !$this->validate_email($email_reply) )
-			{
-				$this->error('set_reply_to() :: "' . $email_reply . '", cette adresse email n\'est pas valide');
-				return false;
-			}
+			$email = $this->headers['From'];
 		}
 		
-		$this->headers['Reply-To'] = ( ( $name_reply != '' ) ? $this->encode_mime_header('"' . $name_reply . '"', 'Reply-To') . ' ' : '' ) . '<' . $email_reply . '>';
-		
+		$this->headers['Reply-To'] = $email;
+				
 		return true;
 	}
 	
 	/**
 	 * Définition de l'adresse de retour d'erreurs
 	 * 
-	 * @param string $email_return  Email de retour d'erreur
+	 * @param string $email  Email de retour d'erreur
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
-	function set_return_path($email_return = '')
+	function set_return_path($email = '')
 	{
-		if( $email_return == '' )
+		$email = trim($email);
+		
+		if( $email != '' )
 		{
-			$email_return = $this->from['email'];
-		}
-		else
-		{
-			$email_return = trim($email_return);
-			
-			if( $this->valid_syntax && !$this->validate_email($email_return) )
+			if( $this->valid_syntax && !$this->validate_email($email) )
 			{
-				$this->error('set_return_path() :: "' . $email_return . '", cette adresse email n\'est pas valide');
+				$this->error('set_return_path() :: "' . $email . '", cette adresse email n\'est pas valide');
 				return false;
 			}
 		}
+		else
+		{
+			$email = $this->sender;
+		}
 		
-		$this->headers['Return-Path'] = $email_return;
+		$this->headers['Return-Path'] = $email;
 		
 		return true;
 	}
@@ -1220,31 +1229,30 @@ class Mailer {
 	/**
 	 * Définition de l'adresse cible pour les notifications de lecture
 	 * 
-	 * @param string $email_notify  Email pour le retour de notification de lecture 
-	 *                                  (par défaut, l'adresse d'envoi est utilisée)
+	 * @param string $email  Email pour le retour de notification de lecture 
+	 *                       (par défaut, l'adresse d'envoi est utilisée)
 	 * 
 	 * @access public
 	 * @return boolean
-	 * 
 	 */
-	function set_notify($email_notify = '')
+	function set_notify($email = '')
 	{
-		if( $email_notify == '' )
+		if( $email != '' )
 		{
-			$email_notify = $this->from['email'];
-		}
-		else
-		{
-			$email_notify = trim($email_notify);
+			$email = trim($email);
 			
-			if( $this->valid_syntax && !$this->validate_email($email_notify) )
+			if( $this->valid_syntax && !$this->validate_email($email) )
 			{
-				$this->error('set_notify() :: "' . $email_notify . '", cette adresse email n\'est pas valide');
+				$this->error('set_notify() :: "' . $email . '", cette adresse email n\'est pas valide');
 				return false;
 			}
 		}
+		else
+		{
+			$email = $this->sender;
+		}
 		
-		$this->headers['Disposition-Notification-To'] = '<' . $email_notify . '>';
+		$this->headers['Disposition-Notification-To'] = '<' . $email . '>';
 		
 		return true;
 	}
@@ -1257,7 +1265,7 @@ class Mailer {
 	 */
 	function organization($soc)
 	{
-		$this->headers['Organization'] = trim($soc);
+		$this->headers['Organization'] = $this->encode_mime_header($soc, 'Organization');
 	}
 	
 	/**
@@ -1281,88 +1289,48 @@ class Mailer {
 		{
 			$level = strtolower($level);
 			
-			switch( $level )
+			if( !in_array($level, array('highest', 'high', 'low', 'lowest')) )
 			{
-				case 'highest':
-					$this->headers['X-MSMail-Priority'] = 'Highest';
-					break;
-				
-				case 'hight':
-					$this->headers['X-MSMail-Priority'] = 'High';
-					break;
-				
-				case 'low':
-					$this->headers['X-MSMail-Priority'] = 'Low';
-					break;
-				
-				case 'lowest':
-					$this->headers['X-MSMail-Priority'] = 'Lowest';
-					break;
-				
-				case 'normal':
-				default:
-					$this->headers['X-MSMail-Priority'] = 'Normal';
-					break;
+				$level = 'normal';
 			}
+			
+			$this->headers['X-MSMail-Priority'] = ucfirst($level);
 		}
 	}
 	
 	/**
 	 * Ajout d'en-têtes supplémentaires
 	 * 
-	 * @param string $name  Nom de l'entête 
-	 * @param string $body  Contenu de l'entête
+	 * @param string $name   Nom de l'entête 
+	 * @param string $value  Contenu de l'entête
 	 * 
 	 * @access public
 	 * @return boolean
 	 */
-	function additionnal_header($name, $body)
+	function additionnal_header($name, $value)
 	{
-		if( $name != '' && $body != '' )
+		//
+		// Le nom de l'en-tête ne doit contenir que des caractères us-ascii, 
+		// et ne doit pas contenir le caractère deux points (:)
+		// - Section 2.2 de la rfc 2822
+		//
+		if( !preg_match('/^[\x21-\x39\x3B-\x7E]+$/', $name) )
 		{
-			$name = trim(strtolower($name));
-			$body = trim($body);
-			
-			//
-			// Le nom de l'en-tête ne doit contenir que des caractères us-ascii, 
-			// et ne doit pas contenir le caractère deux points (:)
-			// - Section 2.2 de la rfc 2822
-			//
-			if( preg_match("/([\001-\032\072\127-\377])/", $name) )
-			{
-				return false;
-			}
-			
-			//
-			// Le contenu de l'en-tête ne doit contenir aucun retour chariot ou 
-			// saut de ligne
-			// - Section 2.2 de la rfc 2822
-			//
-			$body = preg_replace("/[\012\015]/", '', $body);
-			
-			if( strpos($name, '-') )
-			{
-				$elt = explode('-', $name);
-				
-				$item = array();
-				foreach( $elt AS $val )
-				{
-					$item[] = ucfirst($val);
-				}
-				
-				$name = implode('-', $item);
-			}
-			else
-			{
-				$name = ucfirst($name);
-			}
-			
-			$this->headers[$name] = $body;
-			
-			return true;
+			return false;
 		}
 		
-		return false;
+		$name  = str_replace(' ', '-', ucwords(str_replace('-', ' ', $name)));
+		
+		//
+		// Le contenu de l'en-tête ne doit contenir aucun retour chariot ou 
+		// saut de ligne
+		// - Section 2.2 de la rfc 2822
+		//
+		$value = preg_replace('/[\x0A\x0D]/', '', trim($value));
+		
+		$this->headers[$name] = $value;
+		
+		return true;
 	}
 	
 	/**
@@ -1395,7 +1363,7 @@ class Mailer {
 			 * @link http://jlr31130.free.fr/rfc2045.html#6.8.
 			 */
 			case 'base64':
-				$str = chunk_split(base64_encode($str), 76, "\n");
+				$str = rtrim(chunk_split(base64_encode($str), 76, "\n"));
 				break;
 			
 			case 'binary':
@@ -1423,125 +1391,195 @@ class Mailer {
 		 * @link http://www.asciitable.com/
 		 * @link http://jlr31130.free.fr/rfc2045.html (paragraphe 6.7)
 		 */
+		$maxlen = 76;
 		
 		$str = preg_replace("/\r\n?/", "\n", $str);
-		$str = preg_replace("/([\001-\010\013\014\016-\037\075\177-\377])/e", 'sprintf(\'=%02X\', ord("\\1"));', $str);
+		$str = preg_replace("/([\001-\010\013\014\016-\037\075\177-\377])/e",
+			'sprintf(\'=%02X\', ord("\\1"));', $str);
 		$str = preg_replace("/([\011\040])(?=\n)/e", 'sprintf(\'=%02X\', ord("\\1"));', $str);
 		
-		if( strlen($str) > $this->maxlen )
-		{
-			$lines = explode("\n", $str);
-			$total_lines = count($lines);
-			
-			for( $i = 0; $i < $total_lines; $i++ )
-			{
-				if( ($strlen = strlen($lines[$i])) > $this->maxlen )
-				{
-					$new_line = '';
-					
-					do
-					{
-						$tmp = substr($lines[$i], 0, ($this->maxlen - 1));
-						
-						if( ($pos = strrpos($tmp, '=')) && $pos > ($this->maxlen - 4) )
-						{
-							$tmp       = substr($tmp, 0, $pos);
-							$lines[$i] = '=' . substr($lines[$i], ($pos + 1));
-							$strlen    = ($strlen - strlen($tmp));
-						}
-						else
-						{
-							$lines[$i] = substr($lines[$i], ($this->maxlen - 1));
-							$strlen    = ($strlen - ($this->maxlen - 1));
-						}
-						
-						$new_line .= $tmp;
-						if( $strlen > 0 )
-						{
-							$new_line .= "=\n";
-							
-							if( $strlen <= $this->maxlen )
-							{
-								$new_line .= $lines[$i];
-								break;
-							}
-						}
-					}
-					while( $strlen > 0 );
-					
-					$lines[$i] = $new_line;
-				}
-			}
-			
-			$str = implode("\n", $lines);
-		}
+		$lines = explode("\n", $str);
+		$total_lines = count($lines);
 		
-		return $str;
-	}
-	
-	/**
-	 * @param string $body         Contenu de l'entête
-	 * @param string $header_name  Nom de l'entête correspondant
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function encode_mime_header($body, $header_name)
-	{
-		if( preg_match("/([\001-\032\072\177-\377])/", $body) )
+		for( $i = 0; $i < $total_lines; $i++ )
 		{
-			//
-			// On encode le sujet au format quoted-printable (?, " et _ en plus)
-			//
-			// 9 = 2 (=) + 4 (?) + 1 (Q) + 1 <SP> + 1 (:)
-			//
-			$len  = ($this->maxlen - strlen($header_name) - 9 - strlen($this->charset));
-			$body = preg_replace('/^"(.*)"$/', '\\1', $body);
-			$body = preg_replace("/([\001-\032\042\075\077\137\177-\377])/e", 'sprintf(\'=%02X\', ord("\\1"));', $body);
-			
-			if( ($strlen = strlen($body)) > $len )
+			if( ($strlen = strlen($lines[$i])) > $maxlen )
 			{
-				$new_body = '';
+				$new_line = '';
 				
 				do
 				{
-					$tmp = substr($body, 0, $len);
+					$tmp = substr($lines[$i], 0, ($maxlen - 1));
 					
-					if( ($pos = strrpos($tmp, '=')) && $pos > ($len - 4) )
+					if( ($pos = strrpos($tmp, '=')) && $pos > ($maxlen - 4) )
 					{
-						$tmp    = substr($tmp, 0, $pos);
-						$body   = '=' . substr($body, ($pos + 1));
-						$strlen = ($strlen - strlen($tmp));
+						$tmp       = substr($tmp, 0, $pos);
+						$lines[$i] = '=' . substr($lines[$i], ($pos + 1));
+						$strlen    = ($strlen - strlen($tmp));
 					}
 					else
 					{
-						$body   = substr($body, $len);
-						$strlen = ($strlen - $len);
+						$lines[$i] = substr($lines[$i], ($maxlen - 1));
+						$strlen    = ($strlen - ($maxlen - 1));
 					}
 					
-					$new_body .= '=?' . $this->charset . '?Q?' . str_replace(' ', '_', $tmp) . '?=';
+					$new_line .= $tmp;
 					if( $strlen > 0 )
 					{
-						$new_body .= ' ';
+						$new_line .= "=\n";
 						
-						if( $strlen <= $len )
+						if( $strlen <= $maxlen )
 						{
-							$new_body .= '=?' . $this->charset . '?Q?' . str_replace(' ', '_', $body) . '?=';
+							$new_line .= $lines[$i];
 							break;
 						}
 					}
 				}
 				while( $strlen > 0 );
 				
-				$body = $new_body;
-			}
-			else
-			{
-				$body = '=?' . $this->charset . '?Q?' . str_replace(' ', '_', $body) . '?=';
+				$lines[$i] = $new_line;
 			}
 		}
 		
-		return $body;
+		$str = implode("\n", $lines);
+		
+		return $str;
+	}
+	
+	/**
+	 * @param string $value  Contenu de l'entête
+	 * @param string $name   Nom de l'entête correspondant
+	 * @param string $token  Type de jeton
+	 * 
+	 * @access public
+	 * @return string
+	 */
+	function encode_mime_header($value, $name, $token = 'text')
+	{
+		if( preg_match('/[\x00-\x1F\x7F-\xFF]/', $value) )
+		{
+			$maxlen = 76;
+			$sep = "\r\n\x20";
+			
+			switch( $token )
+			{
+				case 'comment':
+					$charlist = '\x00-\x1F\x22\x28\x29\x3A\x3D\x3F\x5F\x7F-\xFF';
+					break;
+				case 'phrase':
+					$charlist = '\x00-\x1F\x22-\x29\x2C\x2E\x3A\x40\x5B-\x60\x7B-\xFF';
+					break;
+				case 'text':
+				default:
+					$charlist = '\x00-\x1F\x3A\x3D\x3F\x5F\x7F-\xFF';
+					break;
+			}
+			
+			/**
+			 * Si le nombre d'octets à encoder représente plus de 33% de la chaîne,
+			 * nous utiliserons l'encodage base64 qui garantit une chaîne encodée 33%
+			 * plus longue que l'originale, sinon, on utilise l'encodage "Q".
+			 * La RFC 2047 recommande d'utiliser pour chaque cas l'encodage produisant
+			 * le résultat le plus court.
+			 * 
+			 * @see RFC 2045#6.8
+			 * @see RFC 2047#4
+			 */
+			$q = preg_match_all("/[$charlist]/", $value, $matches);
+			$strlen   = strlen($value);
+			$encoding = (($q / $strlen) < 0.33) ? 'Q' : 'B';
+			$template = sprintf('=?%s?%s?%%s?=%s', $this->charset, $encoding, $sep);
+			$maxlen   = ($maxlen - strlen($template) + strlen($sep) + 2);// + 2 pour le %s dans le modèle
+			$is_utf8  = (strcasecmp($this->charset, 'UTF-8') == 0);
+			$newbody  = '';
+			$pos = 0;
+			
+			while( $pos < $strlen )
+			{
+				$tmplen = $maxlen;
+				if( $newbody == '' )
+				{
+					$tmplen -= strlen($name . ': ');
+					if( $encoding == 'Q' ) $tmplen++;// TODO : à comprendre
+				}
+				
+				if( $encoding == 'Q' )
+				{
+					$q = preg_match_all("/[$charlist]/", substr($value, $pos, $tmplen), $matches);
+					// chacun des octets trouvés prendra trois fois plus de place dans
+					// la chaîne encodée. On retranche cette valeur de la longueur du tronçon
+					$tmplen -= ($q * 2);
+				}
+				else
+				{
+					/**
+					 * La longueur de l'encoded-text' doit être un multiple de 4
+					 * pour ne pas casser l'encodage base64
+					 * 
+					 * @see RFC 2047#5
+					 */
+					$tmplen -= ($tmplen % 4);
+					$tmplen = floor(($tmplen/4)*3);
+				}
+				
+				if( $is_utf8 )
+				{
+					/**
+					 * Il est interdit de sectionner un caractère multi-octet.
+					 * On teste chaque octet en partant de la fin du tronçon en cours
+					 * jusqu'à tomber sur un caractère ascii ou l'octet de début de
+					 * séquence d'un caractère multi-octets.
+					 * On vérifie alors qu'il y bien $m octets qui suivent (le cas échéant).
+					 * Si ce n'est pas le cas, on réduit la longueur du tronçon.
+					 * 
+					 * @see RFC 2047#5
+					 */
+					for( $i = min(($pos + $tmplen), $strlen), $c = 1; $i > $pos; $i--, $c++ )
+					{
+						$d = ord($value{$i-1});
+						
+						reset($this->_utf8test);
+						for( $m = 1; $m <= 6; $m++ )
+						{
+							$test = each($this->_utf8test);
+							if( ($d & $test[0]) == $test[1] )
+							{
+								if( $c < $m )
+								{
+									$tmplen -= $c;
+								}
+								break 2;
+							}
+						}
+					}
+				}
+				
+				$tmp = substr($value, $pos, $tmplen);
+				if( $encoding == 'Q' )
+				{
+					$tmp = preg_replace("/([$charlist])/e", 'sprintf(\'=%02X\', ord("\\1"));', $tmp);
+					$tmp = str_replace(' ', '_', $tmp);
+				}
+				else
+				{
+					$tmp = base64_encode($tmp);
+				}
+				
+				$newbody .= sprintf($template, $tmp);
+				$pos += $tmplen;
+			}
+			
+			$value = str_replace("\r\n", "\n", rtrim($newbody));
+		}
+		else if( $token != 'text' )
+		{
+			if( preg_match('/[^!#$%&\'*+\/0-9=?a-z^_`{|}~-]/', $value) )
+			{
+				$value = '"'.$value.'"';
+			}
+		}
+		
+		return $value;
 	}
 	
 	/**
@@ -1572,24 +1610,15 @@ class Mailer {
 			 * selon les lecteurs d'emails.
 			 */
 			
-			$str = wordwrap($str, $maxlen, "\n ", 1);
+			$str = wordwrap($str, $maxlen, "\n ");
 		}
 		else if( strlen($str) > $maxlen )
 		{
 			$lines = explode("\n", $str);
 			$str   = '';
-			foreach( $lines AS $line )
+			foreach( $lines as $line )
 			{
-				if( strlen($line) > $maxlen )
-				{
-					//
-					// wordwrap bouffe les espaces aux endroits où il ajoute un saut de ligne
-					// on réduit la longueur maximale de 1 et on coupe avec <SP>\n
-					//
-					$line = wordwrap($line, ($maxlen - 1), " \n");
-				}
-				
-				$str .= $line . "\n";
+				$str .= wordwrap($line, $maxlen, "\n") . "\n";
 			}
 		}
 		
@@ -1652,7 +1681,7 @@ class Mailer {
 		 */
 		if( $this->subject != '' )
 		{
-			$subject = $this->encode_mime_header($this->subject, 'subject');
+			$subject = $this->subject;
 			if( $this->fix_bug_mail == -1 )
 			{
 				$subject = str_replace("\n ", "\r\n ", $this->word_wrap($subject));
@@ -1706,7 +1735,8 @@ class Mailer {
 				break;
 			
 			case WM_HOST_ONLINE:
-				$result = @email($this->from_online, $address, $subject, $message, $this->reply_online, $headers);
+				list($sender) = explode('@', $this->sender);
+				$result = @email($sender, $address, $subject, $message, $sender, $headers);
 				break;
 			
 			case WM_SMTP_MODE:
@@ -1877,11 +1907,11 @@ class Mailer {
 	{
 		if( !empty($this->headers['Return-Path']) )
 		{
-			$Rpath = $this->headers['Return-Path'];
+			$Rpath = trim($this->headers['Return-Path'], '<>');
 		}
-		else if( !empty($this->from['email']) )
+		else if( !empty($this->sender) )
 		{
-			$Rpath = $this->from['email'];
+			$Rpath = $this->sender;
 		}
 		else
 		{
@@ -2090,46 +2120,23 @@ class Mailer {
 	{
 		if( $this->smtp_mode || $this->sendmail_mode )
 		{
-			$this->headers['Subject'] = $this->encode_mime_header($this->subject, 'subject');
+			$this->headers['Subject'] = $this->subject;
 		}
 		else
 		{
 			$this->headers['Subject'] = '';
 		}
 		
-		//
-		// Si la fonction email() est utilisée, les 
-		// modifications spécifiques à Online doivent être effectuées.
-		//
-		if( !$this->smtp_mode && !$this->sendmail_mode && $this->hebergeur == WM_HOST_ONLINE )
+		if( !empty($this->sender) && $this->hebergeur != WM_HOST_ONLINE && empty($this->headers['Return-Path']) )
 		{
-			list($account) = explode('@', $this->from['email']);
-			$this->from_online = $this->reply_online = $account;
-		}
-		else if( !empty($this->from['email']) )
-		{
-			if( empty($this->headers['Return-Path']) )
-			{
-				$this->set_return_path($this->from['email']);
-			}
-			else
-			{
-				$this->headers['Return-Path'] = preg_replace('/<?([^@]+@[^>]+)>?/', '\\1', $this->headers['Return-Path']);
-			}
-			
-			$this->headers['From'] = '';
-			if( $this->from['name'] != '' )
-			{
-				$this->headers['From'] .= $this->encode_mime_header('"' . $this->from['name'] . '"', 'from') . ' ';
-			}
-			$this->headers['From'] .= '<' . $this->from['email'] . '>';
+			$this->set_return_path();
 		}
 		
 		$this->headers['Date']         = date('D, d M Y H:i:s O', time());
-		$this->headers['X-Mailer']     = 'WAmailer/' . $this->version . ' (http://phpcodeur.net)';
+		$this->headers['X-Mailer']     = 'Wamailer/' . $this->version . ' (http://phpcodeur.net)';
 		$this->headers['X-AntiAbuse']  = 'Sender IP - ' . $this->sender_ip . '/Server Name - <' . $this->server_from . '>';
 		$this->headers['MIME-Version'] = '1.0'; 
-		$this->headers['Message-ID']   = '<' . $this->generate_rand_str() . '@' . $this->server_from . '>';
+		$this->headers['Message-ID']   = '<' . md5(microtime() . rand()) . '@' . $this->server_from . '>';
 		
 		//
 		// La rfc2822 conseille de placer certains entêtes dans un certain ordre
@@ -2137,7 +2144,7 @@ class Mailer {
 		$header_rank = array('Return-Path', 'Date', 'From', 'Subject', 'X-Sender', 'To', 'Cc', 'Bcc', 'Reply-To');
 		
 		$headers = '';
-		foreach( $header_rank AS $name )
+		foreach( $header_rank as $name )
 		{
 			if( empty($this->headers[$name]) )
 			{
@@ -2148,7 +2155,7 @@ class Mailer {
 				preg_replace('/(?!\x09|\x20)\r?\n/', '', $this->headers[$name]))) . "\n";
 		}
 		
-		foreach( $this->headers AS $name => $body )
+		foreach( $this->headers as $name => $body )
 		{
 			if( in_array($name, $header_rank) || $body == '' )
 			{
@@ -2161,9 +2168,38 @@ class Mailer {
 		
 		if( empty($this->compiled_message[$this->format]) )
 		{
-			$this->boundary['part0'][$this->format] = '-----=_Part0_' . $this->generate_rand_str() . '--';
-			$this->boundary['part1'][$this->format] = '-----=_Part1_' . $this->generate_rand_str() . '--';
-			$this->boundary['part2'][$this->format] = '-----=_Part2_' . $this->generate_rand_str() . '--';
+			$this->boundary['part0'][$this->format] = '--=_Part0_' . md5(microtime());
+			$this->boundary['part1'][$this->format] = '--=_Part1_' . md5(microtime());
+			$this->boundary['part2'][$this->format] = '--=_Part2_' . md5(microtime());
+			
+			if( $this->extract_auto && $this->format > 1 )
+			{
+				$offset = count($this->embeddedfile['path']);
+				preg_match_all(
+					'/<(?:[^>]+)(?:data|src|background)\s*=\s*(["\'])(.+?\.([a-z]+))\\1(?:[^>]*)>/Si',
+					$this->uncompiled_message[$this->format], $matches, PREG_SET_ORDER
+				);
+				
+				foreach( $matches as $match )
+				{
+					$name = basename($match[2]);
+					$path = $this->root.$name;
+					
+					if( !is_readable($path) )
+					{
+						continue;
+					}
+					
+					$this->embeddedfile['path'][$offset]     = $path;
+					$this->embeddedfile['name'][$offset]     = $name;
+					$this->embeddedfile['mimetype'][$offset] = $this->mime_type($match[3]);
+					$offset++;
+					
+					$data = str_replace($match[2], "cid:$name", $match[0]);
+					$this->uncompiled_message[$this->format] = str_replace($match[0],
+						$data, $this->uncompiled_message[$this->format]);
+				}
+			}
 		}
 		
 		$total_attach   = count($this->attachfile['path']);
@@ -2238,7 +2274,7 @@ class Mailer {
 				$message .= $this->make_content_info($this->format);
 				$message .= "\n\n";
 				$message .= $tmp_msg;
-				$message .= "\n\n";
+				$message .= "\n";
 				
 				for( $i = 0; $i < $total_embedded; $i++ )
 				{
@@ -2248,7 +2284,7 @@ class Mailer {
 						$embedded_ary['mimetype'][$i],
 						'',
 						$this->boundary['part1'][$this->format],
-						TRUE
+						true
 					);
 				}
 				
@@ -2272,7 +2308,7 @@ class Mailer {
 				$message .= $content_info;
 				$message .= "\n\n";
 				$message .= $tmp_msg;
-				$message .= "\n\n";
+				$message .= "\n";
 				
 				for( $i = 0; $i < $total_attach; $i++ )
 				{
@@ -2282,7 +2318,7 @@ class Mailer {
 						$attach_ary['mimetype'][$i],
 						$attach_ary['disposition'][$i],
 						$this->boundary['part0'][$this->format],
-						FALSE
+						false
 					);
 				}
 				
@@ -2306,12 +2342,12 @@ class Mailer {
 			$message .= $this->make_content_info(1);
 			$message .= "\n\n";
 			$message .= $this->make_encoding($this->encoding, $altbody);
-			$message .= "\n\n";
+			$message .= "\n";
 			$message .= '--' . $this->boundary['part2'][$this->format] . "\n";
 			$message .= $this->make_content_info(2);
 			$message .= "\n\n";
 			$message .= $this->make_encoding($this->encoding, $body);
-			$message .= "\n\n";
+			$message .= "\n";
 			$message .= '--' . $this->boundary['part2'][$this->format] . "--\n";
 		}
 		else
@@ -2336,7 +2372,7 @@ class Mailer {
 		if( count($this->tags) > 0 )
 		{
 			$keys = $values = array();
-			foreach( $this->tags AS $key => $val )
+			foreach( $this->tags as $key => $val )
 			{
 				$keys[]   = '/(?:(%)|(\{))'.$key.'(?(1)%|\})/i';
 				$values[] = $val;
@@ -2364,15 +2400,15 @@ class Mailer {
 		
 		for( $i = 0; $i < $total_blocks; $i++ )
 		{
-			$block_name = $matches[1][$i];
+			$name = $matches[1][$i];
 			$tmp = '';
 			
-			if( isset($this->block_tags[$block_name]) && count($this->block_tags[$block_name]) )
+			if( isset($this->block_tags[$name]) && count($this->block_tags[$name]) )
 			{
 				$keys = $values = array();
-				foreach( $this->block_tags[$block_name] AS $key => $val )
+				foreach( $this->block_tags[$name] as $key => $val )
 				{
-					$keys[]   = '/(?:(%)|(\{))' . $block_name . '\.' . $key . '(?(1)%|\})/i';
+					$keys[]   = '/(?:(%)|(\{))' . $name . '\.' . $key . '(?(1)%|\})/i';
 					$values[] = $val;
 				}
 				
@@ -2415,13 +2451,13 @@ class Mailer {
 		
 		if( $embedded )
 		{
-			$cid = $this->generate_rand_str();
+			$cid = md5(microtime()) . '@wamailer';
 			
-			$attach .= 'Content-ID: <' . $cid . '@Wamailer>' . "\n\n";
+			$attach .= 'Content-ID: <' . $cid . '>' . "\n\n";
 			
 			$this->uncompiled_message[$this->format] = preg_replace(
-				'/<(.+?)"cid:' . preg_quote($filename, '/') . '"([^>]*)?>/si',
-				'<\\1"cid:' . $cid . '@Wamailer"\\2>',
+				'/<([^>]+=\s*)(["\'])cid:' . preg_quote($filename, '/') . '\\2([^>]*)>/S',
+				'<\\1\\2cid:' . $cid . '\\2\\3>',
 				$this->uncompiled_message[$this->format]
 			);
 		}
@@ -2459,11 +2495,9 @@ class Mailer {
 	 */
 	function clear_from()
 	{
-		$this->from_online  = '';
-		$this->reply_online = '';
-		$this->from         = array('email' => '', 'name' => '');
-		$this->msg_error    = '';
-		$this->statut       = true;
+		$this->sender    = '';
+		$this->msg_error = '';
+		$this->statut    = true;
 	}
 	
 	/**

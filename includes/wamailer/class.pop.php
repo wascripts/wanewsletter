@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2002-2005 Aurélien Maille
+ * Copyright (c) 2002-2006 Aurélien Maille
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wamailer/
  * @license http://www.gnu.org/copyleft/lesser.html  GNU Lesser General Public License
- * @version 2.3
+ * @version 2.4
  */
 
 if( !defined('CLASS_POP_INC') )
