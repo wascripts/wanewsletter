@@ -2036,14 +2036,14 @@ class Mailer {
 				// FIX
 				// 
 				// La personnalisation telle que "name" <user@domaine.com> ne marche pas
-				// pour les entêtes Cc et Bcc si on utilise la fonction mail() et qu'un serveur
-				// smtp est utilisé. On supprime donc la personnalisation des entêtes Cc et Bcc
+				// pour l'entêtes Cc si on utilise la fonction mail() et qu'un serveur
+				// smtp est utilisé. On supprime donc la personnalisation de l'entête Cc
 				// 
-				// Dans le doute, on remplace également l'entête To (et donc, la personnalisation)
+				// Dans le doute, on supprime également l'entête To.
 				//
 				if( $this->fix_bug_mail == 0 )
 				{
-					$this->headers['To'] = $address;
+					$this->headers['To'] = '';
 				}
 				
 				if( count($this->address['Cc']) > 0 )
