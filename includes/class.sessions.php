@@ -329,11 +329,7 @@ class Session {
 			if( !empty($_SERVER['PHP_AUTH_USER']) )
 			{
 				$username = $_SERVER['PHP_AUTH_USER'];
-				
-				if( !empty($_SERVER['PHP_AUTH_PW']) )
-				{
-					$passwd = md5($_SERVER['PHP_AUTH_PW']);
-				}
+				$passwd   = $_SERVER['PHP_AUTH_PW'];
 			}
 			
 			// Cas particulier : PHP en mode CGI
@@ -361,7 +357,7 @@ class Session {
 			{
 				$autologin = false;
 				$this->sessiondata['adminid'] = $username;
-				$this->sessiondata['adminloginkey'] = $passwd;
+				$this->sessiondata['adminloginkey'] = md5($passwd);
 			}
 		}
 		
