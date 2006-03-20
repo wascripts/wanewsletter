@@ -606,7 +606,7 @@ switch( $mode )
 					$glue = "\n";
 				}
 				
-				$emails = explode($glue, $list_tmp);
+				$emails = explode($glue, trim($list_tmp));
 			}
 			
 			$report = '';
@@ -635,7 +635,8 @@ switch( $mode )
 			
 			if( count($emails) > 0 )
 			{
-				$sql_emails = array_map(create_function('$email', 'return $GLOBALS["db"]->escape($email);'), $emails);
+				$sql_emails = array_map(create_function('$email',
+					'return $GLOBALS["db"]->escape(strtolower($email));'), $emails);
 				
 				$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
 					FROM " . ABONNES_TABLE . " AS a
@@ -645,21 +646,6 @@ switch( $mode )
 				if( !($result = $db->query($sql)) )
 				{
 					trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
-				}
-				
-				//
-				// Suppression des index et contrainte d'unicité. Les insertions seront plus rapides
-				//
-				if( SQL_DRIVER == 'postgres' )
-				{
-					$db->query("ALTER TABLE " . ABONNES_TABLE . " DROP CONSTRAINT abo_email_idx");
-					$db->query("DROP INDEX abo_status_idx");
-				}
-				else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
-				{
-					$db->query("ALTER TABLE " . ABONNES_TABLE . "
-						DROP INDEX abo_email_idx,
-						DROP INDEX abo_status_idx");
 				}
 				
 				//
@@ -693,7 +679,16 @@ switch( $mode )
 				//
 				// Traitement des adresses email inconnues
 				//
-				$emails = array_diff($emails, $emails_ok);
+				@include 'PHP/Compat/Function/array_udiff.php';// partie du module PEAR PHP_Compat
+				
+				if( function_exists('array_udiff') )
+				{
+					$emails = array_udiff($emails, $emails_ok, 'strcasecmp');
+				}
+				else
+				{
+					$emails = array_diff($emails, $emails_ok);
+				}
 				
 				foreach( $emails as $email )
 				{
@@ -705,7 +700,9 @@ switch( $mode )
 					
 					if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
 					{
-						trigger_error('Impossible d\'ajouter un nouvel abonné dans la table des abonnés', ERROR);
+						$report .= sprintf('%s : SQL error (#%d: %s)%s', $email, $db->errno, $db->error, WA_EOL);
+						$db->rollBack();
+						continue;
 					}
 					
 					$sql_data = array();
@@ -724,21 +721,6 @@ switch( $mode )
 					$db->commit();
 					
 					fake_header(true);
-				}
-				
-				//
-				// Remise en place des index et contrainte d'unicité précédemment supprimés
-				//
-				if( SQL_DRIVER == 'postgres' )
-				{
-					$db->query("ALTER TABLE " . ABONNES_TABLE . " ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
-					$db->query("CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)");
-				}
-				else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
-				{
-					$db->query("ALTER TABLE " . ABONNES_TABLE . "
-						ADD UNIQUE abo_email_idx (abo_email),
-						ADD INDEX abo_status_idx (abo_status)");
 				}
 			}
 			
