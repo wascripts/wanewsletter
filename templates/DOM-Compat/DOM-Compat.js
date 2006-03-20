@@ -34,7 +34,7 @@
  */
 
 // Bientôt une diffusion publique et un petit mode d’emploi...
-var applyPatch = true;
+var applyPatch = false;
 
 var DOM_Events = {
 	lastEventDispatched: '',
