@@ -1029,7 +1029,11 @@ function http_get_contents($URL, &$errstr)
 	$client =& new HTTP_Client();
 	$client->openURL('HEAD', $URL);
 	$client->setRequestHeader('User-Agent', 'Wanewsletter ' . WA_VERSION);
-	$client->setRequestHeader('Accept-Encoding', 'gzip');
+	
+	if( extension_loaded('zlib') )
+	{
+		$client->setRequestHeader('Accept-Encoding', 'gzip');
+	}
 	
 	if( $client->send() == false )
 	{
@@ -1067,7 +1071,7 @@ function http_get_contents($URL, &$errstr)
 	{
 		$prolog = substr($client->responseData, 0, strpos($client->responseData, "\n"));
 		
-		if( preg_match('/encoding=("|\')([a-z][a-z0-9._-]*)\\1"/i', $prolog, $match) )
+		if( preg_match('/\s+encoding\s?=\s?("|\')([a-z][a-z0-9._-]*)\\1"/i', $prolog, $match) )
 		{
 			$charset = $match[2];
 		}

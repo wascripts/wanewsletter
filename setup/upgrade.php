@@ -942,6 +942,21 @@ if( $start )
 			{
 				case '2.3-beta1':
 				case '2.3-beta2':
+				case '2.3-beta3':
+					//
+					// En cas de bug lors d'une importation d'emails, les clefs
+					// peuvent ne pas avoir été recréées si une erreur est survenue
+					//
+					if( SQL_DRIVER == 'postgres' )
+					{
+						$db->query("ALTER TABLE " . ABONNES_TABLE . "
+							ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
+					}
+					else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
+					{
+						$db->query("ALTER TABLE " . ABONNES_TABLE . "
+							ADD UNIQUE abo_email_idx (abo_email)");
+					}
 					break;
 				
 				default:
@@ -956,7 +971,7 @@ if( $start )
 		// Modification fichier de configuration +
 		// Affichage message de résultat
 		//
-		if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
+		if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
 		{
 			$output->addHiddenField('driver',  $infos['driver']);
 			$output->addHiddenField('host',    $infos['host']);
@@ -977,6 +992,7 @@ if( $start )
 			exit;
 		}
 		
+		$fw = fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w');
 		fwrite($fw, $config_file);
 		fclose($fw);
 		
