@@ -1,3 +1,3 @@
 
-@C:\\php\\php.exe wanewsletter %*
+@C:\\php\\php.exe -q wanewsletter %*
 

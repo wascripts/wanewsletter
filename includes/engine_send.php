@@ -418,8 +418,11 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				}
 			}
 			
+			$counter = 0;
+			
 			do
 			{
+				$counter++;
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				
 				if( $abo_format == FORMAT_TEXTE )
@@ -509,6 +512,11 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				}
 				
 				fake_header(true);
+				
+				if( defined('IN_COMMANDLINE') && SLEEP_INTERVAL > 0 && ($counter % SLEEP_INTERVAL) == 0 )
+				{
+					sleep(SLEEP_SECONDS);
+				}
 			}
 			while( ($row = $result->fetch()) || ($row = array_pop($supp_address_ok)) != null );
 			
