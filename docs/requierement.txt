@@ -17,6 +17,7 @@ pg_client_encoding(),
 pg_set_client_encoding() => 4.0.3
 array_sum()              => 4.0.4
 preg_split()             => 4.0.5 avec PREG_SPLIT_DELIM_CAPTURE includes/functions.php
+preg_replace_callback()  => 4.0.5 admin/envoi.php
 mysql_get_client_info()  => 4.0.5 admin/tools.php
 mysql_get_server_info()  => 4.0.5 includes/sql/mysql.php
 is_scalar()              => 4.0.5 includes/functions.php

@@ -612,7 +612,7 @@ switch( $mode )
 			$db->query($sql);
 		}
 		
-		if( ( $mode == 'attach' && empty($logdata['log_id']) ) || $mode == 'send' || $mode == 'save' )
+		if( $mode != 'attach' || empty($logdata['log_id']) )
 		{
 			if( $logdata['log_subject'] == '' )
 			{
@@ -631,6 +631,83 @@ switch( $mode )
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
 			}
+			
+			//
+			// Fonction de callback utilisée pour l'appel à preg_replace_callback() plus bas
+			//
+			function replace_include($match)
+			{
+				global $mode, $lang, $error, $msg_error;
+				
+				preg_match_all('/\\s+([a-z_:][a-z0-9_:.-]*)\\s?=\\s?(["\'])(.+?)(?<!\\\\)(?:\\\\\\\\)*\\2/i',
+					$match[1], $attrs, PREG_SET_ORDER);
+				
+				$resource = null;
+				$tds = false;
+				foreach( $attrs as $attr )
+				{
+					switch( $attr[1] )
+					{
+						case 'src':
+							$resource = stripslashes($attr[3]);
+							break;
+						case 'tds' && $attr[3] == 'true':
+						case 'now' && $attr[3] == 'true':
+							$tds = true;
+							break;
+					}
+				}
+				
+				if( is_null($resource) || (!$tds && $mode != 'send') )
+				{
+					return $match[0];
+				}
+				
+				if( substr($resource, 0, 7) == 'http://' )
+				{
+					$result = http_get_contents($resource, $errstr);
+					if( $result == false )
+					{
+						$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($resource), $errstr);
+					}
+				}
+				else
+				{
+					if( $resource{0} != '/' )// Chemin non absolu
+					{
+						$resource = WA_ROOTDIR . '/' . $resource;
+					}
+					
+					if( is_readable($resource) )
+					{
+						$fp = fopen($resource, 'r');
+						$data = fread($fp, filesize($resource));
+						fclose($fp);
+						
+						$result = array('data' => $data, 'charset' => '');
+					}
+					else
+					{
+						$result = false;
+						$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($resource));
+					}
+				}
+				
+				if( $result == false )
+				{
+					$error = true;
+					$msg_error[] = $errstr;
+					return $match[0];
+				}
+				else
+				{
+					return convert_encoding($result['data'], $result['charset']);
+				}
+			}
+			
+			$regexp = '/<\\?inclu[dr]e(\\s+[^>]+)\\?>/i';
+			$logdata['log_body_text'] = preg_replace_callback($regexp, 'replace_include', $logdata['log_body_text']);
+			$logdata['log_body_html'] = preg_replace_callback($regexp, 'replace_include', $logdata['log_body_html']);
 			
 			if( $mode == 'send' )
 			{
@@ -683,6 +760,25 @@ switch( $mode )
 						$error = true;
 						$msg_error[] = sprintf($lang['Cid_error_in_body'], implode(', ', $files_error));
 					}
+				}
+				
+				//
+				// Deux newsletters ne peuvent être simultanément en attente d'envoi
+				// pour une même liste.
+				//
+				$sql = "SELECT COUNT(*) AS test
+					FROM " . LOG_TABLE . "
+					WHERE liste_id = $listdata[liste_id]
+						AND log_status = " . STATUS_STANDBY;
+				if( !($result = $db->query($sql)) )
+				{
+					trigger_error('Impossible de tester la présence de newsletter déjà en attente d\'envoi', ERROR);
+				}
+				
+				if( $result->column('test') > 0 )
+				{
+					$error = true;
+					$msg_error[] = $lang['Message']['Twice_sending'];
 				}
 			}
 			

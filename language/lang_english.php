@@ -218,7 +218,7 @@ $lang['Message']['No_abo_id']               = "No subscriber has been selected";
 $lang['Message']['No_abo_email']            = "None of these addresses email is present in this mailing list";
 $lang['Message']['abo_not_exists']          = "This subscriber does not exist !";
 $lang['Message']['Failed_open_file']        = "Unable to open the received file";
-$lang['Message']['File_not_exists']         = "The %s file does not seem to exist on the server";
+$lang['Message']['File_not_exists']         = "The file %s doesn't exist or isn't readable";
 $lang['Message']['Bad_file_type']           = "The received file type has been prohibited or is not valid";
 $lang['Message']['Error_local']             = "No file found in %s";
 $lang['Message']['No_data_received']        = "No data has been received";
@@ -231,6 +231,7 @@ $lang['Message']['Invalid_url']             = "Given URL is not valid";
 $lang['Message']['Unaccess_host']           = "The host %s seems actually unreachable";
 $lang['Message']['Not_found_at_url']        = "The file does not seems to be at indicated URL";
 $lang['Message']['No_data_at_url']          = "No data available about the file";
+$lang['Message']['Error_load_url']          = "Error while loading url \"%1\$s\" (%2\$s)";
 
 $lang['Message']['Cannot_create_dir']       = "Cannot create %s directory";
 $lang['Message']['Dir_not_writable']        = "The directory <samp>%s</samp> doesn't exist or is not writable";
@@ -265,6 +266,7 @@ $lang['Message']['IDs_sended']              = "Your identifiers were sent to you
 $lang['Message']['Logs_sent']               = "The selected newsletters were sent at your address: %s";
 $lang['Message']['Archive_class_needed']    = "The export module needs the <q>%s</q> <abbr title=\"PHP Extension and Application Repository\">PEAR</abbr> package. Please refer to the documentation for more details.";
 $lang['Message']['Chdir_error']             = "Unable to set current directory with %s (chdir() error)";
+$lang['Message']['Twice_sending']           = "A newsletter is already in the course of sending for this list. Finish or cancel this sending before beginning another of them.";
 
 
 //

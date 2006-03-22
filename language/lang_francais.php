@@ -218,7 +218,7 @@ $lang['Message']['No_abo_id']               = "Aucun abonné n'a été sélectionné"
 $lang['Message']['No_abo_email']            = "Aucune de ces adresses email n'est présente dans cette liste de diffusion";
 $lang['Message']['abo_not_exists']          = "Cet abonné n'existe pas !";
 $lang['Message']['Failed_open_file']        = "Impossible d'ouvrir le fichier reçu";
-$lang['Message']['File_not_exists']         = "Le fichier %s ne semble pas être présent sur le serveur";
+$lang['Message']['File_not_exists']         = "Le fichier %s n'existe pas ou n'est pas accessible en lecture";
 $lang['Message']['Bad_file_type']           = "Le type de fichier reçu a été interdit ou n'est pas valide";
 $lang['Message']['Error_local']             = "Aucun fichier trouvé au chemin %s";
 $lang['Message']['No_data_received']        = "Aucune donnée n'a été réceptionnée";
@@ -231,6 +231,7 @@ $lang['Message']['Invalid_url']             = "L'url donnée n'est pas valide";
 $lang['Message']['Unaccess_host']           = "L'hôte %s semble inaccessible actuellement";
 $lang['Message']['Not_found_at_url']        = "Le fichier ne semble pas présent à l'url indiquée";
 $lang['Message']['No_data_at_url']          = "Aucune donnée disponible sur le fichier";
+$lang['Message']['Error_load_url']          = "Erreur dans le chargement de l'url \"%1\$s\" (%2\$s)";
 
 $lang['Message']['Cannot_create_dir']       = "Impossible de créer le répertoire %s";
 $lang['Message']['Dir_not_writable']        = "Le répertoire <samp>%s</samp> n'existe pas ou n'est pas accessible en écriture";
@@ -265,6 +266,7 @@ $lang['Message']['IDs_sended']              = "Vos identifiants vous ont été env
 $lang['Message']['Logs_sent']               = "Les newsletters sélectionnées ont été envoyées à votre adresse: %s";
 $lang['Message']['Archive_class_needed']    = "Le module d'export nécessite la présence du paquet <abbr title=\"PHP Extension and Application Repository\" xml:lang=\"en\" lang=\"en\">PEAR</abbr> <q>%s</q>. Consultez la documentation pour plus de détails.";
 $lang['Message']['Chdir_error']             = "Impossible de configurer le répertoire courant sur %s (erreur avec chdir())";
+$lang['Message']['Twice_sending']           = "Une newsletter est déjà en cours d'envoi pour cette liste. Terminez ou annulez cet envoi avant d'en commencer un autre.";
 
 
 //
