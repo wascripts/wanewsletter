@@ -5,12 +5,14 @@ var use_smtp_status = {USE_SMTP_STATUS};
 
 function display_block(evt)
 {
-	var dVal = ( evt.currentTarget.value == 1 ) ? 'table-row' : 'none';
-	var node = evt.currentTarget.parentNode.parentNode;
-	
-	while( (node = node.nextSibling) != null ) {
-		if( node.nodeType == Node.ELEMENT_NODE && node.nodeName.toLowerCase() == 'tr' ) {
-			node.style.display = dVal;
+	if( evt.currentTarget.checked == true ) {
+		var dVal = ( evt.currentTarget.value == 1 ) ? 'table-row' : 'none';
+		var node = evt.currentTarget.parentNode.parentNode;
+		
+		while( (node = node.nextSibling) != null ) {
+			if( node.nodeType == Node.ELEMENT_NODE && node.nodeName.toLowerCase() == 'tr' ) {
+				node.style.display = dVal;
+			}
 		}
 	}
 }

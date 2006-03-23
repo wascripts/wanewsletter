@@ -67,7 +67,8 @@ var DOM_Events = {
 			//
 			if( elem.nodeType == Node.DOCUMENT_NODE && ( type == 'load' || type == 'unload' ) )
 			{
-				elem.defaultView['on' + type] = function(evt) {
+//				elem.defaultView['on' + type] = function(evt) {
+				window['on' + type] = function(evt) {// FIX bug konqueror avec defaultView
 					if( !evt ) evt = this.event;
 					evt = DOM_Events.normalize(evt, this.document, this.document);
 					DOM_Events.handleEvent(evt);

@@ -83,7 +83,7 @@ function make_button(bloc)
 function preview(evt)
 {
 	var subject	 = document.forms['send-form'].elements['subject'].value;
-	var preview	 = window.open('about:blank','apercu','width=' + width + ',height=' + height + ',marginleft=2,topmargin=2,left=' + left + ',top=' + top + ',toolbar=0,location=0,directories=0,status=0,scrollbars=1,resizable=0,copyhistory=0,menuBar=0');
+	var preview	 = window.open('','apercu','width=' + width + ',height=' + height + ',marginleft=2,topmargin=2,left=' + left + ',top=' + top + ',toolbar=0,location=0,directories=0,status=0,scrollbars=1,copyhistory=0,menuBar=0');
 	
 	if( evt.target.id == 'preview1' ) {
 		
@@ -125,7 +125,10 @@ function preview(evt)
 		
 		texte = lines.join("\r\n");
 		texte = texte.replace("{LINKS}", "http://www.example.org");
-		texte = texte.replace('<', '&lt;');
+		subject = subject.replace('<', '&lt;');
+		subject = subject.replace('&', '&amp;');
+		texte   = texte.replace('<', '&lt;');
+		texte   = texte.replace('&', '&amp;');
 		
 		var boldSpan = new RegExp("(^|\\s)(\\*[^\\r\\n]+?\\*)(?=\\s|$)", "g");
 		var italicSpan = new RegExp("(^|\\s)(/[^\\r\\n]+?/)(?=\\s|$)", "g");
@@ -136,7 +139,7 @@ function preview(evt)
 		
 		preview.document.writeln('<!DOCTYPE HTML PUBLIC "-\/\/W3C\/\/DTD HTML 4.01\/\/EN" "http:\/\/www.w3.org\/TR\/html4\/strict.dtd">');
 		preview.document.writeln('<html><head><title>' + subject + '<\/title><\/head>');
-		preview.document.writeln('<body><pre>' + texte + '<\/pre><\/body><\/html>');
+		preview.document.writeln('<body><pre style="font-size: 13px;">' + texte + '<\/pre><\/body><\/html>');
 	}
 	else {
 		var texte     = document.forms['send-form'].elements['body_html'].value;
