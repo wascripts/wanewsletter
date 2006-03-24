@@ -337,6 +337,37 @@ class Wanewsletter {
 			$this->alert_admin(true);
 		}
 		
+		if( !$this->hasAccount )
+		{
+			//
+			// Une confirmation est envoyée si la liste le demande
+			//
+			$confirm = !($this->listdata['confirm_subscribe'] == CONFIRM_NONE);
+		}
+		else
+		{
+			//
+			// Une confirmation est envoyée si la liste demande une confirmation même
+			// si l'email a été validé dans une précédente inscription à une autre liste,
+			// et également si l'inscription est faite mais n'a pas encore été confirmée.
+			//
+			$confirm = ($this->isRegistered || $this->listdata['confirm_subscribe'] == CONFIRM_ALWAYS);
+		}
+		
+		if( !$confirm )
+		{
+			$this->update_stats();
+			$this->alert_admin(true);
+			$message = $lang['Message']['Subscribe_2'];
+			$email_tpl = $this->listdata['use_cron'] ? 'welcome_cron1' : 'welcome_form1';
+		}
+		else
+		{
+			$name = ($this->hasAccount && $this->isRegistered) ? 'Reg_not_confirmed' : 'Subscribe_1';
+			$message = sprintf($lang['Message'][$name], $this->listdata['limitevalidate']);
+			$email_tpl = $this->listdata['use_cron'] ? 'welcome_cron2' : 'welcome_form2';
+		}
+		
 		$this->mailer->clear_all();
 		$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
 		$this->mailer->set_address($this->account['email']);
@@ -376,35 +407,6 @@ class Wanewsletter {
 		{
 			$this->message = $lang['Message']['Failed_sending'];
 			return false;
-		}
-		
-		if( !$this->hasAccount )
-		{
-			if( $this->listdata['confirm_subscribe'] == CONFIRM_NONE )
-			{
-				$this->update_stats();
-				$message = $lang['Message']['Subscribe_2'];
-			}
-			else
-			{
-				$message = sprintf($lang['Message']['Subscribe_1'], $this->listdata['limitevalidate']);
-			}
-		}
-		else
-		{
-			if( $this->isRegistered )
-			{
-				$message = sprintf($lang['Message']['Reg_not_confirmed'], $this->listdata['limitevalidate']);
-			}
-			else if( $this->listdata['confirm_subscribe'] != CONFIRM_ALWAYS )
-			{
-				$this->update_stats();
-				$message = $lang['Message']['Subscribe_2'];
-			}
-			else
-			{
-				$message = sprintf($lang['Message']['Subscribe_1'], $this->listdata['limitevalidate']);
-			}
 		}
 		
 		$this->message = nl2br($message);
@@ -550,27 +552,10 @@ class Wanewsletter {
 		{
 			$this->account['code'] = generate_key(20);
 			
-			$sql_abo_id = "SELECT abo_id
-				FROM " . ABONNES_TABLE . "
-				WHERE LOWER(abo_email) = '" . $db->escape(strtolower($this->account['email'])) . "'";
-			if( SQL_DRIVER == 'mysql' )
-			{
-				if( !($result = $db->query($sql_abo_id)) )
-				{
-					trigger_error('Impossible de récupérer l\'identifiant d\'abonné', ERROR);
-					return false;
-				}
-				
-				$sql_abo_id = $result->column('abo_id');
-			}
-			else
-			{
-				$sql_abo_id = '(' . $sql_abo_id . ')';
-			}
-			
 			$sql = "UPDATE " . ABO_LISTE_TABLE . "
 				SET register_key = '{$this->account['code']}'
-				WHERE abo_id = " . $sql_abo_id;
+				WHERE abo_id = {$this->account['abo_id']}
+					AND liste_id = " . $this->listdata['liste_id'];
 			if( !$db->query($sql) )
 			{
 				trigger_error('Impossible d\'assigner le nouvelle clé d\'enregistrement', ERROR);
