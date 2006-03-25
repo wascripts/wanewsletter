@@ -18,6 +18,8 @@
 	</tr>
 	<!-- END file_info -->
 	<tr>
-		<td class="explain" colspan="{S_ROWSPAN}"> {L_TOTAL_LOG_SIZE}&#160;: {TOTAL_LOG_SIZE} </td>
+		<td class="row2" colspan="{S_ROWSPAN}">
+			<span class="m-texte">{L_TOTAL_LOG_SIZE}&#160;: {TOTAL_LOG_SIZE}</span>
+		</td>
 	</tr>
 </table>

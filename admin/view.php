@@ -276,7 +276,7 @@ else if( $mode == 'iframe' )
 				$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
 				$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
 				$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
-				$output->basic(sprintf('<pre>%s</pre>', $body));
+				$output->basic(sprintf('<pre style="font-size: 13px;">%s</pre>', $body));
 			}
 		}
 		else
