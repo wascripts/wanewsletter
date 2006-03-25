@@ -1117,7 +1117,7 @@ $output->set_filenames(array(
 ));
 
 $output->assign_vars(array(
-	'L_EXPLAIN'               => nl2br($lang['Explain']['send']),	
+	'L_EXPLAIN'               => nl2br(sprintf($lang['Explain']['send'],'<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p27">', '</a>')),	
 	'L_LOAD_LOG'              => $lang['Load_log'],
 	'L_LIST_SEND'             => $lang['List_send'],
 	'L_DEST'                  => $lang['Dest'],
