@@ -158,7 +158,7 @@ if( typeof(document.styleSheets) != 'undefined' && typeof(document.styleSheets[0
 		</tr>
 		<tr>
 			<td class="row1"><label for="ftp_pass">{extension_ftp.L_FTP_PASS}&#160;:</label><br /><span class="m-texte">{extension_ftp.L_FTP_PASS_NOTE}</span></td>
-			<td class="row2"><input type="password" id="ftp_pass" name="ftp_pass" value="{extension_ftp.FTP_PASS}" size="30" maxlength="30" class="text" /></td>
+			<td class="row2"><input type="password" id="ftp_pass" name="ftp_pass" size="30" maxlength="30" class="text" /></td>
 		</tr>
 		<!-- END extension_ftp -->
 	</table>
@@ -216,7 +216,7 @@ if( typeof(document.styleSheets) != 'undefined' && typeof(document.styleSheets[0
 		</tr>
 		<tr>
 			<td class="row1"><label for="smtp_pass">{L_SMTP_PASS}&#160;:</label><br /><span class="m-texte">{L_AUTH_SMTP_NOTE}</span></td>
-			<td class="row2"><input type="password" id="smtp_pass" name="smtp_pass" value="{SMTP_PASS}" size="30" maxlength="50" class="text"{DISABLED_SMTP} /></td>
+			<td class="row2"><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="50" class="text"{DISABLED_SMTP} /></td>
 		</tr>
 	</table>
 	

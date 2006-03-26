@@ -1088,6 +1088,11 @@ else if( $mode == 'liste' )
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 			
+			if( empty($pop_pass) )
+			{
+				$pop_pass = $listdata['pop_pass'];
+			}
+			
 			if( $use_cron && !is_disabled_func('fsockopen') )
 			{
 				require WA_ROOTDIR . '/includes/class.pop.php';
@@ -1244,7 +1249,6 @@ else if( $mode == 'liste' )
 			'POP_HOST'             => htmlspecialchars($pop_host),
 			'POP_PORT'             => intval($pop_port),
 			'POP_USER'             => htmlspecialchars($pop_user),
-			'POP_PASS'             => htmlspecialchars($pop_pass),
 			'LISTE_ALIAS'          => htmlspecialchars($liste_alias),
 			
 			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()

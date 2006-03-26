@@ -126,6 +126,11 @@ if( isset($_POST['submit']) )
 		$new_config['smtp_port'] = 25;
 	}
 	
+	if( empty($new_config['ftp_pass']) )
+	{
+		$new_config['ftp_pass'] = $old_config['ftp_pass'];
+	}
+	
 	if( $new_config['use_ftp'] && extension_loaded('ftp') )
 	{
 		$result = Attach::connect_to_ftp(
@@ -155,6 +160,11 @@ if( isset($_POST['submit']) )
 	if( Mailer::is_online_host() == true )
 	{
 		$new_config['engine_send'] = ENGINE_UNIQ;
+	}
+	
+	if( empty($new_config['smtp_pass']) )
+	{
+		$new_config['smtp_pass'] = $old_config['smtp_pass'];
 	}
 	
 	if( $new_config['use_smtp'] && !is_disabled_func('fsockopen') )
@@ -328,7 +338,6 @@ $output->assign_vars( array(
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
 	'SMTP_USER'                 => $new_config['smtp_user'],
-	'SMTP_PASS'                 => $new_config['smtp_pass'],
 	
 	'USE_FTP_STATUS'            => ( $new_config['use_ftp'] ) ? 'true' : 'false',
 	'USE_SMTP_STATUS'           => ( $new_config['use_smtp'] ) ? 'true' : 'false'
@@ -356,7 +365,6 @@ if( extension_loaded('ftp') )
 		'FTP_PORT'             => $new_config['ftp_port'],
 		'FTP_PATH'             => $new_config['ftp_path'],
 		'FTP_USER'             => $new_config['ftp_user'],
-		'FTP_PASS'             => $new_config['ftp_pass'],
 	));
 }
 

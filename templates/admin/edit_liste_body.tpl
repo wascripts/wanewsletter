@@ -105,7 +105,7 @@
 		</tr>
 		<tr>
 			<td class="row1"><label for="pop_pass">{L_POP_PASS}&#160;:</label></td>
-			<td class="row2"><input type="password" id="pop_pass" name="pop_pass" value="{POP_PASS}" size="30" maxlength="50" class="text"{DISABLED_CRON} /></td>
+			<td class="row2"><input type="password" id="pop_pass" name="pop_pass" size="30" maxlength="50" class="text"{DISABLED_CRON} /></td>
 		</tr>
 		<tr>
 			<td class="row1"><label for="liste_alias">{L_LISTE_ALIAS}&#160;:</label></td>
