@@ -43,6 +43,8 @@ $language_dir = WA_ROOTDIR . '/language';
 $Fichier_1 = 'lang_francais.php';
 $Fichier_2 = '../../branche_2.2/language/lang_francais.php';
 
+ini_set('default_mimetype', 'text/plain');
+
 function diff_lang($tab_1, $tab_2)
 {
     $new_tab = array();
@@ -60,7 +62,7 @@ function diff_lang($tab_1, $tab_2)
         }
         else if( !isset($tab_2[$varname]) )
         {
-            $new_tab[$varname] = htmlspecialchars(addcslashes($tab_1[$varname], "\x0A\x0D"));
+            $new_tab[$varname] = addcslashes($tab_1[$varname], "\x0A\x0D\x22\x24");
         }
 		
 		//
@@ -68,7 +70,7 @@ function diff_lang($tab_1, $tab_2)
 		//
 		else if( strcmp($varval, $tab_2[$varname]) !== 0 )
 		{
-			$new_tab[$varname] = htmlspecialchars(addcslashes($tab_1[$varname], "\x0A\x0D"));
+			$new_tab[$varname] = addcslashes($tab_1[$varname], "\x0A\x0D\x22\x24");
 		}
     }
     
@@ -91,14 +93,26 @@ $diff_lang = diff_lang($lang_ary_1, $lang_ary_2);
 
 if( count($diff_lang) > 0 )
 {
-    echo '<h1 style="font-size: 1.1em;">Index manquants ou changements : ' . $Fichier_2 . ' =&gt; ' . $Fichier_1 . '</h1>';
-    echo '<pre>';
-    print_r($diff_lang);
-    echo '</pre>';
+	printf("Index manquants ou changements : %s => %s\n\n", $Fichier_2, $Fichier_1);
+	
+	foreach( $diff_lang as $key => $val )
+	{
+		if( is_array($val) )
+		{
+			foreach( $val as $key2 => $val2 )
+			{
+				echo "\$lang['$key']['$key2'] = \"$val2\"\n";
+			}
+		}
+		else
+		{
+			echo "\$lang['$key'] = \"$val\"\n";
+		}
+	}
 }
 else
 {
-    echo '<p>Aucun index manquant</p>';
+    echo "Aucun index manquant\n";
 }
 
 exit(0);

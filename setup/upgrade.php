@@ -810,6 +810,7 @@ if( $start )
 				case '2.2.8':
 				case '2.2.9':
 				case '2.2.10':
+				case '2.2.11':
 					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 						DROP COLUMN hebergeur, DROP COLUMN version";
 					
