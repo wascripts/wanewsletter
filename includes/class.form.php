@@ -327,16 +327,6 @@ class Wanewsletter {
 		
 		$db->commit();
 		
-		if( $this->listdata['confirm_subscribe'] == CONFIRM_ALWAYS || ($this->listdata['confirm_subscribe'] == CONFIRM_ONCE && !$this->hasAccount) )
-		{
-			$email_tpl = ( $this->listdata['use_cron'] ) ? 'welcome_cron2' : 'welcome_form2';
-		}
-		else
-		{
-			$email_tpl = ( $this->listdata['use_cron'] ) ? 'welcome_cron1' : 'welcome_form1';
-			$this->alert_admin(true);
-		}
-		
 		if( !$this->hasAccount )
 		{
 			//
@@ -669,11 +659,10 @@ class Wanewsletter {
 			$template   = 'admin_unsubscribe';
 		}
 		
-		$sql = "SELECT a.admin_login, a.admin_email
+		$sql = "SELECT a.admin_login, a.admin_email, a.admin_level, aa.auth_view
 			FROM " . ADMIN_TABLE . " AS a
-				INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
+				LEFT JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
 					AND aa.liste_id = {$this->listdata['liste_id']}
-					AND ( a.admin_level = " . ADMIN . " OR aa.auth_view = " . TRUE . " )
 			WHERE a.$fieldname = " . $fieldvalue;
 		if( $result = $db->query($sql) )
 		{
@@ -692,6 +681,11 @@ class Wanewsletter {
 				
 				do
 				{
+					if( $row['admin_level'] != ADMIN && $row['auth_view'] != true )
+					{
+						continue;
+					}
+					
 					$this->mailer->clear_address();
 					$this->mailer->set_address($row['admin_email'], $row['admin_login']);
 					
