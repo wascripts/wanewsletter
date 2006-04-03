@@ -37,7 +37,8 @@ $mode     = ( !empty($_REQUEST['mode']) ) ? trim($_REQUEST['mode']) : '';
 $liste_id = ( !empty($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 
 $sql = 'SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
-		liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe
+		liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe,
+		pop_host, pop_port, pop_user, pop_pass
 	FROM ' . LISTE_TABLE . ' 
 	WHERE liste_id = ' . $liste_id;
 if( !($result = $db->query($sql)) )

@@ -1095,7 +1095,7 @@ else if( $mode == 'liste' )
 			
 			if( $use_cron && !is_disabled_func('fsockopen') )
 			{
-				require WA_ROOTDIR . '/includes/class.pop.php';
+				require WAMAILER_DIR . '/class.pop.php';
 				
 				$pop = new Pop();
 				
