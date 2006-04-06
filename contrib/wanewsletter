@@ -61,7 +61,7 @@ if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) // Au cas où le terminal utilise
 		return wan_utf8_encode($data);
 	}
 	
-	ob_start('convert_output', 2);
+	ob_start('convert_output', 1);
 }
 
 require WA_ROOTDIR . '/start.php';
@@ -259,7 +259,7 @@ if( $process_send == true )
 	//
 	$message = launch_sending($listdata, $logdata);
 	
-	echo strip_tags($message) . "\n";
+	echo "\n", strip_tags($message), "\n";
 	exit(0);
 }
 else if( $import_mail == true && count($emails) > 0 )

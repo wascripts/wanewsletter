@@ -261,6 +261,24 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	// On récupère les infos sur les abonnés destinataires
 	//
+	$sql = "SELECT COUNT(a.abo_id) AS total
+		FROM " . ABONNES_TABLE . " AS a
+			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+				AND al.liste_id  = $listdata[liste_id]
+				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
+				AND al.send      = 0
+		WHERE a.abo_status = " . ABO_ACTIF;
+	if( !($result = $db->query($sql)) )
+	{
+		trigger_error('Impossible d\'obtenir le nombre d\'adresses emails', ERROR);
+	}
+	
+	$total_abo = $result->column('total');
+	if( $nl_config['emails_sended'] > 0 )
+	{
+		$total_abo = min($total_abo, $nl_config['emails_sended']);
+	}
+	
 	$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, al.register_key, al.format
 		FROM " . ABONNES_TABLE . " AS a
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
@@ -283,10 +301,10 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	
 	if( $row = $result->fetch() )
 	{
-		fake_header(false);
-		
 		if( $nl_config['engine_send'] == ENGINE_BCC )
 		{
+			fake_header(false);
+			
 			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			$abo_ids = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			
@@ -364,6 +382,27 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 		else if( $nl_config['engine_send'] == ENGINE_UNIQ )
 		{
+			if( defined('IN_COMMANDLINE') )
+			{
+				require dirname($_SERVER['PHP_SELF']) . '/Console/ProgressBar.php';
+				
+				//
+				// Initialisation de la barre de progression des envois
+				//
+				$bar = new Console_ProgressBar(
+					'Sending emails %percent% [%bar%] %current% of %max%', // One of several predefined formatstrings 
+					'=>',       // What are we filling the bar with 
+					' ',        // What are we PRE-filing the bar with
+					80,         // How wide is the  bar
+					$total_abo, // How many steps are we looping through
+					array('ansi_terminal' => true)
+				);
+			}
+			else
+			{
+				fake_header(false);
+			}
+			
 			if( ($isPHP5 = version_compare(phpversion(), '5.0.0', '>=')) == true )
 			{
 				eval('$mailerText = clone $mailer;');
@@ -511,11 +550,18 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					fwrite($fp, "$row[abo_id]\n");
 				}
 				
-				fake_header(true);
-				
-				if( defined('IN_COMMANDLINE') && SLEEP_INTERVAL > 0 && ($counter % SLEEP_INTERVAL) == 0 )
+				if( defined('IN_COMMANDLINE') )
 				{
-					sleep(SLEEP_SECONDS);
+					$bar->update($counter);
+					
+					if( SLEEP_INTERVAL > 0 && ($counter % SLEEP_INTERVAL) == 0 )
+					{
+						sleep(SLEEP_SECONDS);
+					}
+				}
+				else
+				{
+					fake_header(true);
 				}
 			}
 			while( ($row = $result->fetch()) || ($row = array_pop($supp_address_ok)) != null );
