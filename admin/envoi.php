@@ -605,11 +605,15 @@ switch( $mode )
 		{
 			$listdata['cc_admin'] = $cc_admin;
 			
-			$sql = "UPDATE " . AUTH_ADMIN_TABLE . "
-				SET cc_admin = $cc_admin
-				WHERE admin_id   = $admindata[admin_id]
-					AND liste_id = " . $listdata['liste_id'];
-			$db->query($sql);
+			$sql_data  = array('cc_admin' => $cc_admin);
+			$sql_where = array('admin_id' => $admindata['admin_id'], 'liste_id' => $listdata['liste_id']);
+			
+			$db->build(SQL_UPDATE, AUTH_ADMIN_TABLE, $sql_data, $sql_where);
+			if( $db->affectedRows() == 0 )
+			{
+				$sql_data = array_merge($sql_data, $sql_where);
+				$db->build(SQL_INSERT, AUTH_ADMIN_TABLE, $sql_data);
+			}
 		}
 		
 		if( $mode != 'attach' || empty($logdata['log_id']) )
