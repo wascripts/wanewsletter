@@ -813,27 +813,6 @@ function config_status($config_name)
 }
 
 /**
- * is_disabled_func()
- * 
- * Vérifie si la fonction donnée est activée ou non dans la configuration de PHP
- * 
- * @param string $func_name
- * 
- * @return boolean
- */
-function is_disabled_func($func_name)
-{
-	$liste = @ini_get('disable_functions');
-	
-	if( $liste === NULL )
-	{
-		return TRUE;
-	}
-	
-	return in_array($func_name, array_map('trim', explode(',', $liste)));
-}
-
-/**
  * server_info()
  * 
  * Retourne l'information serveur demandée

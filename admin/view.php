@@ -1093,7 +1093,7 @@ else if( $mode == 'liste' )
 				$pop_pass = $listdata['pop_pass'];
 			}
 			
-			if( $use_cron && !is_disabled_func('fsockopen') )
+			if( $use_cron && function_exists('fsockopen') )
 			{
 				require WAMAILER_DIR . '/class.pop.php';
 				
@@ -1244,8 +1244,8 @@ else if( $mode == 'liste' )
 			'CHECKED_PURGE_OFF'    => ( !$auto_purge ) ? ' checked="checked"' : '',
 			'CHECKED_USE_CRON_ON'  => ( $use_cron ) ? ' checked="checked"' : '',
 			'CHECKED_USE_CRON_OFF' => ( !$use_cron ) ? ' checked="checked"' : '',
-			'DISABLED_CRON'        => ( is_disabled_func('fsockopen') ) ? ' disabled="disabled"' : '',
-			'WARNING_CRON'         => ( is_disabled_func('fsockopen') ) ? ' <span style="color: red;">[not available]</span>' : '',
+			'DISABLED_CRON'        => ( !function_exists('fsockopen') ) ? ' disabled="disabled"' : '',
+			'WARNING_CRON'         => ( !function_exists('fsockopen') ) ? ' <span style="color: red;">[not available]</span>' : '',
 			'POP_HOST'             => htmlspecialchars($pop_host),
 			'POP_PORT'             => intval($pop_port),
 			'POP_USER'             => htmlspecialchars($pop_user),

@@ -167,7 +167,7 @@ if( isset($_POST['submit']) )
 		$new_config['smtp_pass'] = $old_config['smtp_pass'];
 	}
 	
-	if( $new_config['use_smtp'] && !is_disabled_func('fsockopen') )
+	if( $new_config['use_smtp'] && function_exists('fsockopen') )
 	{
 		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $new_config['urlsite'], $match);
 		
@@ -333,8 +333,8 @@ $output->assign_vars( array(
 	'EMAILS_SENDED'             => $new_config['emails_sended'],
 	'CHECKED_USE_SMTP_ON'       => ( $new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'CHECKED_USE_SMTP_OFF'      => ( !$new_config['use_smtp'] ) ? ' checked="checked"' : '',
-	'DISABLED_SMTP'             => ( is_disabled_func('fsockopen') ) ? ' disabled="disabled"' : '',
-	'WARNING_SMTP'              => ( is_disabled_func('fsockopen') ) ? ' <span style="color: red;">[not available]</span>' : '',
+	'DISABLED_SMTP'             => ( !function_exists('fsockopen') ) ? ' disabled="disabled"' : '',
+	'WARNING_SMTP'              => ( !function_exists('fsockopen') ) ? ' <span style="color: red;">[not available]</span>' : '',
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
 	'SMTP_USER'                 => $new_config['smtp_user'],
