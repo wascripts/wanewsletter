@@ -393,11 +393,9 @@ switch( $mode )
 							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
 						}
 						
-						$result['URI']  = substr($result['URI'], 0, strrpos($result['URI'], '/'));
+						$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
 						$result['data'] = preg_replace('/<(head[^>]*)>/si',
-							"<\\1>\n<base href=\"" . htmlspecialchars($result['URI']) . "/\">",
-							$result['data']
-						);
+							"<\\1>\n<base href=\"" . htmlspecialchars($URL) . "/\">", $result['data']);
 					}
 					
 					$logdata['log_body_html'] = convert_encoding($result['data'], $result['charset']);

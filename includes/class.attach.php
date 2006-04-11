@@ -331,10 +331,10 @@ class Attach {
 			//
 			else if( $upload_mode == 'remote' )
 			{
-				require WA_ROOTDIR . '/includes/http/URL_Parser.php';
+				$part = @parse_url($tmp_filename);
 				
-				$URL =& new URL_Parser($tmp_filename);
-				if( $URL->isRelative == true || $URL->scheme != 'http' && ($URL->scheme != 'ftp' || !extension_loaded('ftp')) )
+				if( !is_array($part) || !isset($part['scheme'])
+					|| ($part['scheme'] != 'http' && ($part['scheme'] != 'ftp' || !extension_loaded('ftp'))) )
 				{
 					$error = TRUE;
 					$msg_error[] = $lang['Message']['Invalid_url'];
@@ -353,9 +353,9 @@ class Attach {
 					return;
 				}
 				
-				if( $URL->scheme == 'http' )
+				if( $part['scheme'] == 'http' )
 				{
-					$result = http_get_contents($URL, $errstr);
+					$result = http_get_contents($tmp_filename, $errstr);
 					
 					if( $result == false )
 					{
@@ -371,26 +371,31 @@ class Attach {
 				}
 				else
 				{
-					if( empty($URL->user) )
+					if( !isset($part['user']) )
 					{
-						$URL->user = 'anonymous';
+						$part['user'] = 'anonymous';
 					}
-					if( empty($URL->pass) )
+					if( !isset($part['pass']) )
 					{
-						$URL->pass = 'anonymous';
+						$part['pass'] = 'anonymous';
 					}
 					
-					if( !($cid = @ftp_connect($URL->host, $URL->port)) || !@ftp_login($cid, $URL->user, $URL->pass) )
+					$port = !isset($part['port']) ? 21 : $part['port'];
+					
+					if( !($cid = @ftp_connect($part['host'], $port)) || !@ftp_login($cid, $part['user'], $part['pass']) )
 					{
 						$error = TRUE;
-						$msg_error[] = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($URL->host));
+						$msg_error[] = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
 						
 						return;
 					}
 					
-					$filesize = ftp_size($cid, $URL->path);
+					$path  = !isset($part['path']) ? '/' : $part['path'];
+					$path .= !isset($part['query']) ? '' : '?'.$part['query'];
 					
-					if( !ftp_fget($cid, $fw, $URL->path, FTP_BINARY) )
+					$filesize = ftp_size($cid, $path);
+					
+					if( !ftp_fget($cid, $fw, $path, FTP_BINARY) )
 					{
 						$error = TRUE;
 						$msg_error[] = $lang['Message']['Not_found_at_url'];

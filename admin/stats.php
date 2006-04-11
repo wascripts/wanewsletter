@@ -67,10 +67,8 @@ function send_image($name, $img)
 {
 	global $img_type;
 	
-	require WA_ROOTDIR . '/includes/http/main.php';
-	
-	header('Last-Modified: ' . HTTP_Main::date());
-	header('Expires: ' . HTTP_Main::date());
+	header('Last-Modified: ' . gmdate(DATE_RFC822));
+	header('Expires: ' . gmdate(DATE_RFC822));
 	header('Cache-Control: no-cache, no-store, must-revalidate, proxy-revalidate, private, max-age=0');
 	header('Pragma: no-cache');
 	header('Content-Disposition: inline; filename="' . $name . '.' . $img_type . '"');

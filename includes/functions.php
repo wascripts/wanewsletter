@@ -1003,52 +1003,102 @@ function http_get_contents($URL, &$errstr)
 {
 	global $lang;
 	
-	require WA_ROOTDIR . '/includes/http/Client.php';
+	$part = @parse_url($URL);
 	
-	$client =& new HTTP_Client();
-	$client->openURL('HEAD', $URL);
-	$client->setRequestHeader('User-Agent', 'Wanewsletter ' . WA_VERSION);
+	if( !is_array($part) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http' )
+	{
+		$errstr = $lang['Message']['Invalid_url'];
+		return false;
+	}
+	
+	$port = !isset($part['port']) ? 80 : $part['port'];
+	
+	if( !($fs = @fsockopen($part['host'], $port, $null, $null, 10)) )
+	{
+		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
+		return false;
+	}
+	
+	$path  = !isset($part['path']) ? '/' : $part['path'];
+	$path .= !isset($part['query']) ? '' : '?'.$part['query'];
+	
+	fputs($fs, sprintf("GET %s HTTP/1.0\r\n", $path));// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
+	fputs($fs, sprintf("Host: %s\r\n", $part['host']));
+	fputs($fs, sprintf("User-Agent: Wanewsletter %s\r\n", WA_VERSION));
+	fputs($fs, "Accept: */*\r\n");
 	
 	if( extension_loaded('zlib') )
 	{
-		$client->setRequestHeader('Accept-Encoding', 'gzip');
+		fputs($fs, "Accept-Encoding: gzip\r\n");
 	}
 	
-	if( $client->send() == false )
-	{
-		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($client->url->host));
-		return false;
-	}
+	fputs($fs, "Connection: close\r\n\r\n");
 	
-	if( $client->responseCode != HTTP_STATUS_OK )
+	$inHeader  = true;
+	$isGzipped = false;
+	$data = '';
+	$tmp  = fgets($fs, 1024);
+	
+	if( !preg_match('#^HTTP/(\d\.[x\d])\x20+(\d{3})\x20+.+\r\n#', $tmp, $match) || $match[2] != 200 )
 	{
 		$errstr = $lang['Message']['Not_found_at_url'];
+		fclose($fs);
 		return false;
 	}
 	
-	//
-	// Recherche du type mime des données
-	//
-	$datatype = $client->getResponseHeader('Content-Type');
+	do {
+		$tmp = fgets($fs, 1024);
+		
+		if( $inHeader && strpos($tmp, ':') )
+		{
+			list($header, $value) = explode(':', $tmp);
+			$header = strtolower($header);
+			$value  = trim($value);
+			
+			if( $header == 'content-type' )
+			{
+				if( !preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $match) )
+				{
+					$errstr = $lang['Message']['No_data_at_url'] . ' (type manquant)';
+					fclose($fs);
+					return false;
+				}
+				
+				$datatype = $match[1];
+				$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
+			}
+			
+			if( $header == 'content-encoding' && $value == 'gzip' )
+			{
+				$isGzipped = true;
+			}
+		}
+		else
+		{
+			$inHeader = false;
+			$data .= $tmp;
+		}
+	}
+	while( !feof($fs) );
 	
-	if( !preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $datatype, $match) )
+	fclose($fs);
+	$data = substr($data, 2);// Skip first CRLF
+	
+	if( $isGzipped )
 	{
-		$errstr = $lang['Message']['No_data_at_url'] . ' (type manquant)';
-		return false;
+		// RFC 1952 - Users note on http://www.php.net/manual/en/function.gzencode.php
+		if( strncmp($data, "\x1f\x8b", 2) != 0 )
+		{
+			trigger_error('data is not to GZIP format', E_USER_WARNING);
+			return false;
+		}
+		
+		$data = gzinflate(substr($data, 10));
 	}
 	
-	$datatype = $match[1];
-	$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
-	
-	//
-	// Ok, Tout va bien, on récupère les données
-	//
-	$client->openURL('GET', $URL);
-	$client->send();
-	
-	if( empty($charset) && preg_match('#(?:/|\+)xml#', $datatype) && strncmp($client->responseData, '<?xml', 5) == 0 )
+	if( empty($charset) && preg_match('#(?:/|\+)xml#', $datatype) && strncmp($data, '<?xml', 5) == 0 )
 	{
-		$prolog = substr($client->responseData, 0, strpos($client->responseData, "\n"));
+		$prolog = substr($data, 0, strpos($data, "\n"));
 		
 		if( preg_match('/\s+encoding\s?=\s?("|\')([a-z][a-z0-9._-]*)\\1"/i', $prolog, $match) )
 		{
@@ -1056,12 +1106,7 @@ function http_get_contents($URL, &$errstr)
 		}
 	}
 	
-	return array(
-		'URI'     => $client->url->__toString(),
-		'type'    => $datatype,
-		'charset' => $charset,
-		'data'    => $client->responseData
-	);
+	return array('type' => $datatype, 'charset' => $charset, 'data' => $data);
 }
 
 /**
