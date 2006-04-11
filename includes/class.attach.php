@@ -331,7 +331,8 @@ class Attach {
 			//
 			else if( $upload_mode == 'remote' )
 			{
-				$part = @parse_url($tmp_filename);
+				$URL  = $tmp_filename;
+				$part = @parse_url($URL);
 				
 				if( !is_array($part) || !isset($part['scheme'])
 					|| ($part['scheme'] != 'http' && ($part['scheme'] != 'ftp' || !extension_loaded('ftp'))) )
@@ -355,7 +356,7 @@ class Attach {
 				
 				if( $part['scheme'] == 'http' )
 				{
-					$result = http_get_contents($tmp_filename, $errstr);
+					$result = http_get_contents($URL, $errstr);
 					
 					if( $result == false )
 					{

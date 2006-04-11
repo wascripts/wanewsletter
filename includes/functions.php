@@ -1039,7 +1039,7 @@ function http_get_contents($URL, &$errstr)
 	$data = '';
 	$tmp  = fgets($fs, 1024);
 	
-	if( !preg_match('#^HTTP/(\d\.[x\d])\x20+(\d{3})\x20+.+\r\n#', $tmp, $match) || $match[2] != 200 )
+	if( !preg_match('#^HTTP/(\d\.[x\d])\x20+(\d{3})\s#', $tmp, $match) || $match[2] != 200 )
 	{
 		$errstr = $lang['Message']['Not_found_at_url'];
 		fclose($fs);
@@ -1067,8 +1067,7 @@ function http_get_contents($URL, &$errstr)
 				$datatype = $match[1];
 				$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
 			}
-			
-			if( $header == 'content-encoding' && $value == 'gzip' )
+			else if( $header == 'content-encoding' && $value == 'gzip' )
 			{
 				$isGzipped = true;
 			}
@@ -1084,7 +1083,7 @@ function http_get_contents($URL, &$errstr)
 	fclose($fs);
 	$data = substr($data, 2);// Skip first CRLF
 	
-	if( $isGzipped )
+	if( $isGzipped && !preg_match('/\.t?gz$/i', $part['path']) )
 	{
 		// RFC 1952 - Users note on http://www.php.net/manual/en/function.gzencode.php
 		if( strncmp($data, "\x1f\x8b", 2) != 0 )
@@ -1096,7 +1095,7 @@ function http_get_contents($URL, &$errstr)
 		$data = gzinflate(substr($data, 10));
 	}
 	
-	if( empty($charset) && preg_match('#(?:/|\+)xml#', $datatype) && strncmp($data, '<?xml', 5) == 0 )
+	if( empty($charset) && preg_match('#(?:/|\+)xml$#', $datatype) && strncmp($data, '<?xml', 5) == 0 )
 	{
 		$prolog = substr($data, 0, strpos($data, "\n"));
 		
