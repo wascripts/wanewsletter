@@ -204,7 +204,7 @@ if( $listdata = $result->fetch() )
 			}
 			else
 			{
-				if( empty($headers['date']) || ($time = strtotime($headers['date'])) === -1 )
+				if( empty($headers['date']) || intval($time = strtotime($headers['date'])) > 0 )
 				{
 					$time = time();
 				}
