@@ -1913,8 +1913,8 @@ else if( $mode == 'log' )
 		
 		$sql = "SELECT COUNT(jf.file_id) as num_files, l.log_id
 			FROM " . JOINED_FILES_TABLE . " AS jf
-				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.log_id = l.log_id
 				INNER JOIN " . LOG_TABLE . " AS l ON l.liste_id = $listdata[liste_id]
+				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.log_id = l.log_id
 			WHERE jf.file_id = lf.file_id
 			GROUP BY l.log_id";
 		if( !($result = $db->query($sql)) )
