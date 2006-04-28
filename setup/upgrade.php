@@ -937,32 +937,30 @@ if( $start )
 		}
 		else if( WA_BRANCHE == '2.3' )
 		{
+			$version = str_replace('rc', 'RC', WA_VERSION);
 			$sql_update = array();
 			
-			switch( WA_VERSION )
+			if( !version_compare($version, WA_NEW_VERSION, '<' ) )
 			{
-				case '2.3-beta1':
-				case '2.3-beta2':
-				case '2.3-beta3':
-					//
-					// En cas de bug lors d'une importation d'emails, les clefs
-					// peuvent ne pas avoir été recréées si une erreur est survenue
-					//
-					if( SQL_DRIVER == 'postgres' )
-					{
-						$db->query("ALTER TABLE " . ABONNES_TABLE . "
-							ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
-					}
-					else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
-					{
-						$db->query("ALTER TABLE " . ABONNES_TABLE . "
-							ADD UNIQUE abo_email_idx (abo_email)");
-					}
-					break;
-				
-				default:
-					message($lang['Upgrade_not_required']);
-					break;
+				message($lang['Upgrade_not_required']);
+			}
+			
+			if( version_compare($version, '2.3-beta3', '<=') )
+			{
+				//
+				// En cas de bug lors d'une importation d'emails, les clefs
+				// peuvent ne pas avoir été recréées si une erreur est survenue
+				//
+				if( SQL_DRIVER == 'postgres' )
+				{
+					$db->query("ALTER TABLE " . ABONNES_TABLE . "
+						ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
+				}
+				else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
+				{
+					$db->query("ALTER TABLE " . ABONNES_TABLE . "
+						ADD UNIQUE abo_email_idx (abo_email)");
+				}
 			}
 			
 			exec_queries($sql_update, true);

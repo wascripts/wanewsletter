@@ -141,21 +141,15 @@ if( !(time() % 10) || !defined('IN_ADMIN') )
 //
 $tmp_name = 'tmp';
 
-//
-// Si nous avons un accès restreint à cause d'open_basedir sur le serveur, 
-// nous devrons utiliser le dossier des fichiers temporaires du script 
-//
-$tmp_name = trim($tmp_name, '/');
+define('WA_TMPDIR',    WA_ROOTDIR . '/' . $tmp_name);
+define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
+define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
 
-if( OPEN_BASEDIR_RESTRICTION && !is_writable(WA_ROOTDIR . '/' . $tmp_name) )
+if( !is_writable(WA_TMPDIR) )
 {
 	load_settings();
 	$output->message(sprintf($lang['Message']['Dir_not_writable'],
-		htmlspecialchars(wa_realpath(WA_ROOTDIR . '/' . $tmp_name))));
+		htmlspecialchars(wa_realpath(WA_TMPDIR))));
 }
-
-define('WA_TMPDIR',    WA_ROOTDIR . '/' . $tmp_name, true);
-define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
-define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
 
 ?>
