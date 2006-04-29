@@ -26,10 +26,12 @@
  * @version $Id$
  * 
  * @status experimental
+ * 
+ * Ce module est marqué comme expérimental car son intégration dans Wanewsletter
+ * n'est pas considérée comme étant suffisante, cependant, tous les tests effectués
+ * ont été satisfaisant et la partie permettant les envois d'emails notamment est
+ * considérée comme étant utilisable en "production".
  */
-
-echo "This script has been disabled for security reason\n";
-exit(0);
 
 define('IN_NEWSLETTER',  true);
 define('IN_COMMANDLINE', true);
@@ -71,7 +73,9 @@ load_settings();
 $argv[0]  = basename($argv[0]);
 $version  = WA_VERSION;
 $emails   = array();
+$format   = FORMAT_TEXTE;
 $liste_id = null;
+$message  = null;
 $process_send = $process_subscribe = $import_mail = false;
 
 if( $argc == 1 ) // Aucun argument fourni
@@ -145,6 +149,9 @@ Envois:
 Divers:
   --process-subscribe=NUM  Validation des inscriptions par email
   --import-mail=NUM        Importation d'emails avec NUM un id de liste
+  --format=FORMAT          FORMAT peut prendre la valeur 'plain' ou 'html'
+                           'text' et 'texte' sont acceptés comme
+                           alternative à 'plain'.
 
 Informations:
   -h, --help     Affiche la présente aide
@@ -194,24 +201,38 @@ WANSHELL;
 	{
 		$import_mail = true;
 		$liste_id = $match[1];
-		$i++;
+	}
+	
+	//
+	// Format choisi pour les comptes des adresses emails importées
+	//
+	else if( preg_match('/^--format=/', $argv[$i], $match) )
+	{
+		$format = substr($argv[$i], 9);
 		
-		if( isset($argv[$i]) && $argv[$i] == '--' )
+		if( in_array($format, array('plain', 'text', 'texte')) )
 		{
-			$emails = array_slice($argv, ++$i);
+			$format = FORMAT_TEXTE;
+		}
+		else if( $format == 'html' )
+		{
+			$format = FORMAT_HTML;
 		}
 		else
 		{
-			$emails = '';
-			while( !feof(STDIN) )
-			{
-				$emails .= fgets(STDIN);
-			}
-			
-			$emails = preg_split('/\s+/', trim($emails));
+			trigger_error("Bad format. Possible values are 'plain', 'text', 'texte' or 'html'", CRITICAL_ERROR);
 		}
-		
-		break;
+	}
+	
+	//
+	// Récupération des adresses email passées dans la ligne de commande
+	//
+	else if( $argv[$i] == '--' )
+	{
+		if( isset($argv[++$i]) )
+		{
+			$emails = array_slice($argv, $i);
+		}
 	}
 }
 
@@ -391,13 +412,34 @@ else if( $process_subscribe )
 	
 	$message = $lang['Message']['Success_operation'];
 }
-else if( $import_mail == true && count($emails) > 0 )
+else if( $import_mail == true )
 {
 	require WAMAILER_DIR . '/class.mailer.php';
+	
+	if( count($emails) == 0 )
+	{
+		$emails = '';
+		while( !feof(STDIN) )
+		{
+			$emails .= fgets(STDIN);
+		}
+		
+		$emails = preg_split('/\s+/', trim($emails));
+	}
+	
+	if( count($emails) == 0 )
+	{
+		
+	}
 	
 	$emails = array_unique($emails);
 	$current_time = time();
 	$emails_ok    = array();
+	
+	if( $listdata['liste_format'] != FORMAT_MULTIPLE )
+	{
+		$format = $listdata['liste_format'];
+	}
 	
 	//
 	// Vérification syntaxique des emails

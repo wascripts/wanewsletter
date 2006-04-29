@@ -1,0 +1,8 @@
+
+<IfModule mod_access.c>
+	<Files ~ "^wanewsletter">
+		Order Allow,Deny
+		Allow from 127.0.0.1
+	</Files>
+</IfModule>
+
