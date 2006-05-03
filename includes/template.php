@@ -299,7 +299,7 @@ class Template {
 
         // This one will handle varrefs WITH namespaces
         $varrefs = array();
-        preg_match_all('#\{(([a-z0-9\-_]+?\.)+?)([a-z0-9\-_]+?)\}#is', $code, $varrefs);
+        preg_match_all('#\{(([a-z0-9\-_]+?\.)+?)([a-z0-9\-_]+?)\}#i', $code, $varrefs);
         $varcount = sizeof($varrefs[1]);
         for ($i = 0; $i < $varcount; $i++)
         {
@@ -311,7 +311,7 @@ class Template {
         }
 
         // This will handle the remaining root-level varrefs
-        $code = preg_replace('#\{([a-z0-9\-_]*?)\}#is', '\' . ( ( isset($this->_tpldata[\'.\'][0][\'\1\']) ) ? $this->_tpldata[\'.\'][0][\'\1\'] : \'\' ) . \'', $code);
+        $code = preg_replace('#\{([a-z0-9\-_]*?)\}#i', '\' . ( ( isset($this->_tpldata[\'.\'][0][\'\1\']) ) ? $this->_tpldata[\'.\'][0][\'\1\'] : \'\' ) . \'', $code);
 
         // Break it up into lines.
         $code_lines = explode("\n", $code);
@@ -327,9 +327,6 @@ class Template {
             $code_lines[$i] = chop($code_lines[$i]);
             if (preg_match('#<!-- BEGIN (.*?) -->#', $code_lines[$i], $m))
             {
-                $n[0] = $m[0];
-                $n[1] = $m[1];
-
                 // Added: dougk_ff7-Keeps templates from bombing if begin is on the same line as end.. I think. :)
                 if ( preg_match('#<!-- END (.*?) -->#', $code_lines[$i], $n) )
                 {
@@ -338,7 +335,7 @@ class Template {
                     if ($block_nesting_level < 2)
                     {
                         // Block is not nested.
-                        $code_lines[$i] = '$_' . $a[1] . '_count = ( isset($this->_tpldata[\'' . $n[1] . '.\']) ) ?  sizeof($this->_tpldata[\'' . $n[1] . '.\']) : 0;';
+                        $code_lines[$i] = '$_' . $n[1] . '_count = ( isset($this->_tpldata[\'' . $n[1] . '.\']) ) ?  sizeof($this->_tpldata[\'' . $n[1] . '.\']) : 0;';
                         $code_lines[$i] .= "\n" . 'for ($_' . $n[1] . '_i = 0; $_' . $n[1] . '_i < $_' . $n[1] . '_count; $_' . $n[1] . '_i++)';
                         $code_lines[$i] .= "\n" . '{';
                     }
@@ -354,7 +351,7 @@ class Template {
                         // current indices of all parent blocks.
                         $varref = $this->generate_block_data_ref($namespace, false);
                         // Create the for loop code to iterate over this block.
-                        $code_lines[$i] = '$_' . $a[1] . '_count = ( isset(' . $varref . ') ) ? sizeof(' . $varref . ') : 0;';
+                        $code_lines[$i] = '$_' . $n[1] . '_count = ( isset(' . $varref . ') ) ? sizeof(' . $varref . ') : 0;';
                         $code_lines[$i] .= "\n" . 'for ($_' . $n[1] . '_i = 0; $_' . $n[1] . '_i < $_' . $n[1] . '_count; $_' . $n[1] . '_i++)';
                         $code_lines[$i] .= "\n" . '{';
                     }
@@ -363,8 +360,6 @@ class Template {
                     unset($block_names[$block_nesting_level]);
                     $block_nesting_level--;
                     $code_lines[$i] .= '} // END ' . $n[1];
-                    $m[0] = $n[0];
-                    $m[1] = $n[1];
                 }
                 else
                 {
@@ -419,10 +414,8 @@ class Template {
 
         // Bring it back into a single string of lines of code.
         $code = implode("\n", $code_lines);
-        return $code    ;
-
+        return $code;
     }
-
 
     /**
      * Generates a reference to the given variable inside the given (possibly nested)
