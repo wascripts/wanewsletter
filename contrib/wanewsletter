@@ -38,10 +38,11 @@ define('IN_COMMANDLINE', true);
 define('WA_ROOTDIR',     dirname(dirname(__FILE__)));
 
 //
-// Réglages pour les pauses durant l'envoi
+// Réglages pour les pauses durant l'envoi + divers
 //
 define('SLEEP_INTERVAL', 400);// 0 pour ne pas faire de pause (déconseillé)
 define('SLEEP_SECONDS',  10);
+define('ANSI_TERMINAL',  true);
 
 //
 // PHP CLI ne change pas le répertoire courant pour celui du script

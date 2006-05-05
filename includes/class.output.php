@@ -542,7 +542,7 @@ BASIC;
 	 */
 	function message($str)
 	{
-		global $lang, $message, $php_errormsg;
+		global $lang, $message;
 		
 		if( !empty($lang['Message'][$str]) )
 		{

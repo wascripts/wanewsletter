@@ -40,7 +40,7 @@ $starttime = array_sum(explode(' ', microtime()));
 $simple_header = $error = false;
 $nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = $_php_errors = array();
 $output = null;
-$dsn = $prefixe = '';
+$dsn = $prefixe = $php_errormsg = '';
 
 @include WA_ROOTDIR . '/includes/config.inc.php';
 

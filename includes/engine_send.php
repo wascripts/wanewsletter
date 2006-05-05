@@ -395,7 +395,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					' ',        // What are we PRE-filing the bar with
 					80,         // How wide is the  bar
 					$total_abo, // How many steps are we looping through
-					array('ansi_terminal' => true)
+					array('ansi_terminal' => ANSI_TERMINAL)
 				);
 			}
 			else
