@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2004,2005 Aurélien Maille
+ * Copyright (c) 2004-2006 Aurélien Maille
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * @author  Bobe <bobe@webnaute.net>
  * @link    http://dev.webnaute.net/Applications/DOM-Compat/ (bientôt)
  * @license http://www.gnu.org/copyleft/lesser.html
- * @version $Id: DOM-Compat.js 22 2005-10-30 23:05:18Z bobe $
+ * @version $Id: DOM-Compat.js 24 2006-05-06 19:40:33Z bobe $
  * 
  * @todo
  * - offsetX/Y sous Opera (existe nativement dans Opera mais complètement bogué)
@@ -27,9 +27,6 @@
  * - évènement 'change' sur les input de type 'checkbox' sur MSIE
  * - Simuler correctement detail (voir events successifs click .. click .. dblclick) (problème avec Opera 8.0b1)
  * - offsetY foireux sous Mozilla (si div en position statique. Ok en position relative)
- * - Gérer le cas où un objet contenant une méthode handleEvent() est passé en deuxième 
- *	 argument de addEventListener() ? (https://bugzilla.mozilla.org/show_bug.cgi?id=49017)
- *	 (géré pour l’instant)
  * - Problème avec cette bouse de MSIE : http://www.dotvoid.com/view.php?id=23 (corrigé en grande partie, mais solution à la con)
  */
 
@@ -68,7 +65,7 @@ var DOM_Events = {
 			if( elem.nodeType == Node.DOCUMENT_NODE && ( type == 'load' || type == 'unload' ) )
 			{
 //				elem.defaultView['on' + type] = function(evt) {
-				window['on' + type] = function(evt) {// FIX bug konqueror avec defaultView
+				window['on' + type] = function(evt) {// FIX bug Konqueror/Safari avec defaultView
 					if( !evt ) evt = this.event;
 					evt = DOM_Events.normalize(evt, this.document, this.document);
 					DOM_Events.handleEvent(evt);
@@ -232,6 +229,7 @@ var DOM_Events = {
 					elem.__listener(evt);
 					elem.__listener = null;
 				}
+				// https://bugzilla.mozilla.org/show_bug.cgi?id=49017
 				else if( typeof(listeners[i]) == 'object' && typeof(listeners[i].handleEvent) == 'function' )
 				{
 					listeners[i].handleEvent(evt);
@@ -247,44 +245,6 @@ var DOM_Events = {
 				}
 				elem.listeners['_toremove'] = [];
 			}
-		}
-	},
-	
-	clickPatch: {
-		disableClick: false,
-		status: false,
-		
-		initialize: function() {
-			DOM_Events.addListener('mousedown', function() {
-				DOM_Events.clickPatch.enable();
-			}, true, document);
-			
-			DOM_Events.addListener('mouseup', function() {
-				if( DOM_Events.clickPatch.status == true )
-				{
-					DOM_Events.clickPatch.disable();
-				}
-			}, true, document);
-		},
-		
-		enable: function() {
-			this.disableClick = false;
-			this.status = true;
-			DOM_Events.addListener('mouseover', this.listener, true, document);
-			DOM_Events.addListener('mouseout',  this.listener, true, document);
-			DOM_Events.addListener('mousemove', this.listener, true, document);
-		},
-		
-		disable: function() {
-			this.status = false;
-			DOM_Events.removeListener('mouseover', this.listener, true, document);
-			DOM_Events.removeListener('mouseout',  this.listener, true, document);
-			DOM_Events.removeListener('mousemove', this.listener, true, document);
-		},
-		
-		listener: function() {
-			DOM_Events.clickPatch.disableClick = true;
-			DOM_Events.clickPatch.disable();
 		}
 	},
 	
@@ -764,14 +724,7 @@ if( supportDOM() )
 		document.addEventListener('load', function() {
 			window.clearInterval(patchTimer);
 			patchElement();
-			DOM_Events.clickPatch.initialize();
 		}, false);
-	}
-	else
-	{
-		DOM_Events.addListener('load', function() {
-			DOM_Events.clickPatch.initialize();
-		}, false, document);
 	}
 	
 	if( typeof(window.getComputedStyle) == 'undefined' )
@@ -781,3 +734,4 @@ if( supportDOM() )
 		};
 	}
 }
+
