@@ -32,20 +32,9 @@ define('CLASS_OUTPUT_INC', true);
 class output extends Template {
 
 	/**
-	 * TRUE si application/xhtml+xml est supporté, FALSE sinon
-	 * Détection réalisée par la méthode output()
-	 * 
-	 * @var boolean
-	 * 
-	 * @access private
-	 */
-	var $output_xhtml  = FALSE;
-	
-	/**
 	 * Liens relatifs au document
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $links         = '';
@@ -54,7 +43,6 @@ class output extends Template {
 	 * Scripts clients liés au document
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $javascript    = '';
@@ -63,7 +51,6 @@ class output extends Template {
 	 * Champs cachés d'un formulaire du document
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $hidden_fields = '';
@@ -72,16 +59,14 @@ class output extends Template {
 	 * Meta de redirection
 	 * 
 	 * @var string
-	 * 
 	 * @access private
 	 */
 	var $meta_redirect = '';
 	
 	/**
-	 * output::output()
-	 * 
 	 * @param string $template_root
 	 * 
+	 * @access public
 	 * @return void
 	 */
 	function output($template_root)
@@ -90,41 +75,9 @@ class output extends Template {
 		// Réglage du dossier contenant les templates
 		//
 		$this->set_rootdir($template_root);
-		
-		if( !isset($this->output_xhtml) && !empty($_SERVER['HTTP_ACCEPT']) )
-		{
-			$accept  = $_SERVER['HTTP_ACCEPT'];
-			$q_xhtml = 0.0;
-			$q_html  = 0.0;
-			
-			if( preg_match('/(^|,)[ ]*application\/xhtml\+xml(?:;q=([0-9]\.[0-9]))?[ ]*(,|$)/i', $accept, $match) )
-			{
-				$q_xhtml = ( !empty($match[2]) ) ? $match[2] : 1.0;
-			}
-			
-			if( preg_match('/(^|,)[ ]*text\/html(?:;q=([0-9]\.[0-9]))?[ ]*(,|$)/i', $accept, $match) )
-			{
-				$q_html  = ( !empty($match[2]) ) ? $match[2] : 1.0;
-			}
-			
-			if( $q_xhtml > $q_html )
-			{
-				$this->output_xhtml = TRUE;
-			}
-			else
-			{
-				$this->output_xhtml = FALSE;
-			}
-		}
-		else
-		{
-			$this->output_xhtml = FALSE;
-		}
 	}
 	
 	/**
-	 * output::addLink()
-	 * 
 	 * Ajout d'un lien relatif au document
 	 * 
 	 * @param string $rel      Relation qui lie le document cible au document courant
@@ -133,21 +86,18 @@ class output extends Template {
 	 * @param string $type     Type MIME du document cible
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function addLink($rel, $url, $title = '', $type = '')
 	{
-		$this->links .= "\r\n\t<link rel=\"$rel\" href=\"" . (( function_exists('sessid') ) ? sessid($url) : $url) . "\" title=\"$title\" />";
+		$this->links .= "\r\n\t<link rel=\"$rel\" href=\""
+			. (( function_exists('sessid') ) ? sessid($url) : $url) . "\" title=\"$title\" />";
 	}
 	
 	/**
-	 * output::getLinks()
-	 * 
 	 * Retourne les liens relatifs au document
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function getLinks()
@@ -156,14 +106,11 @@ class output extends Template {
 	}
 	
 	/**
-	 * output::addScript()
-	 * 
 	 * Ajout d'un script client
 	 * 
 	 * @param string $url
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function addScript($url)
@@ -172,12 +119,9 @@ class output extends Template {
 	}
 	
 	/**
-	 * output::getScripts()
-	 * 
 	 * Retourne les scripts clients liés au document
 	 * 
 	 * @access private
-	 * 
 	 * @return string
 	 */
 	function getScripts()
@@ -186,15 +130,12 @@ class output extends Template {
 	}
 	
 	/**
-	 * output::addHiddenField()
-	 * 
 	 * Ajoute un champs caché pour un formulaire
 	 * 
 	 * @param string $name
 	 * @param string $value
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function addHiddenField($name, $value)
@@ -203,12 +144,9 @@ class output extends Template {
 	}
 	
 	/**
-	 * output::getHiddenFields()
-	 * 
 	 * Retourne l'ensemble des champs cachés ajoutés et réinitialise la propriété hidden_fields
 	 * 
 	 * @access public
-	 * 
 	 * @return string
 	 */
 	function getHiddenFields()
@@ -220,32 +158,27 @@ class output extends Template {
 	}
 	
 	/**
-	 * output::redirect()
-	 * 
 	 * Ajoute un meta de redirection pour la page en cours
 	 * 
 	 * @param string  $url
 	 * @param integer $timer
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function redirect($url, $timer)
 	{
-		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, (( function_exists('sessid') ) ? sessid($url) : $url));
+		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />',
+			$timer, (( function_exists('sessid') ) ? sessid($url) : $url));
 	}
 	
 	/**
-	 * output::page_header()
-	 * 
 	 * Envoie en sortie les en-têtes HTTP appropriés et l'en-tête du document
 	 * 
 	 * @param boolean $use_template
 	 * @param string  $page_title
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function page_header($use_template = true, $page_title = '')
@@ -350,12 +283,9 @@ class output extends Template {
 			));
 		}
 		
-		if( !$this->output_xhtml )
-		{
-			$this->assign_block_vars('meta_content_type', array(
-				'CHARSET' => $lang['CHARSET']
-			));
-		}
+		$this->assign_block_vars('meta_content_type', array(
+			'CHARSET' => $lang['CHARSET']
+		));
 		
 		if( $error )
 		{
@@ -366,12 +296,9 @@ class output extends Template {
 	}
 	
 	/**
-	 * output::page_footer()
-	 * 
 	 * Envoi le pied de page et termine l'exécution du script
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function page_footer()
@@ -429,17 +356,6 @@ class output extends Template {
 		$data = ob_get_contents();
 		ob_end_clean();
 		
-		if( $this->output_xhtml )
-		{
-			$data = preg_replace(
-				'/<script([^>]*)>([ \t\r\n]*)<!--(.*)\/\/-->([ \t\r\n]*)<\/script>/s',
-				'<script\\1>\\2<![CDATA[\\3]]>\\4</script>',
-				$data
-			);
-			$data = preg_replace('/ \/>/', '/>', $data);
-			$data = preg_replace('/<([^ >]+)([^>]*)>[ \t\r\n]*<\/\\1>/', '<\\1\\2/>', $data);
-		}
-		
 		echo purge_latin1($data);
 		
 		//
@@ -454,15 +370,12 @@ class output extends Template {
 	}
 	
 	/**
-	 * output::send_headers()
-	 * 
-	 * Envoie des en-têtes HTTP et, le cas échéant, du prologue xml
+	 * Envoie des en-têtes HTTP
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
-	function send_headers($force_html = false)
+	function send_headers()
 	{
 		global $lang;
 		
@@ -472,23 +385,13 @@ class output extends Template {
 		header('Pragma: no-cache');
 		header('Content-Language: ' . $lang['CONTENT_LANG']);
 		
-		header('Content-Type: ' 
-			. (( $this->output_xhtml && !$force_html ) ? 'application/xhtml+xml' : 'text/html' ) 
-			. '; charset=' . $lang['CHARSET']
-		);
+		header('Content-Type: text/html; charset=' . $lang['CHARSET']);
 		
 		ob_start();
 		ob_implicit_flush(0);
-		
-		if( $this->output_xhtml && !$force_html )
-		{
-			echo '<' . '?xml version="1.0" encoding="' . $lang['CHARSET'] . '"?' . ">\n";
-		}
 	}
 	
 	/**
-	 * output::basic()
-	 * 
 	 * Envoi des en-têtes appropriés et d'une page html simplifiée avec les données fournies
 	 * Termine également l'exécution du script
 	 * 
@@ -496,7 +399,6 @@ class output extends Template {
 	 * @param string $page_title
 	 * 
 	 * @access public
-	 * 
 	 * @return void
 	 */
 	function basic($content, $page_title = '')
@@ -531,8 +433,6 @@ BASIC;
 	}
 	
 	/**
-	 * output::message()
-	 * 
 	 * Affiche de message d'information
 	 * 
 	 * @param string $str
@@ -582,8 +482,6 @@ BASIC;
 	}
 	
 	/**
-	 * output::error_box()
-	 * 
 	 * Génération et affichage de liste d'erreur
 	 * 
 	 * @param string $msg_error
@@ -610,15 +508,12 @@ BASIC;
 	}
 	
 	/**
-	 * output::files_list()
-	 * 
 	 * Affichage des fichiers joints 
 	 * 
 	 * @param array   $logdata    Données du log concerné
 	 * @param integer $format     Format du log visualisé (si dans view.php)
 	 * 
 	 * @access public
-	 * 
 	 * @return boolean
 	 */
 	function files_list($logdata, $format = 0)
@@ -740,8 +635,6 @@ BASIC;
 	}
 	
 	/**
-	 * output::build_listbox()
-	 * 
 	 * Affichage de la page de sélection de liste ou insertion du select de choix de liste dans 
 	 * le coin inférieur gauche de l'administration
 	 * 
@@ -749,6 +642,7 @@ BASIC;
 	 * @param boolean $display
 	 * @param string  $jump_to
 	 * 
+	 * @access public
 	 * @return void
 	 */
 	function build_listbox($auth_type, $display = true, $jump_to = '')

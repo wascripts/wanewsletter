@@ -112,9 +112,9 @@ class Session {
 			$client_ip = '127.0.0.1';
 		}
 		
-		if( !empty($proxy_ip) && preg_match('/^(\d+\.\d+\.\d+\.\d+)/', $proxy_ip, $match) )
+		if( preg_match('/^\d+\.\d+\.\d+\.\d+/', $proxy_ip, $match) )
 		{
-			$private_ip = trim($match[1]);
+			$private_ip = $match[0];
 			
 			/*
 			 * Liens utiles sur les différentes plages d'ip : 
