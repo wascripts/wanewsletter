@@ -394,7 +394,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					'=>',       // What are we filling the bar with 
 					' ',        // What are we PRE-filing the bar with
 					80,         // How wide is the  bar
-					$total_abo, // How many steps are we looping through
+					$total_abo + count($supp_address), // How many steps are we looping through
 					array('ansi_terminal' => ANSI_TERMINAL)
 				);
 			}
@@ -458,6 +458,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			}
 			
 			$counter = 0;
+			$sendError = 0;
 			
 			do
 			{
@@ -544,7 +545,12 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				$mailer->assign_tags($tags_replace);
 				
 				// envoi
-				if( $mailer->send() && $row['abo_id'] != -1 )
+				if( !$mailer->send() )
+				{
+					$sendError++;
+				}
+				
+				if( $row['abo_id'] != -1 )
 				{
 					array_push($abo_ids, $row['abo_id']);
 					fwrite($fp, "$row[abo_id]\n");
@@ -569,8 +575,12 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			//
 			// Aucun email envoyé, il y a manifestement un problème, on affiche le message d'erreur
 			//
-			if( count($abo_ids) == 0 )
+			if( $sendError == $total_abo )
 			{
+				flock($fp, LOCK_UN);
+				fclose($fp);
+				unlink($lockfile);
+				
 				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
 			}
 		}
