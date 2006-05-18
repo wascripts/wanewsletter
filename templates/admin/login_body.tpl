@@ -9,7 +9,7 @@
 		</tr>
 		<tr>
 			<td class="row1"><label for="passwd">{L_PASS}&#160;:</label></td>
-			<td class="row1"><input type="password" id="passwd" name="passwd" maxlength="20" size="30" class="text" /></td>
+			<td class="row1"><input type="password" id="passwd" name="passwd" maxlength="30" size="30" class="text" /></td>
 		</tr>
 		<tr>
 			<td colspan="2" class="row-full">

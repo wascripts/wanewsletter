@@ -124,19 +124,19 @@
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="admin_login">{install.L_LOGIN}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" size="30" value="{install.LOGIN}" maxlength="20" class="text" /></td>
+			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" size="30" value="{install.LOGIN}" maxlength="30" class="text" /></td>
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="admin_pass">{install.L_PASS}&#160;:</label></td>
-			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" size="25" maxlength="25" class="text" /></td>
+			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" size="25" maxlength="30" class="text" /></td>
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="confirm_pass">{install.L_PASS_CONF}&#160;:</label></td>
-			<td class="medrow2"><input type="password" id="confirm_pass" name="confirm_pass" size="25" maxlength="25" class="text" /></td>
+			<td class="medrow2"><input type="password" id="confirm_pass" name="confirm_pass" size="25" maxlength="30" class="text" /></td>
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="admin_email">{install.L_EMAIL}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="admin_email" name="admin_email" size="30" value="{install.EMAIL}" maxlength="100" class="text" /></td>
+			<td class="medrow2"><input type="text" id="admin_email" name="admin_email" size="30" value="{install.EMAIL}" class="text" /></td>
 		</tr>
 	</table>
 	
