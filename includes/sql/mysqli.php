@@ -157,10 +157,6 @@ class Wadb_mysqli {
 		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
-			
-			if( !empty($this->options['persistent']) ) {
-				$connect = 'mysqli_pconnect';
-			}
 		}
 		
 		if( !($this->link = $connect($host, $username, $passwd, $this->dbname, $port)) ) {
