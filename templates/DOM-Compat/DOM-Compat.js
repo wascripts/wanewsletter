@@ -310,7 +310,7 @@ var DOM_Events = {
 			_oldEvt: oldEvt
 		};
 		
-		if( ( evt.type == 'dblclick' && this.lastEventDispatched == 'click' ) || ( evt.type == 'click' && this.clickPatch.disableClick == true && evt._isDispatched == false ) )
+		if( evt.type == 'dblclick' && this.lastEventDispatched == 'click' )
 		{
 			evt.preventDefault();
 			evt.type = 'dblclick';// Pour que l’évènement ne soit pas traité par l’interface
@@ -445,11 +445,7 @@ var DOM_Events = {
 						}
 					}
 					
-					if( evt.type == 'mouseup' && this.clickPatch.disableClick )
-					{
-						evt.detail = 0;
-					}
-					else if( oldEvt.type == 'dblclick' )
+					if( oldEvt.type == 'dblclick' )
 					{
 						evt.detail = 2;
 					}
