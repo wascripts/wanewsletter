@@ -520,7 +520,7 @@ BASIC;
 	{
 		global $lang;
 		
-		$page_envoi  = ( strstr(server_info('SCRIPT_NAME'), 'envoi.php') ) ? true : false;
+		$page_envoi  = ( strstr(server_info('PHP_SELF'), 'envoi.php') ) ? true : false;
 		$body_size   = (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
 		$total_size  = 1024; // ~ 1024 correspond au poids de base d'un email (en-têtes)
 		$total_size += ( $body_size > 0 ) ? ($body_size / 2) : 0;
@@ -654,12 +654,12 @@ BASIC;
 		
 		if( empty($jump_to) )
 		{
-			$jump_to	 = './' . basename(server_info('SCRIPT_NAME'));
-			$request_uri = server_info('QUERY_STRING');
+			$jump_to = './' . basename(server_info('PHP_SELF'));
+			$query_string = server_info('QUERY_STRING');
 			
-			if( $request_uri != '' )
+			if( $query_string != '' )
 			{
-				$jump_to .= '?' . htmlspecialchars($request_uri);
+				$jump_to .= '?' . htmlspecialchars($query_string);
 			}
 		}
 		
