@@ -47,12 +47,12 @@ $t = 0;
 //$other_tags[$t]['column_name'] = '';
 //$other_tags[$t]['tag_name']    = '';
 //$other_tags[$t]['field_name']  = '';
-//$t++
+//$t++;
 
 //$other_tags[$t]['column_name'] = '';
 //$other_tags[$t]['tag_name']    = '';
 //$other_tags[$t]['field_name']  = '';
-//$t++
+//$t++;
 
 // etc... Reproduisez les trois lignes si nécessaires.
 
