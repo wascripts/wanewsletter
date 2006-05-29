@@ -354,7 +354,7 @@ switch( $mode )
 				
 				foreach( $other_tags as $data )
 				{
-					if( !empty($data['field_name']) && !isset($sql_data[$data['column_name']]) && !empty($_POST[$data['column_name']]) )
+					if( !empty($data['field_name']) && !empty($_POST[$data['column_name']]) )
 					{
 						$sql_data[$data['column_name']] = $_POST[$data['column_name']];
 					}

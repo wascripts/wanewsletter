@@ -287,7 +287,7 @@ class Wanewsletter {
 			
 			foreach( $other_tags as $data )
 			{
-				if( !empty($data['field_name']) && !isset($sql_data[$data['column_name']]) && isset($_REQUEST[$data['field_name']]) )
+				if( !empty($data['field_name']) && !empty($_REQUEST[$data['field_name']]) )
 				{
 					$sql_data[$data['column_name']] = $_REQUEST[$data['field_name']];
 				}
