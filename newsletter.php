@@ -54,7 +54,6 @@ require WA_ROOTDIR . '/includes/functions.validate.php';
 if( !empty($language) && validate_lang($language) )
 {
 	load_settings(array('admin_lang' => $language));
-	unset($language);
 }
 else
 {
