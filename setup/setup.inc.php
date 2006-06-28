@@ -242,6 +242,7 @@ $lang    = $datetime = $msg_error = $_php_errors = array();
 $error   = false;
 $prefixe = ( !empty($_POST['prefixe']) ) ? trim($_POST['prefixe']) : 'wa_';
 $infos   = array('driver' => 'mysql', 'host' => null, 'user' => null, 'pass' => null, 'dbname' => null);
+$language = $default_lang;
 
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = ''; // Compatibilité avec wanewsletter < 2.3-beta2
 
