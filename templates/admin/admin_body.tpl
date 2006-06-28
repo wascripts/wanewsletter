@@ -44,16 +44,16 @@
 		<!-- BEGIN owner_profil -->
 		<tr>
 			<td class="row1"><label for="current_pass">{L_PASS}&#160;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
-			<td class="row2"><input type="password" id="current_pass" name="current_pass" size="30" maxlength="20" class="text" /></td>
+			<td class="row2"><input type="password" id="current_pass" name="current_pass" size="30" maxlength="30" class="text" /></td>
 		</tr>
 		<!-- END owner_profil -->
 		<tr>
 			<td class="row1"><label for="new_pass">{L_NEW_PASS}&#160;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
-			<td class="row2"><input type="password" id="new_pass" name="new_pass" size="30" maxlength="20" class="text" /></td>
+			<td class="row2"><input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" class="text" /></td>
 		</tr>
 		<tr>
 			<td class="row1"><label for="confirm_pass">{L_CONFIRM_PASS}&#160;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
-			<td class="row2"><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="20" class="text" /></td>
+			<td class="row2"><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" class="text" /></td>
 		</tr>
 	</table>
 	
