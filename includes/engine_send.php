@@ -560,9 +560,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				{
 					$bar->update($counter);
 					
-					if( SLEEP_INTERVAL > 0 && ($counter % SLEEP_INTERVAL) == 0 )
+					if( SEND_DELAY > 0 && ($counter % SEND_PACKET) == 0 )
 					{
-						sleep(SLEEP_SECONDS);
+						sleep(SEND_DELAY);
 					}
 				}
 				else

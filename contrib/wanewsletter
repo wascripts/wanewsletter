@@ -28,21 +28,15 @@
  * @status experimental
  * 
  * Ce module est marqué comme expérimental car son intégration dans Wanewsletter
- * n'est pas considérée comme étant suffisante, cependant, tous les tests effectués
- * ont été satisfaisant et la partie permettant les envois d'emails notamment est
- * considérée comme étant utilisable en "production".
+ * n'est pas considérée comme étant satisfaisante, cependant, tous les tests
+ * effectués ont été satisfaisant et la partie permettant les envois d'emails
+ * notamment est considérée comme étant utilisable en "production".
  */
 
 define('IN_NEWSLETTER',  true);
 define('IN_COMMANDLINE', true);
-define('WA_ROOTDIR',     dirname(dirname(__FILE__)));
-
-//
-// Réglages pour les pauses durant l'envoi + divers
-//
-define('SLEEP_INTERVAL', 400);// 0 pour ne pas faire de pause (déconseillé)
-define('SLEEP_SECONDS',  10);
 define('ANSI_TERMINAL',  true);
+define('WA_ROOTDIR',     dirname(dirname(__FILE__)));
 
 //
 // PHP CLI ne change pas le répertoire courant pour celui du script
@@ -78,6 +72,8 @@ $format   = FORMAT_TEXTE;
 $liste_id = null;
 $message  = null;
 $process_send = $process_subscribe = $import_mail = false;
+$send_packet  = 400;
+$send_delay   = 10;
 
 if( $argc == 1 ) // Aucun argument fourni
 {
@@ -145,7 +141,10 @@ Usage: $argv[0] [options]
 
 Envois:
   -pNUM, --process-send=NUM  Lance un envoi avec NUM un id de liste
-  -lNUM, --limit=NUM         Limite à NUM le nombre d'emails envoyés
+  -lNUM, --limit=NUM   Limite à NUM le nombre d'emails envoyés
+  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par défaut, 400)
+  -dNUM, --delay=NUM   Durée en secondes entre les flots d'envois
+                       (par défaut, 10).
 
 Divers:
   --process-subscribe=NUM  Validation des inscriptions par email
@@ -196,6 +195,22 @@ WANSHELL;
 	else if( preg_match('/^-(?:-limit=|l)(\d+)$/', $argv[$i], $match) )
 	{
 		$nl_config['emails_sended'] = $match[1];
+	}
+	
+	//
+	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
+	//
+	else if( preg_match('/^-(?:-packet=|k)(\d+)$/', $argv[$i], $match) )
+	{
+		$send_packet = $match[1];
+	}
+	
+	//
+	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
+	//
+	else if( preg_match('/^-(?:-delay=|d)(\d+)$/', $argv[$i], $match) )
+	{
+		$send_delay = $match[1];
 	}
 	
 	else if( preg_match('/^--import-mail=(\d+)$/', $argv[$i], $match) )
@@ -257,6 +272,9 @@ if( !is_null($liste_id) )
 
 if( $process_send == true )
 {
+	define('SEND_PACKET', $send_packet);
+	define('SEND_DELAY',  $send_delay);
+	
 	require WA_ROOTDIR . '/includes/engine_send.php';
 	
 	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
