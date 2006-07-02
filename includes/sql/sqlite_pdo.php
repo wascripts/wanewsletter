@@ -634,7 +634,7 @@ class WadbResult_sqlite_pdo {
 	 * Destructeur de classe
 	 * 
 	 * @access public
-	 * @return boolean
+	 * @return void
 	 */
 	function __destruct()
 	{

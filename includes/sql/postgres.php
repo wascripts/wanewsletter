@@ -630,8 +630,8 @@ class WadbResult_postgres {
 	 */
 	function free()
 	{
-		if( !is_null($this->result) ) {
-			@pg_free_result($this->result);
+		if( !is_null($this->result) && is_resource($this->link) ) {
+			pg_free_result($this->result);
 			$this->result = null;
 		}
 	}
@@ -640,7 +640,7 @@ class WadbResult_postgres {
 	 * Destructeur de classe
 	 * 
 	 * @access public
-	 * @return boolean
+	 * @return void
 	 */
 	function __destruct()
 	{

@@ -639,8 +639,8 @@ class WadbResult_mysql {
 	 */
 	function free()
 	{
-		if( !is_null($this->result) ) {
-			@mysql_free_result($this->result);
+		if( !is_null($this->result) && is_resource($this->link) ) {
+			mysql_free_result($this->result);
 			$this->result = null;
 		}
 	}
@@ -649,7 +649,7 @@ class WadbResult_mysql {
 	 * Destructeur de classe
 	 * 
 	 * @access public
-	 * @return boolean
+	 * @return void
 	 */
 	function __destruct()
 	{

@@ -657,8 +657,8 @@ class WadbResult_firebird {
 	 */
 	function free()
 	{
-		if( !is_null($this->result) ) {
-			@ibase_free_result($this->result);
+		if( !is_null($this->result) && is_resource($this->link) ) {
+			ibase_free_result($this->result);
 			$this->result = null;
 		}
 	}
@@ -667,7 +667,7 @@ class WadbResult_firebird {
 	 * Destructeur de classe
 	 * 
 	 * @access public
-	 * @return boolean
+	 * @return void
 	 */
 	function __destruct()
 	{

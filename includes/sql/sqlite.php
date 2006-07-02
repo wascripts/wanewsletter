@@ -593,7 +593,7 @@ class WadbResult_sqlite {
 	 * Destructeur de classe
 	 * 
 	 * @access public
-	 * @return boolean
+	 * @return void
 	 */
 	function __destruct()
 	{
