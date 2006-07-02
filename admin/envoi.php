@@ -437,6 +437,15 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
 			}
 			
+			$output->addHiddenField('mode',   'load');
+			$output->addHiddenField('sessid', $session->session_id);
+			
+			$output->page_header();
+			
+			$output->set_filenames(array(
+				'body' => 'select_log_body.tpl'
+			));
+			
 			if( $row = $result->fetch() )
 			{
 				$log_box = '<select name="id">';
@@ -462,31 +471,21 @@ switch( $mode )
 				while( $row = $result->fetch() );
 				
 				$log_box .= '</select>';
-			}
-			else
-			{
-				$output->redirect('envoi.php', 4);
 				
-				$message  = $lang['Message']['No_log_to_load'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_form'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-				$output->message($message);
+				$output->assign_block_vars('load_draft', array(
+					'L_SELECT_LOG' => $lang['Select_log_to_load'],
+					'LOG_BOX'      => $log_box
+				));
+				
+				$output->assign_block_vars('script_load_by_url', array(
+					'L_FROM_AN_URL' => str_replace('\'', '\\\'', $lang['From_an_URL'])
+				));
 			}
-			
-			$output->addHiddenField('mode',   'load');
-			$output->addHiddenField('sessid', $session->session_id);
-			
-			$output->page_header();
-			
-			$output->set_filenames(array(
-				'body' => 'select_log_body.tpl'
-			));
 			
 			$output->assign_vars(array(
 				'L_TITLE'         => $lang['Title']['select'],
-				'L_SELECT_LOG'    => $lang['Select_log_to_load'],
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
 				
-				'LOG_BOX'         => $log_box,
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM'          => sessid('./envoi.php')
 			));
@@ -511,10 +510,6 @@ switch( $mode )
 				
 				'BODY_TEXT_URL' => ( !empty($_POST['body_text_url']) ) ? htmlspecialchars(trim($_POST['body_text_url'])) : '',
 				'BODY_HTML_URL' => ( !empty($_POST['body_html_url']) ) ? htmlspecialchars(trim($_POST['body_html_url'])) : ''
-			));
-			
-			$output->assign_block_vars('script_load_by_url', array(
-				'L_FROM_AN_URL' => str_replace('\'', '\\\'', $lang['From_an_URL'])
 			));
 			
 			$output->pparse('body');

@@ -49,12 +49,14 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	<h2>{L_TITLE}</h2>
 	
 	<table class="content">
+		<!-- BEGIN load_draft -->
 		<tbody>
 			<tr>
-				<td class="row1"><label>{L_SELECT_LOG}&#160;:</label></td>
-				<td class="row2">{LOG_BOX}</td>
+				<td class="row1"><label>{load_draft.L_SELECT_LOG}&#160;:</label></td>
+				<td class="row2">{load_draft.LOG_BOX}</td>
 			</tr>
 		</tbody>
+		<!-- END load_draft -->
 		<tbody id="loadByURL">
 			<!-- BEGIN load_text_by_url -->
 			<tr>
