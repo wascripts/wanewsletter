@@ -5,9 +5,11 @@ the "%LISTE%" distribution list of the %SITENAME% site.
 
 Thank you for your interest in our distribution list. 
 
+<!-- start_block password -->
 Here is the code was associated to your account, keep affectedly : 
-%CODE%
+%password.CODE%
 
+<!-- end_block password -->
 To confirm your subscription, please click on the following link : 
 %LINK%
 

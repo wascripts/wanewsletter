@@ -4,9 +4,11 @@ You are receiving this email because you (or someone using your email address) h
 
 Thank you for your interest in our distribution list. 
 
+<!-- start_block password -->
 Here is the code was associated to your account, keep affectedly : 
-%CODE%
+%password.CODE%
 
+<!-- end_block password -->
 <!-- start_block enable_profil_cp -->
 You can manage your account options by clicking on the following link : 
 %enable_profil_cp.LINK_PROFIL_CP%

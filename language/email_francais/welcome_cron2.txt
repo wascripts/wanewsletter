@@ -5,9 +5,11 @@ la liste de diffusion "%LISTE%" du site %SITENAME%.
 
 Nous vous remercions de votre intérêt pour notre liste de diffusion. 
 
-Voici le code associé à votre compte, gardez le précieusement : 
-%CODE%
+<!-- start_block password -->
+Voici le code associé à votre compte, gardez-le précieusement : 
+%password.CODE%
 
+<!-- end_block password -->
 Pour confirmer votre inscription, envoyez un email à %EMAIL_NEWSLETTER% avec comme sujet "confirmation" et 
 comme message, le code de votre compte.
 

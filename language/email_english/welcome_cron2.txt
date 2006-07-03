@@ -5,9 +5,11 @@ the "%LISTE%" distribution list of the %SITENAME% site.
 
 Thank you for your interest in our distribution list. 
 
-Here is the code was associated to your account, keep affectedly :
-%CODE%
+<!-- start_block password -->
+Here is the code was associated to your account, keep affectedly : 
+%password.CODE%
 
+<!-- end_block password -->
 To confirm your subscription, send an email to %EMAIL_NEWSLETTER% with the word "confirm" in the subject 
 line, and the code of your account in the body of the message.
 

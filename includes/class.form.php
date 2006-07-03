@@ -280,6 +280,7 @@ class Wanewsletter {
 			$sql_data = array(
 				'abo_email'  => $this->account['email'],
 				'abo_pseudo' => $this->account['pseudo'],
+				'abo_pwd'    => md5($this->account['code']),
 				'abo_status' => $this->account['status']
 			);
 			
@@ -368,7 +369,6 @@ class Wanewsletter {
 		$this->mailer->use_template($email_tpl, array(
 			'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
 			'SITENAME' => $nl_config['sitename'],
-			'CODE'     => $this->account['code'],
 			'URLSITE'  => $nl_config['urlsite'],
 			'SIG'      => $this->listdata['liste_sig']
 		));
@@ -383,6 +383,13 @@ class Wanewsletter {
 		{
 			$this->mailer->assign_tags(array(
 				'LINK' => $this->make_link()
+			));
+		}
+		
+		if( !$this->hasAccount || $this->isRegistered )
+		{
+			$this->mailer->assign_block_tags('password', array(
+				'CODE' => $this->account['code']
 			));
 		}
 		
