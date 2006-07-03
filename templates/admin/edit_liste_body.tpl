@@ -10,7 +10,7 @@
 			<td class="row2"><input type="text" id="liste_name" name="liste_name" value="{LISTE_NAME}" size="40" maxlength="100" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="liste_format">{L_LISTE_PUBLIC}&#160;:</label></td>
+			<td class="row1"><label>{L_LISTE_PUBLIC}&#160;:</label></td>
 			<td class="row2">
 				<input type="radio" id="liste_public_yes" name="liste_public" value="1"{CHECK_PUBLIC_YES} />
 				<label for="liste_public_yes" class="m-texte">{L_YES}</label>
