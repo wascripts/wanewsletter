@@ -469,7 +469,7 @@ class Wadb_mysql {
 	function ping()
 	{
 		// mysql_ping() - php >= 4.3.0
-		return ( function_exists('mysql_ping') ) ? mysql_ping() : false;
+		return ( function_exists('mysql_ping') ) ? mysql_ping($this->link) : false;
 	}
 	
 	/**
