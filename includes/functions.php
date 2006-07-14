@@ -1142,7 +1142,7 @@ function wa_number_format($number, $decimals = 2)
  */
 function hasCidReferences($body, &$refs)
 {
-	$total = preg_match_all('/<.+?"cid:([^\\:*\/?<">|]+)"[^>]*>/si', $body, $matches);
+	$total = preg_match_all('/<[^>]+"cid:([^\\:*\/?<">|]+)"[^>]*>/', $body, $matches);
 	$refs  = $matches[1];
 	
 	return $total;
