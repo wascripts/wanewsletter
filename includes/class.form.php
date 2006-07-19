@@ -406,7 +406,7 @@ class Wanewsletter {
 			return false;
 		}
 		
-		$this->message = nl2br($message);
+		$this->message = $message;
 	}
 	
 	function confirm($code, $time = null)

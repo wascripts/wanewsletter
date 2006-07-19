@@ -134,7 +134,7 @@ if( defined('IN_WA_FORM') )
 	//
 	@restore_error_handler();
 	
-	echo $message;
+	echo nl2br($message);
 }
 
 //
