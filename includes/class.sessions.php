@@ -350,7 +350,7 @@ class Session {
 			
 			if( !is_null($authorization) && strncasecmp($authorization, 'Basic ', 6) == 0 )
 			{
-				list($username, $passwd) = explode(':', base64_decode(substr($authorization, 6)));
+				list($username, $passwd) = explode(':', base64_decode(substr($authorization, 6)), 2);
 			}
 			
 			if( !is_null($username) )

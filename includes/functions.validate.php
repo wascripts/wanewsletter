@@ -50,7 +50,7 @@ function validate_pseudo($pseudo)
  */
 function validate_pass($passwd)
 {
-	return preg_match('/^[[:alnum:]][[:alnum:]_-]{2,30}[[:alnum:]]$/', $passwd);
+	return preg_match('/^[\x21-\x7E]{4,32}$/', $passwd);
 }
 
 /**
