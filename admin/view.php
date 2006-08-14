@@ -1088,7 +1088,7 @@ else if( $mode == 'liste' )
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 			
-			if( empty($pop_pass) )
+			if( empty($pop_pass) && $action == 'edit' )
 			{
 				$pop_pass = $listdata['pop_pass'];
 			}
