@@ -176,7 +176,7 @@ class Wanewsletter {
 			
 			$this->account['abo_id'] = 0;
 			$this->account['email']  = $email;
-			$this->account['pseudo'] = '';
+			$this->account['pseudo'] = (!empty($_REQUEST['pseudo'])) ? $_REQUEST['pseudo'] : '';
 			$this->account['status'] = ( $this->listdata['confirm_subscribe'] == CONFIRM_NONE ) ? ABO_ACTIF : ABO_INACTIF;
 		}
 		
