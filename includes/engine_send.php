@@ -672,7 +672,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		{
 			if( !empty($_GET['step']) && $_GET['step'] == 'auto' )
 			{
-				Location("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
+				Location(str_replace('&amp;', '&', sessid("envoi.php?mode=progress&id=$logdata[log_id]&step=auto")));
 			}
 			
 			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id'] . '&amp;step=auto') . '">', '</a>');
