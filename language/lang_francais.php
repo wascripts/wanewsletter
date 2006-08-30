@@ -82,6 +82,7 @@ $lang['Title']['profil_cp']         = "Panneau de gestion de compte";
 $lang['Title']['sendkey']           = "Recevoir vos identifiants";
 $lang['Title']['archives']          = "Archives des listes de diffusion";
 $lang['Title']['sendpass']          = "Générer un nouveau mot de passe";
+$lang['Title']['form']              = "Inscription à la liste de diffusion";
 
 
 //

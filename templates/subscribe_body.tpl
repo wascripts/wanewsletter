@@ -23,7 +23,7 @@
 	<meta http-equiv="Content-Script-Type" content="text/javascript" />
 	<meta http-equiv="Content-Style-Type" content="text/css" />
 	
-	<title>Inscription à la liste de diffusion</title>
+	<title>{PAGE_TITLE}</title>
 	
 	<meta name="Author" content="Bobe" />
 	<meta name="Editor" content="jEdit" />
@@ -125,7 +125,7 @@
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
 phpCodeur</a> &copy; 2002&#8211;2006 | Wanewsletter<br />
-Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
+Ce script est distribu&eacute; librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>
 

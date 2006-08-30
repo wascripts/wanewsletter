@@ -82,6 +82,7 @@ $lang['Title']['profil_cp']         = "Panel of management of account";
 $lang['Title']['sendkey']           = "Receive your identifiers";
 $lang['Title']['archives']          = "logs of the mailing lists";
 $lang['Title']['sendpass']          = "Generate a new password";
+$lang['Title']['form']              = "Subscribe to newsletter";
 
 
 //

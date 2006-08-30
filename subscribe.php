@@ -79,6 +79,7 @@ $output->set_filenames(array(
 ));
 
 $output->assign_vars(array(
+	'PAGE_TITLE'      => $lang['Title']['form'],
 	'L_INVALID_EMAIL' => str_replace('\'', '\\\'', $lang['Message']['Invalid_email']),
 	'L_PAGE_LOADING'  => str_replace('\'', '\\\'', $lang['Page_loading']),
 	'L_EMAIL'         => $lang['Email_address'],
