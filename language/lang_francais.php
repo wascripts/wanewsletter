@@ -344,9 +344,9 @@ $lang['Click_resend_manuel']        = "Cliquez %sici%s pour envoyer un autre flo
 // Sujets de divers emails envoyés
 //
 $lang['Subject_email']['Subscribe'] = "Inscription à la newsletter de %s";
-$lang['Subject_email']['Unsubscribe'] = "Confirmation de désinscription";
+$lang['Subject_email']['Unsubscribe_1'] = "Confirmation de désinscription";
 $lang['Subject_email']['New_subscribe'] = "Nouvel inscrit à la newsletter";
-$lang['Subject_email']['Unsubscribe'] = "Désinscription de la newsletter";
+$lang['Subject_email']['Unsubscribe_2'] = "Désinscription de la newsletter";
 $lang['Subject_email']['New_admin'] = "Administration de la newsletter de %s";
 $lang['Subject_email']['New_pass']  = "Votre nouveau mot de passe";
 $lang['Subject_email']['Sendkey']   = "Les identifiants de votre compte";

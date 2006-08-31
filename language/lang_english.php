@@ -344,9 +344,9 @@ $lang['Click_resend_manuel']        = "Click %shere%s to send another packet of 
 // Sujets de divers emails envoyés
 //
 $lang['Subject_email']['Subscribe'] = "Subscription to the %s newsletter";
-$lang['Subject_email']['Unsubscribe'] = "Unsubscription confirmation";
+$lang['Subject_email']['Unsubscribe_1'] = "Unsubscription confirmation";
 $lang['Subject_email']['New_subscribe'] = "New newsletter subscriber";
-$lang['Subject_email']['Unsubscribe'] = "New newsletter unsubscriber";
+$lang['Subject_email']['Unsubscribe_2'] = "New newsletter unsubscriber";
 $lang['Subject_email']['New_admin'] = "Administration of %s newsletter";
 $lang['Subject_email']['New_pass']  = "Your new password";
 $lang['Subject_email']['Sendkey']   = "The identifiers of your account";

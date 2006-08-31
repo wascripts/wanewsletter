@@ -561,7 +561,7 @@ class Wanewsletter {
 			
 			$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
 			$this->mailer->set_address($this->account['email']);
-			$this->mailer->set_subject($lang['Subject_email']['Unsubscribe']);
+			$this->mailer->set_subject($lang['Subject_email']['Unsubscribe_1']);
 			$this->mailer->set_priority(3);
 			$this->mailer->set_return_path($this->listdata['return_email']);
 			
@@ -662,7 +662,7 @@ class Wanewsletter {
 		{
 			$fieldname  = 'email_unsubscribe';
 			$fieldvalue = UNSUBSCRIBE_NOTIFY_YES;
-			$subject    = $lang['Subject_email']['Unsubscribe'];
+			$subject    = $lang['Subject_email']['Unsubscribe_2'];
 			$template   = 'admin_unsubscribe';
 		}
 		
