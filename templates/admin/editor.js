@@ -125,10 +125,10 @@ function preview(evt)
 		
 		texte = lines.join("\r\n");
 		texte = texte.replace("{LINKS}", "http://www.example.org");
-		subject = subject.replace('<', '&lt;');
 		subject = subject.replace('&', '&amp;');
-		texte   = texte.replace('<', '&lt;');
+		subject = subject.replace('<', '&lt;');
 		texte   = texte.replace('&', '&amp;');
+		texte   = texte.replace('<', '&lt;');
 		
 		var boldSpan = new RegExp("(^|\\s)(\\*[^\\r\\n]+?\\*)(?=\\s|$)", "g");
 		var italicSpan = new RegExp("(^|\\s)(/[^\\r\\n]+?/)(?=\\s|$)", "g");
