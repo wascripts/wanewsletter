@@ -139,7 +139,7 @@ $lang['Message']['Confirm_double']          = "Vous avez déjà confirmé votre ins
 $lang['Message']['Unsubscribe_1']           = "Ok, vous allez recevoir un email qui vous permettra de confirmer votre choix";
 $lang['Message']['Unsubscribe_2']           = "Vous n'êtes désormais plus inscrit à cette liste de diffusion";
 $lang['Message']['Unsubscribe_3']           = "Votre email a bien été retiré de notre base de données";
-$lang['Message']['Success_setformat']       = "Le changement de format a été effectué avec succés";
+$lang['Message']['Success_setformat']       = "Le changement de format a été effectué avec succès";
 $lang['Message']['Invalid_email']           = "L'adresse email que vous avez indiquée n'est pas valide";
 $lang['Message']['Unrecognized_email']      = "Domaine inconnu ou compte non reconnu par le serveur (%s)";
 $lang['Message']['Unknown_email']           = "Email inconnu";
@@ -156,34 +156,34 @@ $lang['Message']['Invalid_code']            = "Code invalide !";
 $lang['Message']['Invalid_email2']          = "Adresse email invalide !";
 $lang['Message']['Failed_sending2']         = "L'email n'a pu être envoyé ! %s";
 
-$lang['Message']['Success_export']          = "L'exportation des emails a été effectuée avec succés. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
-$lang['Message']['Success_import']          = "Les emails ont été importés avec succés";
-$lang['Message']['Success_import2']         = "L'importation s'est effectuée avec succés mais certains emails ont été refusés";
-$lang['Message']['Success_import3']         = "L'importation s'est effectuée avec succés mais certains emails ont été refusés. \nCliquez %sici%s pour télécharger le rapport (N'oubliez pas de supprimer le fichier du serveur par la suite)";
+$lang['Message']['Success_export']          = "L'exportation des emails a été effectuée avec succès. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
+$lang['Message']['Success_import']          = "Les emails ont été importés avec succès";
+$lang['Message']['Success_import2']         = "L'importation s'est effectuée avec succès mais certains emails ont été refusés";
+$lang['Message']['Success_import3']         = "L'importation s'est effectuée avec succès mais certains emails ont été refusés. \nCliquez %sici%s pour télécharger le rapport (N'oubliez pas de supprimer le fichier du serveur par la suite)";
 $lang['Message']['Success_import4_0']       = "Aucun email n'a été importé";
-$lang['Message']['Success_import4_1']       = "%d email a été importé avec succés";
-$lang['Message']['Success_import4_n']       = "%d emails ont été importés avec succés";
-$lang['Message']['Success_modif']           = "Les modifications ont été effectuées avec succés";
-$lang['Message']['Success_backup']          = "La sauvegarde des tables a été effectuée avec succés. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
-$lang['Message']['Success_restore']         = "La restauration des données a été effectuée avec succés";
+$lang['Message']['Success_import4_1']       = "%d email a été importé avec succès";
+$lang['Message']['Success_import4_n']       = "%d emails ont été importés avec succès";
+$lang['Message']['Success_modif']           = "Les modifications ont été effectuées avec succès";
+$lang['Message']['Success_backup']          = "La sauvegarde des tables a été effectuée avec succès. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
+$lang['Message']['Success_restore']         = "La restauration des données a été effectuée avec succès";
 $lang['Message']['Success_logout']          = "Vous avez été déconnecté de l'administration";
-$lang['Message']['Success_purge']           = "La purge a été effectuée avec succés (%d abonné(s) supprimé(s))";
-$lang['Message']['Success_send']            = "L'envoi partiel a été effectué avec succés à <b>%d</b> abonnés.\nLa lettre de diffusion a été envoyée jusqu'à présent à <b>%d</b> abonnés sur un total de <b>%d</b>";
-$lang['Message']['Success_send_finish']     = "Envoi terminé avec succés.\nCette lettre de diffusion a été envoyée à un total de <b>%d</b> abonnés";
-$lang['Message']['Success_operation']       = "L'opération a été effectuée avec succés";
+$lang['Message']['Success_purge']           = "La purge a été effectuée avec succès (%d abonné(s) supprimé(s))";
+$lang['Message']['Success_send']            = "L'envoi partiel a été effectué avec succès à <b>%d</b> abonnés.\nLa lettre de diffusion a été envoyée jusqu'à présent à <b>%d</b> abonnés sur un total de <b>%d</b>";
+$lang['Message']['Success_send_finish']     = "Envoi terminé avec succès.\nCette lettre de diffusion a été envoyée à un total de <b>%d</b> abonnés";
+$lang['Message']['Success_operation']       = "L'opération a été effectuée avec succès";
 
-$lang['Message']['Profile_updated']         = "Le profil a été mis à jour avec succés";
-$lang['Message']['Admin_added']             = "L'utilisateur a été ajouté avec succés, il va recevoir par email ses identifiants de connexion";
-$lang['Message']['Admin_deleted']           = "L'utilisateur a été supprimé avec succés";
-$lang['Message']['liste_created']           = "La nouvelle liste de diffusion a été créée avec succés";
-$lang['Message']['liste_edited']            = "La liste de diffusion a été modifiée avec succés";
-$lang['Message']['Liste_del_all']           = "La liste a été supprimée avec succés, ainsi que les abonnés et newsletters qui y étaient rattachés";
-$lang['Message']['Liste_del_move']          = "La liste a été supprimée avec succés.\nLes abonnés et newsletters qui y étaient rattachés ont été déplacés vers la liste sélectionnée";
-$lang['Message']['logs_deleted']            = "Les newsletters ont été supprimées avec succés";
-$lang['Message']['log_deleted']             = "La newsletter a été supprimée avec succés";
-$lang['Message']['log_saved']               = "La newsletter a été sauvegardée avec succés";
-$lang['Message']['log_ready']               = "La newsletter a été sauvegardée avec succés et est prète à être envoyée";
-$lang['Message']['abo_deleted']             = "Les abonnés ont été supprimés avec succés";
+$lang['Message']['Profile_updated']         = "Le profil a été mis à jour avec succès";
+$lang['Message']['Admin_added']             = "L'utilisateur a été ajouté avec succès, il va recevoir par email ses identifiants de connexion";
+$lang['Message']['Admin_deleted']           = "L'utilisateur a été supprimé avec succès";
+$lang['Message']['liste_created']           = "La nouvelle liste de diffusion a été créée avec succès";
+$lang['Message']['liste_edited']            = "La liste de diffusion a été modifiée avec succès";
+$lang['Message']['Liste_del_all']           = "La liste a été supprimée avec succès, ainsi que les abonnés et newsletters qui y étaient rattachés";
+$lang['Message']['Liste_del_move']          = "La liste a été supprimée avec succès.\nLes abonnés et newsletters qui y étaient rattachés ont été déplacés vers la liste sélectionnée";
+$lang['Message']['logs_deleted']            = "Les newsletters ont été supprimées avec succès";
+$lang['Message']['log_deleted']             = "La newsletter a été supprimée avec succès";
+$lang['Message']['log_saved']               = "La newsletter a été sauvegardée avec succès";
+$lang['Message']['log_ready']               = "La newsletter a été sauvegardée avec succès et est prête à être envoyée";
+$lang['Message']['abo_deleted']             = "Les abonnés ont été supprimés avec succès";
 $lang['Message']['Send_canceled']           = "Opération effectuée. Tous les envois restants pour cette newsletter ont été annulés";
 $lang['Message']['List_is_busy']            = "Une opération est en cours sur cette liste. Veuillez patienter quelques instants et retenter la manipulation";
 
@@ -262,7 +262,7 @@ $lang['Message']['Compress_unsupported']    = "Format de compression non support
 $lang['Message']['Database_unsupported']    = "Cette base de données n'est pas supportée par le système de sauvegarde/restauration";
 
 $lang['Message']['Profil_cp_disabled']      = "Le panneau de gestion de compte est actuellement désactivé";
-$lang['Message']['Inactive_account']        = "Votre compte est actuellement inactif, vous avez dù recevoir un email pour l'activer.";
+$lang['Message']['Inactive_account']        = "Votre compte est actuellement inactif, vous avez dû recevoir un email pour l'activer.";
 $lang['Message']['IDs_sended']              = "Vos identifiants vous ont été envoyés par email";
 $lang['Message']['Logs_sent']               = "Les newsletters sélectionnées ont été envoyées à votre adresse: %s";
 $lang['Message']['Archive_class_needed']    = "Le module d'export nécessite la présence du paquet <abbr title=\"PHP Extension and Application Repository\" xml:lang=\"en\" lang=\"en\">PEAR</abbr> <q>%s</q>. Consultez la documentation pour plus de détails.";
@@ -383,7 +383,7 @@ $lang['Total_Filesize']             = "Espace disque occupé par les fichiers (pi
 // Page : Configuration
 //
 $lang['Explain']['config']          = "Le formulaire ci-dessous vous permet de configurer tous les aspects du script";
-$lang['Explain']['config_cookies']  = "Ces paramètres vous permettent de régler les cookies utilisés par le script. \nSi vous n'êtes pas sùr de vous, laissez les paramètres par défaut";
+$lang['Explain']['config_cookies']  = "Ces paramètres vous permettent de régler les cookies utilisés par le script. \nSi vous n'êtes pas sûr de vous, laissez les paramètres par défaut";
 $lang['Explain']['config_files']    = "Vous avez la possibilité de joindre des fichiers à vos envois de newsletters. \nPour ce faire, le script offre deux options. Le plus simple est de stocker les fichiers sur le serveur, dans le répertoire défini comme répertoire de stockage (le répertoire en question doit être accessible en écriture). \nSi, pour une raison ou une autre, cela n'est pas rendu possible sur votre serveur, le script a la possibilité de stocker les fichiers sur un serveur <acronym title=\"File Transfert Protocol\" xml:lang=\"en\">ftp</acronym>.\n Vous devez alors entrer les paramètres d'accès au serveur ftp en question.";
 $lang['Explain']['config_email']    = "Ces paramètres vous permettent de configurer les méthodes d'envois d'emails à utiliser. \nLe premier moteur prend comme destinataire l'adresse email de la newsletter elle-même, avec les destinataires en copie cachée. Le deuxième moteur est un peu plus lourd mais envoie un email pour chaque abonné (ce dernier sera automatiquement utilisé si l'hébergeur est <strong>Online</strong>).\n Si, pour une raison quelconque, votre serveur ne dispose pas de fonction mail() ou dérivé, vous avez la possibilité d'utiliser un serveur <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> précis en indiquant les paramètres d'accès au script. \nAttention cependant, certaines restrictions peuvent survenir dans ce cas précis. Référez vous, pour plus de précisions, à la %sfaq du script%s.";
 $lang['Explain']['config_stats']    = "Le script dispose d'un petit module de statistique. Celui ci demande que la librairie GD soit installée sur votre serveur pour fonctionner. \nSi la librairie GD n'est pas installée, il est recommandé de désactiver le module de statistiques pour éviter des traitement de données superflus par le script.";
@@ -620,7 +620,7 @@ $lang['Done']                       = "Effectué";
 $lang['Status_writing']             = "Newsletter normale";
 $lang['Status_model']               = "Modèle réutilisable";
 $lang['File_on_server']             = "fichier existant";
-$lang['Cancel_send_log']            = "Êtes-vous sùr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
+$lang['Cancel_send_log']            = "Êtes-vous sûr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
 $lang['Receive_copy']               = "Recevoir une copie";
 $lang['Receive_copy_title']         = "Si actif, vous recevrez une copie de la newsletter envoyée";
 
@@ -657,8 +657,8 @@ $lang['DB_type_undefined']          = "Le type de base de données n'est pas défi
 $lang['Success_install']            = "L'installation s'est bien déroulée.\nVous pouvez maintenant accéder à l'administration en cliquant %sici%s";
 $lang['Success_upgrade']            = "La mise à jour s'est bien déroulée.\nVous pouvez maintenant accéder à l'administration en cliquant %sici%s";
 $lang['Success_without_config']     = "L'opération s'est bien effectuée mais le fichier de configuration n'a pu être créé.\nVous pouvez le télécharger et l'uploader par vos propres moyens sur le serveur dans le répertoire includes/ du script.";
-$lang['Error_in_install']           = "Une erreur s'est produite durant l'installation.\n\nL'erreur est : %s\nLa requète est : %s";
-$lang['Error_in_upgrade']           = "Une erreur s'est produite durant la mise à jour.\n\nL'erreur est : %s\nLa requète est : %s";
+$lang['Error_in_install']           = "Une erreur s'est produite durant l'installation.\n\nL'erreur est : %s\nLa requête est : %s";
+$lang['Error_in_upgrade']           = "Une erreur s'est produite durant la mise à jour.\n\nL'erreur est : %s\nLa requête est : %s";
 $lang['Upgrade_not_required']       = "Aucune mise à jour n'est nécessaire pour votre version actuelle de Wanewsletter";
 $lang['Unknown_version']            = "Version inconnue, la mise à jour ne peut continuer.";
 
