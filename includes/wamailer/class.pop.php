@@ -402,10 +402,10 @@ class Pop {
 		
 		$output = preg_replace("/\r\n?/", "\n", $output);
 		
-		preg_match("/^(.+?)\n\n(.*?)$/s", $output, $match);
+		list($headers, $message) = explode("\n\n", $output, 2);
 		
-		$this->contents[$num]['headers'] = trim(preg_replace("/\n( |\t)+/", ' ', $match[1]));
-		$this->contents[$num]['message'] = trim($match[2]);
+		$this->contents[$num]['headers'] = trim(preg_replace("/\n( |\t)+/", ' ', $headers));
+		$this->contents[$num]['message'] = trim($message);
 		
 		return true;
 	}
@@ -439,7 +439,7 @@ class Pop {
 		$lines = explode("\n", $str);
 		for( $i = 0; $i < count($lines); $i++ )
 		{
-			list($name, $value) = explode(':', $lines[$i]);
+			list($name, $value) = explode(':', $lines[$i], 2);
 			
 			$name = strtolower($name);
 			$headers[$name] = $this->decode_mime_header($value);
