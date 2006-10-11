@@ -384,7 +384,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		{
 			if( defined('IN_COMMANDLINE') )
 			{
-				require dirname($_SERVER['PHP_SELF']) . '/Console/ProgressBar.php';
+				require WA_ROOTDIR . '/contrib/Console/ProgressBar.php';
 				
 				//
 				// Initialisation de la barre de progression des envois
