@@ -39,7 +39,7 @@ if( count($liste_ids) > 0 )
 {
 	$liste_ids = implode(', ', $liste_ids);
 	
-	if( SQL_DRIVER != 'mysql' ) // Et parce que SQLite ne supporte pas COUNT(DISTINCT(...))
+	if( SQL_SUBSELECT_SUPPORTED ) // Et parce que SQLite ne supporte pas COUNT(DISTINCT(...))
 	{
 		$sql = "SELECT COUNT(a.abo_id) AS num_subscribe
 			FROM " . ABONNES_TABLE . " AS a

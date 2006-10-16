@@ -43,7 +43,7 @@ if( count($liste_ids) > 0 )
 	$sql_abo_ids = "SELECT DISTINCT(abo_id)
 		FROM " . ABO_LISTE_TABLE . "
 		WHERE liste_id IN($sql_liste_ids)";
-	if( SQL_DRIVER == 'mysql' )
+	if( !SQL_SUBSELECT_SUPPORTED )
 	{
 		if( !($result = $db->query($sql_abo_ids)) )
 		{
@@ -130,7 +130,7 @@ if( count($liste_ids) > 0 )
 			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 				AND l.liste_id IN($sql_liste_ids)";
 	
-	if( SQL_DRIVER == 'mysql' )
+	if( !SQL_SUBSELECT_SUPPORTED )
 	{
 		if( !($result = $db->query($sql_file_ids)) )
 		{
