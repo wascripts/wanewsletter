@@ -82,9 +82,9 @@ if( !defined('E_STRICT') ) // Compatibilité PHP5
 	define('E_STRICT', 2048);
 }
 
-if( !defined('DATE_RFC822') )
+if( !defined('DATE_RFC1123') )
 {
-	define('DATE_RFC822', 'D, d M Y H:i:s \G\M\T');
+	define('DATE_RFC1123', 'D, d M Y H:i:s T');
 }
 
 //

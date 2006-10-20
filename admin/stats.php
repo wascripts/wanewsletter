@@ -67,8 +67,8 @@ function send_image($name, $img)
 {
 	global $img_type;
 	
-	header('Last-Modified: ' . gmdate(DATE_RFC822));
-	header('Expires: ' . gmdate(DATE_RFC822));
+	header('Last-Modified: ' . gmdate(DATE_RFC1123));
+	header('Expires: ' . gmdate(DATE_RFC1123));
 	header('Cache-Control: no-cache, no-store, must-revalidate, proxy-revalidate, private, max-age=0');
 	header('Pragma: no-cache');
 	header('Content-Disposition: inline; filename="' . $name . '.' . $img_type . '"');
