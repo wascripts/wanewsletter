@@ -98,7 +98,7 @@ class Smtp {
 	 * @var string
 	 * @access public
 	 */
-	var $server_from     = 'localhost';
+	var $server_from     = '';
 	
 	/**
 	 * Dernière réponse envoyée par le serveur
@@ -183,6 +183,15 @@ class Smtp {
 	 */
 	function Smtp($auto_connect = false)
 	{
+		if( empty($this->server_from) ) {
+			if( isset($_SERVER['SERVER_NAME']) ) {
+				$this->server_from = $_SERVER['SERVER_NAME'];
+			}
+			else if( !($this->server_from = @php_uname('n')) ) {
+				$this->server_from = 'localhost';
+			}
+		}
+		
 		if( $auto_connect )
 		{
 			$this->connect($this->smtp_server, $this->smtp_port, $this->smtp_user, $this->smtp_pass, $this->server_from);
