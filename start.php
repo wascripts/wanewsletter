@@ -30,6 +30,11 @@ if( !defined('IN_NEWSLETTER') )
 	exit('<b>No hacking</b>');
 }
 
+// @link http://bugs.php.net/bug.php?id=31440
+if( isset($_REQUEST['GLOBALS']) || isset($_FILES['GLOBALS']) ) {
+	exit('GLOBALS overwrite attempt detected');
+}
+
 error_reporting(E_ALL);
 
 $starttime = array_sum(explode(' ', microtime()));
