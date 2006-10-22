@@ -440,7 +440,8 @@ class Attach {
 		if( !$this->check_maxsize($log_id, $filesize, $total_size) )
 		{
 			$error = TRUE;
-			$msg_error[] = sprintf($lang['Message']['weight_too_big'], ($nl_config['max_filesize'] - $total_size));
+			$msg_error[] = sprintf($lang['Message']['weight_too_big'],
+				formateSize($nl_config['max_filesize'] - $total_size));
 		}
 		
 		//
@@ -575,7 +576,8 @@ class Attach {
 		if( !$error && !$this->check_maxsize($log_id, $filesize, $total_size) )
 		{
 			$error = TRUE;
-			$msg_error[] = sprintf($lang['Message']['weight_too_big'], ($nl_config['max_filesize'] - $total_size));
+			$msg_error[] = sprintf($lang['Message']['weight_too_big'],
+				formateSize($nl_config['max_filesize'] - $total_size));
 		}
 		
 		//

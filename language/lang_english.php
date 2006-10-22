@@ -256,7 +256,7 @@ $lang['Message']['Upload_error_7']          = "Failed to write file to disk";
 $lang['Message']['Invalid_filename']        = "Invalid file name";
 $lang['Message']['Invalid_action']          = "Invalid action";
 $lang['Message']['Invalid_ext']             = "This file extension has been prohibited";
-$lang['Message']['weight_too_big']          = "The overall size of attached files exceeds the authorized maximum, you have %.2f free bytes remaining";
+$lang['Message']['weight_too_big']          = "The overall size of attached files exceeds the authorized maximum, you have %s remaining";
 
 $lang['Message']['Compress_unsupported']    = "Unsupported compression format";
 $lang['Message']['Database_unsupported']    = "This database is not supported by the backup/restore system";

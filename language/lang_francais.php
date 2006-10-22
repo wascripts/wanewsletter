@@ -256,7 +256,7 @@ $lang['Message']['Upload_error_7']          = "Échec de l'écriture du fichier su
 $lang['Message']['Invalid_filename']        = "Nom de fichier non valide";
 $lang['Message']['Invalid_action']          = "Action non valide";
 $lang['Message']['Invalid_ext']             = "Cette extension de fichier a été interdite";
-$lang['Message']['weight_too_big']          = "Le poids total des fichiers joints excède le maximum autorisé, il ne vous reste que %.2f octets de libre";
+$lang['Message']['weight_too_big']          = "Le poids total des fichiers joints excède le maximum autorisé, il ne vous reste que %s de libre";
 
 $lang['Message']['Compress_unsupported']    = "Format de compression non supporté";
 $lang['Message']['Database_unsupported']    = "Cette base de données n'est pas supportée par le système de sauvegarde/restauration";
