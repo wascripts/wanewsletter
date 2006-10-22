@@ -1151,10 +1151,9 @@ function hasCidReferences($body, &$refs)
  * 
  * Retourne une taille en octet formatée pour être lisible par un humain
  * 
- * @param string  $body
- * @param array   $refs
+ * @param string  $size
  * 
- * @return integer
+ * @return string
  */
 function formateSize($size)
 {
