@@ -224,6 +224,12 @@ switch( $mode )
 				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=progress') . '">', '</a>');
 				$output->message($message);
 			}
+			
+			if( DISABLE_CHECK_LINKS == false && empty($listdata['form_url']) )
+			{
+				$message = nl2br(sprintf($lang['Message']['No_form_url'], '<a href="' . sessid('view.php?mode=liste&amp;action=edit') . '">', '</a>'));
+				$output->message($message);
+			}
 		}
 		else
 		{

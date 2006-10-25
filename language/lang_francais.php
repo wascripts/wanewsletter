@@ -233,6 +233,7 @@ $lang['Message']['Unaccess_host']           = "L'hôte %s semble inaccessible act
 $lang['Message']['Not_found_at_url']        = "Le fichier ne semble pas présent à l'url indiquée";
 $lang['Message']['No_data_at_url']          = "Aucune donnée disponible sur le fichier";
 $lang['Message']['Error_load_url']          = "Erreur dans le chargement de l'url \"%1\$s\" (%2\$s)";
+$lang['Message']['No_form_url']             = "Vous n'avez pas spécifié l'adresse du formulaire dans la %sconfiguration de votre liste%s.\nVous devez corriger cela avant de pouvoir commencer l'envoi.";
 
 $lang['Message']['Cannot_create_dir']       = "Impossible de créer le répertoire %s";
 $lang['Message']['Dir_not_writable']        = "Le répertoire <samp>%s</samp> n'existe pas ou n'est pas accessible en écriture";
