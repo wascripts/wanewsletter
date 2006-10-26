@@ -167,11 +167,16 @@ function preview(evt)
 
 function addLinks(evt)
 {
+	var texte, scrollTop = 0;
 	if( evt.target.id == 'addLinks1' ) {
-		var texte = document.forms['send-form'].elements['body_text'];
+		texte = document.forms['send-form'].elements['body_text'];
 	}
 	else {
-		var texte = document.forms['send-form'].elements['body_html'];
+		texte = document.forms['send-form'].elements['body_html'];
+	}
+	
+	if( typeof(texte.scrollTop) != 'undefined' ) {
+		scrollTop = texte.scrollTop;
 	}
 	
 	if( typeof(texte.selectionStart) != 'undefined' ) {
@@ -179,13 +184,18 @@ function addLinks(evt)
 		var before   = (texte.value).substring(0, texte.selectionStart);
 		var after    = (texte.value).substring(texte.selectionStart, texte.textLength);
 		texte.value  = before + '{LINKS}' + after;
-		texte.setSelectionRange(caretPos, caretPos);
+		texte.selectionStart = caretPos;
+		texte.selectionEnd   = caretPos;
 	}
 	else if( typeof(texte.createTextRange) != 'undefined' && texte.caretPos ) {
 		texte.caretPos.text = '{LINKS}';
 	}
 	else {
 		texte.value += '{LINKS}\n';
+	}
+	
+	if( scrollTop > 0 ) {
+		texte.scrollTop = scrollTop;
 	}
 	
 	texte.focus();
