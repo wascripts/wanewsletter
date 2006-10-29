@@ -208,7 +208,7 @@ if( $process == true ) {
 </head>
 <body>
 
-<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
 <table border="1" cellpadding="2" cellspacing="1">
 	<tr>
 		<th>#</th>

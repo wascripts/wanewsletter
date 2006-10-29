@@ -654,7 +654,7 @@ BASIC;
 		
 		if( empty($jump_to) )
 		{
-			$jump_to = './' . basename(server_info('PHP_SELF'));
+			$jump_to = './' . htmlspecialchars(basename(server_info('PHP_SELF')));
 			$query_string = server_info('QUERY_STRING');
 			
 			if( $query_string != '' )
