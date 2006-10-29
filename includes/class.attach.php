@@ -606,7 +606,7 @@ class Attach {
 	 */
 	function check_filename($filename)
 	{
-		return ( preg_match('/[\\:*\/?<">|]/', $filename) ) ? false : true;
+		return ( preg_match('/[\\:*\/?<">|\x00-\x1F\x7F-\x9F]/', $filename) ) ? false : true;
 	}
 	
 	/**
