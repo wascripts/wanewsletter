@@ -107,10 +107,13 @@ for( $i = 1; $i < $argc; $i++ )
 	//
 	else if( $argv[$i] == '--license' )
 	{
-		echo <<<WANSHELL
-Wanewsletter $version
-Copyright (c) 2002-2006 Aurélien Maille
-
+		echo "Wanewsletter $version\n";
+		echo "Copyright (c) 2002-2006 Aurélien Maille\n";
+		echo "\n";
+		
+		if( preg_match('/^fr[_-]/', getenv('LANG')) )
+		{
+			echo <<<WANSHELL
 Wanewsletter est un logiciel libre; vous pouvez le redistribuer ou le
 modifier selon les termes de la License Publique Générale de GNU, publiée
 par la Free Software Foundation; soit la version 2 de la Licence ou,
@@ -127,6 +130,27 @@ avec Wanewsletter; sinon, écrivez à la Free Software Foundation, Inc.,
 
 
 WANSHELL;
+		}
+		else
+		{
+			echo <<<WANSHELL
+Wanewsletter is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+Wanewsletter is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Wanewsletter; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+
+WANSHELL;
+		}
 		
 		exit(0);
 	}
