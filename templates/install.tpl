@@ -169,11 +169,11 @@
 	<table class="content">
 		<tr>
 			<td class="medrow1"><label for="admin_login">{reinstall.L_LOGIN}&#160;:</label></td>
-			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" value="{reinstall.LOGIN}" maxlength="25" size="25" class="text" /></td>
+			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" value="{reinstall.LOGIN}" maxlength="30" size="30" class="text" /></td>
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="admin_pass">{reinstall.L_PASS}&#160;:</label> </td>
-			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" maxlength="25" size="25" class="text" /></td>
+			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" maxlength="30" size="30" class="text" /></td>
 		</tr>
 	</table>
 	
