@@ -642,9 +642,13 @@ class Wanewsletter {
 	
 	function make_link()
 	{
-		return $this->listdata['form_url']
-			. (( strstr($this->listdata['form_url'], '?') ) ? '&' : '?')
-			. $this->account['code'];
+		$formURL = $this->listdata['form_url'];
+		if( !empty($GLOBALS['formURL']) && empty($_REQUEST['formURL']) && empty($_FILES['formURL']) )
+		{
+			$formURL = $GLOBALS['formURL'];
+		}
+		
+		return $formURL . (strstr($formURL, '?') ? '&' : '?') . $this->account['code'];
 	}
 	
 	function alert_admin($new_subscribe)
