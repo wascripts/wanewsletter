@@ -2124,7 +2124,7 @@ class Mailer {
 	{
 		if( $this->smtp_mode || $this->sendmail_mode )
 		{
-			$this->headers['Subject'] = $this->word_wrap($this->subject);
+			$this->headers['Subject'] = $this->subject;
 		}
 		else
 		{
