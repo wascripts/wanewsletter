@@ -32,6 +32,11 @@ define('WM_HOST_ONLINE',   2);
 define('WM_SMTP_MODE',     3);
 define('WM_SENDMAIL_MODE', 4);
 
+if( !defined('DATE_RFC2822') )
+{
+	define('DATE_RFC2822', 'D, d M Y H:i:s O');
+}
+
 /**
  * Classe d'envois d'emails
  * 
@@ -46,8 +51,8 @@ define('WM_SENDMAIL_MODE', 4);
  * 
  * @link http://abcdrfc.free.fr/ (français)
  * @link http://www.rfc-editor.org/ (anglais)
- * @link http://cvs.php.net/cvs.php/php4.fubar/ext/standard/mail.c?login=2
- * @link http://cvs.php.net/cvs.php/php4.fubar/win32/sendmail.c?login=2
+ * @link http://cvs.php.net/viewvc.cgi/php-src/ext/standard/mail.c
+ * @link http://cvs.php.net/viewvc.cgi/php-src/win32/sendmail.c
  * 
  * @access public
  */
@@ -326,7 +331,7 @@ class Mailer {
 	 * @var string
 	 * @access public
 	 */
-	var $server_from            = 'localhost';
+	var $server_from            = '';
 	
 	/**
 	 * Activer/désactiver le validateur d'adresse email
@@ -402,9 +407,13 @@ class Mailer {
 		// On récupère le domaine actuel dans le cas d'un dialogue SMTP
 		// et pour certains en-têtes de l'email
 		//
-		if( $this->server_from == 'localhost' && !empty($_SERVER['SERVER_NAME']) )
-		{
-			$this->server_from = $_SERVER['SERVER_NAME'];
+		if( empty($this->server_from) ) {
+			if( isset($_SERVER['SERVER_NAME']) ) {
+				$this->server_from = $_SERVER['SERVER_NAME'];
+			}
+			else if( !($this->server_from = @php_uname('n')) ) {
+				$this->server_from = 'localhost';
+			}
 		}
 		
 		//
@@ -899,7 +908,7 @@ class Mailer {
 	 */
 	function set_subject($subject)
 	{
-		$this->subject = trim($this->encode_mime_header($subject, 'subject'));
+		$this->subject = $this->encode_mime_header(trim($subject), 'subject');
 	}
 	
 	/**
@@ -1599,13 +1608,6 @@ class Mailer {
 		if( $is_header )
 		{
 			/**
-			 * \n<LWS> mais la fonction mail() ne laisse passer les long entêtes subject et to 
-			 * que si on sépare avec \r\n<LWS>
-			 * 
-			 * LWS : Linear-White-Space (espace ou tabulation)
-			 * 
-			 * @link http://cvs.php.net/cvs.php/php4.fubar/ext/standard/mail.c?login=2
-			 * 
 			 * espace au lieu de tabulation sinon le sujet notamment ne s'affiche pas correctement 
 			 * selon les lecteurs d'emails.
 			 */
@@ -1666,30 +1668,32 @@ class Mailer {
 		$message = $this->compile_message();
 		$Rpath   = $this->get_return_path();
 		
-		/**
-		 * On encode le sujet de l'email si nécessaire.
-		 * 
-		 * FIX
-		 * 
-		 * La fonction mail() n'accepte les entêtes long que si on utilise la séquence CRLFSP (\r\n )
-		 * Or, sur certains systèmes, il semble que les retours de ligne soient ... doublés ...
-		 * Résultat, le corps de l'email commence au saut de ligne en trop (et donc contient une bonne 
-		 * partie des entêtes).
-		 * Pour éviter cela, on supprime les séquences LFSP (\n ) ajoutées par la méthode word_wrap()
-		 * 
-		 * @link http://bugs.php.net/bug.php?id=24805
-		 */
-		if( $this->subject != '' )
+		if( !$this->smtp_mode && !$this->sendmail_mode )
 		{
-			$subject = $this->subject;
-			if( $this->fix_bug_mail == -1 )
+			$subject = null;
+			
+			if( $this->subject != '' )
 			{
-				$subject = str_replace("\n ", "\r\n ", $this->word_wrap($subject));
+				/**
+				 * FIX
+				 * 
+				 * La fonction mail() n'accepte les entêtes long que si on utilise
+				 * la séquence CRLFSP (\r\n ), or, sur certains systèmes, il semble
+				 * que les retours de ligne soient... doublés...
+				 * Résultat, le corps de l'email commence au saut de ligne en trop
+				 * (et donc contient une bonne partie des entêtes).
+				 * Pour cette raison, on ne 'plie' le sujet avec des séquences LFSP (\n )
+				 * que si l'on est sùr que la fonction mail() ouvre directement
+				 * un socket vers un serveur SMTP
+				 * 
+				 * @link http://bugs.php.net/bug.php?id=24805
+				 */
+				$subject = $this->subject;
+				if( $this->fix_bug_mail == -1 )
+				{
+					$subject = str_replace("\n ", "\r\n ", $this->word_wrap($subject));
+				}
 			}
-		}
-		else
-		{
-			$subject = 'No subject';
 		}
 		
 		if( $do_not_send )
@@ -1697,26 +1701,26 @@ class Mailer {
 			return $headers . "\n\n" . $message;
 		}
 		
-		//
-		// Détection du safe_mode. S'il est activé, on ne pourra pas
-		// régler l'adresse email de retour (return-path) avec le
-		// cinquième argument.
-		// En alternative, utilisation de ini_get() et ini_set() sur
-		// l'option sendmail_from de PHP
-		//
-		$safe_mode     = @ini_get('safe_mode');
-		$safe_mode_gid = @ini_get('safe_mode_gid');// Ajout pour free.fr et sa config php exotique
-		
-		if( $safe_mode || $safe_mode_gid )
-		{
-			$old_Rpath = @ini_get('sendmail_from');
-			@ini_set('sendmail_from', $Rpath);
-		}
-		
 		switch( $this->hebergeur )
 		{
 			case WM_HOST_OTHER:
-				if( strncasecmp(PHP_OS, 'Win', 3) === 0 )
+				//
+				// Détection du safe_mode. S'il est activé, on ne pourra pas
+				// régler l'adresse email de retour (return-path) avec le
+				// cinquième argument.
+				// En alternative, utilisation de ini_get() et ini_set() sur
+				// l'option sendmail_from de PHP
+				//
+				$safe_mode     = @ini_get('safe_mode');
+				$safe_mode_gid = @ini_get('safe_mode_gid');// Ajout pour free.fr et sa config php exotique
+				
+				if( $safe_mode || $safe_mode_gid )
+				{
+					$old_Rpath = @ini_get('sendmail_from');
+					@ini_set('sendmail_from', $Rpath);
+				}
+				
+				if( strncasecmp(PHP_OS, 'Win', 3) == 0 )
 				{
 					$address = preg_replace('/\r\n?|\n/', "\r\n", $address);
 					$subject = preg_replace('/\r\n?|\n/', "\r\n", $subject);
@@ -1731,6 +1735,11 @@ class Mailer {
 				else
 				{
 					$result = @mail($address, $subject, $message, $headers);
+				}
+				
+				if( $safe_mode || $safe_mode_gid )
+				{
+					@ini_set('sendmail_from', $old_Rpath);
 				}
 				break;
 			
@@ -1751,11 +1760,6 @@ class Mailer {
 				$this->error('send() :: Aucune fonction d\'envoi n\'est définie');
 				$result = false;
 				break;
-		}
-		
-		if( $safe_mode || $safe_mode_gid )
-		{
-			@ini_set('sendmail_from', $old_Rpath);
 		}
 		
 		if( !$result && !empty($php_errormsg) && stristr($php_errormsg, ' mail()') )
@@ -1923,7 +1927,7 @@ class Mailer {
 				// Pas moyen d'obtenir une adresse à utiliser.
 				// En dernier ressort, nous utilisons une adresse factice
 				//
-				$Rpath = 'wamailer@localhost';
+				$Rpath = 'wamailer@'.$this->server_from;
 			}
 		}
 		
@@ -2120,7 +2124,7 @@ class Mailer {
 	{
 		if( $this->smtp_mode || $this->sendmail_mode )
 		{
-			$this->headers['Subject'] = $this->subject;
+			$this->headers['Subject'] = $this->word_wrap($this->subject);
 		}
 		else
 		{
@@ -2132,7 +2136,7 @@ class Mailer {
 			$this->set_return_path();
 		}
 		
-		$this->headers['Date']         = date('D, d M Y H:i:s O', time());
+		$this->headers['Date']         = date(DATE_RFC2822);
 		$this->headers['X-Mailer']     = 'Wamailer/' . $this->version . ' (http://phpcodeur.net)';
 		$this->headers['X-AntiAbuse']  = 'Sender IP - ' . $this->sender_ip . '/Server Name - <' . $this->server_from . '>';
 		$this->headers['MIME-Version'] = '1.0'; 
@@ -2152,7 +2156,7 @@ class Mailer {
 			}
 			
 			$headers .= $this->word_wrap(sprintf('%s: %s', $name,
-				preg_replace('/(?!\x09|\x20)\r?\n/', '', $this->headers[$name]))) . "\n";
+				preg_replace('/\r?\n(?!\x09|\x20)/', '', $this->headers[$name]))) . "\n";
 		}
 		
 		foreach( $this->headers as $name => $body )
@@ -2163,7 +2167,7 @@ class Mailer {
 			}
 			
 			$headers .= $this->word_wrap(sprintf('%s: %s', $name,
-				preg_replace('/(?!\x09|\x20)\r?\n/', '', $body))) . "\n";
+				preg_replace('/\r?\n(?!\x09|\x20)/', '', $body))) . "\n";
 		}
 		
 		if( empty($this->compiled_message[$this->format]) )
@@ -2451,7 +2455,7 @@ class Mailer {
 		
 		if( $embedded )
 		{
-			$cid = md5(microtime()) . '@wamailer';
+			$cid = md5(microtime()) . '@' . $this->server_from;
 			
 			$attach .= 'Content-ID: <' . $cid . '>' . "\n\n";
 			
