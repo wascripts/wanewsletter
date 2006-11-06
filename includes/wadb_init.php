@@ -109,8 +109,7 @@ function createDSN($infos, $options = null)
  */
 function parseDSN($dsn)
 {
-	if( !($dsn_parts = parse_url($dsn)) ) {
-		trigger_error("Invalid DSN argument", E_USER_ERROR);
+	if( !($dsn_parts = parse_url($dsn)) || !isset($dsn_parts['scheme']) ) {
 		return false;
 	}
 	

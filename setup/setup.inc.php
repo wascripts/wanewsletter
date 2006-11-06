@@ -358,13 +358,14 @@ if( !isset($supported_db[$infos['driver']]) && ( defined('NL_INSTALLED') || defi
 	plain_error($lang['DB_type_undefined']);
 }
 
+if( $infos['driver'] == 'sqlite' )
+{
+	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/includes/sql') . '/wanewsletter.sqlite';
+}
+
 if( !empty($infos['dbname']) )
 {
 	$dsn = createDSN($infos);
-}
-else if( $infos['driver'] == 'sqlite' )
-{
-	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/includes/sql') . '/wanewsletter.sqlite';
 }
 
 $config_file  = '<' . "?php\n\n";
