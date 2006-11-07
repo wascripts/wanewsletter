@@ -134,6 +134,11 @@ if( defined('IN_WA_FORM') )
 	//
 	@restore_error_handler();
 	
+	// Si besoin, conversion du message vers le charset demandé
+	if( !empty($textCharset) ) {
+		$message = iconv($lang['CHARSET'], $textCharset, $message);
+	}
+	
 	echo nl2br($message);
 }
 
