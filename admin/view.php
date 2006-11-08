@@ -391,7 +391,25 @@ else if( $mode == 'abonnes' )
 	{
 		$liste_ids = $auth->check_auth(AUTH_VIEW);
 		
-		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_email, al.register_date, al.liste_id, al.format
+		//
+		// Récupération des champs des tags personnalisés
+		//
+		include WA_ROOTDIR . '/includes/tags.inc.php';
+		
+		if( count($other_tags) > 0 )
+		{
+			$fields_str = '';
+			foreach( $other_tags as $data )
+			{
+				$fields_str .= 'a.' . $data['column_name'] . ', ';
+			}
+		}
+		else
+		{
+			$fields_str = '';
+		}
+		
+		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_email, al.register_date, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
@@ -426,6 +444,30 @@ else if( $mode == 'abonnes' )
 				'S_ABO_ID'            => $row['abo_id']
 			));
 			
+			//
+			// Affichage des valeurs des tags enregistrés
+			//
+			if( count($other_tags) > 0 )
+			{
+				$output->assign_block_vars('tags', array(
+					'L_CAPTION' => $lang['TagsList'],
+					'L_NAME'    => $lang['Name'],
+					'L_VALUE'   => $lang['Value']
+				));
+				
+				foreach( $other_tags as $tag )
+				{
+					$value = $row[$tag['column_name']];
+					$value = (!is_null($value)) ? htmlspecialchars($value) : '<i>NULL</i>';
+					
+					$output->assign_block_vars('tags.row', array(
+						'NAME'  => $tag['tag_name'],
+						'VALUE' => $value,
+					));
+				}
+			}
+			
+			// Affichage des listes de diffusion auxquelles l'abonné est inscrit
 			$register_date = time();
 			
 			do

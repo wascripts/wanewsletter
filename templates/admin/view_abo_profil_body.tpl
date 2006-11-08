@@ -1,6 +1,5 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./view.php?mode=abonnes">
 <ul class="links special">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=edit&amp;id={S_ABO_ID}">{L_EDIT_ACCOUNT}</a></li>
@@ -35,6 +34,22 @@
 		<!-- END listerow -->
 	</table>
 </div>
-</form>
+
+<!-- BEGIN tags -->
+<table id="tagsList">
+	<caption><span class="texte">{tags.L_CAPTION}</span></caption>
+	<col span="2" width="50%" />
+	<tr>
+		<th>{tags.L_NAME}</th>
+		<th>{tags.L_VALUE}</th>
+	</tr>
+	<!-- BEGIN row -->
+	<tr>
+		<td><span class="texte">{tags.row.NAME}</span></td>
+		<td><span class="texte">{tags.row.VALUE}</span></td>
+	</tr>
+	<!-- END row -->
+</table>
+<!-- END tags -->
 
 {LISTBOX}

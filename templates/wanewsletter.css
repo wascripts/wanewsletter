@@ -449,3 +449,23 @@ td.row1 label, td.medrow1 label, td.smallrow1 label, td.row-full label {
 	color: black;
 }
 
+/* tableau de tags de la page de visualisation d'un profil d'abonné */
+table#tagsList {
+	background-color: #FAFAFA;
+	margin-top: 0;
+	margin-bottom: 1em;
+	margin-left: 8%;
+	border: 1px solid #084A6B;
+	border-spacing: 1px;
+	color: black;
+}
+table#tagsList caption { padding-bottom: 2px; }
+table#tagsList th { background-color: #D6D8DA; }
+table#tagsList td {
+	background-color: #EAEAEA;
+	padding: .1em .2em;
+	empty-cells: show;
+	vertical-align: top;
+	text-align: left;
+}
+

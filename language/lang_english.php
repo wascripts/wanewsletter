@@ -333,6 +333,8 @@ $lang['Account_login']              = "Enter the email address of your account";
 $lang['Account_pass']               = "Password or code of your account";
 $lang['Maximum_size']               = "Maximum size: %s";
 $lang['Lost_password']              = "Lost password?";
+$lang['Name']                       = "Name";
+$lang['Value']                      = "Value";
 
 $lang['Click_return_index']         = "Click %shere%s to return to the home page";
 $lang['Click_return_back']          = "Click %shere%s to go back to the previous page";
@@ -543,6 +545,7 @@ $lang['Warning_email_diff']         = "Be careful, you are going to modify the e
 $lang['Goto_list']                  = "Return at the subscribers list";
 $lang['View_account']               = "View this account";
 $lang['Edit_account']               = "Modify this account";
+$lang['TagsList']                   = "List of tags";
 
 
 //
