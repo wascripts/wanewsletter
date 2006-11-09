@@ -614,6 +614,20 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	
 	$no_send = $sended = 0;
 	
+	if( !$db->ping() ) {
+		//
+		// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
+		//
+		if( SQL_DRIVER == 'mysqli' ) {
+			trigger_error("La connexion à la base de données a été perdue.<br />
+Vous devriez mettre l'option PHP mysqli.reconnect à On dans le php.ini,<br />
+pour permettre la reconnexion automatique au serveur.", ERROR);
+		}
+		else {
+			trigger_error("La connexion à la base de données a été perdue", ERROR);
+		}
+	}
+	
 	if( count($abo_ids) > 0 )
 	{
 		$sql = "UPDATE " . ABO_LISTE_TABLE . "
@@ -622,16 +636,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				AND liste_id = " . $listdata['liste_id'];
 		if( !$db->query($sql) )
 		{
-			//
-			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
-			// On tente une nouvelle connexion
-			//
-			$db->ping();
-			
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
-			}
+			trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
 		}
 	}
 	
@@ -683,22 +688,15 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	{
 		unlink($lockfile);
 		
+		$db->beginTransaction();
+		
 		$sql = "UPDATE " . LOG_TABLE . "
 			SET log_status = " . STATUS_SENDED . ",
 				log_numdest = $sended
 			WHERE log_id = " . $logdata['log_id'];
 		if( !$db->query($sql) )
 		{
-			//
-			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
-			// On initialise une nouvelle connexion
-			//
-			$db->ping();
-			
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
-			}
+			trigger_error('Impossible de mettre à jour la table des logs', ERROR);
 		}
 		
 		$sql = "UPDATE " . ABO_LISTE_TABLE . "
@@ -716,6 +714,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		{
 			trigger_error('Impossible de mettre à jour la table des listes', ERROR);
 		}
+		
+		$db->commit();
 		
 		$message = sprintf($lang['Message']['Success_send_finish'], $sended);
 	}

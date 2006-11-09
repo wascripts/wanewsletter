@@ -485,7 +485,7 @@ class Wadb_sqlite_pdo {
 	 */
 	function ping()
 	{
-		return false;
+		return true;
 	}
 	
 	/**

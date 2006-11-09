@@ -188,7 +188,9 @@ function WaDatabase($dsn)
 	list($infos, $options) = $tmp;
 	$dbclass = 'Wadb_' . $infos['driver'];
 	
-	require WA_ROOTDIR . "/includes/sql/$infos[driver].php";
+	if( !class_exists($dbclass) ) {
+		require WA_ROOTDIR . "/includes/sql/$infos[driver].php";
+	}
 	
 	$infos['username'] = isset($infos['user']) ? $infos['user'] : null;
 	$infos['passwd']   = isset($infos['pass']) ? $infos['pass'] : null;

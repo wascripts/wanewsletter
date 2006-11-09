@@ -419,7 +419,7 @@ class Wadb_sqlite {
 	 */
 	function ping()
 	{
-		return sqlite_open($this->dbname, 0666);
+		return true;
 	}
 	
 	/**

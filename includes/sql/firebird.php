@@ -460,7 +460,7 @@ class Wadb_firebird {
 	 */
 	function ping()
 	{
-		return false;
+		return true;
 	}
 	
 	/**
