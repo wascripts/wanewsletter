@@ -420,13 +420,11 @@ class Wanewsletter {
 			
 			if( $this->account['date'] > $time_limit )
 			{
-				$low_priority = ( strncmp(SQL_DRIVER, 'mysql', 5) == 0 ) ? 'LOW_PRIORITY' : '';
-				
 				$db->beginTransaction();
 				
 				if( $this->account['status'] == ABO_INACTIF )
 				{
-					$sql = "UPDATE $low_priority " . ABONNES_TABLE . "
+					$sql = "UPDATE " . ABONNES_TABLE . "
 						SET abo_status = " . ABO_ACTIF . "
 						WHERE abo_id = " . $this->account['abo_id'];
 					if( !$db->query($sql) )
@@ -434,43 +432,17 @@ class Wanewsletter {
 						trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
 						return false;
 					}
-					
-					$sql = "SELECT liste_id
-						FROM " . ABO_LISTE_TABLE . "
-						WHERE confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
-							AND abo_id = " . $this->account['abo_id'];
-					if( !($result = $db->query($sql)) )
-					{
-						trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-						return false;
-					}
-					
-					while( $row = $result->fetch() )
-					{
-						$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
-							SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
-								register_key = '" . generate_key(20) . "'
-							WHERE liste_id = " . $row['liste_id'] . "
-								AND abo_id = " . $this->account['abo_id'];
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-							return false;
-						}
-					}
 				}
-				else
+				
+				$sql = "UPDATE " . ABO_LISTE_TABLE . "
+					SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
+						register_key = '" . generate_key(20) . "'
+					WHERE liste_id = " . $this->listdata['liste_id'] . "
+						AND abo_id = " . $this->account['abo_id'];
+				if( !$db->query($sql) )
 				{
-					$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
-						SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
-							register_key = '" . generate_key(20) . "'
-						WHERE liste_id = " . $this->listdata['liste_id'] . "
-							AND abo_id = " . $this->account['abo_id'];
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-						return false;
-					}
+					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+					return false;
 				}
 				
 				$db->commit();
@@ -616,9 +588,7 @@ class Wanewsletter {
 				$this->format = FORMAT_TEXTE;
 			}
 			
-			$low_priority = ( strncmp(SQL_DRIVER, 'mysql', 5) == 0 ) ? 'LOW_PRIORITY' : '';
-			
-			$sql = "UPDATE $low_priority " . ABO_LISTE_TABLE . "
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
 				SET format = " . $this->format . "
 				WHERE liste_id = " . $this->listdata['liste_id'] . "
 					AND abo_id = " . $this->account['abo_id'];
