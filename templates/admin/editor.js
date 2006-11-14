@@ -26,24 +26,30 @@
 
 function make_editor()
 {
+	var editForm = document.forms['send-form'];
+	var DOMRangeIE = (typeof(editForm.elements['subject'].selectionStart) == 'undefined'
+		&& typeof(editForm.elements['subject'].createTextRange) != 'undefined');
+	
 	if( document.getElementById('textarea1') != null ) {
-		var bloc_text = document.forms['send-form'].elements['body_text'];
-		
-		DOM_Events.addListener('click', storeCaret, false, bloc_text);
-		DOM_Events.addListener('select', storeCaret, false, bloc_text);
-		DOM_Events.addListener('keyup', storeCaret, false, bloc_text);
-		DOM_Events.addListener('keydown', storeCaret, false, bloc_text);
+		if( DOMRangeIE ) {
+			var bloc_text = editForm.elements['body_text'];
+			
+			DOM_Events.addListener('click', storeCaret, false, bloc_text);
+			DOM_Events.addListener('select', storeCaret, false, bloc_text);
+			DOM_Events.addListener('keyup', storeCaret, false, bloc_text);
+		}
 		
 		make_button(document.getElementById('textarea1'));
 	}
 	
 	if( document.getElementById('textarea2') != null ) {
-		var bloc_html = document.forms['send-form'].elements['body_html'];
-		
-		DOM_Events.addListener('click', storeCaret, false, bloc_html);
-		DOM_Events.addListener('select', storeCaret, false, bloc_html);
-		DOM_Events.addListener('keyup', storeCaret, false, bloc_html);
-		DOM_Events.addListener('keydown', storeCaret, false, bloc_html);
+		if( DOMRangeIE ) {
+			var bloc_html = editForm.elements['body_html'];
+			
+			DOM_Events.addListener('click', storeCaret, false, bloc_html);
+			DOM_Events.addListener('select', storeCaret, false, bloc_html);
+			DOM_Events.addListener('keyup', storeCaret, false, bloc_html);
+		}
 		
 		make_button(document.getElementById('textarea2'));
 	}
