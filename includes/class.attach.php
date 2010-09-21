@@ -896,7 +896,7 @@ class Attach {
 		// Si on a à faire à Opera, on utilise application/octetstream car toute autre type peut poser 
 		// d'éventuels problèmes.
 		//
-		if( empty($mime_type) || eregi('application/octet-?stream', $mime_type) || WA_USER_BROWSER == 'opera' )
+		if( empty($mime_type) || preg_match('#application/octet-?stream#i', $mime_type) || WA_USER_BROWSER == 'opera' )
 		{
 			if( WA_USER_BROWSER == 'msie' || WA_USER_BROWSER == 'opera' )
 			{

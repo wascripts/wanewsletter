@@ -836,10 +836,10 @@ class WadbBackup_postgres {
 			
 			$contents .= ' ' . $row['field'] . ' ' . $row['type'];
 			
-			if( eregi('char', $row['type']) && $row['lengthvar'] > 0 ) {
+			if( preg_match('#char#i', $row['type']) && $row['lengthvar'] > 0 ) {
 				$contents .= '(' . ($row['lengthvar'] - 4) . ')';
 			}
-			else if( eregi('numeric', $row['type']) ) {
+			else if( preg_match('#numeric#i', $row['type']) ) {
 				$contents .= sprintf('(%s,%s)', (($row['lengthvar'] >> 16) & 0xffff), (($row['lengthvar'] - 4) & 0xffff));
 			}
 			
