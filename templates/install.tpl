@@ -22,6 +22,8 @@
 	
 	<meta name="Author" content="Bobe" />
 	<meta name="Editor" content="jEdit" />
+	<meta name="Copyright" content="phpCodeur (c) 2002-2010" />
+	<meta name="Robots" content="noindex, nofollow, none" />
 	
 	<link rel="stylesheet" type="text/css" href="../templates/wanewsletter.css" media="screen" title="Wanewsletter thème" />
 	
@@ -203,7 +205,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&#8211;2006 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
+phpCodeur</a> &copy; 2002&#8211;2010 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>

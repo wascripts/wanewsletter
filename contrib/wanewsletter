@@ -108,7 +108,7 @@ for( $i = 1; $i < $argc; $i++ )
 	else if( $argv[$i] == '--license' )
 	{
 		echo "Wanewsletter $version\n";
-		echo "Copyright (c) 2002-2006 Aurélien Maille\n";
+		echo "Copyright (c) 2002-2010 Aurélien Maille\n";
 		echo "\n";
 		
 		if( preg_match('/^fr[_-]/', getenv('LANG')) )
