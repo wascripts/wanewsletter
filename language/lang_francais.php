@@ -431,7 +431,7 @@ $lang['Smtp_server']                = "Adresse du serveur smtp";
 $lang['Smtp_port']                  = "Port de connexion";
 $lang['Smtp_port_note']             = "La valeur par défaut conviendra dans la grande majorité des cas.";
 $lang['Smtp_user']                  = "Votre login smtp";
-$lang['Smtp_pass']                  = "Votre password smtp";
+$lang['Smtp_pass']                  = "Votre mot de passe smtp";
 $lang['Auth_smtp_note']             = "Seulement si votre serveur smtp requiert une authentification !";
 $lang['Disable_stats']              = "Désactiver le module de statistiques";
 $lang['GD_version']                 = "Version de la librairie GD";
@@ -562,7 +562,7 @@ $lang['Explain']['backup']          = "Ce module vous permet de sauvegarder les 
 $lang['Explain']['restore']         = "Ce module vous permet de restaurer les tables du script à l'aide d'une sauvegarde générée par wanewsletter ou un quelconque gestionnaire de bases de données.\nSi l'upload de fichier n'est pas autorisé sur le serveur, vous avez toutefois la possibilité de spécifier un fichier précédemment uploadé via ftp en indiquant son chemin (relatif à la racine du script)";
 $lang['Explain']['generator']       = "Vous devez entrer ici l'adresse absolue ou les données du formulaire seront reçues (en général, l'adresse où se trouvera le formulaire lui même)";
 $lang['Explain']['code_html']       = "Placez ce code à l'adresse que vous avez/allez indiquer dans la configuration de la liste de diffusion";
-$lang['Explain']['code_php']        = "Vous devez placer ce code à l'adresse de destination du formulaire (adresse entrée précédemment), le fichier doit avoir l'extension php !\nLe script s'occupe de trouver le chemin canonique à placer dans la variable \$waroot, si toutefois il n'est pas bon, vous devrez le modifier vous même et indiquer le bon chemin (le chemin doit être relatif, pas absolus)";
+$lang['Explain']['code_php']        = "Vous devez placer ce code à l'adresse de destination du formulaire (adresse entrée précédemment), le fichier doit avoir l'extension php !\nLe script s'occupe de trouver le chemin canonique à placer dans la variable \$waroot, si toutefois il n'est pas bon, vous devrez le modifier vous même et indiquer le bon chemin (le chemin doit être relatif, pas absolu)";
 
 $lang['Select_tool']                = "Sélectionnez l'outil que vous voulez utiliser";
 $lang['Export_format']              = "Export au format";
