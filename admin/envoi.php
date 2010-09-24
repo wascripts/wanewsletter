@@ -676,7 +676,7 @@ switch( $mode )
 				}
 				else
 				{
-					if( $resource{0} != '/' )// Chemin non absolu
+					if( $resource[0] != '/' )// Chemin non absolu
 					{
 						$resource = WA_ROOTDIR . '/' . $resource;
 					}

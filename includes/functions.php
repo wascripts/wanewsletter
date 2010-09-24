@@ -282,37 +282,31 @@ BASIC;
 			
 			$message = $errstr;
 			break;
-	}
-	
-	$php_errormsg = '';
-	
-	if( $errno == E_WARNING )
-	{
-		$php_errormsg .= '<b>Warning !</b>&#160;: ';
-	}
-	else if( $errno == E_NOTICE )
-	{
-		$php_errormsg .= '<b>Notice</b>&#160;: ';
-	}
-	
-	$php_errormsg .= $errstr . ' in <b>' . basename($errfile) . '</b> on line <b>' . $errline . '</b>';
-	
-	//
-	// Dans le cas d'une fonction précédée par @, error_reporting() 
-	// retournera 0, dans ce cas, pas d'affichage d'erreur
-	//
-	$display_error = error_reporting(E_ALL);
-	
-	if( $errno != ERROR && $errno != E_STRICT && ( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) ) )
-	{
-		if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
-		{
-			array_push($GLOBALS['_php_errors'], $php_errormsg);
-		}
-		else
-		{
-			echo '<p>' . $php_errormsg . '</p>';
-		}
+		
+		default:
+			$label = array(E_NOTICE => 'Notice', E_WARNING => 'Warning', E_STRICT => 'Strict', E_DEPRECATED => 'Deprecated');
+			
+			$php_errormsg  = '<b>'.(isset($label[$errno]) ? $label[$errno] : 'Unknown Error').'</b>&nbsp;: ';
+			$php_errormsg .= $errstr . ' in <b>' . basename($errfile) . '</b> on line <b>' . $errline . '</b>';
+			
+			//
+			// Dans le cas d'une fonction précédée par @, error_reporting() 
+			// retournera 0, dans ce cas, pas d'affichage d'erreur
+			//
+			$display_error = error_reporting(E_ALL);
+			
+			if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
+			{
+				if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
+				{
+					array_push($GLOBALS['_php_errors'], $php_errormsg);
+				}
+				else
+				{
+					echo '<p>' . $php_errormsg . '</p>';
+				}
+			}
+			break;
 	}
 }
 
@@ -336,9 +330,14 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 	{
 		$errstr = $lang['Message'][$errstr];
 	}
+	else {
+		$label = array(E_NOTICE => 'Notice', E_WARNING => 'Warning', E_STRICT => 'Strict', E_DEPRECATED => 'Deprecated');
+		
+		$errstr  = (isset($label[$errno]) ? $label[$errno] : 'Unknown Error').' : "'
+			. $errstr . '" in ' . basename($errfile) . ' on line ' . $errline;
+	}
 	
-	$errstr  = strip_tags($errstr);
-	$errstr .= ' in ' . basename($errfile) . ' on line ' . $errline;
+	$errstr = strip_tags($errstr);
 	
 	if( !empty($db->error) && DEBUG_MODE > 0 )
 	{
@@ -359,9 +358,9 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 		$errstr = wan_utf8_encode($errstr);
 	}
 	
-	if( $errno != E_STRICT && ( DEBUG_MODE == 3 || $display_error ) )
+	if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
 	{
-		fputs(STDERR, 'Error: ' . $errstr . "\n");
+		fputs(STDERR, $errstr . "\n");
 	}
 	
 	if( $errno == CRITICAL_ERROR )

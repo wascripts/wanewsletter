@@ -49,7 +49,7 @@ class Wanewsletter {
 		
 		require WAMAILER_DIR . '/class.mailer.php';
 		
-		$mailer =& new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 		
 		if( $nl_config['use_smtp'] )
 		{

@@ -1545,7 +1545,7 @@ class Mailer {
 					 */
 					for( $i = min(($pos + $tmplen), $strlen), $c = 1; $i > $pos; $i--, $c++ )
 					{
-						$d = ord($value{$i-1});
+						$d = ord($value[$i-1]);
 						
 						reset($this->_utf8test);
 						for( $m = 1; $m <= 6; $m++ )

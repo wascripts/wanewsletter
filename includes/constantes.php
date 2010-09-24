@@ -82,6 +82,11 @@ if( !defined('E_STRICT') ) // Compatibilité PHP5
 	define('E_STRICT', 2048);
 }
 
+if( !defined('E_DEPRECATED') ) // Compatibilité PHP5.3
+{
+	define('E_DEPRECATED', 8192);
+}
+
 if( !defined('DATE_RFC1123') )
 {
 	define('DATE_RFC1123', 'D, d M Y H:i:s T');

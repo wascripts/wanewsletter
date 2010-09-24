@@ -67,7 +67,7 @@ function parseSQL($input, $prefixe = '')
 			$in_comments = true;
 		}
 		
-		if( $between_quotes || ( !$in_comments && strlen($lines[$i]) > 0 && $lines[$i]{0} != '#'
+		if( $between_quotes || ( !$in_comments && strlen($lines[$i]) > 0 && $lines[$i][0] != '#'
 			&& !preg_match('/^--\x20/', $lines[$i]) ) )
 		{
 			//
