@@ -203,6 +203,10 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 		$errno = CRITICAL_ERROR;
 	}
 	
+	if( $output == null ) {// load_settings() par encore appelé
+		$errno = CRITICAL_ERROR;
+	}
+	
 	if( ( $errno == CRITICAL_ERROR || $errno == ERROR ) && ( defined('IN_ADMIN') || defined('IN_CRON') || DEBUG_MODE ) )
 	{
 		if( !empty($db->error) && DEBUG_MODE > 0 )
@@ -215,7 +219,7 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 		$debug_text .= '<b>Fichier</b>&#160;: ' . basename($errfile) . " \n<b>Ligne</b>&#160;: " . $errline . '<br />';
 	}
 	
-	if( !empty($lang['Message'][$errstr]) )
+	if( $errno != CRITICAL_ERROR && !empty($lang['Message'][$errstr]) )
 	{
 		$errstr = nl2br($lang['Message'][$errstr]);
 	}
