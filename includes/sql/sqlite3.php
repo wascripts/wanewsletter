@@ -195,11 +195,15 @@ class Wadb_sqlite3 {
 	 */
 	function encoding($encoding = null)
 	{
+		$result = $this->link->query('PRAGMA encoding');
+		$row = $result->fetchArray();
+		$curEncoding = $row['encoding'];
+		
 		if( !is_null($encoding) ) {
-			trigger_error("Setting encoding isn't supported by SQLite", E_USER_WARNING);
+			$this->link->exec("PRAGMA encoding = \"$encoding\"");
 		}
 		
-		return 'latin1';// TODO
+		return $curEncoding;
 	}
 	
 	/**

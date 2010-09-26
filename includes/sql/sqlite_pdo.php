@@ -245,11 +245,15 @@ class Wadb_sqlite_pdo {
 	 */
 	function encoding($encoding = null)
 	{
+		$result = $this->pdo->query('PRAGMA encoding');
+		$row = $result->fetch();
+		$curEncoding = $row['encoding'];
+		
 		if( !is_null($encoding) ) {
-			trigger_error("Setting encoding isn't supported by SQLite", E_USER_WARNING);
+			$this->pdo->exec("PRAGMA encoding = \"$encoding\"");
 		}
 		
-		return 'latin1';// TODO
+		return $curEncoding;
 	}
 	
 	/**
