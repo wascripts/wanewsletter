@@ -181,7 +181,7 @@ $supported_db = array(
 	'sqlite' => array(
 		'Name'         => 'SQLite &#8805; 2.8, 3.x',
 		'prefixe_file' => 'sqlite',
-		'extension'    => (extension_loaded('sqlite') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
+		'extension'    => (class_exists('SQLite3') || extension_loaded('sqlite') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
 	)
 );
 
@@ -322,7 +322,7 @@ else if( $infos['driver'] == 'mysql4' || $infos['driver'] == 'mysqli' )
 {
 	$infos['driver'] = 'mysql';
 }
-else if( $infos['driver'] == 'sqlite_pdo' )
+else if( $infos['driver'] == 'sqlite_pdo' || $infos['driver'] == 'sqlite3' )
 {
 	$infos['driver'] = 'sqlite';
 }

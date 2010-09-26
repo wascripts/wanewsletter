@@ -140,7 +140,7 @@ class Wadb_postgres {
 		$this->dbname = $dbname;
 		
 		if( is_array($options) ) {
-			$this->options = $options;
+			$this->options = array_merge($this->options, $options);
 		}
 	}
 	
@@ -177,10 +177,10 @@ class Wadb_postgres {
 		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
-			
-			if( !empty($this->options['persistent']) ) {
-				$connect = 'pg_pconnect';
-			}
+		}
+		
+		if( !empty($this->options['persistent']) ) {
+			$connect = 'pg_pconnect';
 		}
 		
 		if( !($this->link = $connect($connectString)) || pg_connection_status($this->link) !== PGSQL_CONNECTION_OK ) {

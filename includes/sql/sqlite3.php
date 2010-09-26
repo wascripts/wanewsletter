@@ -25,19 +25,19 @@
  * @version $Id$
  */
 
-if( !defined('_INC_CLASS_WADB_MYSQL') ) {
+if( !defined('_INC_CLASS_WADB_SQLITE3') ) {
 
-define('_INC_CLASS_WADB_MYSQL', true);
+define('_INC_CLASS_WADB_SQLITE3', true);
 
 define('SQL_INSERT', 1);
 define('SQL_UPDATE', 2);
 define('SQL_DELETE', 3);
 
-define('SQL_FETCH_NUM',   MYSQL_NUM);
-define('SQL_FETCH_ASSOC', MYSQL_ASSOC);
-define('SQL_FETCH_BOTH',  MYSQL_BOTH);
+define('SQL_FETCH_NUM',   SQLITE3_NUM);
+define('SQL_FETCH_ASSOC', SQLITE3_ASSOC);
+define('SQL_FETCH_BOTH',  SQLITE3_BOTH);
 
-class Wadb_mysql {
+class Wadb_sqlite3 {
 	
 	/**
 	 * Connexion à la base de données
@@ -104,35 +104,55 @@ class Wadb_mysql {
 	var $sqltime = 0;
 	
 	/**
-	 * Version du serveur
+	 * Version de la librairie SQLite
 	 * 
 	 * @var string
 	 * @access public
 	 */
-	var $serverVersion = '';
-	
-	/**
-	 * Version du client
-	 * 
-	 * @var string
-	 * @access public
-	 */
-	var $clientVersion = '';
+	var $libVersion = '';
 	
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $dbname   Nom de la base de données
-	 * @param array  $options  Options de connexion/utilisation
+	 * @param string $sqlite_db   Base de données SQLite
+	 * @param array  $options     Options de connexion/utilisation
 	 * 
 	 * @access public
 	 */
-	function Wadb_mysql($dbname, $options = null)
+	function Wadb_sqlite3($sqlite_db, $options = null)
 	{
-		$this->dbname = $dbname;
+		if( file_exists($sqlite_db) ) {
+ 			if( !is_readable($sqlite_db) ) {
+				trigger_error("SQLite database isn't readable!", E_USER_WARNING);
+			}
+		}
+		else if( !is_writable(dirname($sqlite_db)) ) {
+			trigger_error(dirname($sqlite_db) . " isn't writable. Cannot create "
+				. basename($sqlite_db) . " database", E_USER_WARNING);
+		}
 		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
+		}
+		
+		try {
+			$this->link = new SQLite3($sqlite_db, SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE, 
+				!empty($options['encryption_key']) ? $options['encryption_key'] : null);
+		}
+		catch( Exception $e ) {
+			$this->error = $e->getMessage();
+		}
+		
+		if( !is_null($this->link) ) {
+			$this->link->exec('PRAGMA short_column_names = 1');
+			$this->link->exec('PRAGMA case_sensitive_like = 0');
+			
+			$tmp = SQLite3::version();
+			$this->libVersion = $tmp['versionString'];
+			
+//			if( !empty($this->options['charset']) ) {
+//				$this->encoding($this->options['charset']);
+//			}
 		}
 	}
 	
@@ -147,46 +167,11 @@ class Wadb_mysql {
 	 */
 	function connect($infos = null, $options = null)
 	{
-		if( is_array($infos) ) {
-			foreach( array('host', 'username', 'passwd', 'port') as $info ) {
-				$$info = ( isset($infos[$info]) ) ? $infos[$info] : null;
-			}
-		}
-		
-		$connect = 'mysql_connect';
-		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
 		}
 		
-		if( !empty($this->options['persistent']) ) {
-			$connect = 'mysql_pconnect';
-		}
-		
-		if( !is_null($port) ) {
-			$host .= ':' . $port;
-		}
-		
-		if( !($this->link = $connect($host, $username, $passwd)) ) {
-			$this->errno = mysql_errno();
-			$this->error = mysql_error();
-			$this->link  = null;
-		}
-		else if( !mysql_select_db($this->dbname) ) {
-			$this->errno = mysql_errno($this->link);
-			$this->error = mysql_error($this->link);
-			
-			mysql_close($this->link);
-			$this->link  = null;
-		}
-		else {
-			$this->serverVersion = mysql_get_server_info($this->link);
-			$this->clientVersion = mysql_get_client_info();
-			
-			if( !empty($this->options['charset']) ) {
-				$this->encoding($this->options['charset']);
-			}
-		}
+		return true;
 	}
 	
 	/**
@@ -201,8 +186,7 @@ class Wadb_mysql {
 	/**
 	 * Renvoie le jeu de caractères courant utilisé.
 	 * Si l'argument $encoding est fourni, il est utilisé pour définir
-	 * le nouveau jeu de caractères de la connexion en cours.
-	 * Utilisable uniquement avec MySQL >= 4.1.1
+	 * le nouveau jeu de caractères de la connexion en cours
 	 * 
 	 * @param string $encoding
 	 * 
@@ -211,21 +195,11 @@ class Wadb_mysql {
 	 */
 	function encoding($encoding = null)
 	{
-		$charsetSupport = version_compare($this->serverVersion, '4.1.1', '>=');
-		
-		if( $charsetSupport ) {
-			$res = $this->query("SHOW VARIABLES LIKE 'character_set_client'");
-			$curEncoding = $res->column('Value');
-		}
-		else {
-			$curEncoding = 'latin1'; // TODO
+		if( !is_null($encoding) ) {
+			trigger_error("Setting encoding isn't supported by SQLite", E_USER_WARNING);
 		}
 		
-		if( $charsetSupport && !is_null($encoding) ) {
-			$this->query("SET NAMES $encoding");
-		}
-		
-		return $curEncoding;
+		return 'latin1';// TODO
 	}
 	
 	/**
@@ -238,28 +212,18 @@ class Wadb_mysql {
 	 */
 	function query($query)
 	{
-		//
-		// Pour MySQL < 4.0.6 uniquement
-		// @see http://dev.mysql.com/doc/refman/4.1/en/news-4-0-6.html
-		//
-		if( version_compare($this->serverVersion, '4.0.6', '<')
-			&& preg_match('/\s+LIMIT\s+(\d+)\s+OFFSET\s+(\d+)\s*$/i', $query, $match) )
-		{
-			$query  = substr($query, 0, -strlen($match[0]));
-			$query .= " LIMIT $match[2], $match[1]";
-		}
-		
 		$curtime = array_sum(explode(' ', microtime()));
-		$result  = mysql_query($query, $this->link);
+		$result  = $this->link->query($query);
 		$endtime = array_sum(explode(' ', microtime()));
 		
 		$this->sqltime += ($endtime - $curtime);
 		$this->queries++;
 		
 		if( !$result ) {
-			$this->errno = mysql_errno($this->link);
-			$this->error = mysql_error($this->link);
+			$this->errno = $this->link->lastErrorCode();
+			$this->error = $this->link->lastErrorMsg();
 			$this->lastQuery = $query;
+			$this->result = null;
 			
 			$this->rollBack();
 		}
@@ -267,9 +231,13 @@ class Wadb_mysql {
 			$this->errno = 0;
 			$this->error = '';
 			$this->lastQuery = '';
+			$this->result = $result;
 			
-			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
-				$result = new WadbResult_mysql($this->link, $result);
+			if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) ) {
+				$result = true;
+			}
+			else {
+				$result = new WadbResult_sqlite3($result);
 			}
 		}
 		
@@ -353,7 +321,7 @@ class Wadb_mysql {
 	 */
 	function quote($name)
 	{
-		return '`' . $name . '`';
+		return '[' . $name . ']';
 	}
 	
 	/**
@@ -364,11 +332,13 @@ class Wadb_mysql {
 	 */
 	function vacuum($tables)
 	{
-		if( is_array($tables) ) {
-			$tables = implode(', ', $tables);
+		if( !is_array($tables) ) {
+			$tables = array($tables); 
 		}
 		
-		mysql_query('OPTIMIZE TABLE ' . $tables, $this->link);
+		foreach( $tables as $tablename ) {
+			$this->link->exec('VACUUM ' . $tablename);
+		}
 	}
 	
 	/**
@@ -379,8 +349,7 @@ class Wadb_mysql {
 	 */
 	function beginTransaction()
 	{
-		mysql_query('SET AUTOCOMMIT=0', $this->link);
-		return mysql_query('BEGIN', $this->link);
+		return $this->link->exec('BEGIN');
 	}
 	
 	/**
@@ -392,11 +361,10 @@ class Wadb_mysql {
 	 */
 	function commit()
 	{
-		if( !($result = mysql_query('COMMIT', $this->link)) ) {
-			mysql_query('ROLLBACK', $this->link);
+		if( !($result = $this->link->exec('COMMIT')) )
+		{
+			$this->link->exec('ROLLBACK');
 		}
-		
-		mysql_query('SET AUTOCOMMIT=1', $this->link);
 		
 		return $result;
 	}
@@ -410,10 +378,7 @@ class Wadb_mysql {
 	 */
 	function rollBack()
 	{
-		$result = mysql_query('ROLLBACK', $this->link);
-		mysql_query('SET AUTOCOMMIT=1', $this->link);
-		
-		return $result;
+		return @$this->link->exec('ROLLBACK');
 	}
 	
 	/**
@@ -424,7 +389,7 @@ class Wadb_mysql {
 	 */
 	function affectedRows()
 	{
-		return mysql_affected_rows($this->link);
+		return $this->link->changes();
 	}
 	
 	/**
@@ -436,7 +401,7 @@ class Wadb_mysql {
 	 */
 	function lastInsertId()
 	{
-		return mysql_insert_id($this->link);
+		return $this->link->lastInsertRowID();
 	}
 	
 	/**
@@ -450,14 +415,7 @@ class Wadb_mysql {
 	 */
 	function escape($string)
 	{
-		if( function_exists('mysql_real_escape_string') ) {
-			$string = mysql_real_escape_string($string, $this->link);
-		}
-		else {
-			$string = mysql_escape_string($string);
-		}
-		
-		return $string;
+		return $this->link->escapeString($string);
 	}
 	
 	/**
@@ -468,8 +426,7 @@ class Wadb_mysql {
 	 */
 	function ping()
 	{
-		// mysql_ping() - php >= 4.3.0
-		return ( function_exists('mysql_ping') ) ? mysql_ping($this->link) : false;
+		return true;
 	}
 	
 	/**
@@ -481,8 +438,12 @@ class Wadb_mysql {
 	function close()
 	{
 		if( !is_null($this->link) ) {
-			@$this->rollBack();
-			$result = mysql_close($this->link);
+			try {
+				$this->rollBack();
+			}
+			catch( Exception $e ) {}
+			
+			$result = $this->link->close();
 			$this->link = null;
 			
 			return $result;
@@ -491,33 +452,14 @@ class Wadb_mysql {
 			return true;
 		}
 	}
-	
-	/**
-	 * Destructeur de classe
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function __destruct()
-	{
-		$this->close();
-	}
 }
 
-class WadbResult_mysql {
+class WadbResult_sqlite3 {
 	
 	/**
-	 * Connexion à la base de données
+	 * Objet de résultat PDO de requète
 	 * 
-	 * @var resource
-	 * @access private
-	 */
-	var $link;
-	
-	/**
-	 * Ressource de résultat de requète
-	 * 
-	 * @var resource
+	 * @var object
 	 * @access private
 	 */
 	var $result;
@@ -533,16 +475,14 @@ class WadbResult_mysql {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param resource $link    Ressource de connexion à la base de données
-	 * @param resource $result  Ressource de résultat de requète
+	 * @param object $result  Ressource de résultat de requète
 	 * 
 	 * @access public
 	 */
-	function WadbResult_mysql($link, $result)
+	function WadbResult_sqlite3($result)
 	{
-		$this->link   = $link;
 		$this->result = $result;
-		$this->fetchMode = MYSQL_BOTH;
+		$this->fetchMode = SQLITE3_BOTH;
 	}
 	
 	/**
@@ -559,7 +499,7 @@ class WadbResult_mysql {
 			$mode = $this->fetchMode;
 		}
 		
-		return mysql_fetch_array($this->result, $mode);
+		return $this->result->fetchArray($mode);
 	}
 	
 	/**
@@ -570,7 +510,7 @@ class WadbResult_mysql {
 	 */
 	function fetchObject()
 	{
-		return mysql_fetch_object($this->result);
+		return (object) $this->result->fetchArray(SQLITE3_ASSOC);
 	}
 	
 	/**
@@ -606,7 +546,7 @@ class WadbResult_mysql {
 	 */
 	function column($column)
 	{
-		$row = mysql_fetch_array($this->result);
+		$row = $this->result->fetchArray(SQLITE3_ASSOC);
 		
 		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
@@ -621,7 +561,7 @@ class WadbResult_mysql {
 	 */
 	function setFetchMode($mode)
 	{
-		if( in_array($mode, array(MYSQL_NUM, MYSQL_ASSOC, MYSQL_BOTH)) ) {
+		if( in_array($mode, array(SQLITE3_NUM, SQLITE3_ASSOC, SQLITE3_BOTH)) ) {
 			$this->fetchMode = $mode;
 			return true;
 		}
@@ -639,8 +579,7 @@ class WadbResult_mysql {
 	 */
 	function free()
 	{
-		if( !is_null($this->result) && is_resource($this->link) ) {
-			mysql_free_result($this->result);
+		if( !is_null($this->result) ) {
 			$this->result = null;
 		}
 	}
@@ -657,7 +596,7 @@ class WadbResult_mysql {
 	}
 }
 
-class WadbBackup_mysql {
+class WadbBackup_sqlite3 {
 	
 	/**
 	 * Informations concernant la base de données
@@ -682,12 +621,12 @@ class WadbBackup_mysql {
 	 * 
 	 * @access public
 	 */
-	function WadbBackup_mysql($infos)
+	function WadbBackup_sqlite3($infos)
 	{
 		$this->infos = $infos;
 		
 		if( !isset($this->infos['host']) ) {
-			$this->infos['host'] = 'localhost';
+			$this->infos['host'] = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown';
 		}
 	}
 	
@@ -704,12 +643,12 @@ class WadbBackup_mysql {
 		global $db;
 		
 		$contents  = '-- ' . $this->eol;
-		$contents .= "-- $toolname MySQL Dump" . $this->eol;
+		$contents .= "-- $toolname SQLite Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		$contents .= "-- Host     : " . $this->infos['host'] . $this->eol;
-		$contents .= "-- Server   : " . $db->serverVersion . $this->eol;
-		$contents .= "-- Database : " . $this->infos['dbname'] . $this->eol;
-		$contents .= '-- Date     : ' . date('d/m/Y H:i:s O') . $this->eol;
+		$contents .= "-- Host       : " . $this->infos['host'] . $this->eol;
+		$contents .= "-- SQLite lib : " . $db->libVersion . $this->eol;
+		$contents .= "-- Database   : " . basename($this->infos['dbname']) . $this->eol;
+		$contents .= '-- Date       : ' . date('d/m/Y H:i:s O') . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
@@ -726,13 +665,13 @@ class WadbBackup_mysql {
 	{
 		global $db;
 		
-		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $db->quote($this->infos['dbname']))) ) {
+		if( !($result = $db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) ) {
 			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
 		}
 		
 		$tables = array();
 		while( $row = $result->fetch() ) {
-			$tables[$row['Name']] = ( isset($row['Engine']) ) ? $row['Engine'] : $row['Type'];
+			$tables[$row['tbl_name']] = '';
 		}
 		
 		return $tables;
@@ -769,84 +708,30 @@ class WadbBackup_mysql {
 		$contents .= '-- ' . $this->eol;
 		
 		if( $drop_option ) {
-			$contents .= 'DROP TABLE IF EXISTS ' . $db->quote($tabledata['name']) . ';' . $this->eol;
+			$contents .= 'DROP TABLE ' . $tabledata['name'] . ';' . $this->eol;
 		}
 		
-		//
-		// La requète 'SHOW CREATE TABLE' est disponible à partir de MySQL 3.23.20
-		//
-		if( version_compare($db->serverVersion, '3.23.20', '<') ) {
-			if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) ) {
-				trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
-			}
-			
-			$create_table = $result->column('Create Table');
-			$result->free();
-			
-			$contents .= preg_replace("/(\r\n?)|\n/", $this->eol, $create_table);
-		}
-		else {
-			$contents .= 'CREATE TABLE ' . $db->quote($tabledata['name']) . ' (' . $this->eol;
-			
-			if( !($result = $db->query('SHOW COLUMNS FROM ' . $db->quote($tabledata['name']))) ) {
-				trigger_error('Impossible d\'obtenir les noms des colonnes de la table', ERROR);
-			}
-			
-			$end_line = false;
-			while( $row = $result->fetch() ) {
-				if( $end_line ) {
-					$contents .= ',' . $this->eol;
-				}
-				
-				$contents .= "\t" . $quote . $row['Field'] . $quote . ' ' . $row['Type'];
-				$contents .= ( $row['Null'] != 'YES' ) ? ' NOT NULL' : '';
-				$contents .= ( !is_null($row['Default']) ) ? ' DEFAULT \'' . $row['Default'] . '\'' : ' DEFAULT NULL';
-				$contents .= ( $row['Extra'] != '' ) ? ' ' . $row['Extra'] : '';
-				
-				$end_line = true;
-			}
-			$result->free();
-			
-			if( !($result = $db->query('SHOW INDEX FROM ' . $db->quote($tabledata['name']))) ) {
-				trigger_error('Impossible d\'obtenir les clés de la table', ERROR);
-			}
-			
-			$index = array();
-			while( $row = $result->fetch() ) {
-				$name = $row['Key_name'];
-				
-				if( $name != 'PRIMARY' && $row['Non_unique'] == 0 ) {
-					$name = 'unique=' . $name;
-				}
-				
-				if( !isset($index[$name]) ) {
-					$index[$name] = array();
-				}
-				
-				$index[$name][] = $db->quote($row['Column_name']);
-			}
-			$result->free();
-			
-			foreach( $index as $var => $columns ) {
-				$contents .= ',' . $this->eol . "\t";
-				
-				if( $var == 'PRIMARY' ) {
-					$contents .= 'CONSTRAINT PRIMARY KEY';
-				}
-				else if( preg_match('/^unique=(.+)$/', $var, $match) ) {
-					$contents .= 'CONSTRAINT ' . $db->quote($match[1]) . ' UNIQUE';
-				}
-				else {
-					$contents .= 'INDEX ' . $db->quote($var);
-				}
-				
-				$contents .= ' (' . implode(', ', $columns) . ')';
-			}
-			
-			$contents .= $this->eol . ')' . ( ( !empty($tabledata['type']) ) ? ' TYPE=' . $tabledata['type'] : '' );
+		$sql = "SELECT sql, type
+			FROM sqlite_master
+			WHERE tbl_name = '$tabledata[name]'
+				AND sql IS NOT NULL";
+		if( !($result = $db->query($sql)) ) {
+			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
 		}
 		
-		return $contents . ';' . $this->eol;
+		$indexes = '';
+		while( $row = $result->fetch() ) {
+			if( $row['type'] == 'table' ) {
+				$create_table = str_replace(',', ',' . $this->eol, $row['sql']) . ';' . $this->eol;
+			}
+			else {
+				$indexes .= $row['sql'] . ';' . $this->eol;
+			}
+		}
+		
+		$contents .= $create_table . $indexes;
+		
+		return $contents;
 	}
 	
 	/**
@@ -863,7 +748,7 @@ class WadbBackup_mysql {
 		
 		$contents = '';
 		
-		$sql = 'SELECT * FROM ' . $db->quote($tablename);
+		$sql = 'SELECT * FROM ' . $tablename;
 		if( !($result = $db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
@@ -877,15 +762,14 @@ class WadbBackup_mysql {
 			$contents .= '-- ' . $this->eol;
 			
 			$fields = array();
-			for( $j = 0, $n = mysql_num_fields($result->result); $j < $n; $j++ ) {
-				$data = mysql_fetch_field($result->result, $j);
-				$fields[] = $db->quote($data->name);
+			for( $j = 0, $n = $result->result->numColumns(); $j < $n; $j++ ) {
+				array_push($fields, $result->result->columnName($j));
 			}
 			
 			$fields = implode(', ', $fields);
 			
 			do {
-				$contents .= 'INSERT INTO ' . $db->quote($tablename) . " ($fields) VALUES";
+				$contents .= "INSERT INTO $tablename ($fields) VALUES";
 				
 				foreach( $row as $key => $value ) {
 					if( is_null($value) ) {
@@ -900,7 +784,6 @@ class WadbBackup_mysql {
 			}
 			while( $row = $result->fetch() );
 		}
-		$result->free();
 		
 		return $contents;
 	}

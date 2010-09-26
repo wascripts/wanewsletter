@@ -144,7 +144,7 @@ class Wadb_firebird {
 		$this->dbname = $dbname;
 		
 		if( is_array($options) ) {
-			$this->options = $options;
+			$this->options = array_merge($this->options, $options);
 		}
 	}
 	
@@ -174,13 +174,13 @@ class Wadb_firebird {
 		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
-			
-			if( !empty($this->options['persistent']) ) {
-				$connect = 'ibase_pconnect';
-			}
-			if( !empty($this->options['charset']) ) {
-				$charset = $this->options['charset'];
-			}
+		}
+		
+		if( !empty($this->options['persistent']) ) {
+			$connect = 'ibase_pconnect';
+		}
+		if( !empty($this->options['charset']) ) {
+			$charset = $this->options['charset'];
 		}
 		
 		if( !($this->link = $connect($this->dbname, $username, $passwd, $charset)) ) {

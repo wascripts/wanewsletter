@@ -56,7 +56,7 @@ function createDSN($infos, $options = null)
 	if( $infos['driver'] == 'mysqli' ) {
 		$infos['driver'] = 'mysql';
 	}
-	else if( $infos['driver'] == 'sqlite_pdo' ) {
+	else if( $infos['driver'] == 'sqlite_pdo' || $infos['driver'] == 'sqlite3' ) {
 		$infos['driver'] = 'sqlite';
 	}
 	
@@ -119,7 +119,7 @@ function parseDSN($dsn)
 		switch( $key ) {
 			case 'scheme':
 				if( !in_array($value, array('firebird', 'mysql', 'postgres', 'sqlite')) ) {
-					trigger_error("Unsupported database", E_USER_ERROR);
+					trigger_error("Unsupported database", CRITICAL_ERROR);
 					return false;
 				}
 				else if( $value == 'mysql' && extension_loaded('mysqli') ) {
@@ -156,17 +156,34 @@ function parseDSN($dsn)
 	
 	if( $infos['driver'] == 'sqlite' ) {
 		
+		if( class_exists('SQLite3') ) {
+			$infos['driver'] = 'sqlite3';
+		}
+		else if( extension_loaded('pdo') && extension_loaded('pdo_sqlite') ) {
+			$infos['driver'] = 'sqlite_pdo';
+		}
+		else if( !extension_loaded('sqlite') ) {
+			trigger_error("No SQLite3, PDO/SQLite or SQLite extension loaded !", CRITICAL_ERROR);
+		}
+		
 		if( is_readable($infos['dbname']) && filesize($infos['dbname']) > 0 ) {
 			$fp = fopen($infos['dbname'], 'rb');
 			$info = fread($fp, 15);
 			fclose($fp);
 			
 			if( strcmp($info, 'SQLite format 3') == 0 ) {
-				$infos['driver'] = 'sqlite_pdo';
+				if( $infos['driver'] == 'sqlite' ) {
+					trigger_error("No SQLite3 or PDO/SQLite extension loaded !", CRITICAL_ERROR);
+				}
 			}
-		}
-		else if( extension_loaded('pdo') && extension_loaded('pdo_sqlite') ) {
-			$infos['driver'] = 'sqlite_pdo';
+			else if( $infos['driver'] != 'sqlite' ) {
+				if( !extension_loaded('sqlite') ) {
+					trigger_error("SQLite extension isn't loaded !", CRITICAL_ERROR);
+				}
+				else {
+					$infos['driver'] = 'sqlite';
+				}
+			}
 		}
 	}
 	
@@ -181,7 +198,7 @@ function parseDSN($dsn)
 function WaDatabase($dsn)
 {
 	if( !($tmp = parseDSN($dsn)) ) {
-		trigger_error("Invalid DSN argument", E_USER_ERROR);
+		trigger_error("Invalid DSN argument", CRITICAL_ERROR);
 		return false;
 	}
 	

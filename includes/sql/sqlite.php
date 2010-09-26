@@ -134,11 +134,11 @@ class Wadb_sqlite {
 		$connect = 'sqlite_open';
 		
 		if( is_array($options) ) {
-			$this->options = $options;
-			
-			if( !empty($options['persistent']) ) {
-				$connect = 'sqlite_popen';
-			}
+			$this->options = array_merge($this->options, $options);
+		}
+		
+		if( !empty($options['persistent']) ) {
+			$connect = 'sqlite_popen';
 		}
 		
 		if( $this->link = $connect($sqlite_db, 0666, $this->error) ) {
@@ -166,7 +166,7 @@ class Wadb_sqlite {
 	function connect($infos = null, $options = null)
 	{
 		if( is_array($options) ) {
-			$this->options = $options;
+			$this->options = array_merge($this->options, $options);
 		}
 		
 		return true;
@@ -768,7 +768,7 @@ class WadbBackup_sqlite {
 			
 			$fields = array();
 			for( $j = 0, $n = sqlite_num_fields($result->result); $j < $n; $j++ ) {
-				$fields[] = sqlite_field_name($result->result, $j);
+				array_push($fields, sqlite_field_name($result->result, $j));
 			}
 			
 			$fields = implode(', ', $fields);

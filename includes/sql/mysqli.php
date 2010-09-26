@@ -132,7 +132,7 @@ class Wadb_mysqli {
 		$this->dbname = $dbname;
 		
 		if( is_array($options) ) {
-			$this->options = $options;
+			$this->options = array_merge($this->options, $options);
 		}
 	}
 	
@@ -157,6 +157,10 @@ class Wadb_mysqli {
 		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
+		}
+		
+		if( !empty($this->options['persistent']) && version_compare(phpversion(), '5.3.0', '>=') ) {
+			$host = "p:$host";
 		}
 		
 		if( !($this->link = $connect($host, $username, $passwd, $this->dbname, $port)) ) {

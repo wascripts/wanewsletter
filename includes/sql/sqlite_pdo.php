@@ -174,13 +174,13 @@ class Wadb_sqlite_pdo {
 				. basename($sqlite_db) . " database", E_USER_WARNING);
 		}
 		
-		$opt = array();
 		if( is_array($options) ) {
-			$this->options = $options;
-			
-			if( !empty($options['persistent']) ) {
-				$opt[PDO_ATTR_PERSISTENT] = true;
-			}
+			$this->options = array_merge($this->options, $options);
+		}
+		
+		$opt = array();
+		if( !empty($options['persistent']) ) {
+			$opt[PDO_ATTR_PERSISTENT] = true;
 		}
 		
 		try {
@@ -218,7 +218,7 @@ class Wadb_sqlite_pdo {
 	function connect($infos = null, $options = null)
 	{
 		if( is_array($options) ) {
-			$this->options = $options;
+			$this->options = array_merge($this->options, $options);
 		}
 		
 		return true;
