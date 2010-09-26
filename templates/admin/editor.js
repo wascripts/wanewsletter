@@ -74,9 +74,7 @@ function make_button(bloc)
 	bouton = bouton.cloneNode(false);
 	bouton.listeners = [];// sinon, bug de IE
 	bouton.setAttribute('id', 'addLinks' + format);
-	bouton.setAttribute('type', 'button');
 	bouton.setAttribute('value', lang['addlink']);
-	bouton.setAttribute('class', 'button');
 	DOM_Events.addListener('click', addLinks, false, bouton);
 	conteneur.appendChild(bouton);
 	
