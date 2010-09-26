@@ -76,9 +76,9 @@ require WA_ROOTDIR . '/includes/wadb_init.php';
 if( defined('IN_COMMANDLINE') )
 {
 	//
-	// Compatibilité avec PHP < 4.3.0 et PHP en CGI
+	// Compatibilité avec PHP en CGI
 	//
-	if( version_compare(phpversion(), '4.3.0', '<') == true || php_sapi_name() != 'cli' )
+	if( php_sapi_name() != 'cli' )
 	{
 		define('STDIN',  fopen('php://stdin', 'r'));
 		define('STDOUT', fopen('php://stdout', 'w'));

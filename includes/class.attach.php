@@ -931,9 +931,7 @@ class Attach {
 	{
 		if( $this->use_ftp )
 		{
-			$quit = ( version_compare(phpversion(), '4.2.0', '>=') == true ) ? 'ftp_close' : 'ftp_quit';
-			
-			@$quit($this->connect_id);
+			@ftp_close($this->connect_id);
 		}
 	}
 }

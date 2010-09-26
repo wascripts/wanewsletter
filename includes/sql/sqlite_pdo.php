@@ -35,26 +35,9 @@ define('SQL_INSERT', 1);
 define('SQL_UPDATE', 2);
 define('SQL_DELETE', 3);
 
-//
-// Les constantes de classe PDO::* n'existent qu'à partir de PHP 5.1.0.
-// Avant cela, ce sont des variables globales. Nous utiliserons celle-ci
-// et les définissons si elles ne sont pas présentes.
-//
-if( !defined('PDO_FETCH_NUM') ) {
-	define('PDO_FETCH_NUM',       PDO::FETCH_NUM);
-	define('PDO_FETCH_ASSOC',     PDO::FETCH_ASSOC);
-	define('PDO_FETCH_BOTH',      PDO::FETCH_BOTH);
-	define('PDO_FETCH_OBJ',       PDO::FETCH_OBJ);
-	define('PDO_ATTR_PERSISTENT', PDO::ATTR_PERSISTENT);
-	define('PDO_ATTR_ERRMODE',    PDO::ATTR_ERRMODE);
-	define('PDO_ATTR_CASE',       PDO::ATTR_CASE);
-	define('PDO_ERRMODE_SILENT',  PDO::ERRMODE_SILENT);
-	define('PDO_CASE_NATURAL',    PDO::CASE_NATURAL);
-}
-
-define('SQL_FETCH_NUM',   PDO_FETCH_NUM);
-define('SQL_FETCH_ASSOC', PDO_FETCH_ASSOC);
-define('SQL_FETCH_BOTH',  PDO_FETCH_BOTH);
+define('SQL_FETCH_NUM',   PDO::FETCH_NUM);
+define('SQL_FETCH_ASSOC', PDO::FETCH_ASSOC);
+define('SQL_FETCH_BOTH',  PDO::FETCH_BOTH);
 
 class Wadb_sqlite_pdo {
 	
@@ -180,7 +163,7 @@ class Wadb_sqlite_pdo {
 		
 		$opt = array();
 		if( !empty($options['persistent']) ) {
-			$opt[PDO_ATTR_PERSISTENT] = true;
+			$opt[PDO::ATTR_PERSISTENT] = true;
 		}
 		
 		try {
@@ -194,8 +177,8 @@ class Wadb_sqlite_pdo {
 			$this->link = true;
 			$this->pdo->query('PRAGMA short_column_names = 1');
 			$this->pdo->query('PRAGMA case_sensitive_like = 0');
-			$this->pdo->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_SILENT);
-			$this->pdo->setAttribute(PDO_ATTR_CASE,    PDO_CASE_NATURAL);
+			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+			$this->pdo->setAttribute(PDO::ATTR_CASE,    PDO::CASE_NATURAL);
 			
 			$res = $this->pdo->query("SELECT sqlite_version()");
 			$this->libVersion = $res->fetchColumn(0);
@@ -537,7 +520,7 @@ class WadbResult_sqlite_pdo {
 	function WadbResult_sqlite_pdo($result)
 	{
 		$this->result = $result;
-		$this->fetchMode = PDO_FETCH_BOTH;
+		$this->fetchMode = PDO::FETCH_BOTH;
 	}
 	
 	/**
@@ -565,7 +548,7 @@ class WadbResult_sqlite_pdo {
 	 */
 	function fetchObject()
 	{
-		return $this->result->fetch(PDO_FETCH_OBJ);
+		return $this->result->fetch(PDO::FETCH_OBJ);
 	}
 	
 	/**
@@ -596,7 +579,7 @@ class WadbResult_sqlite_pdo {
 	 */
 	function column($column)
 	{
-		$row = $this->result->fetch(PDO_FETCH_BOTH);
+		$row = $this->result->fetch(PDO::FETCH_BOTH);
 		
 		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
@@ -611,7 +594,7 @@ class WadbResult_sqlite_pdo {
 	 */
 	function setFetchMode($mode)
 	{
-		if( in_array($mode, array(PDO_FETCH_NUM, PDO_FETCH_ASSOC, PDO_FETCH_BOTH)) ) {
+		if( in_array($mode, array(PDO::FETCH_NUM, PDO::FETCH_ASSOC, PDO::FETCH_BOTH)) ) {
 			$this->fetchMode = $mode;
 			return true;
 		}
@@ -803,7 +786,7 @@ class WadbBackup_sqlite_pdo {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		$result->setFetchMode(SQL_FETCH_ASSOC);
+		$result->setFetchMode(PDO::FETCH_ASSOC);
 		
 		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;

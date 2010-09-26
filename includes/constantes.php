@@ -87,7 +87,7 @@ if( !defined('E_DEPRECATED') ) // Compatibilité PHP5.3
 	define('E_DEPRECATED', 8192);
 }
 
-if( !defined('DATE_RFC1123') )
+if( !defined('DATE_RFC1123') ) // Compatibilité PHP ??
 {
 	define('DATE_RFC1123', 'D, d M Y H:i:s T');
 }
@@ -138,18 +138,6 @@ define('ENGINE_UNIQ', 2);
 define('CONFIRM_ALWAYS', 2);
 define('CONFIRM_ONCE',   1);
 define('CONFIRM_NONE',   0);
-
-//
-// Codes d'erreur lors de l'upload 
-//
-if( !defined('UPLOAD_ERR_OK') ) // Introduites en PHP 4.3.0
-{
-    define('UPLOAD_ERR_OK',         0);
-    define('UPLOAD_ERR_INI_SIZE',   1);
-    define('UPLOAD_ERR_FORM_SIZE',  2);
-    define('UPLOAD_ERR_PARTIAL',    3);
-    define('UPLOAD_ERR_NO_FILE',    4);
-}
 
 if( !defined('UPLOAD_ERR_NO_TMP_DIR') ) // Introduite en PHP 4.3.10 et 5.0.3
 {

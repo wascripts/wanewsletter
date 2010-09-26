@@ -272,9 +272,15 @@ require WA_ROOTDIR . '/includes/wadb_init.php';
 require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
 //
-// Vérification de la version de PHP disponible. Il nous faut la version 4.1.0 minimum
+// Vérification de la version de PHP disponible. Il nous faut la version 4.3.0 ou 5.1.0 minimum
 //
-if( !function_exists('version_compare') )
+$php_version_ok = false;
+if( function_exists('version_compare') ) {
+	$php_version_ok = version_compare(PHP_VERSION, '5.1.0', '>=') ||
+		(version_compare(PHP_VERSION, '4.3.0', '>=') && version_compare(PHP_VERSION, '5.0.0', '<'));
+}
+
+if( !$php_version_ok )
 {
 	message(sprintf($lang['PHP_version_error'], WA_NEW_VERSION));
 }
@@ -328,14 +334,6 @@ else if( $infos['driver'] == 'sqlite_pdo' || $infos['driver'] == 'sqlite3' )
 }
 
 define('SQL_DRIVER', $infos['driver']);
-
-//
-// Le support de PostgreSQL dans Wanewsletter nécessite PHP >= 4.2.0
-//
-if( version_compare(phpversion(), '4.2.0', '<') )
-{
-	unset($supported_db['postgres']);
-}
 
 $db_list = '';
 foreach( $supported_db as $name => $data )

@@ -199,18 +199,18 @@ class Wadb_mysqli {
 	 */
 	function encoding($encoding = null)
 	{
-		$charsetSupport = version_compare($this->serverVersion, '4.1.1', '>=');
+		$charsetSupport = version_compare($this->serverVersion, '4.1.2', '>=');
 		
 		if( $charsetSupport ) {
-			$res = $this->query("SHOW VARIABLES LIKE 'character_set_client'");
-			$curEncoding = $res->column('Value');
+			$o = $this->get_charset();
+			$curEncoding = $o->charset;
 		}
 		else {
-			$curEncoding = 'latin1'; // TODO
+			$curEncoding = 'latin1'; // TODO ?
 		}
 		
 		if( $charsetSupport && !is_null($encoding) ) {
-			$this->query("SET NAMES $encoding");
+			$this->set_charset($encoding);
 		}
 		
 		return $curEncoding;

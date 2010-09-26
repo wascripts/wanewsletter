@@ -554,17 +554,7 @@ class WadbResult_firebird {
 			$row = ibase_fetch_row($this->result, IBASE_TEXT);
 		}
 		else {
-			if( function_exists('ibase_fetch_assoc') ) {
-				$row = ibase_fetch_assoc($this->result, IBASE_TEXT);
-			}
-			else {
-				$row = ibase_fetch_object($this->result, IBASE_TEXT);
-				
-				if( $row != false ) {
-					settype($row, 'array');
-					$row = array_change_key_case($row, CASE_LOWER);
-				}
-			}
+			$row = ibase_fetch_assoc($this->result, IBASE_TEXT);
 			
 			if( $mode == SQL_FETCH_BOTH && is_array($row) ) {
 				$tmp = array_values($row);

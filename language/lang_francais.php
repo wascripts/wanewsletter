@@ -650,7 +650,7 @@ $lang['Start_install']              = "Démarrer l'installation";
 $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['Result_install']             = "Résultat de l'installation";
 $lang['Result_upgrade']             = "Résultat de la mise à jour";
-$lang['PHP_version_error']          = "Désolé mais Wanewsletter %s requiert une version de PHP supérieure ou égale à la version 4.1.0";
+$lang['PHP_version_error']          = "Désolé mais Wanewsletter %s requiert PHP >= 4.3.0 ou PHP >= 5.1.0";
 $lang['Not_installed']              = "Aucune version de Wanewsletter ne semble présente, le fichier de configuration est vide ou absent du serveur";
 $lang['mssql_support_end']          = "Désolé mais le support de SQL Server a été retiré dans Wanewsletter 2.3";
 $lang['No_db_support']              = "Désolé mais Wanewsletter %s requiert une base de données %s";

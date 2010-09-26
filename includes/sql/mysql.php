@@ -211,7 +211,7 @@ class Wadb_mysql {
 	 */
 	function encoding($encoding = null)
 	{
-		$charsetSupport = version_compare($this->serverVersion, '4.1.1', '>=');
+		$charsetSupport = version_compare($this->serverVersion, '4.1.2', '>=');
 		
 		if( $charsetSupport ) {
 			$res = $this->query("SHOW VARIABLES LIKE 'character_set_client'");
@@ -450,14 +450,7 @@ class Wadb_mysql {
 	 */
 	function escape($string)
 	{
-		if( function_exists('mysql_real_escape_string') ) {
-			$string = mysql_real_escape_string($string, $this->link);
-		}
-		else {
-			$string = mysql_escape_string($string);
-		}
-		
-		return $string;
+		return mysql_real_escape_string($string, $this->link);
 	}
 	
 	/**
@@ -468,8 +461,7 @@ class Wadb_mysql {
 	 */
 	function ping()
 	{
-		// mysql_ping() - php >= 4.3.0
-		return ( function_exists('mysql_ping') ) ? mysql_ping($this->link) : false;
+		return mysql_ping($this->link);
 	}
 	
 	/**
@@ -772,81 +764,16 @@ class WadbBackup_mysql {
 			$contents .= 'DROP TABLE IF EXISTS ' . $db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
-		//
-		// La requète 'SHOW CREATE TABLE' est disponible à partir de MySQL 3.23.20
-		//
-		if( version_compare($db->serverVersion, '3.23.20', '<') ) {
-			if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) ) {
-				trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
-			}
-			
-			$create_table = $result->column('Create Table');
-			$result->free();
-			
-			$contents .= preg_replace("/(\r\n?)|\n/", $this->eol, $create_table);
-		}
-		else {
-			$contents .= 'CREATE TABLE ' . $db->quote($tabledata['name']) . ' (' . $this->eol;
-			
-			if( !($result = $db->query('SHOW COLUMNS FROM ' . $db->quote($tabledata['name']))) ) {
-				trigger_error('Impossible d\'obtenir les noms des colonnes de la table', ERROR);
-			}
-			
-			$end_line = false;
-			while( $row = $result->fetch() ) {
-				if( $end_line ) {
-					$contents .= ',' . $this->eol;
-				}
-				
-				$contents .= "\t" . $quote . $row['Field'] . $quote . ' ' . $row['Type'];
-				$contents .= ( $row['Null'] != 'YES' ) ? ' NOT NULL' : '';
-				$contents .= ( !is_null($row['Default']) ) ? ' DEFAULT \'' . $row['Default'] . '\'' : ' DEFAULT NULL';
-				$contents .= ( $row['Extra'] != '' ) ? ' ' . $row['Extra'] : '';
-				
-				$end_line = true;
-			}
-			$result->free();
-			
-			if( !($result = $db->query('SHOW INDEX FROM ' . $db->quote($tabledata['name']))) ) {
-				trigger_error('Impossible d\'obtenir les clés de la table', ERROR);
-			}
-			
-			$index = array();
-			while( $row = $result->fetch() ) {
-				$name = $row['Key_name'];
-				
-				if( $name != 'PRIMARY' && $row['Non_unique'] == 0 ) {
-					$name = 'unique=' . $name;
-				}
-				
-				if( !isset($index[$name]) ) {
-					$index[$name] = array();
-				}
-				
-				$index[$name][] = $db->quote($row['Column_name']);
-			}
-			$result->free();
-			
-			foreach( $index as $var => $columns ) {
-				$contents .= ',' . $this->eol . "\t";
-				
-				if( $var == 'PRIMARY' ) {
-					$contents .= 'CONSTRAINT PRIMARY KEY';
-				}
-				else if( preg_match('/^unique=(.+)$/', $var, $match) ) {
-					$contents .= 'CONSTRAINT ' . $db->quote($match[1]) . ' UNIQUE';
-				}
-				else {
-					$contents .= 'INDEX ' . $db->quote($var);
-				}
-				
-				$contents .= ' (' . implode(', ', $columns) . ')';
-			}
-			
-			$contents .= $this->eol . ')' . ( ( !empty($tabledata['type']) ) ? ' TYPE=' . $tabledata['type'] : '' );
+		if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) ) {
+			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
 		}
 		
-		return $contents . ';' . $this->eol;
+		$create_table = $result->column('Create Table');
+		$result->free();
+		
+		$contents .= preg_replace("/(\r\n?)|\n/", $this->eol, $create_table) . ';' . $this->eol;
+		
+		return $contents;
 	}
 	
 	/**

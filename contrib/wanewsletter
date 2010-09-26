@@ -547,16 +547,8 @@ else if( $import_mail == true )
 		//
 		// Traitement des adresses email inconnues
 		//
-		@include 'PHP/Compat/Function/array_udiff.php';// partie du module PEAR PHP_Compat
+		$emails = array_udiff($emails, $emails_ok, 'strcasecmp');
 		
-		if( function_exists('array_udiff') )
-		{
-			$emails = array_udiff($emails, $emails_ok, 'strcasecmp');
-		}
-		else
-		{
-			$emails = array_diff($emails, $emails_ok);
-		}
 		
 		foreach( $emails as $email )
 		{
