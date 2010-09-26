@@ -8,9 +8,9 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="row1" style="padding-top: 5px;">
-				<span class="m-texte" style="float: left;">{L_NUMDEST}&#160;: {S_NUMDEST}</span>
-				<span class="m-texte" style="display: block;text-align: right;">
+			<td id="loginfos" class="row1">
+				<span>{L_NUMDEST}&#160;: {S_NUMDEST}</span>
+				<span>
 					<a href="{U_EXPORT}" title="{L_EXPORT_T}">
 						<img src="../templates/images/archive.png" alt="{L_EXPORT}"
 							onmouseover="this.src = '../templates/images/archive-hover.png';"

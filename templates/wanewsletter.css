@@ -25,8 +25,13 @@
  */
 
 html,
-body { background-color: #003B78; font-family: Verdana, Arial, Helvetica, sans-serif; color: white; }
-body { margin: 0; padding: 0; }
+body { background-color: #003B78; color: white; }
+body {
+	margin: 0;
+	padding: 0;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: .8em;
+}
 
 a img { border: none; }
 hr    { display: none; }
@@ -52,7 +57,7 @@ div#header h1 {
 	margin: 0;
 	text-align: center;
 	font-weight: bold;
-	font-size: 1em;
+	font-size: 1.25em;
 	color: white;
 }
 
@@ -64,10 +69,11 @@ ul#menu {
 	border-width: 1px 0;
 	border-color: black;
 	border-style: solid;
+	padding: 2px;
 	text-align: center;
 	font-style: normal;
-	font-size: 11px;
-	line-height: 19px;
+	font-size: .86em;
+	line-height: 1.4;
 	color: black;
 }
 ul#menu li {
@@ -75,102 +81,67 @@ ul#menu li {
 	background: transparent url("images/puce.png") no-repeat scroll center left;
 	padding-left: 8px;
 }
-ul#menu>li { background-image: none; padding-left: 0; }
-ul#menu li::before { content: "\2022\00A0"; }
-ul#menu li:first-child::before { content: normal; }
+ul#menu>li:first-child {
+	background-image: none;
+	padding-left: 0;
+}
 
-div#smallheader, div#global, address#footer, ul#php_errors {
+div#smallheader, ul#errorbox, div#global, address#footer, ul#php_errors {
 	background-color: #DDD;
 	margin: 20px;
 	border: 1px solid black;
-	padding: 0;
-	text-align: center;
+	padding: 10px 2.7%;
 	color: black;
 }
 
 div#smallheader h1 {
-	background-color: inherit;
 	margin: .4em;
 	white-space: nowrap;
 	text-align: center;
 	font-weight: bold;
-	font-size: 1em;
-	color: black;
+	font-size: 1.25em;
 }
 
 address#footer {
-	padding: .3em;
+	padding: .5em;
+	text-align: center;
 	font-style: normal;
 	font-weight: bold;
-	font-size: .6em;
+	font-size: .78em;
 }
 
-ul#php_errors { padding: 10px 15px 10px 35px; text-align: left; font-size: .9em; }
-
 div#dev {
-	background-color: inherit;
 	margin: 20px;
 	text-align: center;
-	font-size: .6em;
 	font-weight: bold;
-	color: #DBDBDB;
+	font-size: .78em;
 }
 
 p#explain {
-	background-color: transparent;
-	margin: 1.5% 2.6% 1%;
 	border-width: 0 1px;
 	border-style: solid;
 	border-color: black;
 	padding: 0 .8%;
-	line-height: 1.35em;
-	text-align: left;
-	font-weight: normal;
-	font-size: .7em;
-	color: black;
+	font-size: .86em;
+	line-height: 1.5;
 }
 
-ul#errorbox {
-	background-color: #DDD;
-	margin: 20px;
-	border: 1px solid black;
-	padding: .5em 2em;
-	list-style-type: square;
-	text-align: left;
-	color: black;
-}
-
-ul#errorbox li {
-	background-color: inherit;
-	font-weight: normal;
-	font-size: .8em;
-	color: black;
-}
+ul#errorbox { padding: .5em 2.5em; }
+ul#errorbox li { margin: 2px 0; }
 
 #iframe {
 	width: 100%;
 	height: 400px;
 	background-color: white;
 	border: 1px solid black;
+	color: black;
 }
 
-#nav-top {
-	margin-top: 1em;
-	margin-bottom: -.9em;
-	margin-left: 2.7%;
-	margin-right: 2.7%;
-}
-
-#nav-bottom {
-	margin-top: -.9em;
-	margin-bottom: 1em;
-	margin-left: 2.7%;
-	margin-right: 2.7%;
-}
+#nav-top { margin: 1em 0 -.8em; }
+#nav-bottom { margin: -.8em 0 1em; }
 
 #nav-top div.left, #nav-bottom div.left {
 	float: left;
-	text-align: left;
 }
 
 #nav-top div.right, #nav-bottom div.right {
@@ -179,22 +150,16 @@ ul#errorbox li {
 
 div.left p, div.right p {
 	display: inline;
-	background-color: inherit;
-	font-weight: normal;
-	font-size: .7em;
-	color: black;
 }
+div.left { margin-top: .2em; }
 
 /* Classes diverses */
 
 .bloc, .smallbloc {
-	background-color: #DDD;
+	margin: 1em 0;
 	border: 1px solid #084A6B;
-	padding: 0;
-	color: black;
 }
 
-.bloc      { margin: 1em 2.5%; }
 .smallbloc { margin: 1em 8%; }
 
 .bloc h2, .smallbloc h2 {
@@ -202,52 +167,40 @@ div.left p, div.right p {
 	background-image: url("images/head.png");
 	background-repeat: repeat-x;
 	margin: 0;
-	padding-top: 5px;
-	height: 22px;
+	padding: 5px;
+	text-align: center;
 	white-space: nowrap;
-	font-size: .8em;
+	font-size: 1em;
 	color: #FAFAFA;
 }
 
 .bloc p, .smallbloc p {
-	background-color: transparent;
 	margin: 0;
 	padding: 1em;
-	text-align: left;
-	font-weight: normal;
-	font-size: .7em;
-	line-height: 1.2em;
+	line-height: 1.4;
 }
 
 .bloc p.message, .smallbloc p.message {
-	padding: 2em !important;
-	font-size: .8em !important;
-	text-align: center !important;
+	padding: 2em;
+	text-align: center;
 }
 
 .bottom {
 	background: #BBB url("images/bottom.png") repeat-x bottom;
 	margin: 0;
-	height: 27px;
+	padding: 3px 0;
+	text-align: center;
+	line-height: 1.0;
 	color: black;
-	voice-family: "\"}\"";
-	voice-family:inherit;
-	height: 24px;
 }
 
-.bloc > .bottom, .smallbloc > .bottom {
-	height: 24px;
-}
-
-ul.links         { margin: 1% 2.5% -.9em; padding: 0; text-align: left; }
-ul.links.special { margin: 1% 8% -.9em; }
+ul.links         { margin: 1% 0 -.8em; padding: 0; text-align: left; }
+ul.links.special { margin: 1% 8% -.8em; }
 
 ul.links li {
 	display: inline;
-	background-color: transparent;
 	padding-right: .6em;
-	font-size: .7em;
-	color: black;
+	font-size: .86em;
 }
 
 ul.links>li { padding-right: 0; }
@@ -257,18 +210,17 @@ ul.links li:after  { content: "]"; }
 .area {
 	background-color: white;
 	border: 1px solid black;
-	margin-left: auto; margin-right: auto;
-	width: 420px;
-	height: 120px;
+	margin: 0 auto;
+	width: 500px;
+	height: 150px;
 	overflow: auto;
-	font-size: .7em;
-	font-weight: normal;
-	color: black;
 	text-align: left;
+	font-size: .86em;
+	color: black;
 }
 
-.stats       { margin: 1.5em auto 0; text-align: center; }
-img[alt="@"] { vertical-align: middle; }
+.stats { margin: 1.5em auto 0; text-align: center; }
+
 
 /* Textes et liens */
 
@@ -281,13 +233,12 @@ a:hover              { background-color: transparent; font-size: inherit; color:
 	color: black;
 }
 
-.texte   { font-size: .8em; }
-.m-texte { font-size: .75em; }
-.s-texte { font-size: .65em; }
+.m-texte { font-size: .86em; }
+.s-texte { font-size: .78em; }
 
 .warning {
 	background-color: #FDC;
-	margin: 1em 2.5%;
+	margin: 1em 0;
 	border: 1px solid #D00;
 	padding: .2em;
 	color: #600;
@@ -318,16 +269,8 @@ label[for] {
 }
 
 form#smallbox {
-	background-color: inherit;
-	margin: 1em 2.5%;
-	padding: 0;
-	color: black;
+	margin: 1em 0;
 	text-align: right;
-}
-
-form#smallbox label {
-	font-size: .8em;
-	font-weight: normal;
 }
 
 /* Boîte de sélection de liste */
@@ -336,7 +279,6 @@ form#smallbox label {
 
 input.pbutton, input.button {
 	font-weight: normal;
-	font-size: .8em;
 	color: black;
 }
 
@@ -344,52 +286,60 @@ input.pbutton { font-weight: bold; }
 
 input[type="reset"],
 input[type="button"],
-input[type="submit"] { border: 1px outset silver;}
-
-input[type="reset"]:hover,
-input[type="button"]:hover,
-input[type="submit"]:hover { background-color: #D6D8DA; }
+input[type="submit"] {
+	border:1px solid #aaa;
+	background: url("images/degrade.png") repeat scroll 0 0 #efefef;
+	color: #222;
+	font-size: .94em;
+	padding: 2px 10px;
+	box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2);
+	-webkit-box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.2);
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+input[type="reset"]::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner { border: none; }
 
 input[type="reset"]:active,
 input[type="button"]:active,
-input[type="submit"]:active { border-style: inset; }
+input[type="submit"]:active {
+	background-image: none;
+	color: #888;
+	box-shadow:0px 0px 1px rgba(0, 0, 0, 0.05);
+	-moz-box-shadow:0px 0px 1px rgba(0, 0, 0, 0.05);
+	-webkit-box-shadow:0px 0px 1px rgba(0, 0, 0, 0.05);
+}
 
 input[type="text"][disabled],
 input[type="password"][disabled] { background-color: #D6D8DA; }
 input[type="text"]:disabled,
 input[type="password"]:disabled  { background-color: #D6D8DA; }
 
-input.text, textarea, select {
-	font-size: .8em;
-	font-weight: normal;
-	color: black;
-}
+input[type="radio"] { vertical-align: text-bottom; }
 
-p select { font-size: 1em; }
-input[type="file"]  { font-size: .8em; font-weight: normal; color: black; }
-input[type="radio"] { vertical-align: sub; }
-
-/*
-  Malgré la propriété font-family dans body, textarea n'en tient pas compte, 
-  que ce soit dans un navigateur gecko ou IE :¬/
-  On redéclare...
-*/
-textarea   { font-family: Verdana, Arial, Helvetica, sans-serif; }
 input.text { text-indent: 2px; }
-
 input.text, textarea, select     { background-color: #FAFAFA; border: 1px inset black; }
 input.text:focus, textarea:focus { background-color: white; border-style: solid; }
+
+#send-form textarea { min-width: 600px; width: 75%; }
+
+/* Exceptions nécessitant une déclaration spécifique pour que leur label référant
+   soit bien positionné en haut de sa cellule */
+textarea#email_list, textarea#liste_sig,
+select#ext_list_id, select#unban_list_id { vertical-align: top; }
 
 /* tables */
 
 table.content    { background-color: #FAFAFA; border-spacing: 1px; width: 99.95%; }
+table.content tr { height: 1.9em; }
 
 th {
 	background-color: #C6C8CA;
 	padding: .3em .4em;
 	white-space: nowrap;
 	font-weight: bold;
-	font-size: .8em;
 	color: black;
 	text-align: center;
 }
@@ -398,27 +348,29 @@ td.explain {
 	background-color: #C6C8CA;
 	padding: .3em .4em;
 	font-weight: normal;
-	font-size: .7em;
-	line-height: 1.3em;
+	font-size: .86em;
+	line-height: 1.5;
 	text-align: left;
 	color: black;
 }
 
 td.row1, td.row2, td.medrow1, td.medrow2,
 td.smallrow1, td.smallrow2, td.minirow {
-	padding: .1em .2em;
+	padding: .2em .4em;
 	empty-cells: show;
-	vertical-align: top;
+	vertical-align: baseline;
 }
+td img { vertical-align: middle; }
+td input[type="checkbox"] { margin: 0 2px; vertical-align: middle; }
 
 td.row1, td.row2 {
-	text-align: justify;
+	text-align: left;
 }
 
 td.row1 { width: 50%; }
 
 td.medrow1, td.medrow2 {
-	text-align: justify;
+	text-align: left;
 }
 
 td.medrow1 { width: 33%; }
@@ -443,11 +395,8 @@ td.row-full {
 td.row1, td.medrow1, td.smallrow1             { background-color: #EAEAEA; }
 td.row2, td.medrow2, td.smallrow2, td.minirow { background-color: #D6D8DA; }
 
-td.row1 label, td.medrow1 label, td.smallrow1 label, td.row-full label {
-	font-weight: normal;
-	font-size: .8em;
-	color: black;
-}
+td#loginfos span { display: block; text-align: right; }
+td#loginfos span:first-child { float: left; padding-top: 1px; }
 
 /* tableau de tags de la page de visualisation d'un profil d'abonné */
 table#tagsList {

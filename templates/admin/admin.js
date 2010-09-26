@@ -61,6 +61,7 @@ function make_admin()
 				switchLink.setAttribute('href', './switch/checkbox');
 				DOM_Events.addListener('click', switch_checkbox, false, switchLink);
 				paragraphe.appendChild(switchLink);
+				paragraphe.setAttribute('class', 'm-texte');
 				
 				secondDiv.insertBefore(paragraphe, secondDiv.getElementsByTagName('input')[0]);
 				secondDiv.insertBefore(document.createTextNode(' '), secondDiv.getElementsByTagName('input')[0]);
