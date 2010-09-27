@@ -66,7 +66,7 @@ function check_login($email, $regkey = null, $passwd = null)
 	
 	$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_status,
 			al.format, al.register_key, al.register_date, l.liste_id, l.liste_name, l.sender_email,
-			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias $fields_str
+			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url $fields_str
 		FROM " . ABONNES_TABLE . " AS a
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
@@ -486,6 +486,7 @@ switch( $mode )
 			}
 			
 			$lang['CHARSET'] = strtoupper($lang['CHARSET']);
+			$lang['Label_link::utf8'] = wan_utf8_encode($lang['Label_link']);
 			
 			while( $row = $result->fetch() )
 			{
@@ -504,6 +505,7 @@ switch( $mode )
 						$row['log_subject']   = wan_utf8_encode($row['log_subject']);
 						$row['log_body_text'] = wan_utf8_encode($row['log_body_text']);
 						$row['log_body_html'] = wan_utf8_encode($row['log_body_html']);
+						$lang['Label_link']   = $lang['Label_link::utf8'];
 						
 						$mailer->set_charset('UTF-8');
 					}
@@ -724,7 +726,7 @@ switch( $mode )
 			$num_logs = count($abodata['listes'][$liste_id]['archives']);
 			$size     = ( $num_logs > 8 ) ? 8 : $num_logs;
 			
-			$select_log = '<select id="liste_' . $liste_id . '" name="log[' . $liste_id . '][]" size="' . $size . '" multiple="multiple" style="min-width: 200px;">';
+			$select_log = '<select id="liste_' . $liste_id . '" name="log[' . $liste_id . '][]" class="logList" size="' . $size . '" multiple="multiple" style="min-width: 200px;">';
 			for( $i = 0; $i < $num_logs; $i++ )
 			{
 				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
