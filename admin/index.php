@@ -182,50 +182,67 @@ if( count($liste_ids) > 0 )
 //
 list($infos) = parseDSN($dsn);
 
-switch( SQL_DRIVER )
+if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
 {
-	case 'mysql':
-	case 'mysqli':
-		$sql = 'SHOW TABLE STATUS FROM ' . $infos['dbname'];
-		if( $result = $db->query($sql) )
+	$sql = 'SHOW TABLE STATUS FROM ' . $infos['dbname'];
+	
+	if( $result = $db->query($sql) )
+	{
+		$dbsize = 0;
+		while( $row = $result->fetch() )
 		{
-			$dbsize = 0;
-			while( $row = $result->fetch() )
+			$add = false;
+			
+			if( $prefixe != '' )
 			{
-				$add = false;
-				
-				if( $prefixe != '' )
-				{
-					if( $row['Name'] != SESSIONS_TABLE && preg_match('/^' . $prefixe . '/', $row['Name']) )
-					{
-						$add = true;
-					}
-				}
-				else
+				if( $row['Name'] != SESSIONS_TABLE && strncmp($row['Name'], $prefixe, strlen($prefixe)) == 0 )
 				{
 					$add = true;
 				}
-				
-				if( $add )
-				{
-					$dbsize += ($row['Data_length'] + $row['Index_length']);
-				}
+			}
+			else
+			{
+				$add = true;
+			}
+			
+			if( $add )
+			{
+				$dbsize += ($row['Data_length'] + $row['Index_length']);
 			}
 		}
-		else
-		{
-			$dbsize = $lang['Not_available'];
-		}
-		break;
-	
-	case 'sqlite':
-	case 'sqlite_pdo':
-		$dbsize = filesize($infos['dbname']);
-		break;
-	
-	default:
+	}
+	else
+	{
 		$dbsize = $lang['Not_available'];
-		break;
+	}
+}
+else if( SQL_DRIVER == 'postgres' )
+{
+	$sql = "SELECT tablename FROM pg_tables WHERE tablename ~ '^$prefixe'";
+	
+	if( $result = $db->query($sql) )
+	{
+		$dbsize = 0;
+		$rowset = $result->fetchAll();
+		
+		foreach( $rowset as $row )
+		{
+			$result = $db->query("SELECT pg_tablespace_size('$row[tablename]')");
+			$row = $result->fetch();
+			
+			$dbsize += $row[0];
+		}
+	}
+	else
+	{
+		$dbsize = $lang['Not_available'];
+	}
+}
+else if( strncmp(SQL_DRIVER, 'sqlite', 6) == 0 ) {
+	$dbsize = filesize($infos['dbname']);
+}
+else {
+	$dbsize = $lang['Not_available'];
 }
 
 if( !($days	 = round(( time() - $nl_config['mailing_startdate'] ) / 86400)) )
