@@ -202,7 +202,7 @@ class Wadb_mysqli {
 		$charsetSupport = version_compare($this->serverVersion, '4.1.2', '>=');
 		
 		if( $charsetSupport ) {
-			$o = $this->get_charset();
+			$o = $this->link->get_charset();
 			$curEncoding = $o->charset;
 		}
 		else {
@@ -210,7 +210,7 @@ class Wadb_mysqli {
 		}
 		
 		if( $charsetSupport && !is_null($encoding) ) {
-			$this->set_charset($encoding);
+			$this->link->set_charset($encoding);
 		}
 		
 		return $curEncoding;
