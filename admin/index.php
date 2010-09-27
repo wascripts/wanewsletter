@@ -218,20 +218,14 @@ if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
 }
 else if( SQL_DRIVER == 'postgres' )
 {
-	$sql = "SELECT tablename FROM pg_tables WHERE tablename ~ '^$prefixe'";
+	$sql = "SELECT sum(pg_total_relation_size(schemaname||'.'||tablename))
+		FROM pg_tables WHERE schemaname = 'public'
+			AND tablename ~ '^$prefixe'";
 	
 	if( $result = $db->query($sql) )
 	{
-		$dbsize = 0;
-		$rowset = $result->fetchAll();
-		
-		foreach( $rowset as $row )
-		{
-			$result = $db->query("SELECT pg_tablespace_size('$row[tablename]')");
-			$row = $result->fetch();
-			
-			$dbsize += $row[0];
-		}
+		$row    = $result->fetch();
+		$dbsize = $row[0];
 	}
 	else
 	{
