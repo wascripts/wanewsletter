@@ -129,6 +129,15 @@ class Mailer {
 	/***************************************************************/
 	
 	/**
+	 * Paramètres de commandes pour le 5e argument de la fonction mail()
+	 * (Non fonctionnel avec le safe mode activé)
+	 * 
+	 * @var string
+	 * @access public
+	 */	
+	var $additional_params      = '';
+	
+	/**
 	 * Chemins par défaut pour les modèles d'emails 
 	 *
 	 * @var string
@@ -386,7 +395,7 @@ class Mailer {
 	 * @var string
 	 * @access private
 	 */
-	var $version                = '2.4';
+	var $version                = '2.4+';
 	
 	/**
 	 * Constructeur de classe
@@ -1335,7 +1344,7 @@ class Mailer {
 		// saut de ligne
 		// - Section 2.2 de la rfc 2822
 		//
-		$value = preg_replace('/[\x0A\x0D]/', '', trim($value));
+		$value = preg_replace('/\s+/', ' ', trim($value));
 		
 		$this->headers[$name] = $value;
 		
@@ -1668,6 +1677,11 @@ class Mailer {
 		$message = $this->compile_message();
 		$Rpath   = $this->get_return_path();
 		
+		if( $do_not_send )
+		{
+			return $headers . "\n\n" . $message;
+		}
+		
 		if( !$this->smtp_mode && !$this->sendmail_mode )
 		{
 			$subject = null;
@@ -1689,16 +1703,11 @@ class Mailer {
 				 * @link http://bugs.php.net/bug.php?id=24805
 				 */
 				$subject = $this->subject;
-				if( $this->fix_bug_mail == -1 )
+				if( $this->fix_bug_mail == -1 )// cette attribut est renseigné dans Mailer::recipients_list()
 				{
 					$subject = str_replace("\n ", "\r\n ", $this->word_wrap($subject));
 				}
 			}
-		}
-		
-		if( $do_not_send )
-		{
-			return $headers . "\n\n" . $message;
 		}
 		
 		switch( $this->hebergeur )
@@ -1706,19 +1715,10 @@ class Mailer {
 			case WM_HOST_OTHER:
 				//
 				// Détection du safe_mode. S'il est activé, on ne pourra pas
-				// régler l'adresse email de retour (return-path) avec le
-				// cinquième argument.
-				// En alternative, utilisation de ini_get() et ini_set() sur
-				// l'option sendmail_from de PHP
+				// régler le 5e argument de l'adresse email.
 				//
-				$safe_mode     = @ini_get('safe_mode');
-				$safe_mode_gid = @ini_get('safe_mode_gid');// Ajout pour free.fr et sa config php exotique
-				
-				if( $safe_mode || $safe_mode_gid )
-				{
-					$old_Rpath = @ini_get('sendmail_from');
-					@ini_set('sendmail_from', $Rpath);
-				}
+				$old_Rpath = @ini_get('sendmail_from');
+				@ini_set('sendmail_from', $Rpath);
 				
 				if( strncasecmp(PHP_OS, 'Win', 3) == 0 )
 				{
@@ -1728,19 +1728,19 @@ class Mailer {
 					$headers = preg_replace('/\r\n?|\n/', "\r\n", $headers);
 				}
 				
-				if( !$safe_mode && !$safe_mode_gid )
+				$safe_mode     = @ini_get('safe_mode');
+				$safe_mode_gid = @ini_get('safe_mode_gid');// Ajout pour free.fr et sa config php exotique
+				
+				if( !empty($this->additional_params) && !$safe_mode && !$safe_mode_gid )
 				{
-					$result = @mail($address, $subject, $message, $headers, '-f' . $Rpath);
+					$result = @mail($address, $subject, $message, $headers, $this->additional_params);
 				}
 				else
 				{
 					$result = @mail($address, $subject, $message, $headers);
 				}
 				
-				if( $safe_mode || $safe_mode_gid )
-				{
-					@ini_set('sendmail_from', $old_Rpath);
-				}
+				@ini_set('sendmail_from', $old_Rpath);
 				break;
 			
 			case WM_HOST_ONLINE:
@@ -1860,10 +1860,7 @@ class Mailer {
 				$this->sendmail_cmd .= ' -- ' . $address;
 			}
 			
-			$mode = ( stristr(PHP_OS, 'WIN') ) ? 'wb' : 'w';
-			$code = 0;
-			
-			if( !($sm = popen($this->sendmail_path . $this->sendmail_cmd, $mode)) )
+			if( !($sm = popen($this->sendmail_path . $this->sendmail_cmd, 'w')) )
 			{
 				$this->error('sendmail() :: Impossible d\'exécuter sendmail');
 				return false;
@@ -1879,7 +1876,7 @@ class Mailer {
 			//
 			fputs($sm, $message . "\n");
 			
-			$code = pclose($sm) >> 8 & 0xFF;
+			$code = pclose($sm);
 			
 			if( $code != 0 )
 			{
