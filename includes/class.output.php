@@ -313,8 +313,7 @@ class output extends Template {
 		
 		if( $dev_infos )
 		{
-			list($infos) = parseDSN($GLOBALS['dsn']);
-			$version = WA_VERSION . ' (' . $infos['driver'] . ')';
+			$version = sprintf('%s (%s)', WA_VERSION, substr(get_class($db), 5));
 		}
 		else
 		{
@@ -346,7 +345,7 @@ class output extends Template {
 			foreach( $GLOBALS['_php_errors'] as $php_error )
 			{
 				$this->assign_block_vars('php_errors.item', array(
-					'TEXT' => $php_error
+					'TEXT' => nl2br(print_r($php_error, true))
 				));
 			}
 		}

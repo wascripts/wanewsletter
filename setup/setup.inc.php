@@ -154,7 +154,7 @@ if( get_magic_quotes_gpc() )
 	strip_magic_quotes_gpc($_REQUEST);
 }
 
-define('WA_NEW_VERSION', '###VERSION###');
+define('WA_NEW_VERSION', '2.3-dev');
 
 $default_lang   = 'francais';
 $supported_lang = array(
@@ -164,7 +164,7 @@ $supported_lang = array(
 
 $supported_db = array(
 	'firebird' => array(
-		'Name'         => 'Firebird 1.5 (expérimental)',
+		'Name'         => 'Firebird &#8805; 1.5 (expérimental)',
 		'prefixe_file' => 'firebird',
 		'extension'    => extension_loaded('interbase')
 	),

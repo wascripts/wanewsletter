@@ -886,24 +886,59 @@ function purge_latin1($data, $translite = false)
  * Détecte si une chaîne est encodée ou non en UTF-8
  * 
  * @param string $data       Chaîne à modifier
- * @param string $translite  Active ou non la translitération
  * 
  * @link   http://w3.org/International/questions/qa-forms-utf-8.html
- * @return string
+ * @see    http://bugs.php.net/bug.php?id=37793 (segfault qui oblige à tronçonner la chaîne)
+ * @return boolean
  */
+
 function is_utf8($data)
 {
-	return preg_match('/^(?:
-		 [\x09\x0A\x0D\x20-\x7E]            # ASCII
-	   | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
-	   |  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
-	   | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  # straight 3-byte
-	   |  \xED[\x80-\x9F][\x80-\xBF]        # excluding surrogates
-	   |  \xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
-	   | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
-	   |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
-	)*$/xs', $data);
-} // function is_utf8
+	$chunk_len = 5000;
+	
+	if( ($len = strlen($data)) > $chunk_len ) {
+		
+		for( $i = 0; $i < $len; $i += $chunk_len )
+		{
+			$str = substr($data, $i, $chunk_len);
+			
+			/*
+			 * Pour éviter de couper accidentellement sur un caractère multi-octet,
+			 * on vérifie que le dernier octet de la chaîne est soit un caractère ascii,
+			 * soit un octet de début de séquence UTF-8
+			 */
+			while( !preg_match('#^[\x09\x0A\x0D\x20-\x7E\xC2\xC3\xDF\xE0\xE2\xED-\xEF\xF0\xF3\xF4]#',
+				$str[strlen($str)-1]) )
+			{
+				$i--;
+				$str = substr($str, 0, -1);
+			}
+			
+			$i--;
+			$str = substr($str, 0, -1);
+			
+			if( !is_utf8($str) )
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	else
+	{
+		return preg_match('/^(?:
+				[\x09\x0A\x0D\x20-\x7E]          # ASCII
+			| [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
+			|  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
+			| [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  # straight 3-byte
+			|  \xED[\x80-\x9F][\x80-\xBF]        # excluding surrogates
+			|  \xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
+			| [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
+			|  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
+		)*$/xs', $data);
+	}
+}
 
 /**
  * wan_utf8_encode()
