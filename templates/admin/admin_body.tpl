@@ -60,7 +60,39 @@
 	<!-- BEGIN admin_options -->
 	<h2>{admin_options.L_TITLE_MANAGE}</h2>
 	
-	<table class="content">
+	<script type="text/javascript">
+	<!--
+ 	DOM_Events.addListener('load', function() {
+ 		var rows = document.getElementById('admin_authlist').rows;
+ 		
+ 		for( var i = 1, m = rows.length; i < m; i++ ) {
+ 			var switchLink = document.createElement('a');
+ 			switchLink.appendChild(document.createTextNode('switch'));
+ 			switchLink.setAttribute('href', './switch/selectbox');
+ 			switchLink.style.cssFloat = 'right';
+ 			DOM_Events.addListener('click', switch_selectbox, false, switchLink);
+ 			
+ 			rows[i].cells[0].appendChild(switchLink);
+ 		}
+	}, false, document);
+	
+	function switch_selectbox(evt)
+	{
+		var node = evt.target.parentNode.parentNode;
+		
+		var boxList = node.getElementsByTagName('select');
+		var val = boxList[0].value;
+		
+		for( var i = 0, m = boxList.length; i < m; i++ ) {
+			boxList[i].options[val].selected = true;
+		}
+		
+		evt.preventDefault();
+	}
+	//-->
+	</script>
+	
+	<table id="admin_authlist" class="content">
 		<tr>
 			<th>{admin_options.L_LISTE_NAME}</th>
 			<th>{admin_options.L_VIEW}</th>
@@ -74,7 +106,7 @@
 		</tr>
 		<!-- BEGIN auth -->
 		<tr>
-			<td class="row1"><span class="m-texte">{admin_options.auth.LISTE_NAME}</span> <input type="hidden" name="liste_id[]" value="{admin_options.auth.LISTE_ID}" /></td>
+			<td class="row1 m-texte">{admin_options.auth.LISTE_NAME} <input type="hidden" name="liste_id[]" value="{admin_options.auth.LISTE_ID}" /></td>
 			<td class="smallrow2">{admin_options.auth.BOX_AUTH_VIEW}</td>
 			<td class="smallrow1">{admin_options.auth.BOX_AUTH_EDIT}</td>
 			<td class="smallrow2">{admin_options.auth.BOX_AUTH_DEL}</td>
