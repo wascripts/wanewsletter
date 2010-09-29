@@ -623,13 +623,13 @@ switch( $mode )
 				$msg_error[] = $lang['Subject_empty'];
 			}
 			
-			if( $listdata['liste_format'] != FORMAT_HTML && $logdata['log_body_text'] == '' )
+			if( $mode == 'send' && $listdata['liste_format'] != FORMAT_HTML && $logdata['log_body_text'] == '' )
 			{
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
 			}
 			
-			if( $listdata['liste_format'] != FORMAT_TEXTE && $logdata['log_body_html'] == '' )
+			if( $mode == 'send' && $listdata['liste_format'] != FORMAT_TEXTE && $logdata['log_body_html'] == '' )
 			{
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
@@ -1145,7 +1145,8 @@ $output->assign_vars(array(
 	'SELECTED_CC_ADMIN_ON'    => ( $listdata['cc_admin'] ) ? ' selected="selected"' : '',
 	'SELECTED_CC_ADMIN_OFF'   => ( !$listdata['cc_admin'] ) ? ' selected="selected"' : '',
 	
-	'S_ENCTYPE'               => ( FILE_UPLOADS_ON ) ? 'multipart/form-data' : 'application/x-www-form-urlencoded', 
+	'S_ENCTYPE'               => ( FILE_UPLOADS_ON ) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
+	'S_DELETE_BUTTON_DISABLED' => $logdata['log_id'] == 0 ? ' disabled="disabled"' : '',
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
 ));
 

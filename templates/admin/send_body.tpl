@@ -112,7 +112,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<input type="submit" name="send" value="{L_SEND_BUTTON}" class="button" /> 
 		<input type="submit" name="save" value="{L_SAVE_BUTTON}" class="pbutton" tabindex="1" /> 
-		<input type="submit" name="delete" value="{L_DELETE_BUTTON}" class="button" />
+		<input type="submit" name="delete" value="{L_DELETE_BUTTON}" class="button" {S_DELETE_BUTTON_DISABLED} />
 	</div>
 </div>
 </form>
