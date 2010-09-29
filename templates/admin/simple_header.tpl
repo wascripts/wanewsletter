@@ -46,7 +46,7 @@
 	</script>
 
 </head>
-<body>
+<body id="simple">
 
 <div id="smallheader">
 	<h1>{SITENAME}</h1>

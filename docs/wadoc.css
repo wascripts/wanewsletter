@@ -24,114 +24,32 @@
  * @version $Id$
  */
 
-html,
-body { background-color: #003B78; font-family: Verdana, Arial, sans-serif; color: white; }
-body { margin: 0; padding: 0; }
-hr   { display: none; }
+@import url("../templates/wanewsletter.css");
 
-h1, div#page, address#footer {
+div#smallheader, div#global, address#footer {
 	width: 80%;
-	max-width: 1000px;
+	max-width: 940px;
 	min-width: 700px;
-	background-color: #DDD;
-	margin: 20px auto;
-	border: 1px solid black;
-	color: black;
+	margin-left: auto;
+	margin-right: auto;
 }
 
-h1, address#footer { padding: .3em 0; text-align: center; }
-
-h1              { font-weight: normal; font-size: 1.2em; }
-address#footer  { font-weight: bold; font-style: normal; font-size: .6em; }
-#preface,
-div#page .bloc  { margin: 1em 2.5%; text-align: left; font-size: .8em; }
-div#page .bloc  { border: 1px solid #084A6B; }
-
-#address {
-	width: 15em;
-	margin: 12px 20px;
-	border: 1px solid #084A6B;
-	padding: .25em .6em;
-	line-height: 1.4em;
-	text-align: left;
-	font-style: normal;
-	font-size: 1.1em;
-}
-
-div#page .bloc h2 {
-	height: 22px;
-	background: #003B78 url("../templates/images/head.png") repeat-x scroll top left;
-	margin: 0;
-	padding-top: 5px;
-	text-align: center;
-	font-size: 1em;
-	color: #FAFAFA;
-}
-
-div#page { counter-reset: item; }
-div#page .bloc[id] h2::before {
+div#global { counter-reset: item; }
+div#global div.bloc[id] h2:before {/* div.bloc[id] pour ne pas cibler le h2 "sommaire" */
 	content: counter(item, decimal) ".\00A0";
 	counter-increment: item;
 }
 
-div#page .bloc h3 {
-	background-color: transparent;
-	margin: 1.2em 20px .6em;
-	font-weight: normal;
-	font-size: 1em;
-	color: #25F;
-}
-
-div#page .bloc p {
-	margin: 12px 20px;
-	padding: 0;
-	text-align: justify;
-	line-height: 1.5em;
-	font-family: "Bitstream Vera Sans", Verdana, Arial, sans-serif;
-}
-
-div#page .bloc p.date { padding: 1em 1.5em; }
-
 ul, ol {
 	margin: 20px 40px;
 	padding: 0;
-	line-height: 1.4em;
+	line-height: 1.4;
 }
-
+ol#toc { margin-left: 60px; }
 li { margin: 2px 0; }
 ol { list-style-type: decimal; }
-ul>li { list-style-type: none; }
-ul>li::before { display: marker; content: "\2013\00A0"; }
-ol#toc { margin: 20px 60px; }
 
-ul.sommaire li { list-style-type: disc; }
-ul.sommaire li li { list-style-type: circle; }
-ul.sommaire li::before { content: normal; }
-
-a { text-decoration: none; }
-
-a, a:link, a:visited {
-	background-color: transparent; 
-	color: #25F;
-}
-
-a:hover {
-	background-color: transparent;
-	color: #F52;
-}
-
-/*
- * Citations
- */
-q:lang(fr)  { quotes: "\00AB\00A0" "\00A0\00BB" "\2039\00A0" "\00A0\203A"; }
-q:lang(en)  { quotes: "\201C" "\201D" "\2018" "\2019"; }
-q::before   { content: open-quote; }
-q::after    { content: close-quote; }
-
-abbr[title] { border-bottom: 1px dotted; cursor: help; }
-
-code, kbd, samp { font-family: "Courier New", Courier, monospace; font-size: 1em; }
-
+.bloc p { line-height: 1.5; margin-left: .8em; margin-right: .8em; }
 code { color: green; }
 
 pre {
@@ -154,4 +72,6 @@ span.hl-default { background-color: inherit; color: #00C; }
 span.hl-html    { background-color: inherit; color: black; }
 span.hl-keyword { background-color: inherit; color: green; }
 span.hl-string  { background-color: inherit; color: #D00; }
+
+
 
