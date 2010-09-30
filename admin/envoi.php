@@ -1152,25 +1152,21 @@ $output->assign_vars(array(
 
 if( $listdata['liste_format'] != FORMAT_HTML )
 {
-	$output->assign_block_vars('formulaire', array(
-		'L_TITLE'         => $lang['Log_in_text'],
-		'L_EXPLAIN_BODY'  => nl2br($lang['Explain']['text']),
+	$output->assign_block_vars('nl_text_textarea', array(
+		'L_TITLE'    => $lang['Log_in_text'],
+		'L_EXPLAIN'  => nl2br($lang['Explain']['text']),
 		
-		'S_TEXTAREA_NAME' => 'body_text',
-		'S_BODY'          => $body_text,
-		'S_FORMAT'        => FORMAT_TEXTE
+		'S_BODY'     => $body_text
 	));
 }
 
 if( $listdata['liste_format'] != FORMAT_TEXTE )
 {
-	$output->assign_block_vars('formulaire', array(
-		'L_TITLE'         => $lang['Log_in_html'],
-		'L_EXPLAIN_BODY'  => nl2br($lang['Explain']['html']),
+	$output->assign_block_vars('nl_html_textarea', array(
+		'L_TITLE'    => $lang['Log_in_html'],
+		'L_EXPLAIN'  => nl2br($lang['Explain']['html']),
 		
-		'S_TEXTAREA_NAME' => 'body_html',
-		'S_BODY'          => $body_html,
-		'S_FORMAT'        => FORMAT_HTML
+		'S_BODY'     => $body_html
 	));
 }
 

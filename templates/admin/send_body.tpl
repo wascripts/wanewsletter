@@ -45,22 +45,39 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 	</table>
 </div>
 
-<!-- BEGIN formulaire -->
-<div class="bloc" id="textarea{formulaire.S_FORMAT}">
-	<h2>{formulaire.L_TITLE}</h2>
+<!-- BEGIN nl_text_textarea -->
+<div class="bloc" id="textarea1">
+	<h2>{nl_text_textarea.L_TITLE}</h2>
 	
 	<table class="content">
 		<tr>
-			<td class="explain">{formulaire.L_EXPLAIN_BODY}</td>
+			<td class="explain">{nl_text_textarea.L_EXPLAIN}</td>
 		</tr>
 		<tr>
 			<td class="row-full">
-				<textarea name="{formulaire.S_TEXTAREA_NAME}" cols="90" rows="20" class="text">{formulaire.S_BODY}</textarea>
+				<textarea name="body_text" cols="90" rows="20" class="text">{nl_text_textarea.S_BODY}</textarea>
 			</td>
 		</tr>
 	</table>
 </div>
-<!-- END formulaire -->
+<!-- END nl_text_textarea -->
+
+<!-- BEGIN nl_html_textarea -->
+<div class="bloc" id="textarea2">
+	<h2>{nl_html_textarea.L_TITLE}</h2>
+	
+	<table class="content">
+		<tr>
+			<td class="explain">{nl_html_textarea.L_EXPLAIN}</td>
+		</tr>
+		<tr>
+			<td class="row-full">
+				<textarea name="body_html" cols="90" rows="20" class="text">{nl_html_textarea.S_BODY}</textarea>
+			</td>
+		</tr>
+	</table>
+</div>
+<!-- END nl_html_textarea -->
 
 <!-- BEGIN joined_files -->
 <div class="bloc">
