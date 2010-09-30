@@ -236,15 +236,6 @@ if( typeof(document.styleSheets) != 'undefined' && typeof(document.styleSheets[0
 				<label for="disable_stats_on" class="m-texte">{L_YES}</label>
 			</td>
 		</tr>
-		<tr>
-			<td class="row1"><label for="gd_img_type">{extension_gd.L_GD_VERSION}&#160;:</label></td>
-			<td class="row2">
-				<select id="gd_img_type" name="gd_img_type">
-					<option value="png"{extension_gd.SELECTED_GD_PNG}> - Lib gd &gt;= 1.6 - </option>
-					<option value="gif"{extension_gd.SELECTED_GD_GIF}> - Lib gd &lt; 1.6 - </option>
-				</select>
-			</td>
-		</tr>
 	</table>
 	<!-- END extension_gd -->
 	

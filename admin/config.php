@@ -59,6 +59,9 @@ if( isset($_POST['submit']) )
 		$new_config[$name] = ( isset($_POST[$name]) ) ? trim($_POST[$name]) : $value;
 	}
 	
+	// On ne touche plus à gd_img_type - n'est plus configurable par le panneau de configuration
+	unset($new_config['gd_img_type']);
+	
 	if( $new_config['language'] == '' || !validate_lang($new_config['language']) )
 	{
 		$new_config['language'] = $nl_config['language'];
@@ -149,7 +152,7 @@ if( isset($_POST['submit']) )
 		}
 		else
 		{
-			@ftp_quit($result['connect_id']);
+			@ftp_close($result['connect_id']);
 		}
 	}
 	else
@@ -386,12 +389,9 @@ if( extension_loaded('gd') )
 		'TITLE_CONFIG_STATS'        => $lang['Title']['config_stats'],
 		'L_EXPLAIN_STATS'           => nl2br($lang['Explain']['config_stats']),
 		'L_DISABLE_STATS'           => $lang['Disable_stats'],
-		'L_GD_VERSION'              => $lang['GD_version'],
 		
 		'CHECKED_DISABLE_STATS_ON'  => ( $new_config['disable_stats'] ) ? ' checked="checked"' : '',
-		'CHECKED_DISABLE_STATS_OFF' => ( !$new_config['disable_stats'] ) ? ' checked="checked"' : '',
-		'SELECTED_GD_PNG'           => ( $new_config['gd_img_type'] == 'png' ) ? ' selected="selected"' : '',
-		'SELECTED_GD_GIF'           => ( $new_config['gd_img_type'] == 'gif' ) ? ' selected="selected"' : ''
+		'CHECKED_DISABLE_STATS_OFF' => ( !$new_config['disable_stats'] ) ? ' checked="checked"' : ''
 	));
 }
 else

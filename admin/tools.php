@@ -163,7 +163,8 @@ switch( $mode )
 		{
 			$output->message('Database_unsupported');
 		}
-		
+	
+	case 'debug':
 	case 'attach':
 		if( $admindata['admin_level'] != ADMIN )
 		{
@@ -187,7 +188,7 @@ switch( $mode )
 $url_page  = './tools.php';
 $url_page .= ( $mode != '' ) ? '?mode=' . $mode : '';
 
-if( $mode != 'backup' && $mode != 'restore' && !$admindata['session_liste'] )
+if( !in_array($mode, array('backup','restore','debug')) && !$admindata['session_liste'] )
 {
 	$output->build_listbox($auth_type, true, $url_page);
 }
@@ -282,8 +283,105 @@ define('WA_EOL', $eol);
 //
 @set_time_limit(1200);
 
+function wan_subdir_status($dir)
+{
+	if( file_exists($dir) ) {
+		if( !is_readable($dir) ) {
+			$str = "non [pas d'accès en lecture]";
+		}
+		else if( !is_writable($dir) ) {
+			$str = "non [pas d'accès en écriture]";
+		}
+		else {
+			$str = "ok";
+		}
+	}
+	else {
+		$str = "non [n'existe pas]";
+	}
+	
+	return $str;
+}
+
+function wan_print_row($name, $value)
+{
+	echo str_pad($name, 24);
+	echo ' : ';
+	echo $value;
+	echo "\r\n";
+}
+
 switch( $mode )
 {
+	case 'debug':
+		echo "<h2>Informations de déboguage</h2>";
+		echo "<pre style='font-size:12px;margin: 20px;'>";
+		
+		wan_print_row('Version Wanewsletter', WA_VERSION);
+		wan_print_row(' - session_length', $nl_config['session_length']);
+		wan_print_row(' - language',       $nl_config['language']);
+		wan_print_row(' - Upload dir',     wan_subdir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
+		
+		if( !$nl_config['disable_stats'] ) {
+			require WA_ROOTDIR . '/includes/functions.stats.php';
+			wan_print_row(' - Stats dir',     wan_subdir_status(WA_STATSDIR));
+		}
+		wan_print_row(' - max_filesize',   $nl_config['max_filesize']);
+		wan_print_row(' - use_ftp',        $nl_config['use_ftp'] ? 'oui' : 'non');
+		wan_print_row(' - engine_send',    $nl_config['engine_send']);
+		wan_print_row(' - emails_sended',  $nl_config['emails_sended']);
+		wan_print_row(' - use_smtp',       $nl_config['use_smtp'] ? 'oui' : 'non');
+		wan_print_row(' - check_email_mx', $nl_config['check_email_mx'] ? 'oui' : 'non');
+		
+		wan_print_row('Version de PHP',    phpversion());
+		wan_print_row(' - Extension FTP',  extension_loaded('ftp') ? 'oui' : 'non');
+		
+		if( extension_loaded('gd') ) {
+			$tmp = gd_info();
+			$str = 'oui - Version ' . $tmp['GD Version'] . ' - Format utilisé : '.$nl_config['gd_img_type'];
+		}
+		else {
+			$str = 'non';
+		}
+		wan_print_row(' - Extension GD', $str);
+		
+		wan_print_row(' - Extension Zip', extension_loaded('zip') ? 'oui' : 'non');
+		wan_print_row(' - Extension Zlib', extension_loaded('zlib') ? 'oui' : 'non');
+		wan_print_row(' - Extension Bz2', extension_loaded('zlib') ? 'oui' : 'non');
+		wan_print_row(' - Extension SimpleXML', extension_loaded('simplexml') ? 'oui' : 'non');
+		wan_print_row(' - Extension XML', extension_loaded('xml') ? 'oui' : 'non');
+		wan_print_row(' - Extension Iconv', extension_loaded('iconv') ? 'oui' : 'non');
+		wan_print_row(' - Extension mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
+		wan_print_row(' - safe_mode', ini_get('safe_mode') ? 'on' : 'off');
+		wan_print_row(' - magic_quotes_gpc', ini_get('magic_quotes_gpc') ? 'on' : 'off');
+		wan_print_row(' - magic_quotes_runtime', ini_get('magic_quotes_runtime') ? 'on' : 'off');
+		wan_print_row(' - allow_url_fopen', ini_get('allow_url_fopen') ? 'on' : 'off');
+		wan_print_row(' - file_uploads', ini_get('file_uploads') ? 'on' : 'off');
+		wan_print_row(' - upload_max_filesize', ini_get('upload_max_filesize'));
+		wan_print_row(' - post_max_size', ini_get('post_max_size'));
+		wan_print_row(' - memory_limit', ini_get('memory_limit'));
+		wan_print_row(' - mail.add_x_header', ini_get('mail.add_x_header'));
+		wan_print_row(' - mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
+		wan_print_row(' - sendmail_from', ini_get('sendmail_from'));
+		wan_print_row(' - sendmail_path', ini_get('sendmail_path'));
+		wan_print_row(' - SMTP',          ini_get('SMTP'));
+		
+		list($infos) = parseDSN($dsn);
+		
+		if( strncmp($infos['driver'], 'sqlite', 6) == 0 ) {
+			wan_print_row('Base de données', sprintf('%s %s', $infos['label'], $db->libVersion));
+		}
+		else {
+			wan_print_row('Base de données', sprintf('%s %s - Client : %s - Jeu de caractères : %s',
+				$infos['label'], $db->serverVersion, $db->clientVersion, $db->encoding()));
+		}
+		
+		echo "</pre>";
+		
+		$output->page_footer();
+		exit;
+		break;
+	
 	case 'export':
 		if( isset($_POST['submit']) )
 		{

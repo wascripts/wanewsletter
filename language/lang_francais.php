@@ -389,7 +389,7 @@ $lang['Explain']['config']          = "Le formulaire ci-dessous vous permet de c
 $lang['Explain']['config_cookies']  = "Ces paramètres vous permettent de régler les cookies utilisés par le script. \nSi vous n'êtes pas sûr de vous, laissez les paramètres par défaut";
 $lang['Explain']['config_files']    = "Vous avez la possibilité de joindre des fichiers à vos envois de newsletters. \nPour ce faire, le script offre deux options. Le plus simple est de stocker les fichiers sur le serveur, dans le répertoire défini comme répertoire de stockage (le répertoire en question doit être accessible en écriture). \nSi, pour une raison ou une autre, cela n'est pas rendu possible sur votre serveur, le script a la possibilité de stocker les fichiers sur un serveur <acronym title=\"File Transfert Protocol\" xml:lang=\"en\">ftp</acronym>.\n Vous devez alors entrer les paramètres d'accès au serveur ftp en question.";
 $lang['Explain']['config_email']    = "Ces paramètres vous permettent de configurer les méthodes d'envois d'emails à utiliser. \nLe premier moteur prend comme destinataire l'adresse email de la newsletter elle-même, avec les destinataires en copie cachée. Le deuxième moteur est un peu plus lourd mais envoie un email pour chaque abonné (ce dernier sera automatiquement utilisé si l'hébergeur est <strong>Online</strong>).\n Si, pour une raison quelconque, votre serveur ne dispose pas de fonction mail() ou dérivé, vous avez la possibilité d'utiliser un serveur <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> précis en indiquant les paramètres d'accès au script. \nAttention cependant, certaines restrictions peuvent survenir dans ce cas précis. Référez vous, pour plus de précisions, à la %sfaq du script%s.";
-$lang['Explain']['config_stats']    = "Le script dispose d'un petit module de statistique. Celui ci demande que la librairie GD soit installée sur votre serveur pour fonctionner. \nSi la librairie GD n'est pas installée, il est recommandé de désactiver le module de statistiques pour éviter des traitement de données superflus par le script.";
+$lang['Explain']['config_stats']    = "Le script dispose d'un petit module de statistique. Celui ci demande que la librairie GD soit installée sur votre serveur pour fonctionner. \nSi Si vous ne souhaitez pas utiliser cette fonctionnalité, il est recommandé de désactiver le module de statistiques pour éviter des traitement de données superflus par le script.";
 
 $lang['Default_lang']               = "Sélectionnez la langue par défaut";
 $lang['Sitename']                   = "Nom de votre site";
@@ -434,7 +434,6 @@ $lang['Smtp_user']                  = "Votre login smtp";
 $lang['Smtp_pass']                  = "Votre mot de passe smtp";
 $lang['Auth_smtp_note']             = "Seulement si votre serveur smtp requiert une authentification !";
 $lang['Disable_stats']              = "Désactiver le module de statistiques";
-$lang['GD_version']                 = "Version de la librairie GD";
 
 
 //

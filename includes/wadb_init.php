@@ -114,6 +114,7 @@ function parseDSN($dsn)
 	}
 	
 	$infos = $options = array();
+	$label = array('firebird' => 'Firebird', 'mysql' => 'MySQL', 'postgres' => 'PostgreSQL', 'sqlite' => 'SQLite');
 	
 	foreach( $dsn_parts as $key => $value ) {
 		switch( $key ) {
@@ -122,8 +123,12 @@ function parseDSN($dsn)
 					trigger_error("Unsupported database", CRITICAL_ERROR);
 					return false;
 				}
-				else if( $value == 'mysql' && extension_loaded('mysqli') ) {
-					$value = 'mysqli';
+				else {
+					$infos['label'] = $label[$value];
+					
+					if( $value == 'mysql' && extension_loaded('mysqli') ) {
+						$value = 'mysqli';
+					}
 				}
 				
 				$infos['driver'] = $value;
