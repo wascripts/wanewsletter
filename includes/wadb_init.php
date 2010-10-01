@@ -220,6 +220,28 @@ function WaDatabase($dsn)
 	$db = new $dbclass($infos['dbname']);
 	$db->connect($infos, $options);
 	
+	$encoding = $db->encoding();
+	if( strncmp($infos['driver'], 'sqlite', 6) != 0 && preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding) ) {
+		/*
+		 * WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
+		 * Si le jeu de caractères de la connexion est multi-octet, on le change
+		 * arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur.
+		 */
+		$newEncoding = 'latin1';
+		$db->encoding($newEncoding);
+		
+		wanlog("<p>Wanewsletter a détecté que le <strong>jeu de caractères de connexion</strong>
+à votre base de données est réglé sur <q>$encoding</q>. Wanewsletter ne gère
+pas les codages de caractères multi-octets et a donc changé cette valeur pour
+<q>$newEncoding</q>.</p>
+<p>Vous devriez éditer le fichier <samp>includes/config.inc.php</samp> et fixer
+ce réglage en ajoutant la chaîne <code>?charset=latin1</code> après le nom de votre
+base de données dans la variable <code>\$dsn</code> (<q>latin1</q> est utilisé
+dans l'exemple mais vous pouvez spécifier n'importe quel jeu de caractère 8 bit
+convenant le mieux à votre langue. Référez-vous à la documentation de votre base
+de données pour connaître les jeux de caractères utilisables).</p>");
+	}
+	
 	return $db;
 }
 
