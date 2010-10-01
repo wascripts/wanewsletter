@@ -475,6 +475,24 @@ for(; $n <= $m; $n++ )
 		convert_time('F', mktime(0, 0, 0, $n, 1, $y)));
 }
 
+$prev_m = $month-1;
+$prev_y = $year;
+
+if( $prev_m < 1 )
+{
+	$prev_m = 12;
+	$prev_y--;
+}
+
+$next_m = $month+1;
+$next_y = $year;
+
+if( $next_m > 12 )
+{
+	$next_m = 1;
+	$next_y++;
+}
+
 $output->assign_vars(array(
 	'L_TITLE'         => $lang['Title']['stats'],
 	'L_EXPLAIN_STATS' => nl2br($lang['Explain']['stats']),
@@ -484,6 +502,10 @@ $output->assign_vars(array(
 	
 	'YEAR_LIST'       => $y_list,
 	'MONTH_LIST'      => $m_list,
+	'L_PREV_PERIOD'   => convert_time('F Y', mktime(0, 0, 0, $prev_m, 1, $prev_y)),
+	'L_NEXT_PERIOD'   => convert_time('F Y', mktime(0, 0, 0, $next_m, 1, $next_y)),
+	'U_PREV_PERIOD'   => sessid('./stats.php?year=' . $prev_y . '&amp;month=' . $prev_m),
+	'U_NEXT_PERIOD'   => sessid('./stats.php?year=' . $next_y . '&amp;month=' . $next_m),
 	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;year=' . $year . '&amp;month=' . $month),
 	'U_IMG_CAMEMBERT' => sessid('./stats.php?img=camembert'),
 	

@@ -22,6 +22,10 @@
 
 <div class="stats">
 	<img src="{U_IMG_GRAPH}" alt="" title="{L_IMG_GRAPH}" />
+	
+	<div>
+		<a href="{U_PREV_PERIOD}">{L_PREV_PERIOD}</a> &ndash; <a href="{U_NEXT_PERIOD}">{L_NEXT_PERIOD}</a>
+	</div>
 </div>
 
 <div class="stats">
