@@ -612,6 +612,7 @@ $lang['Model']                      = "Template";
 $lang['Dest']                       = "Recipient";
 $lang['Log_in_text']                = "Text format newsletter";
 $lang['Log_in_html']                = "Html format newsletter";
+$lang['Last_modified']              = "Last modified : %s";
 $lang['Total_log_size']             = "Approx. newsletter size";
 $lang['Join_file_to_log']           = "File to attach to this newsletter";
 $lang['Subject_empty']              = "You must indicate a subject";

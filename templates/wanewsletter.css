@@ -144,11 +144,10 @@ ul#errorbox li { margin: 2px 0; }
 #nav-top { margin: 1em 0 -.8em; }
 #nav-bottom { margin: -.8em 0 1em; }
 
-#nav-top div.left, #nav-bottom div.left {
+div.left {
 	float: left;
 }
-
-#nav-top div.right, #nav-bottom div.right {
+div.right {
 	text-align: right;
 }
 
@@ -156,6 +155,8 @@ div.left p, div.right p {
 	display: inline;
 }
 div.left { margin-top: .2em; }
+
+div.last-modified { font-style: italic; text-align: right; color: #333; }
 
 /* Classes diverses */
 

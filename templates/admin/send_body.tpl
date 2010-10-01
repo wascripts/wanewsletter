@@ -28,7 +28,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 			<td class="medrow1"><label for="log_status">{L_STATUS}&#160;:</label></td>
 			<td class="row2">
 				<select id="log_status" name="log_status">
-					<option value="0" {SELECTED_STATUS_WRITING}>{L_STATUS_WRITING}</option>
+					<option value="0"{SELECTED_STATUS_WRITING}>{L_STATUS_WRITING}</option>
 					<option value="3"{SELECTED_STATUS_MODEL}>{L_STATUS_MODEL}</option>
 				</select>
 			</td>
@@ -44,6 +44,9 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 		</tr>
 	</table>
 </div>
+<!-- BEGIN last_modified -->
+<div id="nav-bottom" class="last-modified m-texte">{last_modified.S_LAST_MODIFIED}</div>
+<!-- END last_modified -->
 
 <!-- BEGIN nl_text_textarea -->
 <div class="bloc" id="textarea1">

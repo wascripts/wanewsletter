@@ -65,6 +65,7 @@ $logdata['log_subject']   = ( !empty($_POST['subject']) ) ? trim($_POST['subject
 $logdata['log_body_text'] = ( !empty($_POST['body_text']) ) ? trim($_POST['body_text']) : '';
 $logdata['log_body_html'] = ( !empty($_POST['body_html']) ) ? trim($_POST['body_html']) : '';
 $logdata['log_status']    = ( !empty($_POST['log_status']) ) ? STATUS_MODEL : STATUS_WRITING;
+$logdata['log_date']      = -1;
 
 $mode = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
 $prev_status = ( isset($_POST['prev_status']) ) ? intval($_POST['prev_status']) : $logdata['log_status'];
@@ -409,7 +410,7 @@ switch( $mode )
 			}
 			else
 			{
-				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status 
+				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, log_date
 					FROM " . LOG_TABLE . " 
 					WHERE liste_id = $listdata[liste_id]
 						AND log_id = $logdata[log_id]
@@ -437,7 +438,7 @@ switch( $mode )
 				FROM " . LOG_TABLE . " 
 				WHERE liste_id = $listdata[liste_id]
 					AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")
-				ORDER BY log_subject ASC";
+				ORDER BY log_date DESC";
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
@@ -1149,6 +1150,14 @@ $output->assign_vars(array(
 	'S_DELETE_BUTTON_DISABLED' => $logdata['log_id'] == 0 ? ' disabled="disabled"' : '',
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
 ));
+
+if( $logdata['log_date'] != -1 )
+{
+	$output->assign_block_vars('last_modified', array(
+		'S_LAST_MODIFIED' => sprintf($lang['Last_modified'],
+			convert_time($admindata['admin_dateformat'], $logdata['log_date']))
+	));
+}
 
 if( $listdata['liste_format'] != FORMAT_HTML )
 {

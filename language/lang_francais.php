@@ -612,6 +612,7 @@ $lang['Model']                      = "Modèle";
 $lang['Dest']                       = "Destinataire";
 $lang['Log_in_text']                = "Newsletter au format texte";
 $lang['Log_in_html']                = "Newsletter au format HTML";
+$lang['Last_modified']              = "Dernière modification le %s";
 $lang['Total_log_size']             = "Poids approximatif de la newsletter";
 $lang['Join_file_to_log']           = "Fichier à joindre à cette newsletter";
 $lang['Subject_empty']              = "Vous devez donner un sujet à votre newsletter";
