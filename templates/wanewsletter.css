@@ -347,8 +347,7 @@ select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil
 
 /* Exceptions nécessitant une déclaration spécifique pour que leur label référant
    soit bien positionné en haut de sa cellule */
-textarea#email_list, textarea#liste_sig,
-select#ext_list_id, select#unban_list_id, select.logList { vertical-align: top; }
+td + td select[multiple], td + td textarea { vertical-align: top; }
 
 /* tables */
 
