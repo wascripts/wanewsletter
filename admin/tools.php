@@ -315,7 +315,7 @@ switch( $mode )
 {
 	case 'debug':
 		echo "<h2>Informations de déboguage</h2>";
-		echo "<pre style='font-size:12px;margin: 20px;'>";
+		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;'>";
 		
 		wan_print_row('Version Wanewsletter', WA_VERSION);
 		wan_print_row(' - session_length', $nl_config['session_length']);
