@@ -188,12 +188,14 @@ class Wadb_postgres {
 			$this->link  = null;
 		}
 		else {
-			$res = pg_query($this->link, "SELECT VERSION() AS version");
-			$this->serverVersion = pg_fetch_result($res, 0, 'version');
-			
-			if( function_exists('pg_version') ) {
+			if( function_exists('pg_version') ) {// PHP >= 5.0
 				$tmp = pg_version($this->link);
 				$this->clientVersion = $tmp['client'];
+				$this->serverVersion = $tmp['server'];
+			}
+			else {
+				$res = pg_query($this->link, "SELECT VERSION() AS version");
+				$this->serverVersion = pg_fetch_result($res, 0, 'version');
 			}
 			
 			if( !empty($this->options['charset']) ) {
@@ -707,6 +709,11 @@ class WadbBackup_postgres {
 		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
 		$contents .= $this->eol;
 		
+		$contents .= sprintf("SET NAMES '%s';%s", $db->encoding(), $this->eol);
+		$contents .= "SET standard_conforming_strings = off;" . $this->eol;
+		$contents .= "SET escape_string_warning = off;" . $this->eol;
+		$contents .= $this->eol;
+		
 		return $contents;
 	}
 	
@@ -767,13 +774,18 @@ class WadbBackup_postgres {
 			
 			if( $row = $result_seq->fetch() ) {
 				if( $drop_option ) {
-					$contents .= "DROP SEQUENCE $sequence;" . $this->eol;
+					$contents .= "DROP SEQUENCE IF EXISTS $sequence;" . $this->eol;
 				}
 				
-				$contents .= 'CREATE SEQUENCE ' . $sequence . ' start ' . $row['last_value'] . ' increment ' . $row['increment_by'] . ' maxvalue ' . $row['max_value'] . ' minvalue ' . $row['min_value'] . ' cache ' . $row['cache_value'] . '; ' . $this->eol;
+				$contents .= 'CREATE SEQUENCE ' . $sequence
+					. ' start ' . $row['last_value']
+					. ' increment ' . $row['increment_by']
+					. ' maxvalue ' . $row['max_value']
+					. ' minvalue ' . $row['min_value']
+					. ' cache ' . $row['cache_value'] . '; ' . $this->eol;
 				
 				if( $row['last_value'] > 1 && $backup_type != 1 ) {
-					$contents .= 'SELECT NEXTVALE(\'' . $sequence . '\'); ' . $this->eol;
+					//$contents .= 'SELECT NEXTVAL(\'' . $sequence . '\'); ' . $this->eol;
 				}
 			}
 		}
@@ -831,7 +843,7 @@ class WadbBackup_postgres {
 			
 			if( $row['type'] == 'bpchar' ) {
 				// Internally stored as bpchar, but isn't accepted in a CREATE TABLE statement.
-				$row['type'] = 'char';
+				$row['type'] = 'character';
 			}
 			
 			$contents .= ' ' . $row['field'] . ' ' . $row['type'];
@@ -843,11 +855,8 @@ class WadbBackup_postgres {
 				$contents .= sprintf('(%s,%s)', (($row['lengthvar'] >> 16) & 0xffff), (($row['lengthvar'] - 4) & 0xffff));
 			}
 			
-			if( isset($row['rowdefault']) ) {
+			if( $row['notnull'] == 't' ) {
 				$contents .= ' DEFAULT ' . $row['rowdefault'];
-			}
-			
-			if ($row['notnull'] == 't') {
 				$contents .= ' NOT NULL';
 			}
 			
@@ -984,7 +993,7 @@ class WadbBackup_postgres {
 			
 			$fields = array();
 			for( $j = 0, $n = pg_num_fields($result->result); $j < $n; $j++ ) {
-				$fields[] = pg_field_name($result->result, $j);
+				array_push($fields, pg_field_name($result->result, $j));
 			}
 			
 			$fields = implode(', ', $fields);
@@ -997,7 +1006,7 @@ class WadbBackup_postgres {
 						$row[$key] = 'NULL';
 					}
 					else {
-						$row[$key] = '\'' . $db->escape($value) . '\'';
+						$row[$key] = '\'' . addcslashes($db->escape($value), "\r\n") . '\'';
 					}
 				}
 				

@@ -681,6 +681,11 @@ class WadbBackup_mysqli {
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
+		if( version_compare($db->serverVersion, '4.1.2', '>=') ) {
+			$contents .= sprintf("SET NAMES '%s';%s", $db->encoding(), $this->eol);
+			$contents .= $this->eol;
+		}
+		
 		return $contents;
 	}
 	
