@@ -28,9 +28,9 @@
 	{JOINED_FILES_BOX}
 	<!-- END joined_files -->
 	
+	<!-- BEGIN format_box -->
 	<div class="bottom">
-		<!-- BEGIN format_box -->
 		<span class="m-texte">{format_box.L_FORMAT}&#160;:</span> {format_box.FORMAT_BOX} <input type="submit" value="{format_box.L_GO_BUTTON}" class="button" />
-		<!-- END format_box -->
 	</div>
+	<!-- END format_box -->
 </div>

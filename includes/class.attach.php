@@ -403,7 +403,7 @@ class Attach {
 						
 						return;
 					}
-					ftp_quit($cid);
+					ftp_close($cid);
 					
 					require WAMAILER_DIR . '/class.mailer.php';
 					
