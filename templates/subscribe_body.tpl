@@ -61,7 +61,7 @@
 		var emailAddr   = document.forms['subscribe-form'].elements['email'].value;
 		var cancelEvent = null;
 		
-		if( emailAddr.indexOf('@', 1) == -1 || emailAddr.indexOf('.', 1) == -1 ) {
+		if( emailAddr.indexOf('@', 1) == -1 ) {// Test très basique pour éviter un traitement superflu du formulaire
 			window.alert('{L_INVALID_EMAIL}');
 			cancelEvent = true;
 		}
@@ -124,7 +124,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&ndash;2006 | Wanewsletter<br />
+phpCodeur</a> &copy; 2002&ndash;2010 | Wanewsletter<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>

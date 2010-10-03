@@ -413,55 +413,48 @@ class Wanewsletter {
 	{
 		global $db, $nl_config, $lang;
 		
-		if( strcmp($code, $this->account['code']) == 0 )
+		$time = ( is_null($time) ) ? time() : $time;
+		$time_limit = ($time - ($this->listdata['limitevalidate'] * 86400));
+		
+		if( $this->account['date'] > $time_limit )
 		{
-			$time = ( is_null($time) ) ? time() : $time;
-			$time_limit = ($time - ($this->listdata['limitevalidate'] * 86400));
+			$db->beginTransaction();
 			
-			if( $this->account['date'] > $time_limit )
+			if( $this->account['status'] == ABO_INACTIF )
 			{
-				$db->beginTransaction();
-				
-				if( $this->account['status'] == ABO_INACTIF )
-				{
-					$sql = "UPDATE " . ABONNES_TABLE . "
-						SET abo_status = " . ABO_ACTIF . "
-						WHERE abo_id = " . $this->account['abo_id'];
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-						return false;
-					}
-				}
-				
-				$sql = "UPDATE " . ABO_LISTE_TABLE . "
-					SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
-						register_key = '" . generate_key(20) . "'
-					WHERE liste_id = " . $this->listdata['liste_id'] . "
-						AND abo_id = " . $this->account['abo_id'];
+				$sql = "UPDATE " . ABONNES_TABLE . "
+					SET abo_status = " . ABO_ACTIF . "
+					WHERE abo_id = " . $this->account['abo_id'];
 				if( !$db->query($sql) )
 				{
 					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
 					return false;
 				}
-				
-				$db->commit();
-				
-				$this->update_stats();
-				$this->alert_admin(true);
-				
-				$this->message = $lang['Message']['Confirm_ok'];
-				
-				return true;
 			}
-			else
+			
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
+				SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
+					register_key = '" . generate_key(20) . "'
+				WHERE liste_id = " . $this->listdata['liste_id'] . "
+					AND abo_id = " . $this->account['abo_id'];
+			if( !$db->query($sql) )
 			{
-				$this->message = $lang['Message']['Invalid_date'];
+				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+				return false;
 			}
+			
+			$db->commit();
+			
+			$this->update_stats();
+			$this->alert_admin(true);
+			
+			$this->message = $lang['Message']['Confirm_ok'];
+			
+			return true;
 		}
 		else
 		{
-			$this->message = $lang['Message']['Invalid_code'];
+			$this->message = $lang['Message']['Invalid_date'];
 		}
 		
 		return false;
