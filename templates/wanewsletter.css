@@ -352,20 +352,20 @@ td + td select[multiple], td + td textarea { vertical-align: top; }
 /* tables */
 
 table.content    { background-color: #FAFAFA; border-spacing: 1px; width: 100%; }
-table.content tr { height: 1.9em; }
 
 th {
 	background-color: #C6C8CA;
-	padding: .3em .4em;
+	padding: .2em .4em;
 	white-space: nowrap;
 	font-weight: bold;
+	line-height: 1.55;
 	color: black;
 	text-align: center;
 }
 
 td.explain {
 	background-color: #C6C8CA;
-	padding: .3em .4em;
+	padding: .2em .4em;
 	font-weight: normal;
 	font-size: .86em;
 	line-height: 1.5;
@@ -373,11 +373,13 @@ td.explain {
 	color: black;
 }
 
-td.row1, td.row2, td.medrow1, td.medrow2,
-td.smallrow1, td.smallrow2, td.minirow {
+td.row1, td.row2,
+td.medrow1, td.medrow2,
+td.smallrow1, td.smallrow2 {
 	padding: .2em .4em;
 	empty-cells: show;
 	vertical-align: baseline;
+	line-height: 1.55;
 }
 td img { vertical-align: middle; }
 
@@ -397,11 +399,6 @@ td.smallrow1, td.smallrow2 {
 	text-align: center;
 }
 
-td.minirow {
-	width: 20px;
-	text-align: center;
-}
-
 td.row-full {
 	background-color: #D6D8DA;
 	padding: 1em .2em;
@@ -410,11 +407,13 @@ td.row-full {
 	vertical-align: middle;
 }
 
-td.row1, td.medrow1, td.smallrow1             { background-color: #EAEAEA; }
-td.row2, td.medrow2, td.smallrow2, td.minirow { background-color: #D6D8DA; }
+td.row1, td.medrow1, td.smallrow1 { background-color: #EAEAEA; }
+td.row2, td.medrow2, td.smallrow2 { background-color: #D6D8DA; }
 
 td#loginfos span { display: block; text-align: right; }
-td#loginfos span:first-child { float: left; padding-top: 1px; }
+td#loginfos span:first-child { float: left; }
+
+table#files-box th:first-child { min-width: 1.4em; }
 
 /* tableau de tags de la page de visualisation d'un profil d'abonné */
 table#tagsList {

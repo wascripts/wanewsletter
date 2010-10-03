@@ -234,6 +234,7 @@ $lang['Message']['Not_found_at_url']        = "The file does not seems to be at 
 $lang['Message']['No_data_at_url']          = "No data available about the file";
 $lang['Message']['Error_load_url']          = "Error while loading url \"%1\$s\" (%2\$s)";
 $lang['Message']['No_form_url']             = "you don't have specified the url of the form into the %sconfig of your list%s.\nYou must correct it before starting to send mail(s).";
+$lang['Message']['File_not_found']          = "This file was not found on server";
 
 $lang['Message']['Cannot_create_dir']       = "Cannot create %s directory";
 $lang['Message']['Dir_not_writable']        = "The directory <samp>%s</samp> doesn't exist or is not writable";

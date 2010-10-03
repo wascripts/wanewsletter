@@ -521,7 +521,7 @@ BASIC;
 	 */
 	function files_list($logdata, $format = 0)
 	{
-		global $lang;
+		global $lang, $nl_config;
 		
 		$page_envoi  = ( strstr(server_info('PHP_SELF'), 'envoi.php') ) ? true : false;
 		$body_size   = (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
@@ -596,32 +596,41 @@ BASIC;
 			$file_id   = $logdata['joined_files'][$i]['file_id'];
 			$mime_type = $logdata['joined_files'][$i]['file_mimetype'];
 			
-			//
-			// On affiche pas dans la liste les fichiers incorporés dans 
-			// une newsletter au format HTML.
-			//
-			if( $format == FORMAT_HTML && in_array($filename, $embed_files) )
-			{
-				continue;
-			}
+			$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $logdata['joined_files'][$i]['file_physical_name'];
+			$s_show = '';
 			
-			if( strpos($mime_type, 'image') === 0 )
+			if( $nl_config['use_ftp'] || file_exists($tmp_filename) )
 			{
-				$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '">';
-				$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
-				$s_show .= '</a>';
+				//
+				// On affiche pas dans la liste les fichiers incorporés dans 
+				// une newsletter au format HTML.
+				//
+				if( $format == FORMAT_HTML && in_array($filename, $embed_files) )
+				{
+					continue;
+				}
+				
+				$filename = sprintf('<a href="%s">%s</a>',
+					sessid(sprintf($u_download, $file_id)), htmlspecialchars($filename));
+				
+				if( preg_match('#^image/#', $mime_type) )
+				{
+					$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '">';
+					$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
+					$s_show .= '</a>';
+				}
 			}
 			else
 			{
-				$s_show = '';
+				$filename = sprintf('<del title="%s">%s</del>',
+					$lang['Message']['File_not_found'], htmlspecialchars($filename));
 			}
 			
 			$this->assign_block_vars('file_info', array(
 				'OFFSET'     => ($i + 1),
-				'FILENAME'   => htmlspecialchars($filename),
+				'FILENAME'   => $filename,
 				'FILESIZE'   => formateSize($filesize),
-				'S_SHOW'     => $s_show,
-				'U_DOWNLOAD' => sessid(sprintf($u_download, $file_id))
+				'S_SHOW'     => $s_show
 			));
 			
 			if( $page_envoi )
