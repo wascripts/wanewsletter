@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
+ * Copyright (c) 2002-2010 Aurélien Maille
  * 
  * This file is part of Wanewsletter.
  * 
