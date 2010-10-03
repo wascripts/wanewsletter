@@ -265,6 +265,16 @@ class Attach {
 		}
 		
 		//
+		// Vérification de l'accès en écriture au répertoire de stockage
+		//
+		if( $upload_mode != 'local' && !$this->use_ftp && !is_writable($this->upload_path) )
+		{
+			$error = TRUE;
+			$msg_error[] = $lang['Message']['Uploaddir_not_writable'];
+			return;
+		}
+		
+		//
 		// Vérification de la validité du nom du fichier
 		//
 		if( !$this->check_filename($filename) )

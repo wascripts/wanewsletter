@@ -247,6 +247,7 @@ $lang['Message']['Ftp_error_put']           = "Impossible to upload the file on 
 $lang['Message']['Ftp_error_get']           = "Impossible to get the file from the ftp server";
 $lang['Message']['Ftp_error_del']           = "Impossible to delete the file from the ftp server";
 
+$lang['Message']['Uploaddir_not_writable']  = "The upload dir isn't writable";
 $lang['Message']['Upload_error_1']          = "The file exceeds the size authorized by the upload_max_filesize directive in php.ini";
 $lang['Message']['Upload_error_2']          = "The file exceeds the size authorized by the MAX_FILE_SIZE field";
 $lang['Message']['Upload_error_3']          = "The file has been partially uploaded";

@@ -247,6 +247,7 @@ $lang['Message']['Ftp_error_put']           = "Impossible d'uploader le fichier 
 $lang['Message']['Ftp_error_get']           = "Impossible de récupérer le fichier du serveur ftp";
 $lang['Message']['Ftp_error_del']           = "Impossible de supprimer le fichier du serveur ftp";
 
+$lang['Message']['Uploaddir_not_writable']  = "Le répertoire de stockage des fichiers joints n'est pas accessible en écriture";
 $lang['Message']['Upload_error_1']          = "Le fichier excède le poids autorisé par la directive upload_max_filesize de php.ini";
 $lang['Message']['Upload_error_2']          = "Le fichier excède le poids autorisé par le champ MAX_FILE_SIZE";
 $lang['Message']['Upload_error_3']          = "Le fichier n'a été uploadé que partiellement";
