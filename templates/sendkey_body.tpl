@@ -7,7 +7,7 @@
 			<td class="explain" colspan="2">{L_EXPLAIN}</td>
 		</tr>
 		<tr>
-			<td class="row1"> <label for="email">{L_LOGIN}&#160;:</label> </td>
+			<td class="row1"> <label for="email">{L_LOGIN}&nbsp;:</label> </td>
 			<td class="row1"> <input type="text" id="email" name="email" maxlength="250" size="30" class="text" /> </td>
 		</tr>
 	</table>

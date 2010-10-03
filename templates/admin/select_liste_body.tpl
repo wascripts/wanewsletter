@@ -4,7 +4,7 @@
 	
 	<table class="content">
 		<tr>
-			<td class="row1"><label for="liste">{L_SELECT_LISTE}&#160;:</label></td>
+			<td class="row1"><label for="liste">{L_SELECT_LISTE}&nbsp;:</label></td>
 			<td class="row2">{LISTE_BOX}</td>
 		</tr>
 	</table>

@@ -235,12 +235,6 @@ ul.links li:after  { content: "]"; }
 a, a:link, a:visited { background-color: transparent; font-size: inherit; color: #25F !important; text-decoration: none; }
 a:hover              { background-color: transparent; font-size: inherit; color: #F52 !important; text-decoration: none; }
 
-.texte, .m-texte, .s-texte {
-	background-color: transparent;
-	font-weight: normal;
-	color: black;
-}
-
 .m-texte { font-size: .86em; }
 .s-texte { font-size: .78em; }
 
@@ -340,6 +334,7 @@ input.text, textarea, select     {
 	border-width:1px;
 }
 input.text:focus, textarea:focus { background-color: white; }
+input.text.number { width: 40px; }
 
 select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil */
 
@@ -365,11 +360,10 @@ th {
 
 td.explain {
 	background-color: #C6C8CA;
-	padding: .2em .4em;
+	padding: .4em;
 	font-weight: normal;
 	font-size: .86em;
 	line-height: 1.5;
-	text-align: left;
 	color: black;
 }
 
@@ -402,7 +396,6 @@ td.smallrow1, td.smallrow2 {
 td.row-full {
 	background-color: #D6D8DA;
 	padding: 1em .2em;
-	width: 100%;
 	text-align: center;
 	vertical-align: middle;
 }

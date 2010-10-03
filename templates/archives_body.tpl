@@ -7,7 +7,7 @@
 	<table class="content">
 		<!-- BEGIN listerow -->
 		<tr>
-			<td class="medrow1"> <label for="liste_{listerow.LISTE_ID}">{listerow.LISTE_NAME}&#160;:</label> </td>
+			<td class="medrow1"> <label for="liste_{listerow.LISTE_ID}">{listerow.LISTE_NAME}&nbsp;:</label> </td>
 			<td class="medrow2"> {listerow.SELECT_LOG} </td>
 		</tr>
 		<!-- END listerow -->

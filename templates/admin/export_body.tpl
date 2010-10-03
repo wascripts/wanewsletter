@@ -31,7 +31,7 @@ DOM_Events.addListener('load', function() {
 			<td class="explain" colspan="2">{L_EXPLAIN_EXPORT}</td>
 		</tr>
 		<tr>
-			<td class="row1"><label>{L_EXPORT_FORMAT}&#160;:</label></td>
+			<td class="row1"><label>{L_EXPORT_FORMAT}&nbsp;:</label></td>
 			<td class="row2">
 				<input type="radio" id="export-format-text" name="eformat" value="text" checked="checked" />
 				<label for="export-format-text" class="m-texte">{L_PLAIN_TEXT}</label>
@@ -40,17 +40,17 @@ DOM_Events.addListener('load', function() {
 			</td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="glue">{L_GLUE}&#160;:</label></td>
+			<td class="row1"><label for="glue">{L_GLUE}&nbsp;:</label></td>
 			<td class="row2"><input type="text" id="glue" name="glue" size="3" maxlength="3" class="text" /></td>
 		</tr>
 		<!-- BEGIN format_box -->
 		<tr>
-			<td class="row1"><label for="format">{format_box.L_FORMAT}&#160;:</label></td>
+			<td class="row1"><label for="format">{format_box.L_FORMAT}&nbsp;:</label></td>
 			<td class="row2">{format_box.FORMAT_BOX}</td>
 		</tr>
 		<!-- END format_box -->
 		<tr>
-			<td class="row1"><label>{L_ACTION}&#160;:</label></td>
+			<td class="row1"><label>{L_ACTION}&nbsp;:</label></td>
 			<td class="row2">
 				<input type="radio" id="action_dl" name="action" value="download" checked="checked" />
 				<label for="action_dl" class="m-texte">{L_DOWNLOAD}</label>
@@ -60,7 +60,7 @@ DOM_Events.addListener('load', function() {
 		</tr>
 		<!-- BEGIN compress_option -->
 		<tr>
-			<td class="row1"><label>{compress_option.L_COMPRESS}&#160;:</label></td>
+			<td class="row1"><label>{compress_option.L_COMPRESS}&nbsp;:</label></td>
 			<td class="row2">
 				<input type="radio" id="compress_none" name="compress" value="none" checked="checked" />
 				<label for="compress_none" class="m-texte">{compress_option.L_NO}</label>

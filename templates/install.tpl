@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
-	Copyright (c) 2002-2006 Aurélien Maille
+	Copyright (c) 2002-2010 Aurélien Maille
 	
 	Wanewsletter is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@
 	<meta name="Copyright" content="phpCodeur (c) 2002-2010" />
 	<meta name="Robots" content="noindex, nofollow, none" />
 	
-	<link rel="stylesheet" type="text/css" href="../templates/wanewsletter.css" media="screen" title="Wanewsletter thème" />
+	<link rel="stylesheet" type="text/css" href="../templates/wanewsletter.css" media="screen" title="Thème Wanewsletter" />
 	
 	<script type="text/javascript">
 	<!--
@@ -92,27 +92,27 @@
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"><label for="driver">{install.L_DBTYPE}&#160;:</label></td>
+			<td class="medrow1"><label for="driver">{install.L_DBTYPE}&nbsp;:</label></td>
 			<td class="medrow2"><select id="driver" name="driver" onchange="specialSQLite(this);">{install.DB_BOX}</select></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="host">{install.L_DBHOST}&#160;:</label></td>
+			<td class="medrow1"><label for="host">{install.L_DBHOST}&nbsp;:</label></td>
 			<td class="medrow2"><input type="text" id="host" name="host" size="30" value="{install.DBHOST}" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="dbname">{install.L_DBNAME}&#160;:</label></td>
+			<td class="medrow1"><label for="dbname">{install.L_DBNAME}&nbsp;:</label></td>
 			<td class="medrow2"><input type="text" id="dbname" name="dbname" size="30" value="{install.DBNAME}" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="user">{install.L_DBUSER}&#160;:</label></td>
+			<td class="medrow1"><label for="user">{install.L_DBUSER}&nbsp;:</label></td>
 			<td class="medrow2"><input type="text" id="user" name="user" size="30" value="{install.DBUSER}" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="pass">{install.L_DBPWD}&#160;:</label></td>
+			<td class="medrow1"><label for="pass">{install.L_DBPWD}&nbsp;:</label></td>
 			<td class="medrow2"><input type="password" id="pass" name="pass" size="30" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="prefixe">{install.L_PREFIXE}&#160;:</label></td>
+			<td class="medrow1"><label for="prefixe">{install.L_PREFIXE}&nbsp;:</label></td>
 			<td class="medrow2"><input type="text" id="prefixe" name="prefixe" size="10" value="{install.PREFIXE}" class="text" /></td>
 		</tr>
 	</table>
@@ -121,23 +121,23 @@
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"><label for="language">{install.L_DEFAULT_LANG}&#160;:</label></td>
+			<td class="medrow1"><label for="language">{install.L_DEFAULT_LANG}&nbsp;:</label></td>
 			<td class="medrow2">{install.LANG_BOX}</td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="admin_login">{install.L_LOGIN}&#160;:</label></td>
+			<td class="medrow1"><label for="admin_login">{install.L_LOGIN}&nbsp;:</label></td>
 			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" size="30" value="{install.LOGIN}" maxlength="30" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="admin_pass">{install.L_PASS}&#160;:</label></td>
+			<td class="medrow1"><label for="admin_pass">{install.L_PASS}&nbsp;:</label></td>
 			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" size="25" maxlength="30" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="confirm_pass">{install.L_PASS_CONF}&#160;:</label></td>
+			<td class="medrow1"><label for="confirm_pass">{install.L_PASS_CONF}&nbsp;:</label></td>
 			<td class="medrow2"><input type="password" id="confirm_pass" name="confirm_pass" size="25" maxlength="30" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="admin_email">{install.L_EMAIL}&#160;:</label></td>
+			<td class="medrow1"><label for="admin_email">{install.L_EMAIL}&nbsp;:</label></td>
 			<td class="medrow2"><input type="text" id="admin_email" name="admin_email" size="30" value="{install.EMAIL}" class="text" /></td>
 		</tr>
 	</table>
@@ -146,11 +146,11 @@
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"><label for="urlsite">{install.L_URLSITE}&#160;:</label><br /><span class="m-texte">{L_URLSITE_NOTE}</span></td>
+			<td class="medrow1"><label for="urlsite">{install.L_URLSITE}&nbsp;:</label><br /><span class="m-texte">{L_URLSITE_NOTE}</span></td>
 			<td class="medrow2"><input type="text" id="urlsite" name="urlsite" size="30" value="{install.URLSITE}" maxlength="100" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="urlscript">{install.L_URLSCRIPT}&#160;:</label><br /><span class="m-texte">{L_URLSCRIPT_NOTE}</span></td>
+			<td class="medrow1"><label for="urlscript">{install.L_URLSCRIPT}&nbsp;:</label><br /><span class="m-texte">{L_URLSCRIPT_NOTE}</span></td>
 			<td class="medrow2"><input type="text" id="urlscript" name="urlscript" size="30" value="{install.URLSCRIPT}" maxlength="100" class="text" /></td>
 		</tr>
 	</table>
@@ -170,11 +170,11 @@
 	
 	<table class="content">
 		<tr>
-			<td class="medrow1"><label for="admin_login">{reinstall.L_LOGIN}&#160;:</label></td>
+			<td class="medrow1"><label for="admin_login">{reinstall.L_LOGIN}&nbsp;:</label></td>
 			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" value="{reinstall.LOGIN}" maxlength="30" size="30" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="admin_pass">{reinstall.L_PASS}&#160;:</label> </td>
+			<td class="medrow1"><label for="admin_pass">{reinstall.L_PASS}&nbsp;:</label> </td>
 			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" maxlength="30" size="30" class="text" /></td>
 		</tr>
 	</table>
@@ -205,7 +205,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&#8211;2010 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
+phpCodeur</a> &copy; 2002&ndash;2010 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>

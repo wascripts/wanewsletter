@@ -5,7 +5,7 @@
 	<table class="content">
 		<tr>
 			<td rowspan="2" class="row1">
-				<label for="keyword">{L_SEARCH}&#160;: </label><br />
+				<label for="keyword">{L_SEARCH}&nbsp;: </label><br />
 				<span class="m-texte">{L_SEARCH_NOTE}</span>
 			</td>
 			<td class="row2">
@@ -24,7 +24,7 @@
 	<table class="content">
 		<tr>
 			<td rowspan="2" class="row1">
-				<label for="email_list">{delete_option.L_FAST_DELETION}&#160;:</label><br />
+				<label for="email_list">{delete_option.L_FAST_DELETION}&nbsp;:</label><br />
 				<span class="m-texte">{delete_option.L_FAST_DELETION_NOTE}</span>
 			</td>
 			<td class="row2"><textarea id="email_list" name="email_list" rows="2" cols="40"></textarea></td>
@@ -40,15 +40,15 @@
 	<div class="left"><p>{PAGEOF} {NUM_SUBSCRIBERS}</p></div>
 	
 	<div class="right">{S_HIDDEN_FIELDS}
-		<p>{L_CLASSEMENT}&#160;:</p>
+		<p>{L_CLASSEMENT}&nbsp;:</p>
 		<select name="type">
 			<option value="abo_email"{SELECTED_TYPE_EMAIL}>{L_BY_EMAIL}</option>
 			<option value="abo_register_date"{SELECTED_TYPE_DATE}>{L_BY_DATE}</option>
 			<option value="format"{SELECTED_TYPE_FORMAT}>{L_BY_FORMAT}</option>
-		</select>&#160;&#160;<select name="order">
+		</select>&nbsp;&nbsp;<select name="order">
 			<option value="ASC"{SELECTED_ORDER_ASC}>{L_BY_ASC}</option>
 			<option value="DESC"{SELECTED_ORDER_DESC}>{L_BY_DESC}</option>
-		</select>&#160;&#160;<input type="submit" name="tri" value="{L_CLASSER_BUTTON}" class="button" />
+		</select>&nbsp;&nbsp;<input type="submit" name="tri" value="{L_CLASSER_BUTTON}" class="button" />
 	</div>
 </div>
 
@@ -63,15 +63,15 @@
 			<th>{view_format.L_FORMAT}</th>
 			<!-- END view_format -->
 			<!-- BEGIN delete_option -->
-			<th>&#160;</th>
+			<th>&nbsp;</th>
 			<!-- END delete_option -->
 		</tr>
 		<!-- BEGIN aborow -->
 		<tr>
-			<td class="{aborow.TD_CLASS}"><span class="texte"><a href="{aborow.U_VIEW}">{aborow.ABO_EMAIL}</a></span></td>
-			<td class="{aborow.TD_CLASS}"><span class="texte">{aborow.ABO_REGISTER_DATE}</span></td>
+			<td class="{aborow.TD_CLASS}"><a href="{aborow.U_VIEW}">{aborow.ABO_EMAIL}</a></td>
+			<td class="{aborow.TD_CLASS}">{aborow.ABO_REGISTER_DATE}</td>
 			<!-- BEGIN format -->
-			<td class="{aborow.TD_CLASS}"><span class="texte">{aborow.format.ABO_FORMAT}</span></td>
+			<td class="{aborow.TD_CLASS}">{aborow.format.ABO_FORMAT}</td>
 			<!-- END format -->
 			<!-- BEGIN delete -->
 			<td class="{aborow.TD_CLASS}"><input type="checkbox" name="id[]" value="{aborow.delete.ABO_ID}" /></td>
@@ -80,7 +80,7 @@
 		<!-- END aborow -->
 		<!-- BEGIN empty -->
 		<tr>
-			<td class="row-full" colspan="3"><span class="texte">{empty.L_EMPTY}</span></td>
+			<td class="row-full" colspan="3">{empty.L_EMPTY}</td>
 		</tr>
 		<!-- END empty -->
 	</table>

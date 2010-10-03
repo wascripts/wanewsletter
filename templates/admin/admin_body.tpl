@@ -12,19 +12,19 @@
 	
 	<table class="content">
 		<tr>
-			<td class="row1"><label for="language">{L_DEFAULT_LANG}&#160;:</label></td>
+			<td class="row1"><label for="language">{L_DEFAULT_LANG}&nbsp;:</label></td>
 			<td class="row2">{LANG_BOX}</td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="email">{L_EMAIL}&#160;:</label></td>
+			<td class="row1"><label for="email">{L_EMAIL}&nbsp;:</label></td>
 			<td class="row2"><input type="text" id="email" name="email" value="{EMAIL}" size="40" maxlength="200" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="dateformat">{L_DATEFORMAT}&#160;:</label><br /><span class="m-texte">{L_NOTE_DATE}</span></td>
+			<td class="row1"><label for="dateformat">{L_DATEFORMAT}&nbsp;:</label><br /><span class="m-texte">{L_NOTE_DATE}</span></td>
 			<td class="row2"><input type="text" id="dateformat" name="dateformat" value="{DATEFORMAT}" size="15" maxlength="20" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="row1"><label>{L_EMAIL_NEW_SUBSCRIBE}&#160;:</label></td>
+			<td class="row1"><label>{L_EMAIL_NEW_SUBSCRIBE}&nbsp;:</label></td>
 			<td class="row2">
 				<input type="radio" id="email_new_subscribe_yes" name="email_new_subscribe" value="1" {EMAIL_NEW_SUBSCRIBE_YES}/>
 				<label for="email_new_subscribe_yes" class="m-texte">{L_YES}</label>
@@ -33,7 +33,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="row1"><label>{L_EMAIL_UNSUBSCRIBE}&#160;:</label></td>
+			<td class="row1"><label>{L_EMAIL_UNSUBSCRIBE}&nbsp;:</label></td>
 			<td class="row2">
 				<input type="radio" id="email_unsubscribe_yes" name="email_unsubscribe" value="1" {EMAIL_UNSUBSCRIBE_YES}/>
 				<label for="email_unsubscribe_yes" class="m-texte">{L_YES}</label>
@@ -43,16 +43,16 @@
 		</tr>
 		<!-- BEGIN owner_profil -->
 		<tr>
-			<td class="row1"><label for="current_pass">{L_PASS}&#160;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
+			<td class="row1"><label for="current_pass">{L_PASS}&nbsp;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
 			<td class="row2"><input type="password" id="current_pass" name="current_pass" size="30" maxlength="30" class="text" /></td>
 		</tr>
 		<!-- END owner_profil -->
 		<tr>
-			<td class="row1"><label for="new_pass">{L_NEW_PASS}&#160;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
+			<td class="row1"><label for="new_pass">{L_NEW_PASS}&nbsp;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
 			<td class="row2"><input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="confirm_pass">{L_CONFIRM_PASS}&#160;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
+			<td class="row1"><label for="confirm_pass">{L_CONFIRM_PASS}&nbsp;:</label><br /><span class="m-texte">{L_NOTE_PASS}</span></td>
 			<td class="row2"><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" class="text" /></td>
 		</tr>
 	</table>
@@ -123,11 +123,11 @@
 	
 	<table class="content">
 		<tr>
-			<td class="row1"><label for="admin_level">{admin_options.L_ADMIN_LEVEL}&#160;:</label></td>
+			<td class="row1"><label for="admin_level">{admin_options.L_ADMIN_LEVEL}&nbsp;:</label></td>
 			<td class="row2"><select id="admin_level" name="admin_level"><option value="2"{admin_options.SELECTED_ADMIN}>{admin_options.L_ADMIN}</option><option value="1"{admin_options.SELECTED_USER}>{admin_options.L_USER}</option></select></td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="delete_user">{admin_options.L_DELETE_ADMIN}&#160;:</label></td>
+			<td class="row1"><label for="delete_user">{admin_options.L_DELETE_ADMIN}&nbsp;:</label></td>
 			<td class="row2"><input type="checkbox" id="delete_user" name="delete_user" value="1" /> <span class="m-texte">{admin_options.L_NOTE_DELETE}</span></td>
 		</tr>
 	</table>
@@ -143,7 +143,7 @@
 <!-- BEGIN admin_box -->
 <form id="smallbox" method="post" action="./admin.php">
 <div>
-	{admin_box.S_HIDDEN_FIELDS} <label for="admin_id">{admin_box.L_VIEW_PROFILE}&#160;:</label> {admin_box.ADMIN_BOX} <input type="submit" value="{admin_box.L_BUTTON_GO}" class="button" />
+	{admin_box.S_HIDDEN_FIELDS} <label for="admin_id">{admin_box.L_VIEW_PROFILE}&nbsp;:</label> {admin_box.ADMIN_BOX} <input type="submit" value="{admin_box.L_BUTTON_GO}" class="button" />
 </div>
 </form>
 <!-- END admin_box -->

@@ -6,7 +6,7 @@
 	
 	<table class="content">
 		<tr>
-			<td class="row1"><label for="mode">{L_SELECT_TOOL}&#160;:</label></td>
+			<td class="row1"><label for="mode">{L_SELECT_TOOL}&nbsp;:</label></td>
 			<td class="row2">{S_TOOLS_BOX}</td>
 		</tr>
 	</table>

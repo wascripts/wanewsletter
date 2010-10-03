@@ -17,15 +17,15 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 <div class="bloc">
 	<table class="content">
 		<tr>
-			<td class="medrow1"><span class="texte">{L_DEST}&#160;:</span></td>
-			<td class="row2"><span class="texte"><b>{S_DEST}</b></span></td>
+			<td class="medrow1">{L_DEST}&nbsp;:</td>
+			<td class="row2"><b>{S_DEST}</b></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="subject">{L_SUBJECT}&#160;:</label></td>
+			<td class="medrow1"><label for="subject">{L_SUBJECT}&nbsp;:</label></td>
 			<td class="row2"><input type="text" id="subject" name="subject" value="{S_SUBJECT}" size="40" maxlength="100" class="text" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="log_status">{L_STATUS}&#160;:</label></td>
+			<td class="medrow1"><label for="log_status">{L_STATUS}&nbsp;:</label></td>
 			<td class="row2">
 				<select id="log_status" name="log_status">
 					<option value="0"{SELECTED_STATUS_WRITING}>{L_STATUS_WRITING}</option>
@@ -34,7 +34,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 			</td>
 		</tr>
 		<tr title="{L_CC_ADMIN_TITLE}">
-			<td class="medrow1"><label for="cc_admin">{L_CC_ADMIN}&#160;:</label></td>
+			<td class="medrow1"><label for="cc_admin">{L_CC_ADMIN}&nbsp;:</label></td>
 			<td class="row2">
 				<select id="cc_admin" name="cc_admin">
 					<option value="1"{SELECTED_CC_ADMIN_ON}>{L_YES}</option>
@@ -91,7 +91,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 			<td class="explain" colspan="2">{joined_files.L_EXPLAIN_ADD_FILE}</td>
 		</tr>
 		<tr>
-			<td rowspan="{joined_files.S_ROWSPAN}" class="medrow1"><label for="join_file">{joined_files.L_ADD_FILE}&#160;:</label></td>
+			<td rowspan="{joined_files.S_ROWSPAN}" class="medrow1"><label for="join_file">{joined_files.L_ADD_FILE}&nbsp;:</label></td>
 			<td class="row2"><input type="text" id="join_file" name="join_file" size="30" class="text" /></td>
 		</tr>
 		<!-- BEGIN upload_input -->
@@ -122,7 +122,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 
 <!-- BEGIN files_box -->
 <div id="nav-bottom">
-	<div class="left">&#160;</div>
+	<div class="left">&nbsp;</div>
 	<div class="right"><input type="submit" name="unattach" value="{joined_files.files_box.L_DEL_FILE_BUTTON}" class="button" /></div>
 </div>
 <!-- END files_box -->

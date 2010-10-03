@@ -7,14 +7,14 @@
 			<td class="explain" colspan="2"> {L_EXPLAIN_TO_FORBID} </td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="ext_list">{L_FORBID_EXT}&#160;:</label> </td>
+			<td class="medrow1"> <label for="ext_list">{L_FORBID_EXT}&nbsp;:</label> </td>
 			<td class="row2"> <input type="text" id="ext_list" name="ext_list" size="30" maxlength="100" class="text" /> </td>
 		</tr>
 		<tr>
 			<td class="explain" colspan="2"> {L_EXPLAIN_TO_REALLOW} </td>
 		</tr>
 		<tr>
-			<td class="medrow1"> <label for="ext_list_id">{L_REALLOW_EXT}&#160;:</label> </td>
+			<td class="medrow1"> <label for="ext_list_id">{L_REALLOW_EXT}&nbsp;:</label> </td>
 			<td class="row2"> {REALLOW_EXT_BOX} </td>
 		</tr>
 	</table>

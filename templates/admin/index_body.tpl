@@ -5,24 +5,24 @@
 	
 	<table class="content">
 		<tr>
-			<td class="row1"><span class="texte">{REGISTERED_SUBSCRIBERS}</span></td>
+			<td class="row1">{REGISTERED_SUBSCRIBERS}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{TEMP_SUBSCRIBERS}</span></td>
+			<td class="row1">{TEMP_SUBSCRIBERS}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{NEWSLETTERS_SENDED}</span></td>
+			<td class="row1">{NEWSLETTERS_SENDED}</td>
 		</tr>
 		<!-- BEGIN switch_last_newsletter -->
 		<tr>
-			<td class="row1"><span class="texte">{switch_last_newsletter.DATE_LAST_NEWSLETTER}</span></td>
+			<td class="row1">{switch_last_newsletter.DATE_LAST_NEWSLETTER}</td>
 		</tr>
 		<!-- END switch_last_newsletter -->
 		<tr>
-			<td class="row1"><span class="texte">{L_DBSIZE}&#160;: <b>{DBSIZE}</b></span></td>
+			<td class="row1">{L_DBSIZE}&nbsp;: <b>{DBSIZE}</b></td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_FILESIZE}&#160;: <b>{FILESIZE}</b></span></td>
+			<td class="row1">{L_FILESIZE}&nbsp;: <b>{FILESIZE}</b></td>
 		</tr>
 	</table>
 </div>

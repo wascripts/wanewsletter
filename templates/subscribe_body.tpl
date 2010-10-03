@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
-	Copyright (c) 2002-2006 Aurélien Maille
+	Copyright (c) 2002-2010 Aurélien Maille
 	
 	Wanewsletter is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License 
@@ -96,17 +96,17 @@
 	<legend xml:lang="en" lang="en">Mailing liste</legend>
 	
 	<div class="bloc">
-		<label for="email">{L_EMAIL}&#160;:</label>
+		<label for="email">{L_EMAIL}&nbsp;:</label>
 		<input type="text" id="email" name="email" size="25" maxlength="250" />
 	</div>
 	
 	<div class="bloc">
-		<label for="format">{L_FORMAT}&#160;:</label>
+		<label for="format">{L_FORMAT}&nbsp;:</label>
 		<select id="format" name="format"><option value="1">TXT</option><option value="2">HTML</option></select>
 	</div>
 	
 	<div class="bloc">
-		<label for="liste">{L_DIFF_LIST}&#160;:</label>
+		<label for="liste">{L_DIFF_LIST}&nbsp;:</label>
 		{LIST_BOX}
 	</div>
 	
@@ -124,8 +124,8 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&#8211;2006 | Wanewsletter<br />
-Ce script est distribu&eacute; librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
+phpCodeur</a> &copy; 2002&ndash;2006 | Wanewsletter<br />
+Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>
 

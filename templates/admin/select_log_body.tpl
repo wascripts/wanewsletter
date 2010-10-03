@@ -52,7 +52,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 		<!-- BEGIN load_draft -->
 		<tbody>
 			<tr>
-				<td class="row1"><label>{load_draft.L_SELECT_LOG}&#160;:</label></td>
+				<td class="row1"><label>{load_draft.L_SELECT_LOG}&nbsp;:</label></td>
 				<td class="row2">{load_draft.LOG_BOX}</td>
 			</tr>
 		</tbody>
@@ -60,7 +60,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 		<tbody id="loadByURL">
 			<!-- BEGIN load_text_by_url -->
 			<tr>
-				<td class="row1"><label>{load_text_by_url.L_LOAD_BY_URL}&#160;:</label></td>
+				<td class="row1"><label>{load_text_by_url.L_LOAD_BY_URL}&nbsp;:</label></td>
 				<td class="row2">
 					<input type="text" name="body_text_url" value="{load_text_by_url.BODY_TEXT_URL}" size="35" class="text" />
 					<span class="m-texte">({load_text_by_url.L_FORMAT_TEXT})</span>
@@ -69,7 +69,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 			<!-- END load_text_by_url -->
 			<!-- BEGIN load_html_by_url -->
 			<tr>
-				<td class="row1"><label>{load_html_by_url.L_LOAD_BY_URL}&#160;:</label></td>
+				<td class="row1"><label>{load_html_by_url.L_LOAD_BY_URL}&nbsp;:</label></td>
 				<td class="row2">
 					<input type="text" name="body_html_url" value="{load_html_by_url.BODY_HTML_URL}" size="35" class="text" />
 					<span class="m-texte">({load_html_by_url.L_FORMAT_HTML})</span>
@@ -78,7 +78,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 			<!-- END load_html_by_url -->
 			<!-- BEGIN load_multi_by_url -->
 			<tr>
-				<td class="row1" rowspan="2"><label>{load_multi_by_url.L_LOAD_BY_URL}&#160;:</label></td>
+				<td class="row1" rowspan="2"><label>{load_multi_by_url.L_LOAD_BY_URL}&nbsp;:</label></td>
 				<td class="row2">
 					<input type="text" name="body_text_url" value="{load_multi_by_url.BODY_TEXT_URL}" size="35" class="text" />
 					<span class="m-texte">({load_multi_by_url.L_FORMAT_TEXT})</span>

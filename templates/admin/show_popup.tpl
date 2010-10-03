@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
-	Copyright (c) 2002-2006 Aurélien Maille
+	Copyright (c) 2002-2010 Aurélien Maille
 	
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License 

@@ -11,14 +11,14 @@
 		<tr>
 			<th>{L_SUBJECT}</th>
 			<th>{L_DONE}</th>
-			<th colspan="2">&#160;</th>
+			<th colspan="2">&nbsp;</th>
 		</tr>
 		<!-- BEGIN logrow -->
 		<tr>
-			<td class="row1"><span class="texte">{logrow.LOG_SUBJECT}</span></td>
-			<td class="row1" align="right"><span class="texte">{logrow.SEND_PERCENT}&#160;%</span></td>
-			<td class="row1" nowrap><span class="texte"><a href="./envoi.php?mode=progress&amp;id={logrow.LOG_ID}">{L_DO_SEND}</a></span></td>
-			<td class="row1" nowrap><span class="texte"><a href="./envoi.php?mode=cancel&amp;id={logrow.LOG_ID}">{L_CANCEL_SEND}</a></span></td>
+			<td class="row1">{logrow.LOG_SUBJECT}</td>
+			<td class="row1" align="right">{logrow.SEND_PERCENT}&nbsp;%</td>
+			<td class="row1" nowrap><a href="./envoi.php?mode=progress&amp;id={logrow.LOG_ID}">{L_DO_SEND}</a></td>
+			<td class="row1" nowrap><a href="./envoi.php?mode=cancel&amp;id={logrow.LOG_ID}">{L_CANCEL_SEND}</a></td>
 		</tr>
 		<!-- END logrow -->
 	</table>

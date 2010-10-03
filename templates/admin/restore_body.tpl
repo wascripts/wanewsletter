@@ -9,7 +9,7 @@
 		<!-- BEGIN upload_file -->
 		<tr>
 			<td class="row1">
-				<label for="file_upload">{upload_file.L_FILE_UPLOAD}&#160;:</label><br />
+				<label for="file_upload">{upload_file.L_FILE_UPLOAD}&nbsp;:</label><br />
 				<span class="m-texte">({upload_file.L_MAXIMUM_SIZE})</span>
 			</td>
 			<td class="row2">
@@ -19,7 +19,7 @@
 		</tr>
 		<!-- END upload_file -->
 		<tr>
-			<td class="row1"><label for="file_local">{L_FILE_LOCAL}&#160;:</label></td>
+			<td class="row1"><label for="file_local">{L_FILE_LOCAL}&nbsp;:</label></td>
 			<td class="row2"><input type="text" id="file_local" name="file_local" size="25" class="text" /></td>
 		</tr>
 	</table>

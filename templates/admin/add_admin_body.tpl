@@ -6,11 +6,11 @@
 	
 	<table class="content">
 		<tr>
-			<td class="row1"> <label for="new_login">{L_LOGIN}&#160;:</label> </td>
+			<td class="row1"> <label for="new_login">{L_LOGIN}&nbsp;:</label> </td>
 			<td class="row2"> <input type="text" id="new_login" name="new_login" value="{LOGIN}" size="30" maxlength="30" class="text" /> </td>
 		</tr>
 		<tr>
-			<td class="row1"> <label for="new_email">{L_EMAIL}&#160;:</label> <span class="m-texte">{L_EMAIL_NOTE}</span> </td>
+			<td class="row1"> <label for="new_email">{L_EMAIL}&nbsp;:</label> <span class="m-texte">{L_EMAIL_NOTE}</span> </td>
 			<td class="row2"> <input type="text" id="new_email" name="new_email" value="{EMAIL}" size="30" maxlength="200" class="text" /> </td>
 		</tr>
 	</table>

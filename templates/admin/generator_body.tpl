@@ -7,7 +7,7 @@
 			<td class="explain" colspan="2"> {L_EXPLAIN_GENERATOR} </td>
 		</tr>
 		<tr>
-			<td class="row1"> <label for="url_form">{L_TARGET_FORM}&#160;:</label> </td>
+			<td class="row1"> <label for="url_form">{L_TARGET_FORM}&nbsp;:</label> </td>
 			<td class="row2"> <input type="text" id="url_form" name="url_form" size="30" class="text" /> </td>
 		</tr>
 	</table>

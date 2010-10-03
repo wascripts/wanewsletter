@@ -1,5 +1,5 @@
 <div class="bloc">
-	<h2 id="view">{L_SUBJECT}&#160;: {SUBJECT}</h2>
+	<h2 id="view">{L_SUBJECT}&nbsp;: {SUBJECT}</h2>
 	
 	<table class="content">
 		<tr>
@@ -9,7 +9,7 @@
 		</tr>
 		<tr>
 			<td id="loginfos" class="row1">
-				<span>{L_NUMDEST}&#160;: {S_NUMDEST}</span>
+				<span>{L_NUMDEST}&nbsp;: {S_NUMDEST}</span>
 				<span>
 					<a href="{U_EXPORT}" title="{L_EXPORT_T}">
 						<img src="../templates/images/archive.png" alt="{L_EXPORT}"
@@ -30,7 +30,7 @@
 	
 	<!-- BEGIN format_box -->
 	<div class="bottom">
-		<span class="m-texte">{format_box.L_FORMAT}&#160;:</span> {format_box.FORMAT_BOX} <input type="submit" value="{format_box.L_GO_BUTTON}" class="button" />
+		<span class="m-texte">{format_box.L_FORMAT}&nbsp;:</span> {format_box.FORMAT_BOX} <input type="submit" value="{format_box.L_GO_BUTTON}" class="button" />
 	</div>
 	<!-- END format_box -->
 </div>

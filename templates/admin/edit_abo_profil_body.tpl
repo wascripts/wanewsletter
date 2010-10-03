@@ -31,19 +31,19 @@ DOM_Events.addListener('load', function() {
 	
 	<table class="content">
 		<tr>
-			<td class="row1"><label for="pseudo">{L_PSEUDO}&#160;:</label></td>
+			<td class="row1"><label for="pseudo">{L_PSEUDO}&nbsp;:</label></td>
 			<td class="row2"><input type="text" id="pseudo" name="pseudo" value="{S_ABO_PSEUDO}" class="text" size="30" maxlength="30" /></td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="email">{L_EMAIL}&#160;:</label></td>
+			<td class="row1"><label for="email">{L_EMAIL}&nbsp;:</label></td>
 			<td class="row2"><input type="text" id="email" name="email" value="{S_ABO_EMAIL}" class="text" size="30" maxlength="100" /></td>
 		</tr>
 		<tr>
-			<td class="explain" colspan="2">{L_LISTE_TO_REGISTER}&#160;:</td>
+			<td class="explain" colspan="2">{L_LISTE_TO_REGISTER}&nbsp;:</td>
 		</tr>
 		<!-- BEGIN listerow -->
 		<tr>
-			<td class="row1"><span class="texte">&#8211;&#160;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a></span></td>
+			<td class="row1">&ndash;&nbsp;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a></td>
 			<td class="row2">{listerow.FORMAT_BOX}</td>
 		</tr>
 		<!-- END listerow -->

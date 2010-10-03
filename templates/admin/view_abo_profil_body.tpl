@@ -11,24 +11,24 @@
 	
 	<table class="content">
 		<tr>
-			<td class="row1"><span class="texte">{L_PSEUDO}&#160;:</span></td>
-			<td class="row2"><span class="texte">{S_ABO_PSEUDO}</span></td>
+			<td class="row1">{L_PSEUDO}&nbsp;:</td>
+			<td class="row2">{S_ABO_PSEUDO}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_EMAIL}&#160;:</span></td>
-			<td class="row2"><span class="texte"><a href="mailto:{S_ABO_EMAIL}">{S_ABO_EMAIL}</a></span></td>
+			<td class="row1">{L_EMAIL}&nbsp;:</td>
+			<td class="row2"><a href="mailto:{S_ABO_EMAIL}">{S_ABO_EMAIL}</a></td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_REGISTER_DATE}&#160;:</span></td>
-			<td class="row2"><span class="texte">{S_REGISTER_DATE}</span></td>
+			<td class="row1">{L_REGISTER_DATE}&nbsp;:</td>
+			<td class="row2">{S_REGISTER_DATE}</td>
 		</tr>
 		<tr>
-			<td class="explain" colspan="2">{L_LISTE_TO_REGISTER}&#160;:</td>
+			<td class="explain" colspan="2">{L_LISTE_TO_REGISTER}&nbsp;:</td>
 		</tr>
 		<!-- BEGIN listerow -->
 		<tr>
 			<td class="row1" colspan="2">
-				<span class="texte">&#8211;&#160;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a> {listerow.CHOICE_FORMAT}</span>
+				&ndash;&nbsp;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a> {listerow.CHOICE_FORMAT}
 			</td>
 		</tr>
 		<!-- END listerow -->
@@ -37,7 +37,7 @@
 
 <!-- BEGIN tags -->
 <table id="tagsList">
-	<caption><span class="texte">{tags.L_CAPTION}</span></caption>
+	<caption>{tags.L_CAPTION}</caption>
 	<col span="2" width="50%" />
 	<tr>
 		<th>{tags.L_NAME}</th>
@@ -45,8 +45,8 @@
 	</tr>
 	<!-- BEGIN row -->
 	<tr>
-		<td><span class="texte">{tags.row.NAME}</span></td>
-		<td><span class="texte">{tags.row.VALUE}</span></td>
+		<td>{tags.row.NAME}</td>
+		<td>{tags.row.VALUE}</td>
 	</tr>
 	<!-- END row -->
 </table>
