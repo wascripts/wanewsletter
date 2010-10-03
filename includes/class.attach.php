@@ -812,7 +812,7 @@ class Attach {
 					FROM " . LOG_FILES_TABLE . " AS lf
 						INNER JOIN " . JOINED_FILES_TABLE . " AS jf ON jf.file_id = lf.file_id
 					WHERE lf.file_id IN(" . implode(', ', $file_ids) . ")
-					GROUP BY lf.file_id
+					GROUP BY lf.file_id, jf.file_physical_name
 					HAVING COUNT(lf.file_id) = 1";
 				if( !($result = $db->query($sql)) )
 				{
