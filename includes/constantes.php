@@ -271,8 +271,11 @@ else
 	define('WA_USER_BROWSER', 'other');
 }
 
-//
-// Chaîne utilisée pour définir l'entête X-Mailer des emails envoyés par Wanewsletter
-//
-define('WA_X_MAILER', sprintf('Wanewsletter/%s', WA_VERSION));
+if( defined('WA_VERSION') )
+{
+	//
+	// Chaîne utilisée pour définir l'entête X-Mailer des emails envoyés par Wanewsletter
+	//
+	define('WA_X_MAILER', sprintf('Wanewsletter/%s', WA_VERSION));
+}
 
