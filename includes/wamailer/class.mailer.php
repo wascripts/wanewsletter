@@ -2137,7 +2137,12 @@ class Mailer {
 		}
 		
 		$this->headers['Date']         = date(DATE_RFC2822);
-		$this->headers['X-Mailer']     = $this->signature;
+		
+		if( !empty($this->signature) )
+		{
+			$this->headers['X-Mailer'] = $this->signature;
+		}
+		
 		$this->headers['X-AntiAbuse']  = 'Sender IP - ' . $this->sender_ip . '/Server Name - <' . $this->server_from . '>';
 		$this->headers['MIME-Version'] = '1.0'; 
 		$this->headers['Message-ID']   = '<' . md5(microtime() . rand()) . '@' . $this->server_from . '>';
