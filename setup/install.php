@@ -215,13 +215,13 @@ if( $start )
 		//
 		// Création des tables du script 
 		//
-		$sql_create = parseSQL(implode('', file($sql_create)), $prefixe);
+		$sql_create = parseSQL(file_get_contents($sql_create), $prefixe);
 		exec_queries($sql_create, true);
 		
 		//
 		// Insertion des données de base 
 		//
-		$sql_data = parseSQL(implode('', file($sql_data)), $prefixe);
+		$sql_data = parseSQL(file_get_contents($sql_data), $prefixe);
 		
 		$sql_data[] = "UPDATE " . ADMIN_TABLE . "
 			SET admin_login = '" . $db->escape($admin_login) . "',
@@ -236,7 +236,9 @@ if( $start )
 				language    = '$language',
 				mailing_startdate = " . time();
 		$sql_data[] = "UPDATE " . LISTE_TABLE . "
-			SET liste_startdate = " . time() . "
+			SET form_url        = " . $db->escape($urlsite.$urlscript.'subscribe.php') . ",
+				sender_email    = " . $db->escape($admin_email) . ",
+				liste_startdate = " . time() . "
 			WHERE liste_id = 1";
 		
 		exec_queries($sql_data, true);
