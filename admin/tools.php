@@ -352,19 +352,19 @@ switch( $mode )
 		wan_print_row(' - Extension XML', extension_loaded('xml') ? 'oui' : 'non');
 		wan_print_row(' - Extension Iconv', extension_loaded('iconv') ? 'oui' : 'non');
 		wan_print_row(' - Extension mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
-		wan_print_row(' - safe_mode', ini_get('safe_mode') ? 'on' : 'off');
-		wan_print_row(' - magic_quotes_gpc', ini_get('magic_quotes_gpc') ? 'on' : 'off');
-		wan_print_row(' - magic_quotes_runtime', ini_get('magic_quotes_runtime') ? 'on' : 'off');
-		wan_print_row(' - allow_url_fopen', ini_get('allow_url_fopen') ? 'on' : 'off');
-		wan_print_row(' - file_uploads', ini_get('file_uploads') ? 'on' : 'off');
-		wan_print_row(' - upload_max_filesize', ini_get('upload_max_filesize'));
-		wan_print_row(' - post_max_size', ini_get('post_max_size'));
-		wan_print_row(' - memory_limit', ini_get('memory_limit'));
-		wan_print_row(' - mail.add_x_header', ini_get('mail.add_x_header'));
-		wan_print_row(' - mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
-		wan_print_row(' - sendmail_from', ini_get('sendmail_from'));
-		wan_print_row(' - sendmail_path', ini_get('sendmail_path'));
-		wan_print_row(' - SMTP',          ini_get('SMTP'));
+		wan_print_row(' - safe_mode', config_status('safe_mode') ? 'on' : 'off');
+		wan_print_row(' - magic_quotes_gpc', config_status('magic_quotes_gpc') ? 'on' : 'off');
+		wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
+		wan_print_row(' - allow_url_fopen', config_status('allow_url_fopen') ? 'on' : 'off');
+		wan_print_row(' - file_uploads', config_status('file_uploads') ? 'on' : 'off');
+		wan_print_row(' - upload_max_filesize', config_status('upload_max_filesize'));
+		wan_print_row(' - post_max_size', config_status('post_max_size'));
+		wan_print_row(' - memory_limit', config_status('memory_limit'));
+		wan_print_row(' - mail.add_x_header', config_status('mail.add_x_header'));
+		wan_print_row(' - mail.force_extra_parameters', config_status('mail.force_extra_parameters'));
+		wan_print_row(' - sendmail_from', config_status('sendmail_from'));
+		wan_print_row(' - sendmail_path', config_status('sendmail_path'));
+		wan_print_row(' - SMTP',          config_status('SMTP'));
 		
 		list($infos) = parseDSN($dsn);
 		

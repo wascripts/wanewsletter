@@ -106,6 +106,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	require WAMAILER_DIR . '/class.mailer.php';
 	
 	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+	$mailer->signature = WA_X_MAILER;
 	
 	if( $nl_config['use_smtp'] )
 	{

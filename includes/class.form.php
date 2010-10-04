@@ -50,6 +50,7 @@ class Wanewsletter {
 		require WAMAILER_DIR . '/class.mailer.php';
 		
 		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+		$mailer->signature = WA_X_MAILER;
 		
 		if( $nl_config['use_smtp'] )
 		{
@@ -364,7 +365,11 @@ class Wanewsletter {
 		$this->mailer->set_address($this->account['email']);
 		$this->mailer->set_subject(sprintf($lang['Subject_email']['Subscribe'], $nl_config['sitename']));
 		$this->mailer->set_priority(1);
-		$this->mailer->set_return_path($this->listdata['return_email']);
+		
+		if( $this->listdata['return_email'] != '' )
+		{
+			$this->mailer->set_return_path($this->listdata['return_email']);
+		}
 		
 		$this->mailer->use_template($email_tpl, array(
 			'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
@@ -528,7 +533,11 @@ class Wanewsletter {
 			$this->mailer->set_address($this->account['email']);
 			$this->mailer->set_subject($lang['Subject_email']['Unsubscribe_1']);
 			$this->mailer->set_priority(3);
-			$this->mailer->set_return_path($this->listdata['return_email']);
+			
+			if( $this->listdata['return_email'] != '' )
+			{
+				$this->mailer->set_return_path($this->listdata['return_email']);
+			}
 			
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'unsubscribe_cron' : 'unsubscribe_form';
 			

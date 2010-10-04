@@ -110,38 +110,12 @@ if( $listdata = $result->fetch() )
 	}
 	else if( $mode == 'validate' )
 	{
-		require WAMAILER_DIR . '/class.mailer.php';
 		require WAMAILER_DIR . '/class.pop.php';
 		require WA_ROOTDIR . '/includes/class.form.php';
 		require WA_ROOTDIR . '/includes/functions.validate.php';
-		include WA_ROOTDIR . '/includes/functions.stats.php';
+		require WA_ROOTDIR . '/includes/functions.stats.php';
 		
 		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel
-		
-		//
-		// Initialisation de la classe mailer
-		//
-		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-		
-		if( $nl_config['use_smtp'] )
-		{
-			$mailer->smtp_path = WAMAILER_DIR . '/';
-			$mailer->use_smtp(
-				$nl_config['smtp_host'],
-				$nl_config['smtp_port'],
-				$nl_config['smtp_user'],
-				$nl_config['smtp_pass']
-			);
-		}
-		
-		$mailer->set_charset($lang['CHARSET']);
-		$mailer->set_format(FORMAT_TEXTE);
-		$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
-		
-		if( $listdata['return_email'] != '' )
-		{
-			$mailer->set_return_path($listdata['return_email']);
-		}
 		
 		$wan = new Wanewsletter($listdata);
 		$pop = new Pop();

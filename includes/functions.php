@@ -799,13 +799,17 @@ function active_urls($str)
  * 
  * Retourne le statut d'une directive de configuration (telle que réglée sur On ou Off)
  * 
- * @param string $config_name    Nom de la directive
+ * @param string $name    Nom de la directive
  * 
  * @return boolean
  */
-function config_status($config_name)
+function config_status($name)
 {
-	return ( ($config_val = @ini_get($config_name)) == 1 || strtolower($config_val) == 'on' ) ? true : false;
+	$value = ini_get($name);
+	if( preg_match('#^off|false$#i', $value) ) {
+		$value = false;
+	}
+	return $value;
 }
 
 /**

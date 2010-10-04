@@ -110,6 +110,7 @@ if( $mode == 'adduser' )
 			}
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$mailer->signature = WA_X_MAILER;
 			
 			if( $nl_config['use_smtp'] )
 			{
@@ -385,6 +386,7 @@ if( isset($_POST['submit']) )
 			$pseudo = $result->column('admin_login');
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$mailer->signature = WA_X_MAILER;
 			
 			if( $nl_config['use_smtp'] )
 			{

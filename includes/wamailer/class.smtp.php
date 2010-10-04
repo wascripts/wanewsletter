@@ -20,7 +20,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wamailer/
  * @license http://www.gnu.org/copyleft/lesser.html  GNU Lesser General Public License
- * @version 2.4
+ * @version 2.5
  */
 
 if( !defined('CLASS_SMTP_INC') )

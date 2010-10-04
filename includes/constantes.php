@@ -150,7 +150,7 @@ if( !defined('UPLOAD_ERR_CANT_WRITE') ) // Introduite en PHP 5.1.0
 }
 
 //
-// Si nous un accés restreint à cause de open_basedir, certains fichiers uploadés 
+// Si nous avons un accés restreint à cause de open_basedir, certains fichiers uploadés 
 // devront être déplacés vers le dossier des fichiers temporaires du script pour être 
 // accessible en lecture
 //
@@ -271,4 +271,8 @@ else
 	define('WA_USER_BROWSER', 'other');
 }
 
-?>
+//
+// Chaîne utilisée pour définir l'entête X-Mailer des emails envoyés par Wanewsletter
+//
+define('WA_X_MAILER', sprintf('Wanewsletter/%s', WA_VERSION));
+

@@ -237,6 +237,7 @@ switch( $mode )
 				require WAMAILER_DIR . '/class.mailer.php';
 				
 				$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+				$mailer->signature = WA_X_MAILER;
 				
 				if( $nl_config['use_smtp'] )
 				{
@@ -462,6 +463,7 @@ switch( $mode )
 			// Initialisation de la classe mailer
 			//
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$mailer->signature = WA_X_MAILER;
 			
 			if( $nl_config['use_smtp'] )
 			{

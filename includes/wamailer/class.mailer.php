@@ -20,7 +20,7 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wamailer/
  * @license http://www.gnu.org/copyleft/lesser.html	 GNU Lesser General Public License
- * @version 2.4
+ * @version 2.5
  */
 
 if( !defined('CLASS_MAILER_INC') )
@@ -127,15 +127,6 @@ class Mailer {
 	var $sendmail_cmd           = '';
 	
 	/***************************************************************/
-	
-	/**
-	 * Paramètres de commandes pour le 5e argument de la fonction mail()
-	 * (Non fonctionnel avec le safe mode activé)
-	 * 
-	 * @var string
-	 * @access public
-	 */	
-	var $additional_params      = '';
 	
 	/**
 	 * Chemins par défaut pour les modèles d'emails 
@@ -390,12 +381,12 @@ class Mailer {
 	var $fix_bug_mail           = null;
 	
 	/**
-	 * Version actuelle de la classe
+	 * Texte placé dans l'entête X-Mailer
 	 * 
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
-	var $version                = '2.4+';
+	var $signature              = 'Wamailer/2.5';
 	
 	/**
 	 * Constructeur de classe
@@ -1715,10 +1706,22 @@ class Mailer {
 			case WM_HOST_OTHER:
 				//
 				// Détection du safe_mode. S'il est activé, on ne pourra pas
-				// régler le 5e argument de l'adresse email.
+				// régler l'adresse email de retour (return-path) avec le
+				// cinquième argument.
+				// En alternative, utilisation de ini_get() et ini_set() sur
+				// l'option sendmail_from de PHP ?
 				//
-				$old_Rpath = @ini_get('sendmail_from');
-				@ini_set('sendmail_from', $Rpath);
+				$safe_mode = ini_get('safe_mode');
+				if( preg_match('#^off|false$#i', $safe_mode) )
+				{
+					$safe_mode = false;
+				}
+				
+				if( $safe_mode )
+				{
+					$old_Rpath = ini_get('sendmail_from');
+					ini_set('sendmail_from', $Rpath);
+				}
 				
 				if( strncasecmp(PHP_OS, 'Win', 3) == 0 )
 				{
@@ -1728,24 +1731,24 @@ class Mailer {
 					$headers = preg_replace('/\r\n?|\n/', "\r\n", $headers);
 				}
 				
-				$safe_mode     = @ini_get('safe_mode');
-				$safe_mode_gid = @ini_get('safe_mode_gid');// Ajout pour free.fr et sa config php exotique
-				
-				if( !empty($this->additional_params) && !$safe_mode && !$safe_mode_gid )
+				if( !$safe_mode )
 				{
-					$result = @mail($address, $subject, $message, $headers, $this->additional_params);
+					$result = mail($address, $subject, $message, $headers, '-f' . $Rpath);
 				}
 				else
 				{
-					$result = @mail($address, $subject, $message, $headers);
+					$result = mail($address, $subject, $message, $headers);
 				}
 				
-				@ini_set('sendmail_from', $old_Rpath);
+				if( $safe_mode )
+				{
+					ini_set('sendmail_from', $old_Rpath);
+				}
 				break;
 			
 			case WM_HOST_ONLINE:
 				list($sender) = explode('@', $this->sender);
-				$result = @email($sender, $address, $subject, $message, $sender, $headers);
+				$result = email($sender, $address, $subject, $message, $sender, $headers);
 				break;
 			
 			case WM_SMTP_MODE:
@@ -1924,7 +1927,7 @@ class Mailer {
 				// Pas moyen d'obtenir une adresse à utiliser.
 				// En dernier ressort, nous utilisons une adresse factice
 				//
-				$Rpath = 'wamailer@'.$this->server_from;
+				$Rpath = 'postmaster@'.$this->server_from;
 			}
 		}
 		
@@ -2134,7 +2137,7 @@ class Mailer {
 		}
 		
 		$this->headers['Date']         = date(DATE_RFC2822);
-		$this->headers['X-Mailer']     = 'Wamailer/' . $this->version;
+		$this->headers['X-Mailer']     = $this->signature;
 		$this->headers['X-AntiAbuse']  = 'Sender IP - ' . $this->sender_ip . '/Server Name - <' . $this->server_from . '>';
 		$this->headers['MIME-Version'] = '1.0'; 
 		$this->headers['Message-ID']   = '<' . md5(microtime() . rand()) . '@' . $this->server_from . '>';
