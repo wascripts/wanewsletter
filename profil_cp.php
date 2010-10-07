@@ -44,7 +44,7 @@ if( !$nl_config['enable_profil_cp'] )
 //
 $session = new Session();
 
-function check_login($email, $regkey = null, $passwd = null)
+function check_login($email, $regkey = null)
 {
 	global $db, $nl_config, $other_tags;
 	
@@ -78,23 +78,6 @@ function check_login($email, $regkey = null, $passwd = null)
 	
 	if( $row = $result->fetch() )
 	{
-		if( !is_null($passwd) && strcmp($row['abo_pwd'], $passwd) != 0 )
-		{
-			$sql = "SELECT COUNT(*) AS testpass
-				FROM " . ABO_LISTE_TABLE . "
-				WHERE register_key = '" . $db->escape($regkey) . "'
-					AND abo_id = " . $row['abo_id'];
-			if( !($res = $db->query($sql)) )
-			{
-				trigger_error('Impossible de tester le mot de passe de l\'abonné', CRITICAL_ERROR);
-			}
-			
-			if( $res->column('testpass') == 0 )
-			{
-				return false;
-			}
-		}
-		
 		$abodata = array();
 		$abodata['id']       = $row['abo_id'];
 		$abodata['pseudo']   = $row['abo_pseudo'];
@@ -114,16 +97,29 @@ function check_login($email, $regkey = null, $passwd = null)
 		}
 		
 		$abodata['listes'] = array();
+		$regkey_matched = false;
 		
 		do
 		{
 			$abodata['listes'][$row['liste_id']] = $row;
+			
+			if( !is_null($regkey) && strcmp($regkey, md5($row['register_key'])) == 0 )
+			{
+				$regkey_matched = true;
+			}
 		}
 		while( $row = $result->fetch() );
 		
 		if( empty($abodata['language']) )
 		{
 			$abodata['language'] = $nl_config['language'];
+		}
+		
+		if( !is_null($regkey) && strcmp($abodata['passwd'], $regkey) != 0 && !$regkey_matched )
+		{
+			// Le mot de passe rentré ne correspond ni au mot de passe de l'abonné,
+			// ni à l'une de ses clés d'enregistrement
+			return false;
 		}
 		
 		return $abodata;
@@ -161,7 +157,7 @@ if( $mode != 'login' && $mode != 'sendkey' )
 		}
 		else
 		{
-			$abodata = check_login($data['email'], $data['key'], $data['key']);
+			$abodata = check_login($data['email'], $data['key']);
 			if( !is_array($abodata) )
 			{
 				$mode = 'login';
@@ -186,15 +182,16 @@ switch( $mode )
 		if( isset($_POST['submit']) )
 		{
 			$regkey = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
+			$regkey_md5 = md5($regkey);
 			
-			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey, md5($regkey))) )
+			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey_md5)) )
 			{
 				if( $abodata['status'] == ABO_ACTIF )
 				{
-					$key  = ( $regkey == $abodata['regkey'] ) ? $regkey : md5($regkey);
-					$data = serialize(array('email' => $abodata['email'], 'key' => $key));
-					
-					$session->send_cookie('abo', $data, (time() + 3600));
+					$session->send_cookie('abo', serialize(array(
+						'email' => $abodata['email'],
+						'key'   => $regkey_md5
+					)), (time() + 3600));
 					
 					Location('profil_cp.php');
 				}

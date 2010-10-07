@@ -87,7 +87,7 @@ if( !defined('E_DEPRECATED') ) // Compatibilité PHP5.3
 	define('E_DEPRECATED', 8192);
 }
 
-if( !defined('DATE_RFC1123') ) // Compatibilité PHP ??
+if( !defined('DATE_RFC1123') ) // Compatibilité PHP 5.1.1
 {
 	define('DATE_RFC1123', 'D, d M Y H:i:s T');
 }
