@@ -227,7 +227,30 @@ ul.links li:after  { content: "]"; }
 	color: black;
 }
 
-.stats { margin: 1.5em auto 0; text-align: center; }
+.stats { margin: 1.5em 0; text-align: center; }
+
+div#graph-box {
+	position: relative;
+	width: 560px;
+	height: 260px;
+	margin: 10px auto;
+	font-size: 0;
+}
+#graph2 {
+	position: absolute;
+	overflow:hidden;
+	top: 0;
+	left: 560px;
+	width: 0;
+	transition: all ease-out .85s;
+	-o-transition: all ease-out .85s;
+	-moz-transition: all ease-out .85s;
+	-webkit-transition: all ease-out .85s;
+}
+#graph2.toLeft {
+	width: 560px;
+	left: 0;
+}
 
 
 /* Textes et liens */

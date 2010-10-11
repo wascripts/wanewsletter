@@ -502,8 +502,8 @@ $output->assign_vars(array(
 	
 	'YEAR_LIST'       => $y_list,
 	'MONTH_LIST'      => $m_list,
-	'L_PREV_PERIOD'   => convert_time('F Y', mktime(0, 0, 0, $prev_m, 1, $prev_y)),
-	'L_NEXT_PERIOD'   => convert_time('F Y', mktime(0, 0, 0, $next_m, 1, $next_y)),
+	'L_PREV_PERIOD'   => $lang['Prev_month'],
+	'L_NEXT_PERIOD'   => $lang['Next_month'],
 	'U_PREV_PERIOD'   => sessid('./stats.php?year=' . $prev_y . '&amp;month=' . $prev_m),
 	'U_NEXT_PERIOD'   => sessid('./stats.php?year=' . $next_y . '&amp;month=' . $next_m),
 	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;year=' . $year . '&amp;month=' . $month),

@@ -640,6 +640,8 @@ $lang['Subscribe_per_day']          = "Subscriptions/Days";
 $lang['Graph_bar_title']            = "The number of inscriptions per day for the month given";
 $lang['Camembert_title']            = "Shares of the various lists compared to the total number of subscribers";
 $lang['Stats_dir_not_writable']     = "The <samp>stats/</samp> directory doesn't seems to be writable!";
+$lang['Prev_month']                 = "Previous month";
+$lang['Next_month']                 = "Next month";
 
 
 //
