@@ -73,5 +73,7 @@ span.hl-html    { background-color: inherit; color: black; }
 span.hl-keyword { background-color: inherit; color: green; }
 span.hl-string  { background-color: inherit; color: #D00; }
 
-
+/* Section Contribuer... */
+address#address,
+form { margin: 15px 0 15px 10%; }
 
