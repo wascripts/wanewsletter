@@ -600,6 +600,12 @@ $lang['Explain']['send']            = "The sending form allows you to write, sen
 $lang['Explain']['join']            = "Here you can attach files to your newsletter (be carefull not to get your newsletter to big)\nIf file upload is not allowed on your server, you can indicate a distant file (e.g&thinsp;: <samp>http://www.domaine.com/rep/picture.gif</samp>) or a file manually uploaded into the dir of joined files\nYou can also use one the files attached to another newsletter of the same mailing list";
 $lang['Explain']['text']            = "Compose your newsletter in text format here. Do not forget to insert the unsubscribe link, either clicking on the dedicated button if it is available, or by adding manually the tag <code>{LINKS}</code> in your newsletter";
 $lang['Explain']['html']            = "Compose your newsletter in html format here. Do not forget to insert the unsubscribe link, either clicking on the dedicated button if it is available, or by adding manually the tag <code>{LINKS}</code> in your newsletter (the link will be in html format)\nIf you want to use one of the attached files (image, sound...) inside the newsletter, insert cid:file_name instead of the file's address\n\n<em>Example :</em>\n\nYou have uploaded an image named image1.gif and want to use it inside an image tag in your html newsletter. Put the img tag with src attribute : cid:image1.gif ( <code>&lt;img src=\"cid:image1.gif\" alt=\"Alternative text\" /&gt;</code> )";
+$lang['Explain']['load']            = "You can specify external models and the script will load them for you. HTTP urls are allowed, along local path such as:
+<ul>
+<li>/path/to/document &ndash; absolute path</li>
+<li>~/path/to/document &ndash; the tilde (~) is shorthand for the document_root of your web space</li>
+<li>path/to/document &ndash; is relative to the installation directory of Wanewsletter</li>
+</ul>";
 
 $lang['Select_log_to_load']         = "Select a newsletter to load";
 $lang['Select_log_to_send']         = "Select a newsletter that you want to resend";
@@ -614,6 +620,8 @@ $lang['Model']                      = "Template";
 $lang['Dest']                       = "Recipient";
 $lang['Log_in_text']                = "Text format newsletter";
 $lang['Log_in_html']                = "Html format newsletter";
+$lang['Format_text']                = "Text format";
+$lang['Format_html']                = "HTML format";
 $lang['Last_modified']              = "Last modified : %s";
 $lang['Total_log_size']             = "Approx. newsletter size";
 $lang['Join_file_to_log']           = "File to attach to this newsletter";

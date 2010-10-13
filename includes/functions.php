@@ -990,23 +990,73 @@ function convert_encoding($data, $charset, $check_bom = true)
 }
 
 /**
- * http_get_contents()
+ * wan_get_contents()
  * 
- * Récupère un contenu via HTTP et le retourne, ainsi que le jeu de caractère de la chaîne,
- * si disponible, et le type de média
+ * Récupère un contenu local ou via HTTP et le retourne, ainsi que le jeu de
+ * caractère et le type de média de la chaîne, si disponible.
  * 
- * @param mixed $URL      L'URL à appeller
+ * @param string $URL      L'URL à appeller
  * @param string $errstr  Conteneur pour un éventuel message d'erreur
  * 
- * @return array
+ * @return mixed
+ */
+function wan_get_contents($URL, &$errstr)
+{
+	global $lang;
+	
+	if( strncmp($URL, 'http://', 7) == 0 )
+	{
+		$result = http_get_contents($URL, $errstr);
+		if( $result == false )
+		{
+			$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($URL), $errstr);
+		}
+	}
+	else
+	{
+		if( $URL[0] == '~' )
+		{
+			$URL = server_info('DOCUMENT_ROOT') . substr($URL, 1);
+		}
+		else if( $URL[0] != '/' )// Chemin non absolu
+		{
+			$URL = WA_ROOTDIR . '/' . $URL;
+		}
+		
+		if( is_readable($URL) )
+		{
+			$fp = fopen($URL, 'r');
+			$data = fread($fp, filesize($URL));
+			fclose($fp);
+			
+			$result = array('data' => $data, 'charset' => '');
+		}
+		else
+		{
+			$result = false;
+			$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($URL));
+		}
+	}
+	
+	return $result;
+}
+
+/**
+ * http_get_contents()
+ * 
+ * Récupère un contenu via HTTP et le retourne, ainsi que le jeu de
+ * caractère et le type de média de la chaîne, si disponible.
+ * 
+ * @param string $URL      L'URL à appeller
+ * @param string $errstr  Conteneur pour un éventuel message d'erreur
+ * 
+ * @return mixed
  */
 function http_get_contents($URL, &$errstr)
 {
 	global $lang;
 	
-	$part = @parse_url($URL);
-	
-	if( !is_array($part) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http' )
+	if( !($part = parse_url($URL)) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http' )
 	{
 		$errstr = $lang['Message']['Invalid_url'];
 		return false;
@@ -1014,7 +1064,7 @@ function http_get_contents($URL, &$errstr)
 	
 	$port = !isset($part['port']) ? 80 : $part['port'];
 	
-	if( !($fs = @fsockopen($part['host'], $port, $null, $null, 10)) )
+	if( !($fs = fsockopen($part['host'], $port, $null, $null, 10)) )
 	{
 		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
 		return false;
@@ -1025,7 +1075,7 @@ function http_get_contents($URL, &$errstr)
 	
 	fputs($fs, sprintf("GET %s HTTP/1.0\r\n", $path));// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
 	fputs($fs, sprintf("Host: %s\r\n", $part['host']));
-	fputs($fs, sprintf("User-Agent: Wanewsletter %s\r\n", WA_VERSION));
+	fputs($fs, sprintf("User-Agent: Wanewsletter/%s\r\n", WA_VERSION));
 	fputs($fs, "Accept: */*\r\n");
 	
 	if( extension_loaded('zlib') )
@@ -1037,6 +1087,7 @@ function http_get_contents($URL, &$errstr)
 	
 	$inHeader  = true;
 	$isGzipped = false;
+	$datatype = $charset = null;
 	$data = '';
 	$tmp  = fgets($fs, 1024);
 	
@@ -1058,15 +1109,11 @@ function http_get_contents($URL, &$errstr)
 			
 			if( $header == 'content-type' )
 			{
-				if( !preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $match) )
+				if( preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $match) )
 				{
-					$errstr = $lang['Message']['No_data_at_url'] . ' (type manquant)';
-					fclose($fs);
-					return false;
+					$datatype = $match[1];
+					$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
 				}
-				
-				$datatype = $match[1];
-				$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
 			}
 			else if( $header == 'content-encoding' && $value == 'gzip' )
 			{

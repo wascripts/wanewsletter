@@ -356,7 +356,7 @@ switch( $mode )
 			{
 				if( !empty($_POST['body_text_url']) )
 				{
-					$result = http_get_contents($_POST['body_text_url'], $errstr);
+					$result = wan_get_contents($_POST['body_text_url'], $errstr);
 					
 					if( $result == false )
 					{
@@ -370,7 +370,7 @@ switch( $mode )
 				
 				if( !empty($_POST['body_html_url']) )
 				{
-					$result = http_get_contents($_POST['body_html_url'], $errstr);
+					$result = wan_get_contents($_POST['body_html_url'], $errstr);
 					
 					if( $result == false )
 					{
@@ -389,6 +389,11 @@ switch( $mode )
 							{
 								if( preg_match('/http-equiv=("|\')Content-Type\\1/si', $meta[0])
 									&& preg_match('/content=("|\').+?;\s*charset=([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
+								{
+									$result['charset'] = $match[2];
+								}
+								// style <meta charset="<character_set>">
+								else if( preg_match('/charset=("|\')([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
 								{
 									$result['charset'] = $match[2];
 								}
@@ -492,6 +497,7 @@ switch( $mode )
 			$output->assign_vars(array(
 				'L_TITLE'         => $lang['Title']['select'],
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
+				'L_EXPLAIN_LOAD'  => $lang['Explain']['load'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM'          => sessid('./envoi.php')
@@ -512,8 +518,8 @@ switch( $mode )
 			
 			$output->assign_block_vars($bloc_name, array(
 				'L_LOAD_BY_URL' => $lang['Load_by_URL'],
-				'L_FORMAT_TEXT' => $lang['Log_in_text'],
-				'L_FORMAT_HTML' => $lang['Log_in_html'],
+				'L_FORMAT_TEXT' => $lang['Format_text'],
+				'L_FORMAT_HTML' => $lang['Format_html'],
 				
 				'BODY_TEXT_URL' => ( !empty($_POST['body_text_url']) ) ? htmlspecialchars(trim($_POST['body_text_url'])) : '',
 				'BODY_HTML_URL' => ( !empty($_POST['body_html_url']) ) ? htmlspecialchars(trim($_POST['body_html_url'])) : ''
@@ -667,35 +673,7 @@ switch( $mode )
 					return $match[0];
 				}
 				
-				if( substr($resource, 0, 7) == 'http://' )
-				{
-					$result = http_get_contents($resource, $errstr);
-					if( $result == false )
-					{
-						$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($resource), $errstr);
-					}
-				}
-				else
-				{
-					if( $resource[0] != '/' )// Chemin non absolu
-					{
-						$resource = WA_ROOTDIR . '/' . $resource;
-					}
-					
-					if( is_readable($resource) )
-					{
-						$fp = fopen($resource, 'r');
-						$data = fread($fp, filesize($resource));
-						fclose($fp);
-						
-						$result = array('data' => $data, 'charset' => '');
-					}
-					else
-					{
-						$result = false;
-						$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($resource));
-					}
-				}
+				$result = wan_get_contents($resource, $errstr);
 				
 				if( $result == false )
 				{

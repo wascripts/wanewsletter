@@ -600,6 +600,12 @@ $lang['Explain']['send']            = "Le formulaire d'envoi vous permet de rédi
 $lang['Explain']['join']            = "Vous pouvez ici joindre des fichiers à votre newsletter (attention à ne pas trop alourdir votre newsletter)\nSi l'upload de fichier n'est pas autorisé sur le serveur, vous pourrez indiquer un fichier distant (ex&thinsp;: <samp>http://www.domaine.com/rep/image.gif</samp>) ou un fichier manuellement uploadé dans le répertoire des fichiers joints\nVous pouvez également utiliser un des fichiers joints dans une autre newsletter de cette liste";
 $lang['Explain']['text']            = "Rédigez ici votre newsletter au format texte. N'oubliez pas de placer le lien de désinscription, soit en cliquant sur le bouton dédié s'il est disponible, soit en ajoutant manuellement le tag <code>{LINKS}</code> dans votre newsletter";
 $lang['Explain']['html']            = "Rédigez ici votre newsletter au format html. N'oubliez pas de placer le lien de désinscription , soit en cliquant sur le bouton dédié s'il est disponible, soit en ajoutant manuellement le tag <code>{LINKS}</code> dans votre newsletter (le lien sera au format html)\nSi vous voulez utiliser un des fichiers joints (une image, un son...) dans la newsletter html, placer au lieu de l'adresse du fichier cid:nom_du_fichier\n\n<em>Exemple&thinsp;:</em>\n\nVous avez uploadé l'image image1.gif et désirez l'utiliser dans une balise image de la newsletter html, vous placerez alors la balise img avec pour l'attribut src : cid:image1.gif ( <code>&lt;img src=\"cid:image1.gif\" alt=\"texte alternatif\" /&gt;</code> )";
+$lang['Explain']['load']            = "Vous pouvez spécifier les chemins vers des modèles externes et le script les chargera pour vous. Les urls http sont acceptées, ainsi que les chemins locaux tels que&nbsp;:
+<ul>
+<li>/path/to/document &ndash; part de la racine du serveur</li>
+<li>~/path/to/document &ndash; le  signe tilde (~) est un raccourci pour partir de la racine de votre espace web</li>
+<li>path/to/document &ndash; est relatif au répertoire d'installation de Wanewsletter</li>
+</ul>";
 
 $lang['Select_log_to_load']         = "Choisissez la newsletter à charger";
 $lang['Select_log_to_send']         = "Choisissez la newsletter dont vous voulez reprendre l'envoi";
@@ -614,6 +620,8 @@ $lang['Model']                      = "Modèle";
 $lang['Dest']                       = "Destinataire";
 $lang['Log_in_text']                = "Newsletter au format texte";
 $lang['Log_in_html']                = "Newsletter au format HTML";
+$lang['Format_text']                = "Format texte";
+$lang['Format_html']                = "Format HTML";
 $lang['Last_modified']              = "Dernière modification le %s";
 $lang['Total_log_size']             = "Poids approximatif de la newsletter";
 $lang['Join_file_to_log']           = "Fichier à joindre à cette newsletter";

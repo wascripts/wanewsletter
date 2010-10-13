@@ -58,6 +58,9 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 		</tbody>
 		<!-- END load_draft -->
 		<tbody id="loadByURL">
+			<tr>
+				<td colspan="2" class="explain">{L_EXPLAIN_LOAD}</td>
+			</tr>
 			<!-- BEGIN load_text_by_url -->
 			<tr>
 				<td class="row1"><label>{load_text_by_url.L_LOAD_BY_URL}&nbsp;:</label></td>
