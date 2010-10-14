@@ -1025,11 +1025,7 @@ function wan_get_contents($URL, &$errstr)
 		
 		if( is_readable($URL) )
 		{
-			$fp = fopen($URL, 'r');
-			$data = fread($fp, filesize($URL));
-			fclose($fp);
-			
-			$result = array('data' => $data, 'charset' => '');
+			$result = array('data' => file_get_contents($URL), 'charset' => '');
 		}
 		else
 		{
@@ -1085,9 +1081,8 @@ function http_get_contents($URL, &$errstr)
 	
 	fputs($fs, "Connection: close\r\n\r\n");
 	
-	$inHeader  = true;
 	$isGzipped = false;
-	$datatype = $charset = null;
+	$datatype  = $charset = null;
 	$data = '';
 	$tmp  = fgets($fs, 1024);
 	
@@ -1098,38 +1093,40 @@ function http_get_contents($URL, &$errstr)
 		return false;
 	}
 	
-	do {
+	// Entêtes
+	while( !feof($fs) )
+	{
 		$tmp = fgets($fs, 1024);
 		
-		if( $inHeader && strpos($tmp, ':') )
+		if( !strpos($tmp, ':') ) {
+			break;
+		}
+		
+		list($header, $value) = explode(':', $tmp);
+		$header = strtolower($header);
+		$value  = trim($value);
+		
+		if( $header == 'content-type' )
 		{
-			list($header, $value) = explode(':', $tmp);
-			$header = strtolower($header);
-			$value  = trim($value);
-			
-			if( $header == 'content-type' )
+			if( preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $match) )
 			{
-				if( preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $match) )
-				{
-					$datatype = $match[1];
-					$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
-				}
-			}
-			else if( $header == 'content-encoding' && $value == 'gzip' )
-			{
-				$isGzipped = true;
+				$datatype = $match[1];
+				$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
 			}
 		}
-		else
+		else if( $header == 'content-encoding' && $value == 'gzip' )
 		{
-			$inHeader = false;
-			$data .= $tmp;
+			$isGzipped = true;
 		}
 	}
-	while( !feof($fs) );
+	
+	// Contenu
+	while( !feof($fs) )
+	{
+		$data .= fgets($fs, 1024);
+	}
 	
 	fclose($fs);
-	$data = substr($data, 2);// Skip first CRLF
 	
 	if( $isGzipped && !preg_match('/\.t?gz$/i', $part['path']) )
 	{
@@ -1147,7 +1144,7 @@ function http_get_contents($URL, &$errstr)
 	{
 		$prolog = substr($data, 0, strpos($data, "\n"));
 		
-		if( preg_match('/\s+encoding\s?=\s?("|\')([a-z][a-z0-9._-]*)\\1"/i', $prolog, $match) )
+		if( preg_match('/\s+encoding\s?=\s?("|\')([a-z][a-z0-9._-]*)\\1/i', $prolog, $match) )
 		{
 			$charset = $match[2];
 		}
