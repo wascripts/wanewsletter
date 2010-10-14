@@ -1,3 +1,4 @@
+<!--[if gte IE 9]><!-->
 <script type="text/javascript">
 <!--
 var use_ftp_status  = {USE_FTP_STATUS};
@@ -17,18 +18,18 @@ function display_block(evt)
 	}
 }
 
-if( typeof(document.styleSheets) != 'undefined' && typeof(document.styleSheets[0].insertRule) != 'undefined' ) {
+if( typeof(document.styleSheets) != 'undefined' ) {
 	
 	if( use_ftp_status == false ) {
 		document.styleSheets[0].insertRule(
-			'table.content tr#use_ftp_choice + tr, table.content tr#use_ftp_choice ~ tr { display: none; }',
+			'table.content tr#use_ftp_choice ~ tr { display: none; }',
 			document.styleSheets[0].cssRules.length-1
 		);
 	}
 	
 	if( use_smtp_status == false ) {
 		document.styleSheets[0].insertRule(
-			'table.content tr#use_smtp_choice + tr, table.content tr#use_smtp_choice ~ tr { display: none; }',
+			'table.content tr#use_smtp_choice ~ tr { display: none; }',
 			document.styleSheets[0].cssRules.length-1
 		);
 	}
@@ -43,6 +44,7 @@ if( typeof(document.styleSheets) != 'undefined' && typeof(document.styleSheets[0
 }
 //-->
 </script>
+<!--<![endif]-->
 
 <p id="explain">{L_EXPLAIN}</p>
 

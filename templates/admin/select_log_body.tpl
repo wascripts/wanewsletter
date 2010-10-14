@@ -1,4 +1,5 @@
 <!-- BEGIN script_load_by_url -->
+<!--[if gte IE 8]><!-->
 <script type="text/javascript">
 <!--
 if( typeof(document.styleSheets) != 'undefined' ) {
@@ -15,17 +16,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 			var displayVal = null;
 			
 			if( this.selectedIndex == (this.options.length - 1) ) {
-				//
-				// La détection de navigateur est à éviter mais il arrive que l'on ait pas trop le choix...
-				// IE ne reconnait pas la valeur 'table-row-group' de la propriété CSS display. Ça semble 
-				// en revanche fonctionner avec 'block'...
-				//
-				if( navigator.userAgent.indexOf('Opera') == -1 && navigator.userAgent.indexOf('MSIE') != -1 ) {
-					displayVal = 'block';
-				}
-				else {
-					displayVal = 'table-row-group';
-				}
+				displayVal = 'table-row-group';
 			}
 			else {
 				displayVal = 'none';
@@ -42,6 +33,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 }
 //-->
 </script>
+<!--<![endif]-->
 <!-- END script_load_by_url -->
 
 <form method="post" action="{U_FORM}">
