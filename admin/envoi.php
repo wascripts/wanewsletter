@@ -65,7 +65,7 @@ $logdata['log_subject']   = ( !empty($_POST['subject']) ) ? trim($_POST['subject
 $logdata['log_body_text'] = ( !empty($_POST['body_text']) ) ? trim($_POST['body_text']) : '';
 $logdata['log_body_html'] = ( !empty($_POST['body_html']) ) ? trim($_POST['body_html']) : '';
 $logdata['log_status']    = ( !empty($_POST['log_status']) ) ? STATUS_MODEL : STATUS_WRITING;
-$logdata['log_date']      = -1;
+$logdata['log_date']      = ( !empty($_POST['log_date']) ) ? intval($_POST['log_date']) : -1;
 
 $mode = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
 $prev_status = ( isset($_POST['prev_status']) ) ? intval($_POST['prev_status']) : $logdata['log_status'];
@@ -392,7 +392,7 @@ switch( $mode )
 								{
 									$result['charset'] = $match[2];
 								}
-								// style <meta charset="<character_set>">
+								// HTML5 style <meta charset="<character_set>">
 								else if( preg_match('/charset=("|\')([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
 								{
 									$result['charset'] = $match[2];
@@ -405,9 +405,12 @@ switch( $mode )
 							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
 						}
 						
-						$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
-						$result['data'] = preg_replace('/<(head[^>]*)>/si',
-							"<\\1>\n<base href=\"" . htmlspecialchars($URL) . "/\">", $result['data']);
+						if( strncmp($URL, 'http://', 7) == 0 )
+						{
+							$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
+							$result['data'] = preg_replace('/<(head[^>]*)>/si',
+								"<\\1>\n<base href=\"" . htmlspecialchars($URL) . "/\">", $result['data']);
+						}
 					}
 					
 					$logdata['log_body_html'] = convert_encoding($result['data'], $result['charset']);
@@ -1013,7 +1016,7 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	$other_files = $joined_files_id = array();
 	
 	//
-	// On dispatches les données selon que le fichier appartient à la newsletter en cours ou non.
+	// On dispatche les données selon que le fichier appartient à la newsletter en cours ou non.
 	//
 	while( $row = $result->fetch() )
 	{
@@ -1025,7 +1028,7 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 		else
 		{
 			//
-			// file_id sert d'index dans le tableau, pour éviter les doublons ramenés par la requï¿½te
+			// file_id sert d'index dans le tableau, pour éviter les doublons ramenés par la requête
 			//
 			$other_files[$row['file_id']] = $row;
 		}
@@ -1109,6 +1112,7 @@ $output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $prev_status);
+$output->addHiddenField('log_date',    $logdata['log_date']);
 $output->addHiddenField('sessid',      $session->session_id);
 
 $output->page_header();
