@@ -75,7 +75,7 @@ if( isset($_POST['cancel']) )
 	Location('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 }
 
-$vararray = array('send', 'save', 'delete', 'attach', 'unattach');
+$vararray = array('test', 'send', 'save', 'delete', 'attach', 'unattach');
 foreach( $vararray as $varname )
 {
 	if( isset($_REQUEST[$varname]) )
@@ -605,6 +605,7 @@ switch( $mode )
 	case 'attach':
 	case 'send':
 	case 'save':
+	case 'test':
 		$cc_admin = ( !empty($_POST['cc_admin']) ) ? 1 : 0;
 		
 		if( ($mode == 'save' || $mode == 'send') && $listdata['cc_admin'] != $cc_admin )
@@ -691,7 +692,7 @@ switch( $mode )
 			$logdata['log_body_text'] = preg_replace_callback($regexp, 'replace_include', $logdata['log_body_text']);
 			$logdata['log_body_html'] = preg_replace_callback($regexp, 'replace_include', $logdata['log_body_html']);
 			
-			if( $mode == 'send' )
+			if( $mode == 'test' || $mode == 'send' )
 			{
 				if( DISABLE_CHECK_LINKS == false && $listdata['liste_format'] != FORMAT_HTML && !strstr($logdata['log_body_text'], '{LINKS}') )
 				{
@@ -1049,7 +1050,20 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 //
 // Envois des emails
 //
-if( $mode == 'progress' )
+$supp_address = array();
+if( $mode == 'test' && !empty($_POST['test_address']) )
+{
+	require_once WAMAILER_DIR . '/class.mailer.php';
+	
+	$supp_address = explode(',', $_POST['test_address']);
+	$supp_address = array_map('trim', $supp_address);
+	$supp_address = array_unique($supp_address);
+	$supp_address = array_filter($supp_address, create_function('$email',
+		'return Mailer::validate_email($email);'
+	));
+}
+
+if( ($mode == 'test' && count($supp_address) > 0) || $mode == 'progress' )
 {
 	if( !$auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
 	{
@@ -1075,7 +1089,12 @@ if( $mode == 'progress' )
 	//
 	// On lance l'envoi
 	//
-	$message = launch_sending($listdata, $logdata);
+	if( $mode == 'test' )
+	{
+		$logdata['log_subject'] = '[test] '.$logdata['log_subject'];
+	}
+	
+	$message = launch_sending($listdata, $logdata, $supp_address);
 	
 	$output->message(nl2br($message));
 }
@@ -1109,6 +1128,9 @@ $output->assign_vars(array(
 	'L_STATUS_MODEL'          => $lang['Status_model'],
 	'L_CC_ADMIN'              => $lang['Receive_copy'],
 	'L_CC_ADMIN_TITLE'        => htmlspecialchars($lang['Receive_copy_title']),
+	'L_TEST_SEND'             => $lang['Test_send'],
+	'L_TEST_SEND_NOTE'        => $lang['Test_send_note'],
+	
 	'L_SEND_BUTTON'           => $lang['Button']['send'],
 	'L_SAVE_BUTTON'           => $lang['Button']['save'],
 	'L_DELETE_BUTTON'         => $lang['Button']['delete'],

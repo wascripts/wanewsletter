@@ -466,7 +466,7 @@ $lang['Liste_name2']                = "Nom de la liste";
 //
 $lang['Explain']['liste']           = "Ici, vous pouvez ajouter, modifier, supprimer des listes de diffusion, et régler le système de purge.";
 $lang['Explain']['purge']           = "Le système de purge vous permet de nettoyer automatiquement la table des abonnés en supprimant les comptes non activés et dont la date de validité est dépassée.\nCette option est inutile si votre liste ne demande pas de confirmation d'inscription";
-$lang['Explain']['cron']            = "Si vous voulez utilisez l'option de gestion des inscription avec cron, remplissez les champs ci dessous (voir %sla faq%s)";
+$lang['Explain']['cron']            = "Si vous voulez utilisez l'option de gestion des inscriptions avec cron, remplissez les champs ci dessous (voir %sla faq%s)";
 $lang['Click_create_liste']         = "Cliquez %sici%s pour créer une liste de diffusion";
 $lang['Click_return_liste']         = "Cliquez %sici%s pour retourner aux informations sur cette liste";
 $lang['ID_list']                    = "ID de la liste";
@@ -637,6 +637,9 @@ $lang['File_on_server']             = "fichier existant";
 $lang['Cancel_send_log']            = "Êtes-vous sûr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
 $lang['Receive_copy']               = "Recevoir une copie";
 $lang['Receive_copy_title']         = "Si actif, vous recevrez une copie de la newsletter envoyée";
+$lang['Test_send_finish']           = "Test effectué. Vérifiez vos boîtes mail.";
+$lang['Test_send']                  = "Faire un test d'envoi";
+$lang['Test_send_note']             = "Vous pouvez faire un test d'envoi pour vérifier l'affichage de votre lettre en condition réelle. Indiquez une ou plusieurs adresses email séparée par une virgule et validez";
 
 
 //

@@ -42,6 +42,16 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 				</select>
 			</td>
 		</tr>
+		<tr>
+			<td colspan="2" class="explain">{L_TEST_SEND_NOTE}</td>
+		</tr>
+		<tr>
+			<td class="medrow1"><label for="test_address">{L_TEST_SEND}&nbsp;:</label></td>
+			<td class="row2">
+				<input type="text" id="test_address" name="test_address" size="40" class="text" />
+				<input type="submit" name="test" value="{L_SEND_BUTTON}" class="button" />
+			</td>
+		</tr>
 	</table>
 </div>
 <!-- BEGIN last_modified -->

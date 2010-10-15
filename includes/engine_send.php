@@ -103,7 +103,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	// Initialisation de la classe mailer
 	//
-	require WAMAILER_DIR . '/class.mailer.php';
+	require_once WAMAILER_DIR . '/class.mailer.php';
 	
 	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 	$mailer->signature = WA_X_MAILER;
@@ -259,65 +259,70 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		$supp_address = array_unique($supp_address); // Au cas où...
 	}
 	
-	//
-	// On récupère les infos sur les abonnés destinataires
-	//
-	$sql = "SELECT COUNT(a.abo_id) AS total
-		FROM " . ABONNES_TABLE . " AS a
-			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
-				AND al.liste_id  = $listdata[liste_id]
-				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-				AND al.send      = 0
-		WHERE a.abo_status = " . ABO_ACTIF;
-	if( !($result = $db->query($sql)) )
+	$abo_ids     = array();
+	$total_abo   = 0;
+	$abo_address = array();
+	$format      = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
+	
+	if( $logdata['log_status'] == STATUS_STANDBY )
 	{
-		trigger_error('Impossible d\'obtenir le nombre d\'adresses emails', ERROR);
+		//
+		// On récupère les infos sur les abonnés destinataires
+		//
+		$sql = "SELECT COUNT(a.abo_id) AS total
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+					AND al.liste_id  = $listdata[liste_id]
+					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
+					AND al.send      = 0
+			WHERE a.abo_status = " . ABO_ACTIF;
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir le nombre d\'adresses emails', ERROR);
+		}
+		
+		$total_abo = $result->column('total');
+		if( $nl_config['emails_sended'] > 0 )
+		{
+			$total_abo = min($total_abo, $nl_config['emails_sended']);
+		}
+		
+		$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, al.register_key, al.format
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+					AND al.liste_id  = $listdata[liste_id]
+					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
+					AND al.send      = 0
+			WHERE a.abo_status = " . ABO_ACTIF;
+		if( $nl_config['emails_sended'] > 0 )
+		{
+			$sql .= " LIMIT $nl_config[emails_sended] OFFSET 0";
+		}
+		
+		if( !($result = $db->query($sql)) )
+		{
+			trigger_error('Impossible d\'obtenir la liste des adresses emails', ERROR);
+		}
+		
+		while( $row = $result->fetch() )
+		{
+			array_push($abo_address, $row);
+		}
 	}
 	
-	$total_abo = $result->column('total');
-	if( $nl_config['emails_sended'] > 0 )
-	{
-		$total_abo = min($total_abo, $nl_config['emails_sended']);
-	}
-	
-	$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, al.register_key, al.format
-		FROM " . ABONNES_TABLE . " AS a
-			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
-				AND al.liste_id  = $listdata[liste_id]
-				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-				AND al.send      = 0
-		WHERE a.abo_status = " . ABO_ACTIF;
-	if( $nl_config['emails_sended'] > 0 )
-	{
-		$sql .= " LIMIT $nl_config[emails_sended] OFFSET 0";
-	}
-	
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des adresses emails', ERROR);
-	}
-	
-	$abo_ids = array();
-	$format  = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
-	
-	if( $row = $result->fetch() )
+	if( count($abo_address) > 0 || ($logdata['log_status'] != STATUS_STANDBY && count($supp_address) > 0) )
 	{
 		if( $nl_config['engine_send'] == ENGINE_BCC )
 		{
-			fake_header(false);
-			
 			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			$abo_ids = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			
-			do
+			foreach( $abo_address as $row )
 			{
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				array_push($abo_ids[$abo_format], $row['abo_id']);
 				array_push($abonnes[$abo_format], $row['abo_email']);
-				
-				fake_header(true);
 			}
-			while( $row = $result->fetch() );
 			
 			if( $listdata['liste_format'] != FORMAT_HTML )
 			{
@@ -461,7 +466,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			$counter = 0;
 			$sendError = 0;
 			
-			do
+			while( ($row = array_pop($abo_address)) != null || ($row = array_pop($supp_address_ok)) != null )
 			{
 				$counter++;
 				$abo_format = ( !$format ) ? $row['format'] : $format;
@@ -571,12 +576,11 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					fake_header(true);
 				}
 			}
-			while( ($row = $result->fetch()) || ($row = array_pop($supp_address_ok)) != null );
 			
 			//
 			// Aucun email envoyé, il y a manifestement un problème, on affiche le message d'erreur
 			//
-			if( $sendError == $total_abo )
+			if( $total_abo > 0 && $sendError == $total_abo )
 			{
 				flock($fp, LOCK_UN);
 				fclose($fp);
@@ -670,7 +674,7 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 	flock($fp, LOCK_UN);
 	fclose($fp);
 	
-	if( $no_send > 0 )
+	if( $logdata['log_status'] == STATUS_STANDBY && $no_send > 0 )
 	{
 		$message = sprintf($lang['Message']['Success_send'], $nl_config['emails_sended'], $sended, ($sended + $no_send));
 		
@@ -689,36 +693,44 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 	{
 		unlink($lockfile);
 		
-		$db->beginTransaction();
-		
-		$sql = "UPDATE " . LOG_TABLE . "
-			SET log_status = " . STATUS_SENDED . ",
-				log_numdest = $sended
-			WHERE log_id = " . $logdata['log_id'];
-		if( !$db->query($sql) )
+		if( $logdata['log_status'] == STATUS_STANDBY )
 		{
-			trigger_error('Impossible de mettre à jour la table des logs', ERROR);
+			$db->beginTransaction();
+			
+			$sql = "UPDATE " . LOG_TABLE . "
+				SET log_status = " . STATUS_SENDED . ",
+					log_numdest = $sended
+				WHERE log_id = " . $logdata['log_id'];
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
+			}
+			
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
+				SET send = 0
+				WHERE liste_id = " . $listdata['liste_id'];
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+			}
+			
+			$sql = "UPDATE " . LISTE_TABLE . "
+				SET liste_numlogs = liste_numlogs + 1
+				WHERE liste_id = " . $listdata['liste_id'];
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table des listes', ERROR);
+			}
+			
+			$db->commit();
+			
+			$message = sprintf($lang['Message']['Success_send_finish'], $sended);
 		}
-		
-		$sql = "UPDATE " . ABO_LISTE_TABLE . "
-			SET send = 0
-			WHERE liste_id = " . $listdata['liste_id'];
-		if( !$db->query($sql) )
+		else // mode test
 		{
-			trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+			$message  = $lang['Test_send_finish'];
+			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load&amp;id=' . $logdata['log_id']) . '">', '</a>');
 		}
-		
-		$sql = "UPDATE " . LISTE_TABLE . "
-			SET liste_numlogs = liste_numlogs + 1
-			WHERE liste_id = " . $listdata['liste_id'];
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de mettre à jour la table des listes', ERROR);
-		}
-		
-		$db->commit();
-		
-		$message = sprintf($lang['Message']['Success_send_finish'], $sended);
 	}
 	
 	return $message;
