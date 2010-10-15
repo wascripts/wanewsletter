@@ -129,13 +129,13 @@ class Auth {
 	 * 
 	 * @return array/boolean
 	 */
-	function check_auth($auth_type, $liste_id = 0)
+	function check_auth($auth_type, $liste_id = null)
 	{
 		global $admindata;
 		
 		$auth_name = $this->auth_ary[$auth_type];
 		
-		if( !$liste_id )
+		if( $liste_id == null )
 		{
 			$liste_id_ary = array();
 			foreach( $this->listdata as $liste_id => $auth_list )
@@ -150,7 +150,13 @@ class Auth {
 		}
 		else
 		{
-			return ( $admindata['admin_level'] == ADMIN || !empty($this->listdata[$liste_id][$auth_name]) ) ? true : false;
+			if( isset($this->listdata[$liste_id])
+				&& ($admindata['admin_level'] == ADMIN || !empty($this->listdata[$liste_id][$auth_name])) )
+			{
+				return true;
+			}
+			
+			return false;
 		}
 	}
 	
