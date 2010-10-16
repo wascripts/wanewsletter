@@ -1132,8 +1132,6 @@ $output->assign_vars(array(
 	'L_STATUS_MODEL'          => $lang['Status_model'],
 	'L_CC_ADMIN'              => $lang['Receive_copy'],
 	'L_CC_ADMIN_TITLE'        => htmlspecialchars($lang['Receive_copy_title']),
-	'L_TEST_SEND'             => $lang['Test_send'],
-	'L_TEST_SEND_NOTE'        => $lang['Test_send_note'],
 	
 	'L_SEND_BUTTON'           => $lang['Button']['send'],
 	'L_SAVE_BUTTON'           => $lang['Button']['save'],
@@ -1180,6 +1178,15 @@ if( $listdata['liste_format'] != FORMAT_TEXTE )
 		'L_EXPLAIN'  => nl2br($lang['Explain']['html']),
 		
 		'S_BODY'     => $body_html
+	));
+}
+
+if( $auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
+{
+	$output->assign_block_vars('test_send', array(
+		'L_TEST_SEND'      => $lang['Test_send'],
+		'L_TEST_SEND_NOTE' => $lang['Test_send_note'],
+		'L_SEND_BUTTON'    => $lang['Button']['send']
 	));
 }
 
