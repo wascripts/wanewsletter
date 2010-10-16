@@ -36,7 +36,6 @@ if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 
 $listdata = $auth->listdata[$admindata['session_liste']];
 
-$mode     = ( !empty($_GET['mode']) ) ? $_GET['mode'] : '';
 $file_id  = ( !empty($_GET['fid']) ) ? intval($_GET['fid']) : 0;
 $filename = ( !empty($_GET['file']) ) ? trim($_GET['file']) : '';
 
@@ -74,92 +73,37 @@ if( $filedata = $result->fetch() )
 		$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $filedata['file_physical_name']);
 	}
 	
-	$data   = '';
 	$is_svg = (strcasecmp($filedata['file_mimetype'], 'image/svg+xml') == 0);
 	
-	if( $mode != 'popup' || $is_svg == true )
+	if( ($data = file_get_contents($tmp_filename)) === false )
 	{
-		if( !($fp = @fopen($tmp_filename, 'rb')) )
-		{
-			exit('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
-		}
-		
-		$data = fread($fp, filesize($tmp_filename));
-		fclose($fp);
+		exit('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
 	}
 	
-	if( $mode == 'popup' )
+	header('Date: ' . gmdate(DATE_RFC1123));
+	header('Cache-Control: public, max-age=3600');
+	header('Content-Disposition: inline; filename="' . $filedata['file_real_name'] . '"');
+	header('Content-Length: ' . $filedata['file_size']);
+	
+	if( preg_match('#^image/svg\+xml$#i', $filedata['file_mimetype']) )
 	{
-		if( $is_svg == true )
+		$charset = 'UTF-8';
+		if( preg_match('/^<\?xml(.+?)\?>/', $data, $match) )
 		{
-			$width  = '360';
-			$height = '180';
-			
-			if( preg_match('/<(?:[^:]+:)?svg([^>]+)>/', $data, $match) )
+			if( preg_match('/encoding="([a-z0-9.:_-]+)"/i', $match[0], $match2) )
 			{
-				if( preg_match('/width=("|\')([0-9]+)\\1/', $match[1], $match_w) )
-				{
-					$width = $match_w[2];
-				}
-				
-				if( preg_match('/height=("|\')([0-9]+)\\1/', $match[1], $match_h) )
-				{
-					$height = $match_h[2];
-				}
+				$charset = $match2[1];
 			}
 		}
-		else
-		{
-			list($width, $height) = getimagesize($tmp_filename);
-		}
 		
-		$output->send_headers();
-		
-		$output->set_filenames(array(
-			'body' => 'show_popup.tpl'
-		));
-		
-		$output->assign_vars(array(
-			'POPUP_TITLE'  => sprintf($lang['Title']['Show_popup'], $filedata['file_real_name']),
-			'CONTENT_LANG' => $lang['CONTENT_LANG'],
-			'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-			'CHARSET'      => $lang['CHARSET'],
-			
-			'FILENAME'     => $filedata['file_real_name'],
-			'MIME_TYPE'    => $filedata['file_mimetype'],
-			'WIDTH_IMG'    => $width,
-			'HEIGHT_IMG'   => $height,
-			'U_SHOW_IMG'   => sessid('./show.php?fid=' . $file_id)
-		));
-		
-		$output->pparse('body');
+		header('Content-Type: ' . $filedata['file_mimetype'] . '; charset=' . $charset);
 	}
 	else
 	{
-		header('Date: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');
-		header('Content-Disposition: inline; filename="' . $filedata['file_real_name'] . '"');
-		header('Content-Length: ' . $filedata['file_size']);
-		
-		if( $is_svg == true )
-		{
-			$charset = 'UTF-8';
-			if( preg_match('/^<\?xml(.+?)\?>/', $data, $match) )
-			{
-				if( preg_match('/encoding="([a-z0-9.:_-]+)"/i', $match[0], $match2) )
-				{
-					$charset = $match2[1];
-				}
-			}
-			
-			header('Content-Type: ' . $filedata['file_mimetype'] . '; charset=' . $charset);
-		}
-		else
-		{
-			header('Content-Type: ' . $filedata['file_mimetype']);
-		}
-		
-		echo $data;
+		header('Content-Type: ' . $filedata['file_mimetype']);
 	}
+	
+	echo $data;
 	
 	//
 	// Si l'option FTP est utilisée, suppression du fichier temporaire

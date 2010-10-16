@@ -202,8 +202,8 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	color: black;
 }
 
-ul.links         { margin: 1% 0 -.8em; padding: 0; text-align: left; }
-ul.links.special { margin: 1% 8% -.8em; }
+ul.links         { margin: 1% 0 -1em; padding: 0; text-align: left; }
+ul.links.special { margin: 1% 8% -1em; }
 
 ul.links li {
 	display: inline;
@@ -454,3 +454,23 @@ table#tagsList td {
 	text-align: left;
 }
 
+div#image-box {
+	overflow: auto;
+	position: fixed;
+	top: 5%;
+	left: 5%;
+	z-index: 100;
+	max-width: 90%;
+	max-height: 90%;
+	background-color:white;
+	border: 1px solid silver;
+	padding: 5px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+	-moz-box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+}
+div#image-box object { display: block; max-width: 100%; max-height: 100%; }
+div#image-box object[type*="/svg"] { min-width: 50px; min-height: 50px; }

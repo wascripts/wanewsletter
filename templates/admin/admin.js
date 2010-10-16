@@ -130,12 +130,43 @@ function show(evt)
 		}
 	}
 	
-	var w = window.open(evt.currentTarget.href + '&mode=popup&sessid=' + sessid, 'showimage', 'directories=0,menuBar=0,status=0,location=0,scrollbars=0,resizable=yes,toolbar=0,width=400,height=200,left=20,top=20');
-	w.focus();
+	var sURL = evt.currentTarget.href + '&sessid=' + sessid;
 	
-	if( w )
-	{
+	if( typeof(document.addEventListener) != 'undefined' ) {
+		
+		var imgBox = document.getElementById('image-box');
+		
+		if( imgBox == null )
+		{
+			imgBox = document.createElement('div');
+			imgBox.setAttribute('id', 'image-box');
+			document.body.appendChild(imgBox);
+		}
+		
+		imgBox.innerHTML = '<object type="'+evt.currentTarget.type+'"'
+			+ ' data="'+sURL+'"></object>';
+		imgBox.style.display = 'block';
+		
+		var clickListener = function(evt) {
+			if( evt.button == 0 ) {
+				imgBox.style.display = 'none';
+				DOM_Events.removeListener('click', clickListener, false, document);
+			}
+		};
+		DOM_Events.addListener('click', clickListener, false, document);
+		
+		evt.stopPropagation();
 		evt.preventDefault();
+	}
+	// IE <= 8 a des problèmes pour afficher un bloc en position absolue au dessus
+	// d'une iframe ou d'un objet. On garde le système à base de 'popup' pour cette brouette
+	else {
+		var w = window.open(sURL, 'showimage', 'directories=0,menuBar=0,status=0,'
+			+'location=0,scrollbars=0,resizable=yes,toolbar=0,width=500,height=300,left=20,top=20');
+		if( w ) {
+			w.focus();
+			evt.preventDefault();
+		}
 	}
 }
 
