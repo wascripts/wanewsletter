@@ -62,7 +62,7 @@ if( !($result = $db->query($sql)) )
 }
 
 $old_config = array();
-while( $row = $result->fetch(SQL_FETCH_ASSOC) )
+while( $row = $result->fetch() )
 {
 	if( !isset($row['nom']) )
 	{

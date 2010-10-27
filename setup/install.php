@@ -65,7 +65,7 @@ if( defined('NL_INSTALLED') )
 		plain_error('Impossible d\'obtenir la configuration du script');
 	}
 	
-	$old_config = $result->fetch(SQL_FETCH_ASSOC);
+	$old_config = $result->fetch();
 	
 	$urlsite    = $old_config['urlsite'];
 	$urlscript  = $old_config['path'];

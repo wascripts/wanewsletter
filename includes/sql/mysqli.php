@@ -29,14 +29,6 @@ if( !defined('_INC_CLASS_WADB_MYSQLI') ) {
 
 define('_INC_CLASS_WADB_MYSQLI', true);
 
-define('SQL_INSERT', 1);
-define('SQL_UPDATE', 2);
-define('SQL_DELETE', 3);
-
-define('SQL_FETCH_NUM',   MYSQLI_NUM);
-define('SQL_FETCH_ASSOC', MYSQLI_ASSOC);
-define('SQL_FETCH_BOTH',  MYSQLI_BOTH);
-
 class Wadb_mysqli {
 	
 	/**
@@ -48,10 +40,18 @@ class Wadb_mysqli {
 	var $link;
 	
 	/**
+	 * Hôte de la base de données
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $host = '';
+	
+	/**
 	 * Nom de la base de données
 	 * 
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
 	var $dbname = '';
 	
@@ -120,6 +120,13 @@ class Wadb_mysqli {
 	var $clientVersion = '';
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_INSERT = 1;
+	var $SQL_UPDATE = 2;
+	var $SQL_DELETE = 3;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param string $dbname   Nom de la base de données
@@ -151,6 +158,8 @@ class Wadb_mysqli {
 			foreach( array('host', 'username', 'passwd', 'port') as $info ) {
 				$$info = ( isset($infos[$info]) ) ? $infos[$info] : null;
 			}
+			
+			$this->host = $host . (!is_null($port) ? ':'.$port : '');
 		}
 		
 		$connect = 'mysqli_connect';
@@ -284,10 +293,10 @@ class Wadb_mysqli {
 			array_push($values, $value);
 		}
 		
-		if( $type == SQL_INSERT ) {
+		if( $type == $this->SQL_INSERT ) {
 			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
 		}
-		else if( $type == SQL_UPDATE ) {
+		else if( $type == $this->SQL_UPDATE ) {
 			
 			$query = 'UPDATE ' . $table . ' SET ';
 			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
@@ -499,6 +508,13 @@ class WadbResult_mysqli {
 	var $fetchMode;
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_FETCH_NUM   = MYSQLI_NUM;
+	var $SQL_FETCH_ASSOC = MYSQLI_ASSOC;
+	var $SQL_FETCH_BOTH  = MYSQLI_BOTH;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param resource $link    Ressource de connexion à la base de données
@@ -628,12 +644,12 @@ class WadbResult_mysqli {
 class WadbBackup_mysqli {
 	
 	/**
-	 * Informations concernant la base de données
+	 * Connexion à la base de données
 	 * 
-	 * @var array
+	 * @var object
 	 * @access private
 	 */
-	var $infos = array();
+	var $db = null;
 	
 	/**
 	 * Fin de ligne
@@ -646,17 +662,13 @@ class WadbBackup_mysqli {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param array $infos  Informations concernant la base de données
+	 * @param object $db  Connexion à la base de données
 	 * 
 	 * @access public
 	 */
-	function WadbBackup_mysqli($infos)
+	function WadbBackup_mysqli($db)
 	{
-		$this->infos = $infos;
-		
-		if( !isset($this->infos['host']) ) {
-			$this->infos['host'] = 'localhost';
-		}
+		$this->db = $db;
 	}
 	
 	/**
@@ -669,20 +681,18 @@ class WadbBackup_mysqli {
 	 */
 	function header($toolname = '')
 	{
-		global $db;
-		
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname MySQL Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		$contents .= "-- Host     : " . $this->infos['host'] . $this->eol;
-		$contents .= "-- Server   : " . $db->serverVersion . $this->eol;
-		$contents .= "-- Database : " . $this->infos['dbname'] . $this->eol;
+		$contents .= "-- Host     : " . $this->db->host . $this->eol;
+		$contents .= "-- Server   : " . $this->db->serverVersion . $this->eol;
+		$contents .= "-- Database : " . $this->db->dbname . $this->eol;
 		$contents .= '-- Date     : ' . date('d/m/Y H:i:s O') . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
-		if( version_compare($db->serverVersion, '4.1.2', '>=') ) {
-			$contents .= sprintf("SET NAMES '%s';%s", $db->encoding(), $this->eol);
+		if( version_compare($this->db->serverVersion, '4.1.2', '>=') ) {
+			$contents .= sprintf("SET NAMES '%s';%s", $this->db->encoding(), $this->eol);
 			$contents .= $this->eol;
 		}
 		
@@ -697,9 +707,7 @@ class WadbBackup_mysqli {
 	 */
 	function get_tables()
 	{
-		global $db;
-		
-		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $db->quote($this->infos['dbname']))) ) {
+		if( !($result = $this->db->query('SHOW TABLE STATUS FROM ' . $this->db->quote($this->db->dbname))) ) {
 			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
 		}
 		
@@ -735,17 +743,15 @@ class WadbBackup_mysqli {
 	 */
 	function get_table_structure($tabledata, $drop_option)
 	{
-		global $db;
-		
 		$contents  = '-- ' . $this->eol;
 		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		
 		if( $drop_option ) {
-			$contents .= 'DROP TABLE IF EXISTS ' . $db->quote($tabledata['name']) . ';' . $this->eol;
+			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
-		if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) ) {
+		if( !($result = $this->db->query('SHOW CREATE TABLE ' . $this->db->quote($tabledata['name']))) ) {
 			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
 		}
 		
@@ -767,16 +773,14 @@ class WadbBackup_mysqli {
 	 */
 	function get_table_data($tablename)
 	{
-		global $db;
-		
 		$contents = '';
 		
-		$sql = 'SELECT * FROM ' . $db->quote($tablename);
-		if( !($result = $db->query($sql)) ) {
+		$sql = 'SELECT * FROM ' . $this->db->quote($tablename);
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		$result->setFetchMode(SQL_FETCH_ASSOC);
+		$result->setFetchMode(MYSQLI_ASSOC);
 		
 		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
@@ -787,20 +791,20 @@ class WadbBackup_mysqli {
 			$fields = array();
 			for( $j = 0, $n = mysqli_num_fields($result->result); $j < $n; $j++ ) {
 				$data = mysqli_fetch_field_direct($result->result, $j);
-				$fields[] = $db->quote($data->name);
+				$fields[] = $this->db->quote($data->name);
 			}
 			
 			$fields = implode(', ', $fields);
 			
 			do {
-				$contents .= 'INSERT INTO ' . $db->quote($tablename) . " ($fields) VALUES";
+				$contents .= sprintf("INSERT INTO %s (%s) VALUES", $this->db->quote($tablename), $fields);
 				
 				foreach( $row as $key => $value ) {
 					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
 					else {
-						$row[$key] = '\'' . $db->escape($value) . '\'';
+						$row[$key] = '\'' . $this->db->escape($value) . '\'';
 					}
 				}
 				

@@ -29,14 +29,6 @@ if( !defined('_INC_CLASS_WADB_SQLITE') ) {
 
 define('_INC_CLASS_WADB_SQLITE', true);
 
-define('SQL_INSERT', 1);
-define('SQL_UPDATE', 2);
-define('SQL_DELETE', 3);
-
-define('SQL_FETCH_NUM',   SQLITE_NUM);
-define('SQL_FETCH_ASSOC', SQLITE_ASSOC);
-define('SQL_FETCH_BOTH',  SQLITE_BOTH);
-
 class Wadb_sqlite {
 	
 	/**
@@ -51,7 +43,7 @@ class Wadb_sqlite {
 	 * Nom de la base de données
 	 * 
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
 	var $dbname = '';
 	
@@ -112,26 +104,36 @@ class Wadb_sqlite {
 	var $libVersion = '';
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_INSERT = 1;
+	var $SQL_UPDATE = 2;
+	var $SQL_DELETE = 3;
+	
+	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $dbname   Nom de la base de données
+	 * @param string $sqlite_db Nom de la base de données
 	 * @param array  $options  Options de connexion/utilisation
 	 * 
 	 * @access public
 	 */
 	function Wadb_sqlite($sqlite_db, $options = null)
 	{
-		if( file_exists($sqlite_db) ) {
-			if( !is_readable($sqlite_db) ) {
-				trigger_error("SQLite database isn't readable!", E_USER_WARNING);
+		if( $sqlite_db != ':memory:' ) {
+			if( file_exists($sqlite_db) ) {
+				if( !is_readable($sqlite_db) ) {
+					trigger_error("SQLite database isn't readable!", E_USER_WARNING);
+				}
 			}
-		}
-		else if( !is_writable(dirname($sqlite_db)) ) {
-			trigger_error(dirname($sqlite_db) . " isn't writable. Cannot create "
-				. basename($sqlite_db) . " database", E_USER_WARNING);
+			else if( !is_writable(dirname($sqlite_db)) ) {
+				trigger_error(dirname($sqlite_db) . " isn't writable. Cannot create "
+					. basename($sqlite_db) . " database", E_USER_WARNING);
+			}
 		}
 		
 		$connect = 'sqlite_open';
+		$this->dbname = $sqlite_db;
 		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
@@ -268,10 +270,10 @@ class Wadb_sqlite {
 			array_push($values, $value);
 		}
 		
-		if( $type == SQL_INSERT ) {
+		if( $type == $this->SQL_INSERT ) {
 			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
 		}
-		else if( $type == SQL_UPDATE ) {
+		else if( $type == $this->SQL_UPDATE ) {
 			
 			$query = 'UPDATE ' . $table . ' SET ';
 			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
@@ -481,6 +483,13 @@ class WadbResult_sqlite {
 	var $fetchMode;
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_FETCH_NUM   = SQLITE_NUM;
+	var $SQL_FETCH_ASSOC = SQLITE_ASSOC;
+	var $SQL_FETCH_BOTH  = SQLITE_BOTH;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param resource $link    Ressource de connexion à la base de données
@@ -604,12 +613,12 @@ class WadbResult_sqlite {
 class WadbBackup_sqlite {
 	
 	/**
-	 * Informations concernant la base de données
+	 * Connexion à la base de données
 	 * 
-	 * @var array
+	 * @var object
 	 * @access private
 	 */
-	var $infos = array();
+	var $db = null;
 	
 	/**
 	 * Fin de ligne
@@ -622,17 +631,13 @@ class WadbBackup_sqlite {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param array $infos  Informations concernant la base de données
+	 * @param object $db  Connexion à la base de données
 	 * 
 	 * @access public
 	 */
-	function WadbBackup_sqlite($infos)
+	function WadbBackup_sqlite($db)
 	{
-		$this->infos = $infos;
-		
-		if( !isset($this->infos['host']) ) {
-			$this->infos['host'] = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown';
-		}
+		$this->db = $db;
 	}
 	
 	/**
@@ -645,14 +650,14 @@ class WadbBackup_sqlite {
 	 */
 	function header($toolname = '')
 	{
-		global $db;
+		$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown Host';
 		
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname SQLite Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		$contents .= "-- Host       : " . $this->infos['host'] . $this->eol;
-		$contents .= "-- SQLite lib : " . $db->libVersion . $this->eol;
-		$contents .= "-- Database   : " . basename($this->infos['dbname']) . $this->eol;
+		$contents .= "-- Host       : " . $host . $this->eol;
+		$contents .= "-- SQLite lib : " . $this->db->libVersion . $this->eol;
+		$contents .= "-- Database   : " . basename($this->db->dbname) . $this->eol;
 		$contents .= '-- Date       : ' . date('d/m/Y H:i:s O') . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
@@ -668,9 +673,7 @@ class WadbBackup_sqlite {
 	 */
 	function get_tables()
 	{
-		global $db;
-		
-		if( !($result = $db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) ) {
+		if( !($result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) ) {
 			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
 		}
 		
@@ -706,21 +709,19 @@ class WadbBackup_sqlite {
 	 */
 	function get_table_structure($tabledata, $drop_option)
 	{
-		global $db;
-		
 		$contents  = '-- ' . $this->eol;
 		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		
 		if( $drop_option ) {
-			$contents .= 'DROP TABLE ' . $tabledata['name'] . ';' . $this->eol;
+			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
 		$sql = "SELECT sql, type
 			FROM sqlite_master
 			WHERE tbl_name = '$tabledata[name]'
 				AND sql IS NOT NULL";
-		if( !($result = $db->query($sql)) ) {
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
 		}
 		
@@ -749,16 +750,14 @@ class WadbBackup_sqlite {
 	 */
 	function get_table_data($tablename)
 	{
-		global $db;
-		
 		$contents = '';
 		
-		$sql = 'SELECT * FROM ' . $tablename;
-		if( !($result = $db->query($sql)) ) {
+		$sql = 'SELECT * FROM ' . $this->db->quote($tablename);
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		$result->setFetchMode(SQL_FETCH_ASSOC);
+		$result->setFetchMode(SQLITE_ASSOC);
 		
 		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
@@ -768,20 +767,20 @@ class WadbBackup_sqlite {
 			
 			$fields = array();
 			for( $j = 0, $n = sqlite_num_fields($result->result); $j < $n; $j++ ) {
-				array_push($fields, sqlite_field_name($result->result, $j));
+				array_push($fields, $this->db->quote(sqlite_field_name($result->result, $j)));
 			}
 			
 			$fields = implode(', ', $fields);
 			
 			do {
-				$contents .= "INSERT INTO $tablename ($fields) VALUES";
+				$contents .= sprintf("INSERT INTO %s (%s) VALUES", $this->db->quote($tablename), $fields);
 				
 				foreach( $row as $key => $value ) {
 					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
 					else {
-						$row[$key] = '\'' . $db->escape($value) . '\'';
+						$row[$key] = '\'' . $this->db->escape($value) . '\'';
 					}
 				}
 				

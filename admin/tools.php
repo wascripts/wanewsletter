@@ -1121,14 +1121,12 @@ switch( $mode )
 			JOINED_FILES_TABLE, FORBIDDEN_EXT_TABLE, LISTE_TABLE, LOG_TABLE, LOG_FILES_TABLE, SESSIONS_TABLE
 		);
 		
-		list($infos) = parseDSN($dsn);
-		
 		$tables      = array();
 		$tables_plus = ( !empty($_POST['tables_plus']) ) ? array_map('trim', $_POST['tables_plus']) : array();
 		$backup_type = ( isset($_POST['backup_type']) ) ? intval($_POST['backup_type']) : 0;
 		$drop_option = ( !empty($_POST['drop_option']) ) ? true : false;
 		
-		$backup = new $backupclass($infos);// Voir ligne 160 pour $infos et $backupclass
+		$backup = new $backupclass($db);// Voir ligne 160 pour $backupclass
 		$backup->eol = WA_EOL;
 		$tables_ary  = $backup->get_tables();
 		

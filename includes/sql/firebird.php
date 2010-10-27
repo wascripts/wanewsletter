@@ -29,14 +29,6 @@ if( !defined('_INC_CLASS_WADB_FIREBIRD') ) {
 
 define('_INC_CLASS_WADB_FIREBIRD', true);
 
-define('SQL_INSERT', 1);
-define('SQL_UPDATE', 2);
-define('SQL_DELETE', 3);
-
-define('SQL_FETCH_NUM',   1);
-define('SQL_FETCH_ASSOC', 2);
-define('SQL_FETCH_BOTH',  3);
-
 /**
  * @access public
  * @status experimental
@@ -52,10 +44,18 @@ class Wadb_firebird {
 	var $link;
 	
 	/**
+	 * Hôte de la base de données
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $host = '';
+	
+	/**
 	 * Nom de la base de données
 	 * 
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
 	var $dbname = '';
 	
@@ -141,6 +141,13 @@ class Wadb_firebird {
 	var $_matchLimitOffset = true;
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_INSERT = 1;
+	var $SQL_UPDATE = 2;
+	var $SQL_DELETE = 3;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param string $dbname   Nom de la base de données
@@ -176,6 +183,8 @@ class Wadb_firebird {
 					$this->dbname = $host . ':' . $this->dbname;
 				}
 			}
+			
+			$this->host = $host . (!is_null($port) ? ':'.$port : '');
 		}
 		
 		$connect = 'ibase_connect';
@@ -307,10 +316,10 @@ class Wadb_firebird {
 			array_push($values, $value);
 		}
 		
-		if( $type == SQL_INSERT ) {
+		if( $type == $this->SQL_INSERT ) {
 			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
 		}
-		else if( $type == SQL_UPDATE ) {
+		else if( $type == $this->SQL_UPDATE ) {
 			
 			$query = 'UPDATE ' . $table . ' SET ';
 			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
@@ -525,6 +534,13 @@ class WadbResult_firebird {
 	var $fetchMode;
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_FETCH_NUM   = 1;
+	var $SQL_FETCH_ASSOC = 2;
+	var $SQL_FETCH_BOTH  = 3;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param resource $link    Ressource de connexion à la base de données
@@ -536,7 +552,7 @@ class WadbResult_firebird {
 	{
 		$this->link   = $link;
 		$this->result = $result;
-		$this->fetchMode = SQL_FETCH_BOTH;
+		$this->fetchMode = $this->SQL_FETCH_BOTH;
 	}
 	
 	/**
@@ -553,13 +569,13 @@ class WadbResult_firebird {
 			$mode = $this->fetchMode;
 		}
 		
-		if( $mode == SQL_FETCH_NUM ) {
+		if( $mode == $this->SQL_FETCH_NUM ) {
 			$row = ibase_fetch_row($this->result, IBASE_TEXT);
 		}
 		else {
 			$row = ibase_fetch_assoc($this->result, IBASE_TEXT);
 			
-			if( $mode == SQL_FETCH_BOTH && is_array($row) ) {
+			if( $mode == $this->SQL_FETCH_BOTH && is_array($row) ) {
 				$tmp = array_values($row);
 				$row = array_merge($row, $tmp);
 			}
@@ -617,7 +633,7 @@ class WadbResult_firebird {
 	 */
 	function column($column)
 	{
-		$row = $this->fetch(SQL_FETCH_BOTH);
+		$row = $this->fetch($this->SQL_FETCH_BOTH);
 		
 		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
@@ -632,7 +648,7 @@ class WadbResult_firebird {
 	 */
 	function setFetchMode($mode)
 	{
-		if( in_array($mode, array(SQL_FETCH_NUM, SQL_FETCH_ASSOC, SQL_FETCH_BOTH)) ) {
+		if( in_array($mode, array($this->SQL_FETCH_NUM, $this->SQL_FETCH_ASSOC, $this->SQL_FETCH_BOTH)) ) {
 			$this->fetchMode = $mode;
 			return true;
 		}

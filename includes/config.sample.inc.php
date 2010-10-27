@@ -7,9 +7,10 @@
 define('NL_INSTALLED', true);
 define('WA_VERSION',   '2.3-dev');
 
-// exemple de DSN pour SQLite 3
-//$dsn = 'sqlite:/home/to/my/htdocs/wanewsletter/includes/sql/wanewsletter.sqlite3';
+//$dsn = "<driver>://<username>:<password>@<host>:<port>/<database>";
 // exemple de DSN pour MySQL
 //$dsn = 'mysql://username:password@localhost/dbname?charset=latin1';
+// exemple de DSN pour SQLite
+//$dsn = 'sqlite:/path/to/db/wanewsletter.sqlite';
 $prefixe = 'wa_';
 

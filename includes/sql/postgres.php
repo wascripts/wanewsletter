@@ -29,14 +29,6 @@ if( !defined('_INC_CLASS_WADB_POSTGRES') ) {
 
 define('_INC_CLASS_WADB_POSTGRES', true);
 
-define('SQL_INSERT', 1);
-define('SQL_UPDATE', 2);
-define('SQL_DELETE', 3);
-
-define('SQL_FETCH_NUM',   PGSQL_NUM);
-define('SQL_FETCH_ASSOC', PGSQL_ASSOC);
-define('SQL_FETCH_BOTH',  PGSQL_BOTH);
-
 class Wadb_postgres {
 	
 	/**
@@ -48,10 +40,18 @@ class Wadb_postgres {
 	var $link;
 	
 	/**
+	 * Hôte de la base de données
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $host = '';
+	
+	/**
 	 * Nom de la base de données
 	 * 
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
 	var $dbname = '';
 	
@@ -128,6 +128,13 @@ class Wadb_postgres {
 	var $_affectedRows = 0;
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_INSERT = 1;
+	var $SQL_UPDATE = 2;
+	var $SQL_DELETE = 3;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param string $dbname   Nom de la base de données
@@ -171,6 +178,8 @@ class Wadb_postgres {
 					}
 				}
 			}
+			
+			$this->host = $infos['host'] . (!is_null($infos['port']) ? ':'.$infos['port'] : '');
 		}
 		
 		$connect = 'pg_connect';
@@ -304,10 +313,10 @@ class Wadb_postgres {
 			array_push($values, $value);
 		}
 		
-		if( $type == SQL_INSERT ) {
+		if( $type == $this->SQL_INSERT ) {
 			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
 		}
-		else if( $type == SQL_UPDATE ) {
+		else if( $type == $this->SQL_UPDATE ) {
 			
 			$query = 'UPDATE ' . $table . ' SET ';
 			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
@@ -524,6 +533,13 @@ class WadbResult_postgres {
 	var $fetchMode;
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_FETCH_NUM   = PGSQL_NUM;
+	var $SQL_FETCH_ASSOC = PGSQL_ASSOC;
+	var $SQL_FETCH_BOTH  = PGSQL_BOTH;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param resource $link    Ressource de connexion à la base de données
@@ -656,12 +672,12 @@ class WadbResult_postgres {
 class WadbBackup_postgres {
 	
 	/**
-	 * Informations concernant la base de données
+	 * Connexion à la base de données
 	 * 
-	 * @var array
+	 * @var object
 	 * @access private
 	 */
-	var $infos = array();
+	var $db = null;
 	
 	/**
 	 * Fin de ligne
@@ -674,17 +690,13 @@ class WadbBackup_postgres {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param array $infos  Informations concernant la base de données
+	 * @param object $db  Connexion à la base de données
 	 * 
 	 * @access public
 	 */
-	function WadbBackup_postgres($infos)
+	function WadbBackup_postgres($db)
 	{
-		$this->infos = $infos;
-		
-		if( !isset($this->infos['host']) ) {
-			$this->infos['host'] = 'localhost';
-		}
+		$this->db = $db;
 	}
 	
 	/**
@@ -697,19 +709,17 @@ class WadbBackup_postgres {
 	 */
 	function header($toolname = '')
 	{
-		global $db;
-		
-		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
-		$contents .= "  $toolname PostgreSQL Dump" . $this->eol;
-		$contents .= $this->eol;
-		$contents .= "  Host     : " . $this->infos['host'] . $this->eol;
-		$contents .= "  Server   : " . $db->serverVersion . $this->eol;
-		$contents .= "  Database : " . $this->infos['dbname'] . $this->eol;
-		$contents .= '  Date     : ' . date('d/m/Y H:i:s O') . $this->eol;
-		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+		$contents  = '-- ' . $this->eol;
+		$contents .= "-- $toolname PostgreSQL Dump" . $this->eol;
+		$contents .= '-- ' . $this->eol;
+		$contents .= "-- Host     : " . $this->db->host . $this->eol;
+		$contents .= "-- Server   : " . $this->db->serverVersion . $this->eol;
+		$contents .= "-- Database : " . $this->db->dbname . $this->eol;
+		$contents .= '-- Date     : ' . date('d/m/Y H:i:s O') . $this->eol;
+		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
-		$contents .= sprintf("SET NAMES '%s';%s", $db->encoding(), $this->eol);
+		$contents .= sprintf("SET NAMES '%s';%s", $this->db->encoding(), $this->eol);
 		$contents .= "SET standard_conforming_strings = off;" . $this->eol;
 		$contents .= "SET escape_string_warning = off;" . $this->eol;
 		$contents .= $this->eol;
@@ -725,13 +735,11 @@ class WadbBackup_postgres {
 	 */
 	function get_tables()
 	{
-		global $db;
-		
 		$sql = "SELECT tablename 
 			FROM pg_tables 
 			WHERE tablename NOT LIKE 'pg%' 
 			ORDER BY tablename";
-		if( !($result = $db->query($sql)) ) {
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
 		}
 		
@@ -753,31 +761,31 @@ class WadbBackup_postgres {
 	 */
 	function get_other_queries($drop_option)
 	{
-		global $db, $backup_type;
+		global $backup_type;
 		
-		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
-		$contents .= '  Sequences ' . $this->eol;
-		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+		$contents  = '-- ' . $this->eol;
+		$contents .= '-- Sequences ' . $this->eol;
+		$contents .= '-- ' . $this->eol;
 		
 		$sql = "SELECT relname
 			FROM pg_class
 			WHERE NOT relname ~ 'pg_.*' AND relkind ='S'
 			ORDER BY relname";
-		if( !($result = $db->query($sql)) ) {
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible de récupérer les séquences', ERROR);
 		}
 		
 		$contents = '';
 		while( $sequence = $result->column('relname') ) {
 			
-			$result_seq = $db->query('SELECT * FROM ' . $sequence);
+			$result_seq = $this->db->query('SELECT * FROM ' . $this->db->quote($sequence));
 			
 			if( $row = $result_seq->fetch() ) {
 				if( $drop_option ) {
-					$contents .= "DROP SEQUENCE IF EXISTS $sequence;" . $this->eol;
+					$contents .= "DROP SEQUENCE IF EXISTS ".$this->db->quote($sequence).";" . $this->eol;
 				}
 				
-				$contents .= 'CREATE SEQUENCE ' . $sequence
+				$contents .= 'CREATE SEQUENCE ' . $this->db->quote($sequence)
 					. ' start ' . $row['last_value']
 					. ' increment ' . $row['increment_by']
 					. ' maxvalue ' . $row['max_value']
@@ -804,14 +812,12 @@ class WadbBackup_postgres {
 	 */
 	function get_table_structure($tabledata, $drop_option)
 	{
-		global $db;
-		
-		$contents  = '/* ------------------------------------------------------------ ' . $this->eol;
-		$contents .= '  Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
-		$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+		$contents  = '-- ' . $this->eol;
+		$contents .= '-- Struture de la table ' . $tabledata['name'] . $this->eol;
+		$contents .= '-- ' . $this->eol;
 		
 		if( $drop_option ) {
-			$contents .= 'DROP TABLE IF EXISTS ' . $tabledata['name'] . ';' . $this->eol;
+			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
 		$sql = "SELECT a.attnum, a.attname AS field, t.typname as type, a.attlen AS length, 
@@ -822,11 +828,11 @@ class WadbBackup_postgres {
 				AND a.attrelid = c.oid 
 				AND a.atttypid = t.oid 
 			ORDER BY a.attnum";
-		if( !($result = $db->query($sql)) ) {
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tabledata['name'], ERROR);
 		}
 		
-		$contents .= 'CREATE TABLE ' . $tabledata['name'] . ' (' . $this->eol;
+		$contents .= 'CREATE TABLE ' . $this->db->quote($tabledata['name']) . ' (' . $this->eol;
 		
 		while( $row = $result->fetch() ) {
 			$sql = "SELECT d.adsrc AS rowdefault 
@@ -834,7 +840,7 @@ class WadbBackup_postgres {
 				WHERE (c.relname = '" . $tabledata['name'] . "') 
 					AND (c.oid = d.adrelid) 
 					AND d.adnum = " . $row['attnum'];
-			if( $res = $db->query($sql) ) {
+			if( $res = $this->db->query($sql) ) {
 				$row['rowdefault'] = $res->column('rowdefault');
 			}
 			else {
@@ -846,7 +852,7 @@ class WadbBackup_postgres {
 				$row['type'] = 'character';
 			}
 			
-			$contents .= ' ' . $row['field'] . ' ' . $row['type'];
+			$contents .= ' ' . $this->db->quote($row['field']) . ' ' . $row['type'];
 			
 			if( preg_match('#char#i', $row['type']) && $row['lengthvar'] > 0 ) {
 				$contents .= '(' . ($row['lengthvar'] - 4) . ')';
@@ -877,7 +883,7 @@ class WadbBackup_postgres {
 				AND (ta.attrelid = i.indrelid) 
 				AND (ta.attnum = i.indkey[ia.attnum-1]) 
 			ORDER BY index_name, tab_name, column_name";
-		if( !($result = $db->query($sql)) ) {
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible de récupérer les clés primaires et unique de la table ' . $tabledata['name'], ERROR);
 		}
 		
@@ -901,13 +907,14 @@ class WadbBackup_postgres {
 					$index_rows[$row['index_name']]['column_names'] = array();
 				}
 				
-				$index_rows[$row['index_name']]['column_names'][] = $row['column_name'];
+				$index_rows[$row['index_name']]['column_names'][] = $this->db->quote($row['column_name']);
 			}
 		}
 		$result->free();
 		
 		if( !empty($primary_key) ) {
-			$contents .= sprintf("CONSTRAINT %s PRIMARY KEY (%s),", $primary_key_name, $primary_key);
+			$contents .= sprintf("CONSTRAINT %s PRIMARY KEY (%s),",
+				$this->db->quote($primary_key_name), $this->db->quote($primary_key));
 			$contents .= $this->eol;
 		}
 		
@@ -917,11 +924,13 @@ class WadbBackup_postgres {
 				$props['column_names'] = implode(', ', $props['column_names']);
 				
 				if( !empty($props['unique']) ) {
-					$contents .= sprintf("CONSTRAINT %s UNIQUE (%s),", $idx_name, $props['column_names']);
+					$contents .= sprintf("CONSTRAINT %s UNIQUE (%s),",
+						$this->db->quote($idx_name), $props['column_names']);
 					$contents .= $this->eol;
 				}
 				else {
-					$index_create .= sprintf("CREATE %s INDEX %s ON %s (%s);", $props['unique'], $idx_name, $tabledata['name'], $props['column_names']);
+					$index_create .= sprintf("CREATE %s INDEX %s ON %s (%s);", $props['unique'],
+						$this->db->quote($idx_name), $this->db->quote($tabledata['name']), $props['column_names']);
 					$index_create .= $this->eol;
 				}
 			}
@@ -942,7 +951,7 @@ class WadbBackup_postgres {
 						AND c.rcsrc = pg_relcheck.rcsrc 
 						AND c.rcrelid = i.inhparent
 				)";
-		if( !($result = $db->query($sql)) ) {
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible de récupérer les clauses de contraintes de la table ' . $tabledata['name'], ERROR);
 		}
 		
@@ -950,7 +959,7 @@ class WadbBackup_postgres {
 		// Add the constraints to the sql file.
 		//
 		while( $row = $result->fetch() ) {
-			$contents .= 'CONSTRAINT ' . $row['index_name'] . ' CHECK ' . $row['rcsrc'] . ',' . $this->eol;
+			$contents .= 'CONSTRAINT ' . $this->db->quote($row['index_name']) . ' CHECK ' . $row['rcsrc'] . ',' . $this->eol;
 		}
 		*/
 		$len = strlen(',' . $this->eol);
@@ -974,39 +983,37 @@ class WadbBackup_postgres {
 	 */
 	function get_table_data($tablename)
 	{
-		global $db;
-		
 		$contents = '';
 		
-		$sql = 'SELECT * FROM ' . $tablename;
-		if( !($result = $db->query($sql)) ) {
+		$sql = 'SELECT * FROM ' . $this->db->quote($tablename);
+		if( !($result = $this->db->query($sql)) ) {
 			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
 		}
 		
-		$result->setFetchMode(SQL_FETCH_ASSOC);
+		$result->setFetchMode(PGSQL_ASSOC);
 		
 		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
-			$contents .= '/* ------------------------------------------------------------ ' . $this->eol;
-			$contents .= '  Contenu de la table ' . $tablename . ' ' . $this->eol;
-			$contents .= ' ------------------------------------------------------------ */' . $this->eol;
+			$contents .= '-- ' . $this->eol;
+			$contents .= '-- Contenu de la table ' . $tablename . $this->eol;
+			$contents .= '-- ' . $this->eol;
 			
 			$fields = array();
 			for( $j = 0, $n = pg_num_fields($result->result); $j < $n; $j++ ) {
-				array_push($fields, pg_field_name($result->result, $j));
+				array_push($fields, $this->db->quote(pg_field_name($result->result, $j)));
 			}
 			
 			$fields = implode(', ', $fields);
 			
 			do {
-				$contents .= "INSERT INTO $tablename ($fields) VALUES";
+				$contents .= sprintf("INSERT INTO %s (%s) VALUES", $this->db->quote($tablename), $fields);
 				
 				foreach( $row as $key => $value ) {
 					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
 					else {
-						$row[$key] = '\'' . addcslashes($db->escape($value), "\r\n") . '\'';
+						$row[$key] = '\'' . addcslashes($this->db->escape($value), "\r\n") . '\'';
 					}
 				}
 				
