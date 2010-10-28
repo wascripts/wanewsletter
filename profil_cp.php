@@ -87,12 +87,13 @@ function check_login($email, $regkey = null)
 		$abodata['regdate']  = $row['register_date'];
 		$abodata['regkey']   = $row['register_key'];
 		$abodata['status']   = $row['abo_status'];
+		$abodata['tags']     = array();
 		
-		foreach( $other_tags as $data )
+		foreach( $other_tags as $tag )
 		{
-			if( isset($row[$data['column_name']]) )
+			if( isset($row[$tag['column_name']]) )
 			{
-				$abodata[$data['column_name']] = $row[$data['column_name']];
+				$abodata['tags'][$tag['column_name']] = $row[$tag['column_name']];
 			}
 		}
 		
@@ -268,8 +269,20 @@ switch( $mode )
 					'EMAIL'   => $abodata['email'],
 					'CODE'    => $abodata['regkey'],
 					'URLSITE' => $nl_config['urlsite'],
-					'SIG'     => $listdata['liste_sig']
+					'SIG'     => $listdata['liste_sig'],
+					'PSEUDO'  => $abodata['pseudo']
 				));
+				
+				if( count($other_tags) > 0 )
+				{
+					$tags = array();
+					foreach( $other_tags as $tag )
+					{
+						$tags[$tag['tag_name']] = $abodata['tags'][$tag['column_name']];
+					}
+					
+					$mailer->assign_tags($tags);
+				}
 				
 				if( !$mailer->send() )
 				{
@@ -350,11 +363,15 @@ switch( $mode )
 					$sql_data['abo_pwd'] = md5($new_pass);
 				}
 				
-				foreach( $other_tags as $data )
+				foreach( $other_tags as $tag )
 				{
-					if( !empty($data['field_name']) && !empty($_POST[$data['column_name']]) )
+					if( !empty($tag['field_name']) && !empty($_REQUEST[$tag['field_name']]) )
 					{
-						$sql_data[$data['column_name']] = $_POST[$data['column_name']];
+						$sql_data[$tag['column_name']] = $_REQUEST[$tag['field_name']];
+					}
+					else if( !empty($_REQUEST[$tag['column_name']]) )
+					{
+						$sql_data[$tag['column_name']] = $_REQUEST[$tag['column_name']];
 					}
 				}
 				
@@ -391,11 +408,12 @@ switch( $mode )
 			'LANG_BOX' => lang_box($abodata['language'])
 		));
 		
-		foreach( $other_tags as $data )
+		foreach( $other_tags as $tag )
 		{
-			if( isset($abodata[$data['column_name']]) )
+			if( isset($abodata['tags'][$tag['column_name']]) )
 			{
-				$output->assign_var($data['tag_name'], htmlspecialchars($abodata[$data['column_name']]));
+				$output->assign_var($tag['tag_name'],
+					htmlspecialchars($abodata['tags'][$tag['column_name']]));
 			}
 		}
 		
@@ -638,23 +656,23 @@ switch( $mode )
 				
 				if( count($other_tags) > 0 )
 				{
-					foreach( $other_tags as $data )
+					foreach( $other_tags as $tag )
 					{
-						if( $abodata[$data['column_name']] != '' )
+						if( $abodata['tags'][$tag['column_name']] != '' )
 						{
-							if( !is_numeric($abodata[$data['column_name']]) && $format == FORMAT_HTML )
+							if( !is_numeric($abodata['tags'][$tag['column_name']]) && $format == FORMAT_HTML )
 							{
-								$tags_replace[$data['tag_name']] = htmlspecialchars($abodata[$data['column_name']]);
+								$tags_replace[$tag['tag_name']] = htmlspecialchars($abodata['tags'][$tag['column_name']]);
 							}
 							else
 							{
-								$tags_replace[$data['tag_name']] = $abodata[$data['column_name']];
+								$tags_replace[$tag['tag_name']] = $abodata['tags'][$tag['column_name']];
 							}
 							
 							continue;
 						}
 						
-						$tags_replace[$data['tag_name']] = '';
+						$tags_replace[$tag['tag_name']] = '';
 					}
 				}
 				

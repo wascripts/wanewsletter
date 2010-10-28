@@ -42,6 +42,7 @@ class Wanewsletter {
 	var $message       = '';
 	
 	var $mailer;
+	var $other_tags;
 	
 	function Wanewsletter($listdata = null)
 	{
@@ -77,6 +78,9 @@ class Wanewsletter {
 				$this->format = $listdata['liste_format'];
 			}
 		}
+		
+		@include WA_ROOTDIR . '/includes/tags.inc.php';
+		$this->other_tags = $other_tags;
 	}
 	
 	function check($action, $email)
@@ -161,6 +165,8 @@ class Wanewsletter {
 			}
 		}
 		
+		$this->account['tags'] = array();
+		
 		if( is_array($abodata) )
 		{
 			$this->hasAccount   = true;
@@ -170,6 +176,14 @@ class Wanewsletter {
 			$this->account['email']  = $abodata['abo_email'];
 			$this->account['pseudo'] = $abodata['abo_pseudo'];
 			$this->account['status'] = $abodata['abo_status'];
+			
+			foreach( $this->other_tags as $tag )
+			{
+				if( isset($abodata[$tag['column_name']]) )
+				{
+					$this->account['tags'][$tag['column_name']] = $abodata[$tag['column_name']];
+				}
+			}
 		}
 		else
 		{
@@ -285,14 +299,18 @@ class Wanewsletter {
 				'abo_status' => $this->account['status']
 			);
 			
-			@include WA_ROOTDIR . '/includes/tags.inc.php';
-			
-			foreach( $other_tags as $data )
+			foreach( $this->other_tags as $tag )
 			{
-				if( !empty($data['field_name']) && !empty($_REQUEST[$data['field_name']]) )
+				if( !empty($tag['field_name']) && !empty($_REQUEST[$tag['field_name']]) )
 				{
-					$sql_data[$data['column_name']] = $_REQUEST[$data['field_name']];
+					$this->account['tags'][$tag['column_name']] = $_REQUEST[$tag['field_name']];
 				}
+				else if( !empty($_REQUEST[$tag['column_name']]) )
+				{
+					$this->account['tags'][$tag['column_name']] = $_REQUEST[$tag['column_name']];
+				}
+				
+				$sql_data = array_merge($sql_data, $this->account['tags']);
 			}
 			
 			if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
@@ -375,7 +393,8 @@ class Wanewsletter {
 			'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
 			'SITENAME' => $nl_config['sitename'],
 			'URLSITE'  => $nl_config['urlsite'],
-			'SIG'      => $this->listdata['liste_sig']
+			'SIG'      => $this->listdata['liste_sig'],
+			'PSEUDO'   => $this->account['pseudo']
 		));
 		
 		if( $this->listdata['use_cron'] )
@@ -396,6 +415,17 @@ class Wanewsletter {
 			$this->mailer->assign_block_tags('password', array(
 				'CODE' => $this->account['code']
 			));
+		}
+		
+		if( count($this->other_tags) > 0 )
+		{
+			$tags = array();
+			foreach( $this->other_tags as $tag )
+			{
+				$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+			}
+			
+			$this->mailer->assign_tags($tags);
 		}
 		
 		if( $nl_config['enable_profil_cp'] )
@@ -545,7 +575,8 @@ class Wanewsletter {
 				'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
 				'SITENAME' => $nl_config['sitename'],
 				'URLSITE'  => $nl_config['urlsite'],
-				'SIG'      => $this->listdata['liste_sig']
+				'SIG'      => $this->listdata['liste_sig'],
+				'PSEUDO'   => $this->account['pseudo']
 			));
 			
 			if( $this->listdata['use_cron'] )
@@ -560,6 +591,17 @@ class Wanewsletter {
 				$this->mailer->assign_tags(array(
 					'LINK' => $this->make_link()
 				));
+			}
+			
+			if( count($this->other_tags) > 0 )
+			{
+				$tags = array();
+				foreach( $this->other_tags as $tag )
+				{
+					$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+				}
+				
+				$this->mailer->assign_tags($tags);
 			}
 			
 			if( !$this->mailer->send() )
@@ -659,8 +701,20 @@ class Wanewsletter {
 					'EMAIL'   => $this->account['email'],
 					'LISTE'   => unhtmlspecialchars($this->listdata['liste_name']),
 					'URLSITE' => $nl_config['urlsite'],
-					'SIG'     => $this->listdata['liste_sig']
+					'SIG'     => $this->listdata['liste_sig'],
+					'PSEUDO'  => $this->account['pseudo']
 				));
+				
+				if( count($this->other_tags) > 0 )
+				{
+					$tags = array();
+					foreach( $this->other_tags as $tag )
+					{
+						$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+					}
+					
+					$this->mailer->assign_tags($tags);
+				}
 				
 				do
 				{
