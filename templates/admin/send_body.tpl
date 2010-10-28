@@ -34,12 +34,12 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 			</td>
 		</tr>
 		<tr title="{L_CC_ADMIN_TITLE}">
-			<td class="medrow1"><label for="cc_admin">{L_CC_ADMIN}&nbsp;:</label></td>
+			<td class="medrow1"><label>{L_CC_ADMIN}&nbsp;:</label></td>
 			<td class="row2">
-				<select id="cc_admin" name="cc_admin">
-					<option value="1"{SELECTED_CC_ADMIN_ON}>{L_YES}</option>
-					<option value="0"{SELECTED_CC_ADMIN_OFF}>{L_NO}</option>
-				</select>
+				<input type="radio" id="cc_admin_yes" name="cc_admin" value="1" {CHECKED_CC_ADMIN_ON}/>
+				<label for="cc_admin_yes" class="m-texte">{L_YES}</label>
+				<input type="radio" id="cc_admin_no" name="cc_admin" value="0" {CHECKED_CC_ADMIN_OFF}/>
+				<label for="cc_admin_no" class="m-texte">{L_NO}</label>
 			</td>
 		</tr>
 		<!-- BEGIN test_send -->

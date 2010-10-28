@@ -1145,8 +1145,8 @@ $output->assign_vars(array(
 	'S_SUBJECT'               => $subject,
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
 	'SELECTED_STATUS_MODEL'   => ( $logdata['log_status'] == STATUS_MODEL ) ? ' selected="selected"' : '',
-	'SELECTED_CC_ADMIN_ON'    => ( $listdata['cc_admin'] ) ? ' selected="selected"' : '',
-	'SELECTED_CC_ADMIN_OFF'   => ( !$listdata['cc_admin'] ) ? ' selected="selected"' : '',
+	'CHECKED_CC_ADMIN_ON'     => ( $listdata['cc_admin'] ) ? ' checked="checked"' : '',
+	'CHECKED_CC_ADMIN_OFF'    => ( !$listdata['cc_admin'] ) ? ' checked="checked"' : '',
 	
 	'S_ENCTYPE'               => ( FILE_UPLOADS_ON ) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
 	'S_DELETE_BUTTON_DISABLED' => $logdata['log_id'] == 0 ? ' disabled="disabled"' : '',
