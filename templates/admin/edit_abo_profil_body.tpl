@@ -49,6 +49,19 @@ DOM_Events.addListener('load', function() {
 		<!-- END listerow -->
 	</table>
 	
+	<!-- BEGIN tags -->
+	<h2>{tags.L_TITLE}</h2>
+	
+	<table class="content">
+		<!-- BEGIN row -->
+		<tr>
+			<td class="row1"><label for="pseudo">{tags.row.NAME}&nbsp;:</label></td>
+			<td class="row2"><textarea name="tags[{tags.row.FIELDNAME}]" cols="35" rows="2">{tags.row.VALUE}</textarea></td>
+		</tr>
+		<!-- END row -->
+	</table>
+	<!-- END tags -->
+	
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
 	</div>

@@ -297,6 +297,8 @@ else if( $mode == 'iframe' )
 //
 else if( $mode == 'abonnes' )
 {
+	include WA_ROOTDIR . '/includes/tags.inc.php';
+	
 	switch( $action )
 	{
 		case 'delete':
@@ -394,14 +396,12 @@ else if( $mode == 'abonnes' )
 		//
 		// Récupération des champs des tags personnalisés
 		//
-		include WA_ROOTDIR . '/includes/tags.inc.php';
-		
 		if( count($other_tags) > 0 )
 		{
 			$fields_str = '';
-			foreach( $other_tags as $data )
+			foreach( $other_tags as $tag )
 			{
-				$fields_str .= 'a.' . $data['column_name'] . ', ';
+				$fields_str .= 'a.' . $tag['column_name'] . ', ';
 			}
 		}
 		else
@@ -458,7 +458,7 @@ else if( $mode == 'abonnes' )
 				foreach( $other_tags as $tag )
 				{
 					$value = $row[$tag['column_name']];
-					$value = (!is_null($value)) ? htmlspecialchars($value) : '<i>NULL</i>';
+					$value = (!is_null($value)) ? nl2br(htmlspecialchars($value)) : '<i>NULL</i>';
 					
 					$output->assign_block_vars('tags.row', array(
 						'NAME'  => $tag['tag_name'],
@@ -560,6 +560,20 @@ else if( $mode == 'abonnes' )
 					'abo_pseudo' => ( !empty($_POST['pseudo']) ) ? strip_tags(trim($_POST['pseudo'])) : ''
 				);
 				
+				//
+				// Récupération des champs des tags personnalisés
+				//
+				if( count($other_tags) > 0 && isset($_POST['tags']) )
+				{
+					foreach( $other_tags as $tag )
+					{
+						if( isset($_POST['tags'][$tag['column_name']]) )
+						{
+							$sql_data[$tag['column_name']] = $_POST['tags'][$tag['column_name']];
+						}
+					}
+				}
+				
 				if( !$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id)) )
 				{
 					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
@@ -601,7 +615,23 @@ else if( $mode == 'abonnes' )
 			}
 		}
 		
-		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_email, al.liste_id, al.format
+		//
+		// Récupération des champs des tags personnalisés
+		//
+		if( count($other_tags) > 0 )
+		{
+			$fields_str = '';
+			foreach( $other_tags as $tag )
+			{
+				$fields_str .= 'a.' . $tag['column_name'] . ', ';
+			}
+		}
+		else
+		{
+			$fields_str = '';
+		}
+		
+		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_email, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
@@ -644,6 +674,25 @@ else if( $mode == 'abonnes' )
 				
 				'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
 			));
+			
+			//
+			// Affichage des valeurs des tags enregistrés
+			//
+			if( count($other_tags) > 0 )
+			{
+				$output->assign_block_vars('tags', array(
+					'L_TITLE' => $lang['TagsEdit']
+				));
+				
+				foreach( $other_tags as $tag )
+				{
+					$output->assign_block_vars('tags.row', array(
+						'NAME'      => $tag['tag_name'],
+						'FIELDNAME' => $tag['column_name'],
+						'VALUE'     => htmlspecialchars($row[$tag['column_name']])
+					));
+				}
+			}
 			
 			do
 			{

@@ -123,9 +123,7 @@ div#dev {
 }
 
 p#explain {
-	border-width: 0 1px;
-	border-style: solid;
-	border-color: black;
+	border-left: 1px solid black;
 	padding: 0 .8%;
 	line-height: 1.5;
 }
@@ -160,7 +158,7 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 
 /* Classes diverses */
 
-.bloc, .smallbloc {
+.bloc, .smallbloc, table#tagsList {
 	margin: 1.2em 0;
 	border: 1px solid #084A6B;
 	box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
@@ -168,7 +166,7 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	-webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
-.smallbloc { margin-left: 8%; margin-right: 8%; }
+.smallbloc, table#tagsList { margin-left: 8%; margin-right: 8%; }
 
 .bloc h2, .smallbloc h2 {
 	background-color: #003B78;
@@ -436,24 +434,15 @@ table#files-box th:first-child { min-width: 1.4em; }
 
 /* tableau de tags de la page de visualisation d'un profil d'abonné */
 table#tagsList {
+	min-width: 25%;
 	background-color: #FAFAFA;
 	margin-top: 0;
-	margin-bottom: 1em;
-	margin-left: 8%;
-	border: 1px solid #084A6B;
 	border-spacing: 1px;
 	color: black;
 }
 table#tagsList caption { padding-bottom: 2px; }
-table#tagsList th { background-color: #D6D8DA; }
-table#tagsList td {
-	background-color: #EAEAEA;
-	padding: .1em .2em;
-	empty-cells: show;
-	vertical-align: top;
-	text-align: left;
-}
 
+/* Boîte de visualisation des images jointes */
 div#image-box {
 	overflow: auto;
 	position: fixed;
@@ -468,9 +457,9 @@ div#image-box {
 	border-radius: 3px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
-	box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
-	-moz-box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
-	-webkit-box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+	box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+	-moz-box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+	-webkit-box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 div#image-box object { display: block; max-width: 100%; max-height: 100%; }
 div#image-box object[type*="/svg"] { min-width: 50px; min-height: 50px; }

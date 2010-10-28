@@ -547,6 +547,7 @@ $lang['Goto_list']                  = "Retour à la liste des abonnés";
 $lang['View_account']               = "Voir ce compte";
 $lang['Edit_account']               = "Modifier ce compte";
 $lang['TagsList']                   = "Liste des tags";
+$lang['TagsEdit']                   = "Édition des tags";
 
 
 //

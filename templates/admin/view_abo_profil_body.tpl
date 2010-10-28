@@ -45,8 +45,8 @@
 	</tr>
 	<!-- BEGIN row -->
 	<tr>
-		<td>{tags.row.NAME}</td>
-		<td>{tags.row.VALUE}</td>
+		<td class="row1">{tags.row.NAME}</td>
+		<td class="row2">{tags.row.VALUE}</td>
 	</tr>
 	<!-- END row -->
 </table>
