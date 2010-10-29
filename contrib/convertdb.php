@@ -85,6 +85,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	
 	if( error_reporting(E_ALL) ) {
 		printf("%s : %s at line %d\n", $errno, strip_tags($errstr), $errline);
+//		debug_print_backtrace();
 		exit(1);
 	}
 }
@@ -136,6 +137,23 @@ $sql_create = parseSQL($sql_create);
 foreach( $sql_create as $query ) {
 	$query = str_replace('wa_', $prefixe_to, $query);
 	$db_to->query($query);
+}
+
+//
+// Si la base de données de destination est SQLite, on travaille en mémoire et
+// on fait la copie sur disque à la fin, c'est beaucoup plus rapide.
+//
+// Voir ligne ~272 pour la 2e partie du boulot
+//
+if( $dbtype == 'sqlite' ) {
+	$sqlite_db = $db_to->dbname;
+	$db_to->close();
+	$db_to = Wadatabase('sqlite::memory:');
+	
+	foreach( $sql_create as $query ) {
+		$query = str_replace('wa_', $prefixe_to, $query);
+		$db_to->query($query);
+	}
 }
 
 function escape_data($value)
@@ -246,6 +264,17 @@ foreach( $tableList as $tablename ) {
 	
 	printf("%d rows added.\n", $numrows);
 	flush();
+}
+
+if( $dbtype == 'sqlite' ) {
+	$db_to->query(sprintf('ATTACH %s AS dest', $db_to->quote($sqlite_db)));
+	
+	foreach( $tableList as $tablename ) {
+		$db_to->query(sprintf('INSERT INTO dest.%1$s SELECT * FROM %1$s',
+			$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))));
+	}
+	
+	$db_to->query('DETACH dest');
 }
 
 $db_from->close();
