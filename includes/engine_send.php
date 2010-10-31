@@ -225,9 +225,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	if( count($other_tags) > 0 )
 	{
 		$fields_str = '';
-		foreach( $other_tags as $data )
+		foreach( $other_tags as $tag )
 		{
-			$fields_str .= 'a.' . $data['column_name'] . ', ';
+			$fields_str .= 'a.' . $tag['column_name'] . ', ';
 		}
 	}
 	else
@@ -338,12 +338,12 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			// Tableau pour remplacer les tags par des chaines vides
 			// Non utilisation des tags avec le moteur d'envoi en copie cachée
 			//
-			$tags_replace = array('NAME' => '');
+			$tags_replace = array('NAME' => '', 'PSEUDO' => '');
 			if( count($other_tags) > 0 )
 			{
-				foreach( $other_tags as $data )
+				foreach( $other_tags as $tag )
 				{
-					$tags_replace[$data['tag_name']] = '';
+					$tags_replace[$tag['tag_name']] = '';
 				}
 			}
 			
@@ -471,28 +471,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				$counter++;
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				
-				if( $abo_format == FORMAT_TEXTE )
-				{
-					if( $isPHP5 == true )
-					{
-						eval('$mailer = clone $mailerText;');
-					}
-					else
-					{
-						$mailer = $mailerText;
-					}
-				}
-				else
-				{
-					if( $isPHP5 == true )
-					{
-						eval('$mailer = clone $mailerHTML;');
-					}
-					else
-					{
-						$mailer = $mailerHTML;
-					}
-				}
+				// Choix de l'instance de Wamailer en fonction du format voulu
+				$mailer = ($abo_format == FORMAT_TEXTE) ? $mailerText : $mailerHTML;
 				
 				if( $row['abo_pseudo'] != '' )
 				{
@@ -519,24 +499,25 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				{
 					$tags_replace['NAME'] = '';
 				}
+				$tags_replace['PSEUDO'] = $tags_replace['NAME'];// Cohérence avec d'autres parties du script
 				
 				if( count($other_tags) > 0 )
 				{
-					foreach( $other_tags as $data )
+					foreach( $other_tags as $tag )
 					{
-						if( isset($row[$data['column_name']]) )
+						if( isset($row[$tag['column_name']]) )
 						{
-							if( !is_numeric($row[$data['column_name']]) && $abo_format == FORMAT_HTML )
+							if( !is_numeric($row[$tag['column_name']]) && $abo_format == FORMAT_HTML )
 							{
-								$row[$data['column_name']] = htmlspecialchars($row[$data['column_name']]);
+								$row[$tag['column_name']] = htmlspecialchars($row[$tag['column_name']]);
 							}
 							
-							$tags_replace[$data['tag_name']] = $row[$data['column_name']];
+							$tags_replace[$tag['tag_name']] = $row[$tag['column_name']];
 							
 							continue;
 						}
 						
-						$tags_replace[$data['tag_name']] = '';
+						$tags_replace[$tag['tag_name']] = '';
 					}
 				}
 				
