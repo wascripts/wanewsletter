@@ -970,7 +970,7 @@ function convert_encoding($data, $charset, $check_bom = true)
 		}
 	}
 	
-	if( $charset == 'UTF-8' )
+	if( strtoupper($charset) == 'UTF-8' )
 	{
 		if( $GLOBALS['lang']['CHARSET'] == 'ISO-8859-1' )
 		{
@@ -1025,7 +1025,7 @@ function wan_get_contents($URL, &$errstr)
 		
 		if( is_readable($URL) )
 		{
-			$result = array('data' => file_get_contents($URL), 'charset' => '');
+			$result = array('data' => file_get_contents($URL), 'charset' => null);
 		}
 		else
 		{
@@ -1144,7 +1144,7 @@ function http_get_contents($URL, &$errstr)
 	{
 		$prolog = substr($data, 0, strpos($data, "\n"));
 		
-		if( preg_match('/\s+encoding\s?=\s?("|\')([a-z][a-z0-9._-]*)\\1/i', $prolog, $match) )
+		if( preg_match('/\s+encoding\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/i', $prolog, $match) )
 		{
 			$charset = $match[2];
 		}

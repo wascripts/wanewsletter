@@ -387,13 +387,13 @@ switch( $mode )
 							
 							foreach( $match_meta as $meta )
 							{
-								if( preg_match('/http-equiv=("|\')Content-Type\\1/si', $meta[0])
-									&& preg_match('/content=("|\').+?;\s*charset=([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
+								if( preg_match('/http-equiv\s*=\s*("|\')Content-Type\\1/si', $meta[0])
+									&& preg_match('/content\s*=\s*("|\').+?;\s*charset\s*=\s*([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
 								{
 									$result['charset'] = $match[2];
 								}
 								// HTML5 style <meta charset="<character_set>">
-								else if( preg_match('/charset=("|\')([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
+								else if( preg_match('/charset\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
 								{
 									$result['charset'] = $match[2];
 								}
@@ -405,7 +405,7 @@ switch( $mode )
 							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
 						}
 						
-						if( strncmp($URL, 'http://', 7) == 0 )
+						if( strncmp($_POST['body_html_url'], 'http://', 7) == 0 )
 						{
 							$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
 							$result['data'] = preg_replace('/<(head[^>]*)>/si',
