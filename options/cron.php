@@ -165,11 +165,6 @@ if( $listdata = $result->fetch() )
 				case 'confirmation':
 				case 'setformat':
 					break;
-				
-				default:
-					$pop->delete_mail($mail_id);
-					continue 2;
-					break;
 			}
 			
 			$code = $pop->contents[$mail_id]['message'];
@@ -178,11 +173,7 @@ if( $listdata = $result->fetch() )
 				$code = substr($code, 0, 20);
 			}
 			
-			if( $action == 'inscription' || $action == 'setformat' || ($action == 'desinscription' && empty($code)) )
-			{
-				$wan->do_action($action, $email);
-			}
-			else
+			if( !empty($code) && ($action =='confirmation' || $action == 'desinscription') )
 			{
 				if( empty($headers['date']) || intval($time = strtotime($headers['date'])) > 0 )
 				{
@@ -190,6 +181,10 @@ if( $listdata = $result->fetch() )
 				}
 				
 				$wan->check_code($code, $time);
+			}
+			else if( in_array($action, array('inscription','setformat','desinscription')) )
+			{
+				$wan->do_action($action, $email);
 			}
 			
 			//

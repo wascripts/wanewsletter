@@ -357,7 +357,7 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 	//
 	$display_error = error_reporting(E_ALL);
 	
-	if( preg_match('/\.UTF-?8/', getenv('LANG')) ) // Au cas où le terminal utilise l'encodage utf-8
+	if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) // Au cas où le terminal utilise l'encodage utf-8
 	{
 		$errstr = wan_utf8_encode($errstr);
 	}

@@ -115,7 +115,20 @@ class Wanewsletter {
 			}
 		}
 		
-		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang,
+		if( count($this->other_tags) > 0 )
+		{
+			$fields_str = '';
+			foreach( $this->other_tags as $tag )
+			{
+				$fields_str .= 'a.' . $tag['column_name'] . ', ';
+			}
+		}
+		else
+		{
+			$fields_str = '';
+		}
+		
+		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang,
 				a.abo_status, al.format, al.register_key, al.register_date, al.confirmed
 			FROM " . ABONNES_TABLE . " AS a
 				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
@@ -247,7 +260,20 @@ class Wanewsletter {
 	{
 		global $db, $lang;
 		
-		$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed, al.register_date, l.liste_id,
+		if( count($this->other_tags) > 0 )
+		{
+			$fields_str = '';
+			foreach( $this->other_tags as $tag )
+			{
+				$fields_str .= 'a.' . $tag['column_name'] . ', ';
+			}
+		}
+		else
+		{
+			$fields_str = '';
+		}
+		
+		$sql = "SELECT $fields_str a.abo_id, a.abo_email, a.abo_status, al.confirmed, al.register_date, l.liste_id,
 				l.liste_format, l.sender_email, l.liste_alias, l.limitevalidate, l.liste_name,
 				l.return_email, l.form_url, l.liste_sig, l.use_cron, l.confirm_subscribe
 			FROM " . ABONNES_TABLE . " AS a
@@ -266,6 +292,15 @@ class Wanewsletter {
 			$this->account['status'] = $abodata['abo_status'];
 			$this->account['date']   = $abodata['register_date'];
 			$this->account['code']   = $code;
+			$this->account['tags']   = array();
+			
+			foreach( $this->other_tags as $tag )
+			{
+				if( isset($abodata[$tag['column_name']]) )
+				{
+					$this->account['tags'][$tag['column_name']] = $abodata[$tag['column_name']];
+				}
+			}
 			
 			$this->listdata = $abodata;// Récupération des données relatives à la liste
 			
@@ -422,7 +457,10 @@ class Wanewsletter {
 			$tags = array();
 			foreach( $this->other_tags as $tag )
 			{
-				$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+				if( isset($this->account['tags'][$tag['column_name']]) )
+				{
+					$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+				}
 			}
 			
 			$this->mailer->assign_tags($tags);
@@ -598,7 +636,10 @@ class Wanewsletter {
 				$tags = array();
 				foreach( $this->other_tags as $tag )
 				{
-					$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+					if( isset($this->account['tags'][$tag['column_name']]) )
+					{
+						$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+					}
 				}
 				
 				$this->mailer->assign_tags($tags);
@@ -710,7 +751,10 @@ class Wanewsletter {
 					$tags = array();
 					foreach( $this->other_tags as $tag )
 					{
-						$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+						if( isset($this->account['tags'][$tag['column_name']]) )
+						{
+							$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+						}
 					}
 					
 					$this->mailer->assign_tags($tags);
