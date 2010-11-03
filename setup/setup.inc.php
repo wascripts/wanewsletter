@@ -154,7 +154,7 @@ if( get_magic_quotes_gpc() )
 	strip_magic_quotes_gpc($_REQUEST);
 }
 
-define('WA_NEW_VERSION', '2.3-dev');
+define('WA_NEW_VERSION', '2.4-dev');
 
 $default_lang   = 'francais';
 $supported_lang = array(
@@ -169,7 +169,7 @@ $supported_db = array(
 		'extension'    => extension_loaded('interbase')
 	),
 	'mysql' => array(
-		'Name'         => 'MySQL 3.23.x, 4.x, 5.x',
+		'Name'         => 'MySQL &#8805; 4.1, 5.x',
 		'prefixe_file' => 'mysql',
 		'extension'    => (extension_loaded('mysql') || extension_loaded('mysqli'))
 	),

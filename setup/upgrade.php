@@ -88,7 +88,7 @@ if( file_exists(WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php
 	require WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php';
 }
 
-if( !preg_match('/^(2\.[0-3])[-.0-9a-zA-Z]+$/', WA_VERSION, $match) )
+if( !preg_match('/^(2\.[0-4])[-.0-9a-zA-Z]+$/', WA_VERSION, $match) )
 {
 	message($lang['Unknown_version']);
 }
@@ -128,7 +128,7 @@ if( $start )
 				AND passwd = '" . md5($admin_pass) . "'
 				AND $field_level >= " . ADMIN;
 	}
-	else if( WA_BRANCHE == '2.2' || WA_BRANCHE == '2.3' )
+	else if( WA_BRANCHE == '2.2' || WA_BRANCHE == '2.3' || WA_BRANCHE == '2.4' )
 	{
 		$sql = "SELECT COUNT(*)
 			FROM " . ADMIN_TABLE . "
@@ -936,7 +936,7 @@ if( $start )
 			
 			exec_queries($sql_update, true);
 		}
-		else if( WA_BRANCHE == '2.3' )
+		else if( WA_BRANCHE == '2.3' || WA_BRANCHE == '2.4' )
 		{
 			$version = str_replace('rc', 'RC', WA_VERSION);
 			$sql_update = array();

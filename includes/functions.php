@@ -616,46 +616,17 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			
 			$db->beginTransaction();
 			
-			if( !SQL_SUBSELECT_SUPPORTED )
-			{
-				$sql = "SELECT abo_id
+			$sql = "DELETE FROM " . ABONNES_TABLE . "
+				WHERE abo_id IN(
+					SELECT abo_id
 					FROM " . ABO_LISTE_TABLE . "
 					WHERE abo_id IN($sql_abo_ids)
 					GROUP BY abo_id
-					HAVING COUNT(abo_id) = 1";
-				if( $result = $db->query($sql) )
-				{
-					$abo_ids = array();
-					while( $abo_id = $result->column('abo_id') )
-					{
-						array_push($abo_ids, $abo_id);
-					}
-					
-					if( count($abo_ids) > 0 )
-					{
-						$sql = "DELETE FROM " . ABONNES_TABLE . " 
-							WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-						}
-					}
-				}
-			}
-			else
+					HAVING COUNT(abo_id) = 1
+				)";
+			if( !$db->query($sql) )
 			{
-				$sql = "DELETE FROM " . ABONNES_TABLE . "
-					WHERE abo_id IN(
-						SELECT abo_id
-						FROM " . ABO_LISTE_TABLE . "
-						WHERE abo_id IN($sql_abo_ids)
-						GROUP BY abo_id
-						HAVING COUNT(abo_id) = 1
-					)";
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-				}
+				trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
 			}
 			
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "

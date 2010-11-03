@@ -122,17 +122,6 @@ if( !$db->isConnected() )
 }
 
 //
-// FIX Spécial MySQL
-//
-$SqlSubSelectSupport = true;
-if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 && version_compare($db->serverVersion, '4.1.0', '<') ) {
-	$SqlSubSelectSupport = false;
-}
-
-define('SQL_SUBSELECT_SUPPORTED', $SqlSubSelectSupport);
-unset($SqlSubSelectSupport);
-
-//
 // On récupère la configuration du script 
 //
 $sql = 'SELECT * FROM ' . CONFIG_TABLE;

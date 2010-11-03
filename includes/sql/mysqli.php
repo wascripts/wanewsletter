@@ -208,17 +208,10 @@ class Wadb_mysqli {
 	 */
 	function encoding($encoding = null)
 	{
-		$charsetSupport = version_compare($this->serverVersion, '4.1.2', '>=');
+		$o = $this->link->get_charset();
+		$curEncoding = $o->charset;
 		
-		if( $charsetSupport ) {
-			$o = $this->link->get_charset();
-			$curEncoding = $o->charset;
-		}
-		else {
-			$curEncoding = 'latin1'; // TODO ?
-		}
-		
-		if( $charsetSupport && !is_null($encoding) ) {
+		if( !is_null($encoding) ) {
 			$this->link->set_charset($encoding);
 		}
 		
@@ -691,10 +684,8 @@ class WadbBackup_mysqli {
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
-		if( version_compare($this->db->serverVersion, '4.1.2', '>=') ) {
-			$contents .= sprintf("SET NAMES '%s';%s", $this->db->encoding(), $this->eol);
-			$contents .= $this->eol;
-		}
+		$contents .= sprintf("SET NAMES '%s';%s", $this->db->encoding(), $this->eol);
+		$contents .= $this->eol;
 		
 		return $contents;
 	}

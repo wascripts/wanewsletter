@@ -37,31 +37,15 @@ $liste_ids = array_unique(array_map('intval', explode(' ', $liste_ids)));
 
 if( count($liste_ids) > 0 )
 {
-	$liste_ids = implode(', ', $liste_ids);
-	
-	if( SQL_SUBSELECT_SUPPORTED ) // Et parce que SQLite ne supporte pas COUNT(DISTINCT(...))
-	{
-		$sql = "SELECT COUNT(a.abo_id) AS num_subscribe
-			FROM " . ABONNES_TABLE . " AS a
-			WHERE a.abo_id IN(
-					SELECT al.abo_id
-					FROM " . ABO_LISTE_TABLE . " AS al
-					WHERE al.liste_id IN($liste_ids)
-						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-				)
-				AND a.abo_status = " . ABO_ACTIF;
-	}
-	else
-	{
-		$sql = "SELECT COUNT(DISTINCT(a.abo_id)) AS num_subscribe
-			FROM " . ABONNES_TABLE . " AS a
-				INNER JOIN " . ABO_LISTE_TABLE . " AS al
-				ON al.liste_id IN($liste_ids)
-					AND al.abo_id    = a.abo_id
+	$sql = "SELECT COUNT(a.abo_id) AS num_subscribe
+		FROM " . ABONNES_TABLE . " AS a
+		WHERE a.abo_id IN(
+				SELECT al.abo_id
+				FROM " . ABO_LISTE_TABLE . " AS al
+				WHERE al.liste_id IN(" . implode(', ', $liste_ids) . ")
 					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-			WHERE a.abo_status = " . ABO_ACTIF;
-	}
-	
+			)
+			AND a.abo_status = " . ABO_ACTIF;
 	$result = $db->query($sql);
 	$data   = $result->column('num_subscribe');
 }

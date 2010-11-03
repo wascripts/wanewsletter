@@ -739,46 +739,17 @@ else if( $mode == 'abonnes' )
 		{
 			$db->beginTransaction();
 			
-			if( !SQL_SUBSELECT_SUPPORTED )
-			{
-				$sql = "SELECT abo_id
+			$sql = "DELETE FROM " . ABONNES_TABLE . "
+				WHERE abo_id IN(
+					SELECT abo_id
 					FROM " . ABO_LISTE_TABLE . "
 					WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
 					GROUP BY abo_id
-					HAVING COUNT(abo_id) = 1";
-				if( $result = $db->query($sql) )
-				{
-					$abo_ids2 = array();
-					while( $abo_id = $result->column('abo_id') )
-					{
-						array_push($abo_ids2, $abo_id);
-					}
-					
-					if( count($abo_ids2) > 0 )
-					{
-						$sql = "DELETE FROM " . ABONNES_TABLE . " 
-							WHERE abo_id IN(" . implode(', ', $abo_ids2) . ")";
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-						}
-					}
-				}
-			}
-			else
+					HAVING COUNT(abo_id) = 1
+				)";
+			if( !$db->query($sql) )
 			{
-				$sql = "DELETE FROM " . ABONNES_TABLE . "
-					WHERE abo_id IN(
-						SELECT abo_id
-						FROM " . ABO_LISTE_TABLE . "
-						WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
-						GROUP BY abo_id
-						HAVING COUNT(abo_id) = 1
-					)";
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-				}
+				trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
 			}
 			
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
@@ -1371,62 +1342,24 @@ else if( $mode == 'liste' )
 			
 			if( isset($_POST['delete_all']) )
 			{
-				if( !SQL_SUBSELECT_SUPPORTED )
-				{
-					$sql = "SELECT abo_id
+				$sql = "SELECT abo_id
+					FROM " . ABO_LISTE_TABLE . "
+					WHERE abo_id IN(
+						SELECT abo_id
 						FROM " . ABO_LISTE_TABLE . "
-						WHERE liste_id = " . $listdata['liste_id'];
-					if( !($result = $db->query($sql)) )
-					{
-						trigger_error('Impossible d\'obtenir la liste des abonnés de cette liste', ERROR);
-					}
-					
-					$abo_ids = array();
-					while( $abo_id = $result->column('abo_id') )
-					{
-						array_push($abo_ids, $abo_id);
-					}
-					
-					if( count($abo_ids) > 0 )
-					{
-						$sql = "SELECT abo_id 
-							FROM " . ABO_LISTE_TABLE . " 
-							WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
-							GROUP BY abo_id 
-							HAVING COUNT(abo_id) = 1";
-						if( !($result = $db->query($sql)) )
-						{
-							trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
-						}
-						
-						$delete_abo_ids = array();
-						while( $abo_id = $result->column('abo_id') )
-						{
-							array_push($delete_abo_ids, $abo_id);
-						}
-					}
+						WHERE liste_id = $listdata[liste_id]
+					)
+					GROUP BY abo_id
+					HAVING COUNT(abo_id) = 1";
+				if( !$db->query($sql) )
+				{
+					trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
 				}
-				else
+				
+				$delete_abo_ids = array();
+				while( $abo_id = $result->column('abo_id') )
 				{
-					$sql = "SELECT abo_id
-						FROM " . ABO_LISTE_TABLE . "
-						WHERE abo_id IN(
-							SELECT abo_id
-							FROM " . ABO_LISTE_TABLE . "
-							WHERE liste_id = $listdata[liste_id]
-						)
-						GROUP BY abo_id
-						HAVING COUNT(abo_id) = 1";
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
-					}
-					
-					$delete_abo_ids = array();
-					while( $abo_id = $result->column('abo_id') )
-					{
-						array_push($delete_abo_ids, $abo_id);
-					}
+					array_push($delete_abo_ids, $abo_id);
 				}
 				
 				//
@@ -1488,82 +1421,40 @@ else if( $mode == 'liste' )
 					trigger_error('No_liste_id', ERROR);
 				}
 				
-				if( !SQL_SUBSELECT_SUPPORTED )
+				$sql = "SELECT abo_id
+					FROM " . ABO_LISTE_TABLE . "
+					WHERE abo_id IN(
+						SELECT abo_id
+						FROM " . ABO_LISTE_TABLE . "
+						WHERE liste_id = $listdata[liste_id]
+					) AND liste_id = " . $liste_id;
+				if( !$db->query($sql) )
 				{
-					$sql = "SELECT abo_id 
-						FROM " . ABO_LISTE_TABLE . " 
-						WHERE liste_id = " . $listdata['liste_id'];
-					if( !($result = $db->query($sql)) )
-					{
-						trigger_error('Impossible d\'obtenir la liste des abonnés', ERROR);
-					}
-					
-					$abo_ids = array();
-					while( $abo_id = $result->column('abo_id') )
-					{
-						array_push($abo_ids, $abo_id);
-					}
-					
-					if( count($abo_ids) > 0 )
-					{
-						$sql = "SELECT abo_id 
-							FROM " . ABO_LISTE_TABLE . " 
-							WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
-								AND liste_id = " . $liste_id;
-						if( !($result = $db->query($sql)) )
-						{
-							trigger_error('Impossible d\'obtenir la liste des abonnés[2]', ERROR);
-						}
-						
-						$delete_abo_ids = array();
-						while( $abo_id = $result->column('abo_id') )
-						{
-							array_push($delete_abo_ids, $abo_id);
-						}
-						
-						if( count($delete_abo_ids) > 0 )
-						{
-							$update_abo_ids = array_diff($abo_ids, $delete_abo_ids);
-						}
-					}
+					trigger_error('Impossible d\'obtenir la liste des entrées inutiles de la table abo_liste', ERROR);
 				}
-				else
+				
+				$delete_abo_ids = array();
+				while( $abo_id = $result->column('abo_id') )
 				{
-					$sql = "SELECT abo_id
+					array_push($delete_abo_ids, $abo_id);
+				}
+				
+				$sql = "SELECT abo_id
+					FROM " . ABO_LISTE_TABLE . "
+					WHERE abo_id IN(
+						SELECT abo_id
 						FROM " . ABO_LISTE_TABLE . "
-						WHERE abo_id IN(
-							SELECT abo_id
-							FROM " . ABO_LISTE_TABLE . "
-							WHERE liste_id = $listdata[liste_id]
-						) AND liste_id = " . $liste_id;
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible d\'obtenir la liste des entrées inutiles de la table abo_liste', ERROR);
-					}
-					
-					$delete_abo_ids = array();
-					while( $abo_id = $result->column('abo_id') )
-					{
-						array_push($delete_abo_ids, $abo_id);
-					}
-					
-					$sql = "SELECT abo_id
-						FROM " . ABO_LISTE_TABLE . "
-						WHERE abo_id IN(
-							SELECT abo_id
-							FROM " . ABO_LISTE_TABLE . "
-							WHERE liste_id = $listdata[liste_id]
-						) AND liste_id <> " . $liste_id;
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible d\'obtenir la liste des entrées à mettre à jour', ERROR);
-					}
-					
-					$update_abo_ids = array();
-					while( $abo_id = $result->column('abo_id') )
-					{
-						array_push($update_abo_ids, $abo_id);
-					}
+						WHERE liste_id = $listdata[liste_id]
+					) AND liste_id <> " . $liste_id;
+				if( !$db->query($sql) )
+				{
+					trigger_error('Impossible d\'obtenir la liste des entrées à mettre à jour', ERROR);
+				}
+				
+				$update_abo_ids = array();
+				while( $abo_id = $result->column('abo_id') )
+				{
+					array_push($update_abo_ids, $abo_id);
 				}
 				
 				//

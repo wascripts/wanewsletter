@@ -211,7 +211,6 @@ class Wadb_mysql {
 	 * Renvoie le jeu de caractères courant utilisé.
 	 * Si l'argument $encoding est fourni, il est utilisé pour définir
 	 * le nouveau jeu de caractères de la connexion en cours.
-	 * Utilisable uniquement avec MySQL >= 4.1.1
 	 * 
 	 * @param string $encoding
 	 * 
@@ -220,17 +219,10 @@ class Wadb_mysql {
 	 */
 	function encoding($encoding = null)
 	{
-		$charsetSupport = version_compare($this->serverVersion, '4.1.2', '>=');
+		$res = $this->query("SHOW VARIABLES LIKE 'character_set_client'");
+		$curEncoding = $res->column('Value');
 		
-		if( $charsetSupport ) {
-			$res = $this->query("SHOW VARIABLES LIKE 'character_set_client'");
-			$curEncoding = $res->column('Value');
-		}
-		else {
-			$curEncoding = 'latin1'; // TODO
-		}
-		
-		if( $charsetSupport && !is_null($encoding) ) {
+		if( !is_null($encoding) ) {
 			$this->query("SET NAMES $encoding");
 		}
 		
@@ -247,17 +239,6 @@ class Wadb_mysql {
 	 */
 	function query($query)
 	{
-		//
-		// Pour MySQL < 4.0.6 uniquement
-		// @see http://dev.mysql.com/doc/refman/4.1/en/news-4-0-6.html
-		//
-		if( version_compare($this->serverVersion, '4.0.6', '<')
-			&& preg_match('/\s+LIMIT\s+(\d+)\s+OFFSET\s+(\d+)\s*$/i', $query, $match) )
-		{
-			$query  = substr($query, 0, -strlen($match[0]));
-			$query .= " LIMIT $match[2], $match[1]";
-		}
-		
 		$curtime = array_sum(explode(' ', microtime()));
 		$result  = mysql_query($query, $this->link);
 		$endtime = array_sum(explode(' ', microtime()));
@@ -715,10 +696,8 @@ class WadbBackup_mysql {
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
-		if( version_compare($this->db->serverVersion, '4.1.2', '>=') ) {
-			$contents .= sprintf("SET NAMES '%s';%s", $this->db->encoding(), $this->eol);
-			$contents .= $this->eol;
-		}
+		$contents .= sprintf("SET NAMES '%s';%s", $this->db->encoding(), $this->eol);
+		$contents .= $this->eol;
 		
 		return $contents;
 	}

@@ -40,37 +40,13 @@ if( count($liste_ids) > 0 )
 	//
 	// Récupération des nombres d'inscrits
 	//
-	$sql_abo_ids = "SELECT DISTINCT(abo_id)
-		FROM " . ABO_LISTE_TABLE . "
-		WHERE liste_id IN($sql_liste_ids)";
-	if( !SQL_SUBSELECT_SUPPORTED )
-	{
-		if( !($result = $db->query($sql_abo_ids)) )
-		{
-			trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
-		}
-		
-		$abo_ids = array();
-		
-		if( $abo_id = $result->column('abo_id') )
-		{
-			do
-			{
-				array_push($abo_ids, $abo_id);
-			}
-			while( $abo_id = $result->column('abo_id') );
-		}
-		else
-		{
-			$abo_ids[] = 0;
-		}
-		
-		$sql_abo_ids = implode(', ', $abo_ids);
-	}
-	
 	$sql = "SELECT COUNT(abo_id) AS num_abo, abo_status
 		FROM " . ABONNES_TABLE . "
-		WHERE abo_id IN($sql_abo_ids)
+		WHERE abo_id IN(
+			SELECT DISTINCT(abo_id)
+			FROM " . ABO_LISTE_TABLE . "
+			WHERE liste_id IN($sql_liste_ids)
+		)
 		GROUP BY abo_status";
 	if( !($result = $db->query($sql)) )
 	{
@@ -125,39 +101,14 @@ if( count($liste_ids) > 0 )
 	//
 	// Espace disque occupé
 	//
-	$sql_file_ids = "SELECT lf.file_id
-		FROM " . LOG_FILES_TABLE . " AS lf
-			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-				AND l.liste_id IN($sql_liste_ids)";
-	
-	if( !SQL_SUBSELECT_SUPPORTED )
-	{
-		if( !($result = $db->query($sql_file_ids)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des identifiants de fichiers', ERROR);
-		}
-		
-		$file_ids = array();
-		
-		if( $file_id = $result->column('file_id') )
-		{
-			do
-			{
-				array_push($file_ids, $file_id);
-			}
-			while( $file_id = $result->column('file_id') );
-		}
-		else
-		{
-			$file_ids[] = 0;
-		}
-		
-		$sql_file_ids = implode(', ', $file_ids);
-	}
-	
 	$sql = "SELECT SUM(jf.file_size) AS totalsize
 		FROM " . JOINED_FILES_TABLE . " AS jf
-		WHERE jf.file_id IN($sql_file_ids)";
+		WHERE jf.file_id IN(
+			SELECT lf.file_id
+			FROM " . LOG_FILES_TABLE . " AS lf
+				INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+					AND l.liste_id IN($sql_liste_ids)
+		)";
 	$result   = $db->query($sql);
 	$filesize = $result->column('totalsize');
 	
