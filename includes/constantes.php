@@ -154,7 +154,8 @@ if( !defined('UPLOAD_ERR_CANT_WRITE') ) // Introduite en PHP 5.1.0
 // devront être déplacés vers le dossier des fichiers temporaires du script pour être 
 // accessible en lecture
 //
-if( !empty(config_value('open_basedir')) )
+$open_basedir = config_value('open_basedir');
+if( !empty($open_basedir) )
 {
 	define('OPEN_BASEDIR_RESTRICTION', TRUE);
 }

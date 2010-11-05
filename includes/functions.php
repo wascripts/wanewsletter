@@ -776,7 +776,7 @@ function active_urls($str)
  */
 function config_status($name)
 {
-	return config_value($value, true);
+	return config_value($name, true);
 }
 
 /**
