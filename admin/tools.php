@@ -357,14 +357,14 @@ switch( $mode )
 		wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
 		wan_print_row(' - allow_url_fopen', config_status('allow_url_fopen') ? 'on' : 'off');
 		wan_print_row(' - file_uploads', config_status('file_uploads') ? 'on' : 'off');
-		wan_print_row(' - upload_max_filesize', config_status('upload_max_filesize'));
-		wan_print_row(' - post_max_size', config_status('post_max_size'));
-		wan_print_row(' - memory_limit', config_status('memory_limit'));
-		wan_print_row(' - mail.add_x_header', config_status('mail.add_x_header'));
-		wan_print_row(' - mail.force_extra_parameters', config_status('mail.force_extra_parameters'));
-		wan_print_row(' - sendmail_from', config_status('sendmail_from'));
-		wan_print_row(' - sendmail_path', config_status('sendmail_path'));
-		wan_print_row(' - SMTP',          config_status('SMTP'));
+		wan_print_row(' - upload_max_filesize', config_value('upload_max_filesize'));
+		wan_print_row(' - post_max_size', config_value('post_max_size'));
+		wan_print_row(' - memory_limit', config_value('memory_limit'));
+		wan_print_row(' - mail.add_x_header', config_value('mail.add_x_header'));
+		wan_print_row(' - mail.force_extra_parameters', config_value('mail.force_extra_parameters'));
+		wan_print_row(' - sendmail_from', config_value('sendmail_from'));
+		wan_print_row(' - sendmail_path', config_value('sendmail_path'));
+		wan_print_row(' - SMTP',          config_value('SMTP'));
 		
 		list($infos) = parseDSN($dsn);
 		

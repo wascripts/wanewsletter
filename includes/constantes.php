@@ -154,8 +154,7 @@ if( !defined('UPLOAD_ERR_CANT_WRITE') ) // Introduite en PHP 5.1.0
 // devront être déplacés vers le dossier des fichiers temporaires du script pour être 
 // accessible en lecture
 //
-$open_basedir = config_status('open_basedir');
-if( !empty($open_basedir) )
+if( !empty(config_value('open_basedir')) )
 {
 	define('OPEN_BASEDIR_RESTRICTION', TRUE);
 }
@@ -196,13 +195,13 @@ if( config_status('file_uploads') )
 		return $size;
 	}
 	
-	if( !($filesize = @ini_get('upload_max_filesize')) )
+	if( !($filesize = config_value('upload_max_filesize')) )
 	{
         $filesize = '2M'; // 2 Méga-Octets
     }
 	$upload_max_size = get_integer_byte_value($filesize);
 	
-    if( $postsize = @ini_get('post_max_size') )
+    if( $postsize = config_value('post_max_size') )
 	{
         $postsize = get_integer_byte_value($postsize);
         if( $postsize < $upload_max_size )

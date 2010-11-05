@@ -768,17 +768,36 @@ function active_urls($str)
 /**
  * config_status()
  * 
- * Retourne le statut d'une directive de configuration (telle que réglée sur On ou Off)
+ * Retourne la valeur d'une directive de configuration
  * 
- * @param string $name    Nom de la directive
+ * @param string  $name          Nom de la directive
  * 
- * @return boolean
+ * @return mixed
  */
 function config_status($name)
 {
+	return config_value($value, true);
+}
+
+/**
+ * config_value()
+ * 
+ * Retourne la valeur d'une directive de configuration
+ * 
+ * @param string  $name          Nom de la directive
+ * @param boolean $need_boolean  Nécessaire pour obtenir un booléen en retour (pour les directives on/off)
+ * 
+ * @return mixed
+ */
+function config_value($name, $need_boolean = false)
+{
 	$value = ini_get($name);
-	if( preg_match('#^off|false$#i', $value) ) {
-		$value = false;
+	if( $need_boolean ) {
+		if( preg_match('#^off|false$#i', $value) ) {
+			$value = false;
+		}
+		
+		settype($value, 'boolean');
 	}
 	return $value;
 }
