@@ -772,7 +772,7 @@ function active_urls($str)
  * 
  * @param string  $name          Nom de la directive
  * 
- * @return mixed
+ * @return boolean
  */
 function config_status($name)
 {
