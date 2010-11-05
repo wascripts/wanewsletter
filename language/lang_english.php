@@ -680,6 +680,7 @@ $lang['Success_without_config']     = "The installation was succesfully complete
 $lang['Error_in_install']           = "Errors occurred during the installation.\n\nError is : %s\nQuery is : %s";
 $lang['Error_in_upgrade']           = "Errors occurred during the upgrade.\n\nError is : %s\nQuery is : %s";
 $lang['Upgrade_not_required']       = "No upgrade is required for your current version of Wanewsletter";
+$lang['Unsupported_version']        = "This version of Wanewsletter no longer supported by the upgrade script. You should first upgrade your installation to version 2.3.x.";
 $lang['Unknown_version']            = "Unknown version, upgrade cannot be continued.";
 
 $lang['dbtype']                     = "Database Type";
