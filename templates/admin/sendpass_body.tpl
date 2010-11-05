@@ -9,7 +9,7 @@
 		</tr>
 		<tr>
 			<td class="row1"><label for="email">{L_EMAIL}&#160;:</label></td>
-			<td class="row1"><input type="text" id="email" name="email" value="{S_EMAIL}" maxlength="100" size="30" class="text" /></td>
+			<td class="row1"><input type="text" id="email" name="email" value="{S_EMAIL}" maxlength="200" size="30" class="text" /></td>
 		</tr>
 	</table>
 	

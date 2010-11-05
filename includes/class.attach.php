@@ -802,7 +802,7 @@ class Attach {
 					FROM " . LOG_FILES_TABLE . " AS lf
 						INNER JOIN " . JOINED_FILES_TABLE . " AS jf ON jf.file_id = lf.file_id
 					WHERE lf.file_id IN(" . implode(', ', $file_ids) . ")
-					GROUP BY lf.file_id
+					GROUP BY lf.file_id, jf.file_physical_name
 					HAVING COUNT(lf.file_id) = 1";
 				if( !($result = $db->query($sql)) )
 				{
@@ -896,7 +896,7 @@ class Attach {
 		// Si on a à faire à Opera, on utilise application/octetstream car toute autre type peut poser 
 		// d'éventuels problèmes.
 		//
-		if( empty($mime_type) || eregi('application/octet-?stream', $mime_type) || WA_USER_BROWSER == 'opera' )
+		if( empty($mime_type) || preg_match('#application/octet-?stream#i', $mime_type) || WA_USER_BROWSER == 'opera' )
 		{
 			if( WA_USER_BROWSER == 'msie' || WA_USER_BROWSER == 'opera' )
 			{

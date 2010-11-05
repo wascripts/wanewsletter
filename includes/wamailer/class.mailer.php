@@ -1545,7 +1545,7 @@ class Mailer {
 					 */
 					for( $i = min(($pos + $tmplen), $strlen), $c = 1; $i > $pos; $i--, $c++ )
 					{
-						$d = ord($value{$i-1});
+						$d = ord($value[$i-1]);
 						
 						reset($this->_utf8test);
 						for( $m = 1; $m <= 6; $m++ )
@@ -2137,7 +2137,7 @@ class Mailer {
 		}
 		
 		$this->headers['Date']         = date(DATE_RFC2822);
-		$this->headers['X-Mailer']     = 'Wamailer/' . $this->version . ' (http://phpcodeur.net)';
+		$this->headers['X-Mailer']     = 'Wamailer/' . $this->version;
 		$this->headers['X-AntiAbuse']  = 'Sender IP - ' . $this->sender_ip . '/Server Name - <' . $this->server_from . '>';
 		$this->headers['MIME-Version'] = '1.0'; 
 		$this->headers['Message-ID']   = '<' . md5(microtime() . rand()) . '@' . $this->server_from . '>';

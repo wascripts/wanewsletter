@@ -313,8 +313,7 @@ class output extends Template {
 		
 		if( $dev_infos )
 		{
-			list($infos) = parseDSN($GLOBALS['dsn']);
-			$version = WA_VERSION . ' (' . $infos['driver'] . ')';
+			$version = sprintf('%s (%s)', WA_VERSION, substr(get_class($db), 5));
 		}
 		else
 		{
@@ -339,14 +338,18 @@ class output extends Template {
 			));
 		}
 		
-		if( count($GLOBALS['_php_errors']) > 0 )
+		if( defined('IN_ADMIN') && !defined('IN_LOGIN') && count($GLOBALS['_php_errors']) > 0 )
 		{
 			$this->assign_block_vars('php_errors', array());
 			
-			foreach( $GLOBALS['_php_errors'] as $php_error )
+			foreach( $GLOBALS['_php_errors'] as $entry )
 			{
+				if( !is_scalar($entry) ) {
+					$entry = nl2br(print_r($entry, true));
+				}
+				
 				$this->assign_block_vars('php_errors.item', array(
-					'TEXT' => $php_error
+					'TEXT' => $entry
 				));
 			}
 		}

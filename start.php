@@ -99,7 +99,7 @@ else
 // Désactivation de magic_quotes_runtime + 
 // magic_quotes_gpc et retrait éventuel des backslashes 
 //
-set_magic_quotes_runtime(0);
+@ini_set('magic_quotes_runtime', 0);
 
 if( get_magic_quotes_gpc() )
 {

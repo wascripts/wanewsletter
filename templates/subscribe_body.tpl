@@ -61,7 +61,7 @@
 		var emailAddr   = document.forms['subscribe-form'].elements['email'].value;
 		var cancelEvent = null;
 		
-		if( emailAddr.indexOf('@', 1) == -1 || emailAddr.indexOf('.', 1) == -1 ) {
+		if( emailAddr.indexOf('@', 1) == -1 ) {// Test très basique pour éviter un traitement superflu du formulaire
 			window.alert('{L_INVALID_EMAIL}');
 			cancelEvent = true;
 		}
@@ -97,7 +97,7 @@
 	
 	<div class="bloc">
 		<label for="email">{L_EMAIL}&#160;:</label>
-		<input type="text" id="email" name="email" size="25" maxlength="100" />
+		<input type="text" id="email" name="email" size="25" maxlength="250" />
 	</div>
 	
 	<div class="bloc">

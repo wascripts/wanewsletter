@@ -44,7 +44,7 @@ if( !$nl_config['enable_profil_cp'] )
 //
 $session = new Session();
 
-function check_login($email, $regkey = null, $passwd = null)
+function check_login($email, $regkey = null)
 {
 	global $db, $nl_config, $other_tags;
 	
@@ -66,7 +66,7 @@ function check_login($email, $regkey = null, $passwd = null)
 	
 	$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_status,
 			al.format, al.register_key, al.register_date, l.liste_id, l.liste_name, l.sender_email,
-			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias $fields_str
+			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url $fields_str
 		FROM " . ABONNES_TABLE . " AS a
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
@@ -78,23 +78,6 @@ function check_login($email, $regkey = null, $passwd = null)
 	
 	if( $row = $result->fetch() )
 	{
-		if( !is_null($passwd) && strcmp($row['abo_pwd'], $passwd) != 0 )
-		{
-			$sql = "SELECT COUNT(*) AS testpass
-				FROM " . ABO_LISTE_TABLE . "
-				WHERE register_key = '" . $db->escape($regkey) . "'
-					AND abo_id = " . $row['abo_id'];
-			if( !($res = $db->query($sql)) )
-			{
-				trigger_error('Impossible de tester le mot de passe de l\'abonné', CRITICAL_ERROR);
-			}
-			
-			if( $res->column('testpass') == 0 )
-			{
-				return false;
-			}
-		}
-		
 		$abodata = array();
 		$abodata['id']       = $row['abo_id'];
 		$abodata['pseudo']   = $row['abo_pseudo'];
@@ -114,16 +97,29 @@ function check_login($email, $regkey = null, $passwd = null)
 		}
 		
 		$abodata['listes'] = array();
+		$regkey_matched = false;
 		
 		do
 		{
 			$abodata['listes'][$row['liste_id']] = $row;
+			
+			if( !is_null($regkey) && strcmp($regkey, md5($row['register_key'])) == 0 )
+			{
+				$regkey_matched = true;
+			}
 		}
 		while( $row = $result->fetch() );
 		
 		if( empty($abodata['language']) )
 		{
 			$abodata['language'] = $nl_config['language'];
+		}
+		
+		if( !is_null($regkey) && strcmp($abodata['passwd'], $regkey) != 0 && !$regkey_matched )
+		{
+			// Le mot de passe rentré ne correspond ni au mot de passe de l'abonné,
+			// ni à l'une de ses clés d'enregistrement
+			return false;
 		}
 		
 		return $abodata;
@@ -161,7 +157,7 @@ if( $mode != 'login' && $mode != 'sendkey' )
 		}
 		else
 		{
-			$abodata = check_login($data['email'], $data['key'], $data['key']);
+			$abodata = check_login($data['email'], $data['key']);
 			if( !is_array($abodata) )
 			{
 				$mode = 'login';
@@ -186,15 +182,16 @@ switch( $mode )
 		if( isset($_POST['submit']) )
 		{
 			$regkey = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
+			$regkey_md5 = md5($regkey);
 			
-			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey, md5($regkey))) )
+			if( !empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey_md5)) )
 			{
 				if( $abodata['status'] == ABO_ACTIF )
 				{
-					$key  = ( $regkey == $abodata['regkey'] ) ? $regkey : md5($regkey);
-					$data = serialize(array('email' => $abodata['email'], 'key' => $key));
-					
-					$session->send_cookie('abo', $data, (time() + 3600));
+					$session->send_cookie('abo', serialize(array(
+						'email' => $abodata['email'],
+						'key'   => $regkey_md5
+					)), (time() + 3600));
 					
 					Location('profil_cp.php');
 				}
@@ -352,11 +349,15 @@ switch( $mode )
 					$sql_data['abo_pwd'] = md5($new_pass);
 				}
 				
-				foreach( $other_tags as $data )
+				foreach( $other_tags as $tag )
 				{
-					if( !empty($data['field_name']) && !empty($_POST[$data['column_name']]) )
+					if( !empty($tag['field_name']) && !empty($_REQUEST[$tag['field_name']]) )
 					{
-						$sql_data[$data['column_name']] = $_POST[$data['column_name']];
+						$sql_data[$tag['column_name']] = $_REQUEST[$tag['field_name']];
+					}
+					else if( !empty($_REQUEST[$tag['column_name']]) )
+					{
+						$sql_data[$tag['column_name']] = $_REQUEST[$tag['column_name']];
 					}
 				}
 				
@@ -486,6 +487,7 @@ switch( $mode )
 			}
 			
 			$lang['CHARSET'] = strtoupper($lang['CHARSET']);
+			$lang['Label_link::utf8'] = wan_utf8_encode($lang['Label_link']);
 			
 			while( $row = $result->fetch() )
 			{
@@ -504,6 +506,7 @@ switch( $mode )
 						$row['log_subject']   = wan_utf8_encode($row['log_subject']);
 						$row['log_body_text'] = wan_utf8_encode($row['log_body_text']);
 						$row['log_body_html'] = wan_utf8_encode($row['log_body_html']);
+						$lang['Label_link']   = $lang['Label_link::utf8'];
 						
 						$mailer->set_charset('UTF-8');
 					}
@@ -724,7 +727,7 @@ switch( $mode )
 			$num_logs = count($abodata['listes'][$liste_id]['archives']);
 			$size     = ( $num_logs > 8 ) ? 8 : $num_logs;
 			
-			$select_log = '<select id="liste_' . $liste_id . '" name="log[' . $liste_id . '][]" size="' . $size . '" multiple="multiple" style="min-width: 200px;">';
+			$select_log = '<select id="liste_' . $liste_id . '" name="log[' . $liste_id . '][]" class="logList" size="' . $size . '" multiple="multiple" style="min-width: 200px;">';
 			for( $i = 0; $i < $num_logs; $i++ )
 			{
 				$logrow = $abodata['listes'][$liste_id]['archives'][$i];

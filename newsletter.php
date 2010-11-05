@@ -45,8 +45,7 @@ if( !defined('WA_ROOTDIR') )
 	define('WA_ROOTDIR', rtrim($waroot, '/'));
 }
 
-$default_magic_quotes_runtime = get_magic_quotes_runtime();
-$default_error_reporting      = error_reporting(E_ALL);
+$default_error_reporting = error_reporting(E_ALL);
 
 require WA_ROOTDIR . '/start.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
@@ -105,7 +104,7 @@ if( !empty($action) || !empty($code) )
 			
 			if( $listdata = $result->fetch() )
 			{
-				$wanewsletter =& new Wanewsletter($listdata);
+				$wanewsletter = new Wanewsletter($listdata);
 				$wanewsletter->message =& $message;
 				$wanewsletter->do_action($action, $email, $format);
 			}
@@ -121,7 +120,7 @@ if( !empty($action) || !empty($code) )
 	}
 	else
 	{
-		$wanewsletter =& new Wanewsletter();
+		$wanewsletter = new Wanewsletter();
 		$wanewsletter->message =& $message;
 		$wanewsletter->check_code($code);
 	}
@@ -146,7 +145,5 @@ if( defined('IN_WA_FORM') )
 // remise des paramêtres par défaut
 //
 error_reporting($default_error_reporting);
-
-set_magic_quotes_runtime($default_magic_quotes_runtime);
 
 ?>

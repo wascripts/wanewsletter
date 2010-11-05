@@ -143,8 +143,8 @@ if( $listdata = $result->fetch() )
 			$mailer->set_return_path($listdata['return_email']);
 		}
 		
-		$wan =& new Wanewsletter($listdata);
-		$pop =& new Pop();
+		$wan = new Wanewsletter($listdata);
+		$pop = new Pop();
 		$pop->connect($listdata['pop_host'], $listdata['pop_port'], $listdata['pop_user'], $listdata['pop_pass']);
 		
 		$cpt = 0;

@@ -35,86 +35,54 @@
 echo "This script has been disabled for security reasons\n";
 exit(0);
 
+define('WA_LANGUAGE_DIR', '../language');
 
-define('WA_ROOTDIR', '..');
-
-$language_dir = WA_ROOTDIR . '/language';
-
-$Fichier_1 = 'lang_francais.php';
-$Fichier_2 = '../../branche_2.2/language/lang_francais.php';
+$FICHIER_REFERENCE = 'lang_francais.php';
+$FICHIER_A_TESTER  = 'lang_english.php';
 
 ini_set('default_mimetype', 'text/plain');
 
-function diff_lang($tab_1, $tab_2)
+function diff_lang($tab_1, $tab_2, $namespace = '')
 {
-    $new_tab = array();
+    global $FICHIER_REFERENCE, $FICHIER_A_TESTER;
     
     foreach( $tab_1 as $varname => $varval )
     {
         if( is_array($varval) )
         {
-            $new_tab[$varname] = diff_lang($tab_1[$varname], $tab_2[$varname]);
-            
-            if( count($new_tab[$varname]) == 0 )
-            {
-                unset($new_tab[$varname]);
-            }
+            diff_lang($tab_1[$varname], $tab_2[$varname], $namespace.'.'.$varname);
         }
         else if( !isset($tab_2[$varname]) )
         {
-            $new_tab[$varname] = addcslashes($tab_1[$varname], "\x0A\x0D\x22\x24");
+        	printf("%s => index non présent\n", $namespace.'.'.$varname);
         }
-		
-		//
-		// Temporaire, même langue mais branche différente only
-		//
-		else if( strcmp($varval, $tab_2[$varname]) !== 0 )
+        else
 		{
-			$new_tab[$varname] = addcslashes($tab_1[$varname], "\x0A\x0D\x22\x24");
+			$a = preg_match_all('#%(?!%)#', $tab_1[$varname], $m);
+			$b = preg_match_all('#%(?!%)#', $tab_2[$varname], $m);
+			
+			if( $a != $b )
+			{
+				printf("%s => Nombre de paramètres de formatage différent\n", $namespace.'.'.$varname);
+				printf("%s : \"%s\"\n", $FICHIER_REFERENCE, addcslashes($tab_1[$varname], "\x0A\x0D\x22\x24"));
+				printf("%s : \"%s\"\n", $FICHIER_A_TESTER, addcslashes($tab_2[$varname], "\x0A\x0D\x22\x24"));
+			}
 		}
     }
-    
-    return $new_tab;
 }
 
 $lang = array();
-include $language_dir . '/' . $Fichier_1;
+require WA_LANGUAGE_DIR . '/' . $FICHIER_REFERENCE;
 
 $lang_ary_1 = $lang;
 unset($lang);
 
 $lang = array();
-include $language_dir . '/' . $Fichier_2;
+require WA_LANGUAGE_DIR . '/' . $FICHIER_A_TESTER;
 
 $lang_ary_2 = $lang;
 unset($lang);
 
-$diff_lang = diff_lang($lang_ary_1, $lang_ary_2);
-
-if( count($diff_lang) > 0 )
-{
-	printf("Index manquants ou changements : %s => %s\n\n", $Fichier_2, $Fichier_1);
-	
-	foreach( $diff_lang as $key => $val )
-	{
-		if( is_array($val) )
-		{
-			foreach( $val as $key2 => $val2 )
-			{
-				echo "\$lang['$key']['$key2'] = \"$val2\"\n";
-			}
-		}
-		else
-		{
-			echo "\$lang['$key'] = \"$val\"\n";
-		}
-	}
-}
-else
-{
-    echo "Aucun index manquant\n";
-}
+diff_lang($lang_ary_1, $lang_ary_2);
 
 exit(0);
-
-?>

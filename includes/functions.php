@@ -203,6 +203,10 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 		$errno = CRITICAL_ERROR;
 	}
 	
+	if( $output == null ) {// load_settings() par encore appelé
+		$errno = CRITICAL_ERROR;
+	}
+	
 	if( ( $errno == CRITICAL_ERROR || $errno == ERROR ) && ( defined('IN_ADMIN') || defined('IN_CRON') || DEBUG_MODE ) )
 	{
 		if( !empty($db->error) && DEBUG_MODE > 0 )
@@ -215,7 +219,7 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 		$debug_text .= '<b>Fichier</b>&#160;: ' . basename($errfile) . " \n<b>Ligne</b>&#160;: " . $errline . '<br />';
 	}
 	
-	if( !empty($lang['Message'][$errstr]) )
+	if( $errno != CRITICAL_ERROR && !empty($lang['Message'][$errstr]) )
 	{
 		$errstr = nl2br($lang['Message'][$errstr]);
 	}
@@ -282,42 +286,31 @@ BASIC;
 			
 			$message = $errstr;
 			break;
-	}
-	
-	$php_errormsg = '';
-	
-	if( $errno == E_WARNING )
-	{
-		$php_errormsg .= '<b>Warning !</b>&#160;: ';
-	}
-	else if( $errno == E_NOTICE )
-	{
-		$php_errormsg .= '<b>Notice</b>&#160;: ';
-	}
-	
-	$php_errormsg .= $errstr . ' in <b>' . basename($errfile) . '</b> on line <b>' . $errline . '</b>';
-	
-	//
-	// Dans le cas d'une fonction précédée par @, error_reporting() 
-	// retournera 0, dans ce cas, pas d'affichage d'erreur
-	//
-	$display_error = error_reporting(E_ALL);
-	
-	if( $errno != ERROR && $errno != E_STRICT && ( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) ) )
-	{
-		if( $errno != E_WARNING && $errno != E_NOTICE )
-		{
-			exit;
-		}
 		
-		if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
-		{
-			array_push($GLOBALS['_php_errors'], $php_errormsg);
-		}
-		else
-		{
-			echo '<p>' . $php_errormsg . '</p>';
-		}
+		default:
+			$label = array(E_NOTICE => 'Notice', E_WARNING => 'Warning', E_STRICT => 'Strict', E_DEPRECATED => 'Deprecated');
+			
+			$php_errormsg  = '<b>'.(isset($label[$errno]) ? $label[$errno] : 'Unknown Error').'</b>&nbsp;: ';
+			$php_errormsg .= $errstr . ' in <b>' . basename($errfile) . '</b> on line <b>' . $errline . '</b>';
+			
+			//
+			// Dans le cas d'une fonction précédée par @, error_reporting() 
+			// retournera 0, dans ce cas, pas d'affichage d'erreur
+			//
+			$display_error = error_reporting(E_ALL);
+			
+			if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
+			{
+				if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
+				{
+					array_push($GLOBALS['_php_errors'], $php_errormsg);
+				}
+				else
+				{
+					echo '<p>' . $php_errormsg . '</p>';
+				}
+			}
+			break;
 	}
 }
 
@@ -341,9 +334,14 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 	{
 		$errstr = $lang['Message'][$errstr];
 	}
+	else {
+		$label = array(E_NOTICE => 'Notice', E_WARNING => 'Warning', E_STRICT => 'Strict', E_DEPRECATED => 'Deprecated');
+		
+		$errstr  = (isset($label[$errno]) ? $label[$errno] : 'Unknown Error').' : "'
+			. $errstr . '" in ' . basename($errfile) . ' on line ' . $errline;
+	}
 	
-	$errstr  = strip_tags($errstr);
-	$errstr .= ' in ' . basename($errfile) . ' on line ' . $errline;
+	$errstr = strip_tags($errstr);
 	
 	if( !empty($db->error) && DEBUG_MODE > 0 )
 	{
@@ -359,14 +357,14 @@ function wan_cli_handler($errno, $errstr, $errfile, $errline)
 	//
 	$display_error = error_reporting(E_ALL);
 	
-	if( preg_match('/\.UTF-?8/', getenv('LANG')) ) // Au cas où le terminal utilise l'encodage utf-8
+	if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) // Au cas où le terminal utilise l'encodage utf-8
 	{
 		$errstr = wan_utf8_encode($errstr);
 	}
 	
-	if( $errno != E_STRICT && ( DEBUG_MODE == 3 || $display_error ) )
+	if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
 	{
-		fputs(STDERR, 'Error: ' . $errstr . "\n");
+		fputs(STDERR, $errstr . "\n");
 	}
 	
 	if( $errno == CRITICAL_ERROR )
@@ -801,13 +799,17 @@ function active_urls($str)
  * 
  * Retourne le statut d'une directive de configuration (telle que réglée sur On ou Off)
  * 
- * @param string $config_name    Nom de la directive
+ * @param string $name    Nom de la directive
  * 
  * @return boolean
  */
-function config_status($config_name)
+function config_status($name)
 {
-	return ( ($config_val = @ini_get($config_name)) == 1 || strtolower($config_val) == 'on' ) ? true : false;
+	$value = ini_get($name);
+	if( preg_match('#^off|false$#i', $value) ) {
+		$value = false;
+	}
+	return $value;
 }
 
 /**
@@ -887,25 +889,26 @@ function purge_latin1($data, $translite = false)
  * 
  * Détecte si une chaîne est encodée ou non en UTF-8
  * 
- * @param string $data       Chaîne à modifier
- * @param string $translite  Active ou non la translitération
+ * @param string $string    Chaîne à modifier
  * 
  * @link   http://w3.org/International/questions/qa-forms-utf-8.html
- * @return string
+ * @see    http://bugs.php.net/bug.php?id=37793 (segfault qui oblige à tronçonner la chaîne)
+ * @return boolean
  */
-function is_utf8($data)
+function is_utf8($string)
 {
-	return preg_match('/^(?:
-		 [\x09\x0A\x0D\x20-\x7E]            # ASCII
-	   | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
-	   |  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
-	   | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}  # straight 3-byte
-	   |  \xED[\x80-\x9F][\x80-\xBF]        # excluding surrogates
-	   |  \xF0[\x90-\xBF][\x80-\xBF]{2}     # planes 1-3
-	   | [\xF1-\xF3][\x80-\xBF]{3}          # planes 4-15
-	   |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
-	)*$/xs', $data);
-} // function is_utf8
+	return !strlen(
+		preg_replace(
+		'/[\x09\x0A\x0D\x20-\x7E]'              # ASCII
+		. '|[\xC2-\xDF][\x80-\xBF]'             # non-overlong 2-byte
+		. '|\xE0[\xA0-\xBF][\x80-\xBF]'         # excluding overlongs
+		. '|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}'  # straight 3-byte
+		. '|\xED[\x80-\x9F][\x80-\xBF]'         # excluding surrogates
+		. '|\xF0[\x90-\xBF][\x80-\xBF]{2}'      # planes 1-3
+		. '|[\xF1-\xF3][\x80-\xBF]{3}'          # planes 4-15
+		. '|\xF4[\x80-\x8F][\x80-\xBF]{2}'      # plane 16
+		. '/sS', '', $string));
+}
 
 /**
  * wan_utf8_encode()
@@ -967,7 +970,7 @@ function convert_encoding($data, $charset, $check_bom = true)
 		}
 	}
 	
-	if( $charset == 'UTF-8' )
+	if( strtoupper($charset) == 'UTF-8' )
 	{
 		if( $GLOBALS['lang']['CHARSET'] == 'ISO-8859-1' )
 		{
@@ -1022,7 +1025,7 @@ function http_get_contents($URL, &$errstr)
 	
 	fputs($fs, sprintf("GET %s HTTP/1.0\r\n", $path));// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
 	fputs($fs, sprintf("Host: %s\r\n", $part['host']));
-	fputs($fs, sprintf("User-Agent: Wanewsletter %s\r\n", WA_VERSION));
+	fputs($fs, sprintf("User-Agent: Wanewsletter/%s\r\n", WA_VERSION));
 	fputs($fs, "Accept: */*\r\n");
 	
 	if( extension_loaded('zlib') )
@@ -1097,7 +1100,7 @@ function http_get_contents($URL, &$errstr)
 	{
 		$prolog = substr($data, 0, strpos($data, "\n"));
 		
-		if( preg_match('/\s+encoding\s?=\s?("|\')([a-z][a-z0-9._-]*)\\1"/i', $prolog, $match) )
+		if( preg_match('/\s+encoding\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/i', $prolog, $match) )
 		{
 			$charset = $match[2];
 		}

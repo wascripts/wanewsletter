@@ -49,7 +49,7 @@ class Wanewsletter {
 		
 		require WAMAILER_DIR . '/class.mailer.php';
 		
-		$mailer =& new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 		
 		if( $nl_config['use_smtp'] )
 		{
@@ -286,11 +286,15 @@ class Wanewsletter {
 			
 			@include WA_ROOTDIR . '/includes/tags.inc.php';
 			
-			foreach( $other_tags as $data )
+			foreach( $other_tags as $tag )
 			{
-				if( !empty($data['field_name']) && !empty($_REQUEST[$data['field_name']]) )
+				if( !empty($tag['field_name']) && !empty($_REQUEST[$tag['field_name']]) )
 				{
-					$sql_data[$data['column_name']] = $_REQUEST[$data['field_name']];
+					$this->account['tags'][$tag['column_name']] = $_REQUEST[$tag['field_name']];
+				}
+				else if( !empty($_REQUEST[$tag['column_name']]) )
+				{
+					$this->account['tags'][$tag['column_name']] = $_REQUEST[$tag['column_name']];
 				}
 			}
 			

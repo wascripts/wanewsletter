@@ -386,8 +386,8 @@ switch( $mode )
 							
 							foreach( $match_meta as $meta )
 							{
-								if( preg_match('/http-equiv=("|\')Content-Type\\1/si', $meta[0])
-									&& preg_match('/content=("|\').+?;\s*charset=([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
+								if( preg_match('/http-equiv\s*=\s*("|\')Content-Type\\1/si', $meta[0])
+									&& preg_match('/content\s*=\s*("|\').+?;\s*charset\s*=\s*([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
 								{
 									$result['charset'] = $match[2];
 								}
@@ -676,7 +676,7 @@ switch( $mode )
 				}
 				else
 				{
-					if( $resource{0} != '/' )// Chemin non absolu
+					if( $resource[0] != '/' )// Chemin non absolu
 					{
 						$resource = WA_ROOTDIR . '/' . $resource;
 					}

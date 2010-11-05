@@ -132,6 +132,15 @@ class Wadb_firebird {
 	var $autocommit = true;
 	
 	/**
+	 * Mettre à false pour désactiver le remplacement automatique de LIMIT %d OFFSET %d
+	 * dans les requêtes passées à la méthode query()
+	 * 
+	 * @var boolean
+	 * @access private
+	 */
+	var $_matchLimitOffset = true;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param string $dbname   Nom de la base de données
@@ -184,7 +193,7 @@ class Wadb_firebird {
 		}
 		
 		if( !($this->link = $connect($this->dbname, $username, $passwd, $charset)) ) {
-			$this->errno = function_exists('ibase_errcode') ? ibase_errcode() : 0;
+			$this->errno = ibase_errcode();
 			$this->error = ibase_errmsg();
 			$this->link  = null;
 		}
@@ -211,7 +220,8 @@ class Wadb_firebird {
 	 */
 	function encoding($encoding = null)
 	{
-		$curEncoding = 'latin1'; // todo
+		$res = $this->query('SELECT RDB$CHARACTER_SET_NAME FROM RDB$DATABASE');
+		$curEncoding = $res->column(0);
 		
 		if( !is_null($encoding) ) {
 			$this->query("SET NAMES $encoding");
@@ -230,7 +240,7 @@ class Wadb_firebird {
 	 */
 	function query($query)
 	{
-		if( preg_match('/\s+LIMIT\s+(\d+)\s+OFFSET\s+(\d+)\s*$/i', $query, $match) ) {
+		if( $this->_matchLimitOffset && preg_match('/\s+LIMIT\s+(\d+)\s+OFFSET\s+(\d+)\s*$/i', $query, $match) ) {
 			$query = substr($query, 0, -strlen($match[0]));
 			$query = substr($query, 6);
 			$query = "SELECT FIRST $match[1] SKIP $match[2]" . $query;
@@ -245,7 +255,7 @@ class Wadb_firebird {
 		$this->queries++;
 		
 		if( !$result ) {
-			$this->errno = function_exists('ibase_errcode') ? ibase_errcode() : 0;
+			$this->errno = ibase_errcode();
 			$this->error = ibase_errmsg();
 			
 			$this->rollBack();
@@ -406,14 +416,7 @@ class Wadb_firebird {
 	 */
 	function affectedRows()
 	{
-		if( function_exists('ibase_affected_rows') ) { // PHP >= 5.0.0
-			$ret = ibase_affected_rows($this->link);
-		}
-		else {
-			$ret = 0; // TODO
-		}
-		
-		return $ret;
+		return ibase_affected_rows($this->link);
 	}
 	
 	/**

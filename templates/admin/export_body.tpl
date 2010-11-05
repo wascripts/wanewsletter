@@ -1,3 +1,4 @@
+<!--[if gte IE 9]><!-->
 <script type="text/javascript">
 <!--
 DOM_Events.addListener('load', function() {
@@ -6,10 +7,6 @@ DOM_Events.addListener('load', function() {
 	DOM_Events.addListener('change', function() {
 		if( this.checked == true ) {
 			document._glueBox_.style.display = 'table-row';
-			
-			if( navigator.userAgent.indexOf('MSIE') != -1 && navigator.userAgent.indexOf('Opera') == -1 ) {
-				document._glueBox_.style.display = 'block';
-			}
 		}
 	}, false, document.forms['export-form'].elements['export-format-text']);
 	
@@ -21,6 +18,7 @@ DOM_Events.addListener('load', function() {
 }, false, document);
 //-->
 </script>
+<!--<![endif]-->
 
 <form id="export-form" method="post" action="./tools.php?mode=export">
 <div class="smallbloc">
