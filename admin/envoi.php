@@ -403,6 +403,7 @@ switch( $mode )
 						if( preg_match('/<title[^>]*>(.+?)<\/title>/is', $match_head[1], $match) )
 						{
 							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
+							$logdata['log_subject'] = html_entity_decode($logdata['log_subject']);
 						}
 						
 						if( strncmp($_POST['body_html_url'], 'http://', 7) == 0 )
