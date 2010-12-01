@@ -397,6 +397,7 @@ switch( $mode )
 						if( preg_match('/<title[^>]*>(.+?)<\/title>/is', $match_head[1], $match) )
 						{
 							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
+							$logdata['log_subject'] = html_entity_decode($logdata['log_subject']);
 						}
 						
 						$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
