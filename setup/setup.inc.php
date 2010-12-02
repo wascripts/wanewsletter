@@ -307,6 +307,14 @@ foreach( array('driver', 'host', 'user', 'pass', 'dbname') as $varname )
 	$infos[$varname] = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : @$infos[$varname];
 }
 
+// Récupération du port, si associé avec le nom d'hôte
+if( strpos($infos['host'], ':') )
+{
+	$tmp = explode(':', $infos['host']);
+	$infos['host'] = $tmp[0];
+	$infos['port'] = $tmp[1];
+}
+
 foreach( array('start', 'confirm', 'sendfile') as $varname )
 {
 	${$varname} = ( isset($_POST[$varname]) ) ? true : false;
