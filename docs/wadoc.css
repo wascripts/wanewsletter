@@ -49,6 +49,14 @@ ol#toc { margin-left: 60px; }
 li { margin: 2px 0; }
 ol { list-style-type: decimal; }
 
+.bloc h3 {
+	background-color: transparent;
+	margin: 1.2em 1.8em .6em;
+	font-size: 1em;
+	font-weight:bold;
+	color: black;
+}
+
 .bloc p { line-height: 1.5; margin-left: .8em; margin-right: .8em; }
 code { color: green; }
 
