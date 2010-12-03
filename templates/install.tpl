@@ -97,7 +97,7 @@
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="host">{install.L_DBHOST}&nbsp;:</label></td>
-			<td class="medrow2"><input type="text" id="host" name="host" size="30" value="{install.DBHOST}" class="text" /></td>
+			<td class="medrow2"><input type="text" id="host" name="host" size="30" value="{install.DBHOST}" class="text" /> (syntaxe&nbsp;: <em>host[:port]</em>)</td>
 		</tr>
 		<tr>
 			<td class="medrow1"><label for="dbname">{install.L_DBNAME}&nbsp;:</label></td>

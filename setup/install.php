@@ -303,6 +303,10 @@ if( !defined('NL_INSTALLED') )
 		'<a href="http://phpcodeur.net/wascripts/GPL">', '</a>'
 	));
 	
+	if( $infos['host'] == '' ) {
+		$infos['host'] = 'localhost';
+	}
+	
 	$output->assign_block_vars('install', array(
 		'L_EXPLAIN'         => $l_explain,
 		'TITLE_DATABASE'    => $lang['Title']['database'],
