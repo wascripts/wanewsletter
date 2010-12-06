@@ -317,7 +317,7 @@ switch( $mode )
 	case 'editprofile':
 		if( isset($_POST['submit']) )
 		{
-			$vararray = array('pseudo', 'language', 'current_pass', 'new_pass', 'confirm_pass');
+			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language', 'current_pass', 'new_pass', 'confirm_pass');
 			foreach( $vararray as $varname )
 			{
 				${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
@@ -326,6 +326,12 @@ switch( $mode )
 			if( $language == '' || !validate_lang($language) )
 			{
 				$language = $nl_config['language'];
+			}
+			
+			if( $new_email != '' && strcmp($new_email, $confirm_email) != 0 )
+			{
+				$error = TRUE;
+				$msg_error[] = $lang['Message']['Bad_confirm_email'];
 			}
 			
 			if( $current_pass != '' && md5($current_pass) != $abodata['passwd'] )
@@ -363,6 +369,11 @@ switch( $mode )
 					$sql_data['abo_pwd'] = md5($new_pass);
 				}
 				
+				if( $new_email != '' )
+				{
+					$sql_data['abo_email'] = $new_email;
+				}
+				
 				foreach( $other_tags as $tag )
 				{
 					if( !empty($tag['field_name']) && !empty($_REQUEST[$tag['field_name']]) )
@@ -396,7 +407,10 @@ switch( $mode )
 		$output->assign_vars(array(
 			'TITLE'          => $lang['Module']['editprofile'],
 			'L_EXPLAIN'      => nl2br($lang['Explain']['editprofile']),
+			'L_EXPLAIN_EMAIL' => nl2br($lang['Explain']['change_email']),
 			'L_EMAIL'        => $lang['Email_address'],
+			'L_NEW_EMAIL'    => $lang['New_Email'],
+			'L_CONFIRM_EMAIL' => $lang['Confirm_Email'],
 			'L_PSEUDO'       => $lang['Abo_pseudo'],
 			'L_LANG'         => $lang['Default_lang'],
 			'L_NEW_PASS'     => $lang['New_pass'],

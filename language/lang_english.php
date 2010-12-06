@@ -200,6 +200,7 @@ $lang['Message']['Not_auth_attach']         = "You are not authorized to attach 
 $lang['Message']['Error_login']             = "Incorrect login or password!";
 $lang['Message']['Error_sendpass']          = "incorrect login or email!";
 $lang['Message']['Bad_confirm_pass']        = "The new password and confirmed password are not the same";
+$lang['Message']['Bad_confirm_email']       = "The confirmation of your new email address is incorrect";
 $lang['Message']['bad_ftp_param']           = "The connexion to the ftp server could not be established, please check your settings \n(%s)";
 $lang['Message']['bad_smtp_param']          = "The connexion to the smtp server could not be established, please check your settings \n(%s)";
 $lang['Message']['bad_pop_param']           = "The connexion to the pop server could not be established, please check your settings \n(%s)";
@@ -364,6 +365,10 @@ $lang['Welcome_profil_cp']          = "Welcome on the manage panel of your accou
 $lang['Explain']['editprofile']     = "Here, you have the possibility to modify the data of your account.\nYou can inform your first name or pseudo to personalize the newsletters which you will receive (according to the settings of the administrator). You can also put a password to your account, what will be simpler to type than the code of your account.";
 $lang['Explain']['sendkey']         = "If you lost the identifiers of your account, you can ask them to be sent back to you by email";
 $lang['Explain']['archives']        = "You can ask to receive the previous newsletters sent to the mailing lists to which you are registered.\nBe careful, for each newsletter selected, you will receive an email.";
+$lang['Explain']['change_email']    = "The next two fields let you change the email address of your account. Remember that your email address is used to connect to this interface.";
+
+$lang['New_Email']                  = "Enter your new email address";
+$lang['Confirm_Email']              = "Confirme your email address";
 
 
 //

@@ -6,8 +6,19 @@
 	
 	<table class="content">
 		<tr>
+			<td class="explain" colspan="2"> {L_EXPLAIN_EMAIL} </td>
+		</tr>
+		<tr>
 			<td class="row1"> <label>{L_EMAIL}&nbsp;:</label> </td>
 			<td class="row2"> {EMAIL} </td>
+		</tr>
+		<tr>
+			<td class="row1"> <label for="new_email">{L_NEW_EMAIL}&nbsp;:</label> </td>
+			<td class="row2"> <input type="text" id="new_email" name="new_email" size="30" maxlength="250" class="text" /> </td>
+		</tr>
+		<tr>
+			<td class="row1"> <label for="confirm_email">{L_CONFIRM_EMAIL}&nbsp;:</label> </td>
+			<td class="row2"> <input type="text" id="confirm_email" name="confirm_email" size="30" maxlength="250" class="text" /> </td>
 		</tr>
 		<tr>
 			<td class="row1"> <label for="pseudo">{L_PSEUDO}&nbsp;:</label> </td>

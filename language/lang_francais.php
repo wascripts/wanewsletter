@@ -200,6 +200,7 @@ $lang['Message']['Not_auth_attach']         = "Vous n'êtes pas autorisé à joindr
 $lang['Message']['Error_login']             = "Login ou mot de passe incorrect !";
 $lang['Message']['Error_sendpass']          = "Login ou email incorrect !";
 $lang['Message']['Bad_confirm_pass']        = "Nouveau mot de passe et confirmation de mot de passe sont différents";
+$lang['Message']['Bad_confirm_email']       = "La confirmation de votre nouvelle adresse email est erronée";
 $lang['Message']['bad_ftp_param']           = "La connexion au serveur ftp n'a pu être établie, vérifiez vos paramètres \n(%s)";
 $lang['Message']['bad_smtp_param']          = "La connexion au serveur smtp n'a pu être établie, vérifiez vos paramètres \n(%s)";
 $lang['Message']['bad_pop_param']           = "La connexion au serveur pop n'a pu être établie, vérifiez vos paramètres \n(%s)";
@@ -364,7 +365,10 @@ $lang['Welcome_profil_cp']          = "Bienvenue sur le panneau de gestion de vo
 $lang['Explain']['editprofile']     = "Ici, vous avez la possibilité de modifier les données de votre compte.\nVous pouvez renseigner votre prénom ou pseudo pour personnaliser les newsletters que vous recevrez (selon les réglages de l'administrateur). Vous pouvez également mettre un mot de passe à votre compte, ce qui sera plus simple à taper que le code de votre compte.";
 $lang['Explain']['sendkey']         = "Si vous avez perdu les identifiants de votre compte, vous pouvez demander à ce qu'ils vous soient renvoyés par email";
 $lang['Explain']['archives']        = "Vous pouvez, à partir de cette page, demander à recevoir les précédentes newsletters envoyées aux listes de diffusion auxquelles vous êtes inscrit.\nAttention, pour chaque newsletter sélectionnée, vous recevrez un email.";
+$lang['Explain']['change_email']    = "Les deux champs suivant vous permettent de changer l'adresse email de votre compte. N'oubliez pas que votre adresse email vous sert à vous connecter à la présente interface.";
 
+$lang['New_Email']                  = "Entrez votre nouvelle adresse email";
+$lang['Confirm_Email']              = "Confirmez l'adresse email";
 
 //
 // Page d'accueil
