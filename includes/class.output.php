@@ -338,7 +338,7 @@ class output extends Template {
 			));
 		}
 		
-		if( defined('IN_ADMIN') && !defined('IN_LOGIN') && count($GLOBALS['_php_errors']) > 0 )
+		if( !defined('IN_SUBSCRIBE') && !defined('IN_LOGIN') && count($GLOBALS['_php_errors']) > 0 )
 		{
 			$this->assign_block_vars('php_errors', array());
 			

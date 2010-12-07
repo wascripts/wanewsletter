@@ -301,7 +301,7 @@ BASIC;
 			
 			if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
 			{
-				if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
+				if( DISPLAY_ERRORS_IN_BLOCK == TRUE && !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
 				{
 					array_push($GLOBALS['_php_errors'], $php_errormsg);
 				}
