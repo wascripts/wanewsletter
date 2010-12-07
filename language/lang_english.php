@@ -145,6 +145,7 @@ $lang['Message']['Unrecognized_email']      = "Unknown domain or unrecognized ac
 $lang['Message']['Unknown_email']           = "Unknown email address";
 $lang['Message']['Email_banned']            = "This email address or this email type was banished";
 $lang['Message']['Allready_reg']            = "You have already subscribed";
+$lang['Message']['Allready_reg2']           = "The email address you entered already exist in the database";
 $lang['Message']['Reg_not_confirmed']       = "You have already subscribed but you didn't confirm yet your inscription.\nConfirmation email has been sent to you.\nAttention, the confirmation link included in th email will be valid for %1\$d days!\nAfter these %1\$d days, you will have to re-subscribe";
 $lang['Message']['Reg_not_confirmed2']      = "You have already subscribed but you didn't confirm yet your inscription";
 $lang['Message']['Allready_confirm']        = "You have already confirmed your subscription!";

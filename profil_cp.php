@@ -317,6 +317,8 @@ switch( $mode )
 	case 'editprofile':
 		if( isset($_POST['submit']) )
 		{
+			require WAMAILER_DIR . '/class.mailer.php';
+			
 			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language', 'current_pass', 'new_pass', 'confirm_pass');
 			foreach( $vararray as $varname )
 			{
@@ -328,10 +330,34 @@ switch( $mode )
 				$language = $nl_config['language'];
 			}
 			
-			if( $new_email != '' && strcmp($new_email, $confirm_email) != 0 )
+			if( $new_email != '' )
 			{
-				$error = TRUE;
-				$msg_error[] = $lang['Message']['Bad_confirm_email'];
+				if( strcmp($new_email, $confirm_email) != 0 )
+				{
+					$error = TRUE;
+					$msg_error[] = $lang['Message']['Bad_confirm_email'];
+				}
+				else if( !Mailer::validate_email($new_email) )
+				{
+					$error = TRUE;
+					$msg_error[] = $lang['Message']['Invalid_email'];
+				}
+				else
+				{
+					$sql = "SELECT COUNT(*) AS test
+						FROM " . ABONNES_TABLE . "
+						WHERE LOWER(abo_email) = '" . $db->escape(strtolower($new_email)) . "'";
+					if( !($result = $db->query($sql)) )
+					{
+						trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
+					}
+					
+					if( $result->column('test') != 0 )
+					{
+						$error = TRUE;
+						$msg_error[] = $lang['Message']['Allready_reg2'];
+					}
+				}
 			}
 			
 			if( $current_pass != '' && md5($current_pass) != $abodata['passwd'] )
