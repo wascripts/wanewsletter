@@ -210,7 +210,7 @@ class Smtp {
 	 * @access public
 	 * @return boolean
 	 */
-	function connect($smtp_server = '', $smtp_port = 25, $smtp_user = '', $smtp_pass = '', $server_from = '')
+	function connect($smtp_server = '', $smtp_port = '', $smtp_user = '', $smtp_pass = '', $server_from = '')
 	{
 		$vararray = array('smtp_server', 'smtp_port', 'smtp_user', 'smtp_pass', 'server_from');
 		foreach( $vararray AS $varname )
