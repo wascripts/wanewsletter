@@ -1231,7 +1231,7 @@ else if( $mode == 'liste' )
 		}
 		else if( $action == 'edit' )
 		{
-			$listdata['liste_name'] = unhtmlspecialchars($listdata['liste_name']);
+			$listdata['liste_name'] = html_entity_decode($listdata['liste_name']);
 			$vararray = array_merge($vararray, $vararray2);
 			
 			foreach( $vararray as $varname )

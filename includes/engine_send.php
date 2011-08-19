@@ -120,7 +120,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	
 	$mailer->set_charset($lang['CHARSET']);
-	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+	$mailer->set_from($listdata['sender_email'], html_entity_decode($listdata['liste_name']));
 	
 	if( $listdata['return_email'] != '' )
 	{
@@ -493,7 +493,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( $row['abo_pseudo'] != '' )
 				{
-					$tags_replace['NAME'] = ( $abo_format == FORMAT_HTML ) ? $row['abo_pseudo'] : unhtmlspecialchars($row['abo_pseudo']);
+					$tags_replace['NAME'] = ( $abo_format == FORMAT_HTML ) ? $row['abo_pseudo'] : html_entity_decode($row['abo_pseudo']);
 				}
 				else
 				{

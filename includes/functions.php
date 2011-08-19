@@ -106,7 +106,7 @@ function Location($url)
 	
 	$use_refresh   = preg_match("#Microsoft|WebSTAR|Xitami#i", server_info('SERVER_SOFTWARE'));
 	$absolute_url  = make_script_url() . (( defined('IN_ADMIN') ) ? 'admin/' : '');
-	$absolute_url .= unhtmlspecialchars($url);
+	$absolute_url .= html_entity_decode($url);
 	
 	header((( $use_refresh ) ? 'Refresh: 0; URL=' : 'Location: ' ) . $absolute_url);
 	
@@ -697,23 +697,6 @@ function wa_realpath($relative_path)
 	}
 	
 	return str_replace('\\', '/', $absolute_path);
-}
-
-/**
- * unhtmlspecialchars()
- * 
- * Fonction inverse de la fonction htmlspecialchars()
- * 
- * @param string $input
- * 
- * @return string
- */
-function unhtmlspecialchars($input)
-{
-	$html_entities = array('/&lt;/', '/&gt;/', '/&quot;/', '/&amp;/');
-	$html_replace  = array('<', '>', '"', '&');
-	
-	return preg_replace($html_entities, $html_replace, $input);
 }
 
 /**

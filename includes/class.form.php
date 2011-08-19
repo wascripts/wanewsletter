@@ -414,7 +414,7 @@ class Wanewsletter {
 		}
 		
 		$this->mailer->clear_all();
-		$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+		$this->mailer->set_from($this->listdata['sender_email'], html_entity_decode($this->listdata['liste_name']));
 		$this->mailer->set_address($this->account['email']);
 		$this->mailer->set_subject(sprintf($lang['Subject_email']['Subscribe'], $nl_config['sitename']));
 		$this->mailer->set_priority(1);
@@ -425,7 +425,7 @@ class Wanewsletter {
 		}
 		
 		$this->mailer->use_template($email_tpl, array(
-			'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
+			'LISTE'    => html_entity_decode($this->listdata['liste_name']),
 			'SITENAME' => $nl_config['sitename'],
 			'URLSITE'  => $nl_config['urlsite'],
 			'SIG'      => $this->listdata['liste_sig'],
@@ -597,7 +597,7 @@ class Wanewsletter {
 				return false;
 			}
 			
-			$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+			$this->mailer->set_from($this->listdata['sender_email'], html_entity_decode($this->listdata['liste_name']));
 			$this->mailer->set_address($this->account['email']);
 			$this->mailer->set_subject($lang['Subject_email']['Unsubscribe_1']);
 			$this->mailer->set_priority(3);
@@ -610,7 +610,7 @@ class Wanewsletter {
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'unsubscribe_cron' : 'unsubscribe_form';
 			
 			$this->mailer->use_template($email_tpl, array(
-				'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
+				'LISTE'    => html_entity_decode($this->listdata['liste_name']),
 				'SITENAME' => $nl_config['sitename'],
 				'URLSITE'  => $nl_config['urlsite'],
 				'SIG'      => $this->listdata['liste_sig'],
@@ -735,12 +735,12 @@ class Wanewsletter {
 			if( $row = $result->fetch() )
 			{
 				$this->mailer->clear_all();
-				$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+				$this->mailer->set_from($this->listdata['sender_email'], html_entity_decode($this->listdata['liste_name']));
 				$this->mailer->set_subject($subject);
 				
 				$this->mailer->use_template($template, array(
 					'EMAIL'   => $this->account['email'],
-					'LISTE'   => unhtmlspecialchars($this->listdata['liste_name']),
+					'LISTE'   => html_entity_decode($this->listdata['liste_name']),
 					'URLSITE' => $nl_config['urlsite'],
 					'SIG'     => $this->listdata['liste_sig'],
 					'PSEUDO'  => $this->account['pseudo']

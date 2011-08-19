@@ -260,7 +260,7 @@ switch( $mode )
 					$address = $abodata['email'];
 				}
 				
-				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+				$mailer->set_from($listdata['sender_email'], html_entity_decode($listdata['liste_name']));
 				$mailer->set_address($address);
 				$mailer->set_subject($lang['Subject_email']['Sendkey']);
 				$mailer->set_return_path($listdata['return_email']);
@@ -575,7 +575,7 @@ switch( $mode )
 				}
 				
 				$mailer->clear_all();
-				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+				$mailer->set_from($listdata['sender_email'], html_entity_decode($listdata['liste_name']));
 				$mailer->set_address($address);
 				$mailer->set_format($format);
 				$mailer->set_subject($row['log_subject']);
@@ -687,7 +687,7 @@ switch( $mode )
 				
 				if( $abodata['pseudo'] != '' )
 				{
-					$tags_replace['NAME'] = ( $format == FORMAT_HTML ) ? $abodata['pseudo'] : unhtmlspecialchars($abodata['pseudo']);
+					$tags_replace['NAME'] = ( $format == FORMAT_HTML ) ? $abodata['pseudo'] : html_entity_decode($abodata['pseudo']);
 				}
 				else
 				{
