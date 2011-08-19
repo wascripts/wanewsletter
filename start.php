@@ -164,7 +164,7 @@ if( !is_writable(WA_TMPDIR) )
 {
 	load_settings();
 	$output->message(sprintf($lang['Message']['Dir_not_writable'],
-		htmlspecialchars(wa_realpath(WA_TMPDIR))));
+		wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
 }
 
 ?>

@@ -135,7 +135,7 @@ if( $listdata = $result->fetch() )
 		
 		$mailer->set_charset($lang['CHARSET']);
 		$mailer->set_format(FORMAT_TEXTE);
-		$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+		$mailer->set_from($listdata['sender_email'], wan_html_entity_decode($listdata['liste_name']));
 		
 		if( $listdata['return_email'] != '' )
 		{

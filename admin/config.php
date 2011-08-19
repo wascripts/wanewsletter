@@ -95,14 +95,14 @@ if( isset($_POST['submit']) )
 				{
 					$error = true;
 					$msg_error[] = sprintf($lang['Message']['Cannot_create_dir'],
-						htmlspecialchars(wa_realpath($dest_upload)));
+						wan_htmlspecialchars(wa_realpath($dest_upload)));
 				}
 			}
 			else if( !is_writable($dest_upload) )
 			{
 				$error = true;
 				$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-					htmlspecialchars(wa_realpath($dest_upload)));
+					wan_htmlspecialchars(wa_realpath($dest_upload)));
 			}
 		}
 	}
@@ -186,7 +186,7 @@ if( isset($_POST['submit']) )
 		{
 			$error = true;
 			$msg_error[] = sprintf(nl2br($lang['Message']['bad_smtp_param']),
-				htmlspecialchars($smtp->msg_error));
+				wan_htmlspecialchars($smtp->msg_error));
 		}
 		else
 		{
@@ -206,7 +206,7 @@ if( isset($_POST['submit']) )
 		{
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-				htmlspecialchars(wa_realpath(WA_STATSDIR)));
+				wan_htmlspecialchars(wa_realpath(WA_STATSDIR)));
 		}
 	}
 	else
@@ -316,7 +316,7 @@ $output->assign_vars( array(
 	'L_RESET_BUTTON'            => $lang['Button']['reset'],
 	
 	'LANG_BOX'                  => lang_box($new_config['language']),
-	'SITENAME'                  => htmlspecialchars($new_config['sitename']),
+	'SITENAME'                  => wan_htmlspecialchars($new_config['sitename']),
 	'URLSITE'                   => $new_config['urlsite'],
 	'URLSCRIPT'                 => $new_config['path'],
 	'DATE_FORMAT'               => $new_config['date_format'],

@@ -379,7 +379,7 @@ if( $start )
 				$numlogs = ( !empty($num_logs_ary[$row['liste_id']]) ) ? $num_logs_ary[$row['liste_id']] : 0;
 				
 				$sql_update[] = "UPDATE " . LISTE_TABLE . "
-					SET liste_name      = '" . $db->escape(htmlspecialchars($row['liste_name'])) . "',
+					SET liste_name      = '" . $db->escape(wan_htmlspecialchars($row['liste_name'])) . "',
 						sender_email    = '" . $db->escape($old_config['sender_email']) . "',
 						return_email    = '" . $db->escape($old_config['return_email']) . "',
 						liste_sig       = '" . $db->escape($old_config['signature']) . "',

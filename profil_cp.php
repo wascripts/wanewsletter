@@ -217,7 +217,7 @@ switch( $mode )
 			'L_SENDKEY'      => $lang['Lost_password'],
 			'L_VALID_BUTTON' => $lang['Button']['valid'],
 			
-			'S_LOGIN' => htmlspecialchars($email)
+			'S_LOGIN' => wan_htmlspecialchars($email)
 		));
 		
 		$output->pparse('body');
@@ -257,7 +257,7 @@ switch( $mode )
 					$address = $abodata['email'];
 				}
 				
-				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+				$mailer->set_from($listdata['sender_email'], wan_html_entity_decode($listdata['liste_name']));
 				$mailer->set_address($address);
 				$mailer->set_subject($lang['Subject_email']['Sendkey']);
 				$mailer->set_return_path($listdata['return_email']);
@@ -339,7 +339,7 @@ switch( $mode )
 			if( !$error )
 			{
 				$sql_data = array(
-					'abo_pseudo' => htmlspecialchars($pseudo),
+					'abo_pseudo' => wan_htmlspecialchars($pseudo),
 					'abo_lang'   => $language
 				);
 				
@@ -397,7 +397,7 @@ switch( $mode )
 		{
 			if( isset($abodata[$data['column_name']]) )
 			{
-				$output->assign_var($data['tag_name'], htmlspecialchars($abodata[$data['column_name']]));
+				$output->assign_var($data['tag_name'], wan_htmlspecialchars($abodata[$data['column_name']]));
 			}
 		}
 		
@@ -518,7 +518,7 @@ switch( $mode )
 				}
 				
 				$mailer->clear_all();
-				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+				$mailer->set_from($listdata['sender_email'], wan_html_entity_decode($listdata['liste_name']));
 				$mailer->set_address($address);
 				$mailer->set_format($format);
 				$mailer->set_subject($row['log_subject']);
@@ -563,7 +563,7 @@ switch( $mode )
 					}
 					else
 					{
-						$link = '<a href="' . htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>';
+						$link = '<a href="' . wan_htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>';
 					}
 				}
 				
@@ -630,7 +630,7 @@ switch( $mode )
 				
 				if( $abodata['pseudo'] != '' )
 				{
-					$tags_replace['NAME'] = ( $format == FORMAT_HTML ) ? $abodata['pseudo'] : unhtmlspecialchars($abodata['pseudo']);
+					$tags_replace['NAME'] = ( $format == FORMAT_HTML ) ? $abodata['pseudo'] : wan_html_entity_decode($abodata['pseudo']);
 				}
 				else
 				{
@@ -645,7 +645,7 @@ switch( $mode )
 						{
 							if( !is_numeric($abodata[$data['column_name']]) && $format == FORMAT_HTML )
 							{
-								$tags_replace[$data['tag_name']] = htmlspecialchars($abodata[$data['column_name']]);
+								$tags_replace[$data['tag_name']] = wan_htmlspecialchars($abodata[$data['column_name']]);
 							}
 							else
 							{
@@ -731,7 +731,7 @@ switch( $mode )
 			{
 				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
 				
-				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
+				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . wan_htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
 				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
 			}
 			$select_log .= '</select>';

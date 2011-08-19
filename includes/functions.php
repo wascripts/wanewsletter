@@ -105,7 +105,7 @@ function Location($url)
 	
 	$use_refresh   = preg_match("#Microsoft|WebSTAR|Xitami#i", server_info('SERVER_SOFTWARE'));
 	$absolute_url  = make_script_url() . (( defined('IN_ADMIN') ) ? 'admin/' : '');
-	$absolute_url .= unhtmlspecialchars($url);
+	$absolute_url .= wan_html_entity_decode($url);
 	
 	header((( $use_refresh ) ? 'Refresh: 0; URL=' : 'Location: ' ) . $absolute_url);
 	
@@ -728,23 +728,6 @@ function wa_realpath($relative_path)
 }
 
 /**
- * unhtmlspecialchars()
- * 
- * Fonction inverse de la fonction htmlspecialchars()
- * 
- * @param string $input
- * 
- * @return string
- */
-function unhtmlspecialchars($input)
-{
-	$html_entities = array('/&lt;/', '/&gt;/', '/&quot;/', '/&amp;/');
-	$html_replace  = array('<', '>', '"', '&');
-	
-	return preg_replace($html_entities, $html_replace, $input);
-}
-
-/**
  * cut_str()
  * 
  * Pour limiter la longueur d'une chaine de caractère à afficher
@@ -1015,7 +998,7 @@ function http_get_contents($URL, &$errstr)
 	
 	if( !($fs = @fsockopen($part['host'], $port, $null, $null, 10)) )
 	{
-		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
+		$errstr = sprintf($lang['Message']['Unaccess_host'], wan_htmlspecialchars($part['host']));
 		return false;
 	}
 	
@@ -1266,6 +1249,56 @@ $CONVMAP = array(
 		"\x9f" => "Y"
 	)
 );
+
+/**
+ * wan_htmlspecialchars()
+ * 
+ * Idem que la fonction htmlspecialchars() native, mais avec le jeu de
+ * caractère ISO-8859-1 par défaut.
+ * 
+ * @param string $string
+ * @param int    $flags
+ * @param string $encoding
+ * @param bool   $double_encode
+ * 
+ * @return string
+ */
+function wan_htmlspecialchars($string, $flags = ENT_COMPAT, $encoding = 'ISO-8859-1', $double_encode = true)
+{
+	if( $flags == ENT_COMPAT && defined('ENT_HTML401') ) {
+		$flags = ENT_COMPAT | ENT_HTML401;
+	}
+	
+	// L'argument double_encode a été ajouté dans PHP 5.2.3
+	if( version_compare(PHP_VERSION, '5.2.3', '>=') ) {
+		$string = htmlspecialchars($string, $flags, $encoding, $double_encode);
+	}
+	else {
+		$string = htmlspecialchars($string, $flags, $encoding);
+	}
+	
+	return $string;
+}
+
+/**
+ * wan_html_entity_decode()
+ * 
+ * Idem que la fonction html_entity_decode() native, mais avec le jeu de
+ * caractère ISO-8859-1 par défaut.
+ * 
+ * @param string $string
+ * @param int    $flags
+ * @param string $encoding
+ * 
+ * @return string
+ */
+function wan_html_entity_decode($string, $flags = ENT_COMPAT, $encoding = 'ISO-8859-1')
+{
+	if( $flags == ENT_COMPAT && defined('ENT_HTML401') ) {
+		$flags = ENT_COMPAT | ENT_HTML401;
+	}
+	return html_entity_decode($string, $flags, $encoding);
+}
 
 }
 ?>
