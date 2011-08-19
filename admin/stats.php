@@ -287,7 +287,7 @@ if( $img == 'camembert' )
 		$liste_name   = cut_str(wan_html_entity_decode($auth->listdata[$liste_id]['liste_name']), 30);
 		$num_inscrits = ( !empty($tmpdata[$liste_id]) ) ? $tmpdata[$liste_id] : 0;
 		
-		$listes[] = array('name' => htmlspecialchars($liste_name), 'num' => $num_inscrits);
+		$listes[] = array('name' => $liste_name, 'num' => $num_inscrits);
 		$total_inscrits += $num_inscrits;
 	}
 	
