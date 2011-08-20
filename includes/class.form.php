@@ -273,7 +273,7 @@ class Wanewsletter {
 			$fields_str = '';
 		}
 		
-		$sql = "SELECT $fields_str a.abo_id, a.abo_email, a.abo_status, al.confirmed, al.register_date, l.liste_id,
+		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_email, a.abo_status, al.confirmed, al.register_date, l.liste_id,
 				l.liste_format, l.sender_email, l.liste_alias, l.limitevalidate, l.liste_name,
 				l.return_email, l.form_url, l.liste_sig, l.use_cron, l.confirm_subscribe
 			FROM " . ABONNES_TABLE . " AS a
@@ -289,6 +289,7 @@ class Wanewsletter {
 		{
 			$this->account['abo_id'] = $abodata['abo_id'];
 			$this->account['email']  = $abodata['abo_email'];
+			$this->account['pseudo'] = $abodata['abo_pseudo'];
 			$this->account['status'] = $abodata['abo_status'];
 			$this->account['date']   = $abodata['register_date'];
 			$this->account['code']   = $code;
