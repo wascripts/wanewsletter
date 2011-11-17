@@ -150,10 +150,12 @@ function show(evt)
 		var clickListener = function(evt) {
 			if( evt.button == 0 ) {
 				imgBox.style.display = 'none';
-				DOM_Events.removeListener('click', clickListener, false, document);
+				DOM_Events.removeListener('click', clickListener, true, document);
+				evt.stopPropagation();
+				evt.preventDefault();
 			}
 		};
-		DOM_Events.addListener('click', clickListener, false, document);
+		DOM_Events.addListener('click', clickListener, true, document);
 		
 		evt.stopPropagation();
 		evt.preventDefault();
