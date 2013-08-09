@@ -15,7 +15,7 @@ CREATE TABLE wa_abo_liste (
 	confirmed     TINYINT(1) NOT NULL DEFAULT 0,
 	CONSTRAINT wa_abo_liste_pk PRIMARY KEY (abo_id, liste_id),
 	CONSTRAINT register_key_idx UNIQUE (register_key)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -31,7 +31,7 @@ CREATE TABLE wa_abonnes (
 	CONSTRAINT wa_abonnes_pk PRIMARY KEY (abo_id),
 	CONSTRAINT abo_email_idx UNIQUE (abo_email),
 	INDEX abo_status_idx (abo_status)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -48,7 +48,7 @@ CREATE TABLE wa_admin (
 	email_new_subscribe TINYINT(1)   NOT NULL DEFAULT 0,
 	email_unsubscribe   TINYINT(1)   NOT NULL DEFAULT 0,
 	CONSTRAINT wa_admin_pk PRIMARY KEY (admin_id)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -67,7 +67,7 @@ CREATE TABLE wa_auth_admin (
 	auth_attach TINYINT(1) NOT NULL DEFAULT 0,
 	cc_admin    TINYINT(1) NOT NULL DEFAULT 0,
 	INDEX admin_id_idx (admin_id)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -78,7 +78,7 @@ CREATE TABLE wa_ban_list (
 	liste_id  SMALLINT     NOT NULL DEFAULT 0,
 	ban_email VARCHAR(250) NOT NULL DEFAULT '',
 	CONSTRAINT wa_ban_list_pk PRIMARY KEY (ban_id)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -114,7 +114,7 @@ CREATE TABLE wa_config (
 	check_email_mx    TINYINT(1)   NOT NULL DEFAULT 0,
 	enable_profil_cp  TINYINT(1)   NOT NULL DEFAULT 0,
 	mailing_startdate INTEGER      NOT NULL DEFAULT 0
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -125,7 +125,7 @@ CREATE TABLE wa_forbidden_ext (
 	liste_id SMALLINT    NOT NULL DEFAULT 0,
 	fe_ext   VARCHAR(10) NOT NULL DEFAULT '',
 	CONSTRAINT wa_forbidden_ext_pk PRIMARY KEY (fe_id)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -138,7 +138,7 @@ CREATE TABLE wa_joined_files (
 	file_size          INTEGER      NOT NULL DEFAULT 0,
 	file_mimetype      VARCHAR(100) NOT NULL DEFAULT '',
 	CONSTRAINT wa_joined_files_pk PRIMARY KEY (file_id)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -167,7 +167,7 @@ CREATE TABLE wa_liste (
 	pop_user          VARCHAR(100) NOT NULL DEFAULT '',
 	pop_pass          VARCHAR(100) NOT NULL DEFAULT '',
 	CONSTRAINT wa_liste_pk PRIMARY KEY (liste_id)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -185,7 +185,7 @@ CREATE TABLE wa_log (
 	CONSTRAINT wa_log_pk PRIMARY KEY (log_id),
 	INDEX liste_id_idx (liste_id),
 	INDEX log_status_idx (log_status)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -195,7 +195,7 @@ CREATE TABLE wa_log_files (
 	log_id  INTEGER NOT NULL DEFAULT 0,
 	file_id INTEGER NOT NULL DEFAULT 0,
 	CONSTRAINT wa_log_files_pk PRIMARY KEY (log_id, file_id)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 
 -- 
@@ -209,5 +209,5 @@ CREATE TABLE wa_session (
 	session_ip    CHAR(8)  NOT NULL DEFAULT '',
 	session_liste SMALLINT NOT NULL DEFAULT 0,
 	CONSTRAINT wa_session_pk PRIMARY KEY (session_id)
-) TYPE=HEAP;
+) ENGINE=HEAP;
 
