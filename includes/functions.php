@@ -1360,12 +1360,21 @@ if (!function_exists('array_udiff')) {
  * 
  * @return string
  */
-function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', $double_encode = true)
+function wan_htmlspecialchars($string, $flags = ENT_COMPAT, $encoding = 'ISO-8859-1', $double_encode = true)
 {
-	if( $flags == null ) {
+	if( $flags == ENT_COMPAT && defined('ENT_HTML401') ) {
 		$flags = ENT_COMPAT | ENT_HTML401;
 	}
-	return htmlspecialchars($string, $flags, $encoding, $double_encode);
+	
+	// L'argument double_encode a été ajouté dans PHP 5.2.3
+	if( version_compare(PHP_VERSION, '5.2.3', '>=') ) {
+		$string = htmlspecialchars($string, $flags, $encoding, $double_encode);
+	}
+	else {
+		$string = htmlspecialchars($string, $flags, $encoding);
+	}
+	
+	return $string;
 }
 
 /**
@@ -1380,9 +1389,9 @@ function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', 
  * 
  * @return string
  */
-function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1')
+function wan_html_entity_decode($string, $flags = ENT_COMPAT, $encoding = 'ISO-8859-1')
 {
-	if( $flags == null ) {
+	if( $flags == ENT_COMPAT && defined('ENT_HTML401') ) {
 		$flags = ENT_COMPAT | ENT_HTML401;
 	}
 	return html_entity_decode($string, $flags, $encoding);
