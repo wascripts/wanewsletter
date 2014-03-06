@@ -117,8 +117,8 @@ if( $mode == 'sendpass' )
 		'L_EMAIL'        => $lang['Email_address'],
 		'L_VALID_BUTTON' => $lang['Button']['valid'],
 		
-		'S_LOGIN' => htmlspecialchars($login),
-		'S_EMAIL' => htmlspecialchars($email)
+		'S_LOGIN' => wan_htmlspecialchars($login),
+		'S_EMAIL' => wan_htmlspecialchars($email)
 	));
 	
 	$output->pparse('body');
@@ -169,7 +169,7 @@ if( $session->is_logged_in )
 
 if( !empty($redirect) )
 {
-	$output->addHiddenField('redirect', htmlspecialchars($redirect));
+	$output->addHiddenField('redirect', wan_htmlspecialchars($redirect));
 }
 
 $output->page_header();

@@ -220,7 +220,7 @@ class output extends Template {
 			$this->addLink('author',    WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
 			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Copyleft');
 			
-			$page_title = sprintf($lang['General_title'], htmlspecialchars($nl_config['sitename']));
+			$page_title = sprintf($lang['General_title'], wan_htmlspecialchars($nl_config['sitename']));
 		}
 		else
 		{
@@ -238,7 +238,7 @@ class output extends Template {
 		}
 		else
 		{
-			$l_logout = sprintf($lang['Module']['logout_2'], htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES));
+			$l_logout = sprintf($lang['Module']['logout_2'], wan_htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES));
 		}
 		
 		$this->assign_vars( array(
@@ -266,7 +266,7 @@ class output extends Template {
 				'L_USERS'       => $lang['Module']['users'],
 				'L_STATS'       => $lang['Module']['stats'],
 				
-				'SITENAME'      => htmlspecialchars($nl_config['sitename'], ENT_NOQUOTES),
+				'SITENAME'      => wan_htmlspecialchars($nl_config['sitename'], ENT_NOQUOTES),
 			));
 			
 			if( isset($auth) && isset($auth->listdata[$admindata['session_liste']]) )
@@ -611,7 +611,7 @@ BASIC;
 				}
 				
 				$filename = sprintf('<a href="%s">%s</a>',
-					sessid(sprintf($u_download, $file_id)), htmlspecialchars($filename));
+					sessid(sprintf($u_download, $file_id)), wan_htmlspecialchars($filename));
 				
 				if( preg_match('#^image/#', $mime_type) )
 				{
@@ -623,7 +623,7 @@ BASIC;
 			else
 			{
 				$filename = sprintf('<del title="%s">%s</del>',
-					$lang['Message']['File_not_found'], htmlspecialchars($filename));
+					$lang['Message']['File_not_found'], wan_htmlspecialchars($filename));
 			}
 			
 			$this->assign_block_vars('file_info', array(
@@ -666,12 +666,12 @@ BASIC;
 		
 		if( empty($jump_to) )
 		{
-			$jump_to = './' . htmlspecialchars(basename(server_info('PHP_SELF')));
+			$jump_to = './' . wan_htmlspecialchars(basename(server_info('PHP_SELF')));
 			$query_string = server_info('QUERY_STRING');
 			
 			if( $query_string != '' )
 			{
-				$jump_to .= '?' . htmlspecialchars($query_string);
+				$jump_to .= '?' . wan_htmlspecialchars($query_string);
 			}
 		}
 		

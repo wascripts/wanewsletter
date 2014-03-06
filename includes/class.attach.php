@@ -396,7 +396,7 @@ class Attach {
 					if( !($cid = @ftp_connect($part['host'], $port)) || !@ftp_login($cid, $part['user'], $part['pass']) )
 					{
 						$error = TRUE;
-						$msg_error[] = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
+						$msg_error[] = sprintf($lang['Message']['Unaccess_host'], wan_htmlspecialchars($part['host']));
 						
 						return;
 					}

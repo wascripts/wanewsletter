@@ -120,7 +120,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	
 	$mailer->set_charset($lang['CHARSET']);
-	$mailer->set_from($listdata['sender_email'], html_entity_decode($listdata['liste_name']));
+	$mailer->set_from($listdata['sender_email'], wan_html_entity_decode($listdata['liste_name']));
 	
 	if( $listdata['return_email'] != '' )
 	{
@@ -493,7 +493,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( $row['abo_pseudo'] != '' )
 				{
-					$tags_replace['NAME'] = ( $abo_format == FORMAT_HTML ) ? $row['abo_pseudo'] : html_entity_decode($row['abo_pseudo']);
+					$tags_replace['NAME'] = ( $abo_format == FORMAT_HTML ) ? $row['abo_pseudo'] : wan_html_entity_decode($row['abo_pseudo']);
 				}
 				else
 				{
@@ -509,7 +509,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 						{
 							if( !is_numeric($row[$tag['column_name']]) && $abo_format == FORMAT_HTML )
 							{
-								$row[$tag['column_name']] = htmlspecialchars($row[$tag['column_name']]);
+								$row[$tag['column_name']] = wan_htmlspecialchars($row[$tag['column_name']]);
 							}
 							
 							$tags_replace[$tag['tag_name']] = $row[$tag['column_name']];
@@ -747,7 +747,7 @@ function newsletter_links($listdata)
 		{
 			$link = array(
 				FORMAT_TEXTE => $listdata['form_url'],
-				FORMAT_HTML  => '<a href="' . htmlspecialchars($listdata['form_url']) . '">' . $lang['Label_link'] . '</a>'
+				FORMAT_HTML  => '<a href="' . wan_htmlspecialchars($listdata['form_url']) . '">' . $lang['Label_link'] . '</a>'
 			);
 		}
 		else
@@ -756,7 +756,7 @@ function newsletter_links($listdata)
 			
 			$link = array(
 				FORMAT_TEXTE => $tmp_link,
-				FORMAT_HTML  => '<a href="' . htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>'
+				FORMAT_HTML  => '<a href="' . wan_htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>'
 			);
 			
 			unset($tmp_link);

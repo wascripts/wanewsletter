@@ -106,7 +106,7 @@ function Location($url)
 	
 	$use_refresh   = preg_match("#Microsoft|WebSTAR|Xitami#i", server_info('SERVER_SOFTWARE'));
 	$absolute_url  = make_script_url() . (( defined('IN_ADMIN') ) ? 'admin/' : '');
-	$absolute_url .= html_entity_decode($url);
+	$absolute_url .= wan_html_entity_decode($url);
 	
 	header((( $use_refresh ) ? 'Refresh: 0; URL=' : 'Location: ' ) . $absolute_url);
 	
@@ -982,7 +982,7 @@ function wan_get_contents($URL, &$errstr)
 		$result = http_get_contents($URL, $errstr);
 		if( $result == false )
 		{
-			$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($URL), $errstr);
+			$errstr = sprintf($lang['Message']['Error_load_url'], wan_htmlspecialchars($URL), $errstr);
 		}
 	}
 	else
@@ -1003,7 +1003,7 @@ function wan_get_contents($URL, &$errstr)
 		else
 		{
 			$result = false;
-			$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($URL));
+			$errstr = sprintf($lang['Message']['File_not_exists'], wan_htmlspecialchars($URL));
 		}
 	}
 	
@@ -1035,7 +1035,7 @@ function http_get_contents($URL, &$errstr)
 	
 	if( !($fs = fsockopen($part['host'], $port, $null, $null, 10)) )
 	{
-		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
+		$errstr = sprintf($lang['Message']['Unaccess_host'], wan_htmlspecialchars($part['host']));
 		return false;
 	}
 	
@@ -1345,6 +1345,47 @@ if (!function_exists('array_udiff')) {
         }
         return $diff;
     }
+}
+
+/**
+ * wan_htmlspecialchars()
+ * 
+ * Idem que la fonction htmlspecialchars() native, mais avec le jeu de
+ * caractère ISO-8859-1 par défaut.
+ * 
+ * @param string $string
+ * @param int    $flags
+ * @param string $encoding
+ * @param bool   $double_encode
+ * 
+ * @return string
+ */
+function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', $double_encode = true)
+{
+	if( $flags == null ) {
+		$flags = ENT_COMPAT | ENT_HTML401;
+	}
+	return htmlspecialchars($string, $flags, $encoding, $double_encode);
+}
+
+/**
+ * wan_html_entity_decode()
+ * 
+ * Idem que la fonction html_entity_decode() native, mais avec le jeu de
+ * caractère ISO-8859-1 par défaut.
+ * 
+ * @param string $string
+ * @param int    $flags
+ * @param string $encoding
+ * 
+ * @return string
+ */
+function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1')
+{
+	if( $flags == null ) {
+		$flags = ENT_COMPAT | ENT_HTML401;
+	}
+	return html_entity_decode($string, $flags, $encoding);
 }
 
 }

@@ -168,8 +168,8 @@ if( $mode == 'adduser' )
 		'L_VALID_BUTTON'  => $lang['Button']['valid'],
 		'L_CANCEL_BUTTON' => $lang['Button']['cancel'],
 		
-		'LOGIN' => htmlspecialchars($new_login),
-		'EMAIL' => htmlspecialchars($new_email),
+		'LOGIN' => wan_htmlspecialchars($new_login),
+		'EMAIL' => wan_htmlspecialchars($new_email),
 		
 		'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 	));
@@ -464,7 +464,7 @@ if( $admindata['admin_level'] == ADMIN )
 		
 		do
 		{
-			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
+			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], wan_htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
 		}
 		while( $row = $result->fetch() );
 		
@@ -502,7 +502,7 @@ $output->set_filenames( array(
 ));
 
 $output->assign_vars(array(
-	'L_TITLE'               => sprintf($lang['Title']['profile'], htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
+	'L_TITLE'               => sprintf($lang['Title']['profile'], wan_htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
 	'L_EXPLAIN'             => nl2br($lang['Explain']['admin']),
 	'L_DEFAULT_LANG'        => $lang['Default_lang'],
 	'L_EMAIL'               => $lang['Email_address'],

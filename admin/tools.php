@@ -388,7 +388,7 @@ switch( $mode )
 			if( $action == 'store' && !is_writable(WA_TMPDIR) )
 			{
 				$output->message(sprintf($lang['Message']['Dir_not_writable'],
-					htmlspecialchars(wa_realpath(WA_TMPDIR))));
+					wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
 			}
 			
 			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
@@ -540,7 +540,7 @@ switch( $mode )
 					{
 						$output->redirect('./tools.php?mode=import', 4);
 						
-						$message  = sprintf($lang['Message']['Error_local'], htmlspecialchars($filename));
+						$message  = sprintf($lang['Message']['Error_local'], wan_htmlspecialchars($filename));
 						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=import') . '">', '</a>');
 						$output->message($message);
 					}
@@ -684,7 +684,7 @@ switch( $mode )
 					{
 						$output->message(sprintf(
 							$lang['Message']['Invalid_xml_data'],
-							htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
+							wan_htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
 							xml_get_current_line_number($parser)
 						));
 					}
@@ -1153,7 +1153,7 @@ switch( $mode )
 			if( $action == 'store' && !is_writable(WA_TMPDIR) )
 			{
 				$output->message(sprintf($lang['Message']['Dir_not_writable'],
-					htmlspecialchars(wa_realpath(WA_TMPDIR))));
+					wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
 			}
 			
 			//
@@ -1305,7 +1305,7 @@ switch( $mode )
 					{
 						$output->redirect('./tools.php?mode=restore', 4);
 						
-						$message  = sprintf($lang['Message']['Error_local'], htmlspecialchars($filename));
+						$message  = sprintf($lang['Message']['Error_local'], wan_htmlspecialchars($filename));
 						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=restore') . '">', '</a>');
 						$output->message($message);
 					}
@@ -1444,7 +1444,7 @@ switch( $mode )
 		{
 			$url_form = ( !empty($_POST['url_form']) ) ? trim($_POST['url_form']) : '';
 			
-			$code_html  = "<form method=\"post\" action=\"" . htmlspecialchars($url_form) . "\">\n";
+			$code_html  = "<form method=\"post\" action=\"" . wan_htmlspecialchars($url_form) . "\">\n";
 			$code_html .= $lang['Email_address'] . " : <input type=\"text\" name=\"email\" maxlength=\"100\" /> &nbsp; \n";
 			
 			if( $listdata['liste_format'] == FORMAT_MULTIPLE )
@@ -1485,8 +1485,8 @@ switch( $mode )
 				'L_EXPLAIN_CODE_HTML' => nl2br($lang['Explain']['code_html']),
 				'L_EXPLAIN_CODE_PHP'  => nl2br($lang['Explain']['code_php']),
 				
-				'CODE_HTML' => nl2br(htmlspecialchars($code_html, ENT_NOQUOTES)),
-				'CODE_PHP'  => nl2br(htmlspecialchars($code_php, ENT_NOQUOTES))
+				'CODE_HTML' => nl2br(wan_htmlspecialchars($code_html, ENT_NOQUOTES)),
+				'CODE_PHP'  => nl2br(wan_htmlspecialchars($code_php, ENT_NOQUOTES))
 			));
 		}
 		else
