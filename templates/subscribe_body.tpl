@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
-	Copyright (c) 2002-2010 Aurélien Maille
+	Copyright (c) 2002-2014 Aurélien Maille
 	
 	Wanewsletter is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License 
@@ -124,7 +124,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&ndash;2010 | Wanewsletter<br />
+phpCodeur</a> &copy; 2002&ndash;2014 | Wanewsletter<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>

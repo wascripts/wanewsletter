@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
-	Copyright (c) 2002-2010 Aurélien Maille
+	Copyright (c) 2002-2014 Aurélien Maille
 	
 	Wanewsletter is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License 
@@ -22,7 +22,7 @@
 	
 	<meta name="Author" content="Bobe" />
 	<meta name="Editor" content="jEdit" />
-	<meta name="Copyright" content="phpCodeur (c) 2002-2010" />
+	<meta name="Copyright" content="phpCodeur (c) 2002-2014" />
 	<meta name="Robots" content="noindex, nofollow, none" />
 	
 	<link rel="stylesheet" type="text/css" href="../templates/wanewsletter.css" media="screen" title="Thème Wanewsletter" />
@@ -83,7 +83,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&ndash;2010 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
+phpCodeur</a> &copy; 2002&ndash;2014 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
 </address>
