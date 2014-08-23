@@ -1,8 +1,6 @@
 -- 
 -- Schéma des tables de WAnewsletter 2.3.x pour Firebird
 -- 
--- $Id$
--- 
 
 -- 
 -- Structure de la table wa_abo_liste
