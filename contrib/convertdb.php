@@ -98,10 +98,6 @@ if( php_sapi_name() != 'cli' ) {
 
 list($dbtype) = explode(':', $dsn_to);
 
-if( $dbtype == 'firebird' ) {
-	trigger_error('This script doesn\'t support Firebird datebase type', E_USER_ERROR);
-}
-
 //
 // Connect to DB
 //

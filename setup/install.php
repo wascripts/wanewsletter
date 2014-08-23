@@ -201,11 +201,6 @@ if( $start )
 			{
 				exec_queries(str_replace('wa_', $prefixe, $sql_drop_sequence));
 			}
-			else if( SQL_DRIVER == 'firebird' )
-			{
-				exec_queries(str_replace('wa_', $prefixe, $sql_drop_trigger));
-				exec_queries(str_replace('wa_', $prefixe, $sql_drop_generator));
-			}
 			
 			exec_queries(str_replace('wa_', $prefixe, $sql_drop_index));
 			exec_queries(str_replace('wa_', $prefixe, $sql_drop_table));

@@ -113,12 +113,12 @@ function parseDSN($dsn)
 	}
 	
 	$infos = $options = array();
-	$label = array('firebird' => 'Firebird', 'mysql' => 'MySQL', 'postgres' => 'PostgreSQL', 'sqlite' => 'SQLite');
+	$label = array('mysql' => 'MySQL', 'postgres' => 'PostgreSQL', 'sqlite' => 'SQLite');
 	
 	foreach( $dsn_parts as $key => $value ) {
 		switch( $key ) {
 			case 'scheme':
-				if( !in_array($value, array('firebird', 'mysql', 'postgres', 'sqlite')) ) {
+				if( !in_array($value, array('mysql', 'postgres', 'sqlite')) ) {
 					trigger_error("Unsupported database", CRITICAL_ERROR);
 					return false;
 				}

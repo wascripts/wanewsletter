@@ -162,11 +162,6 @@ $supported_lang = array(
 );
 
 $supported_db = array(
-	'firebird' => array(
-		'Name'         => 'Firebird &#8805; 1.5 (expérimental)',
-		'prefixe_file' => 'firebird',
-		'extension'    => extension_loaded('interbase')
-	),
 	'mysql' => array(
 		'Name'         => 'MySQL &#8805; 4.1, 5.x',
 		'prefixe_file' => 'mysql',
