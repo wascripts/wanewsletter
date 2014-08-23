@@ -22,7 +22,6 @@
  * @author  Bobe <wascripts@phpcodeur.net>
  * @link    http://phpcodeur.net/wascripts/wanewsletter/
  * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * @version $Id$
  * 
  * Affiche les entrées présentes dans le premier fichier de language 
  * qui ne sont pas présentes dans le deuxième fichier de language.

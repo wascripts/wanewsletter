@@ -1,8 +1,6 @@
 -- 
 -- Schéma des tables de WAnewsletter 2.3.x pour PostgreSQL
 -- 
--- $Id$
--- 
 
 CREATE SEQUENCE wa_abonnes_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1; 
 CREATE SEQUENCE wa_admin_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;

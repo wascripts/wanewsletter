@@ -1,8 +1,6 @@
 -- 
 -- Données de base de WAnewsletter 2.3.x
 -- 
--- $Id$
--- 
 
 
 -- 
