@@ -67,24 +67,19 @@ function decompress_filedata($filename, $file_ext)
 {
 	if( $file_ext != 'zip' )
 	{
-		switch( $file_ext )
+		if( $file_ext == 'gz' )
 		{
-			case 'gz':
-				$open  = 'gzopen';
-				$eof   = 'gzeof';
-				$gets  = 'gzgets';
-				$close = 'gzclose';
-				break;
-			
-			case 'bz2':
-			case 'txt':
-			case 'sql':
-			case 'xml':
-				$open  = 'fopen';
-				$eof   = 'feof';
-				$gets  = 'fgets';
-				$close = 'fclose';
-				break;
+			$open  = 'gzopen';
+			$eof   = 'gzeof';
+			$gets  = 'gzgets';
+			$close = 'gzclose';
+		}
+		else
+		{
+			$open  = 'fopen';
+			$eof   = 'feof';
+			$gets  = 'fgets';
+			$close = 'fclose';
 		}
 		
 		if( !($fp = @$open($filename, 'rb')) )
@@ -585,12 +580,11 @@ switch( $mode )
 					}
 				}
 				
-				if( !preg_match('/\.(txt|xml|zip|gz|bz2)$/i', $filename, $match) )
+				$file_ext = '';
+				if( preg_match('/\.(zip|gz|bz2)$/i', $filename, $m) )
 				{
-					$output->message('Bad_file_type');
+					$file_ext = $m[1];
 				}
-				
-				$file_ext = $match[1];
 				
 				if( ( !$zziplib_loaded && $file_ext == 'zip' ) || ( !$zlib_loaded && $file_ext == 'gz' ) || ( !$bzip2_loaded && $file_ext == 'bz2' ) )
 				{
