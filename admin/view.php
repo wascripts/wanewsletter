@@ -697,12 +697,19 @@ else if( $mode == 'abonnes' )
 			{
 				if( $auth->listdata[$row['liste_id']]['liste_format'] == FORMAT_MULTIPLE )
 				{
-					$output->assign_block_vars('listerow', array(
-						'LISTE_NAME'   => $auth->listdata[$row['liste_id']]['liste_name'],
-						'FORMAT_BOX'   => format_box('format[' . $row['liste_id'] . ']', $row['format'], false, false, true),
-						'U_VIEW_LISTE' => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
-					));
+					$format_box = format_box("format[$row[liste_id]]",
+						$row['format'], false, false, true);
 				}
+				else
+				{
+					$format_box = $auth->listdata[$row['liste_id']]['liste_format'] == FORMAT_HTML ? 'HTML' : 'texte';
+				}
+				
+				$output->assign_block_vars('listerow', array(
+					'LISTE_NAME'   => $auth->listdata[$row['liste_id']]['liste_name'],
+					'FORMAT_BOX'   => $format_box,
+					'U_VIEW_LISTE' => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
+				));
 			}
 			while( $row = $result->fetch() );
 			
