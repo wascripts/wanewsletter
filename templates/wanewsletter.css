@@ -238,8 +238,6 @@ div#graph-box {
 	left: 560px;
 	width: 0;
 	transition: all ease-out .85s;
-	-o-transition: all ease-out .85s;
-	-moz-transition: all ease-out .85s;
 	-webkit-transition: all ease-out .85s;
 }
 #graph2.toLeft {
