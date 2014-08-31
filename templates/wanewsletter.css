@@ -328,6 +328,10 @@ input[type="reset"]::-moz-focus-inner,
 input[type="button"]::-moz-focus-inner,
 input[type="submit"]::-moz-focus-inner { border: none; }
 
+input[type="reset"]:not(:active):focus,
+input[type="button"]:not(:active):focus,
+input[type="submit"]:not(:active):focus { box-shadow: 0 0 1px #003B78; }
+
 input[type="reset"]:active,
 input[type="button"]:active,
 input[type="submit"]:active,
