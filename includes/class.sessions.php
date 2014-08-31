@@ -127,7 +127,7 @@ class Session {
 			//
 			$pattern_ip = array();
 			$pattern_ip[] = '/^0\..*/'; // Réseau 0 n'existe pas 
-			$pattern_ip[] = '/^127\.0\.0\.1/'; // ip locale 
+			$pattern_ip[] = '/^127\..*/'; // ip locale
 			
 			// Plages d'ip spécifiques à l'intranet 
 			$pattern_ip[] = '/^10\..*/';
