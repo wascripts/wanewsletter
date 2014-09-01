@@ -73,6 +73,7 @@ $lang['Title']['attach']            = "Gestion des extensions de fichiers";
 $lang['Title']['backup']            = "Système de sauvegarde";
 $lang['Title']['restore']           = "Système de restauration";
 $lang['Title']['generator']         = "Générateur de formulaires d'inscriptions";
+$lang['Title']['debug']             = "Informations de débogage";
 $lang['Title']['send']              = "Formulaire d'envoi";
 $lang['Title']['join']              = "Joindre un fichier à la newsletter";
 $lang['Title']['joined_files']      = "Fichiers joints à cette newsletter";

@@ -73,6 +73,7 @@ $lang['Title']['attach']            = "Files extensions management";
 $lang['Title']['backup']            = "Backup system";
 $lang['Title']['restore']           = "Restore system";
 $lang['Title']['generator']         = "Subscription form generator";
+$lang['Title']['debug']             = "Debug informations";
 $lang['Title']['send']              = "Sending form";
 $lang['Title']['join']              = "Attach a file to the newsletter";
 $lang['Title']['joined_files']      = "Newsletter attached files";

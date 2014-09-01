@@ -210,7 +210,7 @@ if( !isset($_POST['submit']) )
 	
 	if( $admindata['admin_level'] == ADMIN )
 	{
-		array_push($tools_ary, 'attach', 'backup', 'restore');
+		array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
 	}
 	
 	$tools_box = '<select id="mode" name="mode">';
@@ -299,7 +299,7 @@ function wan_subdir_status($dir)
 
 function wan_print_row($name, $value)
 {
-	echo str_pad($name, 24);
+	echo str_pad($name, 30);
 	echo ' : ';
 	echo $value;
 	echo "\r\n";
@@ -308,7 +308,7 @@ function wan_print_row($name, $value)
 switch( $mode )
 {
 	case 'debug':
-		echo "<h2>Informations de déboguage</h2>";
+		printf("<h2>%s</h2>", $lang['Title']['debug']);
 		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;'>";
 		
 		wan_print_row('Version Wanewsletter', WA_VERSION);
