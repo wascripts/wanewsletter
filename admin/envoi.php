@@ -442,7 +442,7 @@ switch( $mode )
 		}
 		else
 		{
-			$sql = "SELECT log_id, log_subject, log_status 
+			$sql = "SELECT log_id, log_subject, log_status, log_date
 				FROM " . LOG_TABLE . " 
 				WHERE liste_id = $listdata[liste_id]
 					AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")
@@ -479,8 +479,12 @@ switch( $mode )
 					}
 					
 					$log_box .= sprintf(
-						"<option style=\"%s\" value=\"%d\"> %s %s</option>\n",
-						$style, $row['log_id'], wan_htmlspecialchars(cut_str($row['log_subject'], 40)), $status
+						"<option style=\"%s\" value=\"%d\">%s - %s %s</option>\n",
+						$style,
+						$row['log_id'],
+						wan_htmlspecialchars(cut_str($row['log_subject'], 40)),
+						convert_time('d F Y', $row['log_date']),
+						$status
 					);
 				}
 				while( $row = $result->fetch() );
