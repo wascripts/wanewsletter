@@ -114,7 +114,7 @@ class output extends Template {
 	 */
 	function addScript($url)
 	{
-		$this->javascript .= "\r\n\t<script type=\"text/javascript\" src=\"$url\"></script>";
+		$this->javascript .= "\r\n\t<script src=\"$url\"></script>";
 	}
 	
 	/**
@@ -415,13 +415,14 @@ class output extends Template {
 		$this->send_headers();
 		
 		echo <<<BASIC
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="$lg" lang="$lg" dir="$dir">
+<!DOCTYPE html>
+<html lang="$lg" dir="$dir">
 <head>
+	<meta charset="$charset" />
 	$this->meta_redirect
 	<title>$page_title</title>
 	
-	<style type="text/css" media="screen">
+	<style>
 	body { margin: 10px; text-align: left; }
 	</style>
 </head>

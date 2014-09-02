@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <!--
 	Copyright (c) 2002-2014 Aurélien Maille
 	
@@ -16,16 +16,16 @@
 	along with Wanewsletter; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 -->
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{CONTENT_LANG}" lang="{CONTENT_LANG}" dir="{CONTENT_DIR}">
+<html lang="{CONTENT_LANG}" dir="{CONTENT_DIR}">
 <head>
-	<title>{PAGE_TITLE}</title>
-	
-	<meta name="Author" content="Bobe" />
-	<meta name="Editor" content="jEdit" />
+	<meta charset="{CHARSET}" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="Copyright" content="phpCodeur (c) 2002-2014" />
 	<meta name="Robots" content="noindex, nofollow, none" />
 	
-	<link rel="stylesheet" type="text/css" href="../templates/wanewsletter.css" media="screen" title="Thème Wanewsletter" />
+	<title>{PAGE_TITLE}</title>
+	
+	<link rel="stylesheet" href="../templates/wanewsletter.css" />
 </head>
 <body>
 
@@ -85,7 +85,7 @@
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
 phpCodeur</a> &copy; 2002&ndash;2014 | Wanewsletter {NEW_VERSION} {TRANSLATE}<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
-licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
+licence <abbr title="General Public Licence" lang="en">GPL</abbr></a>
 </address>
 
 </body>

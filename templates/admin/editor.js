@@ -140,7 +140,7 @@ function preview(evt)
 		texte = texte.replace(italicSpan, "$1<em>$2</em>");
 		texte = texte.replace(underlineSpan, "$1<u>$2</u>");
 		
-		preview.document.writeln('<!DOCTYPE HTML PUBLIC "-\/\/W3C\/\/DTD HTML 4.01\/\/EN" "http:\/\/www.w3.org\/TR\/html4\/strict.dtd">');
+		preview.document.writeln('<!DOCTYPE html>');
 		preview.document.writeln('<html><head><title>' + subject + '<\/title><\/head>');
 		preview.document.writeln('<body><pre style="font-size: 13px;">' + texte + '<\/pre><\/body><\/html>');
 	}

@@ -232,12 +232,12 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 	{
 		case CRITICAL_ERROR:
 			echo <<<BASIC
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" dir="ltr">
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
 <head>
 	<title>Erreur critique&#160;!</title>
 	
-	<style type="text/css" media="screen">
+	<style>
 	body { margin: 10px; text-align: left; }
 	</style>
 </head>

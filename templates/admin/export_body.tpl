@@ -34,7 +34,7 @@ DOM_Events.addListener('load', function() {
 				<input type="radio" id="export-format-text" name="eformat" value="text" checked="checked" />
 				<label for="export-format-text" class="m-texte">{L_PLAIN_TEXT}</label>
 				<input type="radio" id="export-format-xml" name="eformat" value="xml" />
-				<label for="export-format-xml" class="m-texte"><abbr title="eXtensible Markup Language" xml:lang="en" lang="en">XML</abbr></label>
+				<label for="export-format-xml" class="m-texte"><abbr title="eXtensible Markup Language" lang="en">XML</abbr></label>
 			</td>
 		</tr>
 		<tr>

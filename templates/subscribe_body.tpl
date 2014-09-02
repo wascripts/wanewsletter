@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <!--
 	Copyright (c) 2002-2014 Aurélien Maille
 	
@@ -16,18 +16,14 @@
 	along with Wanewsletter; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 -->
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<html lang="fr">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-	<meta http-equiv="Content-Script-Type" content="text/javascript" />
-	<meta http-equiv="Content-Style-Type" content="text/css" />
+	<meta charset="ISO-8859-1" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	
 	<title>{PAGE_TITLE}</title>
 	
-	<meta name="Author" content="Bobe" />
-	<meta name="Editor" content="jEdit" />
-	
-	<style type="text/css" media="screen">
+	<style>
 	body { font: .8em "Bitstream Vera Sans", Verdana, Arial, sans-serif; }
 	
 	form#subscribe-form { width: 60%; margin: 30px auto 15px; }
@@ -51,7 +47,7 @@
 	}
 	</style>
 	
-	<script type="text/javascript">
+	<script>
 	<!--
 	var submitted = false;
 	
@@ -92,7 +88,7 @@
 
 <form id="subscribe-form" method="post" action="./subscribe.php">
 <fieldset>
-	<legend xml:lang="en" lang="en">Mailing liste</legend>
+	<legend lang="en">Mailing liste</legend>
 	
 	<div class="bloc">
 		<label for="email">{L_EMAIL}&nbsp;:</label>
@@ -125,7 +121,7 @@
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
 phpCodeur</a> &copy; 2002&ndash;2014 | Wanewsletter<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
-licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
+licence <abbr title="General Public Licence" lang="en">GPL</abbr></a>
 </address>
 
 </body>
