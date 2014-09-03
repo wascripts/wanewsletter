@@ -301,7 +301,7 @@ function wan_print_row($name, $value)
 {
 	echo str_pad($name, 30);
 	echo ' : ';
-	echo $value;
+	echo wan_htmlspecialchars($value);
 	echo "\r\n";
 }
 
@@ -361,7 +361,9 @@ switch( $mode )
 		wan_print_row(' - SMTP',          config_value('SMTP'));
 		
 		list($infos) = parseDSN($dsn);
-		
+
+		wan_print_row('Type de serveur', $_SERVER['SERVER_SOFTWARE']);
+
 		if( strncmp($infos['driver'], 'sqlite', 6) == 0 ) {
 			wan_print_row('Base de données', sprintf('%s %s', $infos['label'], $db->libVersion));
 		}
@@ -369,7 +371,10 @@ switch( $mode )
 			wan_print_row('Base de données', sprintf('%s %s - Client : %s - Jeu de caractères : %s',
 				$infos['label'], $db->serverVersion, $db->clientVersion, $db->encoding()));
 		}
-		
+
+		wan_print_row('Agent utilisateur',
+			isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'Inconnu');
+
 		echo "</pre>";
 		
 		$output->page_footer();
