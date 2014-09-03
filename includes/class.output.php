@@ -267,13 +267,6 @@ class output extends Template {
 				
 				'SITENAME'      => wan_htmlspecialchars($nl_config['sitename'], ENT_NOQUOTES),
 			));
-			
-			if( isset($auth) && isset($auth->listdata[$admindata['session_liste']]) )
-			{
-				$this->assign_block_vars('display_liste', array(
-					'LISTE_NAME' => $auth->listdata[$admindata['session_liste']]['liste_name']
-				));
-			}
 		}
 		else
 		{

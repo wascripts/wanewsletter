@@ -24,7 +24,7 @@
  */
 
 html,
-body { background-color: #003B78; color: white; }
+body { background-color: #314B81; color: white; }
 body {
 	margin: 0;
 	padding: 0;
@@ -40,29 +40,32 @@ hr    { display: none; }
 /* Structure des pages */
 
 div#header {
-	height: 60px;
-	background-color: #003B78;
-	background-image: url("images/header.png");
-	background-repeat: repeat-y;
-	padding: 5px;
+	min-height: 70px;
+	background-color: #314B81;
+	background-image: -webkit-linear-gradient(left, hsl(220, 20%, 95%) 80px, hsl(220, 45%, 35%) 42%);
+	background-image: linear-gradient(to right, hsl(220, 20%, 95%) 80px, hsl(220, 45%, 35%) 42%);
 	color: black;
 }
 
-div#logo a,
-div#logo img { display: block; float: left; }
+div#logo > a { float: left; margin: 5px; }
+div#logo img { display: block; }
 
 div#header h1 {
-	position: absolute;
-	top: 15px;
-	right: 200px;
 	margin: 0;
-	text-align: center;
+	margin-left: 200px;
+	margin-right: 15%;
+	padding-top: .75em;
+	text-align: right;
 	font-weight: bold;
-	font-size: 1.25em;
+	font-size: 2em;
+	text-shadow:
+		hsla(0, 0%, 0%, 0.2) 2px 6px 5px,
+		hsla(0, 0%, 100%, 0.4) 0px -4px 30px;
 	color: white;
 }
 
 ul#menu {
+	clear: both;
 	background-color: #FAFAFA;
 	background-image: url("images/bande.png");
 	background-repeat: repeat-x;
@@ -88,7 +91,7 @@ ul#menu>li:first-child {
 }
 
 div#smallheader, ul#errorbox, div#global, address#footer, ul#php_errors {
-	background-color: #DDD;
+	background-color: #E3E0DD;
 	margin: 20px;
 	border: 1px solid black;
 	padding-left: 2.7%;
@@ -166,13 +169,15 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 .smallbloc, table#tagsList { margin-left: 8%; margin-right: 8%; }
 
 .bloc h2, .smallbloc h2 {
-	background-color: #003B78;
-	background-image: url("images/head.png");
-	background-repeat: repeat-x;
+	background-color: #385693;
+	background-image: -webkit-linear-gradient(top, hsl(220, 45%, 35%) 15%, hsl(220, 25%, 60%));
+	background-image: linear-gradient(to bottom, hsl(220, 45%, 35%) 15%, hsl(220, 25%, 60%));
 	margin: 0;
 	padding: 5px;
 	text-align: center;
+	text-shadow: rgba(0, 0, 0, 0.8) 0 0 2px;
 	white-space: nowrap;
+	font-weight: bold;
 	font-size: 1em;
 	color: #FAFAFA;
 }
@@ -189,7 +194,9 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 }
 
 .bottom {
-	background: #BBB url("images/bottom.png") repeat-x bottom;
+	background-color: #CCC;
+	background-image: -webkit-linear-gradient(top, hsl(0, 0%, 72%), hsl(0, 0%, 90%));
+	background-image: linear-gradient(to bottom, hsl(0, 0%, 72%), hsl(0, 0%, 90%));
 	margin: 0;
 	padding: 3px 0;
 	text-align: center;
@@ -309,7 +316,9 @@ input[type="reset"],
 input[type="button"],
 input[type="submit"] {
 	border:1px solid #aaa;
-	background: url("images/degrade.png") repeat scroll 0 0 #efefef;
+	background-color: #EFEFEF;
+	background-image: -webkit-linear-gradient(top, hsl(0, 0%, 97%), hsl(0, 0%, 88%));
+	background-image: linear-gradient(to bottom, hsl(0, 0%, 97%), hsl(0, 0%, 88%));
 	color: #222;
 	font-size: .94em;
 	padding: 2px 10px;
@@ -366,7 +375,7 @@ td + td select[multiple], td + td textarea { vertical-align: top; }
 table.content    { background-color: #FAFAFA; border-spacing: 1px; width: 100%; }
 
 th {
-	background-color: #C6C8CA;
+	background-color: #C2BFBC;
 	padding: .2em .4em;
 	white-space: nowrap;
 	font-weight: bold;
@@ -376,7 +385,7 @@ th {
 }
 
 td.explain {
-	background-color: #C6C8CA;
+	background-color: #C2BFBC;
 	padding: .4em;
 	font-weight: normal;
 	font-size: .86em;
@@ -417,8 +426,8 @@ td.row-full {
 	vertical-align: middle;
 }
 
-td.row1, td.medrow1, td.smallrow1 { background-color: #EAEAEA; }
-td.row2, td.medrow2, td.smallrow2 { background-color: #D6D8DA; }
+td.row1, td.medrow1, td.smallrow1 { background-color: #E7E5E3; }
+td.row2, td.medrow2, td.smallrow2 { background-color: #DBD8D5; }
 
 td#loginfos span { display: block; text-align: right; }
 td#loginfos span:first-child { float: left; }

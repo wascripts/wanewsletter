@@ -41,11 +41,7 @@
 		</a>
 	</div>
 	
-	<h1>{SITENAME}
-	<!-- BEGIN display_liste -->
-	<br />{display_liste.LISTE_NAME}
-	<!-- END display_liste -->
-	</h1>
+	<h1>{SITENAME}</h1>
 </div>
 
 <ul id="menu">
