@@ -1,39 +1,30 @@
 <!-- BEGIN script_load_by_url -->
-<!--[if gte IE 8]><!-->
-<script type="text/javascript">
+<script>
 <!--
-if( typeof(document.styleSheets) != 'undefined' ) {
+document.addEventListener('DOMContentLoaded', function() {
 	
-	if( typeof(document.styleSheets[0].cssRules) != 'undefined' ) {
-		document.styleSheets[0].insertRule('tbody#loadByURL { display: none; }', 0);
-	}
-	else {
-		document.styleSheets[0].addRule('tbody#loadByURL', 'display: none');
-	}
-	
-	DOM_Events.addListener('load', function() {
-		DOM_Events.addListener('change', function() {
-			var displayVal = null;
-			
-			if( this.selectedIndex == (this.options.length - 1) ) {
-				displayVal = 'table-row-group';
-			}
-			else {
-				displayVal = 'none';
-			}
-			
-			document.getElementById('loadByURL').style.display = displayVal;
-		}, false, document.forms[0].elements['id']);
+	document.styleSheets[0].insertRule('tbody#loadByURL { display: none; }', 0);
+
+	document.forms[0].elements['id'].addEventListener('change', function() {
+		var displayVal = null;
 		
-		var newOption = document.createElement('option');
-		newOption.appendChild(document.createTextNode('\u2013 {script_load_by_url.L_FROM_AN_URL}\u2026'));
+		if( this.selectedIndex == (this.options.length - 1) ) {
+			displayVal = 'table-row-group';
+		}
+		else {
+			displayVal = 'none';
+		}
 		
-		document.forms[0].elements['id'].appendChild(newOption);
-	}, false, document);
-}
+		document.getElementById('loadByURL').style.display = displayVal;
+	}, false);
+
+	var newOption = document.createElement('option');
+	newOption.appendChild(document.createTextNode('\u2013 {script_load_by_url.L_FROM_AN_URL}\u2026'));
+
+	document.forms[0].elements['id'].appendChild(newOption);
+}, false);
 //-->
 </script>
-<!--<![endif]-->
 <!-- END script_load_by_url -->
 
 <form method="post" action="{U_FORM}">

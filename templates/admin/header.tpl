@@ -30,6 +30,7 @@
 	
 	{S_NAV_LINKS}
 	
+	<script src="../templates/admin/admin.js"></script>
 	{S_SCRIPTS}
 </head>
 <body id="top">

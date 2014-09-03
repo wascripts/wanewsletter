@@ -1,25 +1,23 @@
-<script type="text/javascript">
+<script>
 <!--
-function checkForm_editAboProfil(evt)
+function checkForm_editAboProfil()
 {
 	var inputEmail = document.forms[0].elements['email'];
 	
 	if( inputEmail.defaultValue.toLowerCase() != inputEmail.value.toLowerCase() ) {
 		if( !window.confirm('{L_WARNING_EMAIL_DIFF}') ) {
-			evt.preventDefault();
+			return false;
 		}
 	}
+	
+	return true;
 }
-
-DOM_Events.addListener('load', function() {
-	DOM_Events.addListener('submit', checkForm_editAboProfil, false, document.forms[0]);
-}, false, document);
 //-->
 </script>
 
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./view.php?mode=abonnes">
+<form method="post" action="./view.php?mode=abonnes" onsubmit="return checkForm_editAboProfil();">
 <ul class="links special">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=view&amp;id={S_ABO_ID}">{L_VIEW_ACCOUNT}</a></li>

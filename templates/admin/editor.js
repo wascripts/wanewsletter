@@ -25,6 +25,31 @@
 
 function make_editor()
 {
+	var make_button = function(bloc) {
+		var format = bloc.id.substr((bloc.id.length - 1), 1);
+		
+		var conteneur = document.createElement('div');
+		conteneur.setAttribute('class', 'bottom');
+		
+		var button = document.createElement('input');
+		button.setAttribute('id', 'preview' + format);
+		button.setAttribute('type', 'button');
+		button.setAttribute('value', lang['preview']);
+		button.setAttribute('class', 'button');
+		conteneur.appendChild(button);
+		button.onclick = preview;
+		
+		conteneur.appendChild(document.createTextNode('\u00A0'));
+		
+		button = button.cloneNode(false);
+		button.setAttribute('id', 'addLinks' + format);
+		button.setAttribute('value', lang['addlink']);
+		conteneur.appendChild(button);
+		button.onclick = addLinks;
+		
+		bloc.appendChild(conteneur);
+	};
+	
 	var editForm = document.forms['send-form'];
 	var DOMRangeIE = (typeof(editForm.elements['subject'].selectionStart) == 'undefined'
 		&& typeof(editForm.elements['subject'].createTextRange) != 'undefined');
@@ -33,9 +58,9 @@ function make_editor()
 		if( DOMRangeIE ) {
 			var bloc_text = editForm.elements['body_text'];
 			
-			DOM_Events.addListener('click', storeCaret, false, bloc_text);
-			DOM_Events.addListener('select', storeCaret, false, bloc_text);
-			DOM_Events.addListener('keyup', storeCaret, false, bloc_text);
+			bloc_text.onclick  = storeCaret;
+			bloc_text.onselect = storeCaret;
+			bloc_text.onkeyup  = storeCaret;
 		}
 		
 		make_button(document.getElementById('textarea1'));
@@ -45,39 +70,13 @@ function make_editor()
 		if( DOMRangeIE ) {
 			var bloc_html = editForm.elements['body_html'];
 			
-			DOM_Events.addListener('click', storeCaret, false, bloc_html);
-			DOM_Events.addListener('select', storeCaret, false, bloc_html);
-			DOM_Events.addListener('keyup', storeCaret, false, bloc_html);
+			bloc_html.onclick  = storeCaret;
+			bloc_html.onselect = storeCaret;
+			bloc_html.onkeyup  = storeCaret;
 		}
 		
 		make_button(document.getElementById('textarea2'));
 	}
-}
-
-function make_button(bloc)
-{
-	var format = bloc.id.substr((bloc.id.length - 1), 1);
-	
-	var conteneur = document.createElement('div');
-	conteneur.setAttribute('class', 'bottom');
-	
-	var bouton = document.createElement('input');
-	bouton.setAttribute('id', 'preview' + format);
-	bouton.setAttribute('type', 'button');
-	bouton.setAttribute('value', lang['preview']);
-	bouton.setAttribute('class', 'button');
-	DOM_Events.addListener('click', preview, false, bouton);
-	conteneur.appendChild(bouton);
-	conteneur.appendChild(document.createTextNode('\u00A0'));
-	
-	bouton = bouton.cloneNode(false);
-	bouton.listeners = [];// sinon, bug de IE
-	bouton.setAttribute('id', 'addLinks' + format);
-	bouton.setAttribute('value', lang['addlink']);
-	DOM_Events.addListener('click', addLinks, false, bouton);
-	conteneur.appendChild(bouton);
-	
-	bloc.appendChild(conteneur);
 }
 
 /*
@@ -213,12 +212,11 @@ function storeCaret(evt)
 	}
 }
 
-if( supportDOM() ) {
-	var width  = (window.screen.width - 200);
-	var height = (window.screen.height - 200);
-	var top    = 50;
-	var left   = ((window.screen.width - width)/2);
-	
-	DOM_Events.addListener('load', make_editor, false, document);
-}
+var width  = (window.screen.width - 200);
+var height = (window.screen.height - 200);
+var top    = 50;
+var left   = ((window.screen.width - width)/2);
+
+// Need to work in IE < 9, so we don't use W3C DOM Events model here.
+window.onload = function() { make_editor(); };
 

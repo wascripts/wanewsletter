@@ -1,24 +1,23 @@
-<!--[if gte IE 9]><!-->
-<script type="text/javascript">
+<script>
 <!--
-DOM_Events.addListener('load', function() {
+document.addEventListener('DOMContentLoaded', function() {
 	document._glueBox_ = document.getElementById('glue').parentNode.parentNode;
+	var form = document.forms['export-form'];
 	
-	DOM_Events.addListener('change', function() {
+	form.elements['export-format-text'].addEventListener('change', function() {
 		if( this.checked == true ) {
 			document._glueBox_.style.display = 'table-row';
 		}
-	}, false, document.forms['export-form'].elements['export-format-text']);
+	}, false);
 	
-	DOM_Events.addListener('change', function() {
+	form.elements['export-format-xml'].addEventListener('change', function() {
 		if( this.checked == true ) {
 			document._glueBox_.style.display = 'none';
 		}
-	}, false, document.forms['export-form'].elements['export-format-xml']);
-}, false, document);
+	}, false);
+}, false);
 //-->
 </script>
-<!--<![endif]-->
 
 <form id="export-form" method="post" action="./tools.php?mode=export">
 <div class="smallbloc">

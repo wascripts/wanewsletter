@@ -51,7 +51,7 @@
 	<!--
 	var submitted = false;
 	
-	function check_form(evt)
+	function check_form()
 	{
 		var emailAddr   = document.forms['subscribe-form'].elements['email'].value;
 		var cancelEvent = null;
@@ -68,25 +68,14 @@
 			submitted = true;
 		}
 		
-		if( cancelEvent == true ) {
-			if( evt && typeof(evt.preventDefault) != 'undefined' ) { // standard
-				evt.preventDefault();
-			}
-			else { // MS
-				window.event.returnValue = false;
-			}
-		}
-	}
-	
-	window.onload = function() {
-		document.forms['subscribe-form'].onsubmit = check_form;
+		return !cancelEvent;
 	}
 	//-->
 	</script>
 </head>
 <body>
 
-<form id="subscribe-form" method="post" action="./subscribe.php">
+<form id="subscribe-form" method="post" action="./subscribe.php" onsubmit="return check_form();">
 <fieldset>
 	<legend lang="en">Mailing liste</legend>
 	

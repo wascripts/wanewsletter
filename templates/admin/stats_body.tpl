@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script>
 <!--
 var Stats = {
 	currentDate: null,
@@ -83,27 +83,26 @@ var Stats = {
 			1);
 		this.preloadAndSync();
 		
-		DOM_Events.addListener('submit', function(evt){
-			var form = document.forms['date-form'];
-			Stats.currentDate.setMonth(form.elements['month'].value);
-			Stats.currentDate.setFullYear(form.elements['year'].value);
+		document.forms['date-form'].addEventListener('submit', function(evt){
+			Stats.currentDate.setMonth(evt.currentTarget.elements['month'].value);
+			Stats.currentDate.setFullYear(evt.currentTarget.elements['year'].value);
 			Stats.getPrevPeriod();
 			
 			evt.preventDefault();
-		}, false, document.forms['date-form']);
+		}, false);
 		
-		DOM_Events.addListener('click', function(evt){
+		document.getElementById('prev-period').addEventListener('click', function(evt){
 			Stats.getPrevPeriod();
 			evt.preventDefault();
-		}, false, document.getElementById('prev-period'));
-		DOM_Events.addListener('click', function(evt){
+		}, false);
+		document.getElementById('next-period').addEventListener('click', function(evt){
 			Stats.getNextPeriod();
 			evt.preventDefault();
-		}, false, document.getElementById('next-period'));
+		}, false);
 	}
 };
 
-DOM_Events.addListener('load', function(){Stats.initialize();}, false, document);
+document.addEventListener('DOMContentLoaded', function(){Stats.initialize();}, false);
 //-->
 </script>
 

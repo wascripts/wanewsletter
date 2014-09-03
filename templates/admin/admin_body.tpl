@@ -60,22 +60,8 @@
 	<!-- BEGIN admin_options -->
 	<h2>{admin_options.L_TITLE_MANAGE}</h2>
 	
-	<script type="text/javascript">
+	<script>
 	<!--
- 	DOM_Events.addListener('load', function() {
- 		var rows = document.getElementById('admin_authlist').rows;
- 		
- 		for( var i = 1, m = rows.length; i < m; i++ ) {
- 			var switchLink = document.createElement('a');
- 			switchLink.appendChild(document.createTextNode('switch'));
- 			switchLink.setAttribute('href', './switch/selectbox');
- 			switchLink.style.cssFloat = 'right';
- 			DOM_Events.addListener('click', switch_selectbox, false, switchLink);
- 			
- 			rows[i].cells[0].appendChild(switchLink);
- 		}
-	}, false, document);
-	
 	function switch_selectbox(evt)
 	{
 		var node = evt.target.parentNode.parentNode;
@@ -89,6 +75,21 @@
 		
 		evt.preventDefault();
 	}
+	
+	document.addEventListener('DOMContentLoaded', function() {
+ 		var rows = document.getElementById('admin_authlist').rows;
+ 		var switchLink = null;
+ 		
+ 		for( var i = 1, m = rows.length; i < m; i++ ) {
+ 			switchLink = document.createElement('a');
+ 			switchLink.appendChild(document.createTextNode('switch'));
+ 			switchLink.setAttribute('href', '#switch/selectbox');
+ 			switchLink.style.cssFloat = 'right';
+ 			switchLink.addEventListener('click', switch_selectbox, false);
+ 			
+ 			rows[i].cells[0].appendChild(switchLink);
+ 		}
+	}, false);
 	//-->
 	</script>
 	

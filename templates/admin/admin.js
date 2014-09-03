@@ -29,7 +29,7 @@ function make_admin()
 	
 	if( smallbox )
 	{
-		DOM_Events.addListener('change', jump, false, smallbox.getElementsByTagName('select')[0]);
+		smallbox.getElementsByTagName('select')[0].addEventListener('change', jump, false);
 	}
 	
 	var aList = document.getElementsByTagName('a');
@@ -37,7 +37,7 @@ function make_admin()
 	{
 		if( aList[i].rel && aList[i].rel == 'show' )
 		{
-			DOM_Events.addListener('click', show, false, aList[i]);
+			aList[i].addEventListener('click', show, false);
 		}
 	}
 	
@@ -57,8 +57,8 @@ function make_admin()
 				var switchLink = document.createElement('a');
 				var texte = document.createTextNode('switch');
 				switchLink.appendChild(texte);
-				switchLink.setAttribute('href', './switch/checkbox');
-				DOM_Events.addListener('click', switch_checkbox, false, switchLink);
+				switchLink.setAttribute('href', '#switch/checkbox');
+				switchLink.addEventListener('click', switch_checkbox, false);
 				paragraphe.appendChild(switchLink);
 				paragraphe.setAttribute('class', 'm-texte');
 				
@@ -67,13 +67,16 @@ function make_admin()
 			}
 		}
 	}
+
+	window.checkboxStatus = false;
 }
 
 function jump(evt)
 {
 	var selectbox = evt.target;
 	
-	if( selectbox.options[selectbox.selectedIndex].value != 0 && selectbox.options[selectbox.selectedIndex].defaultSelected == false )
+	if( selectbox.options[selectbox.selectedIndex].value != 0
+		&& selectbox.options[selectbox.selectedIndex].defaultSelected == false )
 	{
 		selectbox.form.submit();
 	}
@@ -98,20 +101,20 @@ function switch_checkbox(evt)
 	
 	if( checkbox_ary != null )
 	{
+		window.checkboxStatus = !window.checkboxStatus;
+
 		if( checkbox_ary.length )
 		{
 			for( var i = 0, m = checkbox_ary.length; i < m; i++ )
 			{
-				checkbox_ary[i].checked = check;
+				checkbox_ary[i].checked = window.checkboxStatus;
 			}
 		}
 		else
 		{
-			checkbox_ary.checked = check;
+			checkbox_ary.checked = window.checkboxStatus;
 		}
-		
-		check = !check;
-		
+
 		evt.preventDefault();
 	}
 }
@@ -130,50 +133,32 @@ function show(evt)
 	}
 	
 	var sURL = evt.currentTarget.href + '&sessid=' + sessid;
-	
-	if( typeof(document.addEventListener) != 'undefined' ) {
-		
-		var imgBox = document.getElementById('image-box');
-		
-		if( imgBox == null )
-		{
-			imgBox = document.createElement('div');
-			imgBox.setAttribute('id', 'image-box');
-			document.body.appendChild(imgBox);
-		}
-		
-		imgBox.innerHTML = '<object type="'+evt.currentTarget.type+'"'
-			+ ' data="'+sURL+'"></object>';
-		imgBox.style.display = 'block';
-		
-		var clickListener = function(evt) {
-			if( evt.button == 0 ) {
-				imgBox.style.display = 'none';
-				DOM_Events.removeListener('click', clickListener, true, document);
-				evt.stopPropagation();
-				evt.preventDefault();
-			}
-		};
-		DOM_Events.addListener('click', clickListener, true, document);
-		
-		evt.stopPropagation();
-		evt.preventDefault();
+	var imgBox = document.getElementById('image-box');
+
+	if( imgBox == null )
+	{
+		imgBox = document.createElement('div');
+		imgBox.setAttribute('id', 'image-box');
+		document.body.appendChild(imgBox);
 	}
-	// IE <= 8 a des problèmes pour afficher un bloc en position absolue au dessus
-	// d'une iframe ou d'un objet. On garde le système à base de 'popup' pour cette brouette
-	else {
-		var w = window.open(sURL, 'showimage', 'directories=0,menuBar=0,status=0,'
-			+'location=0,scrollbars=0,resizable=yes,toolbar=0,width=500,height=300,left=20,top=20');
-		if( w ) {
-			w.focus();
+
+	imgBox.innerHTML = '<object type="'+evt.currentTarget.type+'"'
+		+ ' data="'+sURL+'"></object>';
+	imgBox.style.display = 'block';
+
+	var clickListener = function(evt) {
+		if( evt.button == 0 ) {
+			imgBox.style.display = 'none';
+			document.removeEventListener('click', clickListener, true);
+			evt.stopPropagation();
 			evt.preventDefault();
 		}
-	}
+	};
+	document.addEventListener('click', clickListener, true);
+
+	evt.stopPropagation();
+	evt.preventDefault();
 }
 
-if( supportDOM() )
-{
-	var check = true;
-	DOM_Events.addListener('load', make_admin, false, document);
-}
+document.addEventListener('DOMContentLoaded', make_admin, false);
 

@@ -138,12 +138,6 @@ function load_settings($admindata = array())
 		$template_path = WA_ROOTDIR . '/templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
 		
 		$output = new output($template_path);
-		$output->addScript(WA_ROOTDIR . '/templates/DOM-Compat/DOM-Compat.js');
-		
-		if( defined('IN_ADMIN') )
-		{
-			$output->addScript(WA_ROOTDIR . '/templates/admin/admin.js');
-		}
 	}
 	
 	if( !is_array($admindata) )

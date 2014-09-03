@@ -1,5 +1,4 @@
-<!--[if gte IE 9]><!-->
-<script type="text/javascript">
+<script>
 <!--
 var use_ftp_status  = {USE_FTP_STATUS};
 var use_smtp_status = {USE_SMTP_STATUS};
@@ -20,31 +19,30 @@ function display_block(evt)
 
 if( typeof(document.styleSheets) != 'undefined' ) {
 	
-	if( use_ftp_status == false ) {
-		document.styleSheets[0].insertRule(
-			'table.content tr#use_ftp_choice ~ tr { display: none; }',
-			document.styleSheets[0].cssRules.length-1
-		);
-	}
-	
-	if( use_smtp_status == false ) {
-		document.styleSheets[0].insertRule(
-			'table.content tr#use_smtp_choice ~ tr { display: none; }',
-			document.styleSheets[0].cssRules.length-1
-		);
-	}
-	
-	DOM_Events.addListener('load', function() {
-		DOM_Events.addListener('change', display_block, false, document.forms[0].elements['use_ftp'][0]);
-		DOM_Events.addListener('change', display_block, false, document.forms[0].elements['use_ftp'][1]);
+	document.addEventListener('DOMContentLoaded', function() {
+		if( use_ftp_status == false ) {
+			document.styleSheets[0].insertRule(
+				'table.content tr#use_ftp_choice ~ tr { display: none; }',
+				document.styleSheets[0].cssRules.length-1
+			);
+		}
 		
-		DOM_Events.addListener('change', display_block, false, document.forms[0].elements['use_smtp'][0]);
-		DOM_Events.addListener('change', display_block, false, document.forms[0].elements['use_smtp'][1]);
-	}, false, document);
+		if( use_smtp_status == false ) {
+			document.styleSheets[0].insertRule(
+				'table.content tr#use_smtp_choice ~ tr { display: none; }',
+				document.styleSheets[0].cssRules.length-1
+			);
+		}
+		
+		document.forms[0].elements['use_ftp'][0].addEventListener('change', display_block, false);
+		document.forms[0].elements['use_ftp'][1].addEventListener('change', display_block, false);
+		
+		document.forms[0].elements['use_smtp'][0].addEventListener('change', display_block, false);
+		document.forms[0].elements['use_smtp'][1].addEventListener('change', display_block, false);
+	}, false);
 }
 //-->
 </script>
-<!--<![endif]-->
 
 <p id="explain">{L_EXPLAIN}</p>
 
