@@ -195,35 +195,35 @@ class output extends Template {
 		
 		if( defined('IN_ADMIN') )
 		{
-			$this->addLink('top index', './index.php',              $lang['Title']['accueil']);
-			$this->addLink('chapter', './config.php',               $lang['Module']['config']);
-			$this->addLink('chapter', './envoi.php',                $lang['Title']['send']);
-			$this->addLink('chapter', './view.php?mode=abonnes',    $lang['Module']['subscribers']);
-			$this->addLink('chapter', './view.php?mode=liste',      $lang['Module']['list']);
-			$this->addLink('chapter', './view.php?mode=log',        $lang['Module']['log']);
-			$this->addLink('chapter', './tools.php?mode=export',    $lang['Title']['export']);
-			$this->addLink('chapter', './tools.php?mode=import',    $lang['Title']['import']);
-			$this->addLink('chapter', './tools.php?mode=ban',       $lang['Title']['ban']);
-			$this->addLink('chapter', './tools.php?mode=generator', $lang['Title']['generator']);
+			$this->addLink('home', './',              				$lang['Title']['accueil']);
+			$this->addLink('section', './config.php',               $lang['Module']['config']);
+			$this->addLink('section', './envoi.php',                $lang['Title']['send']);
+			$this->addLink('section', './view.php?mode=abonnes',    $lang['Module']['subscribers']);
+			$this->addLink('section', './view.php?mode=liste',      $lang['Module']['list']);
+			$this->addLink('section', './view.php?mode=log',        $lang['Module']['log']);
+			$this->addLink('section', './tools.php?mode=export',    $lang['Title']['export']);
+			$this->addLink('section', './tools.php?mode=import',    $lang['Title']['import']);
+			$this->addLink('section', './tools.php?mode=ban',       $lang['Title']['ban']);
+			$this->addLink('section', './tools.php?mode=generator', $lang['Title']['generator']);
 			
 			if( isset($admindata['admin_level']) && $admindata['admin_level'] == ADMIN )
 			{
-				$this->addLink('chapter', './tools.php?mode=attach' , $lang['Title']['attach']);
-				$this->addLink('chapter', './tools.php?mode=backup' , $lang['Title']['backup']);
-				$this->addLink('chapter', './tools.php?mode=restore', $lang['Title']['restore']);
+				$this->addLink('section', './tools.php?mode=attach' , $lang['Title']['attach']);
+				$this->addLink('section', './tools.php?mode=backup' , $lang['Title']['backup']);
+				$this->addLink('section', './tools.php?mode=restore', $lang['Title']['restore']);
 			}
 			
-			$this->addLink('chapter',   './admin.php', $lang['Module']['users']);
-			$this->addLink('chapter',   './stats.php', $lang['Title']['stats']);
+			$this->addLink('section',   './admin.php', $lang['Module']['users']);
+			$this->addLink('section',   './stats.php', $lang['Title']['stats']);
 			$this->addLink('help',      WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
 			$this->addLink('author',    WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
-			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Copyleft');
+			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
 			
 			$page_title = sprintf($lang['General_title'], wan_htmlspecialchars($nl_config['sitename']));
 		}
 		else
 		{
-			$this->addLink('top index', './profil_cp.php',                  $lang['Title']['accueil']);
+			$this->addLink('home', 		'./profil_cp.php',                  $lang['Title']['accueil']);
 			$this->addLink('section',   './profil_cp.php?mode=editprofile', $lang['Module']['editprofile']);
 			$this->addLink('section',   './profil_cp.php?mode=archives',    $lang['Module']['log']);
 			$this->addLink('section',   './profil_cp.php?mode=logout',      $lang['Module']['logout']);

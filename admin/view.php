@@ -897,12 +897,6 @@ else if( $mode == 'abonnes' )
 		if( $page_id > 1 )
 		{
 			$output->addLink(
-				'first',
-				'./view.php?mode=abonnes' . $get_string . '&amp;page=1',
-				$lang['First_page']
-			);
-			
-			$output->addLink(
 				'prev',
 				'./view.php?mode=abonnes' . $get_string . '&amp;page=' . ($page_id - 1),
 				$lang['Prev_page']
@@ -915,12 +909,6 @@ else if( $mode == 'abonnes' )
 				'next',
 				'./view.php?mode=abonnes' . $get_string . '&amp;page=' . ($page_id + 1),
 				$lang['Next_page']
-			);
-			
-			$output->addLink(
-				'last',
-				'./view.php?mode=abonnes' . $get_string . '&amp;page=' . $total_pages,
-				$lang['Last_page']
 			);
 		}
 	}
@@ -1943,12 +1931,6 @@ else if( $mode == 'log' )
 		if( $page_id > 1 )
 		{
 			$output->addLink(
-				'first',
-				'./view.php?mode=log' . $get_string . '&amp;page=1',
-				$lang['First_page']
-			);
-			
-			$output->addLink(
 				'prev',
 				'./view.php?mode=log' . $get_string . '&amp;page=' . ($page_id - 1),
 				$lang['Prev_page']
@@ -1961,12 +1943,6 @@ else if( $mode == 'log' )
 				'next',
 				'./view.php?mode=log' . $get_string . '&amp;page=' . ($page_id + 1),
 				$lang['Next_page']
-			);
-			
-			$output->addLink(
-				'last',
-				'./view.php?mode=log' . $get_string . '&amp;page=' . $total_pages,
-				$lang['Last_page']
 			);
 		}
 		

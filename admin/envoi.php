@@ -1110,8 +1110,8 @@ $subject   = wan_htmlspecialchars($logdata['log_subject']);
 $body_text = wan_htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
 $body_html = wan_htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
 
-$output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
-$output->addLink('section', './envoi.php?mode=progress', $lang['List_send']);
+$output->addLink('subsection', './envoi.php?mode=load', $lang['Load_log']);
+$output->addLink('subsection', './envoi.php?mode=progress', $lang['List_send']);
 $output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);

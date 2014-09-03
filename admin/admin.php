@@ -491,7 +491,7 @@ $output->addHiddenField('sessid',   $session->session_id);
 
 if( $admindata['admin_level'] == ADMIN )
 {
-	$output->addLink('section', './admin.php?mode=adduser', $lang['Add_user']);
+	$output->addLink('subsection', './admin.php?mode=adduser', $lang['Add_user']);
 }
 
 $output->page_header();
