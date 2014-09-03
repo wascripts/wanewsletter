@@ -5,7 +5,7 @@
 	<table class="content">
 		<tr>
 			<td class="row1"><label for="login">{L_LOGIN}&nbsp;:</label></td>
-			<td class="row1"><input type="text" id="login" name="login" maxlength="30" size="25" class="text" /></td>
+			<td class="row1"><input type="text" id="login" name="login" maxlength="30" size="25" class="text" autofocus /></td>
 		</tr>
 		<tr>
 			<td class="row1"><label for="passwd">{L_PASS}&nbsp;:</label></td>

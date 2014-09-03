@@ -29,17 +29,6 @@
 	<link rel="stylesheet" href="../templates/wanewsletter.css" />
 	
 	{S_NAV_LINKS}
-	
-	<script>
-	<!--
-	window.onload = function() {
-		if( typeof(document.forms['login-form']) != 'undefined' )
-		{
-			document.forms['login-form'].elements['login'].focus();
-		}
-	};
-	//-->
-	</script>
 
 </head>
 <body id="simple">
