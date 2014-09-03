@@ -24,7 +24,7 @@
 	<title>{PAGE_TITLE}</title>
 	
 	<style>
-	body { font: .8em "Bitstream Vera Sans", Verdana, Arial, sans-serif; }
+	body { font: .8em "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif; }
 	
 	form#subscribe-form { width: 60%; margin: 30px auto 15px; }
 	form#subscribe-form fieldset	   { border: 1px dashed #79C; padding: 10px; }
