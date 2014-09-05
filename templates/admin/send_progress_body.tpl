@@ -4,10 +4,10 @@
 	<li><a href="./envoi.php?mode=load">{L_LOAD_LOG}</a></li>
 </ul>
 
-<div class="bloc">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
-	<table class="content">
+	<table class="listing">
 		<tr>
 			<th>{L_SUBJECT}</th>
 			<th>{L_DONE}</th>
@@ -15,10 +15,10 @@
 		</tr>
 		<!-- BEGIN logrow -->
 		<tr>
-			<td class="row1">{logrow.LOG_SUBJECT}</td>
-			<td class="row1" align="right">{logrow.SEND_PERCENT}&nbsp;%</td>
-			<td class="row1" nowrap><a href="./envoi.php?mode=progress&amp;id={logrow.LOG_ID}">{L_DO_SEND}</a></td>
-			<td class="row1" nowrap><a href="./envoi.php?mode=cancel&amp;id={logrow.LOG_ID}">{L_CANCEL_SEND}</a></td>
+			<td>{logrow.LOG_SUBJECT}</td>
+			<td align="right">{logrow.SEND_PERCENT}&nbsp;%</td>
+			<td nowrap><a href="./envoi.php?mode=progress&amp;id={logrow.LOG_ID}">{L_DO_SEND}</a></td>
+			<td nowrap><a href="./envoi.php?mode=cancel&amp;id={logrow.LOG_ID}">{L_CANCEL_SEND}</a></td>
 		</tr>
 		<!-- END logrow -->
 	</table>

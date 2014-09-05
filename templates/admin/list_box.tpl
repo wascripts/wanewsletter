@@ -2,6 +2,6 @@
 <div>
 	<label for="liste" accesskey="l">{L_VIEW_LIST}&nbsp;:</label>
 	{S_LISTBOX} {S_HIDDEN_FIELDS}
-	<input type="submit" value="{L_BUTTON_GO}" class="button" />
+	<button type="submit">{L_BUTTON_GO}</button>
 </div>
 </form>

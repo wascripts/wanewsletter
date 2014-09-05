@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script>
 <!--
 var lang = [];
 lang["preview"] = '{L_PREVIEW_BUTTON}';
@@ -14,19 +14,19 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 	<li><a href="./envoi.php?mode=progress">{L_LIST_SEND}</a></li>
 </ul>
 
-<div class="bloc">
-	<table class="content">
+<div class="block">
+	<table class="dataset compact">
 		<tr>
-			<td class="medrow1">{L_DEST}&nbsp;:</td>
-			<td class="row2"><b>{S_DEST}</b></td>
+			<td>{L_DEST}&nbsp;:</td>
+			<td><strong>{S_DEST}</strong></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="subject">{L_SUBJECT}&nbsp;:</label></td>
-			<td class="row2"><input type="text" id="subject" name="subject" value="{S_SUBJECT}" size="40" maxlength="100" class="text" /></td>
+			<td><label for="subject">{L_SUBJECT}&nbsp;:</label></td>
+			<td><input type="text" id="subject" name="subject" value="{S_SUBJECT}" size="40" maxlength="100" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="log_status">{L_STATUS}&nbsp;:</label></td>
-			<td class="row2">
+			<td><label for="log_status">{L_STATUS}&nbsp;:</label></td>
+			<td>
 				<select id="log_status" name="log_status">
 					<option value="0"{SELECTED_STATUS_WRITING}>{L_STATUS_WRITING}</option>
 					<option value="3"{SELECTED_STATUS_MODEL}>{L_STATUS_MODEL}</option>
@@ -34,94 +34,85 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 			</td>
 		</tr>
 		<tr title="{L_CC_ADMIN_TITLE}">
-			<td class="medrow1"><label>{L_CC_ADMIN}&nbsp;:</label></td>
-			<td class="row2">
+			<td><label>{L_CC_ADMIN}&nbsp;:</label></td>
+			<td>
 				<input type="radio" id="cc_admin_yes" name="cc_admin" value="1" {CHECKED_CC_ADMIN_ON}/>
-				<label for="cc_admin_yes" class="m-texte">{L_YES}</label>
+				<label for="cc_admin_yes" class="notice">{L_YES}</label>
 				<input type="radio" id="cc_admin_no" name="cc_admin" value="0" {CHECKED_CC_ADMIN_OFF}/>
-				<label for="cc_admin_no" class="m-texte">{L_NO}</label>
+				<label for="cc_admin_no" class="notice">{L_NO}</label>
 			</td>
 		</tr>
-		<!-- BEGIN test_send -->
-		<tr>
-			<td colspan="2" class="explain">{test_send.L_TEST_SEND_NOTE}</td>
-		</tr>
-		<tr>
-			<td class="medrow1"><label for="test_address">{test_send.L_TEST_SEND}&nbsp;:</label></td>
-			<td class="row2">
-				<input type="text" id="test_address" name="test_address" size="40" class="text" />
-				<input type="submit" name="test" value="{test_send.L_SEND_BUTTON}" class="button" />
-			</td>
-		</tr>
-		<!-- END test_send -->
 	</table>
+	
+	<!-- BEGIN test_send -->
+	<div class="explain">{test_send.L_TEST_SEND_NOTE}</div>
+	
+	<table class="dataset compact">
+		<tr>
+			<td><label for="test_address">{test_send.L_TEST_SEND}&nbsp;:</label></td>
+			<td>
+				<input type="text" id="test_address" name="test_address" size="40" />
+				<button type="submit" name="test">{test_send.L_SEND_BUTTON}</button>
+			</td>
+		</tr>
+	</table>
+	<!-- END test_send -->
 </div>
 <!-- BEGIN last_modified -->
-<div id="nav-bottom" class="last-modified m-texte">{last_modified.S_LAST_MODIFIED}</div>
+<div id="aside-bottom" class="aside last-modified notice">{last_modified.S_LAST_MODIFIED}</div>
 <!-- END last_modified -->
 
 <!-- BEGIN nl_text_textarea -->
-<div class="bloc" id="textarea1">
+<div class="block" id="textarea1">
 	<h2>{nl_text_textarea.L_TITLE}</h2>
 	
-	<table class="content">
-		<tr>
-			<td class="explain">{nl_text_textarea.L_EXPLAIN}</td>
-		</tr>
-		<tr>
-			<td class="row-full">
-				<textarea name="body_text" cols="90" rows="20" class="text">{nl_text_textarea.S_BODY}</textarea>
-			</td>
-		</tr>
-	</table>
+	<div class="explain">{nl_text_textarea.L_EXPLAIN}</div>
+	
+	<div class="textinput">
+		<textarea name="body_text" cols="90" rows="20">{nl_text_textarea.S_BODY}</textarea>
+	</div>
 </div>
 <!-- END nl_text_textarea -->
 
 <!-- BEGIN nl_html_textarea -->
-<div class="bloc" id="textarea2">
+<div class="block" id="textarea2">
 	<h2>{nl_html_textarea.L_TITLE}</h2>
 	
-	<table class="content">
-		<tr>
-			<td class="explain">{nl_html_textarea.L_EXPLAIN}</td>
-		</tr>
-		<tr>
-			<td class="row-full">
-				<textarea name="body_html" cols="90" rows="20" class="text">{nl_html_textarea.S_BODY}</textarea>
-			</td>
-		</tr>
-	</table>
+	<div class="explain">{nl_html_textarea.L_EXPLAIN}</div>
+	
+	<div class="textinput">
+		<textarea name="body_html" cols="90" rows="20">{nl_html_textarea.S_BODY}</textarea>
+	</div>
 </div>
 <!-- END nl_html_textarea -->
 
 <!-- BEGIN joined_files -->
-<div class="bloc">
+<div class="block">
 	<h2>{joined_files.L_TITLE_ADD_FILE}</h2>
 	
-	<table class="content">
+	<div class="explain">{joined_files.L_EXPLAIN_ADD_FILE}</div>
+	
+	<table class="dataset compact">
 		<tr>
-			<td class="explain" colspan="2">{joined_files.L_EXPLAIN_ADD_FILE}</td>
-		</tr>
-		<tr>
-			<td rowspan="{joined_files.S_ROWSPAN}" class="medrow1"><label for="join_file">{joined_files.L_ADD_FILE}&nbsp;:</label></td>
-			<td class="row2"><input type="text" id="join_file" name="join_file" size="30" class="text" /></td>
+			<td rowspan="{joined_files.S_ROWSPAN}"><label for="join_file">{joined_files.L_ADD_FILE}&nbsp;:</label></td>
+			<td><input type="text" id="join_file" name="join_file" size="40" /></td>
 		</tr>
 		<!-- BEGIN upload_input -->
 		<tr>
-			<td class="row2">
+			<td>
 				<input type="hidden" name="MAX_FILE_SIZE" value="{joined_files.upload_input.MAX_FILE_SIZE}" />
 				<input type="file" name="join_file" size="30" />
-				<span class="m-texte">({joined_files.upload_input.L_MAXIMUM_SIZE})</span>
+				<span class="notice">({joined_files.upload_input.L_MAXIMUM_SIZE})</span>
 			</td>
 		</tr>
 		<!-- END upload_input -->
 		<!-- BEGIN select_box -->
 		<tr>
-			<td class="row2">{joined_files.select_box.SELECT_BOX}</td>
+			<td>{joined_files.select_box.SELECT_BOX}</td>
 		</tr>
 		<!-- END select_box -->
 		<tr>
-			<td class="row2"><input type="submit" name="attach" value="{joined_files.L_ADD_FILE_BUTTON}" class="button" /></td>
+			<td><button type="submit" name="attach">{joined_files.L_ADD_FILE_BUTTON}</button></td>
 		</tr>
 	</table>
 	
@@ -133,18 +124,18 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 </div>
 
 <!-- BEGIN files_box -->
-<div id="nav-bottom">
-	<div class="left">&nbsp;</div>
-	<div class="right"><input type="submit" name="unattach" value="{joined_files.files_box.L_DEL_FILE_BUTTON}" class="button" /></div>
+<div id="aside-bottom" class="aside">
+	<div>&nbsp;</div>
+	<div><button type="submit" name="unattach">{joined_files.files_box.L_DEL_FILE_BUTTON}</button></div>
 </div>
 <!-- END files_box -->
 <!-- END joined_files -->
 
-<div class="bloc">
+<div class="block">
 	<div class="bottom">{S_HIDDEN_FIELDS}
-		<input type="submit" name="send" value="{L_SEND_BUTTON}" class="button" /> 
-		<input type="submit" name="save" value="{L_SAVE_BUTTON}" class="pbutton" tabindex="1" /> 
-		<input type="submit" name="delete" value="{L_DELETE_BUTTON}" class="button" {S_DELETE_BUTTON_DISABLED} />
+		<button type="submit" name="send">{L_SEND_BUTTON}</button>
+		<button type="submit" name="save" class="primary" tabindex="1">{L_SAVE_BUTTON}</button>
+		<button type="submit" name="delete" {S_DELETE_BUTTON_DISABLED}>{L_DELETE_BUTTON}</button>
 	</div>
 </div>
 </form>

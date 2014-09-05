@@ -107,19 +107,15 @@ document.addEventListener('DOMContentLoaded', function(){Stats.initialize();}, f
 </script>
 
 <form id="date-form" method="get" action="./stats.php">
-<div class="bloc">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
-	<table class="content">
-		<tr>
-			<td class="explain">{L_EXPLAIN_STATS}</td>
-		</tr>
-	</table>
+	<div class="explain">{L_EXPLAIN_STATS}</div>
 	
 	<div class="bottom">
 		<select name="year">{YEAR_LIST}</select>
 		<select name="month">{MONTH_LIST}</select>
-		{S_HIDDEN_FIELDS} <input type="submit" value="{L_GO_BUTTON}" class="pbutton" />
+		{S_HIDDEN_FIELDS} <button type="submit" class="primary">{L_GO_BUTTON}</button>
 	</div>
 </div>
 </form>

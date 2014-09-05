@@ -1,30 +1,18 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<div class="bloc">
+<div class="block">
 	<h2>{TITLE_HOME}</h2>
 	
-	<table class="content">
-		<tr>
-			<td class="row1">{REGISTERED_SUBSCRIBERS}</td>
-		</tr>
-		<tr>
-			<td class="row1">{TEMP_SUBSCRIBERS}</td>
-		</tr>
-		<tr>
-			<td class="row1">{NEWSLETTERS_SENDED}</td>
-		</tr>
+	<ul id="home">
+		<li>{REGISTERED_SUBSCRIBERS}</li>
+		<li>{TEMP_SUBSCRIBERS}</li>
+		<li>{NEWSLETTERS_SENDED}</li>
 		<!-- BEGIN switch_last_newsletter -->
-		<tr>
-			<td class="row1">{switch_last_newsletter.DATE_LAST_NEWSLETTER}</td>
-		</tr>
+		<li>{switch_last_newsletter.DATE_LAST_NEWSLETTER}</li>
 		<!-- END switch_last_newsletter -->
-		<tr>
-			<td class="row1">{L_DBSIZE}&nbsp;: <b>{DBSIZE}</b></td>
-		</tr>
-		<tr>
-			<td class="row1">{L_FILESIZE}&nbsp;: <b>{FILESIZE}</b></td>
-		</tr>
-	</table>
+		<li>{L_DBSIZE}&nbsp;: <b>{DBSIZE}</b></li>
+		<li>{L_FILESIZE}&nbsp;: <b>{FILESIZE}</b></li>
+	</ul>
 </div>
 
 {LISTBOX}

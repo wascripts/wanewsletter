@@ -43,36 +43,36 @@
 <div id="global">
 	
 	<!-- BEGIN upgrade -->
-	<div class="bloc"><p>{upgrade.L_EXPLAIN}</p></div>
+	<div class="block"><p>{upgrade.L_EXPLAIN}</p></div>
 	
-	<div class="bloc">
+	<div class="block">
 	<h2>{PAGE_TITLE}</h2>
 	
-	<table class="content">
+	<table class="dataset compact">
 		<tr>
-			<td class="medrow1"><label for="admin_login">{upgrade.L_LOGIN}&nbsp;:</label></td>
-			<td class="medrow2"><input type="text" id="admin_login" name="admin_login" value="{upgrade.LOGIN}" maxlength="30" size="30" class="text" /></td>
+			<td><label for="admin_login">{upgrade.L_LOGIN}&nbsp;:</label></td>
+			<td><input type="text" id="admin_login" name="admin_login" value="{upgrade.LOGIN}" maxlength="30" size="30" /></td>
 		</tr>
 		<tr>
-			<td class="medrow1"><label for="admin_pass">{upgrade.L_PASS}&nbsp;:</label></td>
-			<td class="medrow2"><input type="password" id="admin_pass" name="admin_pass" maxlength="30" size="30" class="text" /></td>
+			<td><label for="admin_pass">{upgrade.L_PASS}&nbsp;:</label></td>
+			<td><input type="password" id="admin_pass" name="admin_pass" maxlength="30" size="30" /></td>
 		</tr>
 	</table>
 	
 	<div class="bottom">
-		<input type="submit" name="start" value="{upgrade.L_START_BUTTON}" class="pbutton" />
+		<button type="submit" name="start" class="primary">{upgrade.L_START_BUTTON}</button>
 	</div>
 	</div>
 	<!-- END upgrade -->
 	
 	<!-- BEGIN download_file -->
-	<div class="bloc">
+	<div class="block">
 	<h2>{download_file.L_TITLE}</h2>
 	
 	<p>{download_file.MSG_RESULT}</p>
 	
 	<div class="bottom">{download_file.S_HIDDEN_FIELDS}
-		<input type="submit" name="sendfile" value="{download_file.L_DL_BUTTON}" class="pbutton" />
+		<button type="submit" name="sendfile" class="primary">{download_file.L_DL_BUTTON}</button>
 	</div>
 	</div>
 	<!-- END download_file -->

@@ -1,16 +1,16 @@
 <form method="post" action="{U_FORM}">
-<div class="bloc">
+<div class="block compact">
 	<h2>{L_TITLE}</h2>
 	
-	<table class="content">
+	<table class="dataset">
 		<tr>
-			<td class="row1"><label for="liste">{L_SELECT_LISTE}&nbsp;:</label></td>
-			<td class="row2">{LISTE_BOX}</td>
+			<td><label for="liste">{L_SELECT_LISTE}&nbsp;:</label></td>
+			<td>{LISTE_BOX}</td>
 		</tr>
 	</table>
 	
 	<div class="bottom">{S_HIDDEN_FIELDS}
-		<input type="submit" value="{L_VALID_BUTTON}" class="pbutton" />
+		<button type="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>
 </form>	 

@@ -997,7 +997,6 @@ else if( $mode == 'abonnes' )
 		for( $i = 0; $i < $num_abo; $i++ )
 		{
 			$output->assign_block_vars('aborow', array(
-				'TD_CLASS'          => ( !($i % 2) ) ? 'row1' : 'row2',
 				'ABO_EMAIL'         => $aborow[$i]['abo_email'],
 				'ABO_REGISTER_DATE' => convert_time($nl_config['date_format'], $aborow[$i]['register_date']),
 				'U_VIEW'            => sessid('./view.php?mode=abonnes&amp;action=view&amp;id=' . $aborow[$i]['abo_id'] . $get_string . $get_page)
@@ -2040,7 +2039,6 @@ else if( $mode == 'log' )
 			}
 			
 			$output->assign_block_vars('logrow', array(
-				'TD_CLASS'    => ( !($i % 2) ) ? 'row1' : 'row2',
 				'ITEM_CLIP'   => $s_clip,
 				'LOG_SUBJECT' => wan_htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
 				'LOG_DATE'    => convert_time($nl_config['date_format'], $logrow[$i]['log_date']),

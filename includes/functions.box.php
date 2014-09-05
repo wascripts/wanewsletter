@@ -65,7 +65,7 @@ function lang_box($default_lang = '')
 	}
 	else
 	{
-		$lang_box = '<span class="m-texte">' . $lang_ary[0]
+		$lang_box = '<span class="notice">' . $lang_ary[0]
 			. '<input type="hidden" id="language" name="language" value="' . $lang_ary[0] . '" />';
 	}
 	

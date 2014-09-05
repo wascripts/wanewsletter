@@ -1,25 +1,25 @@
 <form method="post" action="./profil_cp.php">
 <ul class="links special">
-	<li> <a href="profil_cp.php?mode=sendkey">{L_SENDKEY}</a> </li>
+	<li><a href="profil_cp.php?mode=sendkey">{L_SENDKEY}</a></li>
 </ul>
 
-<div class="smallbloc">
+<div class="block compact">
 	<h2>{TITLE}</h2>
 	
-	<table class="content">
+	<table class="dataset">
 		<tr>
-			<td class="row1"> <label for="email">{L_LOGIN}&nbsp;:</label> </td>
-			<td class="row1"> <input type="text" id="email" name="email" value="{S_LOGIN}" maxlength="250" size="30" class="text" autofocus /> </td>
+			<td><label for="email">{L_LOGIN}&nbsp;:</label></td>
+			<td><input type="text" id="email" name="email" value="{S_LOGIN}" maxlength="250" size="30" autofocus /></td>
 		</tr>
 		<tr>
-			<td class="row1"> <label for="passwd">{L_PASS}&nbsp;:</label> </td>
-			<td class="row1"> <input type="password" id="passwd" name="passwd" maxlength="32" size="30" class="text" /> </td>
+			<td><label for="passwd">{L_PASS}&nbsp;:</label></td>
+			<td><input type="password" id="passwd" name="passwd" maxlength="32" size="30" /></td>
 		</tr>
 	</table>
 	
 	<div class="bottom">
 		<input type="hidden" name="mode" value="login" />
-		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
+		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>
 </form>

@@ -15,77 +15,77 @@
 </ul>
 <!-- END admin_options -->
 
-<div class="bloc">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
-	<table width="100%" cellspacing="1" cellpadding="3" align="center" class="content">
+	<table class="dataset">
 		<tr>
-			<td class="row1">{L_LISTE_ID}&nbsp;:</td>
-			<td class="row2">{LISTE_ID}</td>
+			<td>{L_LISTE_ID}&nbsp;:</td>
+			<td>{LISTE_ID}</td>
 		</tr>
 		<tr>
-			<td class="row1">{L_LISTE_NAME}&nbsp;:</td>
-			<td class="row2">{LISTE_NAME}</td>
+			<td>{L_LISTE_NAME}&nbsp;:</td>
+			<td>{LISTE_NAME}</td>
 		</tr>
 		<tr>
-			<td class="row1">{L_LISTE_PUBLIC}&nbsp;:</td>
-			<td class="row2">{LISTE_PUBLIC}</td>
+			<td>{L_LISTE_PUBLIC}&nbsp;:</td>
+			<td>{LISTE_PUBLIC}</td>
 		</tr>
 		<tr>
-			<td class="row1">{L_AUTH_FORMAT}&nbsp;:</td>
-			<td class="row2">{AUTH_FORMAT}</td>
+			<td>{L_AUTH_FORMAT}&nbsp;:</td>
+			<td>{AUTH_FORMAT}</td>
 		</tr>
 		<tr>
-			<td class="row1">{L_SENDER_EMAIL}&nbsp;:</td>
-			<td class="row2">{SENDER_EMAIL}</td>
+			<td>{L_SENDER_EMAIL}&nbsp;:</td>
+			<td>{SENDER_EMAIL}</td>
 		</tr>
 		<tr>
-			<td class="row1">{L_RETURN_EMAIL}&nbsp;:</td>
-			<td class="row2">{RETURN_EMAIL}</td>
+			<td>{L_RETURN_EMAIL}&nbsp;:</td>
+			<td>{RETURN_EMAIL}</td>
 		</tr>
 		<tr>
-			<td class="row1">{L_CONFIRM_SUBSCRIBE}&nbsp;:</td>
-			<td class="row2">{CONFIRM_SUBSCRIBE}</td>
-		</tr>
-		<!-- BEGIN liste_confirm -->
-		<tr>
-			<td class="row1">{liste_confirm.L_LIMITEVALIDATE}&nbsp;:</td>
-			<td class="row2">{liste_confirm.LIMITEVALIDATE}&nbsp;{liste_confirm.L_DAYS}</td>
-		</tr>
-		<!-- END liste_confirm -->
-		<tr>
-			<td class="row1">{L_NUM_SUBSCRIBERS}&nbsp;:</td>
-			<td class="row2">{NUM_SUBSCRIBERS}</td>
+			<td>{L_CONFIRM_SUBSCRIBE}&nbsp;:</td>
+			<td>{CONFIRM_SUBSCRIBE}</td>
 		</tr>
 		<!-- BEGIN liste_confirm -->
 		<tr>
-			<td class="row1">{liste_confirm.L_NUM_TEMP}&nbsp;:</td>
-			<td class="row2">{liste_confirm.NUM_TEMP}</td>
+			<td>{liste_confirm.L_LIMITEVALIDATE}&nbsp;:</td>
+			<td>{liste_confirm.LIMITEVALIDATE}&nbsp;{liste_confirm.L_DAYS}</td>
 		</tr>
 		<!-- END liste_confirm -->
 		<tr>
-			<td class="row1">{L_NUM_LOGS}&nbsp;:</td>
-			<td class="row2">{NUM_LOGS}</td>
+			<td>{L_NUM_SUBSCRIBERS}&nbsp;:</td>
+			<td>{NUM_SUBSCRIBERS}</td>
+		</tr>
+		<!-- BEGIN liste_confirm -->
+		<tr>
+			<td>{liste_confirm.L_NUM_TEMP}&nbsp;:</td>
+			<td>{liste_confirm.NUM_TEMP}</td>
+		</tr>
+		<!-- END liste_confirm -->
+		<tr>
+			<td>{L_NUM_LOGS}&nbsp;:</td>
+			<td>{NUM_LOGS}</td>
 		</tr>
 		<!-- BEGIN date_last_log -->
 		<tr>
-			<td class="row1">{date_last_log.L_LAST_LOG}&nbsp;:</td>
-			<td class="row2">{date_last_log.LAST_LOG}</td>
+			<td>{date_last_log.L_LAST_LOG}&nbsp;:</td>
+			<td>{date_last_log.LAST_LOG}</td>
 		</tr>
 		<!-- END date_last_log -->
 		<tr>
-			<td class="row1">{L_FORM_URL}&nbsp;:</td>
-			<td class="row2">{FORM_URL}</td>
+			<td>{L_FORM_URL}&nbsp;:</td>
+			<td>{FORM_URL}</td>
 		</tr>
 		<tr>
-			<td class="row1">{L_STARTDATE}&nbsp;:</td>
-			<td class="row2">{STARTDATE}</td>
+			<td>{L_STARTDATE}&nbsp;:</td>
+			<td>{STARTDATE}</td>
 		</tr>
 	</table>
 	
 	<!-- BEGIN purge_option -->
 	<div class="bottom">{purge_option.S_HIDDEN_FIELDS}
-		<input type="submit" name="purge" value="{purge_option.L_PURGE_BUTTON}" class="pbutton" />
+		<button type="submit" name="purge" class="primary">{purge_option.L_PURGE_BUTTON}</button>
 	</div>
 	<!-- END purge_option -->
 </div>

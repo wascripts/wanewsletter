@@ -1,46 +1,46 @@
 <p id="explain">{L_EXPLAIN}</p>
 
 <form id="abo" method="post" action="{U_FORM}">
-<div class="bloc">
-	<table class="content">
+<div class="block">
+	<table class="dataset">
 		<tr>
-			<td rowspan="2" class="row1">
+			<td rowspan="2">
 				<label for="keyword">{L_SEARCH}&nbsp;: </label><br />
-				<span class="m-texte">{L_SEARCH_NOTE}</span>
+				<span class="notice">{L_SEARCH_NOTE}</span>
 			</td>
-			<td class="row2">
-				<input type="text" id="keyword" name="keyword" value="{KEYWORD}" size="35" maxlength="60" class="text" />
-				<input type="submit" name="search" value="{L_SEARCH_BUTTON}" class="pbutton" />
+			<td>
+				<input type="text" id="keyword" name="keyword" value="{KEYWORD}" size="35" maxlength="60" />
+				<button type="submit" name="search" class="primary">{L_SEARCH_BUTTON}</button>
 			</td>
 		</tr>
 		<tr>
-			<td class="row2">{SEARCH_DAYS_BOX}</td>
+			<td>{SEARCH_DAYS_BOX}</td>
 		</tr>
 	</table>
 </div>
 
 <!-- BEGIN delete_option -->
-<div class="bloc">
-	<table class="content">
+<div class="block">
+	<table class="dataset">
 		<tr>
-			<td rowspan="2" class="row1">
+			<td rowspan="2">
 				<label for="email_list">{delete_option.L_FAST_DELETION}&nbsp;:</label><br />
-				<span class="m-texte">{delete_option.L_FAST_DELETION_NOTE}</span>
+				<span class="notice">{delete_option.L_FAST_DELETION_NOTE}</span>
 			</td>
-			<td class="row2"><textarea id="email_list" name="email_list" rows="2" cols="40"></textarea></td>
+			<td><textarea id="email_list" name="email_list" rows="2" cols="40"></textarea></td>
 		</tr>
 		<tr>
-			<td class="row2"><input type="submit" name="delete" value="{delete_option.L_DELETE_BUTTON}" class="button" /></td>
+			<td><button type="submit" name="delete">{delete_option.L_DELETE_BUTTON}</button></td>
 		</tr>
 	</table>
 </div>
 <!-- END delete_option -->
 
-<div id="nav-top">
-	<div class="left"><p>{PAGEOF} {NUM_SUBSCRIBERS}</p></div>
+<div id="aside-top" class="aside">
+	<div>{PAGEOF} {NUM_SUBSCRIBERS}</div>
 	
-	<div class="right">{S_HIDDEN_FIELDS}
-		<p>{L_CLASSEMENT}&nbsp;:</p>
+	<div>{S_HIDDEN_FIELDS}
+		<span>{L_CLASSEMENT}&nbsp;:</span>
 		<select name="type">
 			<option value="abo_email"{SELECTED_TYPE_EMAIL}>{L_BY_EMAIL}</option>
 			<option value="abo_register_date"{SELECTED_TYPE_DATE}>{L_BY_DATE}</option>
@@ -48,14 +48,14 @@
 		</select>&nbsp;&nbsp;<select name="order">
 			<option value="ASC"{SELECTED_ORDER_ASC}>{L_BY_ASC}</option>
 			<option value="DESC"{SELECTED_ORDER_DESC}>{L_BY_DESC}</option>
-		</select>&nbsp;&nbsp;<input type="submit" name="tri" value="{L_CLASSER_BUTTON}" class="button" />
+		</select>&nbsp;&nbsp;<button type="submit" name="tri">{L_CLASSER_BUTTON}</button>
 	</div>
 </div>
 
-<div class="bloc">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
-	<table class="content">
+	<table class="listing">
 		<tr>
 			<th>{L_EMAIL}</th>
 			<th>{L_DATE}</th>
@@ -68,29 +68,29 @@
 		</tr>
 		<!-- BEGIN aborow -->
 		<tr>
-			<td class="{aborow.TD_CLASS}"><a href="{aborow.U_VIEW}">{aborow.ABO_EMAIL}</a></td>
-			<td class="{aborow.TD_CLASS}">{aborow.ABO_REGISTER_DATE}</td>
+			<td><a href="{aborow.U_VIEW}">{aborow.ABO_EMAIL}</a></td>
+			<td>{aborow.ABO_REGISTER_DATE}</td>
 			<!-- BEGIN format -->
-			<td class="{aborow.TD_CLASS}">{aborow.format.ABO_FORMAT}</td>
+			<td>{aborow.format.ABO_FORMAT}</td>
 			<!-- END format -->
 			<!-- BEGIN delete -->
-			<td class="{aborow.TD_CLASS}"><input type="checkbox" name="id[]" value="{aborow.delete.ABO_ID}" /></td>
+			<td><input type="checkbox" name="id[]" value="{aborow.delete.ABO_ID}" /></td>
 			<!-- END delete -->
 		</tr>
 		<!-- END aborow -->
 		<!-- BEGIN empty -->
 		<tr>
-			<td class="row-full" colspan="3">{empty.L_EMPTY}</td>
+			<td colspan="3">{empty.L_EMPTY}</td>
 		</tr>
 		<!-- END empty -->
 	</table>
 </div>
 
-<div id="nav-bottom">
-	<div class="left"><p>{PAGINATION}</p></div>
+<div id="aside-bottom" class="aside">
+	<div>{PAGINATION}</div>
 	
 	<!-- BEGIN delete_option -->
-	<div class="right"><input type="submit" name="delete" value="{delete_option.L_DELETE_ABO_BUTTON}" class="button" /></div>
+	<div><button type="submit" name="delete">{delete_option.L_DELETE_ABO_BUTTON}</button></div>
 	<!-- END delete_option -->
 </div>
 </form>

@@ -24,25 +24,27 @@ function checkForm_editAboProfil()
 	<li><a href="./view.php?mode=abonnes&amp;action=delete&amp;id={S_ABO_ID}">{L_DELETE_ACCOUNT}</a></li>
 </ul>
 
-<div class="smallbloc">
+<div class="block compact">
 	<h2>{L_TITLE}</h2>
 	
-	<table class="content">
+	<table class="dataset">
 		<tr>
-			<td class="row1"><label for="pseudo">{L_PSEUDO}&nbsp;:</label></td>
-			<td class="row2"><input type="text" id="pseudo" name="pseudo" value="{S_ABO_PSEUDO}" class="text" size="30" maxlength="30" /></td>
+			<td><label for="pseudo">{L_PSEUDO}&nbsp;:</label></td>
+			<td><input type="text" id="pseudo" name="pseudo" value="{S_ABO_PSEUDO}" size="30" maxlength="30" /></td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="email">{L_EMAIL}&nbsp;:</label></td>
-			<td class="row2"><input type="text" id="email" name="email" value="{S_ABO_EMAIL}" class="text" size="30" maxlength="100" /></td>
+			<td><label for="email">{L_EMAIL}&nbsp;:</label></td>
+			<td><input type="text" id="email" name="email" value="{S_ABO_EMAIL}" size="30" maxlength="100" /></td>
 		</tr>
-		<tr>
-			<td class="explain" colspan="2">{L_LISTE_TO_REGISTER}&nbsp;:</td>
-		</tr>
+	</table>
+	
+	<div class="explain">{L_LISTE_TO_REGISTER}</div>
+	
+	<table class="dataset">
 		<!-- BEGIN listerow -->
 		<tr>
-			<td class="row1">&ndash;&nbsp;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a></td>
-			<td class="row2">{listerow.FORMAT_BOX}</td>
+			<td>&ndash;&nbsp;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a></td>
+			<td>{listerow.FORMAT_BOX}</td>
 		</tr>
 		<!-- END listerow -->
 	</table>
@@ -50,18 +52,18 @@ function checkForm_editAboProfil()
 	<!-- BEGIN tags -->
 	<h2>{tags.L_TITLE}</h2>
 	
-	<table class="content">
+	<table class="dataset">
 		<!-- BEGIN row -->
 		<tr>
-			<td class="row1"><label for="pseudo">{tags.row.NAME}&nbsp;:</label></td>
-			<td class="row2"><textarea name="tags[{tags.row.FIELDNAME}]" cols="35" rows="2">{tags.row.VALUE}</textarea></td>
+			<td><label for="pseudo">{tags.row.NAME}&nbsp;:</label></td>
+			<td><textarea name="tags[{tags.row.FIELDNAME}]" cols="35" rows="2">{tags.row.VALUE}</textarea></td>
 		</tr>
 		<!-- END row -->
 	</table>
 	<!-- END tags -->
 	
 	<div class="bottom">{S_HIDDEN_FIELDS}
-		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
+		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>
 </form>

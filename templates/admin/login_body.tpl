@@ -1,27 +1,27 @@
 <form id="login-form" method="post" action="./login.php?mode=login">
-<div class="smallbloc">
+<div class="block compact">
 	<h2>{TITLE}</h2>
 	
-	<table class="content">
+	<table class="dataset">
 		<tr>
-			<td class="row1"><label for="login">{L_LOGIN}&nbsp;:</label></td>
-			<td class="row1"><input type="text" id="login" name="login" maxlength="30" size="25" class="text" autofocus /></td>
+			<td><label for="login">{L_LOGIN}&nbsp;:</label></td>
+			<td><input type="text" id="login" name="login" maxlength="30" size="25" autofocus /></td>
 		</tr>
 		<tr>
-			<td class="row1"><label for="passwd">{L_PASS}&nbsp;:</label></td>
-			<td class="row1"><input type="password" id="passwd" name="passwd" maxlength="30" size="25" class="text" /></td>
+			<td><label for="passwd">{L_PASS}&nbsp;:</label></td>
+			<td><input type="password" id="passwd" name="passwd" maxlength="30" size="25" /></td>
 		</tr>
 		<tr>
-			<td colspan="2" class="row-full">
+			<td colspan="2">
 				<input type="checkbox" id="autologin" name="autologin" value="1" />
 				<label for="autologin">{L_AUTOLOGIN}</label><br />
-				<span class="m-texte"><a href="login.php?mode=sendpass">{L_LOST_PASSWORD}</a></span>
+				<span class="notice"><a href="login.php?mode=sendpass">{L_LOST_PASSWORD}</a></span>
 			</td>
 		</tr>
 	</table>
 	
 	<div class="bottom">{S_HIDDEN_FIELDS}
-		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
+		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>
 </form>

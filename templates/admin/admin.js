@@ -25,47 +25,46 @@
 
 function make_admin()
 {
+	//
+	// Boite de sélection de liste
+	//
 	var smallbox = document.forms['smallbox'];
 	
 	if( smallbox )
 	{
 		smallbox.getElementsByTagName('select')[0].addEventListener('change', jump, false);
 	}
-	
+
+	//
+	// Loupe d'affichage des images jointes aux newsletters
+	//
 	var aList = document.getElementsByTagName('a');
 	for( var i = 0, m = aList.length; i < m; i++ )
 	{
-		if( aList[i].rel && aList[i].rel == 'show' )
+		if( aList[i].getAttribute('rel') == 'show' )
 		{
 			aList[i].addEventListener('click', show, false);
 		}
 	}
-	
-	if( typeof(document.forms['logs']) != 'undefined' || typeof(document.forms['abo']) != 'undefined' )
+
+	//
+	// Lien "switch" pour cocher/décocher toutes les checkbox dans un listing
+	//
+	var deleteButton = document.querySelector('div#aside-bottom button[name="delete"]');
+
+	if( deleteButton != null )
 	{
-		var bottomAdmin = document.getElementById('nav-bottom');
+		var divNode = deleteButton.parentNode;
 		
-		if( typeof(bottomAdmin) != 'undefined' )
-		{
-			var divList = bottomAdmin.getElementsByTagName('div');
-			
-			if( divList[1] != null && divList[1].className.toLowerCase() == 'right' )
-			{
-				var secondDiv = divList[1];
-				
-				var paragraphe = document.createElement('p');
-				var switchLink = document.createElement('a');
-				var texte = document.createTextNode('switch');
-				switchLink.appendChild(texte);
-				switchLink.setAttribute('href', '#switch/checkbox');
-				switchLink.addEventListener('click', switch_checkbox, false);
-				paragraphe.appendChild(switchLink);
-				paragraphe.setAttribute('class', 'm-texte');
-				
-				secondDiv.insertBefore(paragraphe, secondDiv.getElementsByTagName('input')[0]);
-				secondDiv.insertBefore(document.createTextNode(' '), secondDiv.getElementsByTagName('input')[0]);
-			}
-		}
+		var switchLink = document.createElement('a');
+		switchLink.appendChild(document.createTextNode('switch'));
+		switchLink.setAttribute('href', '#switch/checkbox');
+		switchLink.setAttribute('class', 'notice');
+		switchLink.style.marginRight = '6px';
+		switchLink.addEventListener('click', switch_checkbox, false);
+
+		divNode.insertBefore(switchLink, divNode.lastElementChild);
+		divNode.insertBefore(document.createTextNode(' '), divNode.lastElementChild);
 	}
 
 	window.checkboxStatus = false;

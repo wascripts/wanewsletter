@@ -38,7 +38,7 @@
 </div>
 
 <div id="global">
-	<div class="bloc">
+	<div class="block">
 	<h2>{L_TITLE}</h2>
 	
 	<p>{MSG_RESULT}</p>

@@ -31,11 +31,10 @@ function make_editor()
 		var conteneur = document.createElement('div');
 		conteneur.setAttribute('class', 'bottom');
 		
-		var button = document.createElement('input');
+		var button = document.createElement('button');
 		button.setAttribute('id', 'preview' + format);
 		button.setAttribute('type', 'button');
-		button.setAttribute('value', lang['preview']);
-		button.setAttribute('class', 'button');
+		button.appendChild(document.createTextNode(lang['preview']));
 		conteneur.appendChild(button);
 		button.onclick = preview;
 		
@@ -43,7 +42,7 @@ function make_editor()
 		
 		button = button.cloneNode(false);
 		button.setAttribute('id', 'addLinks' + format);
-		button.setAttribute('value', lang['addlink']);
+		button.appendChild(document.createTextNode(lang['addlink']));
 		conteneur.appendChild(button);
 		button.onclick = addLinks;
 		
