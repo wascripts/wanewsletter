@@ -328,6 +328,7 @@ table.listing th { width: 50% }
 table#files-box th:first-child { min-width: 1.4em; width: auto; }
 table#files-box td[colspan] { text-align: left; padding: .2em .4em; }
 table#admin_authlist td + td { text-align: center; }
+table#progress-list td { white-space: nowrap; }
 
 ul#home { margin: 0; padding: 0; }
 ul#home li {

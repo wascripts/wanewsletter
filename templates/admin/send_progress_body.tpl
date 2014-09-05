@@ -7,7 +7,7 @@
 <div class="block">
 	<h2>{L_TITLE}</h2>
 	
-	<table class="listing">
+	<table id="progress-list" class="listing">
 		<tr>
 			<th>{L_SUBJECT}</th>
 			<th>{L_DONE}</th>
@@ -16,9 +16,9 @@
 		<!-- BEGIN logrow -->
 		<tr>
 			<td>{logrow.LOG_SUBJECT}</td>
-			<td align="right">{logrow.SEND_PERCENT}&nbsp;%</td>
-			<td nowrap><a href="./envoi.php?mode=progress&amp;id={logrow.LOG_ID}">{L_DO_SEND}</a></td>
-			<td nowrap><a href="./envoi.php?mode=cancel&amp;id={logrow.LOG_ID}">{L_CANCEL_SEND}</a></td>
+			<td>{logrow.SEND_PERCENT}&nbsp;%</td>
+			<td><a href="./envoi.php?mode=progress&amp;id={logrow.LOG_ID}">{L_DO_SEND}</a></td>
+			<td><a href="./envoi.php?mode=cancel&amp;id={logrow.LOG_ID}">{L_CANCEL_SEND}</a></td>
 		</tr>
 		<!-- END logrow -->
 	</table>
