@@ -1,5 +1,5 @@
 <div class="block">
-	<h2 id="view">{L_SUBJECT}&nbsp;: {SUBJECT}</h2>
+	<h2 id="view">{L_SUBJECT}&nbsp;: <q>{SUBJECT}</q></h2>
 	
 	<div class="textinput">
 		<object id="iframe" codebase="{S_CODEBASE}" data="{U_FRAME}" type="text/html" standby="Loading... Please wait."></object>
