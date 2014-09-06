@@ -81,12 +81,12 @@ function make_editor()
 /*
  * Fenêtre de prévisualisation des newsletters
  */
-function preview(evt)
+function preview()
 {
 	var subject	 = document.forms['send-form'].elements['subject'].value;
 	var preview	 = window.open('','apercu','width=' + width + ',height=' + height + ',marginleft=2,topmargin=2,left=' + left + ',top=' + top + ',toolbar=0,location=0,directories=0,status=0,scrollbars=1,copyhistory=0,menuBar=0');
 	
-	if( evt.target.id == 'preview1' ) {
+	if( this.id == 'preview1' ) {
 		
 		var texte = document.forms['send-form'].elements['body_text'].value;
 		var CRLF  = new RegExp("\r?\n", "g");
@@ -166,10 +166,10 @@ function preview(evt)
 	preview.focus();
 }
 
-function addLinks(evt)
+function addLinks()
 {
 	var texte, scrollTop = 0;
-	if( evt.target.id == 'addLinks1' ) {
+	if( this.id == 'addLinks1' ) {
 		texte = document.forms['send-form'].elements['body_text'];
 	}
 	else {
@@ -202,12 +202,10 @@ function addLinks(evt)
 	texte.focus();
 }
 
-function storeCaret(evt)
+function storeCaret()
 {
-	var textEl = evt.target;
-	
-	if( typeof(textEl.createTextRange) != 'undefined' ) {
-		textEl.caretPos = document.selection.createRange().duplicate();
+	if( typeof(this.createTextRange) != 'undefined' ) {
+		this.caretPos = document.selection.createRange().duplicate();
 	}
 }
 
