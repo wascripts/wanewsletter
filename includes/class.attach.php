@@ -719,7 +719,7 @@ class Attach {
 			$this->send_file($row['file_real_name'], $row['file_mimetype'], $data, $row['file_size']);
 		}
 		
-		$output->message(sprintf($lang['Message']['File_not_exists'], ''));
+		$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
 	}
 	
 	/**

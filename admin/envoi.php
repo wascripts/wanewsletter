@@ -35,7 +35,7 @@ if( !$admindata['session_liste'] )
 
 if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 {
-	$output->message('Not_auth_view');
+	$output->displayMessage('Not_auth_view');
 }
 
 //
@@ -135,7 +135,7 @@ switch( $mode )
 			if( !flock($fp, LOCK_EX|LOCK_NB) )
 			{
 				fclose($fp);
-				$output->message('List_is_busy');
+				$output->displayMessage('List_is_busy');
 			}
 			
 			$db->beginTransaction();
@@ -171,7 +171,7 @@ switch( $mode )
 			fclose($fp);
 			unlink($lockfile);
 			
-			$output->message('Send_canceled');
+			$output->displayMessage('Send_canceled');
 		}
 		else
 		{
@@ -219,16 +219,15 @@ switch( $mode )
 			if( !($logdata = $result->fetch()) )
 			{
 				$output->redirect('envoi.php?mode=progress', 4);
-				
-				$message  = $lang['Message']['No_log_found'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=progress') . '">', '</a>');
-				$output->message($message);
+				$output->addLine($lang['Message']['No_log_found']);
+				$output->addLine($lang['Click_return_back'], './envoi.php?mode=progress');
+				$output->displayMessage();
 			}
 			
 			if( DISABLE_CHECK_LINKS == false && empty($listdata['form_url']) )
 			{
-				$message = nl2br(sprintf($lang['Message']['No_form_url'], '<a href="' . sessid('view.php?mode=liste&amp;action=edit') . '">', '</a>'));
-				$output->message($message);
+				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&amp;action=edit');
+				$output->displayMessage();
 			}
 		}
 		else
@@ -301,10 +300,9 @@ switch( $mode )
 			if( !($row = $result->fetch()) )
 			{
 				$output->redirect('envoi.php', 4);
-				
-				$message  = $lang['Message']['No_log_to_send'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_form'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-				$output->message($message);
+				$output->addLine($lang['Message']['No_log_to_send']);
+				$output->addLine($lang['Click_return_form'], './envoi.php');
+				$output->displayMessage();
 			}
 			
 			$output->page_header();
@@ -359,9 +357,9 @@ switch( $mode )
 					
 					if( $result == false )
 					{
-						$message  = $errstr;
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-						$output->message($message);
+						$output->addLine($errstr);
+						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
+						$output->displayMessage();
 					}
 					
 					$logdata['log_body_text'] = convert_encoding($result['data'], $result['charset']);
@@ -373,9 +371,9 @@ switch( $mode )
 					
 					if( $result == false )
 					{
-						$message  = $errstr;
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-						$output->message($message);
+						$output->addLine($errstr);
+						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
+						$output->displayMessage();
 					}
 					
 					if( preg_match('/<head[^>]*>(.+?)<\/head>/is', $result['data'], $match_head) )
@@ -431,10 +429,9 @@ switch( $mode )
 				if( !($logdata = $result->fetch()) )
 				{
 					$output->redirect('envoi.php?mode=load', 4);
-					
-					$message  = $lang['Message']['log_not_exists'];
-					$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-					$output->message($message);
+					$output->addLine($lang['Message']['log_not_exists']);
+					$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
+					$output->displayMessage();
 				}
 				
 				$prev_status = $logdata['log_status'];
@@ -545,10 +542,9 @@ switch( $mode )
 		if( !$logdata['log_id'] )
 		{
 			$output->redirect('envoi.php', 4);
-			
-			$message  = $lang['Message']['No_log_id'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-			$output->message($message);
+			$output->addLine($lang['Message']['No_log_id']);
+			$output->addLine($lang['Click_return_back'], './envoi.php');
+			$output->displayMessage();
 		}
 		
 		if( isset($_POST['confirm']) )
@@ -574,11 +570,10 @@ switch( $mode )
 			//
 			$db->vacuum(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
 			
-			$output->redirect('./envoi.php', 4);
-			
-			$message  = $lang['Message']['log_deleted'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-			$output->message($message);
+			$output->redirect('envoi.php', 4);
+			$output->addLine($lang['Message']['log_deleted']);
+			$output->addLine($lang['Click_return_back'], './envoi.php');
+			$output->displayMessage();
 		}
 		else
 		{
@@ -901,17 +896,16 @@ switch( $mode )
 					if( $mode == 'save' )
 					{
 						$output->redirect('./envoi.php?mode=load&amp;id=' . $logdata['log_id'], 4);
-						
-						$message  = $lang['Message']['log_saved'];
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load&amp;id=' . $logdata['log_id']) . '">', '</a>');
+						$output->addLine($lang['Message']['log_saved']);
+						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 					}
 					else
 					{
-						$message  = $lang['Message']['log_ready'];
-						$message .= '<br /><br />' . sprintf($lang['Click_start_send'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id']) . '">', '</a>');
+						$output->addLine($lang['Message']['log_ready']);
+						$output->addLine($lang['Click_start_send'], './envoi.php?mode=progress&amp;id=' . $logdata['log_id']);
 					}
 					
-					$output->message($message);
+					$output->displayMessage();
 				}
 			}
 		}
@@ -1074,7 +1068,7 @@ if( ($mode == 'test' && count($supp_address) > 0) || $mode == 'progress' )
 {
 	if( !$auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
 	{
-		$output->message('Not_auth_send');
+		$output->displayMessage('Not_auth_send');
 	}
 	
 	require WA_ROOTDIR . '/includes/engine_send.php';
@@ -1103,7 +1097,7 @@ if( ($mode == 'test' && count($supp_address) > 0) || $mode == 'progress' )
 	
 	$message = launch_sending($listdata, $logdata, $supp_address);
 	
-	$output->message(nl2br($message));
+	$output->displayMessage($message);
 }
 
 $subject   = wan_htmlspecialchars($logdata['log_subject']);

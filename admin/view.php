@@ -72,7 +72,7 @@ if( $mode == 'download' )
 {
 	if( !$auth->check_auth(AUTH_VIEW, $listdata['liste_id']) )
 	{
-		$output->message('Not_auth_view');
+		$output->displayMessage('Not_auth_view');
 	}
 	
 	require WA_ROOTDIR . '/includes/class.attach.php';
@@ -139,7 +139,7 @@ else if( $mode == 'export' )
 		// Le paquet PEAR Archive_Tar ou Archive_Zip n'est pas installé ou n'est pas présent
 		// dans le chemin d'inclusion
 		//
-		$output->message(sprintf($lang['Message']['Archive_class_needed'], $classname));
+		$output->displayMessage(sprintf($lang['Message']['Archive_class_needed'], $classname));
 	}
 	
 	$archive = new $classname($archive_name, $compressed);
@@ -312,7 +312,7 @@ else if( $mode == 'abonnes' )
 	
 	if( !$auth->check_auth($auth_type, $listdata['liste_id']) )
 	{
-		$output->message('Not_' . $auth->auth_ary[$auth_type]);
+		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
 	}
 	
 	$abo_id     = ( !empty($_REQUEST['id']) ) ? intval($_REQUEST['id']) : 0;
@@ -382,7 +382,7 @@ else if( $mode == 'abonnes' )
 	if( ($action == 'view' || $action == 'edit') && !$abo_id )
 	{
 		$output->redirect('./view.php?mode=abonnes', 4);
-		$output->message('No_abo_id');
+		$output->displayMessage('No_abo_id');
 	}
 	
 	//
@@ -505,7 +505,7 @@ else if( $mode == 'abonnes' )
 		}
 		else
 		{
-			$output->message('abo_not_exists');
+			$output->displayMessage('abo_not_exists');
 		}
 	}
 	
@@ -551,7 +551,7 @@ else if( $mode == 'abonnes' )
 				//
 				if( count($result_ids) == 0 )
 				{
-					$output->message('Not_auth_edit');
+					$output->displayMessage('Not_auth_edit');
 				}
 				
 				$sql_data = array(
@@ -605,12 +605,11 @@ else if( $mode == 'abonnes' )
 					}
 				}
 				
-				$output->redirect('./view.php?mode=abonnes&action=view&id=' . $abo_id, 4);
-				
-				$message  = $lang['Message']['Profile_updated'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_abo_profile'],
-					'<a href="' . sessid('./view.php?mode=abonnes&action=view&id=' . $abo_id) . '">', '</a>');
-				$output->message($message);
+				$target = './view.php?mode=abonnes&action=view&id=' . $abo_id;
+				$output->redirect($target, 4);
+				$output->addLine($lang['Message']['Profile_updated']);
+				$output->addLine($lang['Click_return_abo_profile'], $target);
+				$output->displayMessage();
 			}
 		}
 		
@@ -718,7 +717,7 @@ else if( $mode == 'abonnes' )
 		}
 		else
 		{
-			$output->message('abo_not_exists');
+			$output->displayMessage('abo_not_exists');
 		}
 	}
 	
@@ -738,7 +737,7 @@ else if( $mode == 'abonnes' )
 		if( $email_list == '' && count($abo_ids) == 0 )
 		{
 			$output->redirect('./view.php?mode=abonnes', 4);
-			$output->message('No_abo_id');
+			$output->displayMessage('No_abo_id');
 		}
 		
 		if( isset($_POST['confirm']) )
@@ -773,11 +772,11 @@ else if( $mode == 'abonnes' )
 			//
 			$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE));
 			
-			$output->redirect('./view.php?mode=abonnes', 4);
-			
-			$message  = $lang['Message']['abo_deleted'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_abo'], '<a href="' . sessid('./view.php?mode=abonnes') . '">', '</a>');
-			$output->message($message);
+			$target = './view.php?mode=abonnes';
+			$output->redirect($target, 4);
+			$output->addLine($lang['Message']['abo_deleted']);
+			$output->addLine($lang['Click_return_abo'], $target);
+			$output->displayMessage();
 		}
 		else
 		{
@@ -804,7 +803,7 @@ else if( $mode == 'abonnes' )
 				if( $sql_list == '' )
 				{
 					$output->redirect('./view.php?mode=abonnes', 4);
-					$output->message('No_abo_id');
+					$output->displayMessage('No_abo_id');
 				}
 				
 				$sql = "SELECT a.abo_id
@@ -828,7 +827,7 @@ else if( $mode == 'abonnes' )
 				else
 				{
 					$output->redirect('./view.php?mode=abonnes', 4);
-					$output->message('No_abo_email');
+					$output->displayMessage('No_abo_email');
 				}
 			}
 			else
@@ -1036,11 +1035,11 @@ else if( $mode == 'liste' )
 		case 'delete':
 			if( $admindata['admin_level'] != ADMIN )
 			{
-				$output->redirect('./view.php?mode=liste', 4);
-				
-				$message  = $lang['Message']['Not_authorized'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-				$output->message($message);
+				$target = './view.php?mode=liste';
+				$output->redirect($target, 4);
+				$output->addLine($lang['Message']['Not_authorized']);
+				$output->addLine($lang['Click_return_liste'], $target);
+				$output->displayMessage();
 			}
 			
 			$auth_type = false;
@@ -1061,7 +1060,7 @@ else if( $mode == 'liste' )
 	
 	if( $auth_type && !$auth->check_auth($auth_type, $admindata['session_liste']) )
 	{
-		$output->message('Not_' . $auth->auth_ary[$auth_type]);
+		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
 	}
 	
 	//
@@ -1215,11 +1214,13 @@ else if( $mode == 'liste' )
 					}
 				}
 				
-				$output->redirect('./view.php?mode=liste', 4);
-				
-				$message  = ( $action == 'add' ) ? $lang['Message']['liste_created'] : $lang['Message']['liste_edited'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_liste'], '<a href="' . sessid('./view.php?mode=liste') . '">', '</a>');
-				$output->message($message);
+				$target = './view.php?mode=liste';
+				$output->redirect($target, 4);
+				$output->addLine(
+					$action == 'add' ? $lang['Message']['liste_created'] : $lang['Message']['liste_edited']
+				);
+				$output->addLine($lang['Click_return_liste'], $target);
+				$output->displayMessage();
 			}
 		}
 		else if( $action == 'edit' )
@@ -1506,11 +1507,13 @@ else if( $mode == 'liste' )
 			//
 			$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE, LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE, LISTE_TABLE));
 			
-			$output->redirect('./index.php', 4);
-			
-			$message  = ( isset($_POST['delete_all']) ) ? $lang['Message']['Liste_del_all'] : nl2br($lang['Message']['Liste_del_move']);
-			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			$output->message($message);
+			$target = './index.php';
+			$output->redirect($target, 4);
+			$output->addLine(
+				isset($_POST['delete_all']) ? $lang['Message']['Liste_del_all'] : $lang['Message']['Liste_del_move']
+			);
+			$output->addLine($lang['Click_return_index'], $target);
+			$output->displayMessage();
 		}
 		else
 		{
@@ -1571,11 +1574,11 @@ else if( $mode == 'liste' )
 	{
 		$abo_deleted = purge_liste($listdata['liste_id'], $listdata['limitevalidate'], $listdata['purge_freq']);
 		
-		$output->redirect('./view.php?mode=liste', 4);
-		
-		$message  = sprintf($lang['Message']['Success_purge'], $abo_deleted);
-		$message .= '<br /><br />' . sprintf($lang['Click_return_liste'], '<a href="' . sessid('./view.php?mode=liste') . '">', '</a>');
-		$output->message($message); 
+		$target = './view.php?mode=liste';
+		$output->redirect($target, 4);
+		$output->addLine(sprintf($lang['Message']['Success_purge'], $abo_deleted));
+		$output->addLine($lang['Click_return_liste'], $target);
+		$output->displayMessage();
 	}
 	
 	//
@@ -1762,7 +1765,7 @@ else if( $mode == 'log' )
 	
 	if( !$auth->check_auth($auth_type, $listdata['liste_id']) )
 	{
-		$output->message('Not_' . $auth->auth_ary[$auth_type]);
+		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
 	}
 	
 	$log_id = ( !empty($_GET['id']) ) ? intval($_GET['id']) : 0;
@@ -1777,7 +1780,7 @@ else if( $mode == 'log' )
 		if( count($log_ids) == 0 )
 		{
 			$output->redirect('./view.php?mode=log', 4);
-			$output->message('No_log_id');
+			$output->displayMessage('No_log_id');
 		}
 		
 		if( isset($_POST['confirm']) )
@@ -1803,11 +1806,11 @@ else if( $mode == 'log' )
 			//
 			$db->vacuum(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
 			
-			$output->redirect('./view.php?mode=log', 4);
-			
-			$message  = $lang['Message']['logs_deleted'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_logs'], '<a href="' . sessid('./view.php?mode=log') . '">', '</a>');
-			$output->message($message);
+			$target = './view.php?mode=log';
+			$output->redirect($target, 4);
+			$output->addLine($lang['Message']['logs_deleted']);
+			$output->addLine($lang['Click_return_logs'], $target);
+			$output->displayMessage();
 		}
 		else
 		{

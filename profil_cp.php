@@ -35,7 +35,7 @@ include WA_ROOTDIR . '/includes/tags.inc.php';
 if( !$nl_config['enable_profil_cp'] )
 {
 	load_settings();
-	$output->message('Profil_cp_disabled');
+	$output->displayMessage('Profil_cp_disabled');
 }
 
 //
@@ -196,7 +196,7 @@ switch( $mode )
 					Location('profil_cp.php');
 				}
 				
-				$output->message('Inactive_account');
+				$output->displayMessage('Inactive_account');
 			}
 			else
 			{
@@ -288,7 +288,7 @@ switch( $mode )
 					trigger_error('Failed_sending', ERROR);
 				}
 				
-				$output->message('IDs_sended');
+				$output->displayMessage('IDs_sended');
 			}
 			else
 			{
@@ -417,7 +417,7 @@ switch( $mode )
 				}
 				
 				$output->redirect('profil_cp.php', 4);
-				$output->message('Profile_updated');
+				$output->displayMessage('Profile_updated');
 			}
 		}
 		
@@ -483,7 +483,7 @@ switch( $mode )
 			
 			if( count($sql_log_id) == 0 )
 			{
-				$output->message('No_log_id');
+				$output->displayMessage('No_log_id');
 			}
 			
 			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
@@ -732,7 +732,7 @@ switch( $mode )
 				}
 			}
 			
-			$output->message(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
+			$output->displayMessage(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
 		}
 		
 		$liste_ids = array();

@@ -100,7 +100,7 @@ if( $mode == 'sendpass' )
 				SET admin_pwd = '" . md5($new_password) . "'
 				WHERE admin_id = " . $admin_id);
 			
-			$output->message('IDs_sended');
+			$output->displayMessage('IDs_sended');
 		}
 	}
 	

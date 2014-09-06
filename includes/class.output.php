@@ -63,6 +63,14 @@ class output extends Template {
 	var $meta_redirect = '';
 	
 	/**
+	 * Pile des messages
+	 *
+	 * @var array
+	 * @access private
+	 */
+	var $messageList   = array();
+	
+	/**
 	 * @param string $template_root
 	 * 
 	 * @access public
@@ -429,7 +437,8 @@ BASIC;
 	}
 	
 	/**
-	 * Affiche de message d'information
+	 * Affiche de message d'information.
+	 * OBSOLÈTE. Voir méthode displayMessage() plus bas.
 	 * 
 	 * @param string $str
 	 * 
@@ -438,12 +447,61 @@ BASIC;
 	 */
 	function message($str)
 	{
+		$this->displayMessage($str);
+	}
+	
+	/**
+	 * Ajoute une entrée à la pile des messages
+	 * 
+	 * @param string $str	le message
+	 * @param string $link	le lien html à intégrer dans le message
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function addLine($str, $link = null)
+	{
+		if( !is_null($link) )
+		{
+			if( !preg_match('#^[^:]+://#i', $link) )
+			{
+				$link = sessid($link);
+			}
+			$str = sprintf($str, '<a href="' . $link . '">', '</a>');
+		}
+		
+		array_push($this->messageList, $str);
+	}
+	
+	/**
+	 * Affichage d'un message d'information
+	 * Si $str n'est pas fourni, la pile de messages $this->messageList est utilisée
+	 * 
+	 * @param string $str
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function displayMessage($str = '')
+	{
 		global $lang, $message;
 		
-		if( !empty($lang['Message'][$str]) )
+		if( !empty($str) )
 		{
-			$str = nl2br($lang['Message'][$str]);
+			if( !empty($lang['Message'][$str]) )
+			{
+				$str = $lang['Message'][$str];
+			}
+			
+			array_push($this->messageList, $str);
 		}
+		
+		$str = '';
+		foreach( $this->messageList as $message )
+		{
+			$str .= '<br><br>'.str_replace("\n", "<br>\n", $message);
+		}
+		$str = substr($str, 8);
 		
 		if( defined('IN_CRON') )
 		{
@@ -681,13 +739,14 @@ BASIC;
 		{
 			if( $display )
 			{
-				$message = $lang['Message']['No_liste_exists'];
+				$this->addLine($lang['Message']['No_liste_exists']);
+				
 				if( $admindata['admin_level'] == ADMIN )
 				{
-					$message .= '<br /><br />' . sprintf($lang['Click_create_liste'], '<a href="' . sessid('./view.php?mode=liste&amp;action=add') . '">', '</a>');
+					$this->addLine($lang['Click_create_liste'], './view.php?mode=liste&amp;action=add');
 				}
 				
-				$this->message($message);
+				$this->displayMessage();
 			}
 			
 			return '';

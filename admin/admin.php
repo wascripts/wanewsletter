@@ -47,10 +47,9 @@ if( isset($_POST['delete_user']) )
 if( ( $mode == 'adduser' || $mode == 'deluser' ) && $admindata['admin_level'] != ADMIN )
 {
 	$output->redirect('index.php', 4);
-	
-	$message  = $lang['Message']['Not_authorized'];
-	$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-	$output->message($message);
+	$output->addLine($lang['Message']['Not_authorized']);
+	$output->addLine($lang['Click_return_index'], './index.php');
+	$output->displayMessage();
 }
 
 if( $mode == 'adduser' )
@@ -141,11 +140,10 @@ if( $mode == 'adduser' )
 			}
 			
 			$output->redirect('./admin.php', 6);
-			
-			$message  = $lang['Message']['Admin_added'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php') . '">', '</a>');
-			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			$output->message($message);
+			$output->addLine($lang['Message']['Admin_added']);
+			$output->addLine($lang['Click_return_profile'], './admin.php');
+			$output->addLine($lang['Click_return_index'], './index.php');
+			$output->displayMessage();
 		}
 	}
 	
@@ -181,7 +179,7 @@ else if( $mode == 'deluser' )
 {
 	if( $admindata['admin_id'] == $admin_id )
 	{
-		$output->message('Owner_account');
+		$output->displayMessage('Owner_account');
 	}
 	
 	if( isset($_POST['confirm']) )
@@ -210,11 +208,10 @@ else if( $mode == 'deluser' )
 		$db->vacuum(array(ADMIN_TABLE, AUTH_ADMIN_TABLE));
 		
 		$output->redirect('./admin.php', 6);
-		
-		$message  = $lang['Message']['Admin_deleted'];
-		$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php') . '">', '</a>');
-		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		$output->message($message);
+		$output->addLine($lang['Message']['Admin_deleted']);
+		$output->addLine($lang['Click_return_profile'], './admin.php');
+		$output->addLine($lang['Click_return_index'], './index.php');
+		$output->displayMessage();
 	}
 	else
 	{
@@ -250,10 +247,9 @@ if( isset($_POST['submit']) )
 	if( $admindata['admin_level'] != ADMIN && $admin_id != $admindata['admin_id'] )
 	{
 		$output->redirect('./index.php', 4);
-		
-		$message  = $lang['Message']['Not_authorized'];
-		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		$output->message($message);
+		$output->addLine($lang['Message']['Not_authorized']);
+		$output->addLine($lang['Click_return_index'], './index.php');
+		$output->displayMessage();
 	}
 	
 	$vararray = array('current_pass', 'new_pass', 'confirm_pass', 'email', 'dateformat', 'language');
@@ -416,11 +412,10 @@ if( isset($_POST['submit']) )
 		}
 		
 		$output->redirect('./admin.php', 6);
-		
-		$message  = $lang['Message']['Profile_updated'];
-		$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php?admin_id=' . $admin_id) . '">', '</a>');
-		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		$output->message($message);
+		$output->addLine($lang['Message']['Profile_updated']);
+		$output->addLine($lang['Click_return_profile'], './admin.php?admin_id=' . $admin_id);
+		$output->addLine($lang['Click_return_index'], './index.php');
+		$output->displayMessage();
 	}
 }
 

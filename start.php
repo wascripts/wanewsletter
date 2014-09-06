@@ -164,8 +164,7 @@ define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
 if( !is_writable(WA_TMPDIR) )
 {
 	load_settings();
-	$output->message(sprintf($lang['Message']['Dir_not_writable'],
+	$output->displayMessage(sprintf($lang['Message']['Dir_not_writable'],
 		wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
 }
 
-?>

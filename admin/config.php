@@ -32,10 +32,9 @@ require WAMAILER_DIR . '/class.mailer.php';
 if( $admindata['admin_level'] != ADMIN )
 {
 	$output->redirect('./index.php', 6);
-	
-	$message  = $lang['Message']['Not_authorized'];
-	$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-	$output->message($message);
+	$output->addLine($lang['Message']['Not_authorized']);
+	$output->addLine($lang['Click_return_index'], './index.php');
+	$output->displayMessage();
 }
 
 $sql = "SELECT * FROM " . CONFIG_TABLE;
@@ -256,7 +255,7 @@ if( isset($_POST['submit']) )
 			}
 		}
 		
-		$output->message('Success_modif');
+		$output->displayMessage('Success_modif');
 	}
 }
 else

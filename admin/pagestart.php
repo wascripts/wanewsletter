@@ -86,7 +86,7 @@ if( !defined('IN_LOGIN') )
 		
 		if( $session->new_session || $sessid != $session->session_id )
 		{
-			$output->message('Invalid_session');
+			$output->displayMessage('Invalid_session');
 		}
 	}
 }
