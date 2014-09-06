@@ -1476,8 +1476,8 @@ switch( $mode )
 				'L_EXPLAIN_CODE_HTML' => nl2br($lang['Explain']['code_html']),
 				'L_EXPLAIN_CODE_PHP'  => nl2br($lang['Explain']['code_php']),
 				
-				'CODE_HTML' => nl2br(wan_htmlspecialchars($code_html, ENT_NOQUOTES)),
-				'CODE_PHP'  => nl2br(wan_htmlspecialchars($code_php, ENT_NOQUOTES))
+				'CODE_HTML' => wan_htmlspecialchars($code_html, ENT_NOQUOTES),
+				'CODE_PHP'  => wan_htmlspecialchars($code_php, ENT_NOQUOTES)
 			));
 		}
 		else
