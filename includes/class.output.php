@@ -227,7 +227,7 @@ class output extends Template {
 			$this->addLink('author',    WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
 			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
 			
-			$page_title = sprintf($lang['General_title'], wan_htmlspecialchars($nl_config['sitename']));
+			$page_title = $lang['General_title'];
 		}
 		else
 		{
