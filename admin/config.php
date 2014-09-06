@@ -158,11 +158,6 @@ if( isset($_POST['submit']) )
 		$new_config['use_ftp'] = 0;
 	}
 	
-	if( Mailer::is_online_host() == true )
-	{
-		$new_config['engine_send'] = ENGINE_UNIQ;
-	}
-	
 	if( empty($new_config['smtp_pass']) )
 	{
 		$new_config['smtp_pass'] = $old_config['smtp_pass'];
@@ -369,17 +364,14 @@ if( extension_loaded('ftp') )
 	));
 }
 
-if( Mailer::is_online_host() == false )
-{
-	$output->assign_block_vars('choice_engine_send', array(
-		'L_ENGINE_SEND'       => $lang['Choice_engine_send'],
-		'L_ENGINE_BCC'        => $lang['With_engine_bcc'],
-		'L_ENGINE_UNIQ'       => $lang['With_engine_uniq'],
-		
-		'CHECKED_ENGINE_BCC'  => ( $new_config['engine_send'] == ENGINE_BCC ) ? ' checked="checked"' : '',
-		'CHECKED_ENGINE_UNIQ' => ( $new_config['engine_send'] == ENGINE_UNIQ ) ? ' checked="checked"' : ''
-	));
-}
+$output->assign_block_vars('choice_engine_send', array(
+	'L_ENGINE_SEND'       => $lang['Choice_engine_send'],
+	'L_ENGINE_BCC'        => $lang['With_engine_bcc'],
+	'L_ENGINE_UNIQ'       => $lang['With_engine_uniq'],
+	
+	'CHECKED_ENGINE_BCC'  => ( $new_config['engine_send'] == ENGINE_BCC ) ? ' checked="checked"' : '',
+	'CHECKED_ENGINE_UNIQ' => ( $new_config['engine_send'] == ENGINE_UNIQ ) ? ' checked="checked"' : ''
+));
 
 if( extension_loaded('gd') )
 {

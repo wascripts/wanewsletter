@@ -153,10 +153,7 @@ class Mailer {
 	var $html_tpl_ext           = 'html';
 	
 	/**
-	 * Vous devez définir la fonction mail qu'utilise votre hébergeur 
-	 * 
-	 * 1 ou WM_HOST_OTHER pour la fonction mail() classique
-	 * 2 ou WM_HOST_ONLINE pour la fonction email() de online
+	 * OBSOLÈTE. NE PAS MODIFIER.
 	 *
 	 * @var integer
 	 * @access public
@@ -455,11 +452,6 @@ class Mailer {
 				
 				$this->sender_ip = preg_replace($pattern_ip, $this->sender_ip, $private_ip);
 			}
-		}
-		
-		if( $this->hebergeur == WM_HOST_OTHER && Mailer::is_online_host() == true )
-		{
-			$this->hebergeur = WM_HOST_ONLINE;
 		}
 	}
 	
