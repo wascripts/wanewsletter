@@ -363,28 +363,71 @@ div#image-box object[type*="/svg"] { min-width: 50px; min-height: 50px; }
 
 /* Spécifique à la page des statistiques */
 
-.stats { margin: 1.5em 0; text-align: center; }
+.stats {
+	background-color: #F0F0F0;
+	width: 560px;
+	margin: 1.5em auto;
+	border: 1px solid #CCC;
+	padding: 20px;
+	text-align: center;
+	box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
 
 div#graph-box {
 	position: relative;
+	overflow:hidden;
 	width: 560px;
 	height: 260px;
-	margin: 10px auto;
-	font-size: 0;
+	margin-bottom: 10px;
 }
-#graph2 {
+div#graph-box img {
 	position: absolute;
-	overflow:hidden;
 	top: 0;
 	left: 560px;
-	width: 0;
-	transition: all ease-out .85s;
-	-webkit-transition: all ease-out .85s;
-}
-#graph2.toLeft {
 	width: 560px;
+	-webkit-transition: all ease-out .7s;
+	transition: all ease-out .7s;
+}
+div#graph-box img.prev {
+	z-index: 1;
+	left: 0;
+	opacity: .3;
+	-webkit-transform: scale(.8);
+	transform: scale(.8);
+}
+div#graph-box img.current {
+	z-index: 2;
 	left: 0;
 }
+div#graph-box img.next {
+	z-index: 1;
+	left: 560px;
+}
+
+/* Transition vers l'image précédente */
+div#graph-box.transitionToPrev img.prev {
+	opacity: 1;
+	-webkit-transform: scale(1);
+	transform: scale(1);
+}
+div#graph-box.transitionToPrev img.current {
+	left: 560px;
+}
+
+/* Transition vers l'image suivante */
+div#graph-box.transitionToNext img.prev {
+	display: none;
+}
+div#graph-box.transitionToNext img.current {
+	opacity: .3;
+	-webkit-transform: scale(.8);
+	transform: scale(.8);
+}
+div#graph-box.transitionToNext img.next {
+	z-index: 3;
+	left: 0;
+}
+
 
 /* Formulaires, champs et boutons */
 

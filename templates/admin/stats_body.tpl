@@ -1,108 +1,142 @@
 <script>
 <!--
 var Stats = {
+	/**
+	 * Lors de la manipulation des dates, ne pas oublier que Javascript traite
+	 * les valeurs numériques des mois sur un intervalle 0..11 alors que le
+	 * script stats.php, la selectbox 'month' et dans les liens #prev-period et
+	 * #next-period, les mois sont dans un intervalle 1..12
+	 */
 	currentDate: null,
+	graphBox: null,
+	ready: false,
 	
 	getPrevPeriod: function() {
 		
-		if( document.getElementById('graph2').className == '' ) {
-			document.getElementById('graph-box').removeChild(document.getElementById('graph2'));
-			document.getElementById('graph1').className = 'toLeft';
-			document.getElementById('graph1').setAttribute('id', 'graph2');
+		if( this.ready == true ) {
+			this.currentDate.setMonth(this.currentDate.getMonth()-1);
 			
-			var tmp = document.getElementById('graph2').cloneNode(true);
-			tmp.setAttribute('id', 'graph1');
-			tmp.className = '';
-			document.getElementById('graph-box').insertBefore(tmp, document.getElementById('graph-box').firstChild);
+			this.graphBox.className = 'transitionToPrev';
+			this.graphBox.insertBefore(this.graphBox.lastElementChild, this.graphBox.firstElementChild);
+			
+			this._getPeriod();
 		}
-		
-		window.setTimeout(function(){Stats.getPrevPeriod2();}, 50);
-	},
-	
-	getPrevPeriod2: function() {
-		this.currentDate.setMonth(this.currentDate.getMonth()-1);
-		var sUrl = this.getURL(this.currentDate.getFullYear(), (this.currentDate.getMonth()+1));
-		document.getElementById('graph1').firstChild.src = sUrl;
-		document.getElementById('graph2').className = '';
-		this.preloadAndSync();
 	},
 	
 	getNextPeriod: function() {
 		
-		if( document.getElementById('graph2').className == 'toLeft' ) {
-			document.getElementById('graph-box').removeChild(document.getElementById('graph1'));
-			document.getElementById('graph2').setAttribute('id', 'graph1');
-			document.getElementById('graph1').className = '';
+		if( this.ready == true ) {
+			this.currentDate.setMonth(this.currentDate.getMonth()+1);
 			
-			var tmp = document.getElementById('graph1').cloneNode(true);
-			tmp.setAttribute('id', 'graph2');
-			document.getElementById('graph-box').appendChild(tmp);
+			this.graphBox.className = 'transitionToNext';
+			this.graphBox.appendChild(this.graphBox.firstElementChild);
+			
+			this._getPeriod();
+		}
+	},
+	
+	_getPeriod: function() {
+		var firstYear = Number(this.form.elements['year'].options[0].value);
+		var currentYear = Number(this.currentDate.getFullYear());
+		var lastYear = Number(this.form.elements['year'].options[this.form.elements['year'].length-1].value);
+		
+		var opt = document.createElement('option');
+		opt.setAttribute('value', currentYear);
+		opt.textContent = currentYear;
+		
+		if( currentYear < firstYear ) {
+			this.form.elements['year'].add(opt, 0);
+			firstYear = currentYear;
+		}
+		else if( currentYear > lastYear ) {
+			this.form.elements['year'].add(opt);
 		}
 		
-		window.setTimeout(function(){Stats.getNextPeriod2();}, 50);
+		this.form.elements['year'].options[currentYear - firstYear].selected = true;
+		this.form.elements['month'].options[this.currentDate.getMonth()].selected = true;
+		
+		this.ready = false;
+		
+		var handleEvent = function() {
+			Stats.preloadAndSync(false);
+		};
+		
+		this.graphBox.addEventListener('webkitTransitionEnd', handleEvent, false);
+		this.graphBox.addEventListener('transitionend', handleEvent, false);
 	},
 	
-	getNextPeriod2: function() {
-		this.currentDate.setMonth(this.currentDate.getMonth()+1);
-		var sUrl = this.getURL(this.currentDate.getFullYear(), (this.currentDate.getMonth()+1));
-		document.getElementById('graph2').firstChild.src = sUrl;
-		document.getElementById('graph2').className = 'toLeft';
-		this.preloadAndSync();
-	},
-	
-	preloadAndSync: function() {
-		// preload des images prÃ©cÃ©dentes et suivantes
-		var prev = new Image();
-		prev.src = this.getURL(this.currentDate.getFullYear(), this.currentDate.getMonth());
-		
-		var next = new Image();
-		next.src = this.getURL(this.currentDate.getFullYear(), (this.currentDate.getMonth()+2));
-		
-		// mise Ã  jour du formulaire
-		var form = document.forms['date-form'];
-		form.elements['month'].options[this.currentDate.getMonth()].selected = true;
-		
-		var indexYear = Number(this.currentDate.getFullYear())-Number(form.elements['year'].options[0].value);
-		if( indexYear > 0 && indexYear < form.elements['year'].options.length ) {
-			form.elements['year'].options[indexYear].selected = true;
+	preloadAndSync: function(force) {
+		if( this.ready == false || force == true ) {
+			var imgList = this.graphBox.getElementsByTagName('img');
+			
+			this.graphBox.className = '';
+			imgList[0].className = 'prev';
+			imgList[1].className = 'current';
+			imgList[2].className = 'next';
+			
+			// preload des images précédentes et suivantes
+			var prev = new Image();
+			prev.src = this.getURL(new Date(this.currentDate.getFullYear(), this.currentDate.getMonth()-1, 1));
+			imgList[0].setAttribute('src', prev.src);
+			
+			var next = new Image();
+			next.src = this.getURL(new Date(this.currentDate.getFullYear(), (this.currentDate.getMonth()+1), 1));
+			imgList[2].setAttribute('src', next.src);
+			
+			// mise à jour liens
+			this.graphBox.prevLink.setAttribute('href', prev.src.replace('img=graph&', ''));
+			this.graphBox.nextLink.setAttribute('href', next.src.replace('img=graph&', ''));
+			
+			this.ready = true;
 		}
-		
-		// mise Ã  jour liens
-		document.getElementById('prev-period').setAttribute('href', prev.src.replace('img=graph&', ''));
-		document.getElementById('next-period').setAttribute('href', next.src.replace('img=graph&', ''));
 	},
 	
-	getURL: function(year, month) {
-		return './stats.php?img=graph&year='+year+'&month='+month;
+	getURL: function(date) {
+		return './stats.php?img=graph&year='+date.getFullYear()+'&month='+(date.getMonth()+1);
 	},
 	
 	initialize: function() {
-		this.currentDate = new Date(
-			document.getElementsByName('year')[0].value,
-			(Number(document.getElementsByName('month')[0].value)-1),
-			1);
-		this.preloadAndSync();
+		this.graphBox = document.getElementById('graph-box');
+		this.graphBox.prevLink = document.getElementById('prev-period');
+		this.graphBox.nextLink = document.getElementById('next-period');
+		this.form = document.forms['date-form'];
 		
-		document.forms['date-form'].addEventListener('submit', function(evt){
-			Stats.currentDate.setMonth(evt.currentTarget.elements['month'].value);
-			Stats.currentDate.setFullYear(evt.currentTarget.elements['year'].value);
+		this.currentDate = new Date(
+			this.form.elements['year'].value,
+			(Number(this.form.elements['month'].value)-1),
+			1
+		);
+		
+		var img = this.graphBox.firstElementChild.cloneNode(false);
+		this.graphBox.insertBefore(img, this.graphBox.firstElementChild);
+		
+		img = this.graphBox.firstElementChild.cloneNode(false);
+		this.graphBox.appendChild(img);
+		
+		this.preloadAndSync(false);
+		
+		this.form.addEventListener('submit', function(evt){
+			Stats.currentDate.setFullYear(this.elements['year'].value);
+			Stats.currentDate.setMonth(this.elements['month'].value);
+			
+			Stats.preloadAndSync(true);
 			Stats.getPrevPeriod();
 			
 			evt.preventDefault();
 		}, false);
 		
-		document.getElementById('prev-period').addEventListener('click', function(evt){
+		this.graphBox.prevLink.addEventListener('click', function(evt) {
 			Stats.getPrevPeriod();
 			evt.preventDefault();
 		}, false);
-		document.getElementById('next-period').addEventListener('click', function(evt){
+		this.graphBox.nextLink.addEventListener('click', function(evt) {
 			Stats.getNextPeriod();
 			evt.preventDefault();
 		}, false);
 	}
 };
 
-document.addEventListener('DOMContentLoaded', function(){Stats.initialize();}, false);
+document.addEventListener('DOMContentLoaded', function() { Stats.initialize(); }, false);
 //-->
 </script>
 
@@ -126,8 +160,7 @@ document.addEventListener('DOMContentLoaded', function(){Stats.initialize();}, f
 
 <div class="stats">
 	<div id="graph-box">
-		<span id="graph1"><img src="{U_IMG_GRAPH}" alt="" title="{L_IMG_GRAPH}" /></span>
-		<span id="graph2"><img src="{U_IMG_GRAPH}" alt="" title="{L_IMG_GRAPH}" /></span>
+		<img src="{U_IMG_GRAPH}" alt="" title="{L_IMG_GRAPH}" class="current" />
 	</div>
 	<div>
 		<a id="prev-period" href="{U_PREV_PERIOD}">{L_PREV_PERIOD}</a>
