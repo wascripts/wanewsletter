@@ -91,9 +91,9 @@ div#header h1 {
 
 ul#menu {
 	clear: both;
-	background-color: #FAFAFA;
-	background-image: url("images/bande.png");
-	background-repeat: repeat-x;
+	background-color: #E6ECEF;
+	background-image: -webkit-linear-gradient(top, hsl(209, 83%, 93%), hsl(209, 0%, 93%));
+	background-image: linear-gradient(to bottom, hsl(209, 83%, 93%), hsl(209, 0%, 93%));
 	margin: 0;
 	border-width: 1px 0;
 	border-color: black;
