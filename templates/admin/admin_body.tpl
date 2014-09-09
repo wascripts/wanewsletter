@@ -84,8 +84,10 @@
  			switchLink = document.createElement('a');
  			switchLink.appendChild(document.createTextNode('switch'));
  			switchLink.setAttribute('href', '#switch/selectbox');
- 			switchLink.style.cssFloat = 'right';
- 			switchLink.addEventListener('click', switch_selectbox, false);
+ 			switchLink.setAttribute('class', 'notice');
+			switchLink.style.cssFloat = 'right';
+			switchLink.style.marginTop = '0.18em';
+			switchLink.addEventListener('click', switch_selectbox, false);
  			
  			rows[i].cells[0].appendChild(switchLink);
  		}
@@ -107,7 +109,7 @@
 		</tr>
 		<!-- BEGIN auth -->
 		<tr>
-			<td class="notice">{admin_options.auth.LISTE_NAME} <input type="hidden" name="liste_id[]" value="{admin_options.auth.LISTE_ID}" /></td>
+			<td>{admin_options.auth.LISTE_NAME} <input type="hidden" name="liste_id[]" value="{admin_options.auth.LISTE_ID}" /></td>
 			<td>{admin_options.auth.BOX_AUTH_VIEW}</td>
 			<td>{admin_options.auth.BOX_AUTH_EDIT}</td>
 			<td>{admin_options.auth.BOX_AUTH_DEL}</td>
