@@ -45,7 +45,7 @@ var Stats = {
 		opt.textContent = currentYear;
 		
 		if( currentYear < firstYear ) {
-			this.form.elements['year'].add(opt, 0);
+			this.form.elements['year'].add(opt, this.form.elements['year'].options[0]);
 			firstYear = currentYear;
 		}
 		else if( currentYear > lastYear ) {
