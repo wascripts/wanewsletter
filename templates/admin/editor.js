@@ -83,6 +83,11 @@ function make_editor()
  */
 function preview()
 {
+	var width  = (window.screen.width - 200);
+	var height = (window.screen.height - 200);
+	var top    = 50;
+	var left   = ((window.screen.width - width)/2);
+
 	var subject	 = document.forms['send-form'].elements['subject'].value;
 	var preview	 = window.open('','apercu','width=' + width + ',height=' + height + ',marginleft=2,topmargin=2,left=' + left + ',top=' + top + ',toolbar=0,location=0,directories=0,status=0,scrollbars=1,copyhistory=0,menuBar=0');
 	
@@ -208,11 +213,6 @@ function storeCaret()
 		this.caretPos = document.selection.createRange().duplicate();
 	}
 }
-
-var width  = (window.screen.width - 200);
-var height = (window.screen.height - 200);
-var top    = 50;
-var left   = ((window.screen.width - width)/2);
 
 // Need to work in IE < 9, so we don't use W3C DOM Events model here.
 window.onload = function() { make_editor(); };
