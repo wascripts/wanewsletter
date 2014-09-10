@@ -63,6 +63,7 @@ var Stats = {
 		
 		this.graphBox.addEventListener('webkitTransitionEnd', handleEvent, false);
 		this.graphBox.addEventListener('transitionend', handleEvent, false);
+		window.setTimeout(function(){ Stats.preloadAndSync(false); }, 700);/* Compatibilité avec IE9 */
 	},
 	
 	preloadAndSync: function(force) {
