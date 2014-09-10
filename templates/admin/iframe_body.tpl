@@ -1,3 +1,4 @@
+<form method="get" action="./view.php#view">
 <div class="block">
 	<h2 id="view">{L_SUBJECT}&nbsp;: <q>{SUBJECT}</q></h2>
 	
@@ -23,9 +24,10 @@
 	<!-- END joined_files -->
 	
 	<!-- BEGIN format_box -->
-	<div class="bottom">
+	<div class="bottom"> {format_box.S_HIDDEN_FIELDS}
 		<span class="notice">{format_box.L_FORMAT}&nbsp;:</span> {format_box.FORMAT_BOX}
 		<button type="submit">{format_box.L_GO_BUTTON}</button>
 	</div>
 	<!-- END format_box -->
 </div>
+</form>

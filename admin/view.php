@@ -2058,7 +2058,7 @@ else if( $mode == 'log' )
 		
 		if( $action == 'view' && is_array($logdata) )
 		{
-			$format = ( !empty($_POST['format']) ) ? intval($_POST['format']) : 0;
+			$format = ( !empty($_GET['format']) ) ? intval($_GET['format']) : 0;
 			
 			$output->set_filenames(array(
 				'iframe_body' => 'iframe_body.tpl'
@@ -2081,9 +2081,19 @@ else if( $mode == 'log' )
 			{
 				require WA_ROOTDIR . '/includes/functions.box.php';
 				
+				$output->addHiddenField('mode', 'log');
+				$output->addHiddenField('action', 'view');
+				$output->addHiddenField('id', $log_id);
+				
+				if( $page_id > 1 )
+				{
+					$output->addHiddenField('page', $page_id);
+				}
+				
 				$output->assign_block_vars('format_box', array(
 					'L_FORMAT'    => $lang['Format'],
 					'L_GO_BUTTON' => $lang['Button']['go'],
+					'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 					'FORMAT_BOX'  => format_box('format', $format, true)
 				));
 			}

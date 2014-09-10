@@ -51,8 +51,8 @@
 	<div><button type="submit" name="delete">{delete_option.L_DELETE}</button></div>
 	<!-- END delete_option -->
 </div>
+</form>
 
 {IFRAME}
-</form>
 
 {LISTBOX}
