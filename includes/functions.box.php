@@ -98,12 +98,12 @@ function format_box($select_name, $default_format = 0, $option_submit = false, $
 		$format_box .= '>';
 	}
 	
-	$format_box .= '<option value="1"' . (( $default_format == FORMAT_TEXTE ) ? 'selected="selected"' : '' ) . '>texte</option>';
-	$format_box .= '<option value="2"' . (( $default_format == FORMAT_HTML ) ? 'selected="selected"' : '' ) . '>html</option>';
+	$format_box .= '<option value="1"' . (( $default_format == FORMAT_TEXTE ) ? ' selected="selected"' : '' ) . '>texte</option>';
+	$format_box .= '<option value="2"' . (( $default_format == FORMAT_HTML ) ? ' selected="selected"' : '' ) . '>html</option>';
 	
 	if( $multi_format )
 	{
-		$format_box .= '<option value="3"' . (( $default_format == FORMAT_MULTIPLE ) ? 'selected="selected"' : '' ) . '>texte &amp; html</option>';
+		$format_box .= '<option value="3"' . (( $default_format == FORMAT_MULTIPLE ) ? ' selected="selected"' : '' ) . '>texte &amp; html</option>';
 	}
 	
 	$format_box .= '</select>';
