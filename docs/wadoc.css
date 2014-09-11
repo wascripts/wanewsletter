@@ -34,7 +34,7 @@ div#smallheader, div#global, address#footer {
 }
 
 div#global { counter-reset: item; }
-div#global div.bloc[id] h2:before {/* div.bloc[id] pour ne pas cibler le h2 "sommaire" */
+div#global div.block[id] h2:before {/* div.bloc[id] pour ne pas cibler le h2 "sommaire" */
 	content: counter(item, decimal) ".\00A0";
 	counter-increment: item;
 }
@@ -44,30 +44,42 @@ ul, ol {
 	padding: 0;
 	line-height: 1.4;
 }
-ol#toc { margin-left: 60px; }
 li { margin: 2px 0; }
-ol { list-style-type: decimal; }
 
-.bloc h3 {
+.block > ol#toc,
+.block > div.content {
+	background-color: #E3E0DD;
+	margin: 1px;
+	padding: 1em 2em;
+}
+
+.block > ol#toc {
+	padding-left: 4em;
+	list-style-type: decimal;
+}
+
+.block h3 {
 	background-color: transparent;
-	margin: 1.2em 1.8em .6em;
+	margin: 1.2em 0 .6em;
 	font-size: 1em;
 	font-weight:bold;
 	color: black;
 }
 
-.bloc p { line-height: 1.5; margin-left: .8em; margin-right: .8em; }
+.block p {
+	margin: 1em 0;
+	padding: 0;
+	line-height: 1.5;
+}
 code { color: green; }
 
 pre {
-	overflow: auto;
 	background-color: #FAFAFA;
 	border: 1px dashed #A4A6A8;
 	margin: .5em 2em;
 	padding: .5em;
-	text-align: left;
-	font: normal 1em/1.2em "Courier New", Courier, monospace;
 	color: black;
+	white-space: pre-wrap;
 }
 
 /*
@@ -81,6 +93,5 @@ span.hl-keyword { background-color: inherit; color: green; }
 span.hl-string  { background-color: inherit; color: #D00; }
 
 /* Section Contribuer... */
-address#address,
-form { margin: 15px 0 15px 10%; }
+address#address { margin: 15px 0 15px 5%; }
 
