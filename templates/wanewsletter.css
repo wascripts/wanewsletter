@@ -446,6 +446,7 @@ form#smallbox {
 #admin_id option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
 
 input, select, button {
+	line-height: normal;/* Sur IE, les <button> héritent du line-height du parent */
 	font-family: inherit;
 }
 
