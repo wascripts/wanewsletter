@@ -449,13 +449,16 @@ input, select, button {
 	line-height: normal;/* Sur IE, les <button> héritent du line-height du parent */
 	font-family: inherit;
 }
+/* Chrome applique par défaut une marge de 2px sur ces éléments */
+input, select, button, textarea {
+	margin: 0;
+}
 
 button {
 	background-color: #EFEFEF;
 	background-image: -webkit-linear-gradient(top, hsl(0, 0%, 97%), hsl(0, 0%, 88%));
 	background-image: linear-gradient(to bottom, hsl(0, 0%, 97%), hsl(0, 0%, 88%));
 	box-shadow: 0 0 1px rgba(0,0,0,0.2);
-	margin: 0;
 	border-radius: 3px;
 	border: 1px solid #AAA;
 	padding: 2px 10px;
