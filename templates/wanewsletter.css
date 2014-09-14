@@ -192,7 +192,7 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 }
 .block.compact { margin-left: 8%; margin-right: 8%; }
 
-.block h2 {
+.block > h2 {
 	background-color: #385693;
 	background-image: -webkit-linear-gradient(top, hsl(220, 45%, 35%) 15%, hsl(220, 25%, 60%));
 	background-image: linear-gradient(to bottom, hsl(220, 45%, 35%) 15%, hsl(220, 25%, 60%));
@@ -219,6 +219,14 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	text-align: center;
 }
 
+.block > p.explain {
+	background-color: #C2BFBC;
+	margin: 0 1px;
+	padding: .5em 1em;
+	font-size: .85em;
+}
+.block > h2 + p.explain { margin-top: 1px; }
+
 .warning {
 	background-color: #FDC;
 	margin: 1em 0;
@@ -235,16 +243,6 @@ div.textinput {
 	color: black;
 }
 div.textinput textarea { min-width: 600px; width: 80%; }
-
-div.explain {
-	background-color: #C2BFBC;
-	margin: 0 1px;
-	padding: .5em 1em;
-	font-size: .85em;
-	line-height: 1.5;
-	color: black;
-}
-h2 + div.explain { margin-top: 1px; }
 
 div.bottom {
 	background-color: #CCC;

@@ -2,7 +2,7 @@
 <div class="block compact">
 	<h2>{TITLE}</h2>
 	
-	<div class="explain">{L_EXPLAIN}</div>
+	<p class="explain">{L_EXPLAIN}</p>
 	
 	<table class="dataset">
 		<tr>

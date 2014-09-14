@@ -2,7 +2,7 @@
 <div class="block compact">
 	<h2>{L_TITLE_BAN}</h2>
 	
-	<div class="explain">{L_EXPLAIN_BAN}</div>
+	<p class="explain">{L_EXPLAIN_BAN}</p>
 	
 	<table class="dataset">
 		<tr>
@@ -11,7 +11,7 @@
 		</tr>
 	</table>
 	
-	<div class="explain">{L_EXPLAIN_UNBAN}</div>
+	<p class="explain">{L_EXPLAIN_UNBAN}</p>
 	
 	<table class="dataset">
 		<tr>

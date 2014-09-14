@@ -4,7 +4,7 @@
 <div class="block">
 	<h2>{TITLE}</h2>
 	
-	<div class="explain">{L_EXPLAIN_EMAIL}</div>
+	<p class="explain">{L_EXPLAIN_EMAIL}</p>
 	
 	<table class="dataset">
 		<tr>

@@ -2,7 +2,7 @@
 <div class="block compact">
 	<h2>{L_TITLE_EXT}</h2>
 	
-	<div class="explain">{L_EXPLAIN_TO_FORBID}</div>
+	<p class="explain">{L_EXPLAIN_TO_FORBID}</p>
 	
 	<table class="dataset compact">
 		<tr>
@@ -11,7 +11,7 @@
 		</tr>
 	</table>
 	
-	<div class="explain">{L_EXPLAIN_TO_REALLOW}</div>
+	<p class="explain">{L_EXPLAIN_TO_REALLOW}</p>
 	
 	<table class="dataset compact">
 		<tr>

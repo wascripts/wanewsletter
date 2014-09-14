@@ -2,7 +2,7 @@
 <div class="block compact">
 	<h2>{L_TITLE_IMPORT}</h2>
 	
-	<div class="explain">{L_EXPLAIN_IMPORT}</div>
+	<p class="explain">{L_EXPLAIN_IMPORT}</p>
 	
 	<table class="dataset">
 		<tr>

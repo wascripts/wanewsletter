@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="block compact">
 	<h2>{L_TITLE_EXPORT}</h2>
 	
-	<div class="explain">{L_EXPLAIN_EXPORT}</div>
+	<p class="explain">{L_EXPLAIN_EXPORT}</p>
 	
 	<table class="dataset">
 		<tr>

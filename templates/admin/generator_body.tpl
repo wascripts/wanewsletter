@@ -2,7 +2,7 @@
 <div class="block compact">
 	<h2>{L_TITLE_GENERATOR}</h2>
 	
-	<div class="explain">{L_EXPLAIN_GENERATOR}</div>
+	<p class="explain">{L_EXPLAIN_GENERATOR}</p>
 	
 	<table class="dataset">
 		<tr>

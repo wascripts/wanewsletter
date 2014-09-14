@@ -57,7 +57,7 @@
 	
 	<h2>{L_TITLE_PURGE}</h2>
 	
-	<div class="explain">{L_EXPLAIN_PURGE}</div>
+	<p class="explain">{L_EXPLAIN_PURGE}</p>
 	
 	<table class="dataset">
 		<tr>
@@ -77,7 +77,7 @@
 	
 	<h2>{L_TITLE_CRON}</h2>
 	
-	<div class="explain">{L_EXPLAIN_CRON}</div>
+	<p class="explain">{L_EXPLAIN_CRON}</p>
 	
 	<table class="dataset">
 		<tr>

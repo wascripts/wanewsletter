@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() { Stats.initialize(); }
 <div class="block">
 	<h2>{L_TITLE}</h2>
 	
-	<div class="explain">{L_EXPLAIN_STATS}</div>
+	<p class="explain">{L_EXPLAIN_STATS}</p>
 	
 	<div class="bottom">
 		<select name="year">{YEAR_LIST}</select>

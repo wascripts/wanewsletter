@@ -38,7 +38,7 @@ function checkForm_editAboProfil()
 		</tr>
 	</table>
 	
-	<div class="explain">{L_LISTE_TO_REGISTER}</div>
+	<p class="explain">{L_LISTE_TO_REGISTER}</p>
 	
 	<table class="dataset">
 		<!-- BEGIN listerow -->

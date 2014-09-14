@@ -89,7 +89,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	
 	<h2>{TITLE_CONFIG_COOKIES}</h2>
 	
-	<div class="explain">{L_EXPLAIN_COOKIES}</div>
+	<p class="explain">{L_EXPLAIN_COOKIES}</p>
 	
 	<table class="dataset">
 		<tr>
@@ -108,7 +108,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	
 	<h2>{TITLE_CONFIG_JOINED_FILES}</h2>
 	
-	<div class="explain">{L_EXPLAIN_JOINED_FILES}</div>
+	<p class="explain">{L_EXPLAIN_JOINED_FILES}</p>
 	
 	<table class="dataset">
 		<tr>
@@ -163,7 +163,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	
 	<h2>{TITLE_CONFIG_EMAIL}</h2>
 	
-	<div class="explain">{L_EXPLAIN_EMAIL}</div>
+	<p class="explain">{L_EXPLAIN_EMAIL}</p>
 	
 	<table class="dataset">
 		<tr>
@@ -220,7 +220,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 	<!-- BEGIN extension_gd -->
 	<h2>{extension_gd.TITLE_CONFIG_STATS}</h2>
 	
-	<div class="explain">{extension_gd.L_EXPLAIN_STATS}</div>
+	<p class="explain">{extension_gd.L_EXPLAIN_STATS}</p>
 	
 	<table class="dataset">
 		<tr>

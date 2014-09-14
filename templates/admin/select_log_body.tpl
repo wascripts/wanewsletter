@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	<!-- END load_draft -->
 	
 	<div id="loadByURL">
-	<div class="explain">{L_EXPLAIN_LOAD}</div>
+	<p class="explain">{L_EXPLAIN_LOAD}</p>
 	
 	<table class="dataset compact">
 		<!-- BEGIN load_text_by_url -->

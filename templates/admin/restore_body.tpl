@@ -2,7 +2,7 @@
 <div class="block compact">
 	<h2>{L_TITLE_RESTORE}</h2>
 
-	<div class="explain">{L_EXPLAIN_RESTORE}</div>
+	<p class="explain">{L_EXPLAIN_RESTORE}</p>
 
 	<table class="dataset">
 		<!-- BEGIN upload_file -->

@@ -24,7 +24,7 @@
 		</tr>
 	</table>
 	
-	<div class="explain">{L_LISTE_TO_REGISTER}&nbsp;:</div>
+	<p class="explain">{L_LISTE_TO_REGISTER}&nbsp;:</p>
 	
 	<table class="listing">
 		<!-- BEGIN listerow -->
