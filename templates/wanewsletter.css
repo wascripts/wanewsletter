@@ -475,6 +475,7 @@ button:hover {
 button:focus {
 	border-color: #003B78;
 	box-shadow: 0 0 2px #003B78;
+	outline: none;/* Chrome applique par défaut un outline sur les button:focus */
 }
 button:active,
 button:disabled {
