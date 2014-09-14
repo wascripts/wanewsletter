@@ -206,15 +206,15 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	color: #FAFAFA;
 }
 
-.block p {
-	margin: 0;
-	padding: 1em;
-	line-height: 1.5;
-}
-
-.block p.message {
+.block > p {
 	background-color: #E3E0DD;
 	margin: 1px;
+	padding: 1em;
+	line-height: 1.5;
+	color: black;
+}
+
+.block > p.message {
 	padding: 2em;
 	text-align: center;
 }
