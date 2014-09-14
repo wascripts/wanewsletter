@@ -13,7 +13,7 @@
 			</td>
 			<td>
 				<input type="hidden" name="MAX_FILE_SIZE" value="{upload_file.MAX_FILE_SIZE}" />
-				<input type="file" id="file_upload" name="file_upload" size="25" />
+				<input type="file" id="file_upload" name="file_upload" data-button-label="{upload_file.L_BROWSE_BUTTON}" />
 			</td>
 		</tr>
 		<!-- END upload_file -->

@@ -101,7 +101,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 		<tr>
 			<td>
 				<input type="hidden" name="MAX_FILE_SIZE" value="{joined_files.upload_input.MAX_FILE_SIZE}" />
-				<input type="file" name="join_file" size="30" />
+				<input type="file" name="join_file" data-button-label="{joined_files.upload_input.L_BROWSE_BUTTON}" />
 				<span class="notice">({joined_files.upload_input.L_MAXIMUM_SIZE})</span>
 			</td>
 		</tr>

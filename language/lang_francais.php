@@ -126,6 +126,7 @@ $lang['Button']['del_account']      = "Supprimer ce compte";
 $lang['Button']['links']            = "Placer le lien de désinscription";
 $lang['Button']['dl']               = "Télécharger";
 $lang['Button']['conf']             = "Confirmer";
+$lang['Button']['browse']           = "Parcourir";
 
 
 //

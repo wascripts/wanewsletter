@@ -126,6 +126,7 @@ $lang['Button']['del_account']      = "Delete this account";
 $lang['Button']['links']            = "Put the unsubscribe link";
 $lang['Button']['dl']               = "Download";
 $lang['Button']['conf']             = "Confirm";
+$lang['Button']['browse']           = "Browse";
 
 
 //

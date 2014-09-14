@@ -159,5 +159,61 @@ function show(evt)
 	evt.preventDefault();
 }
 
+/**
+ * Utilisée pour masquer les champs file et afficher à la place un élément
+ * <button> mieux intégré graphiquement.
+ */
+function initUploadButton(inputFile)
+{
+	/*
+	 * L'attribut HTML5 hidden est le meilleur choix, car il retire aussi
+	 * l'élément de la navigation au clavier
+	 */
+	if( typeof(inputFile.hidden) != 'undefined' ) {
+		inputFile.hidden = true;
+	}
+	else {
+		inputFile.style.position = 'absolute';
+		inputFile.style.left = '9999px';
+		inputFile.style.width = '0';
+		inputFile.style.overflow = 'hidden';
+	}
+	
+	var filename = document.createElement('span');
+	filename.style.margin = '0 1em';
+	inputFile.parentNode.insertBefore(filename, inputFile.parentNode.firstElementChild);
+	
+	var textLabel = inputFile.getAttribute('data-button-label');
+	var button = document.createElement('button');
+	button.setAttribute('type', 'button');
+	button.textContent = textLabel + '\u2026';
+	inputFile.parentNode.insertBefore(button, inputFile.parentNode.firstElementChild);
+	
+	button.addEventListener('click', function() {
+		inputFile.click();
+	}, false);
+	
+	inputFile.addEventListener('change', function() {
+		if( this.files.length == 0 ) {
+			filename.textContent = '';
+		}
+		else {
+			filename.textContent = this.files[0].name;
+		}
+	}, false);
+	inputFile.form.addEventListener('reset', function() {
+		filename.textContent = '';
+	}, false);
+}
+
 document.addEventListener('DOMContentLoaded', make_admin, false);
+document.addEventListener('DOMContentLoaded', function() {
+	if( window.FileList ) {
+		var inputList = document.querySelectorAll('input[type="file"][data-button-label]');
+		
+		for( var i = 0, m = inputList.length; i < m; i++ ) {
+			initUploadButton(inputList[i]);
+		}
+	}
+}, false);
 
