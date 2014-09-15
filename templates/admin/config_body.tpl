@@ -1,52 +1,33 @@
 <script>
 <!--
-var use_ftp_status  = {USE_FTP_STATUS};
-var use_smtp_status = {USE_SMTP_STATUS};
-
-function display_block(evt)
+function toggleView(evt)
 {
-	if( evt.currentTarget.checked == true ) {
-		var dVal = ( evt.currentTarget.value == 1 ) ? 'table-row' : 'none';
-		var node = evt.currentTarget.parentNode.parentNode;
-		
-		while( (node = node.nextSibling) != null ) {
-			if( node.nodeType == Node.ELEMENT_NODE && node.nodeName.toLowerCase() == 'tr' ) {
-				node.style.display = dVal;
-			}
-		}
+	if( this.checked == true ) {
+		document.getElementById(this.name + '_choice').className =
+			( this.value == 1 ) ? '' : 'inactive';
 	}
 }
 
-if( typeof(document.styleSheets) != 'undefined' ) {
+document.addEventListener('DOMContentLoaded', function() {
+	document.styleSheets[0].insertRule(
+		'table.dataset tr.inactive ~ tr { display: none; }',
+		document.styleSheets[0].cssRules.length-1
+	);
 	
-	document.addEventListener('DOMContentLoaded', function() {
-		if( use_ftp_status == false ) {
-			document.styleSheets[0].insertRule(
-				'table.dataset tr#use_ftp_choice ~ tr { display: none; }',
-				document.styleSheets[0].cssRules.length-1
-			);
-		}
-		
-		if( use_smtp_status == false ) {
-			document.styleSheets[0].insertRule(
-				'table.dataset tr#use_smtp_choice ~ tr { display: none; }',
-				document.styleSheets[0].cssRules.length-1
-			);
-		}
-		
-		document.forms[0].elements['use_ftp'][0].addEventListener('change', display_block, false);
-		document.forms[0].elements['use_ftp'][1].addEventListener('change', display_block, false);
-		
-		document.forms[0].elements['use_smtp'][0].addEventListener('change', display_block, false);
-		document.forms[0].elements['use_smtp'][1].addEventListener('change', display_block, false);
-	}, false);
-}
+	var configForm = document.forms['config-form'];
+	
+	configForm.elements['use_ftp'][0].addEventListener('change', toggleView, false);
+	configForm.elements['use_ftp'][1].addEventListener('change', toggleView, false);
+	
+	configForm.elements['use_smtp'][0].addEventListener('change', toggleView, false);
+	configForm.elements['use_smtp'][1].addEventListener('change', toggleView, false);
+}, false);
 //-->
 </script>
 
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./config.php">
+<form id="config-form" method="post" action="./config.php">
 <div class="block">
 	<h2>{TITLE_CONFIG_LANGUAGE}</h2>
 	
@@ -120,7 +101,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 			<td><input type="text" id="max_filesize" name="max_filesize" value="{MAX_FILESIZE}" size="7" maxlength="8" /> <span class="notice">{L_OCTETS}</span></td>
 		</tr>
 		<!-- BEGIN extension_ftp -->
-		<tr id="use_ftp_choice">
+		<tr id="use_ftp_choice" class="{extension_ftp.FTP_ROW_CLASS}">
 			<td><label>{extension_ftp.L_USE_FTP}&nbsp;:</label></td>
 			<td>
 				<input type="radio" id="use_ftp_yes" name="use_ftp" value="1" {extension_ftp.CHECKED_USE_FTP_ON}/>
@@ -190,7 +171,7 @@ if( typeof(document.styleSheets) != 'undefined' ) {
 			<td><label for="emails_sended">{L_EMAILS_SENDED}&nbsp;:</label><br /><span class="notice">{L_EMAILS_SENDED_NOTE}</span></td>
 			<td><input type="text" id="emails_sended" name="emails_sended" value="{EMAILS_SENDED}" size="5" maxlength="5" class="number" /></td>
 		</tr>
-		<tr id="use_smtp_choice">
+		<tr id="use_smtp_choice" class="{SMTP_ROW_CLASS}">
 			<td><label>{L_USE_SMTP}&nbsp;:{WARNING_SMTP}</label><br /><span class="notice">{L_USE_SMTP_NOTE}</span></td>
 			<td>
 				<input type="radio" id="use_smtp_on" name="use_smtp" value="1"{CHECKED_USE_SMTP_ON}{DISABLED_SMTP} />

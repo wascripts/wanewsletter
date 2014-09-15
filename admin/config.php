@@ -327,16 +327,14 @@ $output->assign_vars( array(
 	'CHECKED_CHECK_EMAIL_ON'    => ( $new_config['check_email_mx'] ) ? ' checked="checked"' : '',
 	'CHECKED_CHECK_EMAIL_OFF'   => ( !$new_config['check_email_mx'] ) ? ' checked="checked"' : '',
 	'EMAILS_SENDED'             => $new_config['emails_sended'],
+	'SMTP_ROW_CLASS'            => ( $new_config['use_smtp'] ) ? '' : 'inactive',
 	'CHECKED_USE_SMTP_ON'       => ( $new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'CHECKED_USE_SMTP_OFF'      => ( !$new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'DISABLED_SMTP'             => ( !function_exists('fsockopen') ) ? ' disabled="disabled"' : '',
 	'WARNING_SMTP'              => ( !function_exists('fsockopen') ) ? ' <span style="color: red;">[not available]</span>' : '',
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
-	'SMTP_USER'                 => $new_config['smtp_user'],
-	
-	'USE_FTP_STATUS'            => ( $new_config['use_ftp'] ) ? 'true' : 'false',
-	'USE_SMTP_STATUS'           => ( $new_config['use_smtp'] ) ? 'true' : 'false'
+	'SMTP_USER'                 => $new_config['smtp_user']
 ));
 
 if( extension_loaded('ftp') )
@@ -353,6 +351,7 @@ if( extension_loaded('ftp') )
 		'L_FTP_USER'           => $lang['Ftp_user'],
 		'L_FTP_PASS'           => $lang['Ftp_pass'],
 		
+		'FTP_ROW_CLASS'        => ( $new_config['use_ftp'] ) ? '' : 'inactive',
 		'CHECKED_USE_FTP_ON'   => ( $new_config['use_ftp'] ) ? ' checked="checked"' : '',
 		'CHECKED_USE_FTP_OFF'  => ( !$new_config['use_ftp'] ) ? ' checked="checked"' : '',
 		'CHECKED_FTP_PASV_ON'  => ( $new_config['ftp_pasv'] ) ? ' checked="checked"' : '',
