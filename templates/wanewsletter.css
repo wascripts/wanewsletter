@@ -254,7 +254,7 @@ div.bottom {
 	color: black;
 }
 /* Exception page stats, sans impacter la page de chargement des brouillons */
-div:not(#loadByURL) + div.bottom { margin-top: 1px }
+p.explain + div.bottom { margin-top: 1px }
 
 ul.links         { margin: 1% 0 -1em; padding: 0; text-align: left; }
 ul.links.special { margin: 1% 8% -1em; }
