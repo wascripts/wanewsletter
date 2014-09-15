@@ -474,7 +474,7 @@ $m_list = '';
 
 $y = date('Y', $listdata['liste_startdate']);
 $n = date('n', $listdata['liste_startdate']);
-$c = date('Y');
+$c = max(date('Y'), $year);
 
 if( $y == $c )
 {
@@ -517,6 +517,8 @@ if( $next_m > 12 )
 	$next_y++;
 }
 
+$aTitle = sprintf('%s &ndash; %%s', $lang['Module']['stats']);
+
 $output->assign_vars(array(
 	'L_TITLE'         => $lang['Title']['stats'],
 	'L_EXPLAIN_STATS' => nl2br($lang['Explain']['stats']),
@@ -528,6 +530,8 @@ $output->assign_vars(array(
 	'MONTH_LIST'      => $m_list,
 	'L_PREV_PERIOD'   => $lang['Prev_month'],
 	'L_NEXT_PERIOD'   => $lang['Next_month'],
+	'L_PREV_TITLE'    => sprintf($aTitle, convert_time('F Y', mktime(0, 0, 0, $prev_m, 1, $prev_y))),
+	'L_NEXT_TITLE'    => sprintf($aTitle, convert_time('F Y', mktime(0, 0, 0, $next_m, 1, $next_y))),
 	'U_PREV_PERIOD'   => sessid('./stats.php?year=' . $prev_y . '&amp;month=' . $prev_m),
 	'U_NEXT_PERIOD'   => sessid('./stats.php?year=' . $next_y . '&amp;month=' . $next_m),
 	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;year=' . $year . '&amp;month=' . $month),

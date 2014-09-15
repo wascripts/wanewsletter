@@ -11,10 +11,22 @@ var Stats = {
 	graphBox: null,
 	ready: false,
 	
-	getPrevPeriod: function() {
+	setPrevPeriod: function(prevDate) {
+		var prevImg = this.graphBox.firstElementChild;
+		var prevURL = this.getURL(prevDate);
+		var prev = new Image();
+		prev.src = prevURL.replace('?', '?img=graph&');
+		prevImg.setAttribute('src', prev.src);
+		
+		this.graphBox.prevLink.setAttribute('href', prevURL);
+		this.graphBox.prevLink.setAttribute('title', this.getTitle(prevDate));
+	},
+	
+	getPrevPeriod: function(prevDate) {
 		
 		if( this.ready == true ) {
-			this.currentDate.setMonth(this.currentDate.getMonth()-1);
+			this.setPrevPeriod(prevDate);
+			this.currentDate = prevDate;
 			
 			this.graphBox.className = 'transitionToPrev';
 			this.graphBox.insertBefore(this.graphBox.lastElementChild, this.graphBox.firstElementChild);
@@ -23,10 +35,22 @@ var Stats = {
 		}
 	},
 	
-	getNextPeriod: function() {
+	setNextPeriod: function(nextDate) {
+		var nextImg = this.graphBox.lastElementChild;
+		var nextURL = this.getURL(nextDate);
+		var next = new Image();
+		next.src = nextURL.replace('?', '?img=graph&');
+		nextImg.setAttribute('src', next.src);
+		
+		this.graphBox.nextLink.setAttribute('href', nextURL);
+		this.graphBox.nextLink.setAttribute('title', this.getTitle(nextDate));
+	},
+	
+	getNextPeriod: function(nextDate) {
 		
 		if( this.ready == true ) {
-			this.currentDate.setMonth(this.currentDate.getMonth()+1);
+			this.setNextPeriod(nextDate);
+			this.currentDate = nextDate;
 			
 			this.graphBox.className = 'transitionToNext';
 			this.graphBox.appendChild(this.graphBox.firstElementChild);
@@ -58,16 +82,16 @@ var Stats = {
 		this.ready = false;
 		
 		var handleEvent = function() {
-			Stats.preloadAndSync(false);
+			Stats.preloadAndSync();
 		};
 		
 		this.graphBox.addEventListener('webkitTransitionEnd', handleEvent, false);
 		this.graphBox.addEventListener('transitionend', handleEvent, false);
-		window.setTimeout(function(){ Stats.preloadAndSync(false); }, 700);/* Compatibilité avec IE9 */
+		window.setTimeout(function(){ Stats.preloadAndSync(); }, 700);/* Compatibilité avec IE9 */
 	},
 	
-	preloadAndSync: function(force) {
-		if( this.ready == false || force == true ) {
+	preloadAndSync: function() {
+		if( this.ready == false ) {
 			var imgList = this.graphBox.getElementsByTagName('img');
 			
 			this.graphBox.className = '';
@@ -75,32 +99,55 @@ var Stats = {
 			imgList[1].className = 'current';
 			imgList[2].className = 'next';
 			
-			// preload des images précédentes et suivantes
-			var prev = new Image();
-			prev.src = this.getURL(new Date(this.currentDate.getFullYear(), this.currentDate.getMonth()-1, 1));
-			imgList[0].setAttribute('src', prev.src);
-			
-			var next = new Image();
-			next.src = this.getURL(new Date(this.currentDate.getFullYear(), (this.currentDate.getMonth()+1), 1));
-			imgList[2].setAttribute('src', next.src);
-			
-			// mise à jour liens
-			this.graphBox.prevLink.setAttribute('href', prev.src.replace('img=graph&', ''));
-			this.graphBox.nextLink.setAttribute('href', next.src.replace('img=graph&', ''));
+			this.setPrevPeriod(new Date(this.currentDate.getFullYear(), this.currentDate.getMonth()-1, 1));
+			this.setNextPeriod(new Date(this.currentDate.getFullYear(), this.currentDate.getMonth()+1, 1));
 			
 			this.ready = true;
 		}
 	},
 	
 	getURL: function(date) {
-		return './stats.php?img=graph&year='+date.getFullYear()+'&month='+(date.getMonth()+1);
+		return this.aURL
+			.replace('?img=graph&',  '?')
+			.replace(/year=[0-9]+/,  'year='+date.getFullYear())
+			.replace(/month=[0-9]+/, 'month='+(date.getMonth()+1));
 	},
+	
+	getTitle: function(date) {
+		var title = String(date.getFullYear()) + '/' + String(date.getMonth()+1);
+		
+		// On détecte l'usage avancé possible de toLocaleString() en passant
+		// un argument volontairement erroné et en testant le type d'erreur
+		try {
+			date.toLocaleDateString("i");
+		}
+		catch(e) {
+			if( e.name === "RangeError" ) {
+				title = date.toLocaleDateString(document.documentElement.lang, { month: "long", year: "numeric" });
+			}
+		}
+		
+		return this.aTitle + ' \u2013 ' + title;
+	},
+	
+	pushHistory: function() {
+		window.history.pushState(
+			{ year: this.currentDate.getFullYear(), month: this.currentDate.getMonth() },
+			this.getTitle(this.currentDate),
+			this.getURL(this.currentDate)
+		);
+ 	},
 	
 	initialize: function() {
 		this.graphBox = document.getElementById('graph-box');
 		this.graphBox.prevLink = document.getElementById('prev-period');
 		this.graphBox.nextLink = document.getElementById('next-period');
 		this.form = document.forms['date-form'];
+		
+		// Modèles pour les titres et URL des liens et des entrées dans l'historique
+		this.aTitle = this.graphBox.prevLink.getAttribute('title');
+		this.aTitle = this.aTitle.substring(0, this.aTitle.indexOf('\u2013')-1);
+		this.aURL   = this.graphBox.firstElementChild.getAttribute('src');
 		
 		this.currentDate = new Date(
 			this.form.elements['year'].value,
@@ -114,26 +161,59 @@ var Stats = {
 		img = this.graphBox.firstElementChild.cloneNode(false);
 		this.graphBox.appendChild(img);
 		
-		this.preloadAndSync(false);
+		this.preloadAndSync();
 		
+		// Formulaire de choix de période
 		this.form.addEventListener('submit', function(evt){
-			Stats.currentDate.setFullYear(this.elements['year'].value);
-			Stats.currentDate.setMonth(this.elements['month'].value);
+			var newDate = new Date(this.elements['year'].value, (this.elements['month'].value-1), 1);
 			
-			Stats.preloadAndSync(true);
-			Stats.getPrevPeriod();
+			if( newDate.getTime() < Stats.currentDate.getTime() ) {
+				Stats.getPrevPeriod(newDate);
+			}
+			else {
+				Stats.getNextPeriod(newDate);
+			}
 			
+			Stats.pushHistory();
 			evt.preventDefault();
 		}, false);
 		
+		// Liens précédent et suivant
 		this.graphBox.prevLink.addEventListener('click', function(evt) {
-			Stats.getPrevPeriod();
+			Stats.getPrevPeriod(new Date(Stats.currentDate.getFullYear(), Stats.currentDate.getMonth()-1, 1));
+			Stats.pushHistory();
 			evt.preventDefault();
 		}, false);
 		this.graphBox.nextLink.addEventListener('click', function(evt) {
-			Stats.getNextPeriod();
+			Stats.getNextPeriod(new Date(Stats.currentDate.getFullYear(), Stats.currentDate.getMonth()+1, 1));
+			Stats.pushHistory();
 			evt.preventDefault();
 		}, false);
+		
+		// Gestion de l'historique du navigateur
+		if( window.history && window.history.pushState ) {
+			window.history.replaceState(
+				{ year: this.currentDate.getFullYear(), month: this.currentDate.getMonth() },
+				this.getTitle(this.currentDate),
+				this.getURL(this.currentDate)
+			);
+			
+			window.addEventListener('popstate', function(evt) {
+				if( evt.state ) {
+					var newDate = new Date(evt.state.year, evt.state.month, 1);
+					
+					if( newDate.getTime() < Stats.currentDate.getTime() ) {
+						Stats.getPrevPeriod(newDate);
+					}
+					else {
+						Stats.getNextPeriod(newDate);
+					}
+				}
+			}, false);
+		}
+		else {
+			this.pushHistory = function() { };
+		}
 	}
 };
 
@@ -164,9 +244,9 @@ document.addEventListener('DOMContentLoaded', function() { Stats.initialize(); }
 		<img src="{U_IMG_GRAPH}" alt="" title="{L_IMG_GRAPH}" class="current" />
 	</div>
 	<div>
-		<a id="prev-period" href="{U_PREV_PERIOD}">{L_PREV_PERIOD}</a>
+		<a id="prev-period" href="{U_PREV_PERIOD}" title="{L_PREV_TITLE}">{L_PREV_PERIOD}</a>
 		&ndash;
-		<a id="next-period" href="{U_NEXT_PERIOD}">{L_NEXT_PERIOD}</a>
+		<a id="next-period" href="{U_NEXT_PERIOD}" title="{L_NEXT_TITLE}">{L_NEXT_PERIOD}</a>
 	</div>
 </div>
 
