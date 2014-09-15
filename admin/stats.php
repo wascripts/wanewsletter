@@ -62,14 +62,39 @@ $month = ( !empty($_GET['month']) ) ? intval($_GET['month']) : date('n');
 
 $img_type = $nl_config['gd_img_type'];
 
-function send_image($name, $img)
+function send_image($name, $img, $lastModified = null)
 {
 	global $img_type;
 	
-	header('Last-Modified: ' . gmdate(DATE_RFC1123));
-	header('Expires: ' . gmdate(DATE_RFC1123));
-	header('Cache-Control: no-cache, no-store, must-revalidate, proxy-revalidate, private, max-age=0');
-	header('Pragma: no-cache');
+	if( !is_numeric($lastModified) )
+	{
+		$lastModified = time();
+	}
+	
+	$cachetime = !empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
+	
+	if( !empty($_SERVER['HTTP_CACHE_CONTROL']) )
+	{
+		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_CACHE_CONTROL']);
+	}
+	else if( !empty($_SERVER['HTTP_PRAGMA']) )// HTTP 1.0
+	{
+		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_PRAGMA']);
+	}
+	
+	if( $lastModified <= $cachetime && $canUseCache )
+	{
+		header('Not Modified', true, 304);
+		header('Date: ' . gmdate(DATE_RFC1123));
+		exit;
+	}
+	
+	$maxAge = 0;
+	
+	header('Last-Modified: ' . gmdate(DATE_RFC1123, $lastModified));
+	header('Expires: ' . gmdate(DATE_RFC1123, (time() + $maxAge)));// HTTP 1.0
+	header('Pragma: private');// HTTP 1.0
+	header('Cache-Control: private, must-revalidate, max-age='.$maxAge);
 	header('Content-Disposition: inline; filename="' . $name . '.' . $img_type . '"');
 	header('Content-Type: image/' . $img_type);
 	
@@ -259,7 +284,7 @@ if( $img == 'graph' )
 		}
 	}
 	
-	send_image('subscribers_per_day', $im);
+	send_image('subscribers_per_day', $im, filemtime(WA_STATSDIR . '/' . $filename));
 }
 
 if( $img == 'camembert' )
