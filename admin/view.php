@@ -2072,7 +2072,6 @@ else if( $mode == 'log' )
 				
 				'SUBJECT'    => wan_htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
 				'S_NUMDEST'  => $logdata['log_numdest'],
-				'S_CODEBASE' => $nl_config['urlsite'] . $nl_config['path'] . 'admin/',
 				'U_FRAME'    => sessid('./view.php?mode=iframe&amp;id=' . $log_id . '&amp;format=' . $format),
 				'U_EXPORT'   => sessid('./view.php?mode=export&amp;id=' . $log_id)
 			));

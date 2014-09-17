@@ -3,7 +3,7 @@
 	<h2 id="view">{L_SUBJECT}&nbsp;: <q>{SUBJECT}</q></h2>
 	
 	<div class="textinput">
-		<object id="iframe" codebase="{S_CODEBASE}" data="{U_FRAME}" type="text/html" standby="Loading... Please wait."></object>
+		<object id="iframe" data="{U_FRAME}" type="text/html" width="600" height="400"><p>Unknown error</p></object>
 	</div>
 	<div id="log-details">
 		<span><em>{L_NUMDEST}&nbsp;:</em> {S_NUMDEST}</span>
