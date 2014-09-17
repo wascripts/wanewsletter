@@ -38,13 +38,10 @@ function make_admin()
 	//
 	// Loupe d'affichage des images jointes aux newsletters
 	//
-	var aList = document.getElementsByTagName('a');
+	var aList = document.querySelectorAll('table#files-box a.show');
 	for( var i = 0, m = aList.length; i < m; i++ )
 	{
-		if( aList[i].getAttribute('rel') == 'show' )
-		{
-			aList[i].addEventListener('click', show, false);
-		}
+		aList[i].addEventListener('click', show, false);
 	}
 
 	//

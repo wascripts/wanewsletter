@@ -666,7 +666,7 @@ BASIC;
 				
 				if( preg_match('#^image/#', $mime_type) )
 				{
-					$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '" type="' . $mime_type . '">';
+					$s_show  = '<a class="show" href="' . sessid(sprintf($u_show, $file_id)) . '" type="' . $mime_type . '">';
 					$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
 					$s_show .= '</a>';
 				}
