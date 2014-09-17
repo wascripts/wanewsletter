@@ -82,6 +82,7 @@ $lang['Title']['sendkey']           = "Recevoir vos identifiants";
 $lang['Title']['archives']          = "Archives des listes de diffusion";
 $lang['Title']['sendpass']          = "Générer un nouveau mot de passe";
 $lang['Title']['form']              = "Inscription à la liste de diffusion";
+$lang['Title']['check_update']      = "Vérification des mises à jour";
 
 
 //
@@ -590,6 +591,13 @@ $lang['Download_action']            = "Le télécharger";
 $lang['Store_action']               = "Le stocker sur le serveur";
 $lang['Additionnal_tables']         = "Tables supplémentaires à sauvegarder";
 $lang['Target_form']                = "URL de réception du formulaire";
+
+$lang['Check_update']               = "Vérifier les mises à jour";
+$lang['Used_version']               = "Vous utilisez <strong>Wanewsletter %s</strong>";
+$lang['New_version_available']      = "Une nouvelle version est disponible";
+$lang['Download_page']              = "page de téléchargement";
+$lang['Version_up_to_date']         = "Votre version est à jour";
+$lang['Site_unreachable']           = "Le site web phpcodeur.net est actuellement inaccessible";
 
 
 //

@@ -262,8 +262,48 @@ $output->assign_vars( array(
 	'TEMP_SUBSCRIBERS'       => $l_num_temp,
 	'NEWSLETTERS_SENDED'     => $l_num_logs,
 	'DBSIZE'                 => (is_numeric($dbsize)) ? formateSize($dbsize) : $dbsize,
-	'FILESIZE'               => formateSize($filesize)
+	'FILESIZE'               => formateSize($filesize),
+	'USED_VERSION'           => sprintf($lang['Used_version'], WA_VERSION)
 ));
+
+require WA_ROOTDIR . '/includes/class.updater.php';
+
+$updater = new Wa_Updater();
+$updater->cache    = sprintf('%s/%s', WA_TMPDIR, WA_CHECK_UPDATE_CACHE);
+$updater->cacheTtl = WA_CHECK_UPDATE_CACHE_TTL;
+$result = $updater->check();
+
+if( $result !== false )
+{
+	if( $result === 1 )
+	{
+		$output->assign_block_vars('new_version_available', array(
+			'L_NEW_VERSION_AVAILABLE' => $lang['New_version_available'],
+			'L_DOWNLOAD_PAGE'         => $lang['Download_page'],
+			
+			'U_DOWNLOAD_PAGE' => WA_DOWNLOAD_PAGE
+		));
+	}
+	else
+	{
+		$output->assign_block_vars('version_up_to_date', array(
+			'L_VERSION_UP_TO_DATE' => $lang['Version_up_to_date'],
+		));
+	}
+}
+else
+{
+	$output->assign_block_vars('check_update', array(
+		'L_CHECK_UPDATE'          => $lang['Check_update'],
+		'L_NEW_VERSION_AVAILABLE' => str_replace('\'', '\\\'', $lang['New_version_available']),
+		'L_VERSION_UP_TO_DATE'    => str_replace('\'', '\\\'', $lang['Version_up_to_date']),
+		'L_SITE_UNREACHABLE'      => str_replace('\'', '\\\'', $lang['Site_unreachable']),
+		'L_DOWNLOAD_PAGE'         => str_replace('\'', '\\\'', $lang['Download_page']),
+		
+		'U_DOWNLOAD_PAGE' => WA_DOWNLOAD_PAGE,
+		'U_CHECK_UPDATE'  => sessid('./tools.php?mode=check_update')
+	));
+}
 
 $output->pparse('body');
 

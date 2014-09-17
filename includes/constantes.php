@@ -278,3 +278,11 @@ if( defined('WA_VERSION') )
 	define('WA_X_MAILER', sprintf('Wanewsletter/%s', WA_VERSION));
 }
 
+//
+// Utilisées dans le cadre de la classe de vérification de mise à jour
+//
+define('WA_DOWNLOAD_PAGE', 'http://phpcodeur.net/wascripts/wanewsletter/telecharger');
+define('WA_CHECK_UPDATE_URL', 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version');
+define('WA_CHECK_UPDATE_CACHE', 'wa-check-update.cache');
+define('WA_CHECK_UPDATE_CACHE_TTL', 3600);
+

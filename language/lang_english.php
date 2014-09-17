@@ -82,6 +82,7 @@ $lang['Title']['sendkey']           = "Receive your identifiers";
 $lang['Title']['archives']          = "logs of the mailing lists";
 $lang['Title']['sendpass']          = "Generate a new password";
 $lang['Title']['form']              = "Subscribe to newsletter";
+$lang['Title']['check_update']      = "Check for updates";
 
 
 //
@@ -591,6 +592,13 @@ $lang['Download_action']            = "Back it up";
 $lang['Store_action']               = "Store it on the server";
 $lang['Additionnal_tables']         = "Extra tables to back up";
 $lang['Target_form']                = "Form reception URL";
+
+$lang['Check_update']               = "Check for updates";
+$lang['Used_version']               = "You use <strong>Wanewsletter %s</strong>";
+$lang['New_version_available']      = "A new version is available";
+$lang['Download_page']              = "download page";
+$lang['Version_up_to_date']         = "Your version is up to date";
+$lang['Site_unreachable']           = "The website phpcodeur.net is currently unreachable";
 
 
 //
