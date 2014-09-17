@@ -20,7 +20,6 @@
 <head>
 	<meta charset="{CHARSET}" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<meta name="Copyright" content="phpCodeur (c) 2002-2014" />
 	<meta name="Robots" content="noindex, nofollow, none" />
 	{META}
 	
