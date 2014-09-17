@@ -185,7 +185,7 @@ switch( $mode )
 $url_page  = './tools.php';
 $url_page .= ( $mode != '' ) ? '?mode=' . $mode : '';
 
-if( !in_array($mode, array('backup','restore','debug')) && !$admindata['session_liste'] )
+if( !in_array($mode, array('backup','restore','debug','check_update')) && !$admindata['session_liste'] )
 {
 	$output->build_listbox($auth_type, true, $url_page);
 }
