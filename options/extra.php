@@ -50,15 +50,26 @@ if( count($liste_ids) > 0 )
 }
 else
 {
-	$data   = 'No data';
+	$data   = '-1';
 }
 
-header('Content-Type: application/x-javascript');
-
-if( isset($_GET['use-variable']) ) {
-	echo "var numSubscribe = '$data';";
-} else {
-	echo "document.write('$data');";
+if( isset($_GET['output']) && $_GET['output'] == 'json' )
+{
+	header('Content-Type: application/json');
+	
+	printf('{"numSubscribe":"%d"}', $data);
 }
-
-?>
+else
+{
+	header('Content-Type: application/x-javascript');
+	
+	if( isset($_GET['use-variable']) )
+	{
+		$varname = !empty($_GET['use-variable']) ? $_GET['use-variable'] : 'var numSubscribe';
+		printf("%s = '%d';", $varname, $data);
+	}
+	else
+	{
+		printf("document.write('%d');", $data);
+	}
+}
