@@ -1170,22 +1170,31 @@ function hasCidReferences($body, &$refs)
  */
 function formateSize($size)
 {
-	if( $size >= 1048576 )
+	$k = 1024;
+	$m = $k * $k;
+	$g = $m * $k;
+	
+	if( $size >= $g )
 	{
-		$lsize = $GLOBALS['lang']['MO'];
-		$size /= 1048576;
+		$unit = $GLOBALS['lang']['GO'];
+		$size /= $g;
 	}
-	else if( $size > 1024 )
+	else if( $size >= $m )
 	{
-		$lsize = $GLOBALS['lang']['KO'];
-		$size /= 1024;
+		$unit = $GLOBALS['lang']['MO'];
+		$size /= $m;
+	}
+	else if( $size >= $k )
+	{
+		$unit = $GLOBALS['lang']['KO'];
+		$size /= $k;
 	}
 	else
 	{
-		$lsize = $GLOBALS['lang']['Octets'];
+		$unit = $GLOBALS['lang']['Octets'];
 	}
 	
-	return sprintf("%s\xA0%s", wa_number_format($size), $lsize);
+	return sprintf("%s\xA0%s", wa_number_format($size), $unit);
 }
 
 $CONVMAP = array(
