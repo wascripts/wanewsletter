@@ -1,5 +1,5 @@
 -- 
--- Données de base de WAnewsletter 2.3.x
+-- Données de base de WAnewsletter
 -- 
 
 

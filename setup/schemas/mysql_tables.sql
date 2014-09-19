@@ -1,5 +1,5 @@
 -- 
--- Schéma des tables de WAnewsletter 2.3.x pour MySQL
+-- Schéma des tables de WAnewsletter pour MySQL
 -- 
 
 -- 
