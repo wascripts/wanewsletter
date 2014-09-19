@@ -143,6 +143,7 @@ class Session {
 		$this->cfg_cookie['cookie_path']   = $nl_config['cookie_path'];
 		$this->cfg_cookie['cookie_domain'] = '';//$match[2];
 		$this->cfg_cookie['cookie_secure'] = ( !empty($match[1]) ) ? 1 : 0;
+		$this->cfg_cookie['cookie_httponly'] = true;
 	}
 	
 	/**
@@ -443,14 +444,30 @@ class Session {
 	 */
 	function send_cookie($name, $cookie_data, $cookie_time)
 	{
-		setcookie(
-			$this->cfg_cookie['cookie_name'] . '_' . $name,
-			$cookie_data,
-			$cookie_time,
-			$this->cfg_cookie['cookie_path'],
-			$this->cfg_cookie['cookie_domain'],
-			$this->cfg_cookie['cookie_secure']
-		);
+		if( version_compare(PHP_VERSION, '5.2.0', '>=') )// TODO: FIX it
+		{
+			setcookie(
+				$this->cfg_cookie['cookie_name'] . '_' . $name,
+				$cookie_data,
+				$cookie_time,
+				$this->cfg_cookie['cookie_path'],
+				$this->cfg_cookie['cookie_domain'],
+				$this->cfg_cookie['cookie_secure'],
+				$this->cfg_cookie['cookie_httponly']
+			);
+		}
+		else
+		{
+			// PHP prior 5.2.0 doesn't support httpOnly, so we append it to path parameter
+			setcookie(
+				$this->cfg_cookie['cookie_name'] . '_' . $name,
+				$cookie_data,
+				$cookie_time,
+				$this->cfg_cookie['cookie_path'].'; httpOnly',
+				$this->cfg_cookie['cookie_domain'],
+				$this->cfg_cookie['cookie_secure']
+			);
+		}
 	}
 	
 	/**
