@@ -334,6 +334,7 @@ $lang['Maximum_size']               = "Maximum size: %s";
 $lang['Lost_password']              = "Lost password?";
 $lang['Name']                       = "Name";
 $lang['Value']                      = "Value";
+$lang['Cookie_notice']              = "You must enable cookies to log in";
 
 $lang['Click_return_index']         = "Click %shere%s to return to the home page";
 $lang['Click_return_back']          = "Click %shere%s to go back to the previous page";

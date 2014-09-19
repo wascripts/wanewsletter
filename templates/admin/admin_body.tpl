@@ -146,7 +146,7 @@
 <!-- BEGIN admin_box -->
 <form id="smallbox" method="post" action="./admin.php">
 <div>
-	{admin_box.S_HIDDEN_FIELDS} <label for="admin_id">{admin_box.L_VIEW_PROFILE}&nbsp;:</label>
+	<label for="admin_id">{admin_box.L_VIEW_PROFILE}&nbsp;:</label>
 	{admin_box.ADMIN_BOX} <button type="submit">{admin_box.L_BUTTON_GO}</button>
 </div>
 </form>

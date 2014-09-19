@@ -24,4 +24,13 @@
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>
+
+<!-- BEGIN cookie_notice -->
+<p id="cookie-notice" class="warning compact">{cookie_notice.L_TEXT}</p>
+<script>
+if( navigator.cookieEnabled ) {
+	document.getElementById('cookie-notice').style.display = 'none';
+}
+</script>
+<!-- END cookie_notice -->
 </form>

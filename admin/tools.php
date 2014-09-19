@@ -226,11 +226,6 @@ if( !isset($_POST['submit']) )
 	
 	$output->page_header();
 	
-	if( $session->sessid_url != '' )
-	{
-		$output->addHiddenField('sessid', $session->session_id);
-	}
-	
 	$output->set_filenames(array(
 		'body' => 'tools_body.tpl'
 	));
@@ -466,8 +461,6 @@ switch( $mode )
 				$output->displayMessage('Success_export');
 			}
 		}
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames(array(
 			'tool_body' => 'export_body.tpl'
@@ -845,8 +838,6 @@ switch( $mode )
 			$output->displayMessage();
 		}
 		
-		$output->addHiddenField('sessid', $session->session_id);
-		
 		$output->set_filenames(array(
 			'tool_body' => 'import_body.tpl'
 		));
@@ -977,8 +968,6 @@ switch( $mode )
 		}
 		$unban_email_box .= '</select>';
 		
-		$output->addHiddenField('sessid', $session->session_id);
-		
 		$output->set_filenames( array(
 			'tool_body' => 'ban_list_body.tpl'
 		));
@@ -1090,8 +1079,6 @@ switch( $mode )
 			$reallow_ext_box .= '<option value="0">' . $lang['No_forbidden_ext'] . '</option>';
 		}
 		$reallow_ext_box .= '</select>';
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames( array(
 			'tool_body' => 'forbidden_ext_body.tpl'
@@ -1206,8 +1193,6 @@ switch( $mode )
 				$output->displayMessage('Success_backup');
 			}
 		}
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames(array(
 			'tool_body' => 'backup_body.tpl'
@@ -1402,8 +1387,6 @@ switch( $mode )
 			$output->displayMessage('Success_restore');
 		}
 		
-		$output->addHiddenField('sessid', $session->session_id);
-		
 		$output->set_filenames(array(
 			'tool_body' => 'restore_body.tpl'
 		));
@@ -1488,8 +1471,6 @@ switch( $mode )
 		}
 		else
 		{
-			$output->addHiddenField('sessid', $session->session_id);
-			
 			$output->set_filenames(array(
 				'tool_body' => 'generator_body.tpl'
 			));

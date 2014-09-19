@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <!-- END script_load_by_url -->
 
-<form method="post" action="{U_FORM}">
+<form method="post" action="envoi.php">
 <div class="block">
 	<h2>{L_TITLE}</h2>
 	

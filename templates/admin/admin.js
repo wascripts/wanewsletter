@@ -117,18 +117,7 @@ function switch_checkbox(evt)
 
 function show(evt)
 {
-	var sessid = '';
-	
-	for( var i = 0, m = document.forms.length; i < m; i++ )
-	{
-		if( document.forms[i].elements['sessid'] )
-		{
-			sessid = document.forms[i].elements['sessid'].value;
-			break;
-		}
-	}
-	
-	var sURL = evt.currentTarget.href + '&sessid=' + sessid;
+	var sURL = evt.currentTarget.href;
 	var imgBox = document.getElementById('image-box');
 
 	if( imgBox == null )

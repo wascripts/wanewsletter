@@ -90,11 +90,6 @@ function Location($url)
 {
 	global $db, $output;
 	
-	if( function_exists('sessid') && defined('IN_ADMIN') )
-	{
-		$url = sessid($url);
-	}
-	
 	//
 	// On ferme la connexion à la base de données, si elle existe 
 	//

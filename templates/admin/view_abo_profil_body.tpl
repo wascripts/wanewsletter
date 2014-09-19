@@ -30,7 +30,7 @@
 		<!-- BEGIN listerow -->
 		<tr>
 			<td>
-				&ndash;&nbsp;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a> {listerow.CHOICE_FORMAT}
+				&ndash;&nbsp;<a href="view.php?mode=abonnes&amp;liste={listerow.LISTE_ID}">{listerow.LISTE_NAME}</a> {listerow.CHOICE_FORMAT}
 			</td>
 		</tr>
 		<!-- END listerow -->

@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() { Stats.initialize(); }
 	<div class="bottom">
 		<select name="year">{YEAR_LIST}</select>
 		<select name="month">{MONTH_LIST}</select>
-		{S_HIDDEN_FIELDS} <button type="submit" class="primary">{L_GO_BUTTON}</button>
+		<button type="submit" class="primary">{L_GO_BUTTON}</button>
 	</div>
 </div>
 </form>
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() { Stats.initialize(); }
 </div>
 
 <div class="stats">
-	<img src="{U_IMG_CAMEMBERT}" alt="" title="{L_IMG_CAMEMBERT}" />
+	<img src="stats.php?img=camembert" alt="" title="{L_IMG_CAMEMBERT}" />
 </div>
 
 {LISTBOX}

@@ -97,8 +97,8 @@ class output extends Template {
 	 */
 	function addLink($rel, $url, $title = '', $type = '')
 	{
-		$this->links .= "\r\n\t<link rel=\"$rel\" href=\""
-			. (( function_exists('sessid') ) ? sessid($url) : $url) . "\" title=\"$title\" />";
+		$this->links .= "\r\n\t";
+		$this->links .= sprintf('<link rel="%s" href="%s" title="%s" />', $rel, $url, $title);
 	}
 	
 	/**
@@ -122,7 +122,8 @@ class output extends Template {
 	 */
 	function addScript($url)
 	{
-		$this->javascript .= "\r\n\t<script src=\"$url\"></script>";
+		$this->javascript .= "\r\n\t";
+		$this->javascript .= sprintf('<script src="%s"></script>', $url);
 	}
 	
 	/**
@@ -147,7 +148,8 @@ class output extends Template {
 	 */
 	function addHiddenField($name, $value)
 	{
-		$this->hidden_fields .= sprintf('<input type="hidden" name="%s" value="%s" />', $name, $value) . "\r\n";
+		$this->hidden_fields .= "\r\n\t";
+		$this->hidden_fields .= sprintf('<input type="hidden" name="%s" value="%s" />', $name, $value);
 	}
 	
 	/**
@@ -175,8 +177,7 @@ class output extends Template {
 	 */
 	function redirect($url, $timer)
 	{
-		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />',
-			$timer, (( function_exists('sessid') ) ? sessid($url) : $url));
+		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, $url);
 	}
 	
 	/**
@@ -463,11 +464,7 @@ BASIC;
 	{
 		if( !is_null($link) )
 		{
-			if( !preg_match('#^[^:]+://#i', $link) )
-			{
-				$link = sessid($link);
-			}
-			$str = sprintf($str, '<a href="' . $link . '">', '</a>');
+			$str = sprintf($str, sprintf('<a href="%s">', $link), '</a>');
 		}
 		
 		array_push($this->messageList, $str);
@@ -661,12 +658,11 @@ BASIC;
 					continue;
 				}
 				
-				$filename = sprintf('<a href="%s">%s</a>',
-					sessid(sprintf($u_download, $file_id)), wan_htmlspecialchars($filename));
+				$filename = sprintf('<a href="%s">%s</a>', sprintf($u_download, $file_id), wan_htmlspecialchars($filename));
 				
 				if( preg_match('#^image/#', $mime_type) )
 				{
-					$s_show  = '<a class="show" href="' . sessid(sprintf($u_show, $file_id)) . '" type="' . $mime_type . '">';
+					$s_show  = sprintf('<a class="show" href="%s" type="%s">', sprintf($u_show, $file_id), $mime_type);
 					$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
 					$s_show .= '</a>';
 				}
@@ -759,8 +755,6 @@ BASIC;
 		}
 		$list_box .= $tmp_box . '</select>';
 		
-		$this->addHiddenField('sessid', $session->session_id);
-		
 		if( $display )
 		{
 			$this->page_header();
@@ -775,8 +769,7 @@ BASIC;
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
 				
 				'LISTE_BOX'       => $list_box,
-				'S_HIDDEN_FIELDS' => $this->getHiddenFields(),
-				'U_FORM'          => sessid($jump_to)
+				'U_FORM'          => $jump_to
 			));
 			
 			$this->pparse('body');
@@ -794,9 +787,7 @@ BASIC;
 				'L_BUTTON_GO'     => $lang['Button']['go'],
 				
 				'S_LISTBOX'       => $list_box,
-				'S_HIDDEN_FIELDS' => $this->getHiddenFields(),
-				
-				'U_LISTBOX'       => sessid($jump_to)
+				'U_LISTBOX'       => $jump_to
 			));
 			
 			$this->assign_var_from_handle('LISTBOX', 'list_box_body');
@@ -805,4 +796,3 @@ BASIC;
 }
 
 }
-?>

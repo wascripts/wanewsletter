@@ -300,8 +300,7 @@ else
 		'L_SITE_UNREACHABLE'      => str_replace('\'', '\\\'', $lang['Site_unreachable']),
 		'L_DOWNLOAD_PAGE'         => str_replace('\'', '\\\'', $lang['Download_page']),
 		
-		'U_DOWNLOAD_PAGE' => WA_DOWNLOAD_PAGE,
-		'U_CHECK_UPDATE'  => sessid('./tools.php?mode=check_update')
+		'U_DOWNLOAD_PAGE' => WA_DOWNLOAD_PAGE
 	));
 }
 

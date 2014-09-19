@@ -263,11 +263,7 @@ class Template {
             die("Template->loadfile(): Le fichier $filename pour le modèle $handle est vide");
         }
         
-        //
-        // Ajout traitement par sessid() pour ajout des sessid au bout des urls si besoin 
-        // Cela évite d'appeller la fonction à chaque insertion d'url dans le template 
-        //
-        $this->uncompiled_code[$handle] = ( function_exists('sessid') ) ? sessid($str, true) : $str;
+        $this->uncompiled_code[$handle] = $str;
 
         return true;
     }

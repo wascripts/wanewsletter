@@ -43,7 +43,7 @@ function checkForm_editAboProfil()
 	<table class="dataset">
 		<!-- BEGIN listerow -->
 		<tr>
-			<td>&ndash;&nbsp;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a></td>
+			<td>&ndash;&nbsp;<a href="view.php?mode=abonnes&amp;liste={listerow.LISTE_ID}">{listerow.LISTE_NAME}</a></td>
 			<td>{listerow.FORMAT_BOX}</td>
 		</tr>
 		<!-- END listerow -->

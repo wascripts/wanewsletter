@@ -44,14 +44,6 @@ class Session {
 	var $user_ip      = '';
 	
 	/**
-	 * Chaine éventuelle à ajouter à la fin des urls (contient l'identifiant de session)
-	 * 
-	 * @var string
-	 * @access private
-	 */
-	var $sessid_url   = '';
-	
-	/**
 	 * Identifiant de la session
 	 * 
 	 * @var string
@@ -204,7 +196,6 @@ class Session {
 		$this->send_cookie('sessid', $this->session_id, 0);
 		$this->send_cookie('data', serialize($sessiondata), $current_time + 31536000);
 		
-		$this->sessid_url   = 'sessid=' . $this->session_id;
 		$this->is_logged_in = true;
 		
 		return $admindata;
@@ -229,13 +220,7 @@ class Session {
 		}
 		else
 		{
-			$this->session_id = ( !empty($_GET['sessid']) ) ? $_GET['sessid'] : '';
 			$sessiondata = '';
-			
-			if( $this->session_id != '' )
-			{
-				$this->sessid_url = 'sessid=' . $this->session_id;
-			}
 		}
 		
 		$current_time = time();
@@ -501,32 +486,5 @@ class Session {
 	}
 }
 
-/**
- * Ajout de l'identifiant de session dans l'url si les cookies sont refusés
- * 
- * @param string  $var       Url, texte (si $is_str à true)
- * @param boolean $is_str    True si on doit scanner du texte et rechercher les endroits où ajouter l'id de session
- * 
- * @return string
- */
-function sessid($var, $is_str = false)
-{
-	global $session;
-	
-	if( $session->sessid_url != '' )
-	{
-		if( $is_str )
-		{
-			$var = preg_replace('/(action|a href)="(?!ftp|http|mailto|javascript|{)([^"]+)"/e', '\'\\1="\' . sessid(\'\\2\') . \'"\'', $var);
-		}
-		else if( !preg_match('/sessid=[[:alnum:]]+/', $var) )
-		{
-			$var .= ( ( strpos($var, '?') ) ? '&amp;' : '?' ) . $session->sessid_url;
-		}
-	}
-	
-	return $var;
 }
 
-}
-?>

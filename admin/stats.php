@@ -458,11 +458,6 @@ $output->build_listbox(AUTH_VIEW, false);
 
 require WA_ROOTDIR . '/includes/functions.box.php';
 
-if( $session->sessid_url != '' )
-{
-	$output->addHiddenField('sessid', $session->session_id);
-}
-
 $output->page_header();
 
 $output->set_filenames( array(
@@ -532,12 +527,9 @@ $output->assign_vars(array(
 	'L_NEXT_PERIOD'   => $lang['Next_month'],
 	'L_PREV_TITLE'    => sprintf($aTitle, convert_time('F Y', mktime(0, 0, 0, $prev_m, 1, $prev_y))),
 	'L_NEXT_TITLE'    => sprintf($aTitle, convert_time('F Y', mktime(0, 0, 0, $next_m, 1, $next_y))),
-	'U_PREV_PERIOD'   => sessid('./stats.php?year=' . $prev_y . '&amp;month=' . $prev_m),
-	'U_NEXT_PERIOD'   => sessid('./stats.php?year=' . $next_y . '&amp;month=' . $next_m),
-	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;year=' . $year . '&amp;month=' . $month),
-	'U_IMG_CAMEMBERT' => sessid('./stats.php?img=camembert'),
-	
-	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+	'U_PREV_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $prev_y, $prev_m),
+	'U_NEXT_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $next_y, $next_m),
+	'U_IMG_GRAPH'     => sprintf('stats.php?img=graph&amp;year=%d&amp;month=%d', $year, $month)
 ));
 
 //

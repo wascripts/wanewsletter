@@ -148,7 +148,6 @@ if( $mode == 'adduser' )
 	}
 	
 	$output->addHiddenField('mode', 'adduser');
-	$output->addHiddenField('sessid', $session->session_id);
 	
 	$output->page_header();
 	
@@ -217,7 +216,6 @@ else if( $mode == 'deluser' )
 	{
 		$output->addHiddenField('mode'    , 'deluser');
 		$output->addHiddenField('admin_id', $admin_id);
-		$output->addHiddenField('sessid'  , $session->session_id);
 		
 		$output->page_header();
 		
@@ -233,7 +231,7 @@ else if( $mode == 'deluser' )
 			'L_NO'  => $lang['No'],
 			
 			'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-			'U_FORM' => sessid('./admin.php')
+			'U_FORM' => 'admin.php'
 		));
 		
 		$output->pparse('body');
@@ -482,7 +480,6 @@ else
 require WA_ROOTDIR . '/includes/functions.box.php';
 
 $output->addHiddenField('admin_id', $current_admin['admin_id']);
-$output->addHiddenField('sessid',   $session->session_id);
 
 if( $admindata['admin_level'] == ADMIN )
 {
@@ -570,14 +567,11 @@ if( $admindata['admin_level'] == ADMIN )
 	
 	if( $admin_box != '' )
 	{
-		$output->addHiddenField('sessid', $session->session_id);
-		
 		$output->assign_block_vars('admin_box', array(
 			'L_VIEW_PROFILE'  => $lang['View_profile'],
 			'L_BUTTON_GO'     => $lang['Button']['go'],
 			
-			'ADMIN_BOX'       => $admin_box,
-			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+			'ADMIN_BOX'       => $admin_box
 		));
 	}
 }

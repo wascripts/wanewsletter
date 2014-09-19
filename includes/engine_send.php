@@ -665,8 +665,8 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 				Location("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
 			}
 			
-			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id'] . '&amp;step=auto') . '">', '</a>');
-			$message .= '<br /><br />' .  sprintf($lang['Click_resend_manuel'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id']) . '">', '</a>');
+			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], sprintf('<a href="envoi.php?mode=progress&amp;id=%d&amp;step=auto">', $logdata['log_id']), '</a>');
+			$message .= '<br /><br />' .  sprintf($lang['Click_resend_manuel'], sprintf('<a href="envoi.php?mode=progress&amp;id=%d">', $logdata['log_id']), '</a>');
 		}
 	}
 	else
@@ -709,7 +709,7 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 		else // mode test
 		{
 			$message  = $lang['Test_send_finish'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load&amp;id=' . $logdata['log_id']) . '">', '</a>');
+			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], sprintf('<a href="envoi.php?mode=load&amp;id=%d">', $logdata['log_id']), '</a>');
 		}
 	}
 	

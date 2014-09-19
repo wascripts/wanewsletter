@@ -221,6 +221,11 @@ switch( $mode )
 			'S_LOGIN' => wan_htmlspecialchars($email)
 		));
 		
+		if( !isset($_COOKIE[$nl_config['cookie_name'] . '_abo']) )
+		{
+			$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
+		}
+		
 		$output->pparse('body');
 		break;
 	

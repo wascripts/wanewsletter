@@ -176,7 +176,6 @@ switch( $mode )
 		else
 		{
 			$output->addHiddenField('id', $logdata['log_id']);
-			$output->addHiddenField('sessid', $session->session_id);
 			
 			$output->page_header();
 			
@@ -192,7 +191,7 @@ switch( $mode )
 				'L_NO'  => $lang['No'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => sessid('./envoi.php?mode=cancel')
+				'U_FORM' => 'envoi.php?mode=cancel'
 			));
 			
 			$output->pparse('body');
@@ -449,8 +448,7 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
 			}
 			
-			$output->addHiddenField('mode',   'load');
-			$output->addHiddenField('sessid', $session->session_id);
+			$output->addHiddenField('mode', 'load');
 			
 			$output->page_header();
 			
@@ -504,7 +502,7 @@ switch( $mode )
 				'L_EXPLAIN_LOAD'  => $lang['Explain']['load'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM'          => sessid('./envoi.php')
+				'U_FORM'          => 'envoi.php'
 			));
 			
 			switch( $listdata['liste_format'] )
@@ -577,9 +575,8 @@ switch( $mode )
 		}
 		else
 		{
-			$output->addHiddenField('mode',   'delete');
-			$output->addHiddenField('sessid', $session->session_id);
-			$output->addHiddenField('id',     $logdata['log_id']);
+			$output->addHiddenField('mode', 'delete');
+			$output->addHiddenField('id',   $logdata['log_id']);
 			
 			$output->page_header();
 			
@@ -595,7 +592,7 @@ switch( $mode )
 				'L_NO'  => $lang['No'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => sessid('./envoi.php')
+				'U_FORM' => 'envoi.php'
 			));
 			
 			$output->pparse('body');
@@ -1111,7 +1108,6 @@ $output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
 $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $prev_status);
 $output->addHiddenField('log_date',    $logdata['log_date']);
-$output->addHiddenField('sessid',      $session->session_id);
 
 $output->page_header();
 

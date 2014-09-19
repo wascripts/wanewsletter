@@ -32,7 +32,7 @@ if( !defined('IN_NEWSLETTER') )
 define('IN_ADMIN',   true);
 define('WA_ROOTDIR', '..');
 
-$secure = TRUE;
+$secure = true;
 
 require WA_ROOTDIR . '/start.php';
 require WA_ROOTDIR . '/includes/class.sessions.php';
@@ -80,15 +80,8 @@ if( !defined('IN_LOGIN') )
 		}
 	}
 	
-	if( $secure && strtoupper(server_info('REQUEST_METHOD')) == 'POST' )
+	if( $secure && strtoupper(server_info('REQUEST_METHOD')) == 'POST' && $session->new_session )
 	{
-		$sessid = ( !empty($_POST['sessid']) ) ? trim($_POST['sessid']) : '';
-		
-		if( $session->new_session || $sessid != $session->session_id )
-		{
-			$output->displayMessage('Invalid_session');
-		}
+		$output->displayMessage('Invalid_session');
 	}
 }
-
-?>

@@ -151,17 +151,9 @@ function preview()
 		var texte     = document.forms['send-form'].elements['body_html'].value;
 		var rex_img   = new RegExp("<([^<]+)\"cid:([^\\:*/?<\">|]+)\"([^>]*)?>", "gi");
 		var rex_title = new RegExp("<title>.*</title>", "i");
-		var sessid    = '';
-		
-		for( var i = 0, m = document.forms.length; i < m; i++ ) {
-			if( typeof(document.forms[i].elements['sessid']) != 'undefined' ) {
-				sessid = document.forms[i].elements['sessid'].value;
-				break;
-			}
-		}
-		
+
 		texte = texte.replace("{LINKS}", '<a href="http://www.example.org/">Example</a>');
-		texte = texte.replace(rex_img, "<$1\"../options/show.php?file=$2&amp;sessid=" + sessid + "\"$3>");
+		texte = texte.replace(rex_img, "<$1\"../options/show.php?file=$2\"$3>");
 		texte = texte.replace(rex_title, '<title>' + subject + '</title>');
 		
 		preview.document.write(texte);

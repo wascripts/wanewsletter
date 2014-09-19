@@ -388,7 +388,6 @@ else
 	$output->addHiddenField('disable_stats', '1');
 }
 
-$output->addHiddenField('sessid', $session->session_id);
 $output->assign_var('S_HIDDEN_FIELDS', $output->getHiddenFields());
 
 $output->pparse('body');

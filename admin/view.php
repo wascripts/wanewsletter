@@ -259,7 +259,7 @@ else if( $mode == 'iframe' )
 			{
 				$body = preg_replace(
 					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/si',
-					'<\\1"' . WA_ROOTDIR . '/options/show.php?file=\\2&amp;sessid=' . $session->session_id . '"\\3>',
+					'<\\1"' . WA_ROOTDIR . '/options/show.php?file=\\2"\\3>',
 					$body
 				);
 				
@@ -437,7 +437,7 @@ else if( $mode == 'abonnes' )
 				'L_EDIT_ACCOUNT'      => $lang['Edit_account'],
 				'L_DELETE_ACCOUNT'    => $lang['Button']['del_account'],
 				
-				'U_GOTO_LIST'         => sessid('./view.php?mode=abonnes' . $get_string . $get_page),
+				'U_GOTO_LIST'         => 'view.php?mode=abonnes' . $get_string . $get_page,
 				'S_ABO_PSEUDO'        => ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : '<b>' . $lang['No_data'] . '</b>',
 				'S_ABO_EMAIL'         => $row['abo_email'],
 				'S_ABO_ID'            => $row['abo_id']
@@ -488,7 +488,7 @@ else if( $mode == 'abonnes' )
 				$output->assign_block_vars('listerow', array(
 					'LISTE_NAME'    => $liste_name,
 					'CHOICE_FORMAT' => $format,
-					'U_VIEW_LISTE'  => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
+					'LISTE_ID'      => $row['liste_id']
 				));
 				
 				if( $row['register_date'] < $register_date )
@@ -645,7 +645,6 @@ else if( $mode == 'abonnes' )
 			
 			$output->addHiddenField('id', $row['abo_id']);
 			$output->addHiddenField('action', 'edit');
-			$output->addHiddenField('sessid', $session->session_id);
 			
 			$output->page_header();
 			
@@ -665,7 +664,7 @@ else if( $mode == 'abonnes' )
 				'L_VALID_BUTTON'       => $lang['Button']['valid'],
 				'L_WARNING_EMAIL_DIFF' => str_replace("\n", '\n', addslashes($lang['Warning_email_diff'])),
 				
-				'U_GOTO_LIST'          => sessid('./view.php?mode=abonnes' . $get_string . $get_page),
+				'U_GOTO_LIST'          => 'view.php?mode=abonnes' . $get_string . $get_page,
 				'S_ABO_PSEUDO'         => wan_htmlspecialchars($row['abo_pseudo']),
 				'S_ABO_EMAIL'          => wan_htmlspecialchars($row['abo_email']),
 				'S_ABO_ID'             => $row['abo_id'],
@@ -705,9 +704,9 @@ else if( $mode == 'abonnes' )
 				}
 				
 				$output->assign_block_vars('listerow', array(
-					'LISTE_NAME'   => $auth->listdata[$row['liste_id']]['liste_name'],
-					'FORMAT_BOX'   => $format_box,
-					'U_VIEW_LISTE' => sessid('./view.php?mode=abonnes&amp;liste=' . $row['liste_id'])
+					'LISTE_NAME' => $auth->listdata[$row['liste_id']]['liste_name'],
+					'FORMAT_BOX' => $format_box,
+					'LISTE_ID'   => $row['liste_id']
 				));
 			}
 			while( $row = $result->fetch() );
@@ -783,7 +782,6 @@ else if( $mode == 'abonnes' )
 			unset($abo_id);
 			
 			$output->addHiddenField('action', 'delete');
-			$output->addHiddenField('sessid', $session->session_id);
 			
 			if( $email_list != '' )
 			{
@@ -852,7 +850,7 @@ else if( $mode == 'abonnes' )
 				'L_NO'  => $lang['No'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => sessid('./view.php?mode=abonnes')
+				'U_FORM' => 'view.php?mode=abonnes'
 			));
 			
 			$output->pparse('body');
@@ -929,9 +927,7 @@ else if( $mode == 'abonnes' )
 	}
 	$search_days_box .= '</select>';
 	
-	$navigation = navigation(sessid('./view.php?mode=abonnes' . $get_string), $total_abo, $abo_per_page, $page_id);
-	
-	$output->addHiddenField('sessid', $session->session_id);
+	$navigation = navigation('view.php?mode=abonnes' . $get_string, $total_abo, $abo_per_page, $page_id);
 	
 	$output->page_header();
 	
@@ -968,7 +964,7 @@ else if( $mode == 'abonnes' )
 		'NUM_SUBSCRIBERS'      => ( $total_abo > 0 ) ? '[ <b>' . $total_abo . '</b> ' . $lang['Module']['subscribers'] . ' ]' : '',
 		
 		'S_HIDDEN_FIELDS'      => $output->getHiddenFields(),
-		'U_FORM'               => sessid('./view.php?mode=abonnes' . $get_page)
+		'U_FORM'               => 'view.php?mode=abonnes' . $get_page
 	));
 	
 	if( $listdata['liste_format'] == FORMAT_MULTIPLE )
@@ -998,7 +994,7 @@ else if( $mode == 'abonnes' )
 			$output->assign_block_vars('aborow', array(
 				'ABO_EMAIL'         => $aborow[$i]['abo_email'],
 				'ABO_REGISTER_DATE' => convert_time($nl_config['date_format'], $aborow[$i]['register_date']),
-				'U_VIEW'            => sessid('./view.php?mode=abonnes&amp;action=view&amp;id=' . $aborow[$i]['abo_id'] . $get_string . $get_page)
+				'U_VIEW'            => sprintf('view.php?mode=abonnes&amp;action=view&amp;id=%d%s%s', $aborow[$i]['abo_id'], $get_string, $get_page)
 			));
 			
 			if( $listdata['liste_format'] == FORMAT_MULTIPLE )
@@ -1237,7 +1233,6 @@ else if( $mode == 'liste' )
 		require WA_ROOTDIR . '/includes/functions.box.php';
 		
 		$output->addHiddenField('action', $action);
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->page_header();
 		
@@ -1542,7 +1537,6 @@ else if( $mode == 'liste' )
 			}
 			
 			$output->addHiddenField('action', 'delete');
-			$output->addHiddenField('sessid', $session->session_id);
 			
 			$output->page_header();
 			
@@ -1558,7 +1552,7 @@ else if( $mode == 'liste' )
 				'L_NO'	=> $lang['No'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => sessid('./view.php?mode=liste')
+				'U_FORM' => 'view.php?mode=liste'
 			));
 			
 			$output->pparse('body');
@@ -1737,8 +1731,6 @@ else if( $mode == 'liste' )
 		
 		if( $auth->check_auth(AUTH_DEL, $listdata['liste_id']) )
 		{
-			$output->addHiddenField('sessid', $session->session_id);
-			
 			$output->assign_block_vars('purge_option', array(
 				'L_PURGE_BUTTON'  => $lang['Button']['purge'],
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
@@ -1817,7 +1809,6 @@ else if( $mode == 'log' )
 			unset($log_id);
 			
 			$output->addHiddenField('action', 'delete');
-			$output->addHiddenField('sessid', $session->session_id);
 			
 			foreach( $log_ids as $log_id )
 			{
@@ -1838,7 +1829,7 @@ else if( $mode == 'log' )
 				'L_NO'  => $lang['No'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => sessid('./view.php?mode=log')
+				'U_FORM' => 'view.php?mode=log'
 			));
 			
 			$output->pparse('body');
@@ -1966,15 +1957,13 @@ else if( $mode == 'log' )
 		}
 	}
 	
-	$navigation = navigation(sessid('./view.php?mode=log' . $get_string), $total_logs, $log_per_page, $page_id);
+	$navigation = navigation('view.php?mode=log' . $get_string, $total_logs, $log_per_page, $page_id);
 	
-	$u_form	 = './view.php?mode=log' . ( ( $log_id > 0 ) ? '&amp;id=' . $log_id : '' );
+	$u_form	 = 'view.php?mode=log' . ( ( $log_id > 0 ) ? '&amp;id=' . $log_id : '' );
 	$u_form .= ( $action != '' ) ? '&amp;action=' . $action : '';
 	$u_form .= ( $page_id > 1 ) ? '&amp;page=' . $page_id : '';
 	
 	$get_string .= ( $page_id > 1 ) ? '&amp;page=' . $page_id : '';
-	
-	$output->addHiddenField('sessid', $session->session_id);
 	
 	$output->page_header();
 	
@@ -2003,10 +1992,8 @@ else if( $mode == 'log' )
 		'PAGEOF'                => ( $total_logs > 0 ) ? sprintf($lang['Page_of'], $page_id, ceil($total_logs / $log_per_page)) : '',
 		'NUM_LOGS'              => ( $total_logs > 0 ) ? '[ <b>' . $total_logs . '</b> ' . $lang['Module']['log'] . ' ]' : '',
 		
-		'WAROOT'                => WA_ROOTDIR . '/',
-		'S_SESSID'              => $session->session_id,
 		'S_HIDDEN_FIELDS'       => $output->getHiddenFields(),
-		'U_FORM'                => sessid($u_form)
+		'U_FORM'                => $u_form
 	));
 	
 	if( $num_logs = count($logrow) )
@@ -2045,7 +2032,7 @@ else if( $mode == 'log' )
 				'ITEM_CLIP'   => $s_clip,
 				'LOG_SUBJECT' => wan_htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
 				'LOG_DATE'    => convert_time($nl_config['date_format'], $logrow[$i]['log_date']),
-				'U_VIEW'      => sessid('./view.php?mode=log&amp;action=view&amp;id=' . $logrow[$i]['log_id'] . $get_string)
+				'U_VIEW'      => sprintf('view.php?mode=log&amp;action=view&amp;id=%d%s', $logrow[$i]['log_id'], $get_string)
 			));
 			
 			if( $display_checkbox )
@@ -2071,9 +2058,9 @@ else if( $mode == 'log' )
 				'L_EXPORT'   => $lang['Export'],
 				
 				'SUBJECT'    => wan_htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
-				'S_NUMDEST'  => $logdata['log_numdest'],
-				'U_FRAME'    => sessid('./view.php?mode=iframe&amp;id=' . $log_id . '&amp;format=' . $format),
-				'U_EXPORT'   => sessid('./view.php?mode=export&amp;id=' . $log_id)
+				'NUMDEST'    => $logdata['log_numdest'],
+				'FORMAT'     => $format,
+				'LOG_ID'     => $log_id
 			));
 			
 			if( $listdata['liste_format'] == FORMAT_MULTIPLE )

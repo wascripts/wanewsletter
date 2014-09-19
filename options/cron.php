@@ -30,12 +30,6 @@ define('WA_ROOTDIR',    '..');
 
 require WA_ROOTDIR . '/start.php';
 
-// FIX temporaire, sinon bug lors des envois par flot
-function sessid($var)
-{
-	return $var;
-}
-
 load_settings();
 
 $mode     = ( !empty($_REQUEST['mode']) ) ? trim($_REQUEST['mode']) : '';

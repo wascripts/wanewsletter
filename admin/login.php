@@ -33,7 +33,6 @@ $simple_header = TRUE;
 
 $mode     = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
 $redirect = ( !empty($_REQUEST['redirect']) ) ? trim($_REQUEST['redirect']) : 'index.php';
-$redirect = preg_replace('/(\?|&)sessid=[a-zA-Z0-9]{32}/', '', $redirect);
 
 //
 // Mot de passe perdu
@@ -187,6 +186,12 @@ $output->assign_vars(array(
 	
 	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 ));
+
+if( !isset($_COOKIE[$nl_config['cookie_name'] . '_data']) )
+{
+	$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
+}
+
 
 $output->pparse('body');
 
