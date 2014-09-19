@@ -81,7 +81,7 @@
 	
 	<div class="bloc">
 		<label for="email">{L_EMAIL}&nbsp;:</label>
-		<input type="text" id="email" name="email" size="25" maxlength="250" />
+		<input type="text" id="email" name="email" size="25" maxlength="254" />
 	</div>
 	
 	<div class="bloc">

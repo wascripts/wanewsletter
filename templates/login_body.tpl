@@ -9,11 +9,11 @@
 	<table class="dataset">
 		<tr>
 			<td><label for="email">{L_LOGIN}&nbsp;:</label></td>
-			<td><input type="text" id="email" name="email" value="{S_LOGIN}" maxlength="250" size="30" autofocus /></td>
+			<td><input type="text" id="email" name="email" value="{S_LOGIN}" maxlength="254" size="25" autofocus /></td>
 		</tr>
 		<tr>
 			<td><label for="passwd">{L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="passwd" name="passwd" maxlength="32" size="30" /></td>
+			<td><input type="password" id="passwd" name="passwd" maxlength="30" size="25" /></td>
 		</tr>
 	</table>
 	

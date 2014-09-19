@@ -11,7 +11,7 @@
 		</tr>
 		<tr>
 			<td><label for="new_email">{L_EMAIL}&nbsp;:</label> <span class="notice">{L_EMAIL_NOTE}</span></td>
-			<td><input type="text" id="new_email" name="new_email" value="{EMAIL}" size="30" maxlength="200" /></td>
+			<td><input type="text" id="new_email" name="new_email" value="{EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 	</table>
 	

@@ -5,11 +5,11 @@
 	<table class="dataset">
 		<tr>
 			<td><label for="login">{L_LOGIN}&nbsp;:</label></td>
-			<td><input type="text" id="login" name="login" value="{S_LOGIN}" maxlength="30" size="30" /></td>
+			<td><input type="text" id="login" name="login" value="{S_LOGIN}" maxlength="30" size="25" /></td>
 		</tr>
 		<tr>
 			<td><label for="email">{L_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="email" name="email" value="{S_EMAIL}" maxlength="200" size="30" /></td>
+			<td><input type="text" id="email" name="email" value="{S_EMAIL}" maxlength="254" size="25" /></td>
 		</tr>
 	</table>
 	

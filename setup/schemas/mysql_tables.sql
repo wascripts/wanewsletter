@@ -25,7 +25,7 @@ CREATE TABLE wa_abonnes (
 	abo_id     INTEGER      NOT NULL AUTO_INCREMENT,
 	abo_pseudo VARCHAR(30)  NOT NULL DEFAULT '',
 	abo_pwd    VARCHAR(32)  NOT NULL DEFAULT '',
-	abo_email  VARCHAR(255) NOT NULL DEFAULT '',
+	abo_email  VARCHAR(254) NOT NULL DEFAULT '',
 	abo_lang   VARCHAR(30)  NOT NULL DEFAULT '',
 	abo_status TINYINT(1)   NOT NULL DEFAULT 0,
 	CONSTRAINT wa_abonnes_pk PRIMARY KEY (abo_id),
@@ -41,7 +41,7 @@ CREATE TABLE wa_admin (
 	admin_id            SMALLINT     NOT NULL AUTO_INCREMENT,
 	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
 	admin_pwd           VARCHAR(32)  NOT NULL DEFAULT '',
-	admin_email         VARCHAR(255) NOT NULL DEFAULT '',
+	admin_email         VARCHAR(254) NOT NULL DEFAULT '',
 	admin_lang          VARCHAR(30)  NOT NULL DEFAULT '',
 	admin_dateformat    VARCHAR(20)  NOT NULL DEFAULT '',
 	admin_level         TINYINT(1)   NOT NULL DEFAULT 1,
@@ -76,7 +76,7 @@ CREATE TABLE wa_auth_admin (
 CREATE TABLE wa_ban_list (
 	ban_id    INTEGER      NOT NULL AUTO_INCREMENT,
 	liste_id  SMALLINT     NOT NULL DEFAULT 0,
-	ban_email VARCHAR(250) NOT NULL DEFAULT '',
+	ban_email VARCHAR(254) NOT NULL DEFAULT '',
 	CONSTRAINT wa_ban_list_pk PRIMARY KEY (ban_id)
 ) ENGINE=MyISAM;
 
@@ -149,8 +149,8 @@ CREATE TABLE wa_liste (
 	liste_name        VARCHAR(100) NOT NULL DEFAULT '',
 	liste_public      TINYINT(1)   NOT NULL DEFAULT 1,
 	liste_format      TINYINT(1)   NOT NULL DEFAULT 1,
-	sender_email      VARCHAR(250) NOT NULL DEFAULT '',
-	return_email      VARCHAR(250) NOT NULL DEFAULT '',
+	sender_email      VARCHAR(254) NOT NULL DEFAULT '',
+	return_email      VARCHAR(254) NOT NULL DEFAULT '',
 	confirm_subscribe TINYINT(1)   NOT NULL DEFAULT 0,
 	limitevalidate    SMALLINT     NOT NULL DEFAULT 3,
 	form_url          VARCHAR(255) NOT NULL DEFAULT '',
@@ -159,7 +159,7 @@ CREATE TABLE wa_liste (
 	purge_freq        TINYINT      NOT NULL DEFAULT 0,
 	purge_next        INTEGER      NOT NULL DEFAULT 0,
 	liste_startdate   INTEGER      NOT NULL DEFAULT 0,
-	liste_alias       VARCHAR(250) NOT NULL DEFAULT '',
+	liste_alias       VARCHAR(254) NOT NULL DEFAULT '',
 	liste_numlogs     SMALLINT     NOT NULL DEFAULT 0,
 	use_cron          TINYINT(1)   NOT NULL DEFAULT 0,
 	pop_host          VARCHAR(100) NOT NULL DEFAULT '',

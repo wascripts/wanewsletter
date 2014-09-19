@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="ftp_server">{extension_ftp.L_FTP_SERVER}&nbsp;:</label><br /><span class="notice">{L_FTP_SERVER_NOTE}</span></td>
-			<td><input type="text" id="ftp_server" name="ftp_server" value="{extension_ftp.FTP_SERVER}" size="30" maxlength="50" /></td>
+			<td><input type="text" id="ftp_server" name="ftp_server" value="{extension_ftp.FTP_SERVER}" size="30" maxlength="100" /></td>
 		</tr>
 		<tr>
 			<td><label for="ftp_port">{extension_ftp.L_FTP_PORT}&nbsp;:</label><br /><span class="notice">{L_FTP_PORT_NOTE}</span></td>
@@ -133,11 +133,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="ftp_user">{extension_ftp.L_FTP_USER}&nbsp;:</label><br /><span class="notice">{extension_ftp.L_FTP_USER_NOTE}</span></td>
-			<td><input type="text" id="ftp_user" name="ftp_user" value="{extension_ftp.FTP_USER}" size="30" maxlength="30" /></td>
+			<td><input type="text" id="ftp_user" name="ftp_user" value="{extension_ftp.FTP_USER}" size="30" maxlength="100" /></td>
 		</tr>
 		<tr>
 			<td><label for="ftp_pass">{extension_ftp.L_FTP_PASS}&nbsp;:</label><br /><span class="notice">{extension_ftp.L_FTP_PASS_NOTE}</span></td>
-			<td><input type="password" id="ftp_pass" name="ftp_pass" size="30" maxlength="30" /></td>
+			<td><input type="password" id="ftp_pass" name="ftp_pass" size="30" maxlength="100" /></td>
 		</tr>
 		<!-- END extension_ftp -->
 	</table>
@@ -190,11 +190,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="smtp_user">{L_SMTP_USER}&nbsp;:</label><br /><span class="notice">{L_AUTH_SMTP_NOTE}</span></td>
-			<td><input type="text" id="smtp_user" name="smtp_user" value="{SMTP_USER}" size="30" maxlength="50"{DISABLED_SMTP} /></td>
+			<td><input type="text" id="smtp_user" name="smtp_user" value="{SMTP_USER}" size="30" maxlength="100"{DISABLED_SMTP} /></td>
 		</tr>
 		<tr>
 			<td><label for="smtp_pass">{L_SMTP_PASS}&nbsp;:</label><br /><span class="notice">{L_AUTH_SMTP_NOTE}</span></td>
-			<td><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="50"{DISABLED_SMTP} /></td>
+			<td><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="100"{DISABLED_SMTP} /></td>
 		</tr>
 	</table>
 	

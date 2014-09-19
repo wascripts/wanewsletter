@@ -34,7 +34,7 @@ function checkForm_editAboProfil()
 		</tr>
 		<tr>
 			<td><label for="email">{L_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="email" name="email" value="{S_ABO_EMAIL}" size="30" maxlength="100" /></td>
+			<td><input type="text" id="email" name="email" value="{S_ABO_EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 	</table>
 	

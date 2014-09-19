@@ -7,7 +7,7 @@
 	<table class="dataset">
 		<tr>
 			<td><label for="pattern">{L_BAN_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="pattern" name="pattern" size="30" maxlength="100" /></td>
+			<td><input type="text" id="pattern" name="pattern" size="30" maxlength="254" /></td>
 		</tr>
 	</table>
 	

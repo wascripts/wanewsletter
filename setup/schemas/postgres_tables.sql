@@ -34,7 +34,7 @@ CREATE TABLE wa_abonnes (
 	abo_id     INTEGER      NOT NULL DEFAULT nextval('wa_abonnes_id_seq'::text),
 	abo_pseudo VARCHAR(30)  NOT NULL DEFAULT '',
 	abo_pwd    VARCHAR(32)  NOT NULL DEFAULT '',
-	abo_email  VARCHAR(255) NOT NULL DEFAULT '',
+	abo_email  VARCHAR(254) NOT NULL DEFAULT '',
 	abo_lang   VARCHAR(30)  NOT NULL DEFAULT '',
 	abo_status SMALLINT     NOT NULL DEFAULT 0,
 	CONSTRAINT wa_abonnes_pk PRIMARY KEY (abo_id),
@@ -50,7 +50,7 @@ CREATE TABLE wa_admin (
 	admin_id            SMALLINT     NOT NULL DEFAULT nextval('wa_admin_id_seq'::text),
 	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
 	admin_pwd           VARCHAR(32)  NOT NULL DEFAULT '',
-	admin_email         VARCHAR(255) NOT NULL DEFAULT '',
+	admin_email         VARCHAR(254) NOT NULL DEFAULT '',
 	admin_lang          VARCHAR(30)  NOT NULL DEFAULT '',
 	admin_dateformat    VARCHAR(20)  NOT NULL DEFAULT '',
 	admin_level         SMALLINT     NOT NULL DEFAULT 1,
@@ -85,7 +85,7 @@ CREATE INDEX admin_id_idx ON wa_auth_admin (admin_id);
 CREATE TABLE wa_ban_list (
 	ban_id    INTEGER      NOT NULL DEFAULT nextval('wa_ban_id_seq'::text),
 	liste_id  SMALLINT     NOT NULL DEFAULT 0,
-	ban_email VARCHAR(250) NOT NULL DEFAULT '',
+	ban_email VARCHAR(254) NOT NULL DEFAULT '',
 	CONSTRAINT wa_ban_list_pk PRIMARY KEY (ban_id)
 );
 
@@ -158,8 +158,8 @@ CREATE TABLE wa_liste (
 	liste_name        VARCHAR(100) NOT NULL DEFAULT '',
 	liste_public      SMALLINT     NOT NULL DEFAULT 1,
 	liste_format      SMALLINT     NOT NULL DEFAULT 1,
-	sender_email      VARCHAR(250) NOT NULL DEFAULT '',
-	return_email      VARCHAR(250) NOT NULL DEFAULT '',
+	sender_email      VARCHAR(254) NOT NULL DEFAULT '',
+	return_email      VARCHAR(254) NOT NULL DEFAULT '',
 	confirm_subscribe SMALLINT     NOT NULL DEFAULT 0,
 	limitevalidate    SMALLINT     NOT NULL DEFAULT 3,
 	form_url          VARCHAR(255) NOT NULL DEFAULT '',
@@ -168,7 +168,7 @@ CREATE TABLE wa_liste (
 	purge_freq        SMALLINT     NOT NULL DEFAULT 0,
 	purge_next        INTEGER      NOT NULL DEFAULT 0,
 	liste_startdate   INTEGER      NOT NULL DEFAULT 0,
-	liste_alias       VARCHAR(250) NOT NULL DEFAULT '',
+	liste_alias       VARCHAR(254) NOT NULL DEFAULT '',
 	liste_numlogs     SMALLINT     NOT NULL DEFAULT 0,
 	use_cron          SMALLINT     NOT NULL DEFAULT 0,
 	pop_host          VARCHAR(100) NOT NULL DEFAULT '',

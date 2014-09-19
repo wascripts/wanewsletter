@@ -125,19 +125,19 @@
 		</tr>
 		<tr>
 			<td><label for="admin_login">{install.L_LOGIN}&nbsp;:</label></td>
-			<td><input type="text" id="admin_login" name="admin_login" size="30" value="{install.LOGIN}" maxlength="30" /></td>
+			<td><input type="text" id="admin_login" name="admin_login" value="{install.LOGIN}" size="30" maxlength="30" /></td>
 		</tr>
 		<tr>
 			<td><label for="admin_pass">{install.L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="admin_pass" name="admin_pass" size="25" maxlength="30" /></td>
+			<td><input type="password" id="admin_pass" name="admin_pass" size="30" maxlength="30" /></td>
 		</tr>
 		<tr>
 			<td><label for="confirm_pass">{install.L_PASS_CONF}&nbsp;:</label></td>
-			<td><input type="password" id="confirm_pass" name="confirm_pass" size="25" maxlength="30" /></td>
+			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" /></td>
 		</tr>
 		<tr>
 			<td><label for="admin_email">{install.L_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="admin_email" name="admin_email" size="30" value="{install.EMAIL}" /></td>
+			<td><input type="text" id="admin_email" name="admin_email" value="{install.EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 	</table>
 	

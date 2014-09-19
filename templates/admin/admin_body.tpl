@@ -17,7 +17,7 @@
 		</tr>
 		<tr>
 			<td><label for="email">{L_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="email" name="email" value="{EMAIL}" size="40" maxlength="200" /></td>
+			<td><input type="text" id="email" name="email" value="{EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 		<tr>
 			<td><label for="dateformat">{L_DATEFORMAT}&nbsp;:</label><br /><span class="notice">{L_NOTE_DATE}</span></td>

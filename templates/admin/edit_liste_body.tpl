@@ -24,15 +24,15 @@
 		</tr>
 		<tr>
 			<td><label for="sender_email">{L_SENDER_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="sender_email" name="sender_email" value="{SENDER_EMAIL}" size="40" maxlength="200" /></td>
+			<td><input type="text" id="sender_email" name="sender_email" value="{SENDER_EMAIL}" size="40" maxlength="254" /></td>
 		</tr>
 		<tr>
 			<td><label for="return_email">{L_RETURN_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="return_email" name="return_email" value="{RETURN_EMAIL}" size="40" maxlength="200" /></td>
+			<td><input type="text" id="return_email" name="return_email" value="{RETURN_EMAIL}" size="40" maxlength="254" /></td>
 		</tr>
 		<tr>
 			<td><label for="form_url">{L_FORM_URL}&nbsp;:</label></td>
-			<td><input type="text" id="form_url" name="form_url" value="{FORM_URL}" size="40" maxlength="250" /></td>
+			<td><input type="text" id="form_url" name="form_url" value="{FORM_URL}" size="40" maxlength="255" /></td>
 		</tr>
 		<tr>
 			<td><label>{L_CONFIRM_SUBSCRIBE}&nbsp;:</label></td>
@@ -99,15 +99,15 @@
 		</tr>
 		<tr>
 			<td><label for="pop_user">{L_POP_USER}&nbsp;:</label></td>
-			<td><input type="text" id="pop_user" name="pop_user" value="{POP_USER}" size="30" maxlength="50"{DISABLED_CRON} /></td>
+			<td><input type="text" id="pop_user" name="pop_user" value="{POP_USER}" size="30" maxlength="100"{DISABLED_CRON} /></td>
 		</tr>
 		<tr>
 			<td><label for="pop_pass">{L_POP_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="pop_pass" name="pop_pass" size="30" maxlength="50"{DISABLED_CRON} /></td>
+			<td><input type="password" id="pop_pass" name="pop_pass" size="30" maxlength="100"{DISABLED_CRON} /></td>
 		</tr>
 		<tr>
 			<td><label for="liste_alias">{L_LISTE_ALIAS}&nbsp;:</label></td>
-			<td><input type="text" id="liste_alias" name="liste_alias" value="{LISTE_ALIAS}" size="40" maxlength="200"{DISABLED_CRON} /></td>
+			<td><input type="text" id="liste_alias" name="liste_alias" value="{LISTE_ALIAS}" size="30" maxlength="254"{DISABLED_CRON} /></td>
 		</tr>
 	</table>
 	

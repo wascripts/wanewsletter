@@ -7,7 +7,7 @@
 	<table class="dataset">
 		<tr>
 			<td><label for="email">{L_LOGIN}&nbsp;:</label></td>
-			<td><input type="text" id="email" name="email" maxlength="250" size="30" /></td>
+			<td><input type="text" id="email" name="email" maxlength="254" size="30" /></td>
 		</tr>
 	</table>
 	

@@ -13,11 +13,11 @@
 		</tr>
 		<tr>
 			<td><label for="new_email">{L_NEW_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="new_email" name="new_email" size="30" maxlength="250" /></td>
+			<td><input type="text" id="new_email" name="new_email" size="30" maxlength="254" /></td>
 		</tr>
 		<tr>
 			<td><label for="confirm_email">{L_CONFIRM_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="confirm_email" name="confirm_email" size="30" maxlength="250" /></td>
+			<td><input type="text" id="confirm_email" name="confirm_email" size="30" maxlength="254" /></td>
 		</tr>
 		<tr>
 			<td><label for="pseudo">{L_PSEUDO}&nbsp;:</label></td>
@@ -30,7 +30,7 @@
 		<!-- BEGIN password -->
 		<tr>
 			<td><label for="current_pass">{password.L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="current_pass" name="current_pass" size="30" maxlength="32" /></td>
+			<td><input type="password" id="current_pass" name="current_pass" size="30" maxlength="30" /></td>
 		</tr>
 		<!-- END password -->
 		<tr>
