@@ -385,7 +385,7 @@ switch( $mode )
 			if( !$error )
 			{
 				$sql_data = array(
-					'abo_pseudo' => wan_htmlspecialchars($pseudo),
+					'abo_pseudo' => strip_tags($pseudo),
 					'abo_lang'   => $language
 				);
 				
