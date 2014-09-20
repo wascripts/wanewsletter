@@ -55,19 +55,43 @@ if( $filedata = $result->fetch() )
 		$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $filedata['file_physical_name']);
 	}
 	
-	$is_svg = (strcasecmp($filedata['file_mimetype'], 'image/svg+xml') == 0);
-	
-	if( ($data = file_get_contents($tmp_filename)) === false )
+	if( !is_readable($tmp_filename) )
 	{
-		exit('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
+		plain_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
+	}
+	
+	$maxAge = 0;
+	$lastModified = filemtime($tmp_filename);
+	$canUseCache  = true;
+	$cachetime    = !empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
+	
+	if( !empty($_SERVER['HTTP_CACHE_CONTROL']) )
+	{
+		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_CACHE_CONTROL']);
+	}
+	else if( !empty($_SERVER['HTTP_PRAGMA']) )// HTTP 1.0
+	{
+		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_PRAGMA']);
+	}
+	
+	if( $lastModified <= $cachetime && $canUseCache )
+	{
+		header('Not Modified', true, 304);
+		header('Date: ' . gmdate(DATE_RFC1123));
+		exit;
 	}
 	
 	header('Date: ' . gmdate(DATE_RFC1123));
-	header('Cache-Control: public, max-age=3600');
+	header('Last-Modified: ' . gmdate(DATE_RFC1123, $lastModified));
+	header('Expires: ' . gmdate(DATE_RFC1123, (time() + $maxAge)));// HTTP 1.0
+	header('Pragma: private');// HTTP 1.0
+	header('Cache-Control: private, must-revalidate, max-age='.$maxAge);
 	header('Content-Disposition: inline; filename="' . $filedata['file_real_name'] . '"');
 	header('Content-Length: ' . $filedata['file_size']);
 	
-	if( preg_match('#^image/svg\+xml$#i', $filedata['file_mimetype']) )
+	$data = file_get_contents($tmp_filename);
+	
+	if( strcasecmp($filedata['file_mimetype'], 'image/svg+xml') === 0 )
 	{
 		$charset = 'UTF-8';
 		if( preg_match('/^<\?xml(.+?)\?>/', $data, $match) )
