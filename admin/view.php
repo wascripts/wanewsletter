@@ -90,7 +90,7 @@ else if( $mode == 'export' )
 		{
 			$archive_name .= '.gz';
 			$compressed    = 'gz';
-			$mime_type     = 'application/x-gzip';
+			$mime_type     = 'application/x-gtar';
 		}
 	}
 	

@@ -32,7 +32,7 @@ function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 			break;
 		
 		case 'gzip':
-			$mime_type = 'application/x-gzip-compressed';
+			$mime_type = 'application/x-gzip';
 			$contents  = gzencode($contents);
 			$filename .= '.gz';
 			break;
