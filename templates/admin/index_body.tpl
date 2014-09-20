@@ -6,10 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		evt.preventDefault();
 		
 		var mainBlock = document.getElementById('check-update').parentNode;
-		
-		var loadingImg = document.createElement('img');
-		loadingImg.setAttribute('src', '../templates/images/loading.gif');
-		loadingImg.style.verticalAlign = 'middle';
 		mainBlock.replaceChild(loadingImg, document.getElementById('check-update'));
 		
 		var xhr = new XMLHttpRequest();
@@ -44,6 +40,13 @@ document.addEventListener('DOMContentLoaded', function() {
 		xhr.open('GET', evt.target.href + '&output=json', true);
 		xhr.send();
 	}, false);
+
+	// Image de chargement
+	var loadingImg = document.createElement('img');
+	loadingImg.setAttribute('src', '../templates/images/loading.gif');
+	loadingImg.setAttribute('alt', 'Loading\u2026');
+	loadingImg.style.verticalAlign = 'middle';
+	loadingImg.style.lineHeight = '1';
 }, false);
 //-->
 </script>
