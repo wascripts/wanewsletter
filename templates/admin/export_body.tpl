@@ -60,9 +60,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			<td>
 				<input type="radio" id="compress_none" name="compress" value="none" checked="checked" />
 				<label for="compress_none" class="notice">{compress_option.L_NO}</label>
-				<!-- BEGIN gzip_compress -->
+				<!-- BEGIN zip_compress -->
 				<input type="radio" id="compress_zip" name="compress" value="zip" />
 				<label for="compress_zip" class="notice">Zip</label>
+				<!-- END zip_compress -->
+				<!-- BEGIN gzip_compress -->
 				<input type="radio" id="compress_gzip" name="compress" value="gzip" />
 				<label for="compress_gzip" class="notice">Gzip</label>
 				<!-- END gzip_compress -->

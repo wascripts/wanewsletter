@@ -45,8 +45,10 @@
 			<td><label>{compress_option.L_COMPRESS}&nbsp;:</label></td>
 			<td> 
 				<input type="radio" id="compress_none" name="compress" value="none" checked="checked" /> <label for="compress_none" class="notice">{L_NO}</label> &nbsp; 
-				<!-- BEGIN gzip_compress -->
+				<!-- BEGIN zip_compress -->
 				<input type="radio" id="compress_zip" name="compress" value="zip" /> <label for="compress_zip" class="notice">Zip</label> &nbsp; 
+				<!-- END zip_compress -->
+				<!-- BEGIN gzip_compress -->
 				<input type="radio" id="compress_gzip" name="compress" value="gzip" /> <label for="compress_gzip" class="notice">Gzip</label> &nbsp; 
 				<!-- END gzip_compress -->
 				<!-- BEGIN bz2_compress -->

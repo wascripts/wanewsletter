@@ -20,10 +20,14 @@ function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 	switch( $compress )
 	{
 		case 'zip':
+			$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
 			$mime_type = 'application/zip';
-			$zip = new zipfile;
-			$zip->addFile($contents, $filename, time());
-			$contents  = $zip->file();
+			$zip = new ZipArchive();
+			$zip->open($tmp_filename, 1);// TODO: Fix it! 1 = ZipArchive::CREATE
+			$zip->addFromString($filename, $contents);
+			$zip->close();
+			$contents = file_get_contents($tmp_filename);
+			unlink($tmp_filename);
 			$filename .= '.zip';
 			break;
 		
@@ -227,14 +231,10 @@ if( !isset($_POST['submit']) )
 //
 // On vérifie la présence des extensions nécessaires pour les différents formats de fichiers proposés
 //
-$zziplib_loaded = extension_loaded('zip');
-$zlib_loaded    = extension_loaded('zlib');
-$bzip2_loaded   = extension_loaded('bz2');
-
-if( $zlib_loaded )
-{
-	require WA_ROOTDIR . '/includes/zip.lib.php';
-}
+define('ZIPLIB_LOADED', extension_loaded('zip'));
+define('ZIPLIB_WRITE_LOADED', ZIPLIB_LOADED && version_compare(PHP_VERSION, '5.2.0', '>='));
+define('ZLIB_LOADED',   extension_loaded('zlib'));
+define('BZIP2_LOADED',  extension_loaded('bz2'));
 
 if( WA_USER_OS == 'win' )
 {
@@ -464,19 +464,24 @@ switch( $mode )
 			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
 		));
 		
-		if( $zlib_loaded || $bzip2_loaded )
+		if( ZIPLIB_WRITE_LOADED || ZLIB_LOADED || BZIP2_LOADED )
 		{
 			$output->assign_block_vars('compress_option', array(
 				'L_COMPRESS' => $lang['Compress'],
 				'L_NO'       => $lang['No']
 			)); 
 			
-			if( $zlib_loaded )
+			if( ZIPLIB_WRITE_LOADED )
+			{
+				$output->assign_block_vars('compress_option.zip_compress', array());
+			}
+			
+			if( ZLIB_LOADED )
 			{
 				$output->assign_block_vars('compress_option.gzip_compress', array());
 			}
 			
-			if( $bzip2_loaded )
+			if( BZIP2_LOADED )
 			{
 				$output->assign_block_vars('compress_option.bz2_compress', array());
 			}
@@ -569,7 +574,7 @@ switch( $mode )
 					$file_ext = $m[1];
 				}
 				
-				if( ( !$zziplib_loaded && $file_ext == 'zip' ) || ( !$zlib_loaded && $file_ext == 'gz' ) || ( !$bzip2_loaded && $file_ext == 'bz2' ) )
+				if( ( !ZIPLIB_LOADED && $file_ext == 'zip' ) || ( !ZLIB_LOADED && $file_ext == 'gz' ) || ( !BZIP2_LOADED && $file_ext == 'bz2' ) )
 				{
 					$output->displayMessage('Compress_unsupported');
 				}
@@ -1224,18 +1229,23 @@ switch( $mode )
 			));
 		}
 		
-		if( $zlib_loaded || $bzip2_loaded )
+		if( ZIPLIB_WRITE_LOADED || ZLIB_LOADED || BZIP2_LOADED )
 		{
 			$output->assign_block_vars('compress_option', array(
 				'L_COMPRESS' => $lang['Compress']
 			));
 			
-			if( $zlib_loaded )
+			if( ZIPLIB_WRITE_LOADED )
+			{
+				$output->assign_block_vars('compress_option.zip_compress', array());
+			}
+			
+			if( ZLIB_LOADED )
 			{
 				$output->assign_block_vars('compress_option.gzip_compress', array());
 			}
 			
-			if( $bzip2_loaded )
+			if( BZIP2_LOADED )
 			{
 				$output->assign_block_vars('compress_option.bz2_compress', array());
 			}
@@ -1322,7 +1332,7 @@ switch( $mode )
 				
 				$file_ext = $match[1];
 				
-				if( ( !$zziplib_loaded && $file_ext == 'zip' ) || ( !$zlib_loaded && $file_ext == 'gz' ) || ( !$bzip2_loaded && $file_ext == 'bz2' ) )
+				if( ( !ZIPLIB_LOADED && $file_ext == 'zip' ) || ( !ZLIB_LOADED && $file_ext == 'gz' ) || ( !BZIP2_LOADED && $file_ext == 'bz2' ) )
 				{
 					$output->displayMessage('Compress_unsupported');
 				}
