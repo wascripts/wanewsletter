@@ -24,7 +24,7 @@ function make_admin()
 	var aList = document.querySelectorAll('table#files-box a.show');
 	for( var i = 0, m = aList.length; i < m; i++ )
 	{
-		aList[i].addEventListener('click', show, false);
+		aList[i].addEventListener('click', showImage, false);
 	}
 
 	//
@@ -98,20 +98,22 @@ function switch_checkbox(evt)
 	}
 }
 
-function show(evt)
+function showImage(evt)
 {
-	var sURL = evt.currentTarget.href;
-	var imgBox = document.getElementById('image-box');
+	var imgBox = evt.currentTarget.parentNode.querySelector('div.image-box');
 
 	if( imgBox == null )
 	{
 		imgBox = document.createElement('div');
-		imgBox.setAttribute('id', 'image-box');
-		document.body.appendChild(imgBox);
+		imgBox.setAttribute('class', 'image-box');
+		evt.currentTarget.parentNode.appendChild(imgBox);
+
+		var img = document.createElement('img');
+		img.setAttribute('data-type', evt.currentTarget.type);
+		img.setAttribute('src', evt.currentTarget.href);
+		imgBox.appendChild(img);
 	}
 
-	imgBox.innerHTML = '<object type="'+evt.currentTarget.type+'"'
-		+ ' data="'+sURL+'"></object>';
 	imgBox.style.display = 'block';
 
 	var clickListener = function(evt) {
