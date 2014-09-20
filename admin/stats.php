@@ -54,7 +54,8 @@ function send_image($name, $img, $lastModified = null)
 		$lastModified = time();
 	}
 	
-	$cachetime = !empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
+	$canUseCache = true;
+	$cachetime   = !empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
 	
 	if( !empty($_SERVER['HTTP_CACHE_CONTROL']) )
 	{
