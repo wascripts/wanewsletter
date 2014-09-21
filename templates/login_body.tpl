@@ -1,9 +1,9 @@
-<form method="post" action="./profil_cp.php">
-<ul class="links special">
+<form class="compact" method="post" action="./profil_cp.php">
+<ul class="links">
 	<li><a href="profil_cp.php?mode=sendkey">{L_SENDKEY}</a></li>
 </ul>
 
-<div class="block compact">
+<div class="block">
 	<h2>{TITLE}</h2>
 	
 	<table class="dataset">
@@ -24,7 +24,7 @@
 </div>
 
 <!-- BEGIN cookie_notice -->
-<p id="cookie-notice" class="warning compact">{cookie_notice.L_TEXT}</p>
+<p id="cookie-notice" class="warning">{cookie_notice.L_TEXT}</p>
 <script>
 if( navigator.cookieEnabled ) {
 	document.getElementById('cookie-notice').style.display = 'none';

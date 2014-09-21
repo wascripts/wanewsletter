@@ -1,5 +1,5 @@
-<form method="post" action="{U_FORM}">
-<div class="block compact">
+<form class="compact" method="post" action="{U_FORM}">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
 	<table class="dataset">

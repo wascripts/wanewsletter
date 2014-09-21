@@ -1,5 +1,5 @@
-<form method="post" action="./tools.php?mode=generator">
-<div class="block compact">
+<form class="compact" method="post" action="./tools.php?mode=generator">
+<div class="block">
 	<h2>{L_TITLE_GENERATOR}</h2>
 	
 	<p class="explain">{L_EXPLAIN_GENERATOR}</p>

@@ -1,12 +1,13 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<ul class="links special">
+<div class="compact">
+<ul class="links">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=edit&amp;id={S_ABO_ID}">{L_EDIT_ACCOUNT}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=delete&amp;id={S_ABO_ID}">{L_DELETE_ACCOUNT}</a></li>
 </ul>
 
-<div class="block compact">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
 	<table class="dataset">
@@ -52,6 +53,7 @@
 		<!-- END row -->
 	</table>
 	<!-- END tags -->
+</div>
 </div>
 
 {LISTBOX}

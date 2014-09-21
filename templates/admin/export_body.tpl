@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
 //-->
 </script>
 
-<form id="export-form" method="post" action="./tools.php?mode=export">
-<div class="block compact">
+<form class="compact" id="export-form" method="post" action="./tools.php?mode=export">
+<div class="block">
 	<h2>{L_TITLE_EXPORT}</h2>
 	
 	<p class="explain">{L_EXPLAIN_EXPORT}</p>

@@ -17,14 +17,14 @@ function checkForm_editAboProfil()
 
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./view.php?mode=abonnes" onsubmit="return checkForm_editAboProfil();">
-<ul class="links special">
+<form class="compact" method="post" action="./view.php?mode=abonnes" onsubmit="return checkForm_editAboProfil();">
+<ul class="links">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=view&amp;id={S_ABO_ID}">{L_VIEW_ACCOUNT}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=delete&amp;id={S_ABO_ID}">{L_DELETE_ACCOUNT}</a></li>
 </ul>
 
-<div class="block compact">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
 	<table class="dataset">

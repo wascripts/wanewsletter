@@ -1,5 +1,5 @@
-<form method="post" action="./tools.php?mode=restore" enctype="{S_ENCTYPE}">
-<div class="block compact">
+<form class="compact" method="post" action="./tools.php?mode=restore" enctype="{S_ENCTYPE}">
+<div class="block">
 	<h2>{L_TITLE_RESTORE}</h2>
 
 	<p class="explain">{L_EXPLAIN_RESTORE}</p>

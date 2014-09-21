@@ -1,5 +1,5 @@
-<form method="post" action="./tools.php?mode=ban">
-<div class="block compact">
+<form class="compact" method="post" action="./tools.php?mode=ban">
+<div class="block">
 	<h2>{L_TITLE_BAN}</h2>
 	
 	<p class="explain">{L_EXPLAIN_BAN}</p>

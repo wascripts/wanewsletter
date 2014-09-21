@@ -1,5 +1,5 @@
-<form id="login-form" method="post" action="./login.php?mode=login">
-<div class="block compact">
+<form class="compact" id="login-form" method="post" action="./login.php?mode=login">
+<div class="block">
 	<h2>{TITLE}</h2>
 	
 	<table class="dataset">
@@ -26,7 +26,7 @@
 </div>
 
 <!-- BEGIN cookie_notice -->
-<p id="cookie-notice" class="warning compact">{cookie_notice.L_TEXT}</p>
+<p id="cookie-notice" class="warning">{cookie_notice.L_TEXT}</p>
 <script>
 if( navigator.cookieEnabled ) {
 	document.getElementById('cookie-notice').style.display = 'none';

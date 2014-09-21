@@ -1,5 +1,5 @@
-<form method="post" action="./tools.php?mode=import" enctype="{S_ENCTYPE}">
-<div class="block compact">
+<form class="compact" method="post" action="./tools.php?mode=import" enctype="{S_ENCTYPE}">
+<div class="block">
 	<h2>{L_TITLE_IMPORT}</h2>
 	
 	<p class="explain">{L_EXPLAIN_IMPORT}</p>

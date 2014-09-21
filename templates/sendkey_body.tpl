@@ -1,5 +1,5 @@
-<form method="post" action="./profil_cp.php">
-<div class="block compact">
+<form class="compact" method="post" action="./profil_cp.php">
+<div class="block">
 	<h2>{TITLE}</h2>
 	
 	<p class="explain">{L_EXPLAIN}</p>

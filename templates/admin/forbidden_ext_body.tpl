@@ -1,5 +1,5 @@
-<form method="post" action="./tools.php?mode=attach">
-<div class="block compact">
+<form class="compact" method="post" action="./tools.php?mode=attach">
+<div class="block">
 	<h2>{L_TITLE_EXT}</h2>
 	
 	<p class="explain">{L_EXPLAIN_TO_FORBID}</p>

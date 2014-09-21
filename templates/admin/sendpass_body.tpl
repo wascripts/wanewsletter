@@ -1,5 +1,5 @@
-<form method="post" action="./login.php?mode=sendpass">
-<div class="block compact">
+<form class="compact" method="post" action="./login.php?mode=sendpass">
+<div class="block">
 	<h2>{TITLE}</h2>
 	
 	<table class="dataset">
