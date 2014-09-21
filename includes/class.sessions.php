@@ -120,12 +120,10 @@ class Session {
 		
 		$this->user_ip = $this->encode_ip($client_ip);
 		
-		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $nl_config['urlsite'], $match);
-		
 		$this->cfg_cookie['cookie_name']   = $nl_config['cookie_name'];
 		$this->cfg_cookie['cookie_path']   = $nl_config['cookie_path'];
-		$this->cfg_cookie['cookie_domain'] = '';//$match[2];
-		$this->cfg_cookie['cookie_secure'] = ( !empty($match[1]) ) ? 1 : 0;
+		$this->cfg_cookie['cookie_domain'] = null;
+		$this->cfg_cookie['cookie_secure'] = !empty($_SERVER['HTTPS']) ? 1 : 0;
 		$this->cfg_cookie['cookie_httponly'] = true;
 	}
 	
@@ -178,7 +176,7 @@ class Session {
 		);
 		
 		$this->send_cookie('sessid', $this->session_id, 0);
-		$this->send_cookie('data', serialize($sessiondata), $current_time + 31536000);
+		$this->send_cookie('data', serialize($sessiondata), strtotime('+1 month'));
 		
 		$this->is_logged_in = true;
 		
@@ -269,7 +267,7 @@ class Session {
 						
 						if( $force_update )
 						{
-							$this->send_cookie('listeid', $row['session_liste'], $current_time + 31536000);
+							$this->send_cookie('listeid', $row['session_liste'], strtotime('+1 month'));
 						}
 					}
 					
@@ -337,9 +335,6 @@ class Session {
 		}
 		else
 		{
-			$this->send_cookie('sessid', '', $current_time - 31536000);
-			$this->send_cookie('data', '', $current_time - 31536000);
-			
 			return false;
 		}
 	}
@@ -370,8 +365,9 @@ class Session {
 		}
 		
 		$this->is_logged_in = false;
-		$this->send_cookie('sessid', '', $current_time - 31536000);
-		$this->send_cookie('data', '', $current_time - 31536000);
+		$ts_expire = strtotime('+1 month');
+		$this->send_cookie('sessid', '', $ts_expire);
+		$this->send_cookie('data', '', $ts_expire);
 	}
 	
 	/**
