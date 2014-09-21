@@ -19,11 +19,11 @@
 	<h1>{PAGE_TITLE}</h1>
 </div>
 
-{ERROR_BOX}
-
 <form method="post" action="./upgrade.php">
 <div id="global">
-	
+
+	{ERROR_BOX}
+
 	<!-- BEGIN upgrade -->
 	<div class="block"><p>{upgrade.L_EXPLAIN}</p></div>
 	

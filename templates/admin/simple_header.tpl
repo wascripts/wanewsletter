@@ -19,6 +19,6 @@
 	<h1>{SITENAME}</h1>
 </div>
 
-{ERROR_BOX}
-
 <div id="global">
+
+{ERROR_BOX}

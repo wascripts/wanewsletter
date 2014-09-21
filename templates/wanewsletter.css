@@ -98,7 +98,7 @@ ul#menu>li:first-child {
 	padding-left: 0;
 }
 
-div#smallheader, ul#errorbox, div#global, address#footer, ul#php_errors {
+div#smallheader, div#global, address#footer {
 	background-color: #E3E0DD;
 	margin: 20px;
 	border: 1px solid black;
@@ -106,7 +106,7 @@ div#smallheader, ul#errorbox, div#global, address#footer, ul#php_errors {
 	padding-right: 2.7%;
 	color: black;
 }
-ul#errorbox, div#global, ul#php_errors {
+div#global {
 	font-size: 1.3em;
 }
 
@@ -126,7 +126,6 @@ address#footer {
 	font-weight: bold;
 }
 
-ul#php_errors { padding-top: 10px; padding-bottom: 10px; }
 div#dev {
 	margin: 20px;
 	text-align: center;
@@ -138,9 +137,6 @@ p#explain {
 	padding: 0 .8%;
 	line-height: 1.5;
 }
-
-ul#errorbox { padding: .5em 2.5em; }
-ul#errorbox li { margin: 2px 0; }
 
 #iframe {
 	width: 100%;
@@ -166,6 +162,17 @@ div.aside > div + div { text-align: right; }
 div.last-modified { font-style: italic; text-align: right; color: #333; }
 
 /* Classes diverses */
+
+.warning {
+	background-color: #F4D6D6;
+	margin: 1.4em 0;
+	border: 1px solid #C00;
+	box-shadow: 1px 1px 1px hsla(0, 100%, 72%, 0.2);
+	padding: .5em 2em;
+	line-height: 1.45;
+	color: #600;
+}
+.warning li { list-style-type: disc; }
 
 .block {
 	background-color: #FAFAFA;
@@ -209,15 +216,6 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	font-size: .85em;
 }
 .block > h2 + p.explain { margin-top: 1px; }
-
-.warning {
-	background-color: #FDC;
-	margin-top: 1em;
-	margin-bottom: 1em;
-	border: 1px solid #D00;
-	padding: .5em 1em;
-	color: #600;
-}
 
 div.textinput {
 	background-color: #D6D8DA;

@@ -31,6 +31,6 @@
 	<li><a href="./profil_cp.php?mode=archives">{L_LOG}</a></li>
 </ul>
 
-{ERROR_BOX}
-
 <div id="global">
+
+{ERROR_BOX}

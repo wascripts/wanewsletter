@@ -61,11 +61,11 @@
 	<h1>{PAGE_TITLE}</h1>
 </div>
 
-{ERROR_BOX}
-
 <form method="post" action="./install.php">
 <div id="global">
-	
+
+	{ERROR_BOX}
+
 	<!-- BEGIN install -->
 	<div class="block"><p>{install.L_EXPLAIN}</p></div>
 	

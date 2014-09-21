@@ -324,18 +324,19 @@ class output extends Template {
 		
 		if( !defined('IN_SUBSCRIBE') && !defined('IN_LOGIN') && count($GLOBALS['_php_errors']) > 0 )
 		{
-			$this->assign_block_vars('php_errors', array());
-			
+			$error_box = '';
 			foreach( $GLOBALS['_php_errors'] as $entry )
 			{
 				if( !is_scalar($entry) ) {
 					$entry = nl2br(print_r($entry, true));
 				}
 				
-				$this->assign_block_vars('php_errors.item', array(
-					'TEXT' => $entry
-				));
+				$error_box .= sprintf("<li>%s</li>\n", $entry);
 			}
+			
+			$this->assign_vars(array(
+				'PHP_ERROR_BOX' => sprintf('<ul class="warning">%s</ul>', $error_box)
+			));
 		}
 		
 		$this->pparse('footer');
@@ -518,26 +519,26 @@ BASIC;
 	/**
 	 * Génération et affichage de liste d'erreur
 	 * 
-	 * @param string $msg_error
+	 * @param mixed $msg_errors
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function error_box($msg_error)
+	function error_box($msg_errors)
 	{
-		$error_box = "<ul id=\"errorbox\">\n\t<li> ";
-		if( is_array($msg_error) )
+		if( !is_array($msg_errors) )
 		{
-			$error_box .= implode(" </li>\n\t<li> ", $msg_error);
+			$msg_errors = array($msg_errors);
 		}
-		else
+		
+		$error_box = '';
+		foreach( $msg_errors as $msg_error )
 		{
-			$error_box .= $msg_error;
+			$error_box .= sprintf("<li>%s</li>\n", $msg_error);
 		}
-		$error_box .= " </li>\n</ul>";
 		
 		$this->assign_vars(array(
-			'ERROR_BOX' => $error_box
+			'ERROR_BOX' => sprintf('<ul class="warning">%s</ul>', $error_box)
 		));
 	}
 	

@@ -39,6 +39,6 @@
 	<li><a href="./stats.php">{L_STATS}</a></li>
 </ul>
 
-{ERROR_BOX}
-
 <div id="global">
+
+{ERROR_BOX}
