@@ -267,10 +267,6 @@ class output extends Template {
 			));
 		}
 		
-		$this->assign_block_vars('meta_content_type', array(
-			'CHARSET' => $lang['CHARSET']
-		));
-		
 		if( $error )
 		{
 			$this->error_box($msg_error);
