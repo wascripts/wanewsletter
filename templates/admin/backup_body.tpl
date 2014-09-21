@@ -1,4 +1,4 @@
-<form method="post" action="./tools.php?mode=backup">
+<form class="compact" method="post" action="./tools.php?mode=backup">
 <div class="block">
 	<h2>{L_TITLE_BACKUP}</h2>
 	
