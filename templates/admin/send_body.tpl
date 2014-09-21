@@ -116,11 +116,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 		</tr>
 	</table>
 	
-	<!-- BEGIN files_box -->
-	<h2>{joined_files.files_box.L_TITLE_JOINED_FILES}</h2>
-	
 	{JOINED_FILES_BOX}
-	<!-- END files_box -->
 </div>
 
 <!-- BEGIN files_box -->

@@ -592,6 +592,7 @@ BASIC;
 		));
 		
 		$this->assign_vars(array(
+			'L_JOINED_FILES'   => $lang['Title']['joined_files'],
 			'L_FILENAME'       => $lang['Filename'],
 			'L_FILESIZE'       => $lang['Filesize'],
 			'L_TOTAL_LOG_SIZE' => $lang['Total_log_size'],
@@ -600,22 +601,17 @@ BASIC;
 			'S_ROWSPAN'        => ( $page_envoi ) ? '4' : '3'
 		));
 		
-		if( $page_envoi == true )
+		if( $page_envoi )
 		{
 			$this->assign_block_vars('del_column', array());
-			$this->assign_block_vars('joined_files.files_box', array(
-				'L_TITLE_JOINED_FILES' => $lang['Title']['joined_files'],
-				'L_DEL_FILE_BUTTON'    => $lang['Button']['del_file']
+			$this->assign_block_vars('joined_files.files_box', array( // dans send_body.tpl
+				'L_DEL_FILE_BUTTON' => $lang['Button']['del_file']
 			));
 			
 			$u_download = './envoi.php?mode=download&amp;fid=%d';
 		}
 		else
 		{
-			$this->assign_block_vars('files_box', array(
-				'L_TITLE_JOINED_FILES'	=> $lang['Title']['joined_files']
-			));
-			
 			$u_download = './view.php?mode=download&amp;fid=%d';
 		}
 		

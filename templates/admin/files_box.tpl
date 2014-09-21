@@ -1,3 +1,6 @@
+
+<h2>{L_JOINED_FILES}</h2>
+
 <table id="files-box" class="listing">
 	<tr>
 		<th>#</th>

@@ -18,11 +18,7 @@
 		</span>
 	</div>
 	
-	<!-- BEGIN files_box -->
-	<h2>{files_box.L_TITLE_JOINED_FILES}</h2>
-	
 	{JOINED_FILES_BOX}
-	<!-- END joined_files -->
 	
 	<!-- BEGIN format_box -->
 	<div class="bottom"> {format_box.S_HIDDEN_FIELDS}
