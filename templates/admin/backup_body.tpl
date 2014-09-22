@@ -2,7 +2,7 @@
 <div class="block">
 	<h2>{L_TITLE_BACKUP}</h2>
 	
-	<p class="explain">{L_EXPLAIN_BACKUP}</p>
+	<div class="explain">{L_EXPLAIN_BACKUP}</div>
 	
 	<table class="dataset">
 		<tr>

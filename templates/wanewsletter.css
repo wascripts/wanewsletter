@@ -210,13 +210,13 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	text-align: center;
 }
 
-.block > p.explain {
+.block div.explain {
 	background-color: #C2BFBC;
 	margin: 0 1px;
 	padding: .5em 1em;
 	font-size: .85em;
 }
-.block > h2 + p.explain { margin-top: 1px; }
+.block > h2 + div.explain { margin-top: 1px; }
 
 div.textinput {
 	background-color: #D6D8DA;

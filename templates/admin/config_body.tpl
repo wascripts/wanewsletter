@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	<h2>{TITLE_CONFIG_COOKIES}</h2>
 	
-	<p class="explain">{L_EXPLAIN_COOKIES}</p>
+	<div class="explain">{L_EXPLAIN_COOKIES}</div>
 	
 	<table class="dataset">
 		<tr>
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	<h2>{TITLE_CONFIG_JOINED_FILES}</h2>
 	
-	<p class="explain">{L_EXPLAIN_JOINED_FILES}</p>
+	<div class="explain">{L_EXPLAIN_JOINED_FILES}</div>
 	
 	<table class="dataset">
 		<tr>
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	<h2>{TITLE_CONFIG_EMAIL}</h2>
 	
-	<p class="explain">{L_EXPLAIN_EMAIL}</p>
+	<div class="explain">{L_EXPLAIN_EMAIL}</div>
 	
 	<table class="dataset">
 		<tr>
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	<!-- BEGIN extension_gd -->
 	<h2>{extension_gd.TITLE_CONFIG_STATS}</h2>
 	
-	<p class="explain">{extension_gd.L_EXPLAIN_STATS}</p>
+	<div class="explain">{extension_gd.L_EXPLAIN_STATS}</div>
 	
 	<table class="dataset">
 		<tr>
