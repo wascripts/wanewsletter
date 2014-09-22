@@ -215,6 +215,7 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	margin: 0 1px;
 	padding: .5em 1em;
 	font-size: .85em;
+	line-height: 1.45;
 }
 .block > h2 + div.explain { margin-top: 1px; }
 
