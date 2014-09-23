@@ -1,4 +1,4 @@
-<form class="compact" id="login-form" method="post" action="./login.php?mode=login">
+<form class="compact" id="login-form" method="post" action="login.php">
 <div class="block">
 	<h2>{TITLE}</h2>
 	

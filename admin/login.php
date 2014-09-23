@@ -110,7 +110,7 @@ if( $mode == 'sendpass' )
 //
 // Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
 //
-else if( $mode == 'login' && !$session->is_logged_in )
+else if( isset($_POST['submit']) && !$session->is_logged_in )
 {
 	$login     = ( !empty($_POST['login']) ) ? trim($_POST['login']) : '';
 	$passwd    = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
