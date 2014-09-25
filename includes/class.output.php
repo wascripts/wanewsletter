@@ -363,12 +363,10 @@ class output extends Template {
 	{
 		global $lang;
 		
-		header('Last-Modified: ' . gmdate(DATE_RFC1123));
-		header('Expires: ' . gmdate(DATE_RFC1123));
-		header('Cache-Control: no-cache, no-store, must-revalidate, private, pre-check=0, post-check=0, max-age=0');
-		header('Pragma: no-cache');
+		header('Expires: ' . gmdate(DATE_RFC1123));// HTTP/1.0
+		header('Pragma: no-cache');// HTTP/1.0
+		header('Cache-Control: no-cache, must-revalidate, max-age=0');
 		header('Content-Language: ' . $lang['CONTENT_LANG']);
-		
 		header('Content-Type: text/html; charset=' . $lang['CHARSET']);
 		
 		ob_start();
