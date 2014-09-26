@@ -344,12 +344,12 @@ switch( $mode )
 
 		wan_print_row('Type de serveur', $_SERVER['SERVER_SOFTWARE']);
 
-		if( strncmp($infos['driver'], 'sqlite', 6) == 0 ) {
-			wan_print_row('Base de données', sprintf('%s %s', $infos['label'], $db->libVersion));
+		if( $db->engine == 'sqlite' ) {
+			wan_print_row('Base de données', sprintf('%s %s - Driver : %s', $infos['label'], $db->libVersion, $infos['driver']));
 		}
 		else {
-			wan_print_row('Base de données', sprintf('%s %s - Client : %s - Jeu de caractères : %s',
-				$infos['label'], $db->serverVersion, $db->clientVersion, $db->encoding()));
+			wan_print_row('Base de données', sprintf('%s %s - Client : %s - Jeu de caractères : %s - Driver : %s',
+				$infos['label'], $db->serverVersion, $db->clientVersion, $db->encoding(), $infos['driver']));
 		}
 
 		wan_print_row('Agent utilisateur',
