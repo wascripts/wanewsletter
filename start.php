@@ -103,7 +103,6 @@ if( version_compare(PHP_VERSION, '5.4.0', '<') )
 // Intialisation de la connexion à la base de données 
 //
 $db = WaDatabase($dsn);
-define('SQL_DRIVER', substr(get_class($db), 5));
 
 if( !$db->isConnected() )
 {

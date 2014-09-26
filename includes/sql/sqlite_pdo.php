@@ -625,6 +625,17 @@ class WadbResult_sqlite_pdo {
 	{
 		$this->free();
 	}
+	
+	/**
+	 * Initialise un objet WadbBackup_{self::$engine}
+	 *
+	 * @access public
+	 * @return object
+	 */
+	function initBackup()
+	{
+		return new WadbBackup_sqlite_pdo($this);
+	}
 }
 
 class WadbBackup_sqlite_pdo {

@@ -634,6 +634,17 @@ class WadbResult_mysql {
 	{
 		$this->free();
 	}
+	
+	/**
+	 * Initialise un objet WadbBackup_{self::$engine}
+	 *
+	 * @access public
+	 * @return object
+	 */
+	function initBackup()
+	{
+		return new WadbBackup_mysql($this);
+	}
 }
 
 class WadbBackup_mysql {
