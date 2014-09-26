@@ -48,6 +48,7 @@ if( !defined('NL_INSTALLED') )
 	exit;
 }
 
+require WA_ROOTDIR . '/includes/compat.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';

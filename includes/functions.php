@@ -1278,9 +1278,9 @@ $CONVMAP = array(
  * 
  * @return string
  */
-function wan_htmlspecialchars($string, $flags = ENT_COMPAT, $encoding = 'ISO-8859-1', $double_encode = true)
+function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', $double_encode = true)
 {
-	if( $flags == ENT_COMPAT && defined('ENT_HTML401') ) {
+	if( $flags == null ) {
 		$flags = ENT_COMPAT | ENT_HTML401;
 	}
 	
@@ -1299,11 +1299,12 @@ function wan_htmlspecialchars($string, $flags = ENT_COMPAT, $encoding = 'ISO-885
  * 
  * @return string
  */
-function wan_html_entity_decode($string, $flags = ENT_COMPAT, $encoding = 'ISO-8859-1')
+function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1')
 {
-	if( $flags == ENT_COMPAT && defined('ENT_HTML401') ) {
+	if( $flags == null ) {
 		$flags = ENT_COMPAT | ENT_HTML401;
 	}
+	
 	return html_entity_decode($string, $flags, $encoding);
 }
 

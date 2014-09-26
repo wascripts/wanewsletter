@@ -115,6 +115,7 @@ function exec_queries($sql_ary, $return_error = false)
 
 error_reporting(E_ALL);
 
+require WA_ROOTDIR . '/includes/compat.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/template.php';

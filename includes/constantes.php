@@ -64,11 +64,6 @@ define('ENABLE_HTTP_AUTHENTICATION', TRUE);
 define('CRITICAL_ERROR', E_USER_ERROR);
 define('ERROR',          E_USER_WARNING);
 
-if( !defined('E_DEPRECATED') ) // Compatibilité PHP5.3
-{
-	define('E_DEPRECATED', 8192);
-}
-
 //
 // Formats d'emails 
 //
