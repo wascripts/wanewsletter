@@ -12,6 +12,14 @@ if( !defined('_INC_CLASS_WADB_MYSQL') ) {
 define('_INC_CLASS_WADB_MYSQL', true);
 
 class Wadb_mysql {
+
+	/**
+	 * Type de base de données
+	 *
+	 * @var string
+	 * @access private
+	 */
+	var $engine = 'mysql';
 	
 	/**
 	 * Connexion à la base de données

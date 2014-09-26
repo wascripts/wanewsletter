@@ -12,6 +12,14 @@ if( !defined('_INC_CLASS_WADB_POSTGRES') ) {
 define('_INC_CLASS_WADB_POSTGRES', true);
 
 class Wadb_postgres {
+
+	/**
+	 * Type de base de données
+	 *
+	 * @var string
+	 * @access private
+	 */
+	var $engine = 'postgres';
 	
 	/**
 	 * Connexion à la base de données

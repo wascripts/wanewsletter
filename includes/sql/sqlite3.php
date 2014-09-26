@@ -12,6 +12,14 @@ if( !defined('_INC_CLASS_WADB_SQLITE3') ) {
 define('_INC_CLASS_WADB_SQLITE3', true);
 
 class Wadb_sqlite3 {
+
+	/**
+	 * Type de base de données
+	 *
+	 * @var string
+	 * @access private
+	 */
+	var $engine = 'sqlite';
 	
 	/**
 	 * Connexion à la base de données

@@ -881,10 +881,9 @@ switch( $mode )
 				
 				foreach( $pattern_ary as $pattern )
 				{
-					switch( SQL_DRIVER )
+					switch( $db->engine )
 					{
 						case 'mysql':
-						case 'mysqli':
 							$sql_values[] = "($listdata[liste_id], '" . $db->escape($pattern) . "')";
 							break;
 						
@@ -992,10 +991,9 @@ switch( $mode )
 					
 					if( preg_match('/^[\w_-]+$/', $ext) )
 					{
-						switch( SQL_DRIVER )
+						switch( $db->engine )
 						{
 							case 'mysql':
-							case 'mysqli':
 								$sql_values[] = "($listdata[liste_id], '$ext')";
 								break;
 							

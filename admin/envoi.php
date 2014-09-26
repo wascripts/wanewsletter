@@ -838,10 +838,9 @@ switch( $mode )
 					
 					while( $row = $result->fetch() )
 					{
-						switch( SQL_DRIVER )
+						switch( $db->engine )
 						{
 							case 'mysql':
-							case 'mysqli':
 								$sql_values[] = '(' . $tmp_id . ', ' . $row['file_id'] . ')';
 								break;
 							

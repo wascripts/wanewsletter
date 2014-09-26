@@ -219,7 +219,7 @@ $dsn = '';
 $lang    = $datetime = $msg_error = $_php_errors = array();
 $error   = false;
 $prefixe = ( !empty($_POST['prefixe']) ) ? trim($_POST['prefixe']) : 'wa_';
-$infos   = array('driver' => 'mysql', 'host' => null, 'user' => null, 'pass' => null, 'dbname' => null);
+$infos   = array('engine' => 'mysql', 'host' => null, 'user' => null, 'pass' => null, 'dbname' => null);
 $language = $default_lang;
 
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = ''; // Compatibilité avec wanewsletter < 2.3-beta2
@@ -267,14 +267,14 @@ if( !empty($dsn) )
 //
 else if( !defined('WA_VERSION') || WA_VERSION === '2.3-beta1' )
 {
-	$infos['driver'] = !empty($dbtype) ? $dbtype : $infos['driver'];
+	$infos['engine'] = !empty($dbtype) ? $dbtype : $infos['engine'];
 	$infos['host']   = !empty($dbhost) ? $dbhost : null;
 	$infos['user']   = !empty($dbuser) ? $dbuser : null;
 	$infos['pass']   = !empty($dbpassword) ? $dbpassword : null;
 	$infos['dbname'] = !empty($dbname) ? $dbname : null;
 }
 
-foreach( array('driver', 'host', 'user', 'pass', 'dbname') as $varname )
+foreach( array('engine', 'host', 'user', 'pass', 'dbname') as $varname )
 {
 	$infos[$varname] = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : @$infos[$varname];
 }
@@ -296,24 +296,22 @@ if( !defined('IN_INSTALL') && empty($infos['dbname']) )
 {
 	message($lang['Not_installed']);
 }
-else if( $infos['driver'] == 'mssql' )
+else if( $infos['engine'] == 'mssql' )
 {
 	message($lang['mssql_support_end']);
 }
-else if( $infos['driver'] == 'postgre' )
+else if( $infos['engine'] == 'postgre' )
 {
-	$infos['driver'] = 'postgres';
+	$infos['engine'] = 'postgres';
 }
-else if( $infos['driver'] == 'mysql4' || $infos['driver'] == 'mysqli' )
+else if( $infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli' )
 {
-	$infos['driver'] = 'mysql';
+	$infos['engine'] = 'mysql';
 }
-else if( $infos['driver'] == 'sqlite_pdo' || $infos['driver'] == 'sqlite3' )
+else if( $infos['engine'] == 'sqlite_pdo' || $infos['engine'] == 'sqlite3' )
 {
-	$infos['driver'] = 'sqlite';
+	$infos['engine'] = 'sqlite';
 }
-
-define('SQL_DRIVER', $infos['driver']);
 
 $db_list = '';
 foreach( $supported_db as $name => $data )
@@ -331,12 +329,12 @@ if( count($supported_db) == 0 )
 	message(sprintf($lang['No_db_support'], WA_NEW_VERSION, substr($db_list, 2)));
 }
 
-if( !isset($supported_db[$infos['driver']]) && ( defined('NL_INSTALLED') || defined('IN_UPGRADE') ) )
+if( !isset($supported_db[$infos['engine']]) && ( defined('NL_INSTALLED') || defined('IN_UPGRADE') ) )
 {
 	plain_error($lang['DB_type_undefined']);
 }
 
-if( $infos['driver'] == 'sqlite' )
+if( $infos['engine'] == 'sqlite' )
 {
 	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/includes/sql') . '/wanewsletter.sqlite';
 }

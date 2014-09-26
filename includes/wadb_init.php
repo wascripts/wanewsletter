@@ -35,11 +35,12 @@ define('SESSIONS_TABLE',      $prefixe . 'session');
  */
 function createDSN($infos, $options = null)
 {
+	$infos['engine'] = $infos['driver'];
 	if( $infos['driver'] == 'mysqli' ) {
-		$infos['driver'] = 'mysql';
+		$infos['engine'] = 'mysql';
 	}
 	else if( $infos['driver'] == 'sqlite_pdo' || $infos['driver'] == 'sqlite3' ) {
-		$infos['driver'] = 'sqlite';
+		$infos['engine'] = 'sqlite';
 	}
 	
 	$connect = '';
@@ -66,10 +67,10 @@ function createDSN($infos, $options = null)
 	}
 	
 	if( !empty($connect) ) {
-		$dsn = sprintf('%s://%s/%s', $infos['driver'], $connect, $infos['dbname']);
+		$dsn = sprintf('%s://%s/%s', $infos['engine'], $connect, $infos['dbname']);
 	}
 	else {
-		$dsn = sprintf('%s:%s', $infos['driver'], $infos['dbname']);
+		$dsn = sprintf('%s:%s', $infos['engine'], $infos['dbname']);
 	}
 	
 	if( is_array($options) ) {
@@ -106,7 +107,8 @@ function parseDSN($dsn)
 					return false;
 				}
 				else {
-					$infos['label'] = $label[$value];
+					$infos['label']  = $label[$value];
+					$infos['engine'] = $value;
 					
 					if( $value == 'mysql' && extension_loaded('mysqli') ) {
 						$value = 'mysqli';
@@ -126,7 +128,7 @@ function parseDSN($dsn)
 			case 'path':
 				$infos['dbname'] = rawurldecode($value);
 				
-				if( $infos['driver'] != 'sqlite' && isset($infos['host']) ) {
+				if( $infos['engine'] != 'sqlite' && isset($infos['host']) ) {
 					$infos['dbname'] = ltrim($infos['dbname'], '/');
 				}
 				break;
@@ -141,8 +143,7 @@ function parseDSN($dsn)
 		}
 	}
 	
-	if( $infos['driver'] == 'sqlite' ) {
-		
+	if( $infos['engine'] == 'sqlite' ) {
 		if( class_exists('SQLite3') ) {
 			$infos['driver'] = 'sqlite3';
 		}
@@ -203,7 +204,7 @@ function WaDatabase($dsn)
 	$db->connect($infos, $options);
 	
 	$encoding = $db->encoding();
-	if( strncmp($infos['driver'], 'sqlite', 6) != 0 && preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding) ) {
+	if( $db->engine != 'sqlite' && preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding) ) {
 		/*
 		 * WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
 		 * Si le jeu de caractères de la connexion est multi-octet, on le change
@@ -228,4 +229,3 @@ de données pour connaître les jeux de caractères utilisables).</p>");
 }
 
 }
-?>

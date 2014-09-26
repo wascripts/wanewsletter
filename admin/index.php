@@ -115,7 +115,7 @@ if( count($liste_ids) > 0 )
 //
 list($infos) = parseDSN($dsn);
 
-if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
+if( $db->engine == 'mysql' )
 {
 	$sql = 'SHOW TABLE STATUS FROM ' . $infos['dbname'];
 	
@@ -149,7 +149,7 @@ if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
 		$dbsize = $lang['Not_available'];
 	}
 }
-else if( SQL_DRIVER == 'postgres' )
+else if( $db->engine == 'postgres' )
 {
 	$sql = "SELECT sum(pg_total_relation_size(schemaname||'.'||tablename))
 		FROM pg_tables WHERE schemaname = 'public'
@@ -165,7 +165,7 @@ else if( SQL_DRIVER == 'postgres' )
 		$dbsize = $lang['Not_available'];
 	}
 }
-else if( strncmp(SQL_DRIVER, 'sqlite', 6) == 0 ) {
+else if( $db->engine == 'sqlite' ) {
 	$dbsize = filesize($infos['dbname']);
 }
 else {

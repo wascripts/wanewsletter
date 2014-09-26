@@ -95,7 +95,7 @@ if( $start )
 		$msg_error[] = $lang['Message']['Error_login'];
 	}
 	
-	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$infos['driver']]['prefixe_file'] . '_tables.sql';
+	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$infos['engine']]['prefixe_file'] . '_tables.sql';
 	
 	if( !is_readable($sql_create) )
 	{
@@ -157,7 +157,7 @@ if( $start )
 			{
 				case '2.2-Beta':
 				case '2.2-Beta2':
-					switch( SQL_DRIVER )
+					switch( $db->engine )
 					{
 						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
@@ -258,7 +258,7 @@ if( $start )
 							WHERE abo_id IN(" . implode(', ', $diff_2) . ")";
 					}
 					
-					switch( SQL_DRIVER )
+					switch( $db->engine )
 					{
 						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
@@ -320,7 +320,7 @@ if( $start )
 					}
 				
 				case '2.2-RC2b':
-					switch( SQL_DRIVER )
+					switch( $db->engine )
 					{
 						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
@@ -363,7 +363,7 @@ if( $start )
 					$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_lang = '$language'";
 					
 				case '2.2-RC3':
-					switch( SQL_DRIVER )
+					switch( $db->engine )
 					{
 						case 'postgres':
 							$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
@@ -397,7 +397,7 @@ if( $start )
 					$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
 						DROP COLUMN hebergeur, DROP COLUMN version";
 					
-					if( SQL_DRIVER == 'postgres' )
+					if( $db->engine == 'postgres' )
 					{
 						$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index";
 						$sql_update[] = "DROP INDEX admin_id_wa_auth_admin_index";
@@ -485,7 +485,7 @@ if( $start )
 						DROP COLUMN abo_register_key,
 						DROP COLUMN abo_register_date";
 					
-					if( SQL_DRIVER == 'postgres' )
+					if( $db->engine == 'postgres' )
 					{
 						$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
 							ADD CONSTRAINT register_key_idx UNIQUE (register_key)";
@@ -534,12 +534,12 @@ if( $start )
 				// En cas de bug lors d'une importation d'emails, les clefs
 				// peuvent ne pas avoir été recréées si une erreur est survenue
 				//
-				if( SQL_DRIVER == 'postgres' )
+				if( $db->engine == 'postgres' )
 				{
 					$db->query("ALTER TABLE " . ABONNES_TABLE . "
 						ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
 				}
-				else if( strncmp(SQL_DRIVER, 'mysql', 5) == 0 )
+				else if( $db->engine == 'mysql' )
 				{
 					$db->query("ALTER TABLE " . ABONNES_TABLE . "
 						ADD UNIQUE abo_email_idx (abo_email)");
@@ -555,7 +555,7 @@ if( $start )
 		//
 		if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
 		{
-			$output->addHiddenField('driver',  $infos['driver']);
+			$output->addHiddenField('engine',  $infos['engine']);
 			$output->addHiddenField('host',    $infos['host']);
 			$output->addHiddenField('user',    $infos['user']);
 			$output->addHiddenField('pass',    $infos['pass']);

@@ -100,7 +100,7 @@ if( $start )
 	}
 	else
 	{
-		if( $infos['driver'] == 'sqlite' )
+		if( $infos['engine'] == 'sqlite' )
 		{
 			if( is_writable(dirname($infos['dbname'])) )
 			{
@@ -129,7 +129,7 @@ if( $start )
 		}
 	}
 	
-	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$infos['driver']]['prefixe_file'] . '_tables.sql';
+	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$infos['engine']]['prefixe_file'] . '_tables.sql';
 	$sql_data   = SCHEMAS_DIR . '/data.sql';
 	
 	if( !is_readable($sql_create) || !is_readable($sql_data) )
@@ -180,7 +180,7 @@ if( $start )
 		
 		if( defined('NL_INSTALLED') )
 		{
-			if( SQL_DRIVER == 'postgres' )
+			if( $db->engine == 'postgres' )
 			{
 				exec_queries(str_replace('wa_', $prefixe, $sql_drop_sequence));
 			}
@@ -226,7 +226,7 @@ if( $start )
 		{
 			if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
 			{
-				$output->addHiddenField('driver',  $infos['driver']);
+				$output->addHiddenField('engine',  $infos['engine']);
 				$output->addHiddenField('host',    $infos['host']);
 				$output->addHiddenField('user',    $infos['user']);
 				$output->addHiddenField('pass',    $infos['pass']);
@@ -260,7 +260,7 @@ if( !defined('NL_INSTALLED') )
 	$db_box = '';
 	foreach( $supported_db as $name => $data )
 	{
-		$selected = ( $infos['driver'] == $name ) ? ' selected="selected"' : '';
+		$selected = ( $infos['engine'] == $name ) ? ' selected="selected"' : '';
 		$db_box .= '<option value="' . $name . '"' . $selected . '> ' . $data['Name'] . ' </option>';
 	}
 	

@@ -7,7 +7,7 @@
 define('NL_INSTALLED', true);
 define('WA_VERSION',   '2.4-dev');
 
-//$dsn = "<driver>://<username>:<password>@<host>:<port>/<database>";
+//$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
 // exemple de DSN pour MySQL
 //$dsn = 'mysql://username:password@localhost/dbname?charset=latin1';
 // exemple de DSN pour SQLite

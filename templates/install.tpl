@@ -44,7 +44,7 @@
 	
 	window.onload = function() {
 		var SQLiteBox;
-		if( (SQLiteBox = document.getElementById('driver')) != null ) {
+		if( (SQLiteBox = document.getElementById('engine')) != null ) {
 			specialSQLite(SQLiteBox);
 		}
 	};
@@ -74,8 +74,8 @@
 	
 	<table class="dataset compact">
 		<tr>
-			<td><label for="driver">{install.L_DBTYPE}&nbsp;:</label></td>
-			<td><select id="driver" name="driver" onchange="specialSQLite(this);">{install.DB_BOX}</select></td>
+			<td><label for="engine">{install.L_DBTYPE}&nbsp;:</label></td>
+			<td><select id="engine" name="engine" onchange="specialSQLite(this);">{install.DB_BOX}</select></td>
 		</tr>
 		<tr>
 			<td><label for="host">{install.L_DBHOST}&nbsp;:</label></td>
