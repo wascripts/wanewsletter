@@ -123,18 +123,25 @@ require WA_ROOTDIR . '/includes/class.output.php';
 
 $output = new output(WA_ROOTDIR . '/templates/');
 
-//
-// Désactivation de magic_quotes_runtime + 
-// magic_quotes_gpc et retrait éventuel des backslashes 
-//
-@ini_set('magic_quotes_runtime', 0);
 
-if( get_magic_quotes_gpc() )
+//
+// Les guillemets magiques ont été supprimés dans PHP 5.4.0
+//
+if( version_compare(PHP_VERSION, '5.4.0', '<') )
 {
-	strip_magic_quotes_gpc($_GET);
-	strip_magic_quotes_gpc($_POST);
-	strip_magic_quotes_gpc($_COOKIE);
-	strip_magic_quotes_gpc($_REQUEST);
+	//
+	// Désactivation de magic_quotes_runtime +
+	// magic_quotes_gpc et retrait éventuel des backslashes
+	//
+	@ini_set('magic_quotes_runtime', 0);
+
+	if( get_magic_quotes_gpc() )
+	{
+		strip_magic_quotes_gpc($_GET);
+		strip_magic_quotes_gpc($_POST);
+		strip_magic_quotes_gpc($_COOKIE);
+		strip_magic_quotes_gpc($_REQUEST);
+	}
 }
 
 define('WA_NEW_VERSION', '2.4-dev');
