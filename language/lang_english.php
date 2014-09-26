@@ -657,7 +657,7 @@ $lang['Start_install']              = "Launch install";
 $lang['Start_upgrade']              = "Launch upgrade";
 $lang['Result_install']             = "Install result";
 $lang['Result_upgrade']             = "upgrade result";
-$lang['PHP_version_error']          = "Sorry but Wanewsletter %s requires a php version >= 4.3.0 or >= 5.1.0";
+$lang['PHP_version_error']          = "PHP version is <strong>%s</strong>, however, Wanewsletter requires <strong>PHP %s or higher</strong>";
 $lang['Not_installed']              = "No version of Wanewsletter seems to be present,  the configuration file is empty or is not on the server";
 $lang['mssql_support_end']          = "Sorry but the support for SQL Server has been removed in Wanewsletter 2.3";
 $lang['No_db_support']              = "Sorry but Wanewsletter %s requires a database of type %s";

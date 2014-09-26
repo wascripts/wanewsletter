@@ -8,6 +8,11 @@
  */
 
 //
+// Requirements
+//
+define('WA_PHP_VERSION_REQUIRED', '5.2.3');
+
+//
 // Mode de débugguage du script 
 // 
 // 3 - Toutes les erreurs sont affichées à l'écran
@@ -59,19 +64,9 @@ define('ENABLE_HTTP_AUTHENTICATION', TRUE);
 define('CRITICAL_ERROR', E_USER_ERROR);
 define('ERROR',          E_USER_WARNING);
 
-if( !defined('E_STRICT') ) // Compatibilité PHP5
-{
-	define('E_STRICT', 2048);
-}
-
 if( !defined('E_DEPRECATED') ) // Compatibilité PHP5.3
 {
 	define('E_DEPRECATED', 8192);
-}
-
-if( !defined('DATE_RFC1123') ) // Compatibilité PHP 5.1.1
-{
-	define('DATE_RFC1123', 'D, d M Y H:i:s T');
 }
 
 //
@@ -120,16 +115,6 @@ define('ENGINE_UNIQ', 2);
 define('CONFIRM_ALWAYS', 2);
 define('CONFIRM_ONCE',   1);
 define('CONFIRM_NONE',   0);
-
-if( !defined('UPLOAD_ERR_NO_TMP_DIR') ) // Introduite en PHP 4.3.10 et 5.0.3
-{
-	define('UPLOAD_ERR_NO_TMP_DIR', 6);
-}
-
-if( !defined('UPLOAD_ERR_CANT_WRITE') ) // Introduite en PHP 5.1.0
-{
-	define('UPLOAD_ERR_CANT_WRITE', 7);
-}
 
 //
 // Si nous avons un accés restreint à cause de open_basedir, certains fichiers uploadés 

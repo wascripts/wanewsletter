@@ -179,15 +179,9 @@ class Wadb_postgres {
 			$this->link  = null;
 		}
 		else {
-			if( function_exists('pg_version') ) {// PHP >= 5.0
-				$tmp = pg_version($this->link);
-				$this->clientVersion = $tmp['client'];
-				$this->serverVersion = $tmp['server'];
-			}
-			else {
-				$res = pg_query($this->link, "SELECT VERSION() AS version");
-				$this->serverVersion = pg_fetch_result($res, 0, 'version');
-			}
+			$tmp = pg_version($this->link);
+			$this->clientVersion = $tmp['client'];
+			$this->serverVersion = $tmp['server'];
 			
 			if( !empty($this->options['charset']) ) {
 				$this->encoding($this->options['charset']);

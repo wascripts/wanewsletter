@@ -249,17 +249,11 @@ require WA_ROOTDIR . '/includes/wadb_init.php';
 require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
 //
-// Vérification de la version de PHP disponible. Il nous faut la version 4.3.0 ou 5.1.0 minimum
+// Vérification de la version de PHP disponible.
 //
-$php_version_ok = false;
-if( function_exists('version_compare') ) {
-	$php_version_ok = version_compare(PHP_VERSION, '5.1.0', '>=') ||
-		(version_compare(PHP_VERSION, '4.3.0', '>=') && version_compare(PHP_VERSION, '5.0.0', '<'));
-}
-
-if( !$php_version_ok )
+if( !version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=') )
 {
-	message(sprintf($lang['PHP_version_error'], WA_NEW_VERSION));
+	message(sprintf($lang['PHP_version_error'], PHP_VERSION, WA_PHP_VERSION_REQUIRED));
 }
 
 if( !empty($dsn) )

@@ -1266,68 +1266,6 @@ $CONVMAP = array(
 );
 
 /**
- * Imported from PHP_Compat PEAR package
- * Replace array_udiff()
- *
- * @category    PHP
- * @package     PHP_Compat
- * @link        http://php.net/function.array_udiff
- * @author      Stephan Schmidt <schst@php.net>
- * @author      Aidan Lister <aidan@php.net>
- * @version     $Revision$
- * @since       PHP 5
- * @require     PHP 4.0.6 (is_callable)
- */
-if (!function_exists('array_udiff')) {
-    function array_udiff()
-    {
-        $args = func_get_args();
-
-        if (count($args) < 3) {
-            user_error('Wrong parameter count for array_udiff()', E_USER_WARNING);
-            return;
-        }
-
-        // Get compare function
-        $compare_func = array_pop($args);
-        if (!is_callable($compare_func)) {
-            if (is_array($compare_func)) {
-                $compare_func = $compare_func[0] . '::' . $compare_func[1];
-            }
-            user_error('array_udiff() Not a valid callback ' .
-                $compare_func, E_USER_WARNING);
-            return;
-        }
-
-        // Check arrays
-        $cnt = count($args);
-        for ($i = 0; $i < $cnt; $i++) {
-            if (!is_array($args[$i])) {
-                user_error('array_udiff() Argument #' .
-                    ($i + 1). ' is not an array', E_USER_WARNING);
-                return;
-            }
-        }
-
-        $diff = array ();
-        // Traverse values of the first array
-        foreach ($args[0] as $key => $value) {
-            // Check all arrays
-            for ($i = 1; $i < $cnt; $i++) {
-                foreach ($args[$i] as $cmp_value) {
-                    $result = call_user_func($compare_func, $value, $cmp_value);
-                    if ($result === 0) {
-                        continue 3;
-                    }
-                }
-            }
-            $diff[$key] = $value;
-        }
-        return $diff;
-    }
-}
-
-/**
  * wan_htmlspecialchars()
  * 
  * Idem que la fonction htmlspecialchars() native, mais avec le jeu de
@@ -1346,15 +1284,7 @@ function wan_htmlspecialchars($string, $flags = ENT_COMPAT, $encoding = 'ISO-885
 		$flags = ENT_COMPAT | ENT_HTML401;
 	}
 	
-	// L'argument double_encode a été ajouté dans PHP 5.2.3
-	if( version_compare(PHP_VERSION, '5.2.3', '>=') ) {
-		$string = htmlspecialchars($string, $flags, $encoding, $double_encode);
-	}
-	else {
-		$string = htmlspecialchars($string, $flags, $encoding);
-	}
-	
-	return $string;
+	return htmlspecialchars($string, $flags, $encoding, $double_encode);
 }
 
 /**

@@ -391,16 +391,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				fake_header(false);
 			}
 			
-			if( ($isPHP5 = version_compare(phpversion(), '5.0.0', '>=')) == true )
-			{
-				eval('$mailerText = clone $mailer;');
-				eval('$mailerHTML = clone $mailer;');
-			}
-			else
-			{
-				$mailerText = $mailer;
-				$mailerHTML = $mailer;
-			}
+			$mailerText = clone $mailer;
+			$mailerHTML = clone $mailer;
 			
 			if( !$listdata['use_cron'] )
 			{

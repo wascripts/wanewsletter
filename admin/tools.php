@@ -23,7 +23,7 @@ function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 			$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
 			$mime_type = 'application/zip';
 			$zip = new ZipArchive();
-			$zip->open($tmp_filename, 1);// TODO: Fix it! 1 = ZipArchive::CREATE
+			$zip->open($tmp_filename, ZipArchive::CREATE);
 			$zip->addFromString($filename, $contents);
 			$zip->close();
 			$contents = file_get_contents($tmp_filename);
@@ -232,7 +232,6 @@ if( !isset($_POST['submit']) )
 // On vérifie la présence des extensions nécessaires pour les différents formats de fichiers proposés
 //
 define('ZIPLIB_LOADED', extension_loaded('zip'));
-define('ZIPLIB_WRITE_LOADED', ZIPLIB_LOADED && version_compare(PHP_VERSION, '5.2.0', '>='));
 define('ZLIB_LOADED',   extension_loaded('zlib'));
 define('BZIP2_LOADED',  extension_loaded('bz2'));
 
@@ -464,14 +463,14 @@ switch( $mode )
 			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
 		));
 		
-		if( ZIPLIB_WRITE_LOADED || ZLIB_LOADED || BZIP2_LOADED )
+		if( ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED )
 		{
 			$output->assign_block_vars('compress_option', array(
 				'L_COMPRESS' => $lang['Compress'],
 				'L_NO'       => $lang['No']
 			)); 
 			
-			if( ZIPLIB_WRITE_LOADED )
+			if( ZIPLIB_LOADED )
 			{
 				$output->assign_block_vars('compress_option.zip_compress', array());
 			}
@@ -1229,13 +1228,13 @@ switch( $mode )
 			));
 		}
 		
-		if( ZIPLIB_WRITE_LOADED || ZLIB_LOADED || BZIP2_LOADED )
+		if( ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED )
 		{
 			$output->assign_block_vars('compress_option', array(
 				'L_COMPRESS' => $lang['Compress']
 			));
 			
-			if( ZIPLIB_WRITE_LOADED )
+			if( ZIPLIB_LOADED )
 			{
 				$output->assign_block_vars('compress_option.zip_compress', array());
 			}
