@@ -444,6 +444,17 @@ class Wadb_sqlite {
 	{
 		$this->close();
 	}
+	
+	/**
+	 * Initialise un objet WadbBackup_{self::$engine}
+	 *
+	 * @access public
+	 * @return object
+	 */
+	function initBackup()
+	{
+		return new WadbBackup_sqlite($this);
+	}
 }
 
 class WadbResult_sqlite {
@@ -597,17 +608,6 @@ class WadbResult_sqlite {
 	function __destruct()
 	{
 		$this->free();
-	}
-	
-	/**
-	 * Initialise un objet WadbBackup_{self::$engine}
-	 *
-	 * @access public
-	 * @return object
-	 */
-	function initBackup()
-	{
-		return new WadbBackup_sqlite($this);
 	}
 }
 

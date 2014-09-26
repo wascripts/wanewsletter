@@ -488,6 +488,17 @@ class Wadb_postgres {
 	{
 		$this->close();
 	}
+	
+	/**
+	 * Initialise un objet WadbBackup_{self::$engine}
+	 *
+	 * @access public
+	 * @return object
+	 */
+	function initBackup()
+	{
+		return new WadbBackup_postgres($this);
+	}
 }
 
 class WadbResult_postgres {
@@ -647,17 +658,6 @@ class WadbResult_postgres {
 	function __destruct()
 	{
 		$this->free();
-	}
-	
-	/**
-	 * Initialise un objet WadbBackup_{self::$engine}
-	 *
-	 * @access public
-	 * @return object
-	 */
-	function initBackup()
-	{
-		return new WadbBackup_postgres($this);
 	}
 }
 
