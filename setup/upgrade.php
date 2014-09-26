@@ -14,14 +14,6 @@ require './setup.inc.php';
 $admin_login = ( !empty($_POST['admin_login']) ) ? trim($_POST['admin_login']) : '';
 $admin_pass  = ( !empty($_POST['admin_pass']) ) ? trim($_POST['admin_pass']) : '';
 
-//
-// Compatibilité avec les versions < 2.1.2
-//
-if( !defined('NL_INSTALLED') && isset($dbhost) && !isset($_REQUEST['dbhost']) )
-{
-	define('NL_INSTALLED', true);
-}
-
 if( !defined('NL_INSTALLED') )
 {
 	plain_error("Wanewsletter ne semble pas installé");
@@ -37,24 +29,17 @@ if( !$db->isConnected() )
 //
 // Récupération de la configuration
 //
+$old_config = null;
+
 $sql = "SELECT * FROM " . CONFIG_TABLE;
-if( !($result = $db->query($sql)) )
+if( $result = $db->query($sql) )
 {
-	plain_error("Impossible d'obtenir la configuration du script :\n" . $db->error);
+	$old_config = $result->fetch();
 }
 
-$old_config = array();
-while( $row = $result->fetch() )
+if( !$old_config )
 {
-	if( !isset($row['nom']) )
-	{
-		$old_config = $row;
-		break;
-	}
-	else // branche 2.0
-	{
-		$old_config[$row['nom']] = $row['valeur'];
-	}
+	plain_error("Impossible d'obtenir la configuration du script :\n" . $db->error);
 }
 
 //
