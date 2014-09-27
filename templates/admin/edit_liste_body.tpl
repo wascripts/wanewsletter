@@ -103,7 +103,7 @@
 		</tr>
 		<tr>
 			<td><label for="pop_pass">{L_POP_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="pop_pass" name="pop_pass" size="30" maxlength="100"{DISABLED_CRON} /></td>
+			<td><input type="password" id="pop_pass" name="pop_pass" size="30" maxlength="100"{DISABLED_CRON} autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<td><label for="liste_alias">{L_LISTE_ALIAS}&nbsp;:</label></td>

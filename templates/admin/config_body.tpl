@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="ftp_pass">{extension_ftp.L_FTP_PASS}&nbsp;:</label><br /><span class="notice">{extension_ftp.L_FTP_PASS_NOTE}</span></td>
-			<td><input type="password" id="ftp_pass" name="ftp_pass" size="30" maxlength="100" /></td>
+			<td><input type="password" id="ftp_pass" name="ftp_pass" size="30" maxlength="100" autocomplete="off" /></td>
 		</tr>
 		<!-- END extension_ftp -->
 	</table>
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="smtp_pass">{L_SMTP_PASS}&nbsp;:</label><br /><span class="notice">{L_AUTH_SMTP_NOTE}</span></td>
-			<td><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="100"{DISABLED_SMTP} /></td>
+			<td><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="100"{DISABLED_SMTP} autocomplete="off" /></td>
 		</tr>
 	</table>
 	

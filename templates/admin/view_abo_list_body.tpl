@@ -9,7 +9,7 @@
 				<span class="notice">{L_SEARCH_NOTE}</span>
 			</td>
 			<td>
-				<input type="text" id="keyword" name="keyword" value="{KEYWORD}" size="35" maxlength="60" />
+				<input type="text" id="keyword" name="keyword" value="{KEYWORD}" size="35" maxlength="60" autocomplete="off" />
 				<button type="submit" name="search" class="primary">{L_SEARCH_BUTTON}</button>
 			</td>
 		</tr>

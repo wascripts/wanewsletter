@@ -49,11 +49,11 @@
 		<!-- END owner_profil -->
 		<tr>
 			<td><label for="new_pass">{L_NEW_PASS}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASS}</span></td>
-			<td><input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" /></td>
+			<td><input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<td><label for="confirm_pass">{L_CONFIRM_PASS}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASS}</span></td>
-			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" /></td>
+			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" autocomplete="off" /></td>
 		</tr>
 	</table>
 	

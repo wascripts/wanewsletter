@@ -112,11 +112,11 @@
 		</tr>
 		<tr>
 			<td><label for="admin_pass">{install.L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="admin_pass" name="admin_pass" size="30" maxlength="30" /></td>
+			<td><input type="password" id="admin_pass" name="admin_pass" size="30" maxlength="30" autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<td><label for="confirm_pass">{install.L_PASS_CONF}&nbsp;:</label></td>
-			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" /></td>
+			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<td><label for="admin_email">{install.L_EMAIL}&nbsp;:</label></td>

@@ -13,11 +13,11 @@
 		</tr>
 		<tr>
 			<td><label for="new_email">{L_NEW_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="new_email" name="new_email" size="30" maxlength="254" /></td>
+			<td><input type="text" id="new_email" name="new_email" size="30" maxlength="254" autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<td><label for="confirm_email">{L_CONFIRM_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="confirm_email" name="confirm_email" size="30" maxlength="254" /></td>
+			<td><input type="text" id="confirm_email" name="confirm_email" size="30" maxlength="254" autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<td><label for="pseudo">{L_PSEUDO}&nbsp;:</label></td>
@@ -35,11 +35,11 @@
 		<!-- END password -->
 		<tr>
 			<td><label for="new_pass">{L_NEW_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" /></td>
+			<td><input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<td><label for="confirm_pass">{L_CONFIRM_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" /></td>
+			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" autocomplete="off" /></td>
 		</tr>
 	</table>
 	
