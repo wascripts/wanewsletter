@@ -301,6 +301,7 @@ switch( $mode )
 		wan_print_row(' - check_email_mx', $nl_config['check_email_mx'] ? 'oui' : 'non');
 		
 		wan_print_row('Version de PHP',    phpversion());
+		wan_print_row(' - Extension Bz2', extension_loaded('zlib') ? 'oui' : 'non');
 		wan_print_row(' - Extension FTP',  extension_loaded('ftp') ? 'oui' : 'non');
 		
 		if( extension_loaded('gd') ) {
@@ -311,14 +312,15 @@ switch( $mode )
 			$str = 'non';
 		}
 		wan_print_row(' - Extension GD', $str);
-		
-		wan_print_row(' - Extension Zip', extension_loaded('zip') ? 'oui' : 'non');
-		wan_print_row(' - Extension Zlib', extension_loaded('zlib') ? 'oui' : 'non');
-		wan_print_row(' - Extension Bz2', extension_loaded('zlib') ? 'oui' : 'non');
+		wan_print_row(' - Extension Iconv', extension_loaded('iconv') ? 'oui' : 'non');
+		wan_print_row(' - Extension Mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
+		wan_print_row(' - Extension OpenSSL', extension_loaded('openssl') ? 'oui' : 'non');
+		wan_print_row(' - Extension PCRE', extension_loaded('pcre') ? 'oui' : 'non');// TODO : Fix! Obsolète à partir de PHP >= 5.3.0
 		wan_print_row(' - Extension SimpleXML', extension_loaded('simplexml') ? 'oui' : 'non');
 		wan_print_row(' - Extension XML', extension_loaded('xml') ? 'oui' : 'non');
-		wan_print_row(' - Extension Iconv', extension_loaded('iconv') ? 'oui' : 'non');
-		wan_print_row(' - Extension mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
+		wan_print_row(' - Extension Zip', extension_loaded('zip') ? 'oui' : 'non');
+		wan_print_row(' - Extension Zlib', extension_loaded('zlib') ? 'oui' : 'non');
+		
 		wan_print_row(' - safe_mode', config_status('safe_mode') ? 'on' : 'off');
 		wan_print_row(' - magic_quotes_gpc', config_status('magic_quotes_gpc') ? 'on' : 'off');
 		wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
