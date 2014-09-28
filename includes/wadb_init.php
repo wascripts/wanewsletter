@@ -35,14 +35,6 @@ define('SESSIONS_TABLE',      $prefixe . 'session');
  */
 function createDSN($infos, $options = null)
 {
-	$infos['engine'] = $infos['driver'];
-	if( $infos['driver'] == 'mysqli' ) {
-		$infos['engine'] = 'mysql';
-	}
-	else if( $infos['driver'] == 'sqlite_pdo' || $infos['driver'] == 'sqlite3' ) {
-		$infos['engine'] = 'sqlite';
-	}
-	
 	$connect = '';
 	
 	if( isset($infos['user']) ) {
