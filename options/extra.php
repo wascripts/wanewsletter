@@ -48,11 +48,18 @@ else
 	
 	if( isset($_GET['use-variable']) )
 	{
-		$varname = !empty($_GET['use-variable']) ? $_GET['use-variable'] : 'var numSubscribe';
-		printf("%s = '%d';", $varname, $data);
+		$varname = trim($_GET['use-variable']);
+		
+		if( !preg_match('/^[A-Za-z0-9_.$\\]+$/', $varname) )
+		{
+			$varname = 'var numSubscribe';
+			echo "console.log('Rejected variable name. Accepted chars are [A-Za-z0-9_.\$\\\\].');\n";
+		}
+		
+		printf("%s = %d;\n", $varname, $data);
 	}
 	else
 	{
-		printf("document.write('%d');", $data);
+		printf("document.write('%d');\n", $data);
 	}
 }
