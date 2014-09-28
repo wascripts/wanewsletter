@@ -32,7 +32,7 @@ function validate_pseudo($pseudo)
  */
 function validate_pass($passwd)
 {
-	return preg_match('/^[\x21-\x7E]{4,32}$/', $passwd);
+	return (bool) preg_match('/^[\x20-\x7E]{6,1024}$/', $passwd);
 }
 
 /**
