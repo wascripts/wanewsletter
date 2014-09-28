@@ -274,7 +274,9 @@ if( !defined('NL_INSTALLED') )
 		$urlscript = preg_replace('/^(.*?)\/setup\/?$/i', '\\1/', dirname(server_info('PHP_SELF')));
 	}
 	
-	$l_explain = nl2br(sprintf($lang['Welcome_in_install'],
+	$l_explain = nl2br(sprintf(
+		$lang['Welcome_in_install'],
+		WA_PHP_VERSION_REQUIRED,
 		'<a href="' . WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
 		'<a href="' . WA_ROOTDIR . '/COPYING">', '</a>',
 		'<a href="http://phpcodeur.net/wascripts/GPL">', '</a>'
