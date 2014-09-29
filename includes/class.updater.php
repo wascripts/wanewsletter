@@ -28,7 +28,8 @@ class Wa_Updater {
 		}
 		else if( $complete )
 		{
-			$data = file_get_contents($this->url);
+			$result = http_get_contents($this->url, $errstr);
+			$data = $result['data'];
 			
 			if( $data !== false )
 			{
