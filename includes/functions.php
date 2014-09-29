@@ -16,25 +16,36 @@ define('FUNCTIONS_INC', true);
  * 
  * Génération d'une chaîne aléatoire
  * 
- * @param integer $num_char    Nombre de caractères
- * @param integer $use_uniqid  Active/Désactive l'utilisation de uniqid() (très
- *                             consommateur de ressources lors des importations de masse)
+ * @param integer $length       Nombre de caractères
+ * @param integer $specialChars Ajout de caractères spéciaux
  * 
  * @return string
  */
-function generate_key($num_char = 32, $use_uniqid = true)
+function generate_key($length = 32, $specialChars = false)
 {
-	if( $use_uniqid == true )
-	{
-		srand((double) microtime() * 1000000);
-		$rand_str = md5(uniqid(rand()));
-	}
-	else
-	{
-		$rand_str = md5(microtime());
+	static $charList = null;
+	
+	if( $charList == null ) {
+		$charList = range('0', '9');
+		$charList = array_merge($charList, range('A', 'Z'));
+		$charList = array_merge($charList, range('a', 'z'));
+		
+		if( $specialChars ) {
+			$charList = array_merge($charList, range(' ', '/'));
+			$charList = array_merge($charList, range(':', '@'));
+			$charList = array_merge($charList, range('[', '`'));
+			$charList = array_merge($charList, range('{', '~'));
+		}
+		
+		shuffle($charList);
 	}
 	
-	return ( $num_char >= 32 ) ? $rand_str : substr($rand_str, 0, $num_char);
+	$key = '';
+	for( $i = 0, $m = count($charList)-1; $i < $length; $i++ ) {
+		$key .= $charList[mt_rand(0, $m)];
+	}
+	
+	return $key;
 }
 
 /**
