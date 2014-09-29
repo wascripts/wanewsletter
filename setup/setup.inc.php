@@ -318,11 +318,8 @@ else if( $infos['engine'] == 'sqlite_pdo' || $infos['engine'] == 'sqlite3' )
 	$infos['engine'] = 'sqlite';
 }
 
-$db_list = '';
 foreach( $supported_db as $name => $data )
 {
-	$db_list .= ', ' . $data['Name'];
-	
 	if( $data['extension'] === false )
 	{
 		unset($supported_db[$name]);
@@ -331,7 +328,7 @@ foreach( $supported_db as $name => $data )
 
 if( count($supported_db) == 0 )
 {
-	message(sprintf($lang['No_db_support'], WANEWSLETTER_VERSION, substr($db_list, 2)));
+	message(sprintf($lang['No_db_support'], WANEWSLETTER_VERSION));
 }
 
 if( !isset($supported_db[$infos['engine']]) && ( defined('NL_INSTALLED') || defined('IN_UPGRADE') ) )
