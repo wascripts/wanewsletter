@@ -47,7 +47,14 @@ if( !$old_config )
 //
 if( !defined('WA_VERSION') )
 {
-	define('WA_VERSION', strtolower($old_config['version']));
+	if( isset($old_config['version']) )
+	{
+		define('WA_VERSION', strtolower($old_config['version']));
+	}
+	else
+	{
+		define('WA_VERSION', WANEWSLETTER_VERSION);
+	}
 }
 
 if( file_exists(WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php') )
@@ -61,7 +68,7 @@ if( !version_compare(WA_VERSION, '2.2-beta', '>=' ) )
 	message($lang['Unsupported_version']);
 }
 
-if( !version_compare(WA_VERSION, WA_NEW_VERSION, '<') )
+if( !version_compare(WA_VERSION, WANEWSLETTER_VERSION, '<') )
 {
 	message($lang['Upgrade_not_required']);
 }
@@ -76,7 +83,7 @@ $output->assign_vars( array(
 	'PAGE_TITLE'   => $lang['Title']['upgrade'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-	'NEW_VERSION'  => WA_NEW_VERSION,
+	'NEW_VERSION'  => WANEWSLETTER_VERSION,
 	'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 ));
 
@@ -585,7 +592,7 @@ if( $start )
 }
 
 $output->assign_block_vars('upgrade', array(
-	'L_EXPLAIN'      => nl2br(sprintf($lang['Welcome_in_upgrade'], WA_VERSION)),
+	'L_EXPLAIN'      => nl2br(sprintf($lang['Welcome_in_upgrade'], WANEWSLETTER_VERSION)),
 	'L_LOGIN'        => $lang['Login'],
 	'L_PASS'         => $lang['Password'],
 	'L_START_BUTTON' => $lang['Start_upgrade']

@@ -246,7 +246,7 @@ $output->assign_vars( array(
 	'NEWSLETTERS_SENDED'     => $l_num_logs,
 	'DBSIZE'                 => (is_numeric($dbsize)) ? formateSize($dbsize) : $dbsize,
 	'FILESIZE'               => formateSize($filesize),
-	'USED_VERSION'           => sprintf($lang['Used_version'], WA_VERSION)
+	'USED_VERSION'           => sprintf($lang['Used_version'], WANEWSLETTER_VERSION)
 ));
 
 require WA_ROOTDIR . '/includes/class.updater.php';

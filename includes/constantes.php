@@ -8,6 +8,12 @@
  */
 
 //
+// Version correspondant au code source en place sur le serveur.
+// Remplace la constante obsolète WA_VERSION, jadis définie dans le fichier de configuration.
+//
+define('WANEWSLETTER_VERSION', '2.4-dev');
+
+//
 // Requirements
 //
 define('WA_PHP_VERSION_REQUIRED', '5.2.3');
@@ -233,13 +239,10 @@ else
 	define('WA_USER_BROWSER', 'other');
 }
 
-if( defined('WA_VERSION') )
-{
-	//
-	// Chaîne utilisée pour définir l'entête X-Mailer des emails envoyés par Wanewsletter
-	//
-	define('WA_X_MAILER', sprintf('Wanewsletter/%s', WA_VERSION));
-}
+//
+// Chaîne utilisée pour définir l'entête X-Mailer des emails envoyés par Wanewsletter
+//
+define('WA_X_MAILER', sprintf('Wanewsletter/%s', WANEWSLETTER_VERSION));
 
 //
 // Utilisées dans le cadre de la classe de vérification de mise à jour

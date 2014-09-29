@@ -62,7 +62,7 @@ $output->assign_vars( array(
 	'PAGE_TITLE'   => ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-	'NEW_VERSION'  => WA_NEW_VERSION,
+	'NEW_VERSION'  => WANEWSLETTER_VERSION,
 	'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 ));
 

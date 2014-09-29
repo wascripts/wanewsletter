@@ -48,7 +48,7 @@ require WA_ROOTDIR . '/start.php';
 load_settings();
 
 $argv[0]  = basename($argv[0]);
-$version  = WA_VERSION;
+$version  = WANEWSLETTER_VERSION;
 $emails   = array();
 $format   = FORMAT_TEXTE;
 $liste_id = null;

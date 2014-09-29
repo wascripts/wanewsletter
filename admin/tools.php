@@ -284,7 +284,7 @@ switch( $mode )
 		printf("<h2>%s</h2>", $lang['Title']['debug']);
 		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;'>";
 		
-		wan_print_row('Version Wanewsletter', WA_VERSION);
+		wan_print_row('Version Wanewsletter', WANEWSLETTER_VERSION);
 		wan_print_row(' - session_length', $nl_config['session_length']);
 		wan_print_row(' - language',       $nl_config['language']);
 		wan_print_row(' - Upload dir',     wan_subdir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
@@ -1130,7 +1130,7 @@ switch( $mode )
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql 
 			//
-			$contents  = $backup->header('Wanewsletter ' . WA_VERSION);
+			$contents  = $backup->header('Wanewsletter ' . WANEWSLETTER_VERSION);
 			$contents .= $backup->get_other_queries($drop_option);
 			
 			fake_header(false);

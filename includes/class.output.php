@@ -290,14 +290,11 @@ class output extends Template {
 		));
 		
 		$dev_infos = (defined('DEV_INFOS') && DEV_INFOS == true);
+		$version = WANEWSLETTER_VERSION;
 		
 		if( $dev_infos )
 		{
-			$version = sprintf('%s (%s)', WA_VERSION, substr(get_class($db), 5));
-		}
-		else
-		{
-			$version = WA_VERSION;
+			$version .= sprintf(' (%s)', substr(get_class($db), 5));
 		}
 		
 		$this->assign_vars( array(

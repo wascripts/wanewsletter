@@ -39,7 +39,7 @@ class Wa_Updater {
 		
 		if( $data != '' )
 		{
-			$result = intval(version_compare(WA_VERSION, trim($data), '<'));
+			$result = intval(version_compare(WANEWSLETTER_VERSION, trim($data), '<'));
 		}
 		
 		return $result;

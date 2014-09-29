@@ -5,7 +5,6 @@
 // valide sans utiliser le script d'installation de Wanewsletter.
 //
 define('NL_INSTALLED', true);
-define('WA_VERSION',   '2.4-dev');
 
 //$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
 // exemple de DSN pour MySQL
