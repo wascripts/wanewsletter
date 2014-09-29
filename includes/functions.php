@@ -1026,7 +1026,7 @@ function http_get_contents($URL, &$errstr)
 	
 	fputs($fs, sprintf("GET %s HTTP/1.0\r\n", $path));// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
 	fputs($fs, sprintf("Host: %s\r\n", $part['host']));
-	fputs($fs, sprintf("User-Agent: Wanewsletter/%s\r\n", WANEWSLETTER_VERSION));
+	fputs($fs, sprintf("User-Agent: %s\r\n", WA_SIGNATURE));
 	fputs($fs, "Accept: */*\r\n");
 	
 	if( extension_loaded('zlib') )

@@ -240,9 +240,11 @@ else
 }
 
 //
-// Chaîne utilisée pour définir l'entête X-Mailer des emails envoyés par Wanewsletter
+// Signature du script pour divers cas de figure (entête X-Mailer dans les emails
+// envoyés, entête User-Agent lors des requètes HTTP, etc)
 //
-define('WA_X_MAILER', sprintf('Wanewsletter/%s', WANEWSLETTER_VERSION));
+define('WA_SIGNATURE', sprintf('Wanewsletter/%s', WANEWSLETTER_VERSION));
+define('WA_X_MAILER', WA_SIGNATURE);
 
 //
 // Utilisées dans le cadre de la classe de vérification de mise à jour
