@@ -31,33 +31,47 @@ if( !$db->isConnected() )
 //
 $old_config = wa_get_config();
 
-//
-// Compatibilité avec les versions < 2.3
-//
-if( !defined('WA_VERSION') )
-{
-	if( isset($old_config['version']) )
-	{
-		define('WA_VERSION', strtolower($old_config['version']));
-	}
-	else
-	{
-		define('WA_VERSION', WANEWSLETTER_VERSION);
-	}
-}
-
 if( file_exists(WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php') )
 {
 	require WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php';
 }
 
-// Les versions des branches 2.0 et 2.1 ne sont plus prises en charge
-if( !version_compare(WA_VERSION, '2.2-beta', '>=' ) )
+//
+// Compatibilité avec Wanewsletter < 2.4-beta2
+//
+if( !isset($old_config['db_version']) )
 {
-	message($lang['Unsupported_version']);
+	// Versions <= 2.2.13
+	if( !defined('WA_VERSION') )
+	{
+		$currentVersion = strtolower($old_config['version']);
+	}
+	// Versions <= 2.4-beta1
+	else
+	{
+		$currentVersion = WA_VERSION;
+	}
+	
+	// Les versions des branches 2.0 et 2.1 ne sont plus prises en charge
+	if( !version_compare($currentVersion, '2.2-beta', '>=' ) )
+	{
+		message($lang['Unsupported_version']);
+	}
+	
+	//
+	// On incrémente manuellement db_version en fonction de chaque version ayant
+	// apporté des changements dans les tables de données du script.
+	//
+	$old_config['db_version'] = 0;
+	$versions = array('2.2-beta2', '2.2-rc2', '2.2-rc2b', '2.2-rc3', '2.2.12', '2.3-beta3', '2.4-beta1');
+	
+	foreach( $versions as $version )
+	{
+		$old_config['db_version'] += (int)version_compare($currentVersion, $version, '<=');
+	}
 }
 
-if( !version_compare(WA_VERSION, WANEWSLETTER_VERSION, '<') )
+if( check_db_version($old_config['db_version']) )
 {
 	message($lang['Upgrade_not_required']);
 }
@@ -165,7 +179,7 @@ if( $start )
 		
 		$sql_update = array();
 		
-		if( version_compare(WA_VERSION, '2.2-beta2', '<=') )
+		if( $old_config['db_version'] < 2 )
 		{
 			if( $db->engine == 'postgres' )
 			{
@@ -203,7 +217,7 @@ if( $start )
 		// Le nom de la vrai release candidate 2 est donc 2.2-rc2b pour éviter des problèmes lors des mises
 		// à jour par les gens qui ont téléchargé le package les dix premiers jours.
 		//
-		if( version_compare(WA_VERSION, '2.2-rc2', '<=') )
+		if( $old_config['db_version'] < 3 )
 		{
 			//
 			// Suppression des éventuelles entrées orphelines dans les tables abonnes et abo_liste
@@ -309,7 +323,7 @@ if( $start )
 			}
 		}
 		
-		if( WA_VERSION === '2.2-rc2b' )
+		if( $old_config['db_version'] < 4 )
 		{
 			if( $db->engine == 'postgres' )
 			{
@@ -348,7 +362,7 @@ if( $start )
 			$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_lang = '$language'";
 		}
 		
-		if( WA_VERSION === '2.2-rc3' )
+		if( $old_config['db_version'] < 5 )
 		{
 			if( $db->engine == 'mysql' )
 			{
@@ -359,7 +373,7 @@ if( $start )
 			}
 		}
 		
-		if( version_compare(WA_VERSION, '2.2.12', '<=') )
+		if( $old_config['db_version'] < 6 )
 		{
 			unset($old_config['hebergeur']);
 			unset($old_config['version']);
@@ -480,7 +494,7 @@ if( $start )
 		// (2.3-beta1 pour SQLite 2; 2.3-beta2 pour SQLite 3)
 		//
 		
-		if( version_compare(WA_VERSION, '2.3-beta3', '<=') )
+		if( $old_config['db_version'] < 7 )
 		{
 			//
 			// En cas de bug lors d'une importation d'emails, les clefs
@@ -502,7 +516,7 @@ if( $start )
 			}
 		}
 		
-		if( version_compare(WA_VERSION, '2.4-beta1', '<=') )
+		if( $old_config['db_version'] < 8 )
 		{
 			if( $db->engine == 'postgres' )
 			{
@@ -567,6 +581,11 @@ if( $start )
 		}
 		
 		exec_queries($sql_update, true);
+		
+		//
+		// On met à jour le numéro identifiant la version des tables du script
+		//
+		wa_update_config(array('db_version' => WANEWSLETTER_DB_VERSION));
 		
 		//
 		// Affichage message de résultat

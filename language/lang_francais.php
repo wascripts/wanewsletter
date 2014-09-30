@@ -673,6 +673,9 @@ $lang['Error_in_upgrade']           = "Une erreur s'est produite durant la mise 
 $lang['Upgrade_not_required']       = "Aucune mise à jour n'est nécessaire pour votre version actuelle de Wanewsletter";
 $lang['Unsupported_version']        = "Cette version de Wanewsletter n'est plus supportée par le script de mise à jour. Vous devriez d'abord faire une mise à jour vers une version 2.3.x.";
 
+$lang['Need_upgrade_db']            = "Une mise à jour des tables de données du script est nécessaire.";
+$lang['Need_upgrade_db_link']       = "Cliquez %sici%s pour accéder au script de mise à jour.";
+
 $lang['dbtype']                     = "Type de base de données";
 $lang['dbhost']                     = "Nom du serveur de base de données";
 $lang['dbname']                     = "Nom de votre base de données";

@@ -12,6 +12,19 @@ if( !defined('FUNCTIONS_INC') ) {
 define('FUNCTIONS_INC', true);
 
 /**
+ * Vérifie que les numéros de version des tables dans le fichier constantes.php
+ * et dans la table de configuration du script sont synchro
+ *
+ * @param integer $version Version présente dans la base de données (clé 'db_version')
+ *
+ * @return boolean
+ */
+function check_db_version($version)
+{
+	return (WANEWSLETTER_DB_VERSION == $version);
+}
+
+/**
  * Retourne la configuration du script stockée dans la base de données
  *
  * @return array

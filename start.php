@@ -147,3 +147,13 @@ if( !is_writable(WA_TMPDIR) )
 		wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
 }
 
+//
+// On vérifie si les tables du script sont bien à jour
+//
+if( !check_db_version(@$nl_config['db_version']) )
+{
+	load_settings();
+	$output->addLine($lang['Need_upgrade_db']);
+	$output->addLine($lang['Need_upgrade_db_link'], WA_ROOTDIR.'/setup/upgrade.php');
+	$output->displayMessage();
+}

@@ -14,6 +14,13 @@
 define('WANEWSLETTER_VERSION', '2.4-dev');
 
 //
+// identifiant de version des tables du script.
+// Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
+// le script invite l'utilisateur à lancer la procédure de mise à jour des tables
+//
+define('WANEWSLETTER_DB_VERSION', 8);
+
+//
 // Requirements
 //
 define('WA_PHP_VERSION_REQUIRED', '5.2.3');
