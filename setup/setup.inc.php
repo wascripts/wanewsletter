@@ -123,6 +123,8 @@ require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/template.php';
 require WA_ROOTDIR . '/includes/class.output.php';
 
+check_php_version();
+
 $output = new output(WA_ROOTDIR . '/templates/');
 
 

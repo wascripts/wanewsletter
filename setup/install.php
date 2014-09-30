@@ -288,7 +288,6 @@ if( !defined('NL_INSTALLED') )
 	
 	$l_explain = nl2br(sprintf(
 		$lang['Welcome_in_install'],
-		WA_PHP_VERSION_REQUIRED,
 		'<a href="' . WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
 		'<a href="' . WA_ROOTDIR . '/COPYING">', '</a>',
 		'<a href="http://phpcodeur.net/wascripts/GPL">', '</a>'

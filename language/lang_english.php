@@ -650,7 +650,7 @@ $lang['Next_month']                 = "Next month";
 //
 // Installation du script
 //
-$lang['Welcome_in_install']         = "Welcome to Wanewsletter's install script. \nThis script requires <strong>PHP %s</strong> or higher.\nBefore continuing the installation, please read the %sreadme%s file, it contains important instructions to make the installation work properly.\nPlease read the %slicense agreement of Wanewsletter%s before continuing. A copy of this license is readable at %sphpcodeur.net/wascripts/gpl%s";
+$lang['Welcome_in_install']         = "Welcome to Wanewsletter's install script.\nBefore continuing the installation, please read the %sreadme%s file, it contains important instructions to make the installation work properly.\nPlease read the %slicense agreement of Wanewsletter%s before continuing. A copy of this license is readable at %sphpcodeur.net/wascripts/gpl%s";
 $lang['Welcome_in_upgrade']         = "Welcome to Wanewsletter's upgrade script to version <strong>%s</strong>.\n For security reasons, it is <strong>strongly advisable</strong> to make a backup of the script's tables before proceeding with the upgrade.";
 $lang['Warning_reinstall']          = "<b>Caution!</b> Wanewsletter seems to be already installed. \nIf you wish to reinstall the script, enter your admin login and password. \nAttention, all of your data will be lost if you make a reinstallation of the script. \n if you wish to do an upgrade, use the script upgrade.php";
 $lang['Start_install']              = "Launch install";
