@@ -11,7 +11,7 @@
 // Version correspondant au code source en place sur le serveur.
 // Remplace la constante obsolète WA_VERSION, jadis définie dans le fichier de configuration.
 //
-define('WANEWSLETTER_VERSION', '2.4-dev');
+define('WANEWSLETTER_VERSION', '2.4-beta2');
 
 //
 // identifiant de version des tables du script.
