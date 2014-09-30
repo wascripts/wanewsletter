@@ -269,7 +269,13 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 		$errno = CRITICAL_ERROR;
 	}
 	
-	if( $output == null ) {// load_settings() par encore appelé
+	//
+	// Dans le cas d'une fonction précédée par @, error_reporting() 
+	// retournera 0, dans ce cas, pas d'affichage d'erreur
+	//
+	$display_error = error_reporting(E_ALL);
+	
+	if( $output == null && $display_error ) {// load_settings() par encore appelé
 		$errno = CRITICAL_ERROR;
 	}
 	
@@ -358,12 +364,6 @@ BASIC;
 			
 			$php_errormsg  = '<b>'.(isset($label[$errno]) ? $label[$errno] : 'Unknown Error').'</b>&nbsp;: ';
 			$php_errormsg .= $errstr . ' in <b>' . basename($errfile) . '</b> on line <b>' . $errline . '</b>';
-			
-			//
-			// Dans le cas d'une fonction précédée par @, error_reporting() 
-			// retournera 0, dans ce cas, pas d'affichage d'erreur
-			//
-			$display_error = error_reporting(E_ALL);
 			
 			if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
 			{
