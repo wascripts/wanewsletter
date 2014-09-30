@@ -67,7 +67,7 @@ if( !isset($old_config['db_version']) )
 	
 	foreach( $versions as $version )
 	{
-		$old_config['db_version'] += (int)version_compare($currentVersion, $version, '<=');
+		$old_config['db_version'] += (int)version_compare($currentVersion, $version, '>');
 	}
 }
 
