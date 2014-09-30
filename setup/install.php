@@ -234,6 +234,8 @@ if( $start )
 		
 		$db->close();
 		
+		$login_page = WA_ROOTDIR . '/admin/login.php';
+		
 		if( !defined('NL_INSTALLED') )
 		{
 			if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
@@ -249,7 +251,7 @@ if( $start )
 					'L_TITLE'         => $lang['Result_install'],
 					'L_DL_BUTTON'     => $lang['Button']['dl'],
 					
-					'MSG_RESULT'      => nl2br($lang['Success_without_config']),						
+					'MSG_RESULT'      => nl2br(sprintf($lang['Success_without_config'], sprintf('<a href="%s">', $login_page), '</a>')),						
 					'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 				));
 				
@@ -261,7 +263,7 @@ if( $start )
 			fclose($fw);
 		}
 		
-		message(nl2br(sprintf($lang['Success_install'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>')), $lang['Result_install']);
+		message(nl2br(sprintf($lang['Success_install'], sprintf('<a href="%s">', $login_page), '</a>')), $lang['Result_install']);
 	}
 }
 

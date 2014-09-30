@@ -667,7 +667,7 @@ $lang['DB_type_undefined']          = "The database type isn't defined!";
 
 $lang['Success_install']            = "The installation was succesfully completed.\nYou can now go to the script %sadministration%s";
 $lang['Success_upgrade']            = "The upgrade was succesfully completed.\nYou can now go to the script %sadministration%s";
-$lang['Success_without_config']     = "The installation was succesfully completed, but the configuration file could not be created.\nYou can dowload the file and upload it in the includes/ directory with your ftp client.";
+$lang['Success_without_config']     = "The installation was succesfully completed, but the configuration file could not be created.\nYou can dowload the file and upload it in the <samp>includes/</samp> directory.\nYou can now access to %sadministration%s.";
 $lang['Error_in_install']           = "Errors occurred during the installation.\n\nError is : %s\nQuery is : %s";
 $lang['Error_in_upgrade']           = "Errors occurred during the upgrade.\n\nError is : %s\nQuery is : %s";
 $lang['Upgrade_not_required']       = "No upgrade is required for your current version of Wanewsletter";

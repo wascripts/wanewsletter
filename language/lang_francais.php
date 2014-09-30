@@ -667,7 +667,7 @@ $lang['DB_type_undefined']          = "Le type de base de données n'est pas défi
 
 $lang['Success_install']            = "L'installation s'est bien déroulée.\nVous pouvez maintenant accéder à %sl'administration%s";
 $lang['Success_upgrade']            = "La mise à jour s'est bien déroulée.\nVous pouvez maintenant accéder à %sl'administration%s";
-$lang['Success_without_config']     = "L'opération s'est bien effectuée mais le fichier de configuration n'a pu être créé.\nVous pouvez le télécharger et l'uploader par vos propres moyens sur le serveur dans le répertoire includes/ du script.";
+$lang['Success_without_config']     = "L'installation s'est bien effectuée mais le fichier de configuration n'a pu être créé.\nVous pouvez le télécharger et l'uploader par vos propres moyens sur le serveur dans le répertoire <samp>includes/</samp> du script.\nVous pourrez ensuite accéder à %sl'administration%s.";
 $lang['Error_in_install']           = "Une erreur s'est produite durant l'installation.\n\nL'erreur est : %s\nLa requête est : %s";
 $lang['Error_in_upgrade']           = "Une erreur s'est produite durant la mise à jour.\n\nL'erreur est : %s\nLa requête est : %s";
 $lang['Upgrade_not_required']       = "Aucune mise à jour n'est nécessaire pour votre version actuelle de Wanewsletter";
