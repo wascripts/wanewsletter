@@ -20,12 +20,50 @@ define('ADMIN_TABLE',         $prefixe . 'admin');
 define('AUTH_ADMIN_TABLE',    $prefixe . 'auth_admin');
 define('BANLIST_TABLE',       $prefixe . 'ban_list');
 define('CONFIG_TABLE',        $prefixe . 'config');
-define('JOINED_FILES_TABLE',  $prefixe . 'joined_files');
 define('FORBIDDEN_EXT_TABLE', $prefixe . 'forbidden_ext');
+define('JOINED_FILES_TABLE',  $prefixe . 'joined_files');
 define('LISTE_TABLE',         $prefixe . 'liste');
 define('LOG_TABLE',           $prefixe . 'log');
 define('LOG_FILES_TABLE',     $prefixe . 'log_files');
 define('SESSIONS_TABLE',      $prefixe . 'session');
+
+$GLOBALS['sql_schemas'] = array(
+	ABO_LISTE_TABLE     => array(
+		'index'    => array('register_key_idx')
+	),
+	ABONNES_TABLE       => array(
+		'index'    => array('abo_email_idx', 'abo_status_idx'),
+		'sequence' => array('wa_abonnes_id_seq')
+	),
+	ADMIN_TABLE         => array(
+		'sequence' => array('wa_admin_id_seq')
+	),
+	AUTH_ADMIN_TABLE    => array(
+		'index'    => array('admin_id_idx')
+	),
+	BANLIST_TABLE       => array(
+		'sequence' => array('wa_ban_id_seq')
+	),
+	CONFIG_TABLE        => array(
+		'index'    => array('config_name_idx'),
+		'sequence' => array('wa_config_id_seq')
+	),
+	FORBIDDEN_EXT_TABLE => array(
+		'sequence' => array('wa_forbidden_ext_id_seq')
+	),
+	JOINED_FILES_TABLE  => array(
+		'sequence' => array('wa_joined_files_id_seq')
+	),
+	LISTE_TABLE         => array(
+		'sequence' => array('wa_liste_id_seq')
+	),
+	LOG_TABLE           => array(
+		'index'    => array('liste_id_idx', 'log_status_idx'),
+		'sequence' => array('wa_log_id_seq')
+	),
+	LOG_FILES_TABLE     => array(),
+	SESSIONS_TABLE      => array()
+);
 
 /**
  * Génère une chaîne DSN

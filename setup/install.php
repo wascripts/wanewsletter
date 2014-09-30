@@ -174,13 +174,36 @@ if( $start )
 		
 		if( defined('NL_INSTALLED') )
 		{
-			if( $db->engine == 'postgres' )
+			$sql_drop = array();
+			
+			foreach( $sql_schemas as $tablename => $schema )
 			{
-				exec_queries(str_replace('wa_', $prefixe, $sql_drop_sequence));
+				if( $db->engine == 'postgres' && !empty($schema['sequence']) )
+				{
+					foreach( $schema['sequence'] as $sequence )
+					{
+						$sql_drop[] = sprintf("DROP SEQUENCE IF EXISTS %s",
+							str_replace('wa_', $prefixe, $sequence)
+						);
+					}
+				}
+				
+/*				if( !empty($schema['index']) )
+				{
+					foreach( $schema['index'] as $index )
+					{
+						$sql_drop[] = sprintf("DROP INDEX IF EXISTS %s",
+							str_replace('wa_', $prefixe, $index)
+						);
+					}
+				}*/
+				
+				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
+					str_replace('wa_', $prefixe, $tablename)
+				);
 			}
 			
-			exec_queries(str_replace('wa_', $prefixe, $sql_drop_index));
-			exec_queries(str_replace('wa_', $prefixe, $sql_drop_table));
+			exec_queries($sql_drop);
 		}
 		
 		//

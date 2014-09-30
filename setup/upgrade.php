@@ -125,29 +125,51 @@ if( $start )
 		$sql_create = parseSQL(file_get_contents($sql_create), $prefixe);
 		$sql_data   = parseSQL(file_get_contents($sql_data), $prefixe);
 		
+		$pattern = ($db->engine == 'postgres' ? 'SEQUENCE|' : '') . 'TABLE|INDEX';
+		
+		$sql_create_by_table = $sql_data_by_table = array();
+		
 		foreach( $sql_create as $query )
 		{
-			if( preg_match('/CREATE\s+(?:TABLE|SEQUENCE)\s+(' . $prefixe . '[A-Za-z0-9_$]+?)(?:_id_seq)?\s+/i', $query, $m) )
+			if( preg_match("/CREATE\s+($pattern)\s+([A-Za-z0-9_$]+?)\s+/", $query, $m) )
 			{
-				if( !isset($sql_create[$m[1]]) )
+				foreach( $sql_schemas as $tablename => $schema )
 				{
-					$sql_create[$m[1]] = array();
+					if( $m[1] == 'TABLE' )
+					{
+						if( $tablename != $m[2] )
+						{
+							continue;
+						}
+					}
+					else if( !isset($schema[strtolower($m[1])]) || array_search($m[2], $schema[strtolower($m[1])]) === false )
+					{
+						continue;
+					}
+					
+					if( !isset($sql_create_by_table[$tablename]) )
+					{
+						$sql_create_by_table[$tablename] = array();
+					}
+					$sql_create_by_table[$tablename][] = $query;
 				}
-				$sql_create[$m[1]][] = $query;
 			}
 		}
 		
 		foreach( $sql_data as $query )
 		{
-			if( preg_match('/INSERT\s+INTO\s+(' . $prefixe . '[A-Za-z0-9_$]+)/i', $query, $m) )
+			if( preg_match('/INSERT\s+INTO\s+([A-Za-z0-9_$]+)/', $query, $m) )
 			{
-				if( !isset($sql_data[$m[1]]) )
+				if( !array_key_exists($m[1], $sql_data_by_table) && array_key_exists($m[1], $sql_schemas) )
 				{
-					$sql_data[$m[1]] = array();
+					$sql_data_by_table[$m[1]] = array();
 				}
-				$sql_data[$m[1]][] = $query;
+				$sql_data_by_table[$m[1]][] = $query;
 			}
 		}
+		
+		$sql_create = $sql_create_by_table;
+		$sql_data   = $sql_data_by_table;
 		
 		//
 		// Nous vérifions tout d'abord si des doublons sont présents dans

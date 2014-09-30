@@ -39,15 +39,7 @@ $prefixe_to   = 'wa_';
 // End Of Config
 //
 
-$prefixe   = '';// Pas touche. Empêche les notices PHP dans wadb_init.php sur les déclarations de constantes...
-
-$tableList    = array('wa_abo_liste', 'wa_abonnes', 'wa_admin', 'wa_auth_admin', 'wa_ban_list',
-	'wa_config', 'wa_joined_files', 'wa_forbidden_ext', 'wa_liste', 'wa_log', 'wa_log_files', 'wa_session'
-);
-$indexList    = array('abo_status_idx', 'admin_id_idx', 'config_name_idx', 'liste_id_idx', 'log_status_idx');
-$sequenceList = array('wa_abonnes_id_seq', 'wa_admin_id_seq', 'wa_ban_id_seq',
-	'wa_config_id_seq', 'wa_joined_files_id_seq', 'wa_liste_id_seq', 'wa_log_id_seq'
-);
+$prefixe = 'wa_';// Pas touche. Empêche les notices PHP dans wadb_init.php sur les déclarations de constantes...
 
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';
@@ -87,31 +79,37 @@ $db_to   = WaDatabase($dsn_to);
 
 // DROP if any
 
-// Postgresql sequences
-if( $db_to->engine == 'postgres' ) {
-	foreach( $sequenceList as $seqname ) {
-		$db_to->query(sprintf('DROP SEQUENCE IF EXISTS %s',
-			$db_to->quote(str_replace('wa_', $prefixe_to, $seqname))));
+foreach( $sql_schemas as $tablename => $schema ) {
+	if( $db->engine == 'postgres' && !empty($schema['sequence']) )
+	{
+		foreach( $schema['sequence'] as $sequence )
+		{
+			$db_to->query(sprintf('DROP SEQUENCE IF EXISTS %s',
+				$db_to->quote(str_replace('wa_', $prefixe_to, $sequence))
+			));
+		}
 	}
-}
-
-foreach( $indexList as $indexname ) {
-	$db_to->query(sprintf('DROP INDEX IF EXISTS %s',
-		$db_to->quote(str_replace('wa_', $prefixe_to, $indexname))));
-}
-
-foreach( $tableList as $tablename ) {
+	
+/*	if( !empty($schema['index']) )
+	{
+		foreach( $schema['index'] as $index )
+		{
+			$db_to->query(sprintf('DROP INDEX IF EXISTS %s',
+				$db_to->quote(str_replace('wa_', $prefixe_to, $index))
+			));
+		}
+	}*/
+	
 	$db_to->query(sprintf('DROP TABLE IF EXISTS %s',
-		$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))));
+		$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))
+	));
 }
-
 
 // Create table
 $sql_create = file_get_contents(sprintf('%s/%s_tables.sql', $schemas_dir, $db_to->engine));
-$sql_create = parseSQL($sql_create);
+$sql_create = parseSQL($sql_create, $prefixe_to);
 
 foreach( $sql_create as $query ) {
-	$query = str_replace('wa_', $prefixe_to, $query);
 	$db_to->query($query);
 }
 
@@ -127,7 +125,6 @@ if( $db_to->engine == 'sqlite' ) {
 	$db_to = Wadatabase('sqlite::memory:');
 	
 	foreach( $sql_create as $query ) {
-		$query = str_replace('wa_', $prefixe_to, $query);
 		$db_to->query($query);
 	}
 }
@@ -199,7 +196,7 @@ $sequence = array(
 );
 
 // Populate table
-foreach( $tableList as $tablename ) {
+foreach( $sql_schemas as $tablename => $schema ) {
 	printf("Populate table %s...\n", str_replace('wa_', $prefixe_to, $tablename));
 	flush();
 	
@@ -246,7 +243,7 @@ foreach( $tableList as $tablename ) {
 if( $db_to->engine == 'sqlite' ) {
 	$db_to->query(sprintf('ATTACH %s AS dest', $db_to->quote($sqlite_db)));
 	
-	foreach( $tableList as $tablename ) {
+	foreach( $sql_schemas as $tablename => $schema ) {
 		$db_to->query(sprintf('INSERT INTO dest.%1$s SELECT * FROM %1$s',
 			$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))));
 	}
