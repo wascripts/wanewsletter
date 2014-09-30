@@ -29,18 +29,7 @@ if( !$db->isConnected() )
 //
 // Récupération de la configuration
 //
-$old_config = null;
-
-$sql = "SELECT * FROM " . CONFIG_TABLE;
-if( $result = $db->query($sql) )
-{
-	$old_config = $result->fetch();
-}
-
-if( !$old_config )
-{
-	plain_error("Impossible d'obtenir la configuration du script :\n" . $db->error);
-}
+$old_config = wa_get_config();
 
 //
 // Compatibilité avec les versions < 2.3
@@ -102,8 +91,9 @@ if( $start )
 	}
 	
 	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$infos['engine']]['prefixe_file'] . '_tables.sql';
+	$sql_data   = SCHEMAS_DIR . '/data.sql';
 	
-	if( !is_readable($sql_create) )
+	if( !is_readable($sql_create) || !is_readable($sql_data) )
 	{
 		$error = true;
 		$msg_error[] = $lang['Message']['sql_file_not_readable'];
@@ -118,12 +108,30 @@ if( $start )
 		@set_time_limit(1200);
 		
 		$sql_create = parseSQL(file_get_contents($sql_create), $prefixe);
+		$sql_data   = parseSQL(file_get_contents($sql_data), $prefixe);
 		
 		foreach( $sql_create as $query )
 		{
-			preg_match('/CREATE TABLE ' . $prefixe . '([[:alnum:]_-]+)/i', $query, $match);
-			
-			$sql_create[$match[1]] = $query;
+			if( preg_match('/CREATE\s+(?:TABLE|SEQUENCE)\s+(' . $prefixe . '[A-Za-z0-9_$]+?)(?:_id_seq)?\s+/i', $query, $m) )
+			{
+				if( !isset($sql_create[$m[1]]) )
+				{
+					$sql_create[$m[1]] = array();
+				}
+				$sql_create[$m[1]][] = $query;
+			}
+		}
+		
+		foreach( $sql_data as $query )
+		{
+			if( preg_match('/INSERT\s+INTO\s+(' . $prefixe . '[A-Za-z0-9_$]+)/i', $query, $m) )
+			{
+				if( !isset($sql_data[$m[1]]) )
+				{
+					$sql_data[$m[1]] = array();
+				}
+				$sql_data[$m[1]][] = $query;
+			}
 		}
 		
 		//
@@ -161,9 +169,6 @@ if( $start )
 		{
 			if( $db->engine == 'postgres' )
 			{
-				$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-					ALTER COLUMN smtp_user TYPE VARCHAR(100),
-					ALTER COLUMN smtp_pass TYPE VARCHAR(100)";
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
 					ADD COLUMN liste_alias VARCHAR(254) NOT NULL DEFAULT ''";
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
@@ -179,9 +184,6 @@ if( $start )
 			}
 			else
 			{
-				$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-					MODIFY COLUMN smtp_user VARCHAR(100) NOT NULL DEFAULT '',
-					MODIFY COLUMN smtp_pass VARCHAR(100) NOT NULL DEFAULT ''";
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
 					ADD COLUMN liste_alias VARCHAR(254) NOT NULL DEFAULT '',
 					ADD COLUMN use_cron TINYINT(1) NOT NULL DEFAULT 0,
@@ -257,8 +259,6 @@ if( $start )
 					ADD COLUMN liste_numlogs SMALLINT NOT NULL DEFAULT 0";
 				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
 					ADD COLUMN log_numdest SMALLINT NOT NULL DEFAULT 0";
-				$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-					ADD COLUMN check_email_mx SMALLINT NOT NULL DEFAULT 0";
 			}
 			else
 			{
@@ -266,8 +266,6 @@ if( $start )
 					ADD COLUMN liste_numlogs SMALLINT NOT NULL DEFAULT 0 AFTER liste_alias";
 				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
 					ADD COLUMN log_numdest SMALLINT NOT NULL DEFAULT 0 AFTER log_date";
-				$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-					ADD COLUMN check_email_mx TINYINT(1) NOT NULL DEFAULT 0 AFTER gd_img_type";
 				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . " DROP INDEX abo_id";
 				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . " DROP INDEX liste_id";
 				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
@@ -315,15 +313,11 @@ if( $start )
 		{
 			if( $db->engine == 'postgres' )
 			{
-				$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-					ADD COLUMN enable_profil_cp SMALLINT NOT NULL DEFAULT 0";
 				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 					ADD COLUMN abo_lang VARCHAR(30) NOT NULL DEFAULT ''";
 			}
 			else
 			{
-				$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-					ADD COLUMN enable_profil_cp TINYINT(1) NOT NULL DEFAULT 0 AFTER check_email_mx";
 				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 					ADD COLUMN abo_lang VARCHAR(30) NOT NULL DEFAULT '' AFTER abo_email";
 			}
@@ -356,15 +350,8 @@ if( $start )
 		
 		if( WA_VERSION === '2.2-rc3' )
 		{
-			if( $db->engine == 'postgres' )
+			if( $db->engine == 'mysql' )
 			{
-				$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-					ADD COLUMN ftp_port SMALLINT NOT NULL DEFAULT 21";
-			}
-			else
-			{
-				$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-					ADD COLUMN ftp_port SMALLINT NOT NULL DEFAULT 21 AFTER ftp_server";
 				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 					CHANGE abo_id abo_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT";
 				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
@@ -374,8 +361,8 @@ if( $start )
 		
 		if( version_compare(WA_VERSION, '2.2.12', '<=') )
 		{
-			$sql_update[] = "ALTER TABLE " . CONFIG_TABLE . "
-				DROP COLUMN hebergeur, DROP COLUMN version";
+			unset($old_config['hebergeur']);
+			unset($old_config['version']);
 			
 			if( $db->engine == 'postgres' )
 			{
@@ -535,7 +522,7 @@ if( $start )
 				foreach( array(ABONNES_TABLE, ADMIN_TABLE, BANLIST_TABLE, LISTE_TABLE) as $tablename )
 				{
 					$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
-					$sql_update[] = $sql_create[$tablename];
+					$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
 					$sql_update[] = sprintf('INSERT INTO %1$s SELECT * FROM %1$s_tmp;', $tablename);
 					$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
 				}
@@ -553,41 +540,39 @@ if( $start )
 					MODIFY COLUMN return_email VARCHAR(254) NOT NULL DEFAULT '',
 					MODIFY COLUMN liste_alias VARCHAR(254) NOT NULL DEFAULT ''";
 			}
+			
+			$sql_update[] = "DROP TABLE " . CONFIG_TABLE;
+			$sql_update   = array_merge($sql_update, $sql_create[CONFIG_TABLE]);
+			$sql_update   = array_merge($sql_update, $sql_data[CONFIG_TABLE]);
+			
+			exec_queries($sql_update, true);
+			
+			//
+			// On remet en place la configuration actuelle du script
+			//
+			$new_config = wa_get_config();
+			$new_config = array_intersect_key($old_config, $new_config);
+			wa_update_config($new_config);
+			$old_config = array_diff_key($old_config, $new_config);
+			
+			foreach( $old_config as $name => $value )
+			{
+				$db->query(sprintf(
+					"INSERT INTO %s (config_name, config_value) VALUES('%s', '%s')",
+					CONFIG_TABLE,
+					$db->escape($name),
+					$db->escape($value)
+				));
+			}
 		}
 		
 		exec_queries($sql_update, true);
 		
 		//
-		// Modification fichier de configuration +
 		// Affichage message de résultat
 		//
-		if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
-		{
-			$output->addHiddenField('engine',  $infos['engine']);
-			$output->addHiddenField('host',    $infos['host']);
-			$output->addHiddenField('user',    $infos['user']);
-			$output->addHiddenField('pass',    $infos['pass']);
-			$output->addHiddenField('dbname',  $infos['dbname']);
-			$output->addHiddenField('prefixe', $prefixe);
-			
-			$output->assign_block_vars('download_file', array(
-				'L_TITLE'         => $lang['Result_upgrade'],
-				'L_DL_BUTTON'     => $lang['Button']['dl'],
-				
-				'MSG_RESULT'      => nl2br($lang['Success_without_config']),						
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
-			));
-			
-			$output->pparse('body');
-			exit;
-		}
-		else
-		{
-			file_put_contents(WA_ROOTDIR . '/includes/config.inc.php', $config_file);
-			
-			$message = sprintf($lang['Success_upgrade'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>');
-			message($message, $lang['Result_upgrade']);
-		}
+		$message = sprintf($lang['Success_upgrade'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>');
+		message($message, $lang['Result_upgrade']);
 	}
 }
 
@@ -604,5 +589,3 @@ if( $error )
 }
 
 $output->pparse('body');
-
-?>

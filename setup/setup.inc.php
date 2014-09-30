@@ -93,7 +93,7 @@ function sql_error()
 	exit;
 }
 
-function exec_queries($sql_ary, $return_error = false)
+function exec_queries(&$sql_ary, $return_error = false)
 {
 	global $db;
 	
@@ -111,6 +111,8 @@ function exec_queries($sql_ary, $return_error = false)
 			sql_error();
 		}
 	}
+	
+	$sql_ary = array();
 }
 
 error_reporting(E_ALL);
@@ -186,6 +188,7 @@ $sql_drop_table = array(
 $sql_drop_index = array(
 	'DROP INDEX abo_status_idx',
 	'DROP INDEX admin_id_idx',
+	'DROP INDEX config_name_idx',
 	'DROP INDEX liste_id_idx',
 	'DROP INDEX log_status_idx'
 );
@@ -194,6 +197,7 @@ $sql_drop_sequence = array(
 	'DROP SEQUENCE wa_abonnes_id_seq',
 	'DROP SEQUENCE wa_admin_id_seq',
 	'DROP SEQUENCE wa_ban_id_seq',
+	'DROP SEQUENCE wa_config_id_seq',
 	'DROP SEQUENCE wa_forbidden_ext_id_seq',
 	'DROP SEQUENCE wa_joined_files_id_seq',
 	'DROP SEQUENCE wa_liste_id_seq',

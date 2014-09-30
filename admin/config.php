@@ -20,13 +20,7 @@ if( $admindata['admin_level'] != ADMIN )
 	$output->displayMessage();
 }
 
-$sql = "SELECT * FROM " . CONFIG_TABLE;
-if( !($result = $db->query($sql)) )
-{
-	trigger_error('Impossible de récupérer la configuration du script', ERROR);
-}
-
-$old_config = $result->fetch(SQL_FETCH_ASSOC);
+$old_config = $nl_config;
 $move_files = false;
 
 if( isset($_POST['submit']) )
@@ -196,10 +190,7 @@ if( isset($_POST['submit']) )
 	
 	if( !$error )
 	{
-		if( !$db->build(SQL_UPDATE, CONFIG_TABLE, $new_config) )
-		{
-			trigger_error('Impossible de mettre à jour la configuration', ERROR);
-		}
+		wa_update_config(array_merge($old_config, $new_config));
 		
 		//
 		// Déplacement des fichiers joints dans le nouveau dossier de stockage s'il est changé

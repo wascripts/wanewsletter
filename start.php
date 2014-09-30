@@ -112,13 +112,7 @@ if( !$db->isConnected() )
 //
 // On récupère la configuration du script 
 //
-$sql = 'SELECT * FROM ' . CONFIG_TABLE;
-if( !($result = $db->query($sql)) )
-{
-	trigger_error('Impossible d\'obtenir la configuration de la newsletter', CRITICAL_ERROR);
-}
-
-$nl_config = $result->fetch($result->SQL_FETCH_ASSOC);
+$nl_config = wa_get_config();
 
 //
 // "Constantes" de classe dans le scope global
@@ -127,10 +121,6 @@ $nl_config = $result->fetch($result->SQL_FETCH_ASSOC);
 define('SQL_INSERT', $db->SQL_INSERT);
 define('SQL_UPDATE', $db->SQL_UPDATE);
 define('SQL_DELETE', $db->SQL_DELETE);
-
-define('SQL_FETCH_NUM',   $result->SQL_FETCH_NUM);
-define('SQL_FETCH_ASSOC', $result->SQL_FETCH_ASSOC);
-define('SQL_FETCH_BOTH',  $result->SQL_FETCH_BOTH);
 
 //
 // Purge 'automatique' des listes (comptes non activés au-delà du temps limite)

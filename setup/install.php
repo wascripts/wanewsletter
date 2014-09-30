@@ -41,14 +41,7 @@ if( defined('NL_INSTALLED') )
 		plain_error(sprintf($lang['Connect_db_error'], $db->error));
 	}
 	
-	$sql = "SELECT language, urlsite, path FROM " . CONFIG_TABLE;
-	if( !($result = $db->query($sql)) )
-	{
-		plain_error('Impossible d\'obtenir la configuration du script');
-	}
-	
-	$old_config = $result->fetch();
-	
+	$old_config = wa_get_config();
 	$urlsite    = $old_config['urlsite'];
 	$urlscript  = $old_config['path'];
 	$language   = $old_config['language'];
@@ -206,12 +199,31 @@ if( $start )
 				admin_email = '" . $db->escape($admin_email) . "',
 				admin_lang  = '$language'
 			WHERE admin_id = 1";
-		$sql_data[] = "UPDATE " . CONFIG_TABLE . "
-			SET urlsite     = '" . $db->escape($urlsite) . "',
-				path        = '" . $db->escape($urlscript) . "',
-				cookie_path = '" . $db->escape($urlscript) . "',
-				language    = '$language',
-				mailing_startdate = " . time();
+		$sql_data[] = sprintf(
+			"UPDATE %s SET config_value = '%s' WHERE config_name = 'urlsite'",
+			CONFIG_TABLE,
+			$db->escape($urlsite)
+		);
+		$sql_data[] = sprintf(
+			"UPDATE %s SET config_value = '%s' WHERE config_name = 'path'",
+			CONFIG_TABLE,
+			$db->escape($urlscript)
+		);
+		$sql_data[] = sprintf(
+			"UPDATE %s SET config_value = '%s' WHERE config_name = 'cookie_path'",
+			CONFIG_TABLE,
+			$db->escape($urlscript)
+		);
+		$sql_data[] = sprintf(
+			"UPDATE %s SET config_value = '%s' WHERE config_name = 'language'",
+			CONFIG_TABLE,
+			$db->escape($language)
+		);
+		$sql_data[] = sprintf(
+			"UPDATE %s SET config_value = '%s' WHERE config_name = 'mailing_startdate'",
+			CONFIG_TABLE,
+			time()
+		);
 		$sql_data[] = "UPDATE " . LISTE_TABLE . "
 			SET form_url        = '" . $db->escape($urlsite.$urlscript.'subscribe.php') . "',
 				sender_email    = '" . $db->escape($admin_email) . "',

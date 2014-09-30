@@ -15,8 +15,35 @@ INSERT INTO wa_auth_admin (admin_id, liste_id, auth_view, auth_edit, auth_del, a
 -- 
 -- Configuration de base
 -- 
-INSERT INTO wa_config (sitename, urlsite, path, date_format, session_length, language, cookie_name, cookie_path, upload_path, max_filesize, engine_send, gd_img_type) 
-	VALUES('Yourdomaine', 'http://www.yourdomaine.com', '/', 'd M Y H:i', 3600, 'francais', 'wanewsletter', '/', 'upload/', 80000, 2, 'png');
+INSERT INTO wa_config (config_name, config_value) VALUES('sitename',       'Yourdomaine');
+INSERT INTO wa_config (config_name, config_value) VALUES('urlsite',        'http://www.yourdomaine.com');
+INSERT INTO wa_config (config_name, config_value) VALUES('path',           '/');
+INSERT INTO wa_config (config_name, config_value) VALUES('date_format',    'd M Y H:i');
+INSERT INTO wa_config (config_name, config_value) VALUES('session_length', '3600');
+INSERT INTO wa_config (config_name, config_value) VALUES('language',       'francais');
+INSERT INTO wa_config (config_name, config_value) VALUES('cookie_name',    'wanewsletter');
+INSERT INTO wa_config (config_name, config_value) VALUES('cookie_path',    '/');
+INSERT INTO wa_config (config_name, config_value) VALUES('upload_path',    'upload/');
+INSERT INTO wa_config (config_name, config_value) VALUES('max_filesize',   '80000');
+INSERT INTO wa_config (config_name, config_value) VALUES('use_ftp',        '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('ftp_server',     '');
+INSERT INTO wa_config (config_name, config_value) VALUES('ftp_port',       '21');
+INSERT INTO wa_config (config_name, config_value) VALUES('ftp_pasv',       '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('ftp_path',       '');
+INSERT INTO wa_config (config_name, config_value) VALUES('ftp_user',       '');
+INSERT INTO wa_config (config_name, config_value) VALUES('ftp_pass',       '');
+INSERT INTO wa_config (config_name, config_value) VALUES('engine_send',    '2');
+INSERT INTO wa_config (config_name, config_value) VALUES('emails_sended',  '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('use_smtp',       '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('smtp_host',      '');
+INSERT INTO wa_config (config_name, config_value) VALUES('smtp_port',      '25');
+INSERT INTO wa_config (config_name, config_value) VALUES('smtp_user',      '');
+INSERT INTO wa_config (config_name, config_value) VALUES('smtp_pass',      '');
+INSERT INTO wa_config (config_name, config_value) VALUES('disable_stats',  '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('gd_img_type',    'png');
+INSERT INTO wa_config (config_name, config_value) VALUES('check_email_mx', '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('enable_profil_cp', '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('mailing_startdate', '0');
 
 
 -- 

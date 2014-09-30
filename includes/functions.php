@@ -12,6 +12,63 @@ if( !defined('FUNCTIONS_INC') ) {
 define('FUNCTIONS_INC', true);
 
 /**
+ * Retourne la configuration du script stockée dans la base de données
+ *
+ * @return array
+ */
+function wa_get_config()
+{
+	global $db;
+	
+	if( !($result = $db->query("SELECT * FROM " . CONFIG_TABLE)) ) {
+		trigger_error("Impossible de charger la configuration du script", E_USER_ERROR);
+		return null;
+	}
+	
+	$row = $result->fetch($result->SQL_FETCH_ASSOC);
+	$config = array();
+	
+	if( isset($row['config_name']) ) {// Wanewsletter 2.4-beta2+
+		do {
+			if( $row['config_name'] != null ) {
+				$config[$row['config_name']] = $row['config_value'];
+			}
+		}
+		while( $row = $result->fetch() );
+	}
+	else {
+		// TODO: fix it!
+//		trigger_error("La table de configuration du script est obsolète. Mise à jour requise", E_USER_WARNING);
+		$config = $row;
+	}
+	
+	return $config;
+}
+
+/**
+ * Sauvegarde les clés de configuration fournies dans la base de données
+ *
+ * @param array $config
+ */
+function wa_update_config($config)
+{
+	global $db;
+	
+	foreach( $config as $name => $value ) {
+		$sql = sprintf(
+			"UPDATE %s SET config_value = '%s' WHERE config_name = '%s'",
+			CONFIG_TABLE,
+			$db->escape($value),
+			$db->escape($name)
+		);
+		if( !$db->query($sql) )
+		{
+			trigger_error('Impossible de mettre à jour la configuration', E_USER_ERROR);
+		}
+	}
+}
+
+/**
  * generate_key()
  * 
  * Génération d'une chaîne aléatoire

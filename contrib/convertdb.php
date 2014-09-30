@@ -44,9 +44,9 @@ $prefixe   = '';// Pas touche. Empêche les notices PHP dans wadb_init.php sur l
 $tableList    = array('wa_abo_liste', 'wa_abonnes', 'wa_admin', 'wa_auth_admin', 'wa_ban_list',
 	'wa_config', 'wa_joined_files', 'wa_forbidden_ext', 'wa_liste', 'wa_log', 'wa_log_files', 'wa_session'
 );
-$indexList    = array('abo_status_idx', 'admin_id_idx', 'liste_id_idx', 'log_status_idx');
+$indexList    = array('abo_status_idx', 'admin_id_idx', 'config_name_idx', 'liste_id_idx', 'log_status_idx');
 $sequenceList = array('wa_abonnes_id_seq', 'wa_admin_id_seq', 'wa_ban_id_seq',
-	'wa_joined_files_id_seq', 'wa_liste_id_seq', 'wa_log_id_seq'
+	'wa_config_id_seq', 'wa_joined_files_id_seq', 'wa_liste_id_seq', 'wa_log_id_seq'
 );
 
 require WA_ROOTDIR . '/includes/functions.php';
@@ -191,6 +191,7 @@ $sequence = array(
 	'wa_abonnes'       => array('seqname' => 'wa_abonnes_id_seq', 'seqval' => 0, 'field' => 'abo_id'),
 	'wa_admin'         => array('seqname' => 'wa_admin_id_seq', 'seqval' => 0, 'field' => 'admin_id'),
 	'wa_ban_list'      => array('seqname' => 'wa_ban_id_seq', 'seqval' => 0, 'field' => 'ban_id'),
+	'wa_config'        => array('seqname' => 'wa_config_id_seq', 'seqval' => 0, 'field' => 'config_id'),
 	'wa_forbidden_ext' => array('seqname' => 'wa_forbidden_ext_id_seq', 'seqval' => 0, 'field' => 'fe_id'),
 	'wa_joined_files'  => array('seqname' => 'wa_joined_files_id_seq', 'seqval' => 0, 'field' => 'file_id'),
 	'wa_liste'         => array('seqname' => 'wa_liste_id_seq', 'seqval' => 0, 'field' => 'liste_id'),

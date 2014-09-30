@@ -85,35 +85,11 @@ CREATE TABLE wa_ban_list (
 -- Structure de la table "wa_config"
 -- 
 CREATE TABLE wa_config (
-	sitename          VARCHAR(100) NOT NULL DEFAULT '',
-	urlsite           VARCHAR(100) NOT NULL DEFAULT '',
-	path              VARCHAR(100) NOT NULL DEFAULT '',
-	date_format       VARCHAR(20)  NOT NULL DEFAULT '',
-	session_length    INTEGER      NOT NULL DEFAULT 0,
-	language          VARCHAR(30)  NOT NULL DEFAULT '',
-	cookie_name       VARCHAR(100) NOT NULL DEFAULT '',
-	cookie_path       VARCHAR(100) NOT NULL DEFAULT '',
-	upload_path       VARCHAR(100) NOT NULL DEFAULT '',
-	max_filesize      INTEGER      NOT NULL DEFAULT 0,
-	use_ftp           INTEGER      NOT NULL DEFAULT 0,
-	ftp_server        VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_port          INTEGER      NOT NULL DEFAULT 21,
-	ftp_pasv          INTEGER      NOT NULL DEFAULT 0,
-	ftp_path          VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_user          VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_pass          VARCHAR(100) NOT NULL DEFAULT '',
-	engine_send       INTEGER      NOT NULL DEFAULT 0,
-	emails_sended     INTEGER      NOT NULL DEFAULT 0,
-	use_smtp          INTEGER      NOT NULL DEFAULT 0,
-	smtp_host         VARCHAR(100) NOT NULL DEFAULT '',
-	smtp_port         INTEGER      NOT NULL DEFAULT 25,
-	smtp_user         VARCHAR(100) NOT NULL DEFAULT '',
-	smtp_pass         VARCHAR(100) NOT NULL DEFAULT '',
-	disable_stats     INTEGER      NOT NULL DEFAULT 0,
-	gd_img_type       VARCHAR(5)   NOT NULL DEFAULT '',
-	check_email_mx    INTEGER      NOT NULL DEFAULT 0,
-	enable_profil_cp  INTEGER      NOT NULL DEFAULT 0,
-	mailing_startdate INTEGER      NOT NULL DEFAULT 0
+	config_id     INTEGER      NOT NULL,
+	config_name   VARCHAR(255),
+	config_value  VARCHAR(255),
+	CONSTRAINT wa_config_pk PRIMARY KEY (config_id),
+	CONSTRAINT config_name_idx UNIQUE (config_name)
 );
 
 
