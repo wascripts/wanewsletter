@@ -83,6 +83,7 @@ function sql_error()
 		'PAGE_TITLE'   => $l_title,
 		'CONTENT_LANG' => $lang['CONTENT_LANG'],
 		'CONTENT_DIR'  => $lang['CONTENT_DIR'],
+		'CHARSET'      => $lang['CHARSET'],
 		'NEW_VERSION'  => WANEWSLETTER_VERSION,
 		'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : '',
 		'L_TITLE'      => $lang['Title']['info'],

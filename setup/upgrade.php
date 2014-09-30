@@ -86,6 +86,7 @@ $output->assign_vars( array(
 	'PAGE_TITLE'   => $lang['Title']['upgrade'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
+	'CHARSET'      => $lang['CHARSET'],
 	'NEW_VERSION'  => WANEWSLETTER_VERSION,
 	'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 ));
