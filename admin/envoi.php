@@ -1117,7 +1117,7 @@ $output->assign_vars(array(
 	'L_YES'                   => $lang['Yes'],
 	'L_NO'                    => $lang['No'],
 	
-	'S_DEST'                  => $listdata['liste_name'],
+	'S_DEST'                  => wan_htmlspecialchars($listdata['liste_name']),
 	'S_SUBJECT'               => $subject,
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
 	'SELECTED_STATUS_MODEL'   => ( $logdata['log_status'] == STATUS_MODEL ) ? ' selected="selected"' : '',

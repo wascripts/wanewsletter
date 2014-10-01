@@ -697,8 +697,11 @@ BASIC;
 		{
 			if( in_array($liste_id, $liste_id_ary) )
 			{
-				$selected = ( $admindata['session_liste'] == $liste_id ) ? ' selected="selected"' : '';
-				$tmp_box .= sprintf("<option value=\"%d\"%s>%s</option>\n\t", $liste_id, $selected, cut_str($data['liste_name'], 30));
+				$tmp_box .= sprintf("<option value=\"%d\"%s>%s</option>\n\t",
+					$liste_id,
+					$admindata['session_liste'] == $liste_id ? ' selected="selected"' : '',
+					wan_htmlspecialchars(cut_str($data['liste_name'], 30))
+				);
 			}
 		}
 		

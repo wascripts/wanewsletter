@@ -102,7 +102,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	
 	$mailer->set_charset($lang['CHARSET']);
-	$mailer->set_from($listdata['sender_email'], wan_html_entity_decode($listdata['liste_name']));
+	$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
 	
 	if( $listdata['return_email'] != '' )
 	{

@@ -31,18 +31,22 @@ else
 		{
 			if( $row['liste_format'] == FORMAT_TEXTE )
 			{
-				$f = 'txt';
+				$format = 'txt';
 			}
 			else if( $row['liste_format'] == FORMAT_HTML )
 			{
-				$f = 'html';
+				$format = 'html';
 			}
 			else
 			{
-				$f = 'txt &amp; html';
+				$format = 'txt &amp; html';
 			}
 			
-			$list_box .= '<option value="' . $row['liste_id'] . '"> ' . $row['liste_name'] . ' (' . $f . ') </option>';
+			$list_box .= sprintf('<option value="%d"> %s (%s) </option>',
+				$row['liste_id'],
+				wan_htmlspecialchars($row['liste_name']),
+				$format
+			);
 		}
 		while( $row = $result->fetch() );
 	}

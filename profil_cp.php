@@ -247,7 +247,7 @@ switch( $mode )
 					$address = $abodata['email'];
 				}
 				
-				$mailer->set_from($listdata['sender_email'], wan_html_entity_decode($listdata['liste_name']));
+				$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
 				$mailer->set_address($address);
 				$mailer->set_subject($lang['Subject_email']['Sendkey']);
 				$mailer->set_return_path($listdata['return_email']);
@@ -562,7 +562,7 @@ switch( $mode )
 				}
 				
 				$mailer->clear_all();
-				$mailer->set_from($listdata['sender_email'], wan_html_entity_decode($listdata['liste_name']));
+				$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
 				$mailer->set_address($address);
 				$mailer->set_format($format);
 				$mailer->set_subject($row['log_subject']);
@@ -782,7 +782,7 @@ switch( $mode )
 			
 			$output->assign_block_vars('listerow', array(
 				'LISTE_ID'   => $liste_id,
-				'LISTE_NAME' => $listdata['liste_name'],
+				'LISTE_NAME' => wan_htmlspecialchars($listdata['liste_name']),
 				'SELECT_LOG' => $select_log
 			));
 		}

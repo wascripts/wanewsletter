@@ -538,7 +538,7 @@ if( $admindata['admin_level'] == ADMIN )
 	foreach( $listdata as $listrow )
 	{
 		$output->assign_block_vars('admin_options.auth', array(
-			'LISTE_NAME'      => $listrow['liste_name'],
+			'LISTE_NAME'      => wan_htmlspecialchars($listrow['liste_name']),
 			'LISTE_ID'        => $listrow['liste_id'],
 			
 			'BOX_AUTH_VIEW'   => $auth->box_auth(AUTH_VIEW,   $listrow),

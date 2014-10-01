@@ -293,7 +293,7 @@ if( $img == 'camembert' )
 	$listes = array();
 	foreach( $liste_ids as $liste_id )
 	{
-		$liste_name   = cut_str(wan_html_entity_decode($auth->listdata[$liste_id]['liste_name']), 30);
+		$liste_name   = cut_str($auth->listdata[$liste_id]['liste_name'], 30);
 		$num_inscrits = ( !empty($tmpdata[$liste_id]) ) ? $tmpdata[$liste_id] : 0;
 		
 		$listes[] = array('name' => $liste_name, 'num' => $num_inscrits);

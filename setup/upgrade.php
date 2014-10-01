@@ -660,6 +660,23 @@ if( $start )
 				WHERE config_name = 'emails_sended'";
 		}
 		
+		//
+		// Les noms de listes de diffusion sont stockés avec des entités html
+		// Suprème bétise (je sais pas ce qui m'a pris :S)
+		//
+		if( $old_config['db_version'] < 12 )
+		{
+			$result = $db->query("SELECT liste_id, liste_name FROM ".LISTE_TABLE);
+			while( $row = $result->fetch() )
+			{
+				$sql_update[] = sprintf("UPDATE %s SET liste_name = '%s' WHERE liste_id = %d",
+					LISTE_TABLE,
+					$db->escape(htmlspecialchars_decode($row['liste_name'])),
+					$row['liste_id']
+				);
+			}
+		}
+		
 		exec_queries($sql_update, true);
 		
 		//

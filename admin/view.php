@@ -469,7 +469,7 @@ else if( $mode == 'abonnes' )
 				}
 				
 				$output->assign_block_vars('listerow', array(
-					'LISTE_NAME'    => $liste_name,
+					'LISTE_NAME'    => wan_htmlspecialchars($liste_name),
 					'CHOICE_FORMAT' => $format,
 					'LISTE_ID'      => $row['liste_id']
 				));
@@ -687,7 +687,7 @@ else if( $mode == 'abonnes' )
 				}
 				
 				$output->assign_block_vars('listerow', array(
-					'LISTE_NAME' => $auth->listdata[$row['liste_id']]['liste_name'],
+					'LISTE_NAME' => wan_htmlspecialchars($auth->listdata[$row['liste_id']]['liste_name']),
 					'FORMAT_BOX' => $format_box,
 					'LISTE_ID'   => $row['liste_id']
 				));
@@ -1154,9 +1154,8 @@ else if( $mode == 'liste' )
 			
 			if( !$error )
 			{
-				$sql_data   = $sql_where = array();
-				$liste_name = wan_htmlspecialchars($liste_name);
-				$vararray   = array_merge($vararray, $vararray2);
+				$sql_data = $sql_where = array();
+				$vararray = array_merge($vararray, $vararray2);
 				
 				foreach( $vararray as $varname )
 				{
@@ -1204,7 +1203,6 @@ else if( $mode == 'liste' )
 		}
 		else if( $action == 'edit' )
 		{
-			$listdata['liste_name'] = wan_html_entity_decode($listdata['liste_name']);
 			$vararray = array_merge($vararray, $vararray2);
 			
 			foreach( $vararray as $varname )
@@ -1503,7 +1501,7 @@ else if( $mode == 'liste' )
 				if( in_array($liste_id, $liste_ids) && $liste_id != $listdata['liste_id'] )
 				{
 					$selected  = ( $admindata['session_liste'] == $liste_id ) ? ' selected="selected"' : '';
-					$list_box .= '<option value="' . $liste_id . '"' . $selected . '> - ' . cut_str($data['liste_name'], 30) . ' - </option>';
+					$list_box .= '<option value="' . $liste_id . '"' . $selected . '> - ' . wan_htmlspecialchars(cut_str($data['liste_name'], 30)) . ' - </option>';
 				}
 			}
 			
@@ -1658,7 +1656,7 @@ else if( $mode == 'liste' )
 		'L_STARTDATE'         => $lang['Liste_startdate'],
 		
 		'LISTE_ID'            => $listdata['liste_id'],
-		'LISTE_NAME'          => $listdata['liste_name'],
+		'LISTE_NAME'          => wan_htmlspecialchars($listdata['liste_name']),
 		'LISTE_PUBLIC'        => ( $listdata['liste_public'] ) ? $lang['Yes'] : $lang['No'],
 		'AUTH_FORMAT'         => $l_format,
 		'SENDER_EMAIL'        => $listdata['sender_email'],
