@@ -251,7 +251,7 @@ $supported_lang = array(
 
 $supported_db = array(
 	'mysql' => array(
-		'Name'         => 'MySQL &#8805; 4.1, 5.x',
+		'Name'         => 'MySQL &#8805; 5.0.7',
 		'prefixe_file' => 'mysql',
 		'extension'    => (extension_loaded('mysql') || extension_loaded('mysqli'))
 	),

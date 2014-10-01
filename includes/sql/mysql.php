@@ -209,11 +209,10 @@ class Wadb_mysql {
 	 */
 	function encoding($encoding = null)
 	{
-		$res = $this->query("SHOW VARIABLES LIKE 'character_set_client'");
-		$curEncoding = $res->column('Value');
+		$curEncoding = mysql_client_encoding($this->link);
 		
 		if( !is_null($encoding) ) {
-			$this->query("SET NAMES $encoding");
+			mysql_set_charset($encoding, $this->link);
 		}
 		
 		return $curEncoding;
