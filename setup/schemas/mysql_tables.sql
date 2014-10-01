@@ -185,5 +185,5 @@ CREATE TABLE wa_session (
 	session_ip    CHAR(8)  NOT NULL DEFAULT '',
 	session_liste SMALLINT NOT NULL DEFAULT 0,
 	CONSTRAINT wa_session_pk PRIMARY KEY (session_id)
-) ENGINE=HEAP;
+) ENGINE=MEMORY;
 
