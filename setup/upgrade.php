@@ -511,6 +511,11 @@ if( $start )
 		// (2.3-beta1 pour SQLite 2; 2.3-beta2 pour SQLite 3)
 		//
 		
+		//
+		// La contrainte d'unicité sur abo_email peut avoir été perdue en cas
+		// de bug lors de l'importation via l'outil proposé par Wanewsletter.
+		// On essaie de recréer cette contrainte d'unicité.
+		//
 		if( $old_config['db_version'] < 7 )
 		{
 			//
@@ -533,6 +538,11 @@ if( $start )
 			}
 		}
 		
+		//
+		// Passage de toutes les colonnes stockant une adresse email en VARCHAR(254)
+		// - On uniformise les tailles de colonne pour ce type de données
+		// - le protocole SMTP nécessite une longueur max de 254 octets des adresses email
+		//
 		if( $old_config['db_version'] < 8 )
 		{
 			if( $db->engine == 'postgres' )
@@ -594,6 +604,10 @@ if( $start )
 			}
 		}
 		
+		//
+		// Passage des colonnes abo_pwd et admin_pwd en VARCHAR(255) pour pouvoir
+		// stocker les hashages renvoyés par phpass
+		//
 		if( $old_config['db_version'] < 9 )
 		{
 			if( $db->engine == 'postgres' )
@@ -616,6 +630,22 @@ if( $start )
 					MODIFY COLUMN abo_pwd VARCHAR(255) NOT NULL DEFAULT ''";
 				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
 					MODIFY COLUMN admin_pwd VARCHAR(255) NOT NULL DEFAULT ''";
+			}
+		}
+		
+		//
+		// Les champs TEXT sur MySQL ont un espace de stockage de 2^16 octets
+		// soit environ 64 Kio. Ça pourrait être un peu léger dans des cas
+		// d'utilisation extrème.
+		// On les passe en MEDIUMTEXT.
+		//
+		if( $old_config['db_version'] < 10 )
+		{
+			if( $db->engine == 'mysql' )
+			{
+				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
+					MODIFY COLUMN log_body_html MEDIUMTEXT,
+					MODIFY COLUMN log_body_text MEDIUMTEXT";
 			}
 		}
 		
