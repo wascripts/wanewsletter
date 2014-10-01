@@ -23,7 +23,7 @@ define('WANEWSLETTER_DB_VERSION', 10);
 //
 // Requirements
 //
-define('WA_PHP_VERSION_REQUIRED', '5.2.3');
+define('WA_PHP_VERSION_REQUIRED', '5.2.4');
 
 //
 // Mode de débugguage du script 
