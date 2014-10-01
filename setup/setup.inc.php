@@ -256,7 +256,7 @@ $supported_db = array(
 		'extension'    => (extension_loaded('mysql') || extension_loaded('mysqli'))
 	),
 	'postgres' => array(
-		'Name'         => 'PostgreSQL &#8805; 7.2, 8.x',
+		'Name'         => 'PostgreSQL &#8805; 8.x, 9.x',
 		'prefixe_file' => 'postgres',
 		'extension'    => extension_loaded('pgsql')
 	),
