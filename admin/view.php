@@ -1591,7 +1591,7 @@ else if( $mode == 'liste' )
 	//
 	$sql = "SELECT MAX(log_date) AS last_log 
 		FROM " . LOG_TABLE . " 
-		WHERE log_status = " . STATUS_SENDED . "
+		WHERE log_status = " . STATUS_SENT . "
 			AND liste_id = " . $listdata['liste_id'];
 	if( !($result = $db->query($sql)) )
 	{
@@ -1849,7 +1849,7 @@ else if( $mode == 'log' )
 	
 	$sql = "SELECT COUNT(log_id) AS total_logs 
 		FROM " . LOG_TABLE . " 
-		WHERE log_status = " . STATUS_SENDED . " 
+		WHERE log_status = " . STATUS_SENT . " 
 			AND liste_id = " . $listdata['liste_id'];
 	if( !($result = $db->query($sql)) )
 	{
@@ -1866,7 +1866,7 @@ else if( $mode == 'log' )
 	{
 		$sql = "SELECT log_id, log_subject, log_date, log_body_text, log_body_html, log_numdest
 			FROM " . LOG_TABLE . "
-			WHERE log_status = " . STATUS_SENDED . "
+			WHERE log_status = " . STATUS_SENT . "
 				AND liste_id = $listdata[liste_id]
 			ORDER BY $sql_type " . $sql_order . "
 			LIMIT $log_per_page OFFSET $start";

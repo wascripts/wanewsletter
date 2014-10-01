@@ -309,7 +309,7 @@ if( $start )
 			
 			$sql = "SELECT COUNT(*) AS numlogs, liste_id
 				FROM " . LOG_TABLE . "
-				WHERE log_status = " . STATUS_SENDED . "
+				WHERE log_status = " . STATUS_SENT . "
 				GROUP BY liste_id";
 			if( !($result = $db->query($sql)) )
 			{
@@ -647,6 +647,17 @@ if( $start )
 					MODIFY COLUMN log_body_html MEDIUMTEXT,
 					MODIFY COLUMN log_body_text MEDIUMTEXT";
 			}
+		}
+		
+		//
+		// Correction d'une horrible faute de conjuguaison sur le nom d'une
+		// entrée de la configuration.
+		//
+		if( $old_config['db_version'] < 11 )
+		{
+			$sql_update[] = "UPDATE " . CONFIG_TABLE . "
+				SET config_name = 'sending_limit'
+				WHERE config_name = 'emails_sended'";
 		}
 		
 		exec_queries($sql_update, true);

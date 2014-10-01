@@ -33,7 +33,7 @@ INSERT INTO wa_config (config_name, config_value) VALUES('ftp_path',       '');
 INSERT INTO wa_config (config_name, config_value) VALUES('ftp_user',       '');
 INSERT INTO wa_config (config_name, config_value) VALUES('ftp_pass',       '');
 INSERT INTO wa_config (config_name, config_value) VALUES('engine_send',    '2');
-INSERT INTO wa_config (config_name, config_value) VALUES('emails_sended',  '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('sending_limit',  '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('use_smtp',       '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('smtp_host',      '');
 INSERT INTO wa_config (config_name, config_value) VALUES('smtp_port',      '25');
@@ -44,7 +44,7 @@ INSERT INTO wa_config (config_name, config_value) VALUES('gd_img_type',    'png'
 INSERT INTO wa_config (config_name, config_value) VALUES('check_email_mx', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('enable_profil_cp', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('mailing_startdate', '0');
-INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '10');
+INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '11');
 
 
 -- 

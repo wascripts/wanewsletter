@@ -409,8 +409,8 @@ $lang['Check_email_note']           = "(Vérifie l'existence du domaine et du com
 $lang['Choice_engine_send']         = "Méthode d'envoi à utiliser";
 $lang['With_engine_bcc']            = "Un envoi avec les destinataires en copie cachée";
 $lang['With_engine_uniq']           = "Un envoi pour chaque abonné";
-$lang['Emails_paquet']              = "Nombre d'emails par flot d'envoi";
-$lang['Emails_paquet_note']         = "Laissez à 0 pour tout envoyer en un flot";
+$lang['Sending_limit']              = "Nombre d'emails par flot d'envoi";
+$lang['Sending_limit_note']         = "Laissez à 0 pour envoyer tous les emails en une fois";
 $lang['Use_smtp']                   = "Utilisation d'un serveur <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">smtp</abbr> pour les envois";
 $lang['Use_smtp_note']              = "Seulement si votre serveur ne dispose d'aucune fonction d'envoi d'emails ou que vous désirez utiliser un serveur SMTP spécifique !";
 $lang['Smtp_server']                = "Adresse du serveur smtp";

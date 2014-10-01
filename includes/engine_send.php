@@ -264,9 +264,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 		
 		$total_abo = $result->column('total');
-		if( $nl_config['emails_sended'] > 0 )
+		if( $nl_config['sending_limit'] > 0 )
 		{
-			$total_abo = min($total_abo, $nl_config['emails_sended']);
+			$total_abo = min($total_abo, $nl_config['sending_limit']);
 		}
 		
 		$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, al.register_key, al.format
@@ -276,9 +276,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 					AND al.send      = 0
 			WHERE a.abo_status = " . ABO_ACTIF;
-		if( $nl_config['emails_sended'] > 0 )
+		if( $nl_config['sending_limit'] > 0 )
 		{
-			$sql .= " LIMIT $nl_config[emails_sended] OFFSET 0";
+			$sql .= " LIMIT $nl_config[sending_limit] OFFSET 0";
 		}
 		
 		if( !($result = $db->query($sql)) )
@@ -572,7 +572,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	unset($tmp_files);
 	
-	$no_send = $sended = 0;
+	$no_sent = $sent = 0;
 	
 	if( !$db->ping() ) {
 		//
@@ -616,11 +616,11 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 	{
 		if( $row['send'] == 1 )
 		{
-			$sended  = $row['num_dest'];
+			$sent  = $row['num_dest'];
 		}
 		else
 		{
-			$no_send = $row['num_dest'];
+			$no_sent = $row['num_dest'];
 		}
 	}
 	$result->free();
@@ -629,9 +629,9 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 	flock($fp, LOCK_UN);
 	fclose($fp);
 	
-	if( $logdata['log_status'] == STATUS_STANDBY && $no_send > 0 )
+	if( $logdata['log_status'] == STATUS_STANDBY && $no_sent > 0 )
 	{
-		$message = sprintf($lang['Message']['Success_send'], $nl_config['emails_sended'], $sended, ($sended + $no_send));
+		$message = sprintf($lang['Message']['Success_send'], $nl_config['sending_limit'], $sent, ($sent + $no_sent));
 		
 		if( !defined('IN_COMMANDLINE') )
 		{
@@ -653,8 +653,8 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 			$db->beginTransaction();
 			
 			$sql = "UPDATE " . LOG_TABLE . "
-				SET log_status = " . STATUS_SENDED . ",
-					log_numdest = $sended
+				SET log_status = " . STATUS_SENT . ",
+					log_numdest = $sent
 				WHERE log_id = " . $logdata['log_id'];
 			if( !$db->query($sql) )
 			{
@@ -679,7 +679,7 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 			
 			$db->commit();
 			
-			$message = sprintf($lang['Message']['Success_send_finish'], $sended);
+			$message = sprintf($lang['Message']['Success_send_finish'], $sent);
 		}
 		else // mode test
 		{

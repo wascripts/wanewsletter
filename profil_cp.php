@@ -492,7 +492,7 @@ switch( $mode )
 			$sql = "SELECT liste_id, log_id, log_subject, log_body_text, log_body_html 
 				FROM " . LOG_TABLE . " 
 				WHERE log_id IN(" . implode(', ', $sql_log_id) . ") 
-					AND log_status = " . STATUS_SENDED;
+					AND log_status = " . STATUS_SENT;
 			if( !($result = $db->query($sql)) )
 			{
 				trigger_error('Impossible de récupérer la liste des archives', ERROR);
@@ -732,7 +732,7 @@ switch( $mode )
 		$sql = "SELECT log_id, liste_id, log_subject, log_date 
 			FROM " . LOG_TABLE . " 
 			WHERE liste_id IN(" . implode(', ', $liste_ids) . ") 
-				AND log_status = " . STATUS_SENDED . " 
+				AND log_status = " . STATUS_SENT . " 
 			ORDER BY log_date DESC";
 		if( !($result = $db->query($sql)) )
 		{

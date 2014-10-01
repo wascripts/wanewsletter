@@ -18,7 +18,7 @@ define('WANEWSLETTER_VERSION', '2.4-beta2');
 // Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
 // le script invite l'utilisateur à lancer la procédure de mise à jour des tables
 //
-define('WANEWSLETTER_DB_VERSION', 10);
+define('WANEWSLETTER_DB_VERSION', 11);
 
 //
 // Requirements
@@ -89,7 +89,7 @@ define('FORMAT_MULTIPLE', 3);
 //
 define('STATUS_WRITING', 0);
 define('STATUS_STANDBY', 1);
-define('STATUS_SENDED',  2);
+define('STATUS_SENT',    2);
 define('STATUS_MODEL',   3);
 
 //

@@ -68,7 +68,7 @@ if( count($liste_ids) > 0 )
 	//
 	$sql = "SELECT MAX(log_date) AS last_log 
 		FROM " . LOG_TABLE . " 
-		WHERE log_status = " . STATUS_SENDED . "
+		WHERE log_status = " . STATUS_SENT . "
 			AND liste_id IN($sql_liste_ids)";
 	if( !($result = $db->query($sql)) )
 	{

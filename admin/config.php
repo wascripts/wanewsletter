@@ -92,7 +92,7 @@ if( isset($_POST['submit']) )
 	}
 	
 	$new_config['ftp_server']    = preg_replace('/^(?:ftp:\/\/)?(.*)$/i', '\\1', $new_config['ftp_server']);
-	$new_config['emails_sended'] = intval($new_config['emails_sended']);
+	$new_config['sending_limit'] = intval($new_config['sending_limit']);
 	
 	if( !($new_config['ftp_port'] = intval($new_config['ftp_port'])) )
 	{
@@ -271,8 +271,8 @@ $output->assign_vars( array(
 	'L_OCTETS'                  => $lang['Octets'],
 	'L_CHECK_EMAIL'             => $lang['Check_email'],
 	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p11">', '</a>')),
-	'L_EMAILS_SENDED'           => $lang['Emails_paquet'],
-	'L_EMAILS_SENDED_NOTE'      => nl2br($lang['Emails_paquet_note']),
+	'L_SENDING_LIMIT'           => $lang['Sending_limit'],
+	'L_SENDING_LIMIT_NOTE'      => nl2br($lang['Sending_limit_note']),
 	'L_USE_SMTP'                => $lang['Use_smtp'],
 	'L_USE_SMTP_NOTE'           => nl2br($lang['Use_smtp_note']),
 	'L_YES'                     => $lang['Yes'],
@@ -300,7 +300,7 @@ $output->assign_vars( array(
 	'MAX_FILESIZE'              => $new_config['max_filesize'],
 	'CHECKED_CHECK_EMAIL_ON'    => ( $new_config['check_email_mx'] ) ? ' checked="checked"' : '',
 	'CHECKED_CHECK_EMAIL_OFF'   => ( !$new_config['check_email_mx'] ) ? ' checked="checked"' : '',
-	'EMAILS_SENDED'             => $new_config['emails_sended'],
+	'SENDING_LIMIT'             => $new_config['sending_limit'],
 	'SMTP_ROW_CLASS'            => ( $new_config['use_smtp'] ) ? '' : 'inactive',
 	'CHECKED_USE_SMTP_ON'       => ( $new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'CHECKED_USE_SMTP_OFF'      => ( !$new_config['use_smtp'] ) ? ' checked="checked"' : '',

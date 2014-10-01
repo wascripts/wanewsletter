@@ -410,8 +410,8 @@ $lang['Check_email_note']           = "(Checks if the domain and associated acco
 $lang['Choice_engine_send']         = "Email send method to use";
 $lang['With_engine_bcc']            = "One email with recipients in hidden copy";
 $lang['With_engine_uniq']           = "One email to each subscriber";
-$lang['Emails_paquet']              = "Number of emails per sent packet";
-$lang['Emails_paquet_note']         = "Leave with 0 to send everything in one packet";
+$lang['Sending_limit']              = "Number of mails sent by process";
+$lang['Sending_limit_note']         = "Leave to 0 to send all mails in one time";
 $lang['Use_smtp']                   = "Use of a <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">smtp</abbr> server to send emails";
 $lang['Use_smtp_note']              = "Use only if your server does not have an email sending function or if you want to use a specific SMTP server!";
 $lang['Smtp_server']                = "smtp server address";

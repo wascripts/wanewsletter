@@ -98,7 +98,7 @@ switch( $mode )
 				Location('envoi.php');
 			}
 			
-			$sql = "SELECT COUNT(send) AS sended
+			$sql = "SELECT COUNT(send) AS sent
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE liste_id = $logdata[liste_id] AND send = 1";
 			if( !($result = $db->query($sql)) )
@@ -106,7 +106,7 @@ switch( $mode )
 				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
 			}
 			
-			$sended = $result->column('sended');
+			$sent = $result->column('sent');
 			
 			//
 			// Suppression du fichier lock correspondant s'il existe
@@ -124,8 +124,8 @@ switch( $mode )
 			$db->beginTransaction();
 			
 			$sql = "UPDATE " . LOG_TABLE . "
-				SET log_status  = " . STATUS_SENDED . ",
-					log_numdest = $sended
+				SET log_status  = " . STATUS_SENT . ",
+					log_numdest = $sent
 				WHERE log_id = " . $logdata['log_id'];
 			if( !$db->query($sql) )
 			{

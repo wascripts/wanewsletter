@@ -168,8 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<!-- END choice_engine_send -->
 		<tr>
-			<td><label for="emails_sended">{L_EMAILS_SENDED}&nbsp;:</label><br /><span class="notice">{L_EMAILS_SENDED_NOTE}</span></td>
-			<td><input type="text" id="emails_sended" name="emails_sended" value="{EMAILS_SENDED}" size="5" maxlength="5" class="number" /></td>
+			<td><label for="sending_limit">{L_SENDING_LIMIT}&nbsp;:</label><br /><span class="notice">{L_SENDING_LIMIT_NOTE}</span></td>
+			<td><input type="text" id="sending_limit" name="sending_limit" value="{SENDING_LIMIT}" size="5" maxlength="5" class="number" /></td>
 		</tr>
 		<tr id="use_smtp_choice" class="{SMTP_ROW_CLASS}">
 			<td><label>{L_USE_SMTP}&nbsp;:{WARNING_SMTP}</label><br /><span class="notice">{L_USE_SMTP_NOTE}</span></td>
