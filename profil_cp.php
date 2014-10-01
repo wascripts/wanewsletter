@@ -674,7 +674,11 @@ switch( $mode )
 				
 				if( $abodata['pseudo'] != '' )
 				{
-					$tags_replace['NAME'] = ( $format == FORMAT_HTML ) ? $abodata['pseudo'] : wan_html_entity_decode($abodata['pseudo']);
+					$tags_replace['NAME'] = $abodata['pseudo'];
+					if( $format == FORMAT_HTML )
+					{
+						$tags_replace['NAME'] = wan_htmlspecialchars($abodata['pseudo']);
+					}
 				}
 				else
 				{

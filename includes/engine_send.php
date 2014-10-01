@@ -467,7 +467,11 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( $row['abo_pseudo'] != '' )
 				{
-					$tags_replace['NAME'] = ( $abo_format == FORMAT_HTML ) ? $row['abo_pseudo'] : wan_html_entity_decode($row['abo_pseudo']);
+					$tags_replace['NAME'] = $row['abo_pseudo'];
+					if( $abo_format == FORMAT_HTML )
+					{
+						$tags_replace['NAME'] = wan_htmlspecialchars($row['abo_pseudo']);
+					}
 				}
 				else
 				{
