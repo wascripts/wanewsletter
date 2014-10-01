@@ -681,7 +681,7 @@ class WadbBackup_mysqli {
 		$contents .= "-- Host     : " . $this->db->host . $this->eol;
 		$contents .= "-- Server   : " . $this->db->serverVersion . $this->eol;
 		$contents .= "-- Database : " . $this->db->dbname . $this->eol;
-		$contents .= '-- Date     : ' . date('d/m/Y H:i:s O') . $this->eol;
+		$contents .= '-- Date     : ' . date(DATE_RFC2822) . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
@@ -705,7 +705,7 @@ class WadbBackup_mysqli {
 		
 		$tables = array();
 		while( $row = $result->fetch() ) {
-			$tables[$row['Name']] = ( isset($row['Engine']) ) ? $row['Engine'] : $row['Type'];
+			$tables[$row['Name']] = $row['Engine'];
 		}
 		
 		return $tables;
@@ -811,4 +811,3 @@ class WadbBackup_mysqli {
 }
 
 }
-?>

@@ -61,12 +61,7 @@ function parseSQL($input, $prefixe = '')
 				if( preg_match('/;\s*$/i', $lines[$i]) ) {
 					$lines[$i] = ( $tmp != '' ) ? rtrim($lines[$i]) : trim($lines[$i]);
 					
-					if( $lines[$i] == 'END;' ) {// cas particulier des CREATE TRIGGER pour Firebird
-						$output[count($output)-1] .= $tmp . '; END';
-					}
-					else {
-						$output[] = $tmp . substr($lines[$i], 0, -1);
-					}
+					$output[] = $tmp . substr($lines[$i], 0, -1);
 					
 					$tmp = '';
 				}
@@ -105,4 +100,3 @@ function parseSQL($input, $prefixe = '')
 }
 
 }
-?>

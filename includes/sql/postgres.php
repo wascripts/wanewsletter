@@ -710,7 +710,7 @@ class WadbBackup_postgres {
 		$contents .= "-- Host     : " . $this->db->host . $this->eol;
 		$contents .= "-- Server   : " . $this->db->serverVersion . $this->eol;
 		$contents .= "-- Database : " . $this->db->dbname . $this->eol;
-		$contents .= '-- Date     : ' . date('d/m/Y H:i:s O') . $this->eol;
+		$contents .= '-- Date     : ' . date(DATE_RFC2822) . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
@@ -1023,4 +1023,3 @@ class WadbBackup_postgres {
 }
 
 }
-?>

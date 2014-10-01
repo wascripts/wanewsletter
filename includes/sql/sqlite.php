@@ -651,7 +651,10 @@ class WadbBackup_sqlite {
 	 */
 	function header($toolname = '')
 	{
-		$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown Host';
+		$host = function_exists('php_uname') ? @php_uname('n') : null;
+		if( empty($host) ) {
+			$host = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'Unknown Host';
+		}
 		
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname SQLite Dump" . $this->eol;
@@ -659,7 +662,7 @@ class WadbBackup_sqlite {
 		$contents .= "-- Host       : " . $host . $this->eol;
 		$contents .= "-- SQLite lib : " . $this->db->libVersion . $this->eol;
 		$contents .= "-- Database   : " . basename($this->db->dbname) . $this->eol;
-		$contents .= '-- Date       : ' . date('d/m/Y H:i:s O') . $this->eol;
+		$contents .= '-- Date       : ' . date(DATE_RFC2822) . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
@@ -795,4 +798,3 @@ class WadbBackup_sqlite {
 }
 
 }
-?>
