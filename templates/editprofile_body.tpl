@@ -30,16 +30,16 @@
 		<!-- BEGIN password -->
 		<tr>
 			<td><label for="current_pass">{password.L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="current_pass" name="current_pass" size="30" maxlength="30" /></td>
+			<td><input type="password" id="current_pass" name="current_pass" size="30" /></td>
 		</tr>
 		<!-- END password -->
 		<tr>
 			<td><label for="new_pass">{L_NEW_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="new_pass" name="new_pass" size="30" maxlength="30" autocomplete="off" /></td>
+			<td><input type="password" id="new_pass" name="new_pass" size="30" autocomplete="off" /></td>
 		</tr>
 		<tr>
 			<td><label for="confirm_pass">{L_CONFIRM_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" maxlength="30" autocomplete="off" /></td>
+			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" autocomplete="off" /></td>
 		</tr>
 	</table>
 	

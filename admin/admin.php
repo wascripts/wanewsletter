@@ -76,10 +76,11 @@ if( $mode == 'adduser' )
 		if( !$error )
 		{
 			$new_pass = generate_key(10);
+			$hasher = new PasswordHash();
 			
 			$sql_data = array();
 			$sql_data['admin_login']      = $new_login;
-			$sql_data['admin_pwd']        = md5($new_pass);
+			$sql_data['admin_pwd']        = $hasher->hash($new_pass);
 			$sql_data['admin_email']      = $new_email;
 			$sql_data['admin_lang']       = $nl_config['language'];
 			$sql_data['admin_dateformat'] = $nl_config['date_format'];
@@ -255,7 +256,10 @@ if( isset($_POST['submit']) )
 	$email_new_subscribe = ( !empty($_POST['email_new_subscribe']) ) ? intval($_POST['email_new_subscribe']) : SUBSCRIBE_NOTIFY_NO;
 	$email_unsubscribe   = ( !empty($_POST['email_unsubscribe']) ) ? intval($_POST['email_unsubscribe']) : UNSUBSCRIBE_NOTIFY_NO;
 	
-	if( $admin_id == $admindata['admin_id'] && $current_pass != '' && md5($current_pass) != $admindata['admin_pwd'] )
+	$hasher = new PasswordHash();
+	
+	if( $admin_id == $admindata['admin_id'] && $current_pass != ''
+		&& !$hasher->check($current_pass, $admindata['admin_pwd']) )
 	{
 		$error = TRUE;
 		$msg_error[] = $lang['Message']['Error_login'];
@@ -269,7 +273,7 @@ if( isset($_POST['submit']) )
 			$error = TRUE;
 			$msg_error[] = $lang['Message']['Alphanum_pass'];
 		}
-		else if( $new_pass != $confirm_pass )
+		else if( $new_pass !== $confirm_pass )
 		{
 			$error = TRUE;
 			$msg_error[] = $lang['Message']['Bad_confirm_pass'];
@@ -296,7 +300,7 @@ if( isset($_POST['submit']) )
 		
 		if( $set_password )
 		{
-			$sql_data['admin_pwd'] = md5($new_pass);
+			$sql_data['admin_pwd'] = $hasher->hash($new_pass);
 		}
 		
 		if( $admindata['admin_level'] == ADMIN && $admin_id != $admindata['admin_id'] && !empty($_POST['admin_level']) )

@@ -24,7 +24,7 @@ CREATE TABLE wa_abo_liste (
 CREATE TABLE wa_abonnes (
 	abo_id     INTEGER      NOT NULL,
 	abo_pseudo VARCHAR(30)  NOT NULL DEFAULT '',
-	abo_pwd    VARCHAR(32)  NOT NULL DEFAULT '',
+	abo_pwd    VARCHAR(255) NOT NULL DEFAULT '',
 	abo_email  VARCHAR(254) NOT NULL DEFAULT '',
 	abo_lang   VARCHAR(30)  NOT NULL DEFAULT '',
 	abo_status INTEGER      NOT NULL DEFAULT 0,
@@ -40,7 +40,7 @@ CREATE INDEX abo_status_idx ON wa_abonnes (abo_status);
 CREATE TABLE wa_admin (
 	admin_id            INTEGER      NOT NULL,
 	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
-	admin_pwd           VARCHAR(32)  NOT NULL DEFAULT '',
+	admin_pwd           VARCHAR(255) NOT NULL DEFAULT '',
 	admin_email         VARCHAR(254) NOT NULL DEFAULT '',
 	admin_lang          VARCHAR(30)  NOT NULL DEFAULT '',
 	admin_dateformat    VARCHAR(20)  NOT NULL DEFAULT '',

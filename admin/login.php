@@ -78,8 +78,10 @@ if( $mode == 'sendpass' )
 				trigger_error('Failed_sending', ERROR);
 			}
 			
+			$hasher = new PasswordHash();
+			
 			$db->query("UPDATE " . ADMIN_TABLE . "
-				SET admin_pwd = '" . md5($new_password) . "'
+				SET admin_pwd = '" . $db->escape($hasher->hash($new_password)) . "'
 				WHERE admin_id = " . $admin_id);
 			
 			$output->displayMessage('IDs_sended');
@@ -114,9 +116,9 @@ else if( isset($_POST['submit']) && !$session->is_logged_in )
 {
 	$login     = ( !empty($_POST['login']) ) ? trim($_POST['login']) : '';
 	$passwd    = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
-	$autologin = ( !empty($_POST['autologin']) ) ? TRUE : FALSE;
+	$autologin = false;// ( !empty($_POST['autologin']) ) ? TRUE : FALSE;
 	
-	$session->login($login, md5($passwd), $autologin);
+	$session->login($login, $passwd, $autologin);
 	
 	if( !$session->is_logged_in )
 	{

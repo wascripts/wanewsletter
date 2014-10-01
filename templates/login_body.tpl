@@ -13,7 +13,7 @@
 		</tr>
 		<tr>
 			<td><label for="passwd">{L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="passwd" name="passwd" maxlength="30" size="25" /></td>
+			<td><input type="password" id="passwd" name="passwd" size="25" /></td>
 		</tr>
 	</table>
 	

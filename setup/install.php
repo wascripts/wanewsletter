@@ -20,8 +20,7 @@ foreach( $vararray as $varname )
 	${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
 }
 
-$confirm_pass = ( $confirm_pass != '' ) ? md5($confirm_pass) : '';
-$language     = ( $language != '' ) ? $language : $default_lang;
+$language = ( $language != '' ) ? $language : $default_lang;
 
 $output->set_filenames( array(
 	'body' => 'install.tpl'
@@ -67,26 +66,13 @@ if( $start )
 	
 	if( defined('NL_INSTALLED') )
 	{
-		$login = false;
-		
-		$sql = "SELECT admin_email, admin_pwd, admin_level 
-			FROM " . ADMIN_TABLE . " 
-			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($admin_login)) . "'";
-		if( $result = $db->query($sql) )
+		if( $data = check_admin($admin_login, $admin_pass) )
 		{
-			if( $row = $result->fetch() )
-			{
-				if( md5($admin_pass) == $row['admin_pwd'] && $row['admin_level'] == ADMIN )
-				{
-					$login        = true;
-					$start        = true;
-					$admin_email  = $row['admin_email'];
-					$confirm_pass = $row['admin_pwd'];
-				}
-			}
+			$start        = true;
+			$admin_email  = $data['admin_email'];
+			$confirm_pass = $admin_pass;
 		}
-		
-		if( !$login )
+		else
 		{
 			$error = true;
 			$msg_error[] = $lang['Message']['Error_login'];
@@ -145,7 +131,7 @@ if( $start )
 			$error = true;
 			$msg_error[] = $lang['Message']['Alphanum_pass'];
 		}
-		else if( md5($admin_pass) != $confirm_pass )
+		else if( $admin_pass !== $confirm_pass )
 		{
 			$error = true;
 			$msg_error[] = $lang['Message']['Bad_confirm_pass'];
@@ -217,9 +203,11 @@ if( $start )
 		//
 		$sql_data = parseSQL(file_get_contents($sql_data), $prefixe);
 		
+		$hasher = new PasswordHash();
+		
 		$sql_data[] = "UPDATE " . ADMIN_TABLE . "
 			SET admin_login = '" . $db->escape($admin_login) . "',
-				admin_pwd   = '" . md5($admin_pass) . "',
+				admin_pwd   = '" . $db->escape($hasher->hash($admin_pass)) . "',
 				admin_email = '" . $db->escape($admin_email) . "',
 				admin_lang  = '$language'
 			WHERE admin_id = 1";

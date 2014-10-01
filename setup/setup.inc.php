@@ -119,6 +119,45 @@ function exec_queries(&$sql_ary, $return_error = false)
 	$sql_ary = array();
 }
 
+function check_admin($login, $passwd)
+{
+	global $db;
+	
+	$sql = "SELECT admin_email, admin_pwd, admin_level 
+		FROM " . ADMIN_TABLE . " 
+		WHERE LOWER(admin_login) = '" . $db->escape(strtolower($login)) . "'
+			AND admin_level = " . ADMIN;
+	if( $result = $db->query($sql) )
+	{
+		if( $row = $result->fetch() )
+		{
+			$login = false;
+			$hasher = new PasswordHash();
+			
+			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
+			if( $row['admin_pwd'][0] != '$' )
+			{
+				if( $row['admin_pwd'] === md5($passwd) )
+				{
+					$login = true;
+				}
+			}
+			// New password hash using phpass
+			else if( $hasher->check($passwd, $row['admin_pwd']) )
+			{
+				$login = true;
+			}
+			
+			if( $login )
+			{
+				return $row;
+			}
+		}
+	}
+	
+	return false;
+}
+
 error_reporting(E_ALL);
 
 require WA_ROOTDIR . '/includes/compat.inc.php';
@@ -126,6 +165,7 @@ require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/template.php';
 require WA_ROOTDIR . '/includes/class.output.php';
+require WA_ROOTDIR . '/includes/class.phpass.php';
 
 check_php_version();
 

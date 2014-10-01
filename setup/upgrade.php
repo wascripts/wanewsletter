@@ -93,13 +93,7 @@ $output->assign_vars( array(
 
 if( $start )
 {
-	$sql = "SELECT COUNT(*)
-		FROM " . ADMIN_TABLE . "
-		WHERE LOWER(admin_login) = '" . $db->escape(strtolower($admin_login)) . "'
-			AND admin_pwd = '" . md5($admin_pass) . "'
-			AND admin_level >= " . ADMIN;
-	$res = $db->query($sql);
-	if( $res->column(0) == 0 )
+	if( !check_admin($admin_login, $admin_pass) )
 	{
 		$error = true;
 		$msg_error[] = $lang['Message']['Error_login'];

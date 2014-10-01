@@ -37,7 +37,7 @@
 		</tr>
 		<tr>
 			<td><label for="admin_pass">{upgrade.L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="admin_pass" name="admin_pass" maxlength="30" size="30" /></td>
+			<td><input type="password" id="admin_pass" name="admin_pass" size="30" /></td>
 		</tr>
 	</table>
 	

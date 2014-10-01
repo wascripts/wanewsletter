@@ -9,12 +9,12 @@
 		</tr>
 		<tr>
 			<td><label for="passwd">{L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="passwd" name="passwd" maxlength="30" size="25" /></td>
+			<td><input type="password" id="passwd" name="passwd" size="25" /></td>
 		</tr>
 		<tr>
 			<td colspan="2">
-				<input type="checkbox" id="autologin" name="autologin" value="1" />
-				<label for="autologin">{L_AUTOLOGIN}</label><br />
+				<!-- input type="checkbox" id="autologin" name="autologin" value="1" />
+				<label for="autologin">{L_AUTOLOGIN}</label><br /  -->
 				<span class="notice"><a href="login.php?mode=sendpass">{L_LOST_PASSWORD}</a></span>
 			</td>
 		</tr>

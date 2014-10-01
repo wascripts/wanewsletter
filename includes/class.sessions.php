@@ -403,8 +403,38 @@ class Session {
 			trigger_error('Impossible d\'obtenir les données sur cet utilisateur', CRITICAL_ERROR);
 		}
 		
-		if( ($admindata = $result->fetch()) && $admindata['admin_pwd'] == $admin_pwd )
+		$login = false;
+		$hasher = new PasswordHash();
+		
+		if( $admindata = $result->fetch() )
 		{
+			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
+			if( $admindata['admin_pwd'][0] != '$' )
+			{
+				if( $admindata['admin_pwd'] === md5($admin_pwd) )
+				{
+					$login = true;
+				}
+			}
+			// New password hash using phpass
+			else if( $hasher->check($admin_pwd, $admindata['admin_pwd']) )
+			{
+				$login = true;
+			}
+		}
+		
+		if( $login )
+		{
+			$admindata['admin_pwd'] = $hasher->hash($admin_pwd);
+			
+			$sql = sprintf("UPDATE %s SET admin_pwd = '%s' WHERE admin_id = %d",
+				ADMIN_TABLE, $db->escape($admindata['admin_pwd']), $admindata['admin_id']);
+			
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour la table administrateur', CRITICAL_ERROR);
+			}
+			
 			return $this->open($admindata, $autologin);
 		}
 		
