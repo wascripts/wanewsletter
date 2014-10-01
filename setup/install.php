@@ -174,7 +174,7 @@ if( $start )
 					}
 				}
 				
-/*				if( !empty($schema['index']) )
+				if( !empty($schema['index']) )
 				{
 					foreach( $schema['index'] as $index )
 					{
@@ -182,7 +182,7 @@ if( $start )
 							str_replace('wa_', $prefixe, $index)
 						);
 					}
-				}*/
+				}
 				
 				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
 					str_replace('wa_', $prefixe, $tablename)

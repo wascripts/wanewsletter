@@ -119,6 +119,57 @@ function exec_queries(&$sql_ary, $return_error = false)
 	$sql_ary = array();
 }
 
+
+/**
+ * SQLite a un support très limité de la commande ALTER TABLE
+ * Impossible de modifier ou supprimer une colonne donnée
+ * On réécrit les tables dont la structure a changé
+ *
+ * @param string $tablename  Nom de la table à recréer
+ */
+function wa_sqlite_recreate_table($tablename)
+{
+	global $db, $prefixe, $sql_create, $sql_schemas;
+	
+	$schema = &$sql_schemas[$tablename];
+	
+	if( !empty($schema['updated']) )
+	{
+		return null;
+	}
+	
+	$schema['updated'] = true;
+	$columns = array();
+	
+	$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
+	while( $row = $result->fetch() )
+	{
+		$columns[] = $row['name'];
+	}
+	
+	$sql_update   = array();
+	
+	if( isset($schema['index']) )
+	{
+		foreach( $schema['index'] as $index )
+		{
+			$sql_update[] = sprintf("DROP INDEX IF EXISTS %s",
+				str_replace('wa_', $prefixe, $index)
+			);
+		}
+	}
+	
+	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
+	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
+	$sql_update[] = sprintf('INSERT INTO %1$s (%2$s) SELECT %2$s FROM %1$s_tmp;',
+		$tablename,
+		implode(',', $columns)
+	);
+	$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
+	
+	exec_queries($sql_update, true);
+}
+
 function check_admin($login, $passwd)
 {
 	global $db;

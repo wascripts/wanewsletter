@@ -552,10 +552,7 @@ if( $start )
 			{
 				foreach( array(ABONNES_TABLE, ADMIN_TABLE, BANLIST_TABLE, LISTE_TABLE) as $tablename )
 				{
-					$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
-					$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
-					$sql_update[] = sprintf('INSERT INTO %1$s SELECT * FROM %1$s_tmp;', $tablename);
-					$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
+					wa_sqlite_recreate_table($tablename);
 				}
 			}
 			else
@@ -594,6 +591,31 @@ if( $start )
 					$db->escape($name),
 					$db->escape($value)
 				));
+			}
+		}
+		
+		if( $old_config['db_version'] < 9 )
+		{
+			if( $db->engine == 'postgres' )
+			{
+				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
+					ALTER COLUMN abo_pwd TYPE VARCHAR(255)";
+				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
+					ALTER COLUMN admin_pwd TYPE VARCHAR(255)";
+			}
+			else if( $db->engine == 'sqlite' )
+			{
+				foreach( array(ABONNES_TABLE, ADMIN_TABLE) as $tablename )
+				{
+					wa_sqlite_recreate_table($tablename);
+				}
+			}
+			else
+			{
+				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
+					MODIFY COLUMN abo_pwd VARCHAR(255) NOT NULL DEFAULT ''";
+				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
+					MODIFY COLUMN admin_pwd VARCHAR(255) NOT NULL DEFAULT ''";
 			}
 		}
 		
