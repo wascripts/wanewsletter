@@ -285,6 +285,7 @@ switch( $mode )
 		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;'>";
 		
 		wan_print_row('Version Wanewsletter', WANEWSLETTER_VERSION);
+		wan_print_row(' - db_version',     $nl_config['db_version']);
 		wan_print_row(' - session_length', $nl_config['session_length']);
 		wan_print_row(' - language',       $nl_config['language']);
 		wan_print_row(' - Upload dir',     wan_subdir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
@@ -306,16 +307,24 @@ switch( $mode )
 		
 		if( extension_loaded('gd') ) {
 			$tmp = gd_info();
-			$str = 'oui - Version ' . $tmp['GD Version'] . ' - Format utilisé : '.$nl_config['gd_img_type'];
+			$str = sprintf('oui - Version %s - Format %s', $tmp['GD Version'], $nl_config['gd_img_type']);
 		}
 		else {
 			$str = 'non';
 		}
 		wan_print_row(' - Extension GD', $str);
-		wan_print_row(' - Extension Iconv', extension_loaded('iconv') ? 'oui' : 'non');
+		wan_print_row(' - Extension Iconv',
+			extension_loaded('iconv') ?
+				sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
+		);
 		wan_print_row(' - Extension Mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
-		wan_print_row(' - Extension OpenSSL', extension_loaded('openssl') ? 'oui' : 'non');
-		wan_print_row(' - Extension PCRE', extension_loaded('pcre') ? 'oui' : 'non');// TODO : Fix! Obsolète à partir de PHP >= 5.3.0
+		wan_print_row(' - Extension OpenSSL',
+			extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
+		);
+		// TODO : Fix! Le module PCRE est toujours actif à partir de PHP 5.3
+		wan_print_row(' - Extension PCRE',
+			extension_loaded('pcre') ? sprintf('oui - Version %s', PCRE_VERSION) : 'non'
+		);
 		wan_print_row(' - Extension SimpleXML', extension_loaded('simplexml') ? 'oui' : 'non');
 		wan_print_row(' - Extension XML', extension_loaded('xml') ? 'oui' : 'non');
 		wan_print_row(' - Extension Zip', extension_loaded('zip') ? 'oui' : 'non');
@@ -331,6 +340,7 @@ switch( $mode )
 		wan_print_row(' - memory_limit', config_value('memory_limit'));
 		wan_print_row(' - mail.add_x_header', config_value('mail.add_x_header'));
 		wan_print_row(' - mail.force_extra_parameters', config_value('mail.force_extra_parameters'));
+		wan_print_row(' - open_basedir',  config_value('open_basedir'));
 		wan_print_row(' - sendmail_from', config_value('sendmail_from'));
 		wan_print_row(' - sendmail_path', config_value('sendmail_path'));
 		wan_print_row(' - SMTP',          config_value('SMTP'));
