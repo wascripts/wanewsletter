@@ -317,6 +317,7 @@ switch( $mode )
 			extension_loaded('iconv') ?
 				sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
 		);
+		wan_print_row(' - Extension Mcrypt',  extension_loaded('mcrypt') ? 'oui' : 'non');
 		wan_print_row(' - Extension Mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
 		wan_print_row(' - Extension OpenSSL',
 			extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
