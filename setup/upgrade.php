@@ -62,8 +62,8 @@ if( !isset($old_config['db_version']) )
 	// On incrémente manuellement db_version en fonction de chaque version ayant
 	// apporté des changements dans les tables de données du script.
 	//
-	$old_config['db_version'] = 0;
-	$versions = array('2.2-beta2', '2.2-rc2', '2.2-rc2b', '2.2-rc3', '2.2.12', '2.3-beta3', '2.4-beta1');
+	$old_config['db_version'] = 1;
+	$versions = array('2.2-beta2', '2.2-rc2', '2.2-rc2b', '2.2-rc3', '2.2.12', '2.3-beta3');
 	
 	foreach( $versions as $version )
 	{
@@ -542,6 +542,7 @@ if( $start )
 		// Passage de toutes les colonnes stockant une adresse email en VARCHAR(254)
 		// - On uniformise les tailles de colonne pour ce type de données
 		// - le protocole SMTP nécessite une longueur max de 254 octets des adresses email
+		// - Nouveau format de table de configuration
 		//
 		if( $old_config['db_version'] < 8 )
 		{
@@ -589,11 +590,11 @@ if( $start )
 			// On remet en place la configuration actuelle du script
 			//
 			$new_config = wa_get_config();
-			$new_config = array_intersect_key($old_config, $new_config);
-			wa_update_config($new_config);
-			$old_config = array_diff_key($old_config, $new_config);
+			wa_update_config(array_intersect_key($old_config, $new_config));
+			$ext_config = array_diff_key($old_config, $new_config);
+			$old_config = array_merge($new_config, $old_config);
 			
-			foreach( $old_config as $name => $value )
+			foreach( $ext_config as $name => $value )
 			{
 				$db->query(sprintf(
 					"INSERT INTO %s (config_name, config_value) VALUES('%s', '%s')",
@@ -655,9 +656,20 @@ if( $start )
 		//
 		if( $old_config['db_version'] < 11 )
 		{
-			$sql_update[] = "UPDATE " . CONFIG_TABLE . "
-				SET config_name = 'sending_limit'
-				WHERE config_name = 'emails_sended'";
+			if( isset($old_config['sending_limit']) )// Table de configuration recréée dans l'update 8
+			{
+				$sql_update[] = "UPDATE " . CONFIG_TABLE . "
+					SET config_value = '$old_config[emails_sended]'
+					WHERE config_name = 'sending_limit'";
+				$sql_update[] = "DELETE FROM " . CONFIG_TABLE . "
+					WHERE config_name = 'emails_sended'";
+			}
+			else
+			{
+				$sql_update[] = "UPDATE " . CONFIG_TABLE . "
+					SET config_name = 'sending_limit'
+					WHERE config_name = 'emails_sended'";
+			}
 		}
 		
 		//
