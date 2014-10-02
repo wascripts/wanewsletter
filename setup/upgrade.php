@@ -694,7 +694,7 @@ if( $start )
 		//
 		// On met à jour le numéro identifiant la version des tables du script
 		//
-		wa_update_config(array('db_version' => WANEWSLETTER_DB_VERSION));
+		wa_update_config('db_version', WANEWSLETTER_DB_VERSION);
 		
 		//
 		// Affichage message de résultat

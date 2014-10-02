@@ -75,11 +75,18 @@ function wa_get_config()
 /**
  * Sauvegarde les clés de configuration fournies dans la base de données
  *
- * @param array $config
+ * @param mixed $config  Soit le nom de l'option de configuration à mettre à jour,
+ *                       soit un tableau d'options
+ * @param string $value  Si le premier argument est une chaîne, utilisé comme
+ *                       valeur pour l'option ciblée
  */
-function wa_update_config($config)
+function wa_update_config($config, $value = null)
 {
 	global $db;
+	
+	if( is_string($config) ) {
+		$config = array($config => $value);
+	}
 	
 	foreach( $config as $name => $value ) {
 		$sql = sprintf(
