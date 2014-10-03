@@ -197,12 +197,17 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	color: #FAFAFA;
 }
 
-.block > p {
+.block > p,
+.block > div.message {
 	background-color: #E3E0DD;
 	margin: 1px;
 	padding: 1em;
 	line-height: 1.55;
 	color: black;
+}
+.block > div.message {
+	padding-top: 1px;
+	padding-bottom: 1px;
 }
 
 .block > p.message {
