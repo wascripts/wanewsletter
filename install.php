@@ -13,7 +13,7 @@ define('WA_ROOTDIR', '.');
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 
-function message($message, $l_title = null)
+function message($message)
 {
 	global $lang, $output;
 	
@@ -22,25 +22,9 @@ function message($message, $l_title = null)
 		$message = $lang['Message'][$message];
 	}
 	
-	$output->send_headers();
-	
-	$output->set_filenames( array(
-		'body' => 'result.tpl'
-	));
-	
-	if( is_null($l_title) )
-	{
-		$l_title = defined('NL_INSTALLED') ? $lang['Title']['reinstall'] : $lang['Title']['install'];
-	}
-	
-	$output->assign_vars(array(
-		'PAGE_TITLE'   => $l_title,
-		'CONTENT_LANG' => $lang['CONTENT_LANG'],
-		'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-		'NEW_VERSION'  => WANEWSLETTER_VERSION,
-		'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : '',
-		'L_TITLE'      => $lang['Title']['info'],
-		'MSG_RESULT'   => nl2br($message)
+	$output->assign_block_vars('result', array(
+		'L_TITLE'    => $lang['Result_install'],
+		'MSG_RESULT' => nl2br($message)
 	));
 	
 	$output->pparse('body');
@@ -134,10 +118,6 @@ $supported_lang = array(
 
 $language = ( $language != '' ) ? $language : $supported_lang[$lang['CONTENT_LANG']];
 
-$output->set_filenames( array(
-	'body' => 'install.tpl'
-));
-
 $start = isset($_POST['start']);
 
 if( $start && $language != $prev_language )
@@ -163,6 +143,10 @@ if( defined('NL_INSTALLED') )
 }
 
 load_settings();
+
+$output->set_filenames( array(
+	'body' => 'install.tpl'
+));
 
 $output->send_headers();
 
@@ -421,7 +405,7 @@ if( $start )
 			fclose($fw);
 		}
 		
-		message(sprintf($lang['Success_install'], sprintf('<a href="%s">', $login_page), '</a>'), $lang['Result_install']);
+		message(sprintf($lang['Success_install'], sprintf('<a href="%s">', $login_page), '</a>'));
 	}
 }
 

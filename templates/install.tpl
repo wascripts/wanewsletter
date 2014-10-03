@@ -179,6 +179,14 @@
 	</div>
 	<!-- END download_file -->
 	
+	<!-- BEGIN result -->
+	<div class="block">
+	<h2>{result.L_TITLE}</h2>
+	
+	<p>{result.MSG_RESULT}</p>
+	</div>
+	<!-- END result -->
+	
 	<input type="hidden" name="prev_language" value="{S_PREV_LANGUAGE}" />
 </div>
 </form>
