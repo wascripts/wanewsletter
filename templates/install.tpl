@@ -7,7 +7,7 @@
 	
 	<title>{PAGE_TITLE}</title>
 	
-	<link rel="stylesheet" href="../templates/wanewsletter.css" />
+	<link rel="stylesheet" href="templates/wanewsletter.css" />
 	
 	<script>
 	<!--
@@ -55,13 +55,13 @@
 
 <div id="header">
 	<div id="logo">
-		<img src="../images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" />
+		<img src="images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" />
 	</div>
 	
 	<h1>{PAGE_TITLE}</h1>
 </div>
 
-<form method="post" action="./install.php">
+<form method="post" action="install.php">
 <div id="global">
 
 	{ERROR_BOX}

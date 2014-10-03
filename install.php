@@ -9,7 +9,7 @@
 
 define('IN_NEWSLETTER', true);
 define('IN_INSTALL', true);
-define('WA_ROOTDIR', '..');
+define('WA_ROOTDIR', '.');
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 
@@ -443,7 +443,7 @@ if( !defined('NL_INSTALLED') )
 	
 	if( $urlscript == '' )
 	{
-		$urlscript = preg_replace('/^(.*?)\/setup\/?$/i', '\\1/', dirname(server_info('PHP_SELF')));
+		$urlscript = dirname(server_info('PHP_SELF')).'/';
 	}
 	
 	$l_explain = nl2br(sprintf(

@@ -69,7 +69,7 @@ if( !defined('IN_INSTALL') && !defined('NL_INSTALLED') )
 		$header_location = 'Location: ';
 	}
 	
-	header($header_location . sprintf('%s/setup/install.php', WA_ROOTDIR));
+	header($header_location . sprintf('%s/install.php', WA_ROOTDIR));
 	exit;
 }
 
