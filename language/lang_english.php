@@ -651,14 +651,13 @@ $lang['Next_month']                 = "Next month";
 // Installation du script
 //
 $lang['Welcome_in_install']         = "Welcome to Wanewsletter's install script.\nBefore continuing the installation, please read the %sreadme%s file, it contains important instructions to make the installation work properly.\nPlease read the %slicense agreement of Wanewsletter%s before continuing. A copy of this license is readable at %sphpcodeur.net/wascripts/gpl%s";
-$lang['Welcome_in_upgrade']         = "Welcome to Wanewsletter's upgrade script to version <strong>%s</strong>.\n For security reasons, it is <strong>strongly advisable</strong> to make a backup of the script's tables before proceeding with the upgrade.";
+$lang['Welcome_in_upgrade']         = "Welcome to Wanewsletter's upgrade script to version <strong>%s</strong>.\n For security reasons, it is <strong>strongly advisable</strong> to make a backup of the script's tables before proceeding with the upgrade.\nOnce you are ready, launch the upgrade with the button below.";
 $lang['Warning_reinstall']          = "<b>Caution!</b> Wanewsletter seems to be already installed. \nIf you wish to reinstall the script, enter your admin login and password. \nAttention, all of your data will be lost if you make a reinstallation of the script. \n if you wish to do an upgrade, use the script upgrade.php";
 $lang['Start_install']              = "Launch install";
 $lang['Start_upgrade']              = "Launch upgrade";
 $lang['Result_install']             = "Install result";
 $lang['Result_upgrade']             = "upgrade result";
 $lang['PHP_version_error']          = "PHP version is <strong>%s</strong>, however, Wanewsletter requires <strong>PHP %s or higher</strong>";
-$lang['Not_installed']              = "No version of Wanewsletter seems to be present,  the configuration file is empty or is not on the server";
 $lang['mssql_support_end']          = "Sorry but the support for SQL Server has been removed in Wanewsletter 2.3";
 $lang['No_db_support']              = "Sorry but Wanewsletter %s requires a MySQL, PostgreSQL or SQLite database";
 $lang['Connect_db_error']           = "Unable to connect to database (%s)";
@@ -666,8 +665,9 @@ $lang['sqldir_perms_problem']       = "To use Wanewsletter with a SQLite databas
 $lang['DB_type_undefined']          = "The database type isn't defined!";
 
 $lang['Success_install']            = "The installation was succesfully completed.\nYou can now go to the script %sadministration%s";
-$lang['Success_upgrade']            = "The upgrade was succesfully completed.\nYou can now go to the script %sadministration%s";
-$lang['Success_without_config']     = "The installation was succesfully completed, but the configuration file could not be created.\nYou can dowload the file and upload it in the <samp>includes/</samp> directory.\nYou can now access to %sadministration%s.";
+$lang['Success_upgrade']            = "The upgrade was succesfully completed.";
+$lang['Success_install_no_config']  = "The installation was succesfully completed, but the configuration file could not be created.\nYou can dowload the file and upload it in the <samp>includes/</samp> directory.\nYou can now access to %sadministration%s.";
+$lang['Success_upgrade_no_config']  = "The upgrade was succesfully completed, but the configuration file needs to be refreshed with the following content:";
 $lang['Error_in_install']           = "Errors occurred during the installation.\n\nError is : %s\nQuery is : %s";
 $lang['Error_in_upgrade']           = "Errors occurred during the upgrade.\n\nError is : %s\nQuery is : %s";
 $lang['Upgrade_not_required']       = "No upgrade is required for your current version of Wanewsletter";

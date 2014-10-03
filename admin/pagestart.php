@@ -44,22 +44,39 @@ if( !defined('IN_LOGIN') )
 		Location('login.php' . $redirect);
 	}
 	
-	$auth = new Auth();
-	
-	//
-	// Si la liste en session n'existe pas, on met à jour la session
-	//
-	if( !isset($auth->listdata[$admindata['session_liste']]) )
+	if( !defined('IN_UPGRADE') )
 	{
-		$admindata['session_liste'] = 0;
-		
-		$sql = "UPDATE " . SESSIONS_TABLE . "
-			SET session_liste = 0 
-			WHERE session_id = '" . $session->session_id . "' 
-				AND admin_id = " . $admindata['admin_id'];
-		if( !$db->query($sql) )
+		//
+		// On vérifie si les tables du script sont bien à jour
+		//
+		if( !check_db_version(@$nl_config['db_version']) )
 		{
-			trigger_error('Impossible de mettre à jour le session_liste', ERROR);
+			$output->addLine($lang['Need_upgrade_db']);
+			$output->addLine($lang['Need_upgrade_db_link'], WA_ROOTDIR.'/admin/upgrade.php');
+			$output->displayMessage();
+		}
+		
+		$auth = new Auth();
+		
+		//
+		// Si la liste en session n'existe pas, on met à jour la session
+		//
+		if( !isset($auth->listdata[$admindata['session_liste']]) )
+		{
+			$admindata['session_liste'] = 0;
+			
+			$sql = sprintf("UPDATE %s
+				SET session_liste = 0 
+				WHERE session_id = '%s' 
+					AND admin_id = %d",
+				SESSIONS_TABLE,
+				$session->session_id,
+				$admindata['admin_id']
+			);
+			if( !$db->query($sql) )
+			{
+				trigger_error('Impossible de mettre à jour le session_liste', ERROR);
+			}
 		}
 	}
 	

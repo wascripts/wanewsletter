@@ -258,4 +258,79 @@ de données pour connaître les jeux de caractères utilisables).</p>");
 	return $db;
 }
 
+/**
+ * Exécute une ou plusieurs requètes SQL sur la base de données
+ *
+ * @param mixed $queries  Une ou plusieurs requètes SQL à exécuter
+ */
+function exec_queries(&$queries)
+{
+	global $db;
+	
+	if( !is_array($queries) )
+	{
+		$queries = array($queries);
+	}
+	
+	foreach( $queries as $query )
+	{
+		if( !empty($query) && !$db->query($query) )
+		{
+			trigger_error("Erreur lors de l'execution de la requète SQL", E_USER_ERROR);
+		}
+	}
+	
+	$queries = array();
+}
+
+/**
+ * SQLite a un support très limité de la commande ALTER TABLE
+ * Impossible de modifier ou supprimer une colonne donnée
+ * On réécrit les tables dont la structure a changé
+ *
+ * @param string $tablename  Nom de la table à recréer
+ */
+function wa_sqlite_recreate_table($tablename)
+{
+	global $db, $prefixe, $sql_create, $sql_schemas;
+	
+	$schema = &$sql_schemas[$tablename];
+	
+	if( !empty($schema['updated']) )
+	{
+		return null;
+	}
+	
+	$schema['updated'] = true;
+	$columns = array();
+	
+	$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
+	while( $row = $result->fetch() )
+	{
+		$columns[] = $row['name'];
+	}
+	
+	$sql_update   = array();
+	
+	if( isset($schema['index']) )
+	{
+		foreach( $schema['index'] as $index )
+		{
+			$sql_update[] = sprintf("DROP INDEX IF EXISTS %s",
+				str_replace('wa_', $prefixe, $index)
+			);
+		}
+	}
+	
+	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
+	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
+	$sql_update[] = sprintf('INSERT INTO %1$s (%2$s) SELECT %2$s FROM %1$s_tmp;',
+		$tablename,
+		implode(',', $columns)
+	);
+	$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
+	
+	exec_queries($sql_update);
+}
+
 }

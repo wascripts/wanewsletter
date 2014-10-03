@@ -225,9 +225,7 @@ class Session {
 			//
 			// Récupération des infos sur la session et l'utilisateur 
 			//
-			$sql = "SELECT s.session_id, s.session_start, s.session_time, s.session_ip, s.session_liste,
-					a.admin_id, a.admin_login, a.admin_pwd, a.admin_email, a.admin_lang, a.admin_dateformat,
-					a.admin_level, a.email_new_subscribe, a.email_unsubscribe
+			$sql = "SELECT s.*, a.*
 				FROM " . SESSIONS_TABLE . " AS s
 					INNER JOIN " . ADMIN_TABLE . " AS a ON a.admin_id = s.admin_id
 				WHERE s.session_id = '{$this->session_id}'
@@ -384,9 +382,7 @@ class Session {
 	{
 		global $db;
 		
-		$sql = 'SELECT s.session_id, s.session_start, s.session_time, s.session_ip, s.session_liste,
-					a.admin_id, a.admin_login, a.admin_pwd, a.admin_email, a.admin_lang, a.admin_dateformat,
-					a.admin_level, a.email_new_subscribe, a.email_unsubscribe
+		$sql = 'SELECT s.*, a.*
 			FROM ' . ADMIN_TABLE . ' AS a
 			LEFT JOIN ' . SESSIONS_TABLE . ' AS s ON s.admin_id = a.admin_id WHERE ';
 		if( is_numeric($admin_mixed) )

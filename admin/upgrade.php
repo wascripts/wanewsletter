@@ -7,44 +7,28 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+define('IN_NEWSLETTER', true);
 define('IN_UPGRADE', true);
 
-require './setup.inc.php';
+require './pagestart.php';
 
-$admin_login = ( !empty($_POST['admin_login']) ) ? trim($_POST['admin_login']) : '';
-$admin_pass  = ( !empty($_POST['admin_pass']) ) ? trim($_POST['admin_pass']) : '';
-
-if( !defined('NL_INSTALLED') )
+if( $admindata['admin_level'] != ADMIN )
 {
-	plain_error("Wanewsletter ne semble pas installé");
-}
-
-$db = WaDatabase($dsn);
-
-if( !$db->isConnected() )
-{
-	plain_error(sprintf($lang['Connect_db_error'], $db->error));
-}
-
-//
-// Récupération de la configuration
-//
-$old_config = wa_get_config();
-
-if( file_exists(WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php') )
-{
-	require WA_ROOTDIR . '/language/lang_' . $old_config['language'] . '.php';
+	$output->redirect('./index.php', 6);
+	$output->addLine($lang['Message']['Not_authorized']);
+	$output->addLine($lang['Click_return_index'], './index.php');
+	$output->displayMessage();
 }
 
 //
 // Compatibilité avec Wanewsletter < 2.4-beta2
 //
-if( !isset($old_config['db_version']) )
+if( !isset($nl_config['db_version']) )
 {
 	// Versions <= 2.2.13
 	if( !defined('WA_VERSION') )
 	{
-		$currentVersion = strtolower($old_config['version']);
+		$currentVersion = strtolower($nl_config['version']);
 	}
 	// Versions <= 2.4-beta1
 	else
@@ -55,52 +39,31 @@ if( !isset($old_config['db_version']) )
 	// Les versions des branches 2.0 et 2.1 ne sont plus prises en charge
 	if( !version_compare($currentVersion, '2.2-beta', '>=' ) )
 	{
-		message($lang['Unsupported_version']);
+		$output->displayMessage($lang['Unsupported_version']);
 	}
 	
 	//
 	// On incrémente manuellement db_version en fonction de chaque version ayant
 	// apporté des changements dans les tables de données du script.
 	//
-	$old_config['db_version'] = 1;
+	$nl_config['db_version'] = 1;
 	$versions = array('2.2-beta2', '2.2-rc2', '2.2-rc2b', '2.2-rc3', '2.2.12', '2.3-beta3');
 	
 	foreach( $versions as $version )
 	{
-		$old_config['db_version'] += (int)version_compare($currentVersion, $version, '>');
+		$nl_config['db_version'] += (int)version_compare($currentVersion, $version, '>');
 	}
 }
 
-if( check_db_version($old_config['db_version']) )
+if( check_db_version($nl_config['db_version']) )
 {
-	message($lang['Upgrade_not_required']);
+	$output->displayMessage($lang['Upgrade_not_required']);
 }
 
-$output->set_filenames( array(
-	'body' => 'upgrade.tpl'
-));
-
-$output->send_headers();
-
-$output->assign_vars( array(
-	'PAGE_TITLE'   => $lang['Title']['upgrade'],
-	'CONTENT_LANG' => $lang['CONTENT_LANG'],
-	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-	'CHARSET'      => $lang['CHARSET'],
-	'NEW_VERSION'  => WANEWSLETTER_VERSION,
-	'TRANSLATE'    => ( $lang['TRANSLATE'] != '' ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
-));
-
-if( $start )
+if( isset($_POST['start']) )
 {
-	if( !check_admin($admin_login, $admin_pass) )
-	{
-		$error = true;
-		$msg_error[] = $lang['Message']['Error_login'];
-	}
-	
-	$sql_create = SCHEMAS_DIR . '/' . $supported_db[$infos['engine']]['prefixe_file'] . '_tables.sql';
-	$sql_data   = SCHEMAS_DIR . '/data.sql';
+	$sql_create = WA_ROOTDIR . '/setup/schemas/' . $db->engine . '_tables.sql';
+	$sql_data   = WA_ROOTDIR . '/setup/schemas/data.sql';
 	
 	if( !is_readable($sql_create) || !is_readable($sql_data) )
 	{
@@ -115,6 +78,8 @@ if( $start )
 		// On allonge le temps maximum d'execution du script.
 		//
 		@set_time_limit(1200);
+		
+		require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 		
 		$sql_create = parseSQL(file_get_contents($sql_create), $prefixe);
 		$sql_data   = parseSQL(file_get_contents($sql_data), $prefixe);
@@ -176,7 +141,7 @@ if( $start )
 			HAVING COUNT(abo_email) > 1";
 		if( !($result = $db->query($sql)) )
 		{
-			sql_error();
+			trigger_error('Impossible de récupérer la liste des adresses emails', E_USER_ERROR);
 		}
 		
 		if( $row = $result->fetch() )
@@ -189,14 +154,15 @@ if( $start )
 			}
 			while( $row = $result->fetch() );
 			
-			message("Des adresses email sont présentes en plusieurs exemplaires dans la table " . ABONNES_TABLE . ", la mise à jour ne peut continuer.
+			$output->displayMessage("Des adresses email sont présentes en plusieurs
+			exemplaires dans la table " . ABONNES_TABLE . ", la mise à jour ne peut continuer.
 			Supprimez les doublons en cause puis relancez la mise à jour.
 			Adresses email présentes en plusieurs exemplaires : " . implode(', ', $emails));
 		}
 		
 		$sql_update = array();
 		
-		if( $old_config['db_version'] < 2 )
+		if( $nl_config['db_version'] < 2 )
 		{
 			if( $db->engine == 'postgres' )
 			{
@@ -234,7 +200,7 @@ if( $start )
 		// Le nom de la vrai release candidate 2 est donc 2.2-rc2b pour éviter des problèmes lors des mises
 		// à jour par les gens qui ont téléchargé le package les dix premiers jours.
 		//
-		if( $old_config['db_version'] < 3 )
+		if( $nl_config['db_version'] < 3 )
 		{
 			//
 			// Suppression des éventuelles entrées orphelines dans les tables abonnes et abo_liste
@@ -243,7 +209,7 @@ if( $start )
 				FROM " . ABONNES_TABLE;
 			if( !($result = $db->query($sql)) )
 			{
-				sql_error();
+				trigger_error('Impossible de récupérer les ID des abonnés', E_USER_ERROR);
 			}
 			
 			$abonnes_id = array();
@@ -257,7 +223,7 @@ if( $start )
 				GROUP BY abo_id";
 			if( !($result = $db->query($sql)) )
 			{
-				sql_error();
+				trigger_error('Impossible de récupérer les ID des abonnés', E_USER_ERROR);
 			}
 			
 			$abo_liste_id = array();
@@ -313,7 +279,7 @@ if( $start )
 				GROUP BY liste_id";
 			if( !($result = $db->query($sql)) )
 			{
-				sql_error();
+				trigger_error('Impossible de récupérer les informations sur les archives', E_USER_ERROR);
 			}
 			
 			while( $row = $result->fetch() )
@@ -329,7 +295,7 @@ if( $start )
 				GROUP BY al.liste_id";
 			if( !($result = $db->query($sql)) )
 			{
-				sql_error();
+				trigger_error('Impossible de récupérer le nombre de destinataires', E_USER_ERROR);
 			}
 			
 			while( $row = $result->fetch() )
@@ -340,7 +306,7 @@ if( $start )
 			}
 		}
 		
-		if( $old_config['db_version'] < 4 )
+		if( $nl_config['db_version'] < 4 )
 		{
 			if( $db->engine == 'postgres' )
 			{
@@ -363,7 +329,7 @@ if( $start )
 				GROUP BY al.liste_id";
 			if( !($result = $db->query($sql)) )
 			{
-				sql_error();
+				trigger_error('Impossible de récupérer les comptes abonnés actifs', E_USER_ERROR);
 			}
 			
 			while( $row = $result->fetch() )
@@ -376,10 +342,10 @@ if( $start )
 				}
 			}
 			
-			$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_lang = '$language'";
+			$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_lang = '$nl_config[language]'";
 		}
 		
-		if( $old_config['db_version'] < 5 )
+		if( $nl_config['db_version'] < 5 )
 		{
 			if( $db->engine == 'mysql' )
 			{
@@ -390,10 +356,10 @@ if( $start )
 			}
 		}
 		
-		if( $old_config['db_version'] < 6 )
+		if( $nl_config['db_version'] < 6 )
 		{
-			unset($old_config['hebergeur']);
-			unset($old_config['version']);
+			unset($nl_config['hebergeur']);
+			unset($nl_config['version']);
 			
 			if( $db->engine == 'postgres' )
 			{
@@ -431,13 +397,13 @@ if( $start )
 				ADD COLUMN register_date INTEGER NOT NULL DEFAULT 0,
 				ADD COLUMN confirmed SMALLINT NOT NULL DEFAULT 0";
 			
-			exec_queries($sql_update, true);
+			exec_queries($sql_update);
 			
 			$sql = "SELECT abo_id, abo_register_key, abo_pwd, abo_register_date, abo_status
 				FROM " . ABONNES_TABLE;
 			if( !($result = $db->query($sql)) )
 			{
-				sql_error();
+				trigger_error('Impossible de récupérer les données sur les abonnés', E_USER_ERROR);
 			}
 			
 			while( $row = $result->fetch() )
@@ -465,7 +431,7 @@ if( $start )
 				WHERE register_key IS NULL";
 			if( !($result = $db->query($sql)) )
 			{
-				sql_error();
+				trigger_error('Impossible de récupérer les abonnés sans register_key', E_USER_ERROR);
 			}
 			
 			while( $row = $result->fetch() )
@@ -516,7 +482,7 @@ if( $start )
 		// de bug lors de l'importation via l'outil proposé par Wanewsletter.
 		// On essaie de recréer cette contrainte d'unicité.
 		//
-		if( $old_config['db_version'] < 7 )
+		if( $nl_config['db_version'] < 7 )
 		{
 			//
 			// En cas de bug lors d'une importation d'emails, les clefs
@@ -544,7 +510,7 @@ if( $start )
 		// - le protocole SMTP nécessite une longueur max de 254 octets des adresses email
 		// - Nouveau format de table de configuration
 		//
-		if( $old_config['db_version'] < 8 )
+		if( $nl_config['db_version'] < 8 )
 		{
 			if( $db->engine == 'postgres' )
 			{
@@ -584,15 +550,15 @@ if( $start )
 			$sql_update   = array_merge($sql_update, $sql_create[CONFIG_TABLE]);
 			$sql_update   = array_merge($sql_update, $sql_data[CONFIG_TABLE]);
 			
-			exec_queries($sql_update, true);
+			exec_queries($sql_update);
 			
 			//
 			// On remet en place la configuration actuelle du script
 			//
 			$new_config = wa_get_config();
-			wa_update_config(array_intersect_key($old_config, $new_config));
-			$ext_config = array_diff_key($old_config, $new_config);
-			$old_config = array_merge($new_config, $old_config);
+			wa_update_config(array_intersect_key($nl_config, $new_config));
+			$ext_config = array_diff_key($nl_config, $new_config);
+			$nl_config = array_merge($new_config, $nl_config);
 			
 			foreach( $ext_config as $name => $value )
 			{
@@ -609,7 +575,7 @@ if( $start )
 		// Passage des colonnes abo_pwd et admin_pwd en VARCHAR(255) pour pouvoir
 		// stocker les hashages renvoyés par phpass
 		//
-		if( $old_config['db_version'] < 9 )
+		if( $nl_config['db_version'] < 9 )
 		{
 			if( $db->engine == 'postgres' )
 			{
@@ -640,7 +606,7 @@ if( $start )
 		// d'utilisation extrème.
 		// On les passe en MEDIUMTEXT.
 		//
-		if( $old_config['db_version'] < 10 )
+		if( $nl_config['db_version'] < 10 )
 		{
 			if( $db->engine == 'mysql' )
 			{
@@ -654,12 +620,12 @@ if( $start )
 		// Correction d'une horrible faute de conjuguaison sur le nom d'une
 		// entrée de la configuration.
 		//
-		if( $old_config['db_version'] < 11 )
+		if( $nl_config['db_version'] < 11 )
 		{
-			if( isset($old_config['sending_limit']) )// Table de configuration recréée dans l'update 8
+			if( isset($nl_config['sending_limit']) )// Table de configuration recréée dans l'update 8
 			{
 				$sql_update[] = "UPDATE " . CONFIG_TABLE . "
-					SET config_value = '$old_config[emails_sended]'
+					SET config_value = '$nl_config[emails_sended]'
 					WHERE config_name = 'sending_limit'";
 				$sql_update[] = "DELETE FROM " . CONFIG_TABLE . "
 					WHERE config_name = 'emails_sended'";
@@ -676,7 +642,7 @@ if( $start )
 		// Les noms de listes de diffusion sont stockés avec des entités html
 		// Suprème bétise (je sais pas ce qui m'a pris :S)
 		//
-		if( $old_config['db_version'] < 12 )
+		if( $nl_config['db_version'] < 12 )
 		{
 			$result = $db->query("SELECT liste_id, liste_name FROM ".LISTE_TABLE);
 			while( $row = $result->fetch() )
@@ -689,7 +655,7 @@ if( $start )
 			}
 		}
 		
-		exec_queries($sql_update, true);
+		exec_queries($sql_update);
 		
 		//
 		// On met à jour le numéro identifiant la version des tables du script
@@ -699,21 +665,60 @@ if( $start )
 		//
 		// Affichage message de résultat
 		//
-		$message = sprintf($lang['Success_upgrade'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>');
-		message($message, $lang['Result_upgrade']);
+		
+		if( defined('UPDATE_CONFIG_FILE') )
+		{
+			$config_file  = '<' . "?php\n";
+			$config_file .= "\n";
+			$config_file .= "//\n";
+			$config_file .= "// Paramètres d'accès à la base de données\n";
+			$config_file .= "// Ne pas modifier ce fichier ! (Do not edit this file)\n";
+			$config_file .= "//\n";
+			$config_file .= "define('NL_INSTALLED', true);\n";
+			$config_file .= "\n";
+			$config_file .= "\$dsn = '$dsn';\n";
+			$config_file .= "\$prefixe = '$prefixe';\n";
+			$config_file .= "\n";
+			
+			$output->page_header();
+			
+			$output->set_filenames( array(
+				'body' => 'result_upgrade_body.tpl'
+			));
+			
+			$output->assign_vars( array(
+				'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
+				'MESSAGE' => $lang['Success_upgrade_no_config']
+			));
+			
+			$output->assign_block_vars('update_config_file', array(
+				'CONTENT' => $config_file
+			));
+			
+			$output->pparse('body');
+			
+			$output->page_footer();
+		}
+		else
+		{
+			$output->displayMessage($lang['Success_upgrade']);
+		}
 	}
 }
 
-$output->assign_block_vars('upgrade', array(
-	'L_EXPLAIN'      => nl2br(sprintf($lang['Welcome_in_upgrade'], WANEWSLETTER_VERSION)),
-	'L_LOGIN'        => $lang['Login'],
-	'L_PASS'         => $lang['Password'],
-	'L_START_BUTTON' => $lang['Start_upgrade']
+$output->page_header();
+
+$output->set_filenames( array(
+	'body' => 'upgrade_body.tpl'
 ));
 
-if( $error )
-{
-	$output->error_box($msg_error);
-}
+$output->assign_vars( array(
+	'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
+	'L_EXPLAIN'       => nl2br(sprintf($lang['Welcome_in_upgrade'], WANEWSLETTER_VERSION)),
+	'L_START_BUTTON'  => $lang['Start_upgrade']
+));
 
 $output->pparse('body');
+
+$output->page_footer();
+

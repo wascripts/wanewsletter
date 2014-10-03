@@ -28,6 +28,8 @@ $simple_header = $error = false;
 $nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = $_php_errors = array();
 $output = null;
 $dsn = $prefixe = $php_errormsg = '';
+// Compatibilité avec wanewsletter < 2.3-beta2
+$dbtype = $dbhost = $dbuser = $dbpassword = $dbname = '';
 
 @include WA_ROOTDIR . '/includes/config.inc.php';
 
@@ -42,9 +44,7 @@ if( !defined('NL_INSTALLED') )
 		$header_location = 'Location: ';
 	}
 	
-	$path = ( file_exists('setup/install.php') ) ? 'setup/install.php' : '../setup/install.php';
-	
-	header($header_location . $path);
+	header($header_location . sprintf('%s/setup/install.php', WA_ROOTDIR));
 	exit;
 }
 
@@ -105,6 +105,34 @@ if( version_compare(PHP_VERSION, '5.4.0', '<') )
 //
 // Intialisation de la connexion à la base de données 
 //
+
+// Compatibilité avec wanewsletter < 2.3-beta2
+if( empty($dsn) )
+{
+	$infos['engine'] = !empty($dbtype) ? $dbtype : 'mysql';
+	$infos['host']   = $dbhost;
+	$infos['user']   = $dbuser;
+	$infos['pass']   = $dbpassword;
+	$infos['dbname'] = $dbname;
+	
+	if( $infos['engine'] == 'mssql' )
+	{
+		exit($lang['mssql_support_end']);
+	}
+	else if( $infos['engine'] == 'postgre' )
+	{
+		$infos['engine'] = 'postgres';
+	}
+	else if( $infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli' )
+	{
+		$infos['engine'] = 'mysql';
+	}
+	
+	$dsn = createDSN($infos);
+	
+	define('UPDATE_CONFIG_FILE', true);
+}
+
 $db = WaDatabase($dsn);
 
 if( !$db->isConnected() )
@@ -148,15 +176,4 @@ if( !is_writable(WA_TMPDIR) )
 	load_settings();
 	$output->displayMessage(sprintf($lang['Message']['Dir_not_writable'],
 		wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
-}
-
-//
-// On vérifie si les tables du script sont bien à jour
-//
-if( !check_db_version(@$nl_config['db_version']) )
-{
-	load_settings();
-	$output->addLine($lang['Need_upgrade_db']);
-	$output->addLine($lang['Need_upgrade_db_link'], WA_ROOTDIR.'/setup/upgrade.php');
-	$output->displayMessage();
 }

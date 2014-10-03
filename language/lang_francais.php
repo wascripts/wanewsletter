@@ -651,14 +651,13 @@ $lang['Next_month']                 = "Mois suivant";
 // Installation du script
 //
 $lang['Welcome_in_install']         = "Bienvenue dans le script d'installation de Wanewsletter.\nAvant de continuer l'installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l'installation.\nAssurez-vous également d'avoir pris connaissance de la %slicence d'utilisation de Wanewsletter%s avant de continuer. Une traduction française <strong>non officielle</strong> est disponible à l'adresse %sphpcodeur.net/wascripts/gpl%s";
-$lang['Welcome_in_upgrade']         = "Bienvenue dans le script de mise à jour vers Wanewsletter <strong>%s</strong>.\n Par mesure de sécurité, il est <strong>fortement conseillé</strong> de faire une sauvegarde des tables du script avant de procéder à la mise à jour.";
+$lang['Welcome_in_upgrade']         = "Bienvenue dans le script de mise à jour vers Wanewsletter <strong>%s</strong>.\n Par mesure de sécurité, il est <strong>fortement conseillé</strong> de faire une sauvegarde des tables de données du script avant de procéder à la mise à jour.\nUne fois que vous êtes prêt, lancez la mise à jour avec le bouton ci-dessous.";
 $lang['Warning_reinstall']          = "<b>Attention !</b> Wanewsletter semble déjà installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d'administrateur. \nAttention, toutes les données de l'installation précédente seront définitivement perdues.\n Si vous souhaitez plutôt effectuer une mise à jour d'une installation existante, utilisez le script upgrade.php";
 $lang['Start_install']              = "Démarrer l'installation";
 $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['Result_install']             = "Résultat de l'installation";
 $lang['Result_upgrade']             = "Résultat de la mise à jour";
 $lang['PHP_version_error']          = "Votre version de PHP est <strong>%s</strong>, cependant, Wanewsletter requiert <strong>PHP %s ou supérieur</strong>";
-$lang['Not_installed']              = "Aucune version de Wanewsletter ne semble présente, le fichier de configuration est vide ou absent du serveur";
 $lang['mssql_support_end']          = "Désolé mais le support de SQL Server a été retiré dans Wanewsletter 2.3";
 $lang['No_db_support']              = "Désolé mais Wanewsletter %s requiert une base de données MySQL, PostgreSQL ou SQLite";
 $lang['Connect_db_error']           = "Impossible de se connecter à la base de données (%s)";
@@ -666,8 +665,9 @@ $lang['sqldir_perms_problem']       = "Pour utiliser Wanewsletter avec une base 
 $lang['DB_type_undefined']          = "Le type de base de données n'est pas défini !";
 
 $lang['Success_install']            = "L'installation s'est bien déroulée.\nVous pouvez maintenant accéder à %sl'administration%s";
-$lang['Success_upgrade']            = "La mise à jour s'est bien déroulée.\nVous pouvez maintenant accéder à %sl'administration%s";
-$lang['Success_without_config']     = "L'installation s'est bien effectuée mais le fichier de configuration n'a pu être créé.\nVous pouvez le télécharger et l'uploader par vos propres moyens sur le serveur dans le répertoire <samp>includes/</samp> du script.\nVous pourrez ensuite accéder à %sl'administration%s.";
+$lang['Success_upgrade']            = "La mise à jour s'est bien déroulée.";
+$lang['Success_install_no_config']  = "L'installation s'est bien effectuée mais le fichier de configuration n'a pu être créé.\nVous pouvez le télécharger et l'uploader par vos propres moyens sur le serveur dans le répertoire <samp>includes/</samp> du script.\nVous pourrez ensuite accéder à %sl'administration%s.";
+$lang['Success_upgrade_no_config']  = "La mise à jour s'est bien déroulée, mais votre fichier de configuration doit être actualisé avec le contenu suivant:";
 $lang['Error_in_install']           = "Une erreur s'est produite durant l'installation.\n\nL'erreur est : %s\nLa requête est : %s";
 $lang['Error_in_upgrade']           = "Une erreur s'est produite durant la mise à jour.\n\nL'erreur est : %s\nLa requête est : %s";
 $lang['Upgrade_not_required']       = "Aucune mise à jour n'est nécessaire pour votre version actuelle de Wanewsletter";
