@@ -43,7 +43,7 @@ if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) // Au cas où le terminal utilise
 	ob_start('convert_output', 1);
 }
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 
 load_settings();
 

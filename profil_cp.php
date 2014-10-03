@@ -10,7 +10,7 @@
 define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR',    '.');
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/class.sessions.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 include WA_ROOTDIR . '/includes/tags.inc.php';

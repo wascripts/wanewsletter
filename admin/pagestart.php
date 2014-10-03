@@ -17,7 +17,7 @@ define('WA_ROOTDIR', '..');
 
 $secure = true;
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/class.sessions.php';
 require WA_ROOTDIR . '/includes/class.auth.php';
 

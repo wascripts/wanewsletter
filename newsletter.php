@@ -29,7 +29,7 @@ if( !defined('WA_ROOTDIR') )
 
 $default_error_reporting = error_reporting(E_ALL);
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 
 if( !empty($language) && validate_lang($language) )

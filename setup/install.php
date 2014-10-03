@@ -11,7 +11,7 @@ define('IN_NEWSLETTER', true);
 define('IN_INSTALL', true);
 define('WA_ROOTDIR', '..');
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 
 function message($message, $l_title = null)
 {

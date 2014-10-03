@@ -24,7 +24,7 @@ exit(0);
 define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR',   '..');
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 
 load_settings();
 

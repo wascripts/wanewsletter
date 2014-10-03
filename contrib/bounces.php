@@ -85,7 +85,7 @@ function process_bounce($deliveryReport)
 define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR',    '..');
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 
 $process = false;
 foreach( $_SERVER['argv'] as $arg ) {
