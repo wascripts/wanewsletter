@@ -4,10 +4,10 @@
 
 
 -- 
--- Création d'un compte administrateur
+-- Création d'un compte administrateur (mot de passe par défaut: admin)
 -- 
 INSERT INTO wa_admin (admin_login, admin_pwd, admin_email, admin_lang, admin_dateformat, admin_level)
-	VALUES('admin', '', 'admin@domaine.com', 'francais', 'd M Y H:i', 2);
+	VALUES('admin', '$P$D6MbHmah9V/JY/9H3.dRGKpCVS65su0', 'admin@domaine.com', 'francais', 'd M Y H:i', 2);
 INSERT INTO wa_auth_admin (admin_id, liste_id, auth_view, auth_edit, auth_del, auth_send, auth_import, auth_export, auth_ban, auth_attach)
 	VALUES (1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
