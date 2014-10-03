@@ -21,11 +21,6 @@ define('WANEWSLETTER_VERSION', '2.4-beta2');
 define('WANEWSLETTER_DB_VERSION', 12);
 
 //
-// Requirements
-//
-define('WA_PHP_VERSION_REQUIRED', '5.2.4');
-
-//
 // Mode de débugguage du script 
 // 
 // 3 - Toutes les erreurs sont affichées à l'écran

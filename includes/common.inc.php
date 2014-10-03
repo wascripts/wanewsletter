@@ -17,6 +17,16 @@ if( isset($_REQUEST['GLOBALS']) || isset($_FILES['GLOBALS']) ) {
 	exit('GLOBALS overwrite attempt detected');
 }
 
+// Check PHP version
+define('WA_PHP_VERSION_REQUIRED', '5.2.4');
+if( !version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=') ) {
+	printf("Your server is running PHP %s, but Wanewsletter requires PHP %s or higher",
+		PHP_VERSION,
+		WA_PHP_VERSION_REQUIRED
+	);
+	exit;
+}
+
 error_reporting(E_ALL);
 
 $starttime = array_sum(explode(' ', microtime()));
@@ -59,7 +69,6 @@ require WA_ROOTDIR . '/includes/wadb_init.php';
 require WA_ROOTDIR . '/includes/class.phpass.php';
 
 load_settings();
-check_php_version();
 
 //
 // Appel du gestionnaire d'erreur 

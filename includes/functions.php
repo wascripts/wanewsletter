@@ -12,18 +12,6 @@ if( !defined('FUNCTIONS_INC') ) {
 define('FUNCTIONS_INC', true);
 
 /**
- * Vérifie la version de PHP en fonction du minimum requis.
- */
-function check_php_version()
-{
-	global $lang;
-	if( !version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=') ) {
-		printf($lang['PHP_version_error'], PHP_VERSION, WA_PHP_VERSION_REQUIRED);
-		exit;
-	}
-}
-
-/**
  * Vérifie que les numéros de version des tables dans le fichier constantes.php
  * et dans la table de configuration du script sont synchro
  *
