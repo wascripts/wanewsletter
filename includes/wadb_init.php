@@ -27,6 +27,21 @@ define('LOG_TABLE',           $prefixe . 'log');
 define('LOG_FILES_TABLE',     $prefixe . 'log_files');
 define('SESSIONS_TABLE',      $prefixe . 'session');
 
+$GLOBALS['supported_db'] = array(
+	'mysql' => array(
+		'Name'         => 'MySQL &#8805; 5.0.7',
+		'extension'    => (extension_loaded('mysql') || extension_loaded('mysqli'))
+	),
+	'postgres' => array(
+		'Name'         => 'PostgreSQL &#8805; 8.x, 9.x',
+		'extension'    => extension_loaded('pgsql')
+	),
+	'sqlite' => array(
+		'Name'         => 'SQLite &#8805; 2.8, 3.x',
+		'extension'    => (class_exists('SQLite3') || extension_loaded('sqlite') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
+	)
+);
+
 $GLOBALS['sql_schemas'] = array(
 	ABO_LISTE_TABLE     => array(
 		'index'    => array('register_key_idx')
@@ -233,8 +248,9 @@ function WaDatabase($dsn)
 	$db = new $dbclass($infos['dbname']);
 	$db->connect($infos, $options);
 	
-	$encoding = $db->encoding();
-	if( $db->engine != 'sqlite' && preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding) ) {
+	if( $db->isConnected() &&  $db->engine != 'sqlite' && ($encoding = $db->encoding())
+		&& preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding) )
+	{
 		/*
 		 * WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
 		 * Si le jeu de caractères de la connexion est multi-octet, on le change

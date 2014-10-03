@@ -16,11 +16,9 @@ define('FUNCTIONS_INC', true);
  */
 function check_php_version()
 {
+	global $lang;
 	if( !version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=') ) {
-		printf("Votre serveur fonctionne avec PHP %s, mais Wanewsletter requiert PHP %s ou plus",
-			PHP_VERSION,
-			WA_PHP_VERSION_REQUIRED
-		);
+		printf($lang['PHP_version_error'], PHP_VERSION, WA_PHP_VERSION_REQUIRED);
 		exit;
 	}
 }
@@ -211,13 +209,34 @@ function load_settings($admindata = array())
 {
 	global $nl_config, $lang, $datetime;
 	
-	if( !defined('IN_COMMANDLINE') )
+	$check_list = array();
+	$supported_lang = array(
+		'fr' => 'francais',
+		'en' => 'english'
+	);
+	$file_pattern = WA_ROOTDIR . '/language/lang_%s.php';
+	
+	$check_list['francais'] = true;
+	
+	if( !empty($nl_config['language']) )
 	{
-		global $output;
+		$check_list[$nl_config['language']] = true;
+	}
+	
+	if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
+	{
+		$accepted_langs = array_map('trim', explode(',', server_info('HTTP_ACCEPT_LANGUAGE')));
 		
-		$template_path = WA_ROOTDIR . '/templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
-		
-		$output = new output($template_path);
+		foreach( $accepted_langs as $langcode )
+		{
+			$langcode = strtolower(substr($langcode, 0, 2));
+			
+			if( isset($supported_lang[$langcode]) )
+			{
+				$check_list[$supported_lang[$langcode]] = true;
+				break;
+			}
+		}
 	}
 	
 	if( !is_array($admindata) )
@@ -227,7 +246,7 @@ function load_settings($admindata = array())
 	
 	if( !empty($admindata['admin_lang']) )
 	{
-		$nl_config['language'] = $admindata['admin_lang'];
+		$check_list[$admindata['admin_lang']] = true;
 	}
 	
 	if( !empty($admindata['admin_dateformat']) )
@@ -235,22 +254,21 @@ function load_settings($admindata = array())
 		$nl_config['date_format'] = $admindata['admin_dateformat'];
 	}
 	
-	$language_path = wa_realpath(WA_ROOTDIR . '/language/lang_' . $nl_config['language'] . '.php');
+	$check_list = array_reverse($check_list);
 	
-	if( !file_exists($language_path) )
+	foreach( $check_list as $language => $bool )
 	{
-		$nl_config['language'] = 'francais';
-		$language_path = wa_realpath(WA_ROOTDIR . '/language/lang_' . $nl_config['language'] . '.php');
-		
-		if( !file_exists($language_path) )
+		if( @is_readable(sprintf($file_pattern, $language)) )
 		{
-			trigger_error('<b>Les fichiers de localisation sont introuvables !</b>', CRITICAL_ERROR);
+			require sprintf($file_pattern, $language);
+			break;
 		}
 	}
 	
-	require $language_path;
-	
-	$lang['CHARSET'] = strtoupper($lang['CHARSET']);
+	if( empty($lang) )
+	{
+		trigger_error('<b>Les fichiers de localisation sont introuvables !</b>', E_USER_ERROR);
+	}
 }
 
 /**

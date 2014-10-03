@@ -28,12 +28,16 @@ $simple_header = $error = false;
 $nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = $_php_errors = array();
 $output = null;
 $dsn = $prefixe = $php_errormsg = '';
+$prefixe = isset($_POST['prefixe']) ? $_POST['prefixe'] : 'wa_';
 // Compatibilité avec wanewsletter < 2.3-beta2
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = '';
 
-@include WA_ROOTDIR . '/includes/config.inc.php';
+if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
+{
+	@include WA_ROOTDIR . '/includes/config.inc.php';
+}
 
-if( !defined('NL_INSTALLED') )
+if( !defined('IN_INSTALL') && !defined('NL_INSTALLED') )
 {
 	if( !empty($_SERVER['SERVER_SOFTWARE']) && preg_match("#Microsoft|WebSTAR|Xitami#i", $_SERVER['SERVER_SOFTWARE']) )
 	{
@@ -54,6 +58,7 @@ require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';
 require WA_ROOTDIR . '/includes/class.phpass.php';
 
+load_settings();
 check_php_version();
 
 //
@@ -77,6 +82,10 @@ else
 {
 	require WA_ROOTDIR . '/includes/template.php';
 	require WA_ROOTDIR . '/includes/class.output.php';
+	
+	$output = new output(sprintf(
+		'%s/templates/%s', WA_ROOTDIR, defined('IN_ADMIN') ? 'admin/' : ''
+	));
 	
 	set_error_handler('wan_web_handler');
 }
@@ -133,32 +142,27 @@ if( empty($dsn) )
 	define('UPDATE_CONFIG_FILE', true);
 }
 
-$db = WaDatabase($dsn);
-
-if( !$db->isConnected() )
+if( !defined('IN_INSTALL') )
 {
-	trigger_error('<b>Impossible de se connecter à la base de données</b>', CRITICAL_ERROR);
-}
-
-//
-// On récupère la configuration du script 
-//
-$nl_config = wa_get_config();
-
-//
-// "Constantes" de classe dans le scope global
-// Pas plus haut car on a besoin d'une instance de Wadb_* et WadbResult_*
-//
-define('SQL_INSERT', $db->SQL_INSERT);
-define('SQL_UPDATE', $db->SQL_UPDATE);
-define('SQL_DELETE', $db->SQL_DELETE);
-
-//
-// Purge 'automatique' des listes (comptes non activés au-delà du temps limite)
-//
-if( !(time() % 10) || !defined('IN_ADMIN') )
-{
-	purge_liste();
+	$db = WaDatabase($dsn);
+	
+	if( !$db->isConnected() )
+	{
+		trigger_error(sprintf($lang['Connect_db_error'], $db->error), E_USER_ERROR);
+	}
+	
+	//
+	// On récupère la configuration du script 
+	//
+	$nl_config = wa_get_config();
+	
+	//
+	// "Constantes" de classe dans le scope global
+	// Pas plus haut car on a besoin d'une instance de Wadb_* et WadbResult_*
+	//
+	define('SQL_INSERT', $db->SQL_INSERT);
+	define('SQL_UPDATE', $db->SQL_UPDATE);
+	define('SQL_DELETE', $db->SQL_DELETE);
 }
 
 //
@@ -171,9 +175,3 @@ define('WA_TMPDIR',    WA_ROOTDIR . '/' . $tmp_name);
 define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
 define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
 
-if( !is_writable(WA_TMPDIR) )
-{
-	load_settings();
-	$output->displayMessage(sprintf($lang['Message']['Dir_not_writable'],
-		wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
-}

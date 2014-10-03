@@ -44,6 +44,14 @@ if( !defined('IN_LOGIN') )
 		Location('login.php' . $redirect);
 	}
 	
+	if( !is_writable(WA_TMPDIR) )
+	{
+		$output->displayMessage(sprintf(
+			$lang['Message']['Dir_not_writable'],
+			wan_htmlspecialchars(wa_realpath(WA_TMPDIR))
+		));
+	}
+	
 	if( !defined('IN_UPGRADE') )
 	{
 		//
@@ -84,4 +92,12 @@ if( !defined('IN_LOGIN') )
 	{
 		$output->displayMessage('Invalid_session');
 	}
+}
+
+//
+// Purge 'automatique' des listes (comptes non activés au-delà du temps limite)
+//
+if( !(time() % 10) )
+{
+	purge_liste();
 }
