@@ -714,7 +714,7 @@ class WadbBackup_sqlite3 {
 	function get_table_structure($tabledata, $drop_option)
 	{
 		$contents  = '-- ' . $this->eol;
-		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= '-- Structure de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		
 		if( $drop_option ) {
