@@ -50,7 +50,7 @@ else
 	{
 		$varname = trim($_GET['use-variable']);
 		
-		if( !preg_match('/^[A-Za-z0-9_.$\\]+$/', $varname) )
+		if( !preg_match('/^[A-Za-z0-9_.$\\\\]+$/', $varname) )
 		{
 			$varname = 'var numSubscribe';
 			echo "console.log('Rejected variable name. Accepted chars are [A-Za-z0-9_.\$\\\\].');\n";
