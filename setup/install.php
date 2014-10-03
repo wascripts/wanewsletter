@@ -88,7 +88,7 @@ if( !isset($supported_db[$infos['engine']]) && defined('NL_INSTALLED') )
 
 if( $infos['engine'] == 'sqlite' && !defined('NL_INSTALLED') )
 {
-	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/includes/sql') . '/wanewsletter.sqlite';
+	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/data/db') . '/wanewsletter.sqlite';
 }
 
 if( !empty($infos['dbname']) )
@@ -253,8 +253,8 @@ if( $start )
 		}
 	}
 	
-	$sql_create = WA_ROOTDIR . '/setup/schemas/' . $infos['engine'] . '_tables.sql';
-	$sql_data   = WA_ROOTDIR . '/setup/schemas/data.sql';
+	$sql_create = WA_ROOTDIR . '/data/schemas/' . $infos['engine'] . '_tables.sql';
+	$sql_data   = WA_ROOTDIR . '/data/schemas/data.sql';
 	
 	if( !is_readable($sql_create) || !is_readable($sql_data) )
 	{

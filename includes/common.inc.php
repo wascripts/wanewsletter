@@ -42,6 +42,17 @@ $prefixe = isset($_POST['prefixe']) ? $_POST['prefixe'] : 'wa_';
 // Compatibilité avec wanewsletter < 2.3-beta2
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = '';
 
+//
+// Réglage des divers répertoires utilisés par le script.
+// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
+// de Wanewsletter.
+// Ces variables sont ensuite utilisées dans constantes.php pour définir les
+// constantes WA_*DIR
+//
+$logs_dir  = '~/data/logs';
+$stats_dir = '~/data/stats';
+$tmp_dir   = '~/data/tmp';
+
 if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
 {
 	@include WA_ROOTDIR . '/includes/config.inc.php';
@@ -173,14 +184,4 @@ if( !defined('IN_INSTALL') )
 	define('SQL_UPDATE', $db->SQL_UPDATE);
 	define('SQL_DELETE', $db->SQL_DELETE);
 }
-
-//
-// Nom du dossier des fichiers temporaires du script
-// Le nom ne doit contenir / ni au début, ni à la fin
-//
-$tmp_name = 'tmp';
-
-define('WA_TMPDIR',    WA_ROOTDIR . '/' . $tmp_name);
-define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
-define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
 

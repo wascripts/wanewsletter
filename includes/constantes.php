@@ -18,7 +18,7 @@ define('WANEWSLETTER_VERSION', '2.4-beta2');
 // Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
 // le script invite l'utilisateur à lancer la procédure de mise à jour des tables
 //
-define('WANEWSLETTER_DB_VERSION', 12);
+define('WANEWSLETTER_DB_VERSION', 13);
 
 //
 // Mode de débugguage du script 
@@ -255,4 +255,14 @@ define('WA_DOWNLOAD_PAGE', 'http://phpcodeur.net/wascripts/wanewsletter/telechar
 define('WA_CHECK_UPDATE_URL', 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version');
 define('WA_CHECK_UPDATE_CACHE', 'wa-check-update.cache');
 define('WA_CHECK_UPDATE_CACHE_TTL', 3600);
+
+//
+// Déclaration des dossiers et fichiers spéciaux utilisés par le script
+//
+define('WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
+define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
+define('WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
+
+define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
+define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
 

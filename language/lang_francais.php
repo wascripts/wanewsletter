@@ -219,7 +219,7 @@ $lang['Message']['File_not_found']          = "Ce fichier est introuvable sur le
 
 $lang['Message']['Cannot_create_dir']       = "Impossible de créer le répertoire %s";
 $lang['Message']['Dir_not_writable']        = "Le répertoire <samp>%s</samp> n'existe pas ou n'est pas accessible en écriture";
-$lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (setup/schemas/)";
+$lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (data/schemas/)";
 
 $lang['Message']['Ftp_unable_connect']      = "Impossible de se connecter au serveur ftp";
 $lang['Message']['Ftp_error_login']         = "L'authentification auprès du serveur ftp a échoué";
@@ -671,6 +671,7 @@ $lang['Error_in_install']           = "Une erreur s'est produite durant l'instal
 $lang['Error_in_upgrade']           = "Une erreur s'est produite durant la mise à jour.\n\nL'erreur est : %s\nLa requête est : %s";
 $lang['Upgrade_not_required']       = "Aucune mise à jour n'est nécessaire pour votre version actuelle de Wanewsletter";
 $lang['Unsupported_version']        = "Cette version de Wanewsletter n'est plus supportée par le script de mise à jour. Vous devriez d'abord faire une mise à jour vers une version 2.3.x.";
+$lang['Moved_dirs_notice']          = "<strong>Note&nbsp;:</strong> Les répertoires <samp>stats/</samp> et <samp>tmp/</samp> se trouvent désormais dans le répertoire <samp>data/</samp>.\n Transférez le contenu des répertoires <samp>stats/</samp> et <samp>tmp/</samp> vers leurs équivalents dans <samp>data/</samp> et supprimez-les.\n N'oubliez pas de donner les droits en écriture sur ces répertoires.";
 
 $lang['Need_upgrade_db']            = "Une mise à jour des tables de données du script est nécessaire.";
 $lang['Need_upgrade_db_link']       = "Cliquez %sici%s pour accéder au script de mise à jour.";

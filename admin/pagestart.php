@@ -44,14 +44,6 @@ if( !defined('IN_LOGIN') )
 		Location('login.php' . $redirect);
 	}
 	
-	if( !is_writable(WA_TMPDIR) )
-	{
-		$output->displayMessage(sprintf(
-			$lang['Message']['Dir_not_writable'],
-			wan_htmlspecialchars(wa_realpath(WA_TMPDIR))
-		));
-	}
-	
 	if( !defined('IN_UPGRADE') )
 	{
 		//
@@ -62,6 +54,14 @@ if( !defined('IN_LOGIN') )
 			$output->addLine($lang['Need_upgrade_db']);
 			$output->addLine($lang['Need_upgrade_db_link'], WA_ROOTDIR.'/admin/upgrade.php');
 			$output->displayMessage();
+		}
+		
+		if( !is_writable(WA_TMPDIR) )
+		{
+			$output->displayMessage(sprintf(
+				$lang['Message']['Dir_not_writable'],
+				wan_htmlspecialchars(wa_realpath(WA_TMPDIR))
+			));
 		}
 		
 		$auth = new Auth();

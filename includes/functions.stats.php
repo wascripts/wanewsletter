@@ -10,7 +10,6 @@
 if( !defined('FUNCTIONS_STATS_INC') ) {
 
 define('FUNCTIONS_STATS_INC', true);
-define('WA_STATSDIR', WA_ROOTDIR . '/stats', true);
 
 /**
  * convertToRGB()

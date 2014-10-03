@@ -62,8 +62,8 @@ if( check_db_version($nl_config['db_version']) )
 
 if( isset($_POST['start']) )
 {
-	$sql_create = WA_ROOTDIR . '/setup/schemas/' . $db->engine . '_tables.sql';
-	$sql_data   = WA_ROOTDIR . '/setup/schemas/data.sql';
+	$sql_create = WA_ROOTDIR . '/data/schemas/' . $db->engine . '_tables.sql';
+	$sql_data   = WA_ROOTDIR . '/data/schemas/data.sql';
 	
 	if( !is_readable($sql_create) || !is_readable($sql_data) )
 	{
@@ -655,6 +655,19 @@ if( isset($_POST['start']) )
 			}
 		}
 		
+		//
+		// Les noms de listes de diffusion sont stockés avec des entités html
+		// Suprème bétise (je sais pas ce qui m'a pris :S)
+		//
+		$moved_dirs = false;
+		
+		if( $nl_config['db_version'] < 13 )
+		{
+			// fake. Permet simplement de savoir que les répertoires stats, tmp, ...
+			// ont changé de place et le notifier à l'administrateur
+			$moved_dirs = @!is_writable(WA_TMPDIR);
+		}
+		
 		exec_queries($sql_update);
 		
 		//
@@ -666,7 +679,7 @@ if( isset($_POST['start']) )
 		// Affichage message de résultat
 		//
 		
-		if( defined('UPDATE_CONFIG_FILE') )
+		if( defined('UPDATE_CONFIG_FILE') || $moved_dirs )
 		{
 			$config_file  = '<' . "?php\n";
 			$config_file .= "\n";
@@ -686,14 +699,28 @@ if( isset($_POST['start']) )
 				'body' => 'result_upgrade_body.tpl'
 			));
 			
+			$message = $lang['Success_upgrade'];
+			
+			if( defined('UPDATE_CONFIG_FILE') )
+			{
+				$output->assign_block_vars('update_config_file', array(
+					'CONTENT' => $config_file
+				));
+				
+				$message = $lang['Success_upgrade_no_config'];
+			}
+			
 			$output->assign_vars( array(
 				'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
-				'MESSAGE' => $lang['Success_upgrade_no_config']
+				'MESSAGE' => $message
 			));
 			
-			$output->assign_block_vars('update_config_file', array(
-				'CONTENT' => $config_file
-			));
+			if( $moved_dirs )
+			{
+				$output->assign_block_vars('moved_dirs', array(
+					'MOVED_DIRS_NOTICE' => nl2br($lang['Moved_dirs_notice'])
+				));
+			}
 			
 			$output->pparse('body');
 			

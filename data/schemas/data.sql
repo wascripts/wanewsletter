@@ -23,7 +23,7 @@ INSERT INTO wa_config (config_name, config_value) VALUES('session_length', '3600
 INSERT INTO wa_config (config_name, config_value) VALUES('language',       'francais');
 INSERT INTO wa_config (config_name, config_value) VALUES('cookie_name',    'wanewsletter');
 INSERT INTO wa_config (config_name, config_value) VALUES('cookie_path',    '/');
-INSERT INTO wa_config (config_name, config_value) VALUES('upload_path',    'upload/');
+INSERT INTO wa_config (config_name, config_value) VALUES('upload_path',    'data/uploads/');
 INSERT INTO wa_config (config_name, config_value) VALUES('max_filesize',   '80000');
 INSERT INTO wa_config (config_name, config_value) VALUES('use_ftp',        '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('ftp_server',     '');
@@ -44,7 +44,7 @@ INSERT INTO wa_config (config_name, config_value) VALUES('gd_img_type',    'png'
 INSERT INTO wa_config (config_name, config_value) VALUES('check_email_mx', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('enable_profil_cp', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('mailing_startdate', '0');
-INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '12');
+INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '13');
 
 
 -- 
