@@ -656,8 +656,9 @@ if( isset($_POST['start']) )
 		}
 		
 		//
-		// Les noms de listes de diffusion sont stockés avec des entités html
-		// Suprème bétise (je sais pas ce qui m'a pris :S)
+		// Ajout du répertoire data/ centralisant les données "volatiles".
+		// On ajoutera une note à ce propos dans le message de résultat de
+		// la mise à jour.
 		//
 		$moved_dirs = false;
 		
