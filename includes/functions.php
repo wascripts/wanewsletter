@@ -216,12 +216,7 @@ function load_settings($admindata = array())
 	);
 	$file_pattern = WA_ROOTDIR . '/language/lang_%s.php';
 	
-	$check_list['francais'] = true;
-	
-	if( !empty($nl_config['language']) )
-	{
-		$check_list[$nl_config['language']] = true;
-	}
+	$check_list[] = 'francais';
 	
 	if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
 	{
@@ -233,10 +228,15 @@ function load_settings($admindata = array())
 			
 			if( isset($supported_lang[$langcode]) )
 			{
-				$check_list[$supported_lang[$langcode]] = true;
+				$check_list[] = $supported_lang[$langcode];
 				break;
 			}
 		}
+	}
+	
+	if( !empty($nl_config['language']) )
+	{
+		$check_list[] = $nl_config['language'];
 	}
 	
 	if( !is_array($admindata) )
@@ -246,7 +246,7 @@ function load_settings($admindata = array())
 	
 	if( !empty($admindata['admin_lang']) )
 	{
-		$check_list[$admindata['admin_lang']] = true;
+		$check_list[] = $admindata['admin_lang'];
 	}
 	
 	if( !empty($admindata['admin_dateformat']) )
@@ -254,13 +254,17 @@ function load_settings($admindata = array())
 		$nl_config['date_format'] = $admindata['admin_dateformat'];
 	}
 	
-	$check_list = array_reverse($check_list);
+	$check_list = array_unique(array_reverse($check_list));
 	
-	foreach( $check_list as $language => $bool )
+	foreach( $check_list as $language )
 	{
 		if( @is_readable(sprintf($file_pattern, $language)) )
 		{
-			require sprintf($file_pattern, $language);
+			if( empty($lang) || $supported_lang[$lang['CONTENT_LANG']] != $language )
+			{
+				require sprintf($file_pattern, $language);
+			}
+			
 			break;
 		}
 	}

@@ -127,7 +127,12 @@ if( isset($_POST['sendfile']) )
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
 }
 
-$language = ( $language != '' ) ? $language : 'francais';
+$supported_lang = array(
+	'fr' => 'francais',
+	'en' => 'english'
+);
+
+$language = ( $language != '' ) ? $language : $supported_lang[$lang['CONTENT_LANG']];
 
 $output->set_filenames( array(
 	'body' => 'install.tpl'
@@ -140,6 +145,8 @@ if( $start && $language != $prev_language )
 	$start = false;
 }
 
+$nl_config['language'] = $language;
+
 if( defined('NL_INSTALLED') )
 {
 	$db = WaDatabase($dsn);
@@ -149,13 +156,13 @@ if( defined('NL_INSTALLED') )
 		plain_error(sprintf($lang['Connect_db_error'], $db->error));
 	}
 	
-	$old_config = wa_get_config();
-	$urlsite    = $old_config['urlsite'];
-	$urlscript  = $old_config['path'];
-	$language   = $old_config['language'];
+	$nl_config = wa_get_config();
+	$urlsite    = $nl_config['urlsite'];
+	$urlscript  = $nl_config['path'];
+	$language   = $nl_config['language'];
 }
 
-require WA_ROOTDIR . '/language/lang_' . $language . '.php';
+load_settings();
 
 $output->send_headers();
 
