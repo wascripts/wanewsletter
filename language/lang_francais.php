@@ -253,6 +253,7 @@ $lang['Message']['Archive_class_needed']    = "Le module d'export nécessite la p
 $lang['Message']['Chdir_error']             = "Impossible de configurer le répertoire courant sur %s (erreur avec chdir())";
 $lang['Message']['Twice_sending']           = "Une newsletter est déjà en cours d'envoi pour cette liste. Terminez ou annulez cet envoi avant d'en commencer un autre.";
 
+$lang['Message']['Invalid_cookie_name']     = "Les caractères blancs, ainsi que le signe égal, le point-virgule et la virgule ne sont pas autorisés dans le nom du cookie.";
 
 //
 // Divers

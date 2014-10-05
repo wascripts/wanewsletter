@@ -253,6 +253,7 @@ $lang['Message']['Archive_class_needed']    = "The export module needs the <q>%s
 $lang['Message']['Chdir_error']             = "Unable to set current directory with %s (chdir() error)";
 $lang['Message']['Twice_sending']           = "A newsletter is already in the course of sending for this list. Finish or cancel this sending before beginning another of them.";
 
+$lang['Message']['Invalid_cookie_name']     = "The white space characters, equal sign, comma and semi-colon are not allowed in the cookie name.";
 
 //
 // Divers

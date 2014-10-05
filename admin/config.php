@@ -52,6 +52,13 @@ if( isset($_POST['submit']) )
 	
 	$new_config['date_format'] = ( $new_config['date_format'] == '' ) ? 'd M Y H:i' : $new_config['date_format'];
 	
+	// Restriction de caractères sur le nom du cookie
+	if( preg_match("/[=,;\s\v]/", $new_config['cookie_name']) )
+	{
+		$error = true;
+		$msg_error[] = nl2br($lang['Message']['Invalid_cookie_name']);
+	}
+	
 	if( ($new_config['session_length'] = intval($new_config['session_length'])) <= 0 )
 	{
 		$new_config['session_length'] = 3600;
