@@ -1321,7 +1321,7 @@ else if( $mode == 'liste' )
 					)
 					GROUP BY abo_id
 					HAVING COUNT(abo_id) = 1";
-				if( !$db->query($sql) )
+				if( !($result = $db->query($sql)) )
 				{
 					trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
 				}
@@ -1398,7 +1398,7 @@ else if( $mode == 'liste' )
 						FROM " . ABO_LISTE_TABLE . "
 						WHERE liste_id = $listdata[liste_id]
 					) AND liste_id = " . $liste_id;
-				if( !$db->query($sql) )
+				if( !($result = $db->query($sql)) )
 				{
 					trigger_error('Impossible d\'obtenir la liste des entrées inutiles de la table abo_liste', ERROR);
 				}
@@ -1416,7 +1416,7 @@ else if( $mode == 'liste' )
 						FROM " . ABO_LISTE_TABLE . "
 						WHERE liste_id = $listdata[liste_id]
 					) AND liste_id <> " . $liste_id;
-				if( !$db->query($sql) )
+				if( !($result = $db->query($sql)) )
 				{
 					trigger_error('Impossible d\'obtenir la liste des entrées à mettre à jour', ERROR);
 				}
