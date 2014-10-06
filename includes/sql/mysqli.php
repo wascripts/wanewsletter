@@ -198,11 +198,11 @@ class Wadb_mysqli {
 	 */
 	function encoding($encoding = null)
 	{
-		$o = $this->link->get_charset();
+		$o = mysqli_get_charset($this->link);
 		$curEncoding = $o->charset;
 		
 		if( !is_null($encoding) ) {
-			$this->link->set_charset($encoding);
+			mysqli_set_charset($this->link, $encoding);
 		}
 		
 		return $curEncoding;
