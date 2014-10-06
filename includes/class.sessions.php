@@ -67,6 +67,14 @@ class Session {
 	var $is_logged_in = false;
 	
 	/**
+	 * Mise à jour du hash de mot de passe à chaque identification réussie
+	 
+	 * @var boolean
+	 * @access public
+	 */
+	var $update_hash  = true;
+	
+	/**
 	 * Intialisation de la classe, récupération de l'ip ..
 	 * 
 	 * @return void
@@ -421,14 +429,17 @@ class Session {
 		
 		if( $login )
 		{
-			$admindata['admin_pwd'] = $hasher->hash($admin_pwd);
-			
-			$sql = sprintf("UPDATE %s SET admin_pwd = '%s' WHERE admin_id = %d",
-				ADMIN_TABLE, $db->escape($admindata['admin_pwd']), $admindata['admin_id']);
-			
-			if( !$db->query($sql) )
+			if( $this->update_hash )
 			{
-				trigger_error('Impossible de mettre à jour la table administrateur', CRITICAL_ERROR);
+				$admindata['admin_pwd'] = $hasher->hash($admin_pwd);
+				
+				$sql = sprintf("UPDATE %s SET admin_pwd = '%s' WHERE admin_id = %d",
+					ADMIN_TABLE, $db->escape($admindata['admin_pwd']), $admindata['admin_id']);
+				
+				if( !$db->query($sql) )
+				{
+					trigger_error('Impossible de mettre à jour la table administrateur', CRITICAL_ERROR);
+				}
 			}
 			
 			return $this->open($admindata, $autologin);

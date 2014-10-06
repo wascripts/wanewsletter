@@ -27,7 +27,7 @@ $liste = ( !empty($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 //// Start session and load settings 
 //
 $session = new Session();
-
+$session->update_hash = (isset($nl_config['db_version']) && $nl_config['db_version'] > 8);
 $admindata = $session->check($liste);
 load_settings($admindata);
 //
