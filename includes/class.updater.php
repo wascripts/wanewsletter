@@ -31,7 +31,7 @@ class Wa_Updater {
 			$result = http_get_contents($this->url, $errstr);
 			$data = $result['data'];
 			
-			if( $data !== false )
+			if( $data != false )
 			{
 				file_put_contents($this->cache, $data);
 			}
