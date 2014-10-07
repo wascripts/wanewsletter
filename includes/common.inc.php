@@ -27,7 +27,7 @@ if( !version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=') ) {
 	exit;
 }
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~(E_STRICT|E_DEPRECATED));
 
 $starttime = array_sum(explode(' ', microtime()));
 
@@ -35,9 +35,9 @@ $starttime = array_sum(explode(' ', microtime()));
 // Intialisation des variables pour éviter toute injection malveillante de code 
 //
 $simple_header = $error = false;
-$nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = $_php_errors = array();
+$nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = array();
 $output = null;
-$dsn = $prefixe = $php_errormsg = '';
+$dsn = $prefixe = '';
 $prefixe = isset($_POST['prefixe']) ? $_POST['prefixe'] : 'wa_';
 // Compatibilité avec wanewsletter < 2.3-beta2
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = '';
@@ -79,6 +79,9 @@ require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';
 require WA_ROOTDIR . '/includes/class.phpass.php';
 
+set_error_handler('wan_error_handler');
+set_exception_handler('wan_exception_handler');
+
 load_settings();
 
 //
@@ -95,8 +98,6 @@ if( defined('IN_COMMANDLINE') )
 		define('STDOUT', fopen('php://stdout', 'w'));
 		define('STDERR', fopen('php://stderr', 'w'));
 	}
-	
-	set_error_handler('wan_cli_handler');
 }
 else
 {
@@ -106,8 +107,6 @@ else
 	$output = new output(sprintf(
 		'%s/templates/%s', WA_ROOTDIR, defined('IN_ADMIN') ? 'admin/' : ''
 	));
-	
-	set_error_handler('wan_web_handler');
 }
 
 //
@@ -165,11 +164,6 @@ if( empty($dsn) )
 if( !defined('IN_INSTALL') )
 {
 	$db = WaDatabase($dsn);
-	
-	if( !$db->isConnected() )
-	{
-		trigger_error(sprintf($lang['Connect_db_error'], $db->error), E_USER_ERROR);
-	}
 	
 	//
 	// On récupère la configuration du script 

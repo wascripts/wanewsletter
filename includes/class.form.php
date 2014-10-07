@@ -85,14 +85,13 @@ class Wanewsletter {
 			$sql = "SELECT ban_email
 				FROM " . BANLIST_TABLE . "
 				WHERE liste_id = " . $this->listdata['liste_id'];
-			if( $result = $db->query($sql) )
+			$result = $db->query($sql);
+			
+			while( $ban_email = $result->column('ban_email') )
 			{
-				while( $ban_email = $result->column('ban_email') )
+				if( preg_match('/\b' . str_replace('*', '.*?', $ban_email) . '\b/i', $email) )
 				{
-					if( preg_match('/\b' . str_replace('*', '.*?', $ban_email) . '\b/i', $email) )
-					{
-						return array('error' => true, 'message' => $lang['Message']['Email_banned']);
-					}
+					return array('error' => true, 'message' => $lang['Message']['Email_banned']);
 				}
 			}
 		}
@@ -116,10 +115,7 @@ class Wanewsletter {
 				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id = {$this->listdata['liste_id']}
 			WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
-		if( !($result = $db->query($sql)) )
-		{
-			return array('error' => true, 'message' => 'Impossible de tester les tables d\'inscriptions');
-		}
+		$result = $db->query($sql);
 		
 		if( $abodata = $result->fetch() )
 		{
@@ -262,10 +258,7 @@ class Wanewsletter {
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.register_key = '" . $db->escape($code) . "'
 				INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		if( $abodata = $result->fetch() )
 		{
@@ -331,11 +324,7 @@ class Wanewsletter {
 				$sql_data = array_merge($sql_data, $this->account['tags']);
 			}
 			
-			if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
-			{
-				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des abonnés', ERROR);
-				return false;
-			}
+			$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
 			
 			$this->account['abo_id'] = $db->lastInsertId();
 		}
@@ -356,11 +345,7 @@ class Wanewsletter {
 			
 			$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, register_key, register_date, confirmed) 
 				VALUES({$this->account['abo_id']}, {$this->listdata['liste_id']}, $this->format, '{$this->account['code']}', {$this->account['date']}, $confirmed)";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des abonnés[2]', ERROR);
-				return false;
-			}
+			$db->query($sql);
 		}
 		
 		$db->commit();
@@ -481,11 +466,7 @@ class Wanewsletter {
 				$sql = "UPDATE " . ABONNES_TABLE . "
 					SET abo_status = " . ABO_ACTIF . "
 					WHERE abo_id = " . $this->account['abo_id'];
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-					return false;
-				}
+				$db->query($sql);
 			}
 			
 			$sql = "UPDATE " . ABO_LISTE_TABLE . "
@@ -493,11 +474,7 @@ class Wanewsletter {
 					register_key = '" . generate_key(20) . "'
 				WHERE liste_id = " . $this->listdata['liste_id'] . "
 					AND abo_id = " . $this->account['abo_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-				return false;
-			}
+			$db->query($sql);
 			
 			$db->commit();
 			
@@ -525,11 +502,7 @@ class Wanewsletter {
 			$sql = "SELECT COUNT(abo_id) AS num_subscribe
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE abo_id = " . $this->account['abo_id'];
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de vérifier la table de jointure', ERROR);
-				return false;
-			}
+			$result = $db->query($sql);
 			
 			$num_subscribe = $result->column('num_subscribe');
 			
@@ -538,21 +511,13 @@ class Wanewsletter {
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
 				WHERE liste_id = " . $this->listdata['liste_id'] . "
 					AND abo_id = " . $this->account['abo_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible d\'effacer l\'entrée de la table abo_liste', ERROR);
-				return false;
-			}
+			$db->query($sql);
 			
 			if( $num_subscribe == 1 )
 			{
 				$sql = 'DELETE FROM ' . ABONNES_TABLE . ' 
 					WHERE abo_id = ' . $this->account['abo_id'];
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible d\'effacer l\'entrée de la table des abonnés', ERROR);
-					return false;
-				}
+				$db->query($sql);
 				
 				$this->message = $lang['Message']['Unsubscribe_3'];
 			}
@@ -574,11 +539,7 @@ class Wanewsletter {
 				SET register_key = '{$this->account['code']}'
 				WHERE abo_id = {$this->account['abo_id']}
 					AND liste_id = " . $this->listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible d\'assigner le nouvelle clé d\'enregistrement', ERROR);
-				return false;
-			}
+			$db->query($sql);
 			
 			$this->mailer->set_from($this->listdata['sender_email'], $this->listdata['liste_name']);
 			$this->mailer->set_address($this->account['email']);
@@ -660,11 +621,7 @@ class Wanewsletter {
 				SET format = " . $this->format . "
 				WHERE liste_id = " . $this->listdata['liste_id'] . "
 					AND abo_id = " . $this->account['abo_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-				return false;
-			}
+			$db->query($sql);
 			
 			$this->message = $lang['Message']['Success_setformat'];
 			

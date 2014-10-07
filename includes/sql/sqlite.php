@@ -133,17 +133,20 @@ class Wadb_sqlite {
 			$connect = 'sqlite_popen';
 		}
 		
-		if( $this->link = $connect($sqlite_db, 0666, $this->error) ) {
-			sqlite_exec($this->link, 'PRAGMA short_column_names = 1');
-			sqlite_exec($this->link, 'PRAGMA case_sensitive_like = 0');
-			
-			ini_set('sqlite.assoc_case', '0');
-			$this->libVersion = sqlite_libversion();
-			
-//			if( !empty($this->options['charset']) ) {
-//				$this->encoding($this->options['charset']);
-//			}
+		if( !($this->link = $connect($sqlite_db, 0666, $this->error)) ) {
+			$this->errno = -1;
+			throw new SQLException($this->error, $this->errno);
 		}
+		
+		sqlite_exec($this->link, 'PRAGMA short_column_names = 1');
+		sqlite_exec($this->link, 'PRAGMA case_sensitive_like = 0');
+		
+		ini_set('sqlite.assoc_case', '0');
+		$this->libVersion = sqlite_libversion();
+		
+//		if( !empty($this->options['charset']) ) {
+//			$this->encoding($this->options['charset']);
+//		}
 	}
 	
 	/**
@@ -213,6 +216,7 @@ class Wadb_sqlite {
 			$this->errno = sqlite_last_error($this->link);
 			$this->error = sqlite_error_string($this->errno);
 			$this->lastQuery = $query;
+			throw new SQLException($this->error, $this->errno);
 			
 			$this->rollBack();
 		}
@@ -677,11 +681,9 @@ class WadbBackup_sqlite {
 	 */
 	function get_tables()
 	{
-		if( !($result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) ) {
-			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
-		}
-		
+		$result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
 		$tables = array();
+		
 		while( $row = $result->fetch() ) {
 			$tables[$row['tbl_name']] = '';
 		}
@@ -725,9 +727,7 @@ class WadbBackup_sqlite {
 			FROM sqlite_master
 			WHERE tbl_name = '$tabledata[name]'
 				AND sql IS NOT NULL";
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		$indexes = '';
 		while( $row = $result->fetch() ) {
@@ -756,11 +756,7 @@ class WadbBackup_sqlite {
 	{
 		$contents = '';
 		
-		$sql = 'SELECT * FROM ' . $this->db->quote($tablename);
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
-		}
-		
+		$result = $this->db->query('SELECT * FROM ' . $this->db->quote($tablename));
 		$result->setFetchMode(SQLITE_ASSOC);
 		
 		if( $row = $result->fetch() ) {

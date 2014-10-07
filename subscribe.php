@@ -17,46 +17,41 @@ $list_box = '';
 $sql = "SELECT liste_id, liste_name, liste_format
 	FROM " . LISTE_TABLE . "
 	WHERE liste_public = " . TRUE;
-if( !($result = $db->query($sql)) )
+$result = $db->query($sql);
+
+$list_box = '<select id="liste" name="liste">';
+
+if( $row = $result->fetch() )
 {
-	trigger_error('Impossible d\'obtenir la liste des listes de diffusion', ERROR);
+	do
+	{
+		if( $row['liste_format'] == FORMAT_TEXTE )
+		{
+			$format = 'txt';
+		}
+		else if( $row['liste_format'] == FORMAT_HTML )
+		{
+			$format = 'html';
+		}
+		else
+		{
+			$format = 'txt &amp; html';
+		}
+		
+		$list_box .= sprintf('<option value="%d"> %s (%s) </option>',
+			$row['liste_id'],
+			wan_htmlspecialchars($row['liste_name']),
+			$format
+		);
+	}
+	while( $row = $result->fetch() );
 }
 else
 {
-	$list_box = '<select id="liste" name="liste">';
-	
-	if( $row = $result->fetch() )
-	{
-		do
-		{
-			if( $row['liste_format'] == FORMAT_TEXTE )
-			{
-				$format = 'txt';
-			}
-			else if( $row['liste_format'] == FORMAT_HTML )
-			{
-				$format = 'html';
-			}
-			else
-			{
-				$format = 'txt &amp; html';
-			}
-			
-			$list_box .= sprintf('<option value="%d"> %s (%s) </option>',
-				$row['liste_id'],
-				wan_htmlspecialchars($row['liste_name']),
-				$format
-			);
-		}
-		while( $row = $result->fetch() );
-	}
-	else
-	{
-		$message = 'No list found';
-	}
-	
-	$list_box .= '</select>';
+	$message = 'No list found';
 }
+
+$list_box .= '</select>';
 
 $output->send_headers(true);
 

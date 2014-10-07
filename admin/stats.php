@@ -278,10 +278,7 @@ if( $img == 'camembert' )
 		WHERE al.liste_id IN(" . implode(', ', $liste_ids) . ")
 			AND confirmed = " . SUBSCRIBE_CONFIRMED . "
 		GROUP BY al.liste_id";
-	if( !($result = $db->query($sql)) )
-	{
-		display_img_error('An error has occured while generating image!');
-	}
+	$result = $db->query($sql);
 	
 	$tmpdata = array();
 	while( $row = $result->fetch() )

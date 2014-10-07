@@ -131,12 +131,7 @@ class Wadb_sqlite3 {
 		try {
 			$this->link = new SQLite3($sqlite_db, SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE, 
 				!empty($options['encryption_key']) ? $options['encryption_key'] : null);
-		}
-		catch( Exception $e ) {
-			$this->error = $e->getMessage();
-		}
-		
-		if( !is_null($this->link) ) {
+			
 			$this->link->exec('PRAGMA short_column_names = 1');
 			$this->link->exec('PRAGMA case_sensitive_like = 0');
 			
@@ -146,6 +141,11 @@ class Wadb_sqlite3 {
 //			if( !empty($this->options['charset']) ) {
 //				$this->encoding($this->options['charset']);
 //			}
+		}
+		catch( Exception $e ) {
+			$this->errno = $e->getCode();
+			$this->error = $e->getMessage();
+			throw new SQLException($this->error, $this->errno);
 		}
 	}
 	
@@ -221,6 +221,7 @@ class Wadb_sqlite3 {
 			$this->error = $this->link->lastErrorMsg();
 			$this->lastQuery = $query;
 			$this->result = null;
+			throw new SQLException($this->error, $this->errno);
 			
 			$this->rollBack();
 		}
@@ -677,11 +678,9 @@ class WadbBackup_sqlite3 {
 	 */
 	function get_tables()
 	{
-		if( !($result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) ) {
-			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
-		}
-		
+		$result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
 		$tables = array();
+		
 		while( $row = $result->fetch() ) {
 			$tables[$row['tbl_name']] = '';
 		}
@@ -725,9 +724,7 @@ class WadbBackup_sqlite3 {
 			FROM sqlite_master
 			WHERE tbl_name = '$tabledata[name]'
 				AND sql IS NOT NULL";
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		$indexes = '';
 		while( $row = $result->fetch() ) {
@@ -756,11 +753,7 @@ class WadbBackup_sqlite3 {
 	{
 		$contents = '';
 		
-		$sql = 'SELECT * FROM ' . $this->db->quote($tablename);
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
-		}
-		
+		$result = $this->db->query('SELECT * FROM ' . $this->db->quote($tablename));
 		$result->setFetchMode(SQLITE3_ASSOC);
 		
 		if( $row = $result->fetch() ) {

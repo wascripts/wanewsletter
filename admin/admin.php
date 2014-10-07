@@ -55,10 +55,7 @@ if( $mode == 'adduser' )
 			$sql = "SELECT COUNT(*) AS login_test 
 				FROM " . ADMIN_TABLE . " 
 				WHERE LOWER(admin_login) = '" . $db->escape(strtolower($new_login)) . "'";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de tester le login', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( $result->column('login_test') > 0 )
 			{
@@ -86,10 +83,7 @@ if( $mode == 'adduser' )
 			$sql_data['admin_dateformat'] = $nl_config['date_format'];
 			$sql_data['admin_level']      = USER;
 			
-			if( !$db->build(SQL_INSERT, ADMIN_TABLE, $sql_data) )
-			{
-				trigger_error('Impossible d\'ajouter le nouvel administrateur', ERROR);
-			}
+			$db->build(SQL_INSERT, ADMIN_TABLE, $sql_data);
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			$mailer->signature = WA_X_MAILER;
@@ -120,7 +114,7 @@ if( $mode == 'adduser' )
 			
 			if( !$mailer->send() )
 			{
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 			}
 			
 			$output->redirect('./admin.php', 6);
@@ -168,21 +162,8 @@ else if( $mode == 'deluser' )
 	if( isset($_POST['confirm']) )
 	{
 		$db->beginTransaction();
-		
-		$sql = "DELETE FROM " . ADMIN_TABLE . " 
-			WHERE admin_id = " . $admin_id;
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de supprimer l\'administrateur', ERROR);
-		}
-		
-		$sql = "DELETE FROM " . AUTH_ADMIN_TABLE . " 
-			WHERE admin_id = " . $admin_id;
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de supprimer les permissions de l\'administrateur', ERROR);
-		}
-		
+		$db->query("DELETE FROM " . ADMIN_TABLE . " WHERE admin_id = " . $admin_id);
+		$db->query("DELETE FROM " . AUTH_ADMIN_TABLE . " WHERE admin_id = " . $admin_id);
 		$db->commit();
 		
 		//
@@ -308,10 +289,7 @@ if( isset($_POST['submit']) )
 			$sql_data['admin_level'] = ( $_POST['admin_level'] == ADMIN ) ? ADMIN : USER;
 		}
 		
-		if( !$db->build(SQL_UPDATE, ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id)) )
-		{
-			trigger_error('Impossible de mettre le profil à jour', ERROR);
-		}
+		$db->build(SQL_UPDATE, ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id));
 		
 		if( $admindata['admin_level'] == ADMIN )
 		{
@@ -337,18 +315,12 @@ if( isset($_POST['submit']) )
 					$sql_data['admin_id'] = $admin_id;
 					$sql_data['liste_id'] = $liste_ids[$i];
 					
-					if( !$db->build(SQL_INSERT, AUTH_ADMIN_TABLE, $sql_data) )
-					{
-						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des permissions', ERROR);
-					}
+					$db->build(SQL_INSERT, AUTH_ADMIN_TABLE, $sql_data);
 				}
 				else
 				{
 					$sql_where = array('admin_id' => $admin_id, 'liste_id' => $liste_ids[$i]);
-					if( !$db->build(SQL_UPDATE, AUTH_ADMIN_TABLE, $sql_data, $sql_where) )
-					{
-						trigger_error('Impossible de mettre à jour la table des permissions', ERROR);
-					}
+					$db->build(SQL_UPDATE, AUTH_ADMIN_TABLE, $sql_data, $sql_where);
 				}
 			}
 		}
@@ -358,12 +330,12 @@ if( isset($_POST['submit']) )
 			$sql = "SELECT admin_login
 				FROM " . ADMIN_TABLE . "
 				WHERE admin_id = " . $admin_id;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer le pseudo de cet utilisateur', ERROR);
-			}
+			$result = $db->query($sql);
 			
-			$pseudo = $result->column('admin_login');
+			if( ($pseudo = $result->column('admin_login')) === false )
+			{
+				trigger_error('Impossible de récupérer le pseudo de cet utilisateur', E_USER_ERROR);
+			}
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			$mailer->signature = WA_X_MAILER;
@@ -392,7 +364,7 @@ if( isset($_POST['submit']) )
 			
 			if( !$mailer->send() )
 			{
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 			}
 		}
 		
@@ -416,9 +388,11 @@ if( $admindata['admin_level'] == ADMIN )
 				admin_dateformat, admin_level, email_new_subscribe, email_unsubscribe
 			FROM " . ADMIN_TABLE . " 
 			WHERE admin_id = " . $admin_id;
-		if( $result = $db->query($sql) )
+		$result = $db->query($sql);
+		
+		if( !($current_admin = $result->fetch()) )
 		{
-			$current_admin = $result->fetch();
+			trigger_error("Impossible de récupérer les données de l'utilisateur", E_USER_ERROR);
 		}
 	}
 	
@@ -431,10 +405,7 @@ if( $admindata['admin_level'] == ADMIN )
 		FROM " . ADMIN_TABLE . "
 		WHERE admin_id <> $current_admin[admin_id]
 		ORDER BY admin_login ASC";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des administrateurs', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $row = $result->fetch() )
 	{

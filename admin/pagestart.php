@@ -81,10 +81,7 @@ if( !defined('IN_LOGIN') )
 				$session->session_id,
 				$admindata['admin_id']
 			);
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour le session_liste', ERROR);
-			}
+			$db->query($sql);
 		}
 	}
 	

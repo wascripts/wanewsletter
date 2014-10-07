@@ -21,14 +21,20 @@ define('WANEWSLETTER_VERSION', '2.4-beta2');
 define('WANEWSLETTER_DB_VERSION', 13);
 
 //
-// Mode de débugguage du script 
-// 
-// 3 - Toutes les erreurs sont affichées à l'écran
-// 2 - Toutes les erreurs provenant de variables/fonctions/autres non précédés d'un @ sont affichées à l'écran 
-// 1 - Seules les erreurs en rapport avec la base de données sont affichées (le script donne des détails sur l'erreur)
-// 0 - Le script affiche simplement un message d'erreur lors de problèmes SQL, sans donner plus de détails 
+// Modes de débogage du script
 //
-define('DEBUG_MODE', 3);
+// Le script annonce les erreurs critiques, sans donner de détails
+define('DEBUG_LEVEL_QUIET',  1);
+// Le script affiche les erreurs PHP et SQL en donnant des détails
+define('DEBUG_LEVEL_NORMAL', 2);
+// Le script affiche aussi les erreurs non inclues dans le niveau d'erreurs PHP
+// configuré par error_reporting() ou masquées avec l'opérateur @
+define('DEBUG_LEVEL_ALL',    3);
+
+//
+// Configure le niveau de débogage souhaité
+//
+define('DEBUG_MODE', DEBUG_LEVEL_ALL);
 
 //
 // Pour visualiser le temps d'exécution du script et le nombre de requètes effectuées
@@ -37,9 +43,10 @@ define('DEV_INFOS', TRUE);
 //define('DEV_INFOS', FALSE);
 
 //
-// Active/Désactive l'affichage des erreurs proprement dans un bloc html en bas de page
+// Active/Désactive le stockage des messages non critiques dans une pile pour
+// affichage propre ultérieur en pied de page
 //
-define('DISPLAY_ERRORS_IN_BLOCK', TRUE);
+define('USE_WANLOG', true);
 
 //
 // Active/Désactive le passage automatique à l'UTF-8 au moment de l'envoi en présence de 
@@ -65,12 +72,6 @@ define('ENABLE_HTTP_AUTHENTICATION', TRUE);
 //
 // Il est recommandé de ne rien modifier au-delà de cette ligne
 //
-
-//
-// Codes des messages d'erreur et d'information 
-//
-define('CRITICAL_ERROR', E_USER_ERROR);
-define('ERROR',          E_USER_WARNING);
 
 //
 // Formats d'emails 

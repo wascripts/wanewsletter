@@ -23,10 +23,7 @@ $sql = 'SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate
 		pop_host, pop_port, pop_user, pop_pass
 	FROM ' . LISTE_TABLE . ' 
 	WHERE liste_id = ' . $liste_id;
-if( !($result = $db->query($sql)) )
-{
-	trigger_error('Impossible de récupérer les informations sur cette liste', ERROR);
-}
+$result = $db->query($sql);
 
 if( $listdata = $result->fetch() )
 {
@@ -53,10 +50,7 @@ if( $listdata = $result->fetch() )
 			WHERE liste_id = $listdata[liste_id]
 				AND log_status = " . STATUS_STANDBY . "
 			LIMIT 1 OFFSET 0";
-		if( !($result = $db->query($sql)) ) // on récupère le dernier log en statut d'envoi
-		{
-			trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
-		}
+		$result = $db->query($sql); // on récupère le dernier log en statut d'envoi
 		
 		if( !($logdata = $result->fetch()) )
 		{
@@ -70,10 +64,7 @@ if( $listdata = $result->fetch() )
 					AND l.liste_id = $listdata[liste_id]
 					AND l.log_id   = $logdata[log_id]
 			ORDER BY jf.file_real_name ASC";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$logdata['joined_files'] = $result->fetchAll();
 		
@@ -182,12 +173,12 @@ if( $listdata = $result->fetch() )
 	}
 	else
 	{
-		trigger_error('No valid mode specified', ERROR);
+		trigger_error('No valid mode specified', E_USER_ERROR);
 	}
 }
 else
 {
-	trigger_error('Unknown_list', ERROR);
+	trigger_error('Unknown_list', E_USER_ERROR);
 }
 
 ?>

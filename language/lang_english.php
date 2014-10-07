@@ -254,6 +254,7 @@ $lang['Message']['Chdir_error']             = "Unable to set current directory w
 $lang['Message']['Twice_sending']           = "A newsletter is already in the course of sending for this list. Finish or cancel this sending before beginning another of them.";
 
 $lang['Message']['Invalid_cookie_name']     = "The white space characters, equal sign, comma and semi-colon are not allowed in the cookie name.";
+$lang['Message']['Critical_error']          = "A critical error has occured. Enable debug mode if you wish to get more details.";
 
 //
 // Divers

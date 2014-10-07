@@ -139,10 +139,7 @@ if( isset($_POST['start']) )
 			FROM " . ABONNES_TABLE . "
 			GROUP BY abo_email
 			HAVING COUNT(abo_email) > 1";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de récupérer la liste des adresses emails', E_USER_ERROR);
-		}
+		$result = $db->query($sql);
 		
 		if( $row = $result->fetch() )
 		{
@@ -207,10 +204,7 @@ if( isset($_POST['start']) )
 			//
 			$sql = "SELECT abo_id
 				FROM " . ABONNES_TABLE;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer les ID des abonnés', E_USER_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$abonnes_id = array();
 			while( $abo_id = $result->column('abo_id') )
@@ -221,10 +215,7 @@ if( isset($_POST['start']) )
 			$sql = "SELECT abo_id
 				FROM " . ABO_LISTE_TABLE . "
 				GROUP BY abo_id";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer les ID des abonnés', E_USER_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$abo_liste_id = array();
 			while( $abo_id = $result->column('abo_id') )
@@ -277,10 +268,7 @@ if( isset($_POST['start']) )
 				FROM " . LOG_TABLE . "
 				WHERE log_status = " . STATUS_SENT . "
 				GROUP BY liste_id";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer les informations sur les archives', E_USER_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			while( $row = $result->fetch() )
 			{
@@ -293,10 +281,7 @@ if( isset($_POST['start']) )
 				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
 				WHERE a.abo_id = al.abo_id AND a.abo_status = " . ABO_ACTIF . "
 				GROUP BY al.liste_id";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer le nombre de destinataires', E_USER_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			while( $row = $result->fetch() )
 			{
@@ -327,10 +312,7 @@ if( isset($_POST['start']) )
 				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
 				WHERE a.abo_id = al.abo_id AND a.abo_status = " . ABO_ACTIF . "
 				GROUP BY al.liste_id";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer les comptes abonnés actifs', E_USER_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			while( $row = $result->fetch() )
 			{
@@ -401,10 +383,7 @@ if( isset($_POST['start']) )
 			
 			$sql = "SELECT abo_id, abo_register_key, abo_pwd, abo_register_date, abo_status
 				FROM " . ABONNES_TABLE;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer les données sur les abonnés', E_USER_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			while( $row = $result->fetch() )
 			{
@@ -429,10 +408,7 @@ if( isset($_POST['start']) )
 			$sql = "SELECT abo_id, liste_id
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE register_key IS NULL";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer les abonnés sans register_key', E_USER_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			while( $row = $result->fetch() )
 			{

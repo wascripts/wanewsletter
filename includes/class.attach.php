@@ -73,7 +73,7 @@ class Attach {
 			
 			if( $result['error'] )
 			{
-				trigger_error($result['message'], ERROR);
+				trigger_error($result['message'], E_USER_ERROR);
 			}
 			
 			$this->connect_id = $result['connect_id'];
@@ -200,10 +200,7 @@ class Attach {
 			$sql = "SELECT COUNT(file_id) AS test_name
 				FROM " . JOINED_FILES_TABLE . "
 				WHERE file_physical_name = '" . $db->escape($physical_filename) . "'";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de tester la table des fichiers joints', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$test_name = $result->column('test_name');
 		}
@@ -500,19 +497,13 @@ class Attach {
 				'file_mimetype'      => $filetype
 			);
 			
-			if( !$db->build(SQL_INSERT, JOINED_FILES_TABLE, $filedata) )
-			{
-				trigger_error('Impossible d\'insérer les données du fichier dans la base de données', ERROR);
-			}
+			$db->build(SQL_INSERT, JOINED_FILES_TABLE, $filedata);
 			
 			$file_id = $db->lastInsertId();
 			
 			$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id) 
 				VALUES($log_id, $file_id)";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible d\'insérer la jointure dans la table log_files', ERROR);
-			}
+			$db->query($sql);
 			
 			$db->commit();
 		}
@@ -543,10 +534,7 @@ class Attach {
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = l.log_id
 			WHERE jf.file_id = " . $file_id;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de récupérer les données sur ce fichier', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$physical_name = $result->column('file_physical_name');
 		
@@ -579,10 +567,7 @@ class Attach {
 		{
 			$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id) 
 				VALUES($log_id, $file_id)";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible d\'insérer la jointure dans la table log_files', ERROR);
-			}
+			$db->query($sql);
 		}
 		
 		$this->quit();
@@ -617,10 +602,7 @@ class Attach {
 			FROM " . FORBIDDEN_EXT_TABLE . "
 			WHERE LOWER(fe_ext) = '" . $db->escape(strtolower($extension)) . "'
 				AND liste_id = " . $listdata['liste_id'];
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de tester la table des extensions interdites',  ERROR);
-		}
+		$result = $db->query($sql);
 		
 		return ( $result->column('test_extension') > 0 ) ? false : true;
 	}
@@ -643,10 +625,7 @@ class Attach {
 			FROM " . JOINED_FILES_TABLE . " AS jf
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = " . $log_id;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la somme du poids des fichiers joints', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		return ( ($result->column('total_size') + $filesize) > $nl_config['max_filesize'] ) ? false : true;
 	}
@@ -669,10 +648,7 @@ class Attach {
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = l.log_id
 			WHERE jf.file_id = " . $file_id;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les données sur ce fichier', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		if( $row = $result->fetch() )
 		{
@@ -687,7 +663,7 @@ class Attach {
 			
 			if( !($fp = @fopen($tmp_filename, 'rb')) )
 			{
-				trigger_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)', ERROR);
+				trigger_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)', E_USER_ERROR);
 			}
 			
 			$data = fread($fp, filesize($tmp_filename));
@@ -722,7 +698,7 @@ class Attach {
 		
 		if( !@ftp_get($this->connect_id, $tmp_filename, $data['file_physical_name'], $mode) )
 		{
-			trigger_error('Ftp_error_get', ERROR);
+			trigger_error('Ftp_error_get', E_USER_ERROR);
 		}
 		
 		return $tmp_filename;
@@ -774,10 +750,7 @@ class Attach {
 					FROM " . LOG_FILES_TABLE . " 
 					WHERE log_id IN(" . implode(', ', $log_ids) . ") 
 					GROUP BY file_id";
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir la liste des fichiers', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				$file_ids = array();
 				while( $file_id = $result->column('file_id') )
@@ -796,10 +769,7 @@ class Attach {
 					WHERE lf.file_id IN(" . implode(', ', $file_ids) . ")
 					GROUP BY lf.file_id, jf.file_physical_name
 					HAVING COUNT(lf.file_id) = 1";
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir la liste des fichiers à supprimer', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				$ids = array();
 				while( $row = $result->fetch() )
@@ -812,19 +782,13 @@ class Attach {
 				{
 					$sql = "DELETE FROM " . JOINED_FILES_TABLE . " 
 						WHERE file_id IN(" . implode(', ', $ids) . ")";
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de supprimer les entrées inutiles de la table des fichiers joints', ERROR);
-					}
+					$db->query($sql);
 				}
 				
 				$sql = "DELETE FROM " . LOG_FILES_TABLE . " 
 					WHERE log_id IN(" . implode(', ', $log_ids) . ") 
 						AND file_id IN(" . implode(', ', $file_ids) . ")";
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les entrées de la table log_files', ERROR);
-				}
+				$db->query($sql);
 				
 				//
 				// Suppression physique des fichiers joints devenus inutiles
@@ -835,7 +799,7 @@ class Attach {
 					{
 						if( !@ftp_delete($this->connect_id, $filename) )
 						{
-							trigger_error('Ftp_error_del', ERROR);
+							trigger_error('Ftp_error_del', E_USER_ERROR);
 						}
 					}
 					else

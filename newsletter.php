@@ -27,7 +27,7 @@ if( !defined('WA_ROOTDIR') )
 	define('WA_ROOTDIR', rtrim($waroot, '/'));
 }
 
-$default_error_reporting = error_reporting(E_ALL);
+$default_error_reporting = error_reporting();
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
@@ -79,10 +79,7 @@ if( !empty($action) || !empty($code) )
 					liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe
 				FROM " . LISTE_TABLE . "
 				WHERE liste_id = " .  $liste;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir les données sur la liste', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( $listdata = $result->fetch() )
 			{

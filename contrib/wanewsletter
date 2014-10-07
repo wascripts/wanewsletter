@@ -242,7 +242,7 @@ WANSHELL;
 		}
 		else
 		{
-			trigger_error("Bad format. Possible values are 'plain', 'text', 'texte' or 'html'", CRITICAL_ERROR);
+			trigger_error("Bad format. Possible values are 'plain', 'text', 'texte' or 'html'", E_USER_ERROR);
 		}
 	}
 	
@@ -265,14 +265,11 @@ if( !is_null($liste_id) )
 			pop_host, pop_port, pop_user, pop_pass
 		FROM ' . LISTE_TABLE . ' 
 		WHERE liste_id = ' . $liste_id;
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible de récupérer les informations sur cette liste', CRITICAL_ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( !($listdata = $result->fetch()) )
 	{
-		trigger_error('Unknown_list', CRITICAL_ERROR);
+		trigger_error('Unknown_list', E_USER_ERROR);
 	}
 }
 
@@ -288,10 +285,7 @@ if( $process_send == true )
 		WHERE liste_id = $listdata[liste_id]
 			AND log_status = " . STATUS_STANDBY . "
 		LIMIT 1 OFFSET 0";
-	if( !($result = $db->query($sql)) ) // on récupère le dernier log en statut d'envoi
-	{
-		trigger_error('Impossible d\'obtenir les données sur ce log', CRITICAL_ERROR);
-	}
+	$result = $db->query($sql);// on récupère le dernier log en statut d'envoi
 	
 	if( !($logdata = $result->fetch()) )
 	{
@@ -306,10 +300,7 @@ if( $process_send == true )
 				AND l.liste_id = $listdata[liste_id]
 				AND l.log_id   = $logdata[log_id]
 		ORDER BY jf.file_real_name ASC";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des fichiers joints', CRITICAL_ERROR);
-	}
+	$result = $db->query($sql);
 	
 	$logdata['joined_files'] = $result->fetchAll();
 	
@@ -455,10 +446,7 @@ else if( $import_mail == true )
 				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id = $listdata[liste_id]
 			WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de tester les tables d\'inscriptions', CRITICAL_ERROR);
-		}
+		$result = $db->query($sql);
 		
 		//
 		// Traitement des adresses email déjà présentes dans la base de données
@@ -475,10 +463,7 @@ else if( $import_mail == true )
 				$sql_data['register_date'] = $current_time;
 				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 				
-				if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-				{
-					trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', CRITICAL_ERROR);
-				}
+				$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
 				
 				$counter++;
 			}
@@ -504,9 +489,11 @@ else if( $import_mail == true )
 			$sql_data['abo_email']  = $email;
 			$sql_data['abo_status'] = ABO_ACTIF;
 			
-			if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
-			{
-				printf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error);
+			try {
+				$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
+			}
+			catch( SQLException $e ) {
+				fputs(STDERR, sprintf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error));
 				$db->rollBack();
 				continue;
 			}
@@ -519,10 +506,7 @@ else if( $import_mail == true )
 			$sql_data['register_date'] = $current_time;
 			$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
 			
-			if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-			{
-				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', CRITICAL_ERROR);
-			}
+			$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
 			
 			$counter++;
 			$db->commit();

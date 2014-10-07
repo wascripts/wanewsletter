@@ -88,10 +88,7 @@ switch( $mode )
 			$sql = "SELECT log_id, liste_id, log_status
 				FROM " . LOG_TABLE . "
 				WHERE log_id = " . $logdata['log_id'];
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste d\'appartenance du log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( !($logdata = $result->fetch()) || $logdata['log_status'] != STATUS_STANDBY )
 			{
@@ -101,11 +98,7 @@ switch( $mode )
 			$sql = "SELECT COUNT(send) AS sent
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE liste_id = $logdata[liste_id] AND send = 1";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
-			}
-			
+			$result = $db->query($sql);
 			$sent = $result->column('sent');
 			
 			//
@@ -127,26 +120,17 @@ switch( $mode )
 				SET log_status  = " . STATUS_SENT . ",
 					log_numdest = $sent
 				WHERE log_id = " . $logdata['log_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
-			}
+			$db->query($sql);
 			
 			$sql = "UPDATE " . ABO_LISTE_TABLE . "
 				SET send = 0
 				WHERE liste_id = " . $logdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-			}
+			$db->query($sql);
 			
 			$sql = "UPDATE " . LISTE_TABLE . " 
 				SET liste_numlogs = liste_numlogs + 1 
 				WHERE liste_id = " . $logdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des listes', ERROR);
-			}
+			$db->query($sql);
 			
 			$db->commit();
 			
@@ -193,10 +177,7 @@ switch( $mode )
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
 					AND log_id = $logdata[log_id]
 					AND log_status = " . STATUS_STANDBY;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( !($logdata = $result->fetch()) )
 			{
@@ -235,10 +216,7 @@ switch( $mode )
 								SET send = 1
 								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
 									AND liste_id = " . $liste_id;
-							if( !$db->query($sql) )
-							{
-								trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-							}
+							$db->query($sql);
 						}
 						
 						ftruncate($fp, 0);
@@ -253,10 +231,7 @@ switch( $mode )
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
 				GROUP BY liste_id, send";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$data = array();
 			while( $row = $result->fetch() )
@@ -274,10 +249,7 @@ switch( $mode )
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
 					AND log_status = " . STATUS_STANDBY . "
 				ORDER BY log_subject ASC";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( !($row = $result->fetch()) )
 			{
@@ -403,10 +375,7 @@ switch( $mode )
 					WHERE liste_id = $listdata[liste_id]
 						AND log_id = $logdata[log_id]
 						AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")";
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				if( !($logdata = $result->fetch()) )
 				{
@@ -426,10 +395,7 @@ switch( $mode )
 				WHERE liste_id = $listdata[liste_id]
 					AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")
 				ORDER BY log_date DESC";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$output->addHiddenField('mode', 'load');
 			
@@ -534,10 +500,7 @@ switch( $mode )
 			
 			$sql = 'DELETE FROM ' . LOG_TABLE . ' 
 				WHERE log_id = ' . $logdata['log_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer le log', ERROR);
-			}
+			$db->query($sql);
 			
 			require WA_ROOTDIR . '/includes/class.attach.php';
 			
@@ -696,10 +659,7 @@ switch( $mode )
 							INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 								AND l.liste_id = $listdata[liste_id]
 						ORDER BY jf.file_real_name ASC";
-					if( !($result = $db->query($sql)) )
-					{
-						trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-					}
+					$result = $db->query($sql);
 					
 					$files = $files_error = array();
 					while( $row = $result->fetch() )
@@ -735,10 +695,7 @@ switch( $mode )
 					FROM " . LOG_TABLE . "
 					WHERE liste_id = $listdata[liste_id]
 						AND log_status = " . STATUS_STANDBY;
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible de tester la présence de newsletter déjà en attente d\'envoi', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				if( $result->column('test') > 0 )
 				{
@@ -795,10 +752,7 @@ switch( $mode )
 					$sql_where = array('log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']);
 				}
 				
-				if( !$db->build($sql_type, LOG_TABLE, $logdata, $sql_where) )
-				{
-					trigger_error('Impossible de sauvegarder la newsletter', ERROR);
-				}
+				$db->build($sql_type, LOG_TABLE, $logdata, $sql_where);
 				
 				if( $sql_type == SQL_INSERT )
 				{
@@ -813,10 +767,7 @@ switch( $mode )
 					$handle_id = $tmp_id;
 					$logdata['log_status'] = STATUS_STANDBY;
 					
-					if( !$db->build(SQL_INSERT, LOG_TABLE, $logdata) )
-					{
-						trigger_error('Impossible de dupliquer la newsletter', ERROR);
-					}
+					$db->build(SQL_INSERT, LOG_TABLE, $logdata);
 					
 					$tmp_id = $db->lastInsertId();
 				}
@@ -829,10 +780,7 @@ switch( $mode )
 					$sql = "SELECT file_id 
 						FROM " . LOG_FILES_TABLE . " 
 						WHERE log_id = " . $handle_id;
-					if( !($result = $db->query($sql)) )
-					{
-						trigger_error('Impossible d\'obtenir les fichiers joints de ce log', ERROR);
-					}
+					$result = $db->query($sql);
 					
 					$sql_values = array();
 					
@@ -847,10 +795,7 @@ switch( $mode )
 							default:
 								$sqldata = array('log_id' => $tmp_id, 'file_id' => $row['file_id']);
 								
-								if( !$db->build(SQL_INSERT, LOG_FILES_TABLE, $sqldata) )
-								{
-									trigger_error('Impossible de dupliquer les fichiers joints', ERROR);
-								}
+								$db->build(SQL_INSERT, LOG_FILES_TABLE, $sqldata);
 								break;
 						}
 					}
@@ -859,10 +804,7 @@ switch( $mode )
 					{
 						$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id) 
 							VALUES " . implode(', ', $sql_values);
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de dupliquer les fichiers joints', ERROR);
-						}
+						$db->query($sql);
 					}
 				}
 				
@@ -985,10 +927,7 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 				AND l.liste_id = $listdata[liste_id]
 		ORDER BY jf.file_real_name ASC";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	$other_files = $joined_files_id = array();
 	

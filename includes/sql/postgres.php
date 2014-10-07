@@ -183,8 +183,11 @@ class Wadb_postgres {
 		}
 		
 		if( !($this->link = $connect($connectString)) || pg_connection_status($this->link) !== PGSQL_CONNECTION_OK ) {
+			$this->errno = -1;
 			$this->error = @$php_errormsg;
 			$this->link  = null;
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$tmp = pg_version($this->link);
@@ -246,11 +249,14 @@ class Wadb_postgres {
 		$this->queries++;
 		
 		if( !$result ) {
+			$this->errno = -1;
 			$this->error = pg_last_error($this->link);
+			throw new SQLException($this->error, $this->errno);
 			
 			$this->rollBack();
 		}
 		else {
+			$this->errno = 0;
 			$this->error = '';
 			
 			if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) ) {
@@ -734,11 +740,9 @@ class WadbBackup_postgres {
 			FROM pg_tables 
 			WHERE tablename NOT LIKE 'pg%' 
 			ORDER BY tablename";
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
-		}
-		
+		$result = $this->db->query($sql);
 		$tables = array();
+		
 		while( $row = $result->fetch() ) {
 			$tables[$row['tablename']] = '';
 		}
@@ -766,9 +770,7 @@ class WadbBackup_postgres {
 			FROM pg_class
 			WHERE NOT relname ~ 'pg_.*' AND relkind ='S'
 			ORDER BY relname";
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible de récupérer les séquences', ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		$contents = '';
 		while( $sequence = $result->column('relname') ) {
@@ -823,9 +825,7 @@ class WadbBackup_postgres {
 				AND a.attrelid = c.oid 
 				AND a.atttypid = t.oid 
 			ORDER BY a.attnum";
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tabledata['name'], ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		$contents .= 'CREATE TABLE ' . $this->db->quote($tabledata['name']) . ' (' . $this->eol;
 		
@@ -835,10 +835,11 @@ class WadbBackup_postgres {
 				WHERE (c.relname = '" . $tabledata['name'] . "') 
 					AND (c.oid = d.adrelid) 
 					AND d.adnum = " . $row['attnum'];
-			if( $res = $this->db->query($sql) ) {
+			try {
+				$res = $this->db->query($sql);
 				$row['rowdefault'] = $res->column('rowdefault');
 			}
-			else {
+			catch( Exception $e ) {
 				unset($row['rowdefault']);
 			}
 			
@@ -878,9 +879,7 @@ class WadbBackup_postgres {
 				AND (ta.attrelid = i.indrelid) 
 				AND (ta.attnum = i.indkey[ia.attnum-1]) 
 			ORDER BY index_name, tab_name, column_name";
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible de récupérer les clés primaires et unique de la table ' . $tabledata['name'], ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		$primary_key = $primary_key_name = '';
 		$index_rows  = array();
@@ -946,9 +945,7 @@ class WadbBackup_postgres {
 						AND c.rcsrc = pg_relcheck.rcsrc 
 						AND c.rcrelid = i.inhparent
 				)";
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible de récupérer les clauses de contraintes de la table ' . $tabledata['name'], ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		//
 		// Add the constraints to the sql file.
@@ -981,9 +978,7 @@ class WadbBackup_postgres {
 		$contents = '';
 		
 		$sql = 'SELECT * FROM ' . $this->db->quote($tablename);
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		$result->setFetchMode(PGSQL_ASSOC);
 		

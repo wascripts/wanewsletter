@@ -247,6 +247,7 @@ class output extends Template {
 		
 		if( defined('IN_ADMIN') )
 		{
+			$sitename = isset($nl_config['sitename']) ? $nl_config['sitename'] : 'Wanewsletter';
 			$this->assign_vars(array(
 				'L_INDEX'       => $lang['Module']['accueil'],
 				'L_CONFIG'      => $lang['Module']['config'],
@@ -257,7 +258,7 @@ class output extends Template {
 				'L_USERS'       => $lang['Module']['users'],
 				'L_STATS'       => $lang['Module']['stats'],
 				
-				'SITENAME'      => wan_htmlspecialchars($nl_config['sitename'], ENT_NOQUOTES),
+				'SITENAME'      => wan_htmlspecialchars($sitename, ENT_NOQUOTES),
 			));
 		}
 		else
@@ -292,18 +293,9 @@ class output extends Template {
 		$dev_infos = (defined('DEV_INFOS') && DEV_INFOS == true);
 		$version = WANEWSLETTER_VERSION;
 		
-		if( $dev_infos )
+		if( $dev_infos && is_object($db) )
 		{
-			$version .= sprintf(' (%s)', substr(get_class($db), 5));
-		}
-		
-		$this->assign_vars( array(
-			'VERSION'   => $version,
-			'TRANSLATE' => ( !empty($lang['TRANSLATE']) ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
-		));
-		
-		if( $dev_infos )
-		{
+			$version  .= sprintf(' (%s)', substr(get_class($db), 5));
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);
 			
@@ -315,20 +307,27 @@ class output extends Template {
 			));
 		}
 		
-		if( !defined('IN_SUBSCRIBE') && !defined('IN_LOGIN') && count($GLOBALS['_php_errors']) > 0 )
+		$this->assign_vars( array(
+			'VERSION'   => $version,
+			'TRANSLATE' => ( !empty($lang['TRANSLATE']) ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
+		));
+		
+		$entries = wanlog();
+		
+		if( count($entries) > 0 )
 		{
-			$error_box = '';
-			foreach( $GLOBALS['_php_errors'] as $entry )
+			$wanlog_box = '';
+			foreach( $entries as $entry )
 			{
 				if( !is_scalar($entry) ) {
-					$entry = nl2br(print_r($entry, true));
+					$entry = print_r($entry, true);
 				}
 				
-				$error_box .= sprintf("<li>%s</li>\n", $entry);
+				$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
 			}
 			
 			$this->assign_vars(array(
-				'PHP_ERROR_BOX' => sprintf('<ul class="warning">%s</ul>', $error_box)
+				'WANLOG_BOX' => sprintf('<ul class="warning" style="font-family:monospace;font-size:12px;">%s</ul>', $wanlog_box)
 			));
 		}
 		
@@ -475,36 +474,26 @@ BASIC;
 		}
 		$str = substr($str, 8);
 		
-		if( defined('IN_CRON') )
+		$title = '<span style="color: #33DD33;">' . $lang['Title']['info'] . '</span>';
+		
+		if( !defined('HEADER_INC') )
 		{
-			exit($str);
+			$this->page_header();
 		}
 		
-		if( !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
-		{
-			$title = '<span style="color: #33DD33;">' . $lang['Title']['info'] . '</span>';
-			
-			if( !defined('HEADER_INC') )
-			{
-				$this->page_header();
-			}
-			
-			$this->set_filenames(array(
-				'body' => 'message_body.tpl'
-			));
-			
-			$this->assign_vars( array(
-				'MSG_TITLE' => $title,
-				'MSG_TEXT'  => $str
-			));
-			
-			$this->pparse('body');
-			
-			$this->page_footer();
-			exit;
-		}
+		$this->set_filenames(array(
+			'body' => 'message_body.tpl'
+		));
 		
-		$message = $str;
+		$this->assign_vars( array(
+			'MSG_TITLE' => $title,
+			'MSG_TEXT'  => $str
+		));
+		
+		$this->pparse('body');
+		
+		$this->page_footer();
+		exit;
 	}
 	
 	/**

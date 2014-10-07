@@ -71,7 +71,7 @@ function decompress_filedata($filename, $file_ext)
 		
 		if( !($fp = @$open($filename, 'rb')) )
 		{
-			trigger_error('Failed_open_file', ERROR);
+			trigger_error('Failed_open_file', E_USER_ERROR);
 		}
 		
 		$data = '';
@@ -90,13 +90,13 @@ function decompress_filedata($filename, $file_ext)
 	{
 		if( !($zip = zip_open($filename)) )
 		{
-			trigger_error('Failed_open_file', ERROR);
+			trigger_error('Failed_open_file', E_USER_ERROR);
 		}
 		
 		$zip_entry = zip_read($zip);
 		if( !zip_entry_open($zip, $zip_entry, 'rb') )
 		{
-			trigger_error('Failed_open_file', ERROR);
+			trigger_error('Failed_open_file', E_USER_ERROR);
 		}
 		
 		$data = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
@@ -390,10 +390,7 @@ switch( $mode )
 						AND al.format    = $format
 						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 				WHERE a.abo_status = " . ABO_ACTIF;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des emails à exporter', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$contents = '';
 			if( $eformat == 'xml' )
@@ -440,7 +437,7 @@ switch( $mode )
 			{
 				if( !($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb')) )
 				{
-					trigger_error('Impossible d\'écrire le fichier de sauvegarde', ERROR);
+					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 				
 				fwrite($fw, $contents);
@@ -726,10 +723,7 @@ switch( $mode )
 						LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 							AND al.liste_id = $listdata[liste_id]
 					WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				//
 				// Traitement des adresses email déjà présentes dans la base de données
@@ -746,10 +740,7 @@ switch( $mode )
 						$sql_data['register_date'] = $current_time;
 						$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 						
-						if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-						{
-							trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
-						}
+						$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
 					}
 					else
 					{
@@ -772,8 +763,10 @@ switch( $mode )
 					$sql_data['abo_email']  = $email;
 					$sql_data['abo_status'] = ABO_ACTIF;
 					
-					if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
-					{
+					try {
+						$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
+					}
+					catch( SQLException $e ) {
 						$report .= sprintf('%s : SQL error (#%d: %s)%s', $email, $db->errno, $db->error, WA_EOL);
 						$db->rollBack();
 						continue;
@@ -787,10 +780,7 @@ switch( $mode )
 					$sql_data['register_date'] = $current_time;
 					$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
 					
-					if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-					{
-						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
-					}
+					$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
 					
 					$db->commit();
 					
@@ -896,10 +886,7 @@ switch( $mode )
 						default:
 							$sql = "INSERT INTO " . BANLIST_TABLE . " (liste_id, ban_email) 
 								VALUES($listdata[liste_id], '" . $db->escape($pattern) . "')";
-							if( !$db->query($sql) )
-							{
-								trigger_error('Impossible de mettre à jour la table des bannis', ERROR);
-							}
+							$db->query($sql);
 							break;
 					}
 				}
@@ -908,10 +895,7 @@ switch( $mode )
 				{
 					$sql = "INSERT INTO " . BANLIST_TABLE . " (liste_id, ban_email) 
 						VALUES " . implode(', ', $sql_values);
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible d\'insérer les données dans la table des bannis', ERROR);
-					}
+					$db->query($sql);
 				}
 			}
 			
@@ -919,10 +903,7 @@ switch( $mode )
 			{
 				$sql = "DELETE FROM " . BANLIST_TABLE . " 
 					WHERE ban_id IN (" . implode(', ', $unban_list_id) . ")";
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les emails bannis sélectionnés', ERROR);
-				}
+				$db->query($sql);
 				
 				//
 				// Optimisation des tables
@@ -940,10 +921,7 @@ switch( $mode )
 		$sql = "SELECT ban_id, ban_email 
 			FROM " . BANLIST_TABLE . " 
 			WHERE liste_id = " . $listdata['liste_id'];
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des masques de bannissement', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$unban_email_box = '<select id="unban_list_id" name="unban_list_id[]" multiple="multiple" size="10">';
 		if( $row = $result->fetch() )
@@ -1006,10 +984,7 @@ switch( $mode )
 							default:
 								$sql = "INSERT INTO " . FORBIDDEN_EXT_TABLE . " (liste_id, fe_ext) 
 									VALUES($listdata[liste_id], '$ext')";
-								if( !$db->query($sql) )
-								{
-									trigger_error('Impossible de mettre à jour la table des extensions interdites', ERROR);
-								}
+								$db->query($sql);
 								break;
 						}
 					}
@@ -1019,10 +994,7 @@ switch( $mode )
 				{
 					$sql = "INSERT INTO " . FORBIDDEN_EXT_TABLE . " (liste_id, fe_ext) 
 						VALUES " . implode(', ', $sql_values);
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de mettre à jour la table des extensions interdites', ERROR);
-					}
+					$db->query($sql);
 				}
 			}
 			
@@ -1030,10 +1002,7 @@ switch( $mode )
 			{
 				$sql = "DELETE FROM " . FORBIDDEN_EXT_TABLE . " 
 					WHERE fe_id IN (" . implode(', ', $ext_list_id) . ")";
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les extensions interdites sélectionnées', ERROR);
-				}
+				$db->query($sql);
 				
 				//
 				// Optimisation des tables
@@ -1051,10 +1020,7 @@ switch( $mode )
 		$sql = "SELECT fe_id, fe_ext 
 			FROM " . FORBIDDEN_EXT_TABLE . " 
 			WHERE liste_id = " . $listdata['liste_id'];
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des extensions interdites', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$reallow_ext_box = '<select id="ext_list_id" name="ext_list_id[]" multiple="multiple" size="10">';
 		if( $row = $result->fetch() )
@@ -1181,7 +1147,7 @@ switch( $mode )
 			{
 				if( !($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb')) )
 				{
-					trigger_error('Impossible d\'écrire le fichier de sauvegarde', ERROR);
+					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 				
 				fwrite($fw, $contents);
@@ -1379,8 +1345,7 @@ switch( $mode )
 			
 			foreach( $queries as $query )
 			{
-				$db->query($query) || trigger_error('Erreur sql lors de la restauration', ERROR);
-				
+				$db->query($query);
 				fake_header(true);
 			}
 			

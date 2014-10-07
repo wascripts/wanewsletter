@@ -31,10 +31,7 @@ if( $mode == 'sendpass' )
 			FROM " . ADMIN_TABLE . "
 			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($login)) . "'
 				AND admin_email = '" . $db->escape($email) . "'";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les informations du compte', CRITICAL_ERROR);
-		}
+		$result = $db->query($sql);
 		
 		if( !($admin_id = $result->column('admin_id')) )
 		{
@@ -75,7 +72,7 @@ if( $mode == 'sendpass' )
 			
 			if( !$mailer->send() )
 			{
-				trigger_error('Failed_sending', ERROR);
+				trigger_error('Failed_sending', E_USER_ERROR);
 			}
 			
 			$hasher = new PasswordHash();

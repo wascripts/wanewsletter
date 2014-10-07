@@ -157,6 +157,7 @@ class Session {
 		}
 		
 		$sql_data = array(
+			'session_id'    => generate_key(),
 			'admin_id'      => $admindata['admin_id'],
 			'session_start' => $current_time,
 			'session_time'  => $current_time,
@@ -164,19 +165,24 @@ class Session {
 			'session_liste' => $liste
 		);
 		
-		if( $this->session_id == '' || !$db->build(SQL_UPDATE, SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id))
-			|| $db->affectedRows() == 0 )
+		if( $this->session_id != '' )
 		{
-			$this->new_session = true;
-			$this->session_id  = $sql_data['session_id'] = generate_key();
+			$db->build(SQL_UPDATE, SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id));
 			
-			if( !$db->build(SQL_INSERT, SESSIONS_TABLE, $sql_data) )
+			if( $db->affectedRows() == 0 )
 			{
-				trigger_error('Impossible de démarrer une nouvelle session', CRITICAL_ERROR);
+				$this->session_id = '';
 			}
 		}
 		
+		if( $this->session_id == '' )
+		{
+			$this->new_session = true;
+			$db->build(SQL_INSERT, SESSIONS_TABLE, $sql_data);
+		}
+		
 		$admindata = array_merge($admindata, $sql_data);
+		$this->session_id = $admindata['session_id'];
 		
 		$sessiondata = array(
 			'adminloginkey' => ( $autologin ) ? $admindata['admin_pwd'] : '',
@@ -238,10 +244,7 @@ class Session {
 					INNER JOIN " . ADMIN_TABLE . " AS a ON a.admin_id = s.admin_id
 				WHERE s.session_id = '{$this->session_id}'
 					AND s.session_start > " . $expiry_time;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer les infos sur la session et l\'utilisateur', CRITICAL_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( $row = $result->fetch() )
 			{
@@ -266,10 +269,7 @@ class Session {
 							SET session_time  = $current_time, 
 								session_liste = $row[session_liste]
 							WHERE session_id = '{$this->session_id}'";
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de mettre à jour la session en cours', CRITICAL_ERROR);
-						}
+						$db->query($sql);
 						
 						if( $force_update )
 						{
@@ -364,10 +364,7 @@ class Session {
 			$sql = "DELETE FROM " . SESSIONS_TABLE . " 
 				WHERE session_id = '{$this->session_id}'
 					AND admin_id = " . $admin_id;
-			if( !$db->query($sql) )
-			{
-				trigger_error('Erreur lors de la fermeture de la session', CRITICAL_ERROR);
-			}
+			$db->query($sql);
 		}
 		
 		$this->is_logged_in = false;
@@ -402,12 +399,8 @@ class Session {
 			$sql .= 'LOWER(a.admin_login) = \'' . $db->escape(strtolower($admin_mixed)) . '\'';
 		}
 		
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les données sur cet utilisateur', CRITICAL_ERROR);
-		}
-		
-		$login = false;
+		$result = $db->query($sql);
+		$login  = false;
 		$hasher = new PasswordHash();
 		
 		if( $admindata = $result->fetch() )
@@ -434,12 +427,11 @@ class Session {
 				$admindata['admin_pwd'] = $hasher->hash($admin_pwd);
 				
 				$sql = sprintf("UPDATE %s SET admin_pwd = '%s' WHERE admin_id = %d",
-					ADMIN_TABLE, $db->escape($admindata['admin_pwd']), $admindata['admin_id']);
-				
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de mettre à jour la table administrateur', CRITICAL_ERROR);
-				}
+					ADMIN_TABLE,
+					$db->escape($admindata['admin_pwd']),
+					$admindata['admin_id']
+				);
+				$db->query($sql);
 			}
 			
 			return $this->open($admindata, $autologin);

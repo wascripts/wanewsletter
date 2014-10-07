@@ -30,10 +30,7 @@ if( count($liste_ids) > 0 )
 			WHERE liste_id IN($sql_liste_ids)
 		)
 		GROUP BY abo_status";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	while( $row = $result->fetch() )
 	{
@@ -53,10 +50,7 @@ if( count($liste_ids) > 0 )
 	$sql = "SELECT SUM(liste_numlogs) AS num_logs 
 		FROM " . LISTE_TABLE . " 
 		WHERE liste_id IN($sql_liste_ids)";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre de logs envoyés', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $tmp = $result->column('num_logs') )
 	{
@@ -70,10 +64,7 @@ if( count($liste_ids) > 0 )
 		FROM " . LOG_TABLE . " 
 		WHERE log_status = " . STATUS_SENT . "
 			AND liste_id IN($sql_liste_ids)";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $tmp = $result->column('last_log') )
 	{
@@ -117,11 +108,12 @@ list($infos) = parseDSN($dsn);
 
 if( $db->engine == 'mysql' )
 {
-	$sql = 'SHOW TABLE STATUS FROM ' . $infos['dbname'];
+	$sql = sprintf("SHOW TABLE STATUS FROM %s", $db->quote($infos['dbname']));
 	
-	if( $result = $db->query($sql) )
-	{
+	try {
+		$result = $db->query($sql);
 		$dbsize = 0;
+		
 		while( $row = $result->fetch() )
 		{
 			$add = false;
@@ -144,8 +136,8 @@ if( $db->engine == 'mysql' )
 			}
 		}
 	}
-	else
-	{
+	catch( SQLException $e ) {
+		wanlog($e);
 		$dbsize = $lang['Not_available'];
 	}
 }
@@ -155,13 +147,13 @@ else if( $db->engine == 'postgres' )
 		FROM pg_tables WHERE schemaname = 'public'
 			AND tablename ~ '^$prefixe'";
 	
-	if( $result = $db->query($sql) )
-	{
+	try {
+		$result = $db->query($sql);
 		$row    = $result->fetch();
 		$dbsize = $row[0];
 	}
-	else
-	{
+	catch( SQLException $e ) {
+		wanlog($e);
 		$dbsize = $lang['Not_available'];
 	}
 }

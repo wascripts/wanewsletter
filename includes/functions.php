@@ -33,12 +33,8 @@ function wa_get_config()
 {
 	global $db;
 	
-	if( !($result = $db->query("SELECT * FROM " . CONFIG_TABLE)) ) {
-		trigger_error("Impossible de charger la configuration du script", E_USER_ERROR);
-		return null;
-	}
-	
-	$row = $result->fetch($result->SQL_FETCH_ASSOC);
+	$result = $db->query("SELECT * FROM " . CONFIG_TABLE);
+	$row    = $result->fetch($result->SQL_FETCH_ASSOC);
 	$config = array();
 	
 	if( isset($row['config_name']) ) {// Wanewsletter 2.4-beta2+
@@ -50,8 +46,7 @@ function wa_get_config()
 		while( $row = $result->fetch() );
 	}
 	else {
-		// TODO: fix it!
-//		trigger_error("La table de configuration du script est obsolète. Mise à jour requise", E_USER_WARNING);
+		trigger_error("La table de configuration du script est obsolète. Mise à jour requise", E_USER_WARNING);
 		$config = $row;
 	}
 	
@@ -75,16 +70,12 @@ function wa_update_config($config, $value = null)
 	}
 	
 	foreach( $config as $name => $value ) {
-		$sql = sprintf(
+		$db->query(sprintf(
 			"UPDATE %s SET config_value = '%s' WHERE config_name = '%s'",
 			CONFIG_TABLE,
 			$db->escape($value),
 			$db->escape($name)
-		);
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de mettre à jour la configuration', E_USER_ERROR);
-		}
+		));
 	}
 }
 
@@ -264,68 +255,197 @@ function load_settings($admindata = array())
 }
 
 /**
- * wan_web_handler()
+ * wan_error_handler()
  * 
  * Gestionnaire d'erreur personnalisé du script (en sortie http)
  * 
  * @param integer $errno      Code de l'erreur
  * @param string  $errstr     Texte proprement dit de l'erreur
  * @param string  $errfile    Fichier où s'est produit l'erreur
- * @param integer $errline    Numéro de la ligne 
- * 
- * @return void
+ * @param integer $errline    Numéro de la ligne
+ *
+ * @return boolean
  */
-function wan_web_handler($errno, $errstr, $errfile, $errline)
+function wan_error_handler($errno, $errstr, $errfile, $errline)
 {
-	global $db, $output, $lang, $message, $php_errormsg;
-	
-	$debug_text = '';
-	
-	if( defined('IN_CRON') && $errno == ERROR )
-	{
-		$errno = CRITICAL_ERROR;
-	}
+	$simple = (defined('IN_COMMANDLINE') || defined('IN_SUBSCRIBE') || defined('IN_WA_FORM') || defined('IN_CRON'));
+	$fatal  = ($errno == E_USER_ERROR || $errno == E_RECOVERABLE_ERROR);
 	
 	//
-	// Dans le cas d'une fonction précédée par @, error_reporting() 
-	// retournera 0, dans ce cas, pas d'affichage d'erreur
+	// On affiche pas les erreurs non prises en compte dans le réglage du
+	// error_reporting si error_reporting vaut 0, sauf si DEBUG_MODE est au max
 	//
-	$display_error = error_reporting(E_ALL);
-	
-	if( $output == null && $display_error ) {// load_settings() par encore appelé
-		$errno = CRITICAL_ERROR;
+	if( !$fatal && (DEBUG_MODE == DEBUG_LEVEL_QUIET
+		|| (DEBUG_MODE == DEBUG_LEVEL_NORMAL && !(error_reporting() & $errno))) )
+	{
+		return true;
 	}
 	
-	if( ( $errno == CRITICAL_ERROR || $errno == ERROR ) && ( defined('IN_ADMIN') || defined('IN_CRON') || DEBUG_MODE ) )
-	{
-		if( !empty($db->error) && DEBUG_MODE > 0 )
-		{
-			$debug_text .= '<b>SQL query</b>&#160;:<br /> ' . nl2br($db->lastQuery) . "<br /><br />\n";
-			$debug_text .= '<b>SQL errno</b>&#160;: ' . $db->errno . "<br />\n";
-			$debug_text .= '<b>SQL error</b>&#160;: ' . $db->error . "<br />\n<br />\n";
+	$message = wan_format_error($errno, $errstr, $errfile, $errline);
+	
+	if( $simple || $fatal ) {
+		wan_display_error($message, $simple);
+		
+		if( $fatal ) {
+			exit(1);
+		}
+	}
+	else {
+		if( USE_WANLOG ) {
+			wanlog($message);
+		}
+		else {
+			wan_display_error($message, true);
+		}
+	}
+	
+	return true;
+}
+
+/**
+ * wan_exception_handler()
+ * 
+ * Gestionnaire d'erreur personnalisé du script (en sortie http)
+ * 
+ * @param Exception $e  Exception "attrapée" par le gestionnaire
+ */
+function wan_exception_handler($e)
+{
+	wan_display_error(wan_format_error($e));
+	exit(1);
+}
+
+/**
+ * wan_format_error()
+ *
+ * Formatage du message d'erreurs
+ *
+ * @param mixed   $e          Code d'erreur OU objet Exception
+ * @param string  $errstr     Texte proprement dit de l'erreur
+ * @param string  $errfile    Fichier où s'est produit l'erreur
+ * @param integer $errline    Numéro de la ligne
+ *
+ * @return string
+ */
+function wan_format_error($e, $errstr = null, $errfile = null, $errline = null)
+{
+	global $db, $lang;
+	
+	if( $e instanceof Exception ) {
+		$errno   = $e->getCode();
+		$errstr  = $e->getMessage();
+		$errfile = $e->getFile();
+		$errline = $e->getLine();
+		$backtrace = $e->getTrace();
+	}
+	else {
+		$errno = $e;
+		$backtrace = debug_backtrace();
+		array_shift($backtrace);// On ne veut pas tenir compte de l'appel à wan_format_error()
+		array_shift($backtrace);// On ne veut pas tenir compte de l'appel au gestionnaire d'erreurs
+	}
+	
+	foreach( $backtrace as $i => &$t ) {
+		$file = wan_htmlspecialchars(str_replace(dirname(dirname(__FILE__)), '~', $t['file']));
+		$call = (isset($t['class']) ? $t['class'].$t['type'] : '') . $t['function'];
+		$t = sprintf('#%d  %s() called at [%s:%d]', $i, $call, $file, $t['line']);
+	}
+	
+	if( count($backtrace) > 0 ) {
+		$backtrace = sprintf("<b>Backtrace:</b>\n%s\n", implode("\n", $backtrace));
+	}
+	else {
+		$backtrace = '';
+	}
+	
+	if( DEBUG_MODE == DEBUG_LEVEL_QUIET ) {
+		// Si on est en mode de non-débogage, on a forcément attrapé une erreur
+		// critique pour arriver ici.
+		$message  = $lang['Message']['Critical_error'];
+	}
+	else if( $e instanceof SQLException ) {
+		$message  = sprintf("<b>%s</b>\n", get_class($e));
+		$message .= "<b>SQL errno:</b> $errno\n";
+		$message .= sprintf("<b>SQL error:</b> %s\n", wan_htmlspecialchars($errstr));
+		$message .= sprintf("<b>SQL query:</b> %s\n", wan_htmlspecialchars($db->lastQuery));
+		$message .= $backtrace;
+	}
+	else {
+		$labels  = array(
+			E_NOTICE => 'PHP Notice',
+			E_WARNING => 'PHP Warning',
+			E_USER_ERROR => 'Error',
+			E_USER_WARNING => 'Warning',
+			E_USER_NOTICE => 'Notice',
+			E_STRICT => 'PHP Strict',
+			E_DEPRECATED => 'PHP Deprecated',
+			E_USER_DEPRECATED => 'Deprecated',
+			E_RECOVERABLE_ERROR => 'PHP Error'
+		);
+		
+		$label = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
+		$errfile = str_replace(dirname(dirname(__FILE__)), '~', $errfile);
+		
+		if( !empty($lang['Message']) && !empty($lang['Message'][$errstr]) ) {
+			$errstr = $lang['Message'][$errstr];
 		}
 		
-		$debug_text .= '<b>Fichier</b>&#160;: ' . basename($errfile) . " \n<b>Ligne</b>&#160;: " . $errline . '<br />';
+		$message = sprintf(
+			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
+			($e instanceof Exception) ? get_class($e) : $label,
+			wan_htmlspecialchars($errstr),
+			wan_htmlspecialchars($errfile),
+			$errline
+		);
+		$message .= $backtrace;
 	}
 	
-	if( $errno != CRITICAL_ERROR && !empty($lang['Message'][$errstr]) )
-	{
-		$errstr = nl2br($lang['Message'][$errstr]);
-	}
+	return $message;
+}
+
+/**
+ * wan_display_error()
+ *
+ * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
+ *
+ * @param string  $message     Message à afficher
+ * @param boolean $simpleHTML  Si true, affichage simple dans un paragraphe
+ */
+function wan_display_error($message, $simpleHTML = false)
+{
+	global $output;
 	
-	if( $debug_text != '' )
-	{
-		$errstr .= "<br /><br />\n\n" . $debug_text;
+	if( defined('IN_COMMANDLINE') ) {
+		if( defined('ANSI_TERMINAL') ) {
+			$message = preg_replace("#<b>#",  "\033[1;31m", $message, 1);
+			$message = preg_replace("#</b>#", "\033[0m", $message, 1);
+			
+			$message = preg_replace("#<b>#",  "\033[1;37m", $message);
+			$message = preg_replace("#</b>#", "\033[0m", $message);
+		}
+		
+		$message = htmlspecialchars_decode($message);
+		
+		// Au cas où le terminal utilise l'encodage utf-8
+		if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) {
+			$message = wan_utf8_encode($message);
+		}
+		
+		fputs(STDERR, $message);
 	}
-	
-	switch( $errno )
-	{
-		case CRITICAL_ERROR:
-			echo <<<BASIC
+	else if( $simpleHTML ) {
+		echo '<p>' . nl2br($message) . '</p>';
+	}
+	else if( $output instanceof output ) {
+		$output->displayMessage($message);
+	}
+	else {
+		$message = nl2br($message);
+		echo <<<BASIC
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html dir="ltr">
 <head>
-	<title>Erreur critique&#160;!</title>
+	<title>Erreur critique&nbsp;!</title>
 	
 	<style>
 	body { margin: 10px; text-align: left; }
@@ -333,127 +453,40 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 </head>
 <body>
 	<div>
-		<h1>Erreur critique&#160;!</h1>
+		<h1>Erreur critique&nbsp;!</h1>
 		
-		<p>$errstr</p>
+		<p>$message</p>
 	</div>
 </body>
 </html>
 BASIC;
-			
-			exit;
-			break;
-		
-		case ERROR:
-			if( defined('IN_CRON') )
-			{
-				exit($errstr);
-			}
-			
-			if( !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
-			{
-				$title = '<span style="color: #DD3333;">' . $lang['Title']['error'] . '</span>';
-				
-				if( !defined('HEADER_INC') )
-				{
-					$output->page_header();
-				}
-				
-				$output->set_filenames(array(
-					'body' => 'message_body.tpl'
-				));
-				
-				$output->assign_vars( array(
-					'MSG_TITLE' => $title,
-					'MSG_TEXT'  => $errstr
-				));
-				
-				$output->pparse('body');
-				
-				$output->page_footer();
-			}
-			
-			$message = $errstr;
-			break;
-		
-		default:
-			$label = array(E_NOTICE => 'Notice', E_WARNING => 'Warning', E_STRICT => 'Strict', E_DEPRECATED => 'Deprecated');
-			
-			$php_errormsg  = '<b>'.(isset($label[$errno]) ? $label[$errno] : 'Unknown Error').'</b>&nbsp;: ';
-			$php_errormsg .= $errstr . ' in <b>' . basename($errfile) . '</b> on line <b>' . $errline . '</b>';
-			
-			if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
-			{
-				if( DISPLAY_ERRORS_IN_BLOCK == TRUE && !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
-				{
-					array_push($GLOBALS['_php_errors'], $php_errormsg);
-				}
-				else
-				{
-					echo '<p>' . $php_errormsg . '</p>';
-				}
-			}
-			break;
 	}
 }
 
 /**
- * wan_cli_handler()
+ * wanlog()
+ *
+ * Si elle est appelée avec un argument, ajoute l'entrée dans le journal,
+ * sinon, renvoie le journal.
  * 
- * Gestionnaire d'erreur personnalisé du script (en ligne de commande)
+ * @param mixed $e  Chaîne d'information ou d'erreur à stocker dans
+ *                  l'historique de Wanewsletter ou objet Exception
  * 
- * @param integer $errno      Code de l'erreur
- * @param string  $errstr     Texte proprement dit de l'erreur
- * @param string  $errfile    Fichier où s'est produit l'erreur
- * @param integer $errline    Numéro de la ligne 
- * 
- * @return void
+ * @return array
  */
-function wan_cli_handler($errno, $errstr, $errfile, $errline)
+function wanlog($e = null)
 {
-	global $db, $lang;
+	static $entries = array();
 	
-	if( !empty($lang['Message'][$errstr]) )
-	{
-		$errstr = $lang['Message'][$errstr];
-	}
-	else {
-		$label = array(E_NOTICE => 'Notice', E_WARNING => 'Warning', E_STRICT => 'Strict', E_DEPRECATED => 'Deprecated');
-		
-		$errstr  = (isset($label[$errno]) ? $label[$errno] : 'Unknown Error').' : "'
-			. $errstr . '" in ' . basename($errfile) . ' on line ' . $errline;
+	if( $e === null ) {
+		return $entries;
 	}
 	
-	$errstr = strip_tags($errstr);
-	
-	if( !empty($db->error) && DEBUG_MODE > 0 )
-	{
-		$errstr .= "\n";
-		$errstr .= 'SQL query: ' . $db->lastQuery . "\n";
-		$errstr .= 'SQL errno: ' . $db->errno . "\n";
-		$errstr .= 'SQL error: ' . $db->error . "\n\n";
+	if( $e instanceof Exception ) {
+		$e = wan_format_error($e);
 	}
 	
-	//
-	// Dans le cas d'une fonction précédée par @, error_reporting() 
-	// retournera 0, dans ce cas, pas d'affichage d'erreur
-	//
-	$display_error = error_reporting(E_ALL);
-	
-	if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) // Au cas où le terminal utilise l'encodage utf-8
-	{
-		$errstr = wan_utf8_encode($errstr);
-	}
-	
-	if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
-	{
-		fputs(STDERR, $errstr . "\n");
-	}
-	
-	if( $errno == CRITICAL_ERROR )
-	{
-		exit(0);
-	}
+	array_push($entries, $e);
 }
 
 /**
@@ -483,21 +516,6 @@ function plain_error($var, $exit = true, $verbose = false)
 	
 	if( $exit ) {
 		exit;
-	}
-}
-
-/**
- * wanlog()
- * 
- * @param string $str  Chaîne d'information ou d'erreur à stocker dans
- *                     l'historique de Wanewsletter
- * 
- * @return void
- */
-function wanlog($str)
-{
-	if( isset($GLOBALS['_php_errors']) ) {
-		array_push($GLOBALS['_php_errors'], $str);
 	}
 }
 
@@ -657,10 +675,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			FROM " . LISTE_TABLE . " 
 			WHERE purge_next < " . time() . " 
 				AND auto_purge = " . TRUE;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les listes de diffusion à purger', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		while( $row = $result->fetch() )
 		{
@@ -681,10 +696,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			WHERE liste_id = $liste_id
 				AND confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
 				AND register_date < " . (time() - ($limitevalidate * 86400));
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les entrées à supprimer de la table abo_liste', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$abo_ids = array();
 		while( $abo_id = $result->column('abo_id') )
@@ -707,18 +719,12 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 					GROUP BY abo_id
 					HAVING COUNT(abo_id) = 1
 				)";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-			}
+			$db->query($sql);
 			
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
 				WHERE abo_id IN($sql_abo_ids)
 					AND liste_id = " . $liste_id;
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les entrées de la table abo_liste', ERROR);
-			}
+			$db->query($sql);
 			
 			$db->commit();
 		}
@@ -726,10 +732,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 		$sql = "UPDATE " . LISTE_TABLE . " 
 			SET purge_next = " . (time() + ($purge_freq * 86400)) . " 
 			WHERE liste_id = " . $liste_id;
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de mettre à jour la table liste', ERROR);
-		}
+		$db->query($sql);
 		
 		return $num_abo_deleted;
 	}

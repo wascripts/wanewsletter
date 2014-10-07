@@ -72,10 +72,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				SET send = 1
 				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
 					AND liste_id = " . $listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-			}
+			$db->query($sql);
 		}
 		
 		ftruncate($fp, 0);
@@ -227,10 +224,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			FROM " . ADMIN_TABLE . " AS a
 				INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
 					AND aa.cc_admin = " . TRUE;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		while( $email = $result->column('admin_email') )
 		{
@@ -258,10 +252,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 					AND al.send      = 0
 			WHERE a.abo_status = " . ABO_ACTIF;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir le nombre d\'adresses emails', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$total_abo = $result->column('total');
 		if( $nl_config['sending_limit'] > 0 )
@@ -281,10 +272,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			$sql .= " LIMIT $nl_config[sending_limit] OFFSET 0";
 		}
 		
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des adresses emails', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		while( $row = $result->fetch() )
 		{
@@ -338,7 +326,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( !$mailer->send() )
 				{
-					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 				}
 				
 				fwrite($fp, implode("\n", $abo_ids[FORMAT_TEXTE])."\n");
@@ -360,7 +348,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( !$mailer->send() )
 				{
-					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 				}
 				
 				fwrite($fp, implode("\n", $abo_ids[FORMAT_HTML])."\n");
@@ -545,12 +533,12 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				fclose($fp);
 				unlink($lockfile);
 				
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 			}
 		}
 		else
 		{
-			trigger_error('Unknown_engine', ERROR);
+			trigger_error('Unknown_engine', E_USER_ERROR);
 		}
 		
 		$result->free();
@@ -585,10 +573,10 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		if( $db->engine == 'mysql' ) {
 			trigger_error("La connexion à la base de données a été perdue.<br />
 Vous devriez mettre l'option PHP mysqli.reconnect à On dans le php.ini,<br />
-pour permettre la reconnexion automatique au serveur.", ERROR);
+pour permettre la reconnexion automatique au serveur.", E_USER_ERROR);
 		}
 		else {
-			trigger_error("La connexion à la base de données a été perdue", ERROR);
+			trigger_error("La connexion à la base de données a été perdue", E_USER_ERROR);
 		}
 	}
 	
@@ -598,10 +586,7 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 			SET send = 1
 			WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
 				AND liste_id = " . $listdata['liste_id'];
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
-		}
+		$db->query($sql);
 	}
 	
 	$sql = "SELECT COUNT(*) AS num_dest, al.send
@@ -611,10 +596,7 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 		WHERE al.liste_id    = $listdata[liste_id]
 			AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 		GROUP BY al.send";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre d\'envois restants à faire', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	while( $row = $result->fetch() )
 	{
@@ -660,26 +642,17 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 				SET log_status = " . STATUS_SENT . ",
 					log_numdest = $sent
 				WHERE log_id = " . $logdata['log_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
-			}
+			$db->query($sql);
 			
 			$sql = "UPDATE " . ABO_LISTE_TABLE . "
 				SET send = 0
 				WHERE liste_id = " . $listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-			}
+			$db->query($sql);
 			
 			$sql = "UPDATE " . LISTE_TABLE . "
 				SET liste_numlogs = liste_numlogs + 1
 				WHERE liste_id = " . $listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des listes', ERROR);
-			}
+			$db->query($sql);
 			
 			$db->commit();
 			

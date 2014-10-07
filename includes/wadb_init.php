@@ -11,6 +11,8 @@ if( !defined('_INC_WADB_INIT') ) {
 
 define('_INC_WADB_INIT', true);
 
+class SQLException extends Exception { }
+
 //
 // Tables du script 
 //
@@ -148,7 +150,7 @@ function parseDSN($dsn)
 		switch( $key ) {
 			case 'scheme':
 				if( !in_array($value, array('mysql', 'postgres', 'sqlite')) ) {
-					trigger_error("Unsupported database", CRITICAL_ERROR);
+					trigger_error("Unsupported database", E_USER_ERROR);
 					return false;
 				}
 				else {
@@ -196,7 +198,7 @@ function parseDSN($dsn)
 			$infos['driver'] = 'sqlite_pdo';
 		}
 		else if( !extension_loaded('sqlite') ) {
-			trigger_error("No SQLite3, PDO/SQLite or SQLite extension loaded !", CRITICAL_ERROR);
+			trigger_error("No SQLite3, PDO/SQLite or SQLite extension loaded !", E_USER_ERROR);
 		}
 		
 		if( is_readable($infos['dbname']) && filesize($infos['dbname']) > 0 ) {
@@ -206,12 +208,12 @@ function parseDSN($dsn)
 			
 			if( strcmp($info, 'SQLite format 3') == 0 ) {
 				if( $infos['driver'] == 'sqlite' ) {
-					trigger_error("No SQLite3 or PDO/SQLite extension loaded !", CRITICAL_ERROR);
+					trigger_error("No SQLite3 or PDO/SQLite extension loaded !", E_USER_ERROR);
 				}
 			}
 			else if( $infos['driver'] != 'sqlite' ) {
 				if( !extension_loaded('sqlite') ) {
-					trigger_error("SQLite extension isn't loaded !", CRITICAL_ERROR);
+					trigger_error("SQLite extension isn't loaded !", E_USER_ERROR);
 				}
 				else {
 					$infos['driver'] = 'sqlite';
@@ -231,7 +233,7 @@ function parseDSN($dsn)
 function WaDatabase($dsn)
 {
 	if( !($tmp = parseDSN($dsn)) ) {
-		trigger_error("Invalid DSN argument", CRITICAL_ERROR);
+		trigger_error("Invalid DSN argument", E_USER_ERROR);
 		return false;
 	}
 	
@@ -290,9 +292,9 @@ function exec_queries(&$queries)
 	
 	foreach( $queries as $query )
 	{
-		if( !empty($query) && !$db->query($query) )
+		if( !empty($query) )
 		{
-			trigger_error("Erreur lors de l'execution de la requète SQL", E_USER_ERROR);
+			$db->query($query);
 		}
 	}
 	

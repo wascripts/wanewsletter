@@ -170,13 +170,16 @@ class Wadb_mysql {
 			$this->errno = mysql_errno();
 			$this->error = mysql_error();
 			$this->link  = null;
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else if( !mysql_select_db($this->dbname) ) {
 			$this->errno = mysql_errno($this->link);
 			$this->error = mysql_error($this->link);
-			
 			mysql_close($this->link);
 			$this->link  = null;
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->serverVersion = mysql_get_server_info($this->link);
@@ -239,6 +242,7 @@ class Wadb_mysql {
 			$this->errno = mysql_errno($this->link);
 			$this->error = mysql_error($this->link);
 			$this->lastQuery = $query;
+			throw new SQLException($this->error, $this->errno);
 			
 			$this->rollBack();
 		}
@@ -710,11 +714,9 @@ class WadbBackup_mysql {
 	 */
 	function get_tables()
 	{
-		if( !($result = $this->db->query('SHOW TABLE STATUS FROM ' . $this->db->quote($this->db->dbname))) ) {
-			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
-		}
-		
+		$result = $this->db->query('SHOW TABLE STATUS FROM ' . $this->db->quote($this->db->dbname));
 		$tables = array();
+		
 		while( $row = $result->fetch() ) {
 			$tables[$row['Name']] = $row['Engine'];
 		}
@@ -754,10 +756,7 @@ class WadbBackup_mysql {
 			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
-		if( !($result = $this->db->query('SHOW CREATE TABLE ' . $this->db->quote($tabledata['name']))) ) {
-			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
-		}
-		
+		$result = $this->db->query('SHOW CREATE TABLE ' . $this->db->quote($tabledata['name']));
 		$create_table = $result->column('Create Table');
 		$result->free();
 		
@@ -779,9 +778,7 @@ class WadbBackup_mysql {
 		$contents = '';
 		
 		$sql = 'SELECT * FROM ' . $this->db->quote($tablename);
-		if( !($result = $this->db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		$result->setFetchMode(MYSQL_ASSOC);
 		

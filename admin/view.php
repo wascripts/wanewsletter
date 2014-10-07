@@ -99,19 +99,16 @@ else if( $mode == 'export' )
 	$sql = "SELECT log_subject, log_body_text, log_body_html
 		FROM " . LOG_TABLE . "
 		WHERE log_id = " . $log_id;
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir les données de l\'archive', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( !($logdata = $result->fetch()) )
 	{
-		trigger_error('log_not_exists', ERROR);
+		trigger_error('log_not_exists', E_USER_ERROR);
 	}
 	
 	if( @chdir(WA_TMPDIR) == false )
 	{
-		trigger_error(sprintf($lang['Message']['Chdir_error'], WA_TMPDIR), ERROR);
+		trigger_error(sprintf($lang['Message']['Chdir_error'], WA_TMPDIR), E_USER_ERROR);
 	}
 	
 	@include $classfile;
@@ -126,7 +123,7 @@ else if( $mode == 'export' )
 	}
 	
 	$archive = new $classname($archive_name, $compressed);
-	//$archive->setErrorHandling(PEAR_ERROR_TRIGGER, ERROR);
+	//$archive->setErrorHandling(PEAR_ERROR_TRIGGER, E_USER_ERROR);
 	
 	if( !file_exists('newsletter') )
 	{
@@ -146,10 +143,7 @@ else if( $mode == 'export' )
 			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 				AND l.log_id   = $log_id
 		ORDER BY jf.file_real_name ASC";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des fichiers joints au log', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	//
 	// Copie des fichiers joints dans le répertoire temporaire WA_TMPDIR/newsletter
@@ -227,10 +221,7 @@ else if( $mode == 'iframe' )
 	$sql = "SELECT $body_type
 		FROM " . LOG_TABLE . "
 		WHERE log_id = $log_id AND liste_id = " . $listdata['liste_id'];
-	if( !($result = $db->query($sql)) )
-	{
-		$output->basic('Impossible d\'obtenir les données sur ce log');
-	}
+	$result = $db->query($sql);
 	
 	if( $row  = $result->fetch() )
 	{
@@ -396,10 +387,7 @@ else if( $mode == 'abonnes' )
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
 			WHERE a.abo_id = $abo_id";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les données sur cet abonné', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		if( $row = $result->fetch() )
 		{
@@ -516,10 +504,7 @@ else if( $mode == 'abonnes' )
 				$sql = "SELECT liste_id
 					FROM " . ABO_LISTE_TABLE . "
 					WHERE abo_id = " . $abo_id;
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible de récupérer les données sur l\'abonné', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				$tmp_ids = array();
 				while( $tmp_id = $result->column('liste_id') )
@@ -556,10 +541,7 @@ else if( $mode == 'abonnes' )
 					}
 				}
 				
-				if( !$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id)) )
-				{
-					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-				}
+				$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id));
 				
 				$formatList = ( !empty($_POST['format']) && is_array($_POST['format']) ) ? $_POST['format'] : array();
 				
@@ -581,10 +563,7 @@ else if( $mode == 'abonnes' )
 							SET format = $format
 							WHERE abo_id = $abo_id
 								AND liste_id IN(" . implode(', ', $sql_ids) . ")";
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de mettre à jour la table abo_liste', ERROR);
-						}
+						$db->query($sql);
 					}
 				}
 				
@@ -617,10 +596,7 @@ else if( $mode == 'abonnes' )
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
 			WHERE a.abo_id = $abo_id";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les données sur cet abonné', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		if( $row = $result->fetch() )
 		{
@@ -734,18 +710,12 @@ else if( $mode == 'abonnes' )
 					GROUP BY abo_id
 					HAVING COUNT(abo_id) = 1
 				)";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-			}
+			$db->query($sql);
 			
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
 				WHERE abo_id IN(" . implode(', ', $abo_ids) . ") 
 					AND liste_id = " . $listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les entrées de la table abo_liste', ERROR);
-			}
+			$db->query($sql);
 			
 			$db->commit();
 			
@@ -792,10 +762,7 @@ else if( $mode == 'abonnes' )
 						INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 							AND al.liste_id = $listdata[liste_id]
 					WHERE a.abo_email IN($sql_list)";
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir les ID des adresses email entrées', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				if( $abo_id = $result->column('abo_id') )
 				{
@@ -850,10 +817,7 @@ else if( $mode == 'abonnes' )
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 				AND al.liste_id  = $listdata[liste_id]
 				AND al.confirmed = $abo_confirmed $sql_search_date $sql_search";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre d\'abonnés', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	$total_abo = $result->column('total_abo');
 	
@@ -866,11 +830,7 @@ else if( $mode == 'abonnes' )
 					AND al.confirmed = $abo_confirmed $sql_search_date $sql_search
 			ORDER BY $sql_type " . $sql_order . "
 			LIMIT $abo_per_page OFFSET $start";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des abonnés', ERROR);
-		}
-		
+		$result = $db->query($sql);
 		$aborow = $result->fetchAll();
 		
 		$total_pages = ceil($total_abo / $abo_per_page);
@@ -1173,10 +1133,7 @@ else if( $mode == 'liste' )
 					$sql_where['liste_id'] = $listdata['liste_id'];
 				}
 				
-				if( !$db->build($sql_type, LISTE_TABLE, $sql_data, $sql_where) )
-				{
-					trigger_error('Impossible de mettre à jour la table des listes', ERROR);
-				}
+				$db->build($sql_type, LISTE_TABLE, $sql_data, $sql_where);
 				
 				if( $action == 'add' )
 				{
@@ -1186,10 +1143,7 @@ else if( $mode == 'liste' )
 						SET session_liste = $new_liste_id 
 						WHERE session_id = '{$session->session_id}' 
 							AND admin_id = " . $admindata['admin_id'];
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de mettre à jour le session_liste', ERROR);
-					}
+					$db->query($sql);
 				}
 				
 				$target = './view.php?mode=liste';
@@ -1303,10 +1257,7 @@ else if( $mode == 'liste' )
 			
 			$sql = "DELETE FROM " . AUTH_ADMIN_TABLE . " 
 				WHERE liste_id = " . $listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les entrées de la table des permissions', ERROR);
-			}
+			$db->query($sql);
 			
 			$update_abo_ids = $delete_abo_ids = array();
 			
@@ -1321,10 +1272,7 @@ else if( $mode == 'liste' )
 					)
 					GROUP BY abo_id
 					HAVING COUNT(abo_id) = 1";
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir la liste des comptes à supprimer', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				$delete_abo_ids = array();
 				while( $abo_id = $result->column('abo_id') )
@@ -1339,18 +1287,12 @@ else if( $mode == 'liste' )
 				{
 					$sql = "DELETE FROM " . ABONNES_TABLE . " 
 						WHERE abo_id IN(" . implode(', ', $delete_abo_ids) . ")";
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-					}
+					$db->query($sql);
 				}
 				
 				$sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
 					WHERE liste_id = " . $listdata['liste_id'];
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les entrées de la table abo_liste', ERROR);
-				}
+				$db->query($sql);
 				
 				//
 				// Suppression des archives et éventuelles pièces jointes
@@ -1358,10 +1300,7 @@ else if( $mode == 'liste' )
 				$sql = "SELECT log_id 
 					FROM " . LOG_TABLE . " 
 					WHERE liste_id = " . $listdata['liste_id'];
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir la liste des logs', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				$log_ids = array();
 				while( $log_id = $result->column('log_id') )
@@ -1376,10 +1315,7 @@ else if( $mode == 'liste' )
 				
 				$sql = "DELETE FROM " . LOG_TABLE . "
 					WHERE liste_id = " . $listdata['liste_id'];
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les entrées de la table des logs', ERROR);
-				}
+				$db->query($sql);
 				
 				include WA_ROOTDIR . '/includes/functions.stats.php';
 				remove_stats($listdata['liste_id']);
@@ -1388,7 +1324,7 @@ else if( $mode == 'liste' )
 			{
 				if( !isset($auth->listdata[$liste_id]) )
 				{
-					trigger_error('No_liste_id', ERROR);
+					trigger_error('No_liste_id', E_USER_ERROR);
 				}
 				
 				$sql = "SELECT abo_id
@@ -1398,10 +1334,7 @@ else if( $mode == 'liste' )
 						FROM " . ABO_LISTE_TABLE . "
 						WHERE liste_id = $listdata[liste_id]
 					) AND liste_id = " . $liste_id;
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir la liste des entrées inutiles de la table abo_liste', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				$delete_abo_ids = array();
 				while( $abo_id = $result->column('abo_id') )
@@ -1416,10 +1349,7 @@ else if( $mode == 'liste' )
 						FROM " . ABO_LISTE_TABLE . "
 						WHERE liste_id = $listdata[liste_id]
 					) AND liste_id <> " . $liste_id;
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir la liste des entrées à mettre à jour', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				$update_abo_ids = array();
 				while( $abo_id = $result->column('abo_id') )
@@ -1434,10 +1364,7 @@ else if( $mode == 'liste' )
 					$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
 						WHERE abo_id IN(" . implode(', ', $delete_abo_ids) . ")
 							AND liste_id = " . $listdata['liste_id'];
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de supprimer les entrées inutiles de la table abo_liste', ERROR);
-					}
+					$db->query($sql);
 				}
 				
 				//
@@ -1448,10 +1375,7 @@ else if( $mode == 'liste' )
 						SET liste_id = $liste_id
 						WHERE abo_id IN(" . implode(', ', $update_abo_ids) . ")
 							AND liste_id = " . $listdata['liste_id'];
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de mettre à jour les entrées de la table abo_liste', ERROR);
-					}
+					$db->query($sql);
 				}
 				
 				//
@@ -1460,10 +1384,7 @@ else if( $mode == 'liste' )
 				$sql = "UPDATE " . LOG_TABLE . " 
 					SET liste_id = $liste_id 
 					WHERE liste_id = " . $listdata['liste_id'];
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les entrées de la table des logs', ERROR);
-				}
+				$db->query($sql);
 				
 				include WA_ROOTDIR . '/includes/functions.stats.php';
 				remove_stats($listdata['liste_id'], $liste_id);
@@ -1471,10 +1392,7 @@ else if( $mode == 'liste' )
 			
 			$sql = "DELETE FROM " . LISTE_TABLE . " 
 				WHERE liste_id = " . $listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer l\'entrée de la table des listes', ERROR);
-			}
+			$db->query($sql);
 			
 			$db->commit();
 			
@@ -1567,10 +1485,7 @@ else if( $mode == 'liste' )
 		FROM " . ABO_LISTE_TABLE . "
 		WHERE liste_id = $listdata[liste_id]
 		GROUP BY confirmed";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	while( $row = $result->fetch() )
 	{
@@ -1591,10 +1506,7 @@ else if( $mode == 'liste' )
 		FROM " . LOG_TABLE . " 
 		WHERE log_status = " . STATUS_SENT . "
 			AND liste_id = " . $listdata['liste_id'];
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $tmp = $result->column('last_log') )
 	{
@@ -1762,10 +1674,7 @@ else if( $mode == 'log' )
 			
 			$sql = "DELETE FROM " . LOG_TABLE . " 
 				WHERE log_id IN(" . implode(', ', $log_ids) . ")";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les logs', ERROR);
-			}
+			$db->query($sql);
 			
 			require WA_ROOTDIR . '/includes/class.attach.php';
 			
@@ -1849,10 +1758,7 @@ else if( $mode == 'log' )
 		FROM " . LOG_TABLE . " 
 		WHERE log_status = " . STATUS_SENT . " 
 			AND liste_id = " . $listdata['liste_id'];
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre de logs', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	$total_logs = $result->column('total_logs');
 	
@@ -1868,10 +1774,7 @@ else if( $mode == 'log' )
 				AND liste_id = $listdata[liste_id]
 			ORDER BY $sql_type " . $sql_order . "
 			LIMIT $log_per_page OFFSET $start";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des logs', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		while( $row = $result->fetch() )
 		{
@@ -1890,10 +1793,7 @@ else if( $mode == 'log' )
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.log_id = l.log_id
 			WHERE jf.file_id = lf.file_id
 			GROUP BY l.log_id";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les nombres de fichiers joints par log', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$files_count = array();
 		while( $row = $result->fetch() )
@@ -1929,10 +1829,7 @@ else if( $mode == 'log' )
 						AND l.liste_id = $listdata[liste_id]
 						AND l.log_id   = $log_id
 				ORDER BY jf.file_real_name ASC";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des fichiers joints au log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$logdata['joined_files'] = $result->fetchAll();
 		}

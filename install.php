@@ -175,31 +175,30 @@ if( $start )
 			FROM " . ADMIN_TABLE . " 
 			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($login)) . "'
 				AND admin_level = " . ADMIN;
-		if( $result = $db->query($sql) )
+		$result = $db->query($sql);
+		
+		if( $row = $result->fetch() )
 		{
-			if( $row = $result->fetch() )
+			$hasher = new PasswordHash();
+			
+			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
+			if( $row['admin_pwd'][0] != '$' )
 			{
-				$hasher = new PasswordHash();
-				
-				// Ugly old md5 hash prior Wanewsletter 2.4-beta2
-				if( $row['admin_pwd'][0] != '$' )
-				{
-					if( $row['admin_pwd'] === md5($passwd) )
-					{
-						$login = true;
-					}
-				}
-				// New password hash using phpass
-				else if( $hasher->check($passwd, $row['admin_pwd']) )
+				if( $row['admin_pwd'] === md5($passwd) )
 				{
 					$login = true;
 				}
-				
-				if( $login )
-				{
-					$admin_email  = $row['admin_email'];
-					$confirm_pass = $admin_pass;
-				}
+			}
+			// New password hash using phpass
+			else if( $hasher->check($passwd, $row['admin_pwd']) )
+			{
+				$login = true;
+			}
+			
+			if( $login )
+			{
+				$admin_email  = $row['admin_email'];
+				$confirm_pass = $admin_pass;
 			}
 		}
 		

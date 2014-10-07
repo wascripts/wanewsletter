@@ -36,10 +36,7 @@ $sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_m
 		INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 			AND l.liste_id = $listdata[liste_id]
 	WHERE $sql_where";
-if( !($result = $db->query($sql)) )
-{
-	plain_error('Impossible de récupérer les données sur le fichier : ' . $db->error);
-}
+$result = $db->query($sql);
 
 if( $filedata = $result->fetch() )
 {

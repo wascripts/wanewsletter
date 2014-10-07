@@ -80,10 +80,7 @@ class Auth {
 				LEFT JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = $admin_id
 					AND aa.liste_id = li.liste_id
 			ORDER BY li.liste_name ASC";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les données des listes de diffusion', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$tmp_ary = array();
 		while( $row = $result->fetch() )

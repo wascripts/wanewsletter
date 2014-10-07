@@ -1,5 +1,5 @@
 
-{PHP_ERROR_BOX}
+{WANLOG_BOX}
 </div>
 
 <hr />

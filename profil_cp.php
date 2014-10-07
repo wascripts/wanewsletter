@@ -53,10 +53,7 @@ function check_login($email, $regkey = null)
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
 		WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible de récupérer les données de l\'abonné', CRITICAL_ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $row = $result->fetch() )
 	{
@@ -273,7 +270,7 @@ switch( $mode )
 				
 				if( !$mailer->send() )
 				{
-					trigger_error('Failed_sending', ERROR);
+					trigger_error('Failed_sending', E_USER_ERROR);
 				}
 				
 				$output->displayMessage('IDs_sended');
@@ -334,10 +331,7 @@ switch( $mode )
 					$sql = "SELECT COUNT(*) AS test
 						FROM " . ABONNES_TABLE . "
 						WHERE LOWER(abo_email) = '" . $db->escape(strtolower($new_email)) . "'";
-					if( !($result = $db->query($sql)) )
-					{
-						trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
-					}
+					$result = $db->query($sql);
 					
 					if( $result->column('test') != 0 )
 					{
@@ -399,10 +393,7 @@ switch( $mode )
 					}
 				}
 				
-				if( !$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id'])) )
-				{
-					trigger_error('Impossible de mettre le profil à jour', ERROR);
-				}
+				$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id']));
 				
 				$output->redirect('profil_cp.php', 4);
 				$output->displayMessage('Profile_updated');
@@ -474,14 +465,12 @@ switch( $mode )
 				$output->displayMessage('No_log_id');
 			}
 			
-			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
+			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name,
+					jf.file_physical_name, jf.file_size, jf.file_mimetype 
 				FROM " . JOINED_FILES_TABLE . " AS jf
 					INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 						AND lf.log_id IN(" . implode(', ', $sql_log_id) . ")";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$files = array();
 			while( $row = $result->fetch() )
@@ -493,10 +482,7 @@ switch( $mode )
 				FROM " . LOG_TABLE . " 
 				WHERE log_id IN(" . implode(', ', $sql_log_id) . ") 
 					AND log_status = " . STATUS_SENT;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer la liste des archives', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			require WAMAILER_DIR . '/class.mailer.php';
 			require WA_ROOTDIR . '/includes/class.attach.php';
@@ -720,7 +706,7 @@ switch( $mode )
 				// envoi
 				if( !$mailer->send() )
 				{
-					trigger_error('Failed_sending', ERROR);
+					trigger_error('Failed_sending', E_USER_ERROR);
 				}
 			}
 			
@@ -738,10 +724,7 @@ switch( $mode )
 			WHERE liste_id IN(" . implode(', ', $liste_ids) . ") 
 				AND log_status = " . STATUS_SENT . " 
 			ORDER BY log_date DESC";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de récupérer la liste des archives', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		while( $row = $result->fetch() )
 		{
