@@ -1119,11 +1119,13 @@ function http_get_contents($URL, &$errstr)
 	
 	$port = !isset($part['port']) ? 80 : $part['port'];
 	
-	if( !($fs = fsockopen($part['host'], $port, $null, $null, 10)) )
+	if( !($fs = fsockopen($part['host'], $port, $null, $null, 5)) )
 	{
 		$errstr = sprintf($lang['Message']['Unaccess_host'], wan_htmlspecialchars($part['host']));
 		return false;
 	}
+	
+	stream_set_timeout($fs, 5);
 	
 	$path  = !isset($part['path']) ? '/' : $part['path'];
 	$path .= !isset($part['query']) ? '' : '?'.$part['query'];
