@@ -71,9 +71,14 @@ if( !isset($supported_db[$infos['engine']]) && defined('NL_INSTALLED') )
 	message($lang['DB_type_undefined']);
 }
 
-if( $infos['engine'] == 'sqlite' && !defined('NL_INSTALLED') )
+if( $infos['engine'] == 'sqlite' )
 {
-	$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/data/db') . '/wanewsletter.sqlite';
+	$infos['host'] = null;
+	
+	if( !defined('NL_INSTALLED') )
+	{
+		$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/data/db') . '/wanewsletter.sqlite';
+	}
 }
 
 if( !empty($infos['dbname']) )
