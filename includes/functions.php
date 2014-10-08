@@ -421,7 +421,11 @@ function wan_format_error($e, $errstr = null, $errfile = null, $errline = null)
 		$message  = sprintf("<b>%s</b>\n", get_class($e));
 		$message .= "<b>SQL errno:</b> $errno\n";
 		$message .= sprintf("<b>SQL error:</b> %s\n", wan_htmlspecialchars($errstr));
-		$message .= sprintf("<b>SQL query:</b> %s\n", wan_htmlspecialchars($db->lastQuery));
+		
+		if( is_object($db) ) {
+			$message .= sprintf("<b>SQL query:</b> %s\n", wan_htmlspecialchars($db->lastQuery));
+		}
+		
 		$message .= $backtrace;
 	}
 	else {
