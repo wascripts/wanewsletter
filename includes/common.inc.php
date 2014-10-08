@@ -58,35 +58,25 @@ if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
 	@include WA_ROOTDIR . '/includes/config.inc.php';
 }
 
-if( !defined('IN_INSTALL') && !defined('NL_INSTALLED') )
-{
-	if( !empty($_SERVER['SERVER_SOFTWARE']) && preg_match("#Microsoft|WebSTAR|Xitami#i", $_SERVER['SERVER_SOFTWARE']) )
-	{
-		$header_location = 'Refresh: 0; URL=';
-	}
-	else
-	{
-		$header_location = 'Location: ';
-	}
-	
-	header($header_location . sprintf('%s/install.php', WA_ROOTDIR));
-	exit;
-}
-
 require WA_ROOTDIR . '/includes/compat.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';
 require WA_ROOTDIR . '/includes/class.phpass.php';
 
+if( !defined('IN_INSTALL') && !defined('NL_INSTALLED') )
+{
+	http_redirect(sprintf('%s/install.php', WA_ROOTDIR));
+}
+
+//
+// Configuration des gestionnaires d'erreurs et d'exceptions
+//
 set_error_handler('wan_error_handler');
 set_exception_handler('wan_exception_handler');
 
 load_settings();
 
-//
-// Appel du gestionnaire d'erreur 
-//
 if( defined('IN_COMMANDLINE') )
 {
 	//
