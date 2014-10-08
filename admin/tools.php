@@ -182,7 +182,11 @@ else if( $admindata['session_liste'] )
 //
 // Affichage de la boîte de sélection des modules
 //
-if( !isset($_POST['submit']) )
+
+// Exception téléchargement du rapport post-importation
+$getreport = ($mode == 'import' && isset($_GET['action']) && $_GET['action'] == 'getreport');
+
+if( !isset($_POST['submit']) && !$getreport )
 {
 	if( $mode != 'backup' && $mode != 'restore' )
 	{
@@ -503,6 +507,22 @@ switch( $mode )
 		break;
 	
 	case 'import':
+		$report_filename = WA_TMPDIR . '/wa_import_report.txt';
+		
+		if( isset($_GET['action']) && $_GET['action'] == 'getreport' )
+		{
+			if( !is_readable($report_filename) )
+			{
+				trigger_error("Impossible de récupérer le rapport. Le fichier est absent ou inaccessible", E_USER_ERROR);
+			}
+			
+			$data = file_get_contents($report_filename);
+			
+			include WA_ROOTDIR . '/includes/class.attach.php';
+			
+			Attach::send_file(basename($report_filename), 'text/plain', $data);
+		}
+		
 		if( isset($_POST['submit']) )
 		{
 			$list_email  = ( !empty($_POST['list_email']) ) ? trim($_POST['list_email']) : '';
@@ -794,7 +814,7 @@ switch( $mode )
 			//
 			if( $report != '' )
 			{
-				if( is_writable(WA_TMPDIR) && ($fw = fopen(WA_TMPDIR . '/wa_import_report.txt', 'w')) )
+				if( $fw = fopen($report_filename, 'w') )
 				{
 					$report_str  = '#' . WA_EOL;
 					$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
@@ -806,7 +826,7 @@ switch( $mode )
 					fwrite($fw, $report_str);
 					fclose($fw);
 					
-					$output->addLine($lang['Message']['Success_import3'], WA_TMPDIR . '/wa_import_report.txt');
+					$output->addLine($lang['Message']['Success_import3'], 'tools.php?mode=import&action=getreport');
 				}
 				else
 				{
