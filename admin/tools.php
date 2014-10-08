@@ -203,8 +203,12 @@ if( !isset($_POST['submit']) && !$getreport )
 	$tools_box = '<select id="mode" name="mode">';
 	foreach( $tools_ary as $tool_name )
 	{
-		$selected = ( $mode == $tool_name ) ? ' selected="selected"' : '';
-		$tools_box .= sprintf("<option value=\"%s\"%s> %s </option>\n\t", $tool_name, $selected, $lang['Title'][$tool_name]);
+		$tools_box .= sprintf(
+			"<option value=\"%s\"%s> %s </option>\n\t",
+			$tool_name,
+			$mode == $tool_name ? ' selected="selected"' : '',
+			$lang['Title'][$tool_name]
+		);
 	}
 	$tools_box .= '</select>';
 	
@@ -374,12 +378,6 @@ switch( $mode )
 	case 'export':
 		if( isset($_POST['submit']) )
 		{
-			if( $action == 'store' && !is_writable(WA_TMPDIR) )
-			{
-				$output->displayMessage(sprintf($lang['Message']['Dir_not_writable'],
-					wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
-			}
-			
 			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
 			{
 				$format = $listdata['liste_format'];
@@ -406,7 +404,7 @@ switch( $mode )
 				
 				$format = ( $format == FORMAT_HTML ) ? 'HTML' : 'text';
 				$contents  = '<' . '?xml version="1.0"?' . ">\n"
-					. "<!-- Date : " . date('d/m/Y H:i:s O') . " - Format : $format -->\n"
+					. "<!-- Date : " . date(DATE_RFC2822) . " - Format : $format -->\n"
 					. "<Wanliste>\n" . $contents . "</Wanliste>\n";
 				
 				$mime_type = 'application/xml';
@@ -1118,12 +1116,6 @@ switch( $mode )
 		
 		if( isset($_POST['submit']) )
 		{
-			if( $action == 'store' && !is_writable(WA_TMPDIR) )
-			{
-				$output->displayMessage(sprintf($lang['Message']['Dir_not_writable'],
-					wan_htmlspecialchars(wa_realpath(WA_TMPDIR))));
-			}
-			
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql 
 			//
