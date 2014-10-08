@@ -250,7 +250,6 @@ $lang['Message']['Inactive_account']        = "Your account is actually inactive
 $lang['Message']['IDs_sended']              = "Your identifiers were sent to you by email";
 $lang['Message']['Logs_sent']               = "The selected newsletters were sent at your address: %s";
 $lang['Message']['Archive_class_needed']    = "The export module needs the <q>%s</q> <abbr title=\"PHP Extension and Application Repository\">PEAR</abbr> package. Please refer to the documentation for more details.";
-$lang['Message']['Chdir_error']             = "Unable to set current directory with %s (chdir() error)";
 $lang['Message']['Twice_sending']           = "A newsletter is already in the course of sending for this list. Finish or cancel this sending before beginning another of them.";
 
 $lang['Message']['Invalid_cookie_name']     = "The white space characters, equal sign, comma and semi-colon are not allowed in the cookie name.";

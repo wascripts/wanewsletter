@@ -74,23 +74,23 @@ else if( $mode == 'export' )
 	
 	if( EXPORT_FORMAT == 'Zip' )
 	{
-		$archive_name = 'newsletter.zip';
-		$mime_type    = 'application/zip';
-		$classname    = 'Archive_Zip';
-		$classfile    = 'Archive/Zip.php';
+		$filename  = 'newsletter.zip';
+		$mime_type = 'application/zip';
+		$classname = 'Archive_Zip';
+		$classfile = 'Archive/Zip.php';
 	}
 	else
 	{
-		$archive_name = 'newsletter.tar';
-		$mime_type    = 'application/x-tar';
-		$classname    = 'Archive_Tar';
-		$classfile    = 'Archive/Tar.php';
+		$filename  = 'newsletter.tar';
+		$mime_type = 'application/x-tar';
+		$classname = 'Archive_Tar';
+		$classfile = 'Archive/Tar.php';
 		
 		if( extension_loaded('zlib') )
 		{
-			$archive_name .= '.gz';
-			$compressed    = 'gz';
-			$mime_type     = 'application/x-gtar';
+			$filename  .= '.gz';
+			$compressed = 'gz';
+			$mime_type  = 'application/x-gtar';
 		}
 	}
 	
@@ -106,11 +106,6 @@ else if( $mode == 'export' )
 		trigger_error('log_not_exists', E_USER_ERROR);
 	}
 	
-	if( @chdir(WA_TMPDIR) == false )
-	{
-		trigger_error(sprintf($lang['Message']['Chdir_error'], WA_TMPDIR), E_USER_ERROR);
-	}
-	
 	@include $classfile;
 	
 	if( !class_exists($classname) )
@@ -122,20 +117,14 @@ else if( $mode == 'export' )
 		$output->displayMessage(sprintf($lang['Message']['Archive_class_needed'], $classname));
 	}
 	
-	$archive = new $classname($archive_name, $compressed);
-	//$archive->setErrorHandling(PEAR_ERROR_TRIGGER, E_USER_ERROR);
-	
-	if( !file_exists('newsletter') )
+	$filename = WA_TMPDIR . '/' . $filename;
+	if( file_exists($filename) )
 	{
-		mkdir('newsletter');
+		unlink($filename);
 	}
 	
-	if( !file_exists('newsletter/files') )
-	{
-		mkdir('newsletter/files');
-	}
-	
-	$files = array('newsletter/newsletter.txt', 'newsletter/newsletter.html');
+	$archive = new $classname($filename, $compressed);
+	$archive->setErrorHandling(PEAR_ERROR_TRIGGER, E_USER_ERROR);
 	
 	$sql = "SELECT jf.file_real_name, jf.file_physical_name
 		FROM " . JOINED_FILES_TABLE . " AS jf
@@ -151,8 +140,8 @@ else if( $mode == 'export' )
 	//
 	while( $row = $result->fetch() )
 	{
-		copy(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $row['file_physical_name'], 'newsletter/files/' . $row['file_real_name']);
-		array_push($files, 'newsletter/files/' . $row['file_real_name']);
+		$data = file_get_contents(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $row['file_physical_name']);
+		$archive->addString('newsletter/files/' . $row['file_real_name'], $data);
 		
 		$logdata['log_body_html'] = preg_replace(
 			'/<(.+?)"cid:' . preg_quote($row['file_real_name'], '/') . '"([^>]*)?>/si',
@@ -178,24 +167,15 @@ else if( $mode == 'export' )
 		$logdata['log_body_html'] = purge_latin1($logdata['log_body_html']);
 	}
 	
-	$fw = fopen('newsletter/newsletter.txt', 'wb');
-	fwrite($fw, $logdata['log_body_text']);
-	fclose($fw);
-	
-	$fw = fopen('newsletter/newsletter.html', 'wb');
-	fwrite($fw, $logdata['log_body_html']);
-	fclose($fw);
-	
-	$archive->create($files);
-	
-	foreach( $files as $file )
-	{
-		unlink($file);
-	}
+	$archive->addString('newsletter/newsletter.txt', $logdata['log_body_text']);
+	$archive->addString('newsletter/newsletter.html', $logdata['log_body_html']);
 	
 	require WA_ROOTDIR . '/includes/class.attach.php';
 	
-	Attach::send_file($archive_name, $mime_type, implode('', file($archive_name)));
+	$data = file_get_contents($filename);
+	unlink($filename);
+	
+	Attach::send_file(basename($filename), $mime_type, $data);
 }
 
 //
