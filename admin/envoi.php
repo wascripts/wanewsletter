@@ -54,7 +54,7 @@ $prev_status = ( isset($_POST['prev_status']) ) ? intval($_POST['prev_status']) 
 
 if( isset($_POST['cancel']) )
 {
-	Location('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
+	http_redirect('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 }
 
 $vararray = array('test', 'send', 'save', 'delete', 'attach', 'unattach');
@@ -92,7 +92,7 @@ switch( $mode )
 			
 			if( !($logdata = $result->fetch()) || $logdata['log_status'] != STATUS_STANDBY )
 			{
-				Location('envoi.php');
+				http_redirect('envoi.php');
 			}
 			
 			$sql = "SELECT COUNT(send) AS sent

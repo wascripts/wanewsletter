@@ -41,7 +41,7 @@ if( !defined('IN_LOGIN') )
 		$redirect  = '?redirect=' . basename(server_info('PHP_SELF'));
 		$redirect .= ( server_info('QUERY_STRING') != '' ) ? rawurlencode('?' . server_info('QUERY_STRING')) : '';
 		
-		Location('login.php' . $redirect);
+		http_redirect('login.php' . $redirect);
 	}
 	
 	if( !defined('IN_UPGRADE') )

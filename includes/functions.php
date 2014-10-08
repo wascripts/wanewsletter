@@ -117,62 +117,116 @@ function generate_key($length = 32, $specialChars = false)
 }
 
 /**
- * make_script_url()
+ * wan_build_url()
  * 
- * Construction de l'url du script
+ * Construction d'une url
  * 
- * @param string $url    Url relative
+ * @param string  $url      Url à compléter
+ * @param array   $params   Paramètres à ajouter en fin d'url
+ * @param boolean $session  Ajout de l'ID de session PHP s'il y a lieu
  * 
  * @return string
  */
-function make_script_url($url = '')
+function wan_build_url($url, $params = array(), $session = false)
 {
-	global $nl_config;
+	$parts = parse_url($url);
 	
-	$excluded_ports = array(80, 8080);
-	$server_port    = server_info('SERVER_PORT');
+	if( !is_array($params) ) {
+		$params = array();
+	}
 	
-	return rtrim($nl_config['urlsite'], '/')
-		. (( !in_array($server_port, $excluded_ports) ) ? ':' . $server_port : '')
-		. (( $nl_config['path'] != '/' ) ? '/' . trim($nl_config['path'], '/') . '/' : '/')
-		. $url;
+	if( empty($parts['scheme']) ) {
+		$proto = 'http';
+		if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ) {
+			$proto = 'https';
+		}
+	}
+	else {
+		$proto = $parts['scheme'];
+	}
+	
+	$server = !empty($parts['host']) ? $parts['host'] : $_SERVER['HTTP_HOST'];
+	
+	if( !empty($parts['port']) ) {
+		$server .= ':'.$parts['port'];
+	}
+	else if( $_SERVER['SERVER_PORT'] != 80 && $_SERVER['SERVER_PORT'] != 443 ) {
+		$server .= ':'.$_SERVER['SERVER_PORT'];
+	}
+	
+	$path  = !empty($parts['path']) ? $parts['path'] : '/';
+	$query = !empty($parts['query']) ? $parts['query'] : '';
+	
+	if( $path[0] != '/' ) {
+		$parts = explode('/', dirname($_SERVER['SCRIPT_NAME']).'/'.$path);
+		$path  = array();
+		
+		foreach( $parts as $part ) {
+			if( $part == '.' || $part == '' ) {
+				continue;
+			}
+			if( $part == '..' ) {
+				array_pop($path);
+			}
+			else {
+				$path[] = $part;
+			}
+		}
+		$path = implode('/', $path);
+	}
+	
+	$cur_params = array();
+	if( $query != '' ) {
+		parse_str($query, $cur_params);
+	}
+	
+	if( defined('SID') && !empty(SID) ) {
+		list($name, $value) = explode('=', SID);
+		$params[$name] = $value;
+	}
+	
+	$params = array_merge($cur_params, $params);
+	$query  = http_build_query($params);
+	
+	$url = $proto . '://' . $server . '/' . ltrim($path, '/') . ($query != '' ? '?' . $query : '');
+	
+	return $url;
 }
 
 /**
- * Location()
- * 
- * Fonction de redirection du script avec url absolue, d'après les 
- * spécifications HTTP/1.1
- * 
- * @param string $url    Url relative de redirection
- * 
- * @return void
+ * http_redirect()
+ *
+ * Version adaptée de la fonction http_redirect() de pecl_http
+ *
+ * @param string  $url      Url de redirection
+ * @param array   $params   Paramètres à ajouter en fin d'url
+ * @param boolean $session  Ajout de l'ID de session PHP s'il y a lieu
+ * @param integer $status   Code de redirection HTTP
  */
-function Location($url)
+if( !function_exists('http_redirect') ) {
+function http_redirect($url, $params = array(), $session = false, $status = 0)
 {
-	global $db, $output;
-	
-	//
-	// On ferme la connexion à la base de données, si elle existe 
-	//
-	if( isset($db) && is_object($db) )
-	{
-		$db->close();
+	switch( $status ) {
+		case 301: $statusText = 'Moved Permanently'; break;
+		case 303: $statusText = 'See Other'; break;
+		case 302:
+		default:
+			$statusText = 'Moved Temporarily';
+			$status = 302;
+			break;
 	}
 	
-	$use_refresh   = preg_match("#Microsoft|WebSTAR|Xitami#i", server_info('SERVER_SOFTWARE'));
-	$absolute_url  = make_script_url() . (( defined('IN_ADMIN') ) ? 'admin/' : '');
-	$absolute_url .= wan_html_entity_decode($url);
-	
-	header((( $use_refresh ) ? 'Refresh: 0; URL=' : 'Location: ' ) . $absolute_url);
+	$url = wan_build_url($url, $params, $session);
+	header($statusText, true, $status);
+	header(sprintf('Location: %s', $url));
 	
 	//
 	// Si la fonction header() ne donne rien, on affiche une page de redirection 
 	//
-	$message = '<p>If your browser doesn\'t support meta redirect, click <a href="' . $url . '">here</a> to go on next page.</p>';
-	
-	$output->redirect($url, 0);
-	$output->basic($message, 'Redirection');
+	printf('<p>If your browser doesn\'t support meta redirect, click
+		<a href="%s">here</a> to go on next page.</p>', wan_htmlspecialchars($url));
+	exit;
+}
 }
 
 /**

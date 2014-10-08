@@ -16,7 +16,7 @@ $admin_id = ( !empty($_REQUEST['admin_id']) ) ? intval($_REQUEST['admin_id']) : 
 
 if( isset($_POST['cancel']) )
 {
-	Location('admin.php');
+	http_redirect('admin.php');
 }
 
 if( isset($_POST['delete_user']) )
@@ -109,7 +109,7 @@ if( $mode == 'adduser' )
 				'PSEUDO'     => $new_login,
 				'SITENAME'   => $nl_config['sitename'],
 				'PASSWORD'   => $new_pass,
-				'LINK_ADMIN' => make_script_url('admin/index.php')
+				'LINK_ADMIN' => wan_build_url('admin/index.php')
 			));
 			
 			if( !$mailer->send() )

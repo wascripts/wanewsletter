@@ -437,7 +437,7 @@ class Wanewsletter {
 		if( $nl_config['enable_profil_cp'] )
 		{
 			$this->mailer->assign_block_tags('enable_profil_cp', array(
-				'LINK_PROFIL_CP' => make_script_url('profil_cp.php')
+				'LINK_PROFIL_CP' => wan_build_url('profil_cp.php')
 			));
 		}
 		

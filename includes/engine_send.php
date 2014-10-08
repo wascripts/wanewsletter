@@ -623,7 +623,7 @@ pour permettre la reconnexion automatique au serveur.", E_USER_ERROR);
 		{
 			if( !empty($_GET['step']) && $_GET['step'] == 'auto' )
 			{
-				Location("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
+				http_redirect("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
 			}
 			
 			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], sprintf('<a href="envoi.php?mode=progress&amp;id=%d&amp;step=auto">', $logdata['log_id']), '</a>');

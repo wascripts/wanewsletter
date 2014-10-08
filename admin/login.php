@@ -144,7 +144,7 @@ else if( $mode == 'logout' )
 //
 if( $session->is_logged_in )
 {
-	Location($redirect);
+	http_redirect($redirect);
 }
 
 if( !empty($redirect) )

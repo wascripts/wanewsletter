@@ -20,12 +20,12 @@ $mode_ary  = array('liste', 'log', 'abonnes', 'download', 'iframe', 'export');
 
 if( !in_array($mode, $mode_ary) )
 {
-	Location('index.php');
+	http_redirect('index.php');
 }
 
 if( isset($_POST['cancel']) )
 {
-	Location('view.php?mode=' . $mode);
+	http_redirect('view.php?mode=' . $mode);
 }
 
 $vararray = array('purge', 'edit', 'delete');

@@ -173,7 +173,7 @@ switch( $mode )
 						'key'   => $regkey_md5
 					)), (time() + 3600));
 					
-					Location('profil_cp.php');
+					http_redirect('profil_cp.php');
 				}
 				
 				$output->displayMessage('Inactive_account');
