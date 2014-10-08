@@ -37,12 +37,13 @@ $infos   = array('engine' => 'mysql', 'host' => null, 'user' => null, 'pass' => 
 
 if( !empty($dsn) )
 {
-	list($infos) = parseDSN($dsn);
+	$tmp = parseDSN($dsn);
+	$infos = array_merge($infos, $tmp[0]);
 }
 
 foreach( array('engine', 'host', 'user', 'pass', 'dbname') as $varname )
 {
-	$infos[$varname] = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : @$infos[$varname];
+	$infos[$varname] = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : $infos[$varname];
 }
 
 // Récupération du port, si associé avec le nom d'hôte
