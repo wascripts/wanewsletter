@@ -43,10 +43,10 @@ define('DEV_INFOS', TRUE);
 //define('DEV_INFOS', FALSE);
 
 //
-// Active/Désactive le stockage des messages non critiques dans une pile pour
-// affichage propre ultérieur en pied de page
+// Active/Désactive l'affichage des messages d'erreur en pied de page.
+// Si false, les erreurs sont affichées dès qu'elles sont traitées.
 //
-define('USE_WANLOG', true);
+define('DISPLAY_ERRORS_IN_LOG', true);
 
 //
 // Active/Désactive le passage automatique à l'UTF-8 au moment de l'envoi en présence de 

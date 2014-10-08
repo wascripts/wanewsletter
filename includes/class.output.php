@@ -319,16 +319,28 @@ class output extends Template {
 			$wanlog_box = '';
 			foreach( $entries as $entry )
 			{
-				if( !is_scalar($entry) ) {
+				if( $entry instanceof Exception ) {
+					if( !DISPLAY_ERRORS_IN_LOG ) {
+						continue;
+					}
+					
+					$entry = wan_format_error($entry);
+				}
+				else if( !is_scalar($entry) ) {
 					$entry = print_r($entry, true);
 				}
 				
 				$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
 			}
 			
-			$this->assign_vars(array(
-				'WANLOG_BOX' => sprintf('<ul class="warning" style="font-family:monospace;font-size:12px;">%s</ul>', $wanlog_box)
-			));
+			if( $wanlog_box != '' ) {
+				$this->assign_vars(array(
+					'WANLOG_BOX' => sprintf('<ul class="warning"
+						style="font-family:monospace;font-size:12px;">%s</ul>',
+						$wanlog_box
+					)
+				));
+			}
 		}
 		
 		$this->pparse('footer');

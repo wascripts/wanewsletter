@@ -61,8 +61,9 @@ if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
 require WA_ROOTDIR . '/includes/compat.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/includes/wadb_init.php';
+require WA_ROOTDIR . '/includes/class.error.php';
 require WA_ROOTDIR . '/includes/class.phpass.php';
+require WA_ROOTDIR . '/includes/wadb_init.php';
 
 if( !defined('IN_INSTALL') && !defined('NL_INSTALLED') )
 {

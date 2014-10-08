@@ -335,21 +335,25 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 		return true;
 	}
 	
-	$message = wan_format_error($errno, $errstr, $errfile, $errline);
+	$error = new WanError(array(
+		'type'    => $errno,
+		'message' => $errstr,
+		'file'    => $errfile,
+		'line'    => $errline
+	));
 	
 	if( $simple || $fatal ) {
-		wan_display_error($message, $simple);
+		wan_display_error($error, $simple);
 		
 		if( $fatal ) {
 			exit(1);
 		}
 	}
 	else {
-		if( USE_WANLOG ) {
-			wanlog($message);
-		}
-		else {
-			wan_display_error($message, true);
+		wanlog($error);
+		
+		if( !DISPLAY_ERRORS_IN_LOG ) {
+			wan_display_error($error, true);
 		}
 	}
 	
@@ -365,7 +369,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
  */
 function wan_exception_handler($e)
 {
-	wan_display_error(wan_format_error($e));
+	wan_display_error($e);
 	exit(1);
 }
 
@@ -374,29 +378,24 @@ function wan_exception_handler($e)
  *
  * Formatage du message d'erreurs
  *
- * @param mixed   $e          Code d'erreur OU objet Exception
- * @param string  $errstr     Texte proprement dit de l'erreur
- * @param string  $errfile    Fichier où s'est produit l'erreur
- * @param integer $errline    Numéro de la ligne
+ * @param Exception  $error  Exception décrivant l'erreur
  *
  * @return string
  */
-function wan_format_error($e, $errstr = null, $errfile = null, $errline = null)
+function wan_format_error($error)
 {
 	global $db, $lang;
 	
-	if( $e instanceof Exception ) {
-		$errno   = $e->getCode();
-		$errstr  = $e->getMessage();
-		$errfile = $e->getFile();
-		$errline = $e->getLine();
-		$backtrace = $e->getTrace();
-	}
-	else {
-		$errno = $e;
-		$backtrace = debug_backtrace();
-		array_shift($backtrace);// On ne veut pas tenir compte de l'appel à wan_format_error()
-		array_shift($backtrace);// On ne veut pas tenir compte de l'appel au gestionnaire d'erreurs
+	$errno   = $error->getCode();
+	$errstr  = $error->getMessage();
+	$errfile = $error->getFile();
+	$errline = $error->getLine();
+	$backtrace = $error->getTrace();
+	
+	if( $error instanceof WanError ) {
+		// Cas spécial. L'exception personnalisée a été créé dans wan_error_handler()
+		// et contient donc l'appel à wan_error_handler() elle-même. On corrige.
+		array_shift($backtrace);
 	}
 	
 	foreach( $backtrace as $i => &$t ) {
@@ -417,9 +416,8 @@ function wan_format_error($e, $errstr = null, $errfile = null, $errline = null)
 		// critique pour arriver ici.
 		$message  = $lang['Message']['Critical_error'];
 	}
-	else if( $e instanceof SQLException ) {
-		$message  = sprintf("<b>%s</b>\n", get_class($e));
-		$message .= "<b>SQL errno:</b> $errno\n";
+	else if( $error instanceof SQLException ) {
+		$message  = "<b>SQL errno:</b> $errno\n";
 		$message .= sprintf("<b>SQL error:</b> %s\n", wan_htmlspecialchars($errstr));
 		
 		if( is_object($db) ) {
@@ -450,7 +448,7 @@ function wan_format_error($e, $errstr = null, $errfile = null, $errline = null)
 		
 		$message = sprintf(
 			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
-			($e instanceof Exception) ? get_class($e) : $label,
+			($error instanceof WanError) ? $label : get_class($error),
 			wan_htmlspecialchars($errstr),
 			wan_htmlspecialchars($errfile),
 			$errline
@@ -466,12 +464,14 @@ function wan_format_error($e, $errstr = null, $errfile = null, $errline = null)
  *
  * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
  *
- * @param string  $message     Message à afficher
- * @param boolean $simpleHTML  Si true, affichage simple dans un paragraphe
+ * @param Exception  $error       Exception décrivant l'erreur
+ * @param boolean    $simpleHTML  Si true, affichage simple dans un paragraphe
  */
-function wan_display_error($message, $simpleHTML = false)
+function wan_display_error($error, $simpleHTML = false)
 {
 	global $output;
+	
+	$message = wan_format_error($error);
 	
 	if( defined('IN_COMMANDLINE') ) {
 		if( defined('ANSI_TERMINAL') ) {
@@ -527,24 +527,19 @@ BASIC;
  * Si elle est appelée avec un argument, ajoute l'entrée dans le journal,
  * sinon, renvoie le journal.
  * 
- * @param mixed $e  Chaîne d'information ou d'erreur à stocker dans
- *                  l'historique de Wanewsletter ou objet Exception
+ * @param mixed  $entry  Peut être un objet Exception, ou une simple chaîne
  * 
  * @return array
  */
-function wanlog($e = null)
+function wanlog($entry = null)
 {
 	static $entries = array();
 	
-	if( $e === null ) {
+	if( $entry === null ) {
 		return $entries;
 	}
 	
-	if( $e instanceof Exception ) {
-		$e = wan_format_error($e);
-	}
-	
-	array_push($entries, $e);
+	array_push($entries, $entry);
 }
 
 /**
