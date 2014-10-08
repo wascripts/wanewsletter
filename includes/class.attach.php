@@ -332,7 +332,7 @@ class Attach {
 					return;
 				}
 				
-				$tmp_path = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : '/tmp';
+				$tmp_path = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : sys_get_temp_dir();
 				$tmp_filename = tempnam($tmp_path, 'wa0');
 				
 				if( !($fw = @fopen($tmp_filename, 'wb')) )
@@ -693,7 +693,7 @@ class Attach {
 	function ftp_to_tmp($data)
 	{
 		$mode         = $this->get_mode($data['file_mimetype']);
-		$tmp_path     = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : '/tmp';
+		$tmp_path     = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : sys_get_temp_dir();
 		$tmp_filename = tempnam($tmp_path, 'wa1');
 		
 		if( !@ftp_get($this->connect_id, $tmp_filename, $data['file_physical_name'], $mode) )
