@@ -256,21 +256,27 @@ function WaDatabase($dsn)
 		/*
 		 * WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
 		 * Si le jeu de caractères de la connexion est multi-octet, on le change
-		 * arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur.
+		 * arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur
+		 * en cas d'échec.
 		 */
 		$newEncoding = 'latin1';
 		$db->encoding($newEncoding);
 		
-		wanlog("<p>Wanewsletter a détecté que le <strong>jeu de caractères de connexion</strong>
-à votre base de données est réglé sur <q>$encoding</q>. Wanewsletter ne gère
-pas les codages de caractères multi-octets et a donc changé cette valeur pour
-<q>$newEncoding</q>.</p>
-<p>Vous devriez éditer le fichier <samp>includes/config.inc.php</samp> et fixer
-ce réglage en ajoutant la chaîne <code>?charset=latin1</code> après le nom de votre
-base de données dans la variable <code>\$dsn</code> (<q>latin1</q> est utilisé
-dans l'exemple mais vous pouvez spécifier n'importe quel jeu de caractère 8 bit
-convenant le mieux à votre langue. Référez-vous à la documentation de votre base
-de données pour connaître les jeux de caractères utilisables).</p>");
+		if( strcasecmp($encoding, $db->encoding()) === 0 ) {
+			global $output;
+			
+			$message = <<<ERR
+Wanewsletter a détecté que le <strong>jeu de caractères</strong>
+de connexion à votre base de données est <q>$encoding</q>.
+Wanewsletter ne gère pas les codages de caractères multi-octets et a donc tenté
+de changer ce réglage en faveur du jeu de caractères <q>$newEncoding</q>, mais sans succès.<br />
+Consultez la documentation de votre base de données pour trouver le réglage adéquat
+et définir le paramètre charset dans la variable \$dsn du fichier de configuration
+(consultez le fichier config.sample.inc.php pour voir un exemple de DSN configuré
+de cette manière)."
+ERR;
+			$output->displayMessage(str_replace("\n", " ", $message));
+		}
 	}
 	
 	return $db;
