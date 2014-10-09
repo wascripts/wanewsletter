@@ -147,8 +147,6 @@ if( defined('NL_INSTALLED') )
 	}
 	
 	$nl_config = wa_get_config();
-	$urlsite    = $nl_config['urlsite'];
-	$urlscript  = $nl_config['path'];
 	$language   = $nl_config['language'];
 }
 
@@ -277,13 +275,6 @@ if( $start )
 			$error = true;
 			$msg_error[] = $lang['Message']['Invalid_email'];
 		}
-		
-		$urlsite = rtrim($urlsite, '/');
-		
-		if( $urlscript != '/' )
-		{
-			$urlscript = '/' . trim($urlscript, '/') . '/';
-		}
 	}
 	
 	if( !$error )
@@ -339,6 +330,14 @@ if( $start )
 		// Insertion des données de base 
 		//
 		$sql_data = parseSQL(file_get_contents($sql_data), $prefixe);
+		
+		$urlsite = 'http';
+		if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ) {
+			$urlsite = 'https';
+		}
+		$urlsite .= '://' . $_SERVER['HTTP_HOST'];
+		
+		$urlscript = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
 		
 		$hasher = new PasswordHash();
 		
@@ -427,16 +426,6 @@ if( !defined('NL_INSTALLED') )
 		$db_box .= '<option value="' . $name . '"' . $selected . '> ' . $data['Name'] . ' </option>';
 	}
 	
-	if( $urlsite == '' )
-	{
-		$urlsite = 'http://' . server_info('HTTP_HOST');
-	}
-	
-	if( $urlscript == '' )
-	{
-		$urlscript = dirname(server_info('PHP_SELF')).'/';
-	}
-	
 	$l_explain = nl2br(sprintf(
 		$lang['Welcome_in_install'],
 		'<a href="' . WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
@@ -452,7 +441,6 @@ if( !defined('NL_INSTALLED') )
 		'L_EXPLAIN'         => $l_explain,
 		'TITLE_DATABASE'    => $lang['Title']['database'],
 		'TITLE_ADMIN'       => $lang['Title']['admin'],
-		'TITLE_DIVERS'      => $lang['Title']['config_divers'],
 		'L_DBTYPE'          => $lang['dbtype'],
 		'L_DBHOST'          => $lang['dbhost'],
 		'L_DBNAME'          => $lang['dbname'],
@@ -464,10 +452,6 @@ if( !defined('NL_INSTALLED') )
 		'L_PASS'            => $lang['Password'],
 		'L_PASS_CONF'       => $lang['Conf_pass'],
 		'L_EMAIL'           => $lang['Email_address'],
-		'L_URLSITE'         => $lang['Urlsite'],
-		'L_URLSCRIPT'       => $lang['Urlscript'],
-		'L_URLSITE_NOTE'    => $lang['Urlsite_note'],
-		'L_URLSCRIPT_NOTE'  => $lang['Urlscript_note'],
 		'L_START_BUTTON'    => $lang['Start_install'],
 		
 		'DB_BOX'    => $db_box,
@@ -477,8 +461,6 @@ if( !defined('NL_INSTALLED') )
 		'PREFIXE'   => wan_htmlspecialchars($prefixe),
 		'LOGIN'     => wan_htmlspecialchars($admin_login),
 		'EMAIL'     => wan_htmlspecialchars($admin_email),
-		'URLSITE'   => wan_htmlspecialchars($urlsite),
-		'URLSCRIPT' => wan_htmlspecialchars($urlscript),
 		'LANG_BOX'  => lang_box($language)
 	));
 }

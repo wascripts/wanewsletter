@@ -124,19 +124,6 @@
 		</tr>
 	</table>
 	
-	<h2>{install.TITLE_DIVERS}</h2>
-	
-	<table class="dataset compact">
-		<tr>
-			<td><label for="urlsite">{install.L_URLSITE}&nbsp;:</label><br /><span class="notice">{L_URLSITE_NOTE}</span></td>
-			<td><input type="text" id="urlsite" name="urlsite" size="30" value="{install.URLSITE}" maxlength="100" /></td>
-		</tr>
-		<tr>
-			<td><label for="urlscript">{install.L_URLSCRIPT}&nbsp;:</label><br /><span class="notice">{L_URLSCRIPT_NOTE}</span></td>
-			<td><input type="text" id="urlscript" name="urlscript" size="30" value="{install.URLSCRIPT}" maxlength="100" /></td>
-		</tr>
-	</table>
-	
 	<div class="bottom">
 		<button type="submit" name="start" class="primary">{install.L_START_BUTTON}</button>
 	</div>
