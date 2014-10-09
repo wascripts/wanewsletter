@@ -491,7 +491,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				{
 					$tags_replace = array_merge($tags_replace, array(
 						'WA_CODE'  => $row['register_key'],
-						'WA_EMAIL' => rawurlencode($row['abo_email'])
+						'WA_EMAIL' => $row['abo_email']
 					));
 				}
 				
