@@ -231,9 +231,9 @@ class Wadb_mysqli {
 			$this->errno = mysqli_errno($this->link);
 			$this->error = mysqli_error($this->link);
 			$this->lastQuery = $query;
-			throw new SQLException($this->error, $this->errno);
-			
 			$this->rollBack();
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;

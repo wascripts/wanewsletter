@@ -251,9 +251,9 @@ class Wadb_postgres {
 		if( !$result ) {
 			$this->errno = -1;
 			$this->error = pg_last_error($this->link);
-			throw new SQLException($this->error, $this->errno);
-			
 			$this->rollBack();
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;

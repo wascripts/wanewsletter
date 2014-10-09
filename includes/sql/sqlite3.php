@@ -221,9 +221,9 @@ class Wadb_sqlite3 {
 			$this->error = $this->link->lastErrorMsg();
 			$this->lastQuery = $query;
 			$this->result = null;
-			throw new SQLException($this->error, $this->errno);
-			
 			$this->rollBack();
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;

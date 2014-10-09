@@ -257,12 +257,13 @@ class Wadb_sqlite_pdo {
 			$this->error = $tmp[2];
 			$this->lastQuery = $query;
 			$this->result = null;
-			throw new SQLException($this->error, $this->errno);
 			
 			try {
 				$this->rollBack();
 			}
 			catch( PDOException $e ) {}
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;

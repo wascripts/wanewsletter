@@ -216,9 +216,9 @@ class Wadb_sqlite {
 			$this->errno = sqlite_last_error($this->link);
 			$this->error = sqlite_error_string($this->errno);
 			$this->lastQuery = $query;
-			throw new SQLException($this->error, $this->errno);
-			
 			$this->rollBack();
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;

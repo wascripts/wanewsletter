@@ -242,9 +242,9 @@ class Wadb_mysql {
 			$this->errno = mysql_errno($this->link);
 			$this->error = mysql_error($this->link);
 			$this->lastQuery = $query;
-			throw new SQLException($this->error, $this->errno);
-			
 			$this->rollBack();
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;
