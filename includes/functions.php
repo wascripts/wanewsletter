@@ -137,7 +137,7 @@ function wan_build_url($url, $params = array(), $session = false)
 	
 	if( empty($parts['scheme']) ) {
 		$proto = 'http';
-		if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ) {
+		if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ) {
 			$proto = 'https';
 		}
 	}

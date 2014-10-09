@@ -131,8 +131,12 @@ class Session {
 		$this->cfg_cookie['cookie_name']   = $nl_config['cookie_name'];
 		$this->cfg_cookie['cookie_path']   = $nl_config['cookie_path'];
 		$this->cfg_cookie['cookie_domain'] = null;
-		$this->cfg_cookie['cookie_secure'] = !empty($_SERVER['HTTPS']) ? 1 : 0;
+		$this->cfg_cookie['cookie_secure'] = false;
 		$this->cfg_cookie['cookie_httponly'] = true;
+		
+		if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ) {
+			$this->cfg_cookie['cookie_secure'] = true;
+		}
 	}
 	
 	/**
@@ -371,6 +375,7 @@ class Session {
 		$ts_expire = strtotime('-1 month');
 		$this->send_cookie('sessid', '', $ts_expire);
 		$this->send_cookie('data', '', $ts_expire);
+
 	}
 	
 	/**
