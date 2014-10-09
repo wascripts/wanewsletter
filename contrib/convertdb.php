@@ -12,7 +12,7 @@
  * 
  * TODO : Les champs étrangers (champs personnalisés) ne sont pas pris en compte
  * La correction manuelle consiste à ajouter les descriptions des nouveaux champs dans
- * le fichier de schéma des tables correspondant dans ~/data/schemas
+ * le fichier de schéma des tables correspondant dans ~/includes/sql/schemas
  */
 
 //
@@ -27,7 +27,7 @@ exit(0);
 //
 define('WA_ROOTDIR', '..');
 
-$schemas_dir  = WA_ROOTDIR . '/data/schemas';
+$schemas_dir  = WA_ROOTDIR . '/includes/sql/schemas';
 
 //$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
 $dsn_from     = 'mysql://username:password@localhost/dbname?charset=latin1';

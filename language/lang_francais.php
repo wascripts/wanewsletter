@@ -219,7 +219,7 @@ $lang['Message']['File_not_found']          = "Ce fichier est introuvable sur le
 
 $lang['Message']['Cannot_create_dir']       = "Impossible de créer le répertoire %s";
 $lang['Message']['Dir_not_writable']        = "Le répertoire <samp>%s</samp> n'existe pas ou n'est pas accessible en écriture";
-$lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (data/schemas/)";
+$lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (includes/sql/schemas/)";
 
 $lang['Message']['Ftp_unable_connect']      = "Impossible de se connecter au serveur ftp";
 $lang['Message']['Ftp_error_login']         = "L'authentification auprès du serveur ftp a échoué";

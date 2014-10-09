@@ -62,8 +62,8 @@ if( check_db_version($nl_config['db_version']) )
 
 if( isset($_POST['start']) )
 {
-	$sql_create = WA_ROOTDIR . '/data/schemas/' . $db->engine . '_tables.sql';
-	$sql_data   = WA_ROOTDIR . '/data/schemas/data.sql';
+	$sql_create = WA_ROOTDIR . '/includes/sql/schemas/' . $db->engine . '_tables.sql';
+	$sql_data   = WA_ROOTDIR . '/includes/sql/schemas/data.sql';
 	
 	if( !is_readable($sql_create) || !is_readable($sql_data) )
 	{
