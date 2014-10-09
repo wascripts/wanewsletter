@@ -368,7 +368,7 @@ class Session {
 		}
 		
 		$this->is_logged_in = false;
-		$ts_expire = strtotime('+1 month');
+		$ts_expire = strtotime('-1 month');
 		$this->send_cookie('sessid', '', $ts_expire);
 		$this->send_cookie('data', '', $ts_expire);
 	}
