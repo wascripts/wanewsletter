@@ -545,7 +545,7 @@ function wanlog($entry = null)
 /**
  * wan_error_get_last()
  *
- * Même fonctionnent que la fonction native error_get_last()
+ * Même fonctionnement que la fonction native error_get_last()
  *
  * @param mixed  $entry  Peut être un objet Exception, ou une simple chaîne
  *
@@ -564,6 +564,7 @@ function wan_error_get_last()
 				'file'    => $e->getFile(),
 				'line'    => $e->getLine()
 			);
+			break;
 		}
 	}
 	
