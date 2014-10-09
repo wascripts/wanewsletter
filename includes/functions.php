@@ -211,7 +211,7 @@ function http_redirect($url, $params = array(), $session = false, $status = 0)
 		case 303: $statusText = 'See Other'; break;
 		case 302:
 		default:
-			$statusText = 'Moved Temporarily';
+			$statusText = 'Found';
 			$status = 302;
 			break;
 	}
