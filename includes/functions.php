@@ -449,8 +449,8 @@ function wan_format_error($error)
 		$message = sprintf(
 			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
 			($error instanceof WanError) ? $label : get_class($error),
-			wan_htmlspecialchars($errstr),
-			wan_htmlspecialchars($errfile),
+			$errstr,
+			$errfile,
 			$errline
 		);
 		$message .= $backtrace;
