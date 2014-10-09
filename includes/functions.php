@@ -543,6 +543,34 @@ function wanlog($entry = null)
 }
 
 /**
+ * wan_error_get_last()
+ *
+ * Même fonctionnent que la fonction native error_get_last()
+ *
+ * @param mixed  $entry  Peut être un objet Exception, ou une simple chaîne
+ *
+ * @return array
+ */
+function wan_error_get_last()
+{
+	$errors = wanlog();
+	$error  = null;
+	
+	while( $e = array_pop($errors) ) {
+		if( $e instanceof Exception ) {
+			$error = array(
+				'type'    => $e->getCode(),
+				'message' => $e->getMessage(),
+				'file'    => $e->getFile(),
+				'line'    => $e->getLine()
+			);
+		}
+	}
+	
+	return $error;
+}
+
+/**
  * plain_error()
  * 
  * @param mixed   $var      Variable à afficher
