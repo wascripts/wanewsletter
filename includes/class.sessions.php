@@ -469,6 +469,35 @@ class Session {
 	}
 	
 	/**
+	 * Renomme les cookies précédemment envoyés par la classe Session
+	 *
+	 * @param string  $new_prefix  Nouveau préfixe pour les cookies envoyés
+	 *
+	 * @access public
+	 */
+	function rename_cookies($new_prefix)
+	{
+		$old_prefix = $this->cfg_cookie['cookie_name'];
+		$cookies_to_rename = array();
+		
+		foreach( $_COOKIE as $name => $value ) {
+			$len = strlen($old_prefix)+1;
+			if( strncmp($name, $old_prefix.'_', $len) === 0 ) {
+				$name = substr($name, $len);
+				$cookies_to_rename[$name] = $value;
+				$this->send_cookie($name, '', strtotime('-1 month'));
+			}
+		}
+		
+		$this->cfg_cookie['cookie_name'] = $new_prefix;
+		
+		foreach( $cookies_to_rename as $name => $value ) {
+			$expires = ($name == 'sessid') ? 0 : strtotime('+1 month');
+			$this->send_cookie($name, $value, $expires);
+		}
+	}
+	
+	/**
 	 * Encodage des IP pour stockage et comparaisons plus simples 
 	 * Importé de phpBB et modifié 
 	 * 

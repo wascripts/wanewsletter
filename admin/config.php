@@ -210,6 +210,15 @@ if( isset($_POST['submit']) )
 		wa_update_config(array_merge($old_config, $new_config));
 		
 		//
+		// Si le préfixe des cookie a changé, on envoie de nouveaux cookies et
+		// on supprime ceux qui sont obsolètes.
+		//
+		if( $new_config['cookie_name'] !== $old_config['cookie_name'] )
+		{
+			$session->rename_cookies($new_config['cookie_name']);
+		}
+		
+		//
 		// Déplacement des fichiers joints dans le nouveau dossier de stockage s'il est changé
 		//
 		if( $move_files )
