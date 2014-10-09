@@ -180,7 +180,7 @@ function wan_build_url($url, $params = array(), $session = false)
 		parse_str($query, $cur_params);
 	}
 	
-	if( defined('SID') && !empty(SID) ) {
+	if( defined('SID') && SID != '' ) {
 		list($name, $value) = explode('=', SID);
 		$params[$name] = $value;
 	}
