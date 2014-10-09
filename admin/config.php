@@ -34,9 +34,6 @@ if( isset($_POST['submit']) )
 		$new_config[$name] = ( isset($_POST[$name]) ) ? trim($_POST[$name]) : $value;
 	}
 	
-	// On ne touche plus à gd_img_type - n'est plus configurable par le panneau de configuration
-	unset($new_config['gd_img_type']);
-	
 	if( $new_config['language'] == '' || !validate_lang($new_config['language']) )
 	{
 		$new_config['language'] = $nl_config['language'];

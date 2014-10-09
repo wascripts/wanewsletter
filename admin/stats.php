@@ -43,7 +43,13 @@ $img   = ( !empty($_GET['img']) ) ? trim($_GET['img']) : '';
 $year  = ( !empty($_GET['year']) ) ? intval($_GET['year']) : date('Y');
 $month = ( !empty($_GET['month']) ) ? intval($_GET['month']) : date('n');
 
-$img_type = $nl_config['gd_img_type'];
+$img_type = (imagetypes() & IMG_GIF) ? 'gif' : null;
+$img_type = (imagetypes() & IMG_PNG) ? 'png' : $img_type;
+
+if( is_null($img_type) ) {
+	// WTF ?!
+	$output->displayMessage($lang['Message']['No_gd_img_support']);
+}
 
 function send_image($name, $img, $lastModified = null)
 {

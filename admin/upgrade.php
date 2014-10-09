@@ -645,6 +645,15 @@ if( isset($_POST['start']) )
 			$moved_dirs = @!is_writable(WA_TMPDIR);
 		}
 		
+		//
+		// Entrée de configuration 'gd_img_type' obsolète. On la supprime.
+		//
+		if( $nl_config['db_version'] < 14 )
+		{
+			$sql_update[] = "DELETE FROM " . CONFIG_TABLE . "
+				WHERE config_name = 'gd_img_type'";
+		}
+		
 		exec_queries($sql_update);
 		
 		//

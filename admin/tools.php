@@ -315,7 +315,9 @@ switch( $mode )
 		
 		if( extension_loaded('gd') ) {
 			$tmp = gd_info();
-			$str = sprintf('oui - Version %s - Format %s', $tmp['GD Version'], $nl_config['gd_img_type']);
+			$format = (imagetypes() & IMG_GIF) ? 'GIF' : 'Unavailable';
+			$format = (imagetypes() & IMG_PNG) ? 'PNG' : $format;
+			$str = sprintf('oui - Version %s - Format %s', $tmp['GD Version'], $format);
 		}
 		else {
 			$str = 'non';

@@ -255,6 +255,7 @@ $lang['Message']['Twice_sending']           = "A newsletter is already in the co
 $lang['Message']['Invalid_cookie_name']     = "The white space characters, equal sign, comma and semi-colon are not allowed in the cookie name.";
 $lang['Message']['Invalid_cookie_path']     = "The cookie path must include the installation directory script (%s)";
 $lang['Message']['Critical_error']          = "A critical error has occured. Enable debug mode if you wish to get more details.";
+$lang['Message']['No_gd_img_support']       = "No image format are available";
 
 //
 // Divers
