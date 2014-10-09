@@ -139,11 +139,11 @@ $nl_config['language'] = $language;
 
 if( defined('NL_INSTALLED') )
 {
-	$db = WaDatabase($dsn);
-	
-	if( !$db->isConnected() )
-	{
-		plain_error(sprintf($lang['Connect_db_error'], $db->error));
+	try {
+		$db = WaDatabase($dsn);
+	}
+	catch( Exception $e ) {
+		message(sprintf($lang['Connect_db_error'], $e->getMessage()));
 	}
 	
 	$nl_config = wa_get_config();
@@ -213,32 +213,25 @@ if( $start )
 	}
 	else
 	{
-		if( $infos['engine'] == 'sqlite' )
-		{
-			if( is_writable(dirname($infos['dbname'])) )
-			{
-				$db = WaDatabase($dsn);
-			}
-			else
-			{
-				$error = true;
-				$msg_error[] = $lang['sqldir_perms_problem'];
-			}
-		}
-		else if( !empty($dsn) )
-		{
-			$db = WaDatabase($dsn);
-		}
-		else
+		if( empty($dsn) )
 		{
 			$error = true;
 			$msg_error[] = sprintf($lang['Connect_db_error'], 'Invalid DB name');
 		}
-		
-		if( !$error && !$db->isConnected() )
+		else if( $infos['engine'] == 'sqlite' && !is_writable(dirname($infos['dbname'])) )
 		{
 			$error = true;
-			$msg_error[] = sprintf($lang['Connect_db_error'], $db->error);
+			$msg_error[] = $lang['sqldir_perms_problem'];
+		}
+		else
+		{
+			try {
+				$db = WaDatabase($dsn);
+			}
+			catch( Exception $e ) {
+				$error = true;
+				$msg_error[] = sprintf($lang['Connect_db_error'], $e->getMessage());
+			}
 		}
 	}
 	
