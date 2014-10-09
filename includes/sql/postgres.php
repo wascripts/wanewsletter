@@ -169,7 +169,7 @@ class Wadb_postgres {
 				}
 			}
 			
-			$this->host = $infos['host'] . (!is_null($infos['port']) ? ':'.$infos['port'] : '');
+			$this->host = $infos['host'] . (!empty($infos['port']) ? ':'.$infos['port'] : '');
 		}
 		
 		$connect = 'pg_connect';
@@ -183,8 +183,9 @@ class Wadb_postgres {
 		}
 		
 		if( !($this->link = $connect($connectString)) || pg_connection_status($this->link) !== PGSQL_CONNECTION_OK ) {
+			$tmp = wan_error_get_last();
 			$this->errno = -1;
-			$this->error = @$php_errormsg;
+			$this->error = $tmp['message'];
 			$this->link  = null;
 			
 			throw new SQLException($this->error, $this->errno);
@@ -241,35 +242,44 @@ class Wadb_postgres {
 	function query($query)
 	{
 		$curtime = array_sum(explode(' ', microtime()));
-		$result  = pg_query($this->link, $query);
+		$result  = pg_send_query($this->link, $query);
 		$endtime = array_sum(explode(' ', microtime()));
 		
 		$this->sqltime += ($endtime - $curtime);
 		$this->lastQuery = $query;
 		$this->queries++;
 		
-		if( !$result ) {
-			$this->errno = -1;
-			$this->error = pg_last_error($this->link);
-			$this->rollBack();
+		if( $result ) {
+			$result   = pg_get_result($this->link);
+			$sqlstate = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
 			
-			throw new SQLException($this->error, $this->errno);
+			if( 0 == $sqlstate ) {
+				$this->errno = 0;
+				$this->error = '';
+				
+				if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) ) {
+					$this->_affectedRows = pg_affected_rows($result);
+					$result = true;
+				}
+				else {
+					$result = new WadbResult_postgres($this->link, $result);
+				}
+				
+				return $result;
+			}
+			else {
+				$this->errno = $sqlstate;
+				$this->error = pg_result_error_field($result, PGSQL_DIAG_MESSAGE_PRIMARY);
+				
+				$this->rollBack();
+			}
 		}
 		else {
-			$this->errno = 0;
-			$this->error = '';
-			
-			if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) ) {
-				$this->_affectedRows = @pg_affected_rows($result);
-				$result = true;
-			}
-			
-			if( !is_bool($result) ) {// on a réceptionné une ressource ou un objet
-				$result = new WadbResult_postgres($this->link, $result);
-			}
+			$this->errno = -1;
+			$this->error = 'Unknown error with database';
 		}
 		
-		return $result;
+		throw new SQLException($this->error, $this->errno);
 	}
 	
 	/**
