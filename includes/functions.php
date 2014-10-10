@@ -215,18 +215,13 @@ function wan_build_url($url, $params = array(), $session = false)
 if( !function_exists('http_redirect') ) {
 function http_redirect($url, $params = array(), $session = false, $status = 0)
 {
-	switch( $status ) {
-		case 301: $statusText = 'Moved Permanently'; break;
-		case 303: $statusText = 'See Other'; break;
-		case 302:
-		default:
-			$statusText = 'Found';
-			$status = 302;
-			break;
+	$status = intval($status);
+	if( !in_array($status, array(301, 302, 303, 307, 308)) ) {
+		$status = 302;
 	}
 	
 	$url = wan_build_url($url, $params, $session);
-	header($statusText, true, $status);
+	http_response_code($status);
 	header(sprintf('Location: %s', $url));
 	
 	//
