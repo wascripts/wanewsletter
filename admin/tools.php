@@ -359,6 +359,7 @@ switch( $mode )
 		list($infos) = parseDSN($dsn);
 
 		wan_print_row('Type de serveur', $_SERVER['SERVER_SOFTWARE']);
+		wan_print_row('Connexion sécurisée', wan_ssl_connection() ? 'oui' : 'non');
 
 		if( $db->engine == 'sqlite' ) {
 			wan_print_row('Base de données', sprintf('%s %s - Driver : %s', $infos['label'], $db->libVersion, $infos['driver']));
