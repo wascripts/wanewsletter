@@ -860,7 +860,7 @@ else if( $mode == 'abonnes' )
 	
 	$output->assign_vars(array(
 		'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
-		'L_TITLE'              => $lang['Title']['abo'],
+		'L_TITLE'              => sprintf($lang['Title']['abo'], wan_htmlspecialchars($listdata['liste_name'])),
 		'L_SEARCH'             => $lang['Search_abo'],
 		'L_SEARCH_NOTE'        => $lang['Search_abo_note'],
 		'L_SEARCH_BUTTON'      => $lang['Button']['search'],
@@ -1831,7 +1831,7 @@ else if( $mode == 'log' )
 	
 	$output->assign_vars(array(
 		'L_EXPLAIN'             => nl2br($lang['Explain']['logs']),
-		'L_TITLE'               => $lang['Title']['logs'],
+		'L_TITLE'               => sprintf($lang['Title']['logs'], wan_htmlspecialchars($listdata['liste_name'])),
 		'L_CLASSEMENT'          => $lang['Classement'],
 		'L_BY_SUBJECT'          => $lang['By_subject'],
 		'L_BY_DATE'             => $lang['By_date'],
