@@ -324,10 +324,7 @@ if( $start )
 		//
 		$sql_data = parseSQL(file_get_contents($sql_data), $prefixe);
 		
-		$urlsite = 'http';
-		if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ) {
-			$urlsite = 'https';
-		}
+		$urlsite  = wan_ssl_connection() ? : 'https' : 'http';
 		$urlsite .= '://' . $_SERVER['HTTP_HOST'];
 		
 		$urlscript = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';

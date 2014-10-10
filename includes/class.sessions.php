@@ -131,12 +131,8 @@ class Session {
 		$this->cfg_cookie['cookie_name']   = $nl_config['cookie_name'];
 		$this->cfg_cookie['cookie_path']   = $nl_config['cookie_path'];
 		$this->cfg_cookie['cookie_domain'] = null;
-		$this->cfg_cookie['cookie_secure'] = false;
+		$this->cfg_cookie['cookie_secure'] = wan_ssl_connection();
 		$this->cfg_cookie['cookie_httponly'] = true;
-		
-		if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ) {
-			$this->cfg_cookie['cookie_secure'] = true;
-		}
 	}
 	
 	/**

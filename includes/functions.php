@@ -117,6 +117,18 @@ function generate_key($length = 32, $specialChars = false)
 }
 
 /**
+ * wan_ssl_connection()
+ *
+ * Indique si on est sur une connexion sécurisée
+ *
+ * @return boolean
+ */
+function wan_ssl_connection()
+{
+	return ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 443 == $_SERVER['SERVER_PORT'] );
+}
+
+/**
  * wan_build_url()
  * 
  * Construction d'une url
@@ -136,10 +148,7 @@ function wan_build_url($url, $params = array(), $session = false)
 	}
 	
 	if( empty($parts['scheme']) ) {
-		$proto = 'http';
-		if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ) {
-			$proto = 'https';
-		}
+		$proto = wan_ssl_connection() ? 'https' : 'http';
 	}
 	else {
 		$proto = $parts['scheme'];
