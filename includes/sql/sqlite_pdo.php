@@ -127,13 +127,30 @@ class Wadb_sqlite_pdo {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $sqlite_db   Base de données SQLite
 	 * @param array  $options     Options de connexion/utilisation
 	 * 
 	 * @access public
 	 */
-	function Wadb_sqlite_pdo($sqlite_db, $options = null)
+	function Wadb_sqlite_pdo($options = null)
 	{
+		if( is_array($options) ) {
+			$this->options = array_merge($this->options, $options);
+		}
+	}
+	
+	/**
+	 * Connexion à la base de données
+	 * 
+	 * @param array $infos    Informations de connexion
+	 * @param array $options  Options de connexion/utilisation
+	 * 
+	 * @access public
+	 * @return boolean
+	 */
+	function connect($infos = null, $options = null)
+	{
+		$sqlite_db = ($infos['path'] != '') ? $infos['path'] : null;
+		
 		if( $sqlite_db != ':memory:' ) {
 			if( file_exists($sqlite_db) ) {
 				if( !is_readable($sqlite_db) ) {
@@ -178,24 +195,6 @@ class Wadb_sqlite_pdo {
 			$this->error = $e->getMessage();
 			throw new SQLException($this->error, $this->errno);
 		}
-	}
-	
-	/**
-	 * Connexion à la base de données
-	 * 
-	 * @param array $infos    Informations de connexion
-	 * @param array $options  Options de connexion/utilisation
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function connect($infos = null, $options = null)
-	{
-		if( is_array($options) ) {
-			$this->options = array_merge($this->options, $options);
-		}
-		
-		return true;
 	}
 	
 	/**

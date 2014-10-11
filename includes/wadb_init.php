@@ -31,14 +31,17 @@ define('SESSIONS_TABLE',      $prefixe . 'session');
 
 $GLOBALS['supported_db'] = array(
 	'mysql' => array(
+		'label'        => 'MySQL',
 		'Name'         => 'MySQL &#8805; 5.0.7',
 		'extension'    => (extension_loaded('mysql') || extension_loaded('mysqli'))
 	),
 	'postgres' => array(
+		'label'        => 'PostgreSQL',
 		'Name'         => 'PostgreSQL &#8805; 8.x, 9.x',
 		'extension'    => extension_loaded('pgsql')
 	),
 	'sqlite' => array(
+		'label'        => 'SQLite',
 		'Name'         => 'SQLite &#8805; 2.8, 3.x',
 		'extension'    => (class_exists('SQLite3') || extension_loaded('sqlite') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
 	)
@@ -92,10 +95,16 @@ function createDSN($infos, $options = null)
 {
 	$connect = '';
 	
-	if( isset($infos['user']) ) {
+	if( $infos['engine'] == 'sqlite' ) {
+		$infos['host']   = null;
+		$infos['user']   = null;
+		$infos['dbname'] = $infos['path'];
+	}
+	
+	if( !empty($infos['user']) ) {
 		$connect .= rawurlencode($infos['user']);
 		
-		if( isset($infos['pass']) ) {
+		if( !empty($infos['pass']) ) {
 			$connect .= ':' . rawurlencode($infos['pass']);
 		}
 		
@@ -108,7 +117,7 @@ function createDSN($infos, $options = null)
 	
 	if( !empty($infos['host']) ) {
 		$connect .= rawurlencode($infos['host']);
-		if( isset($infos['port']) ) {
+		if( !empty($infos['port']) ) {
 			$connect .= ':' . intval($infos['port']);
 		}
 	}
@@ -120,13 +129,9 @@ function createDSN($infos, $options = null)
 		$dsn = sprintf('%s:%s', $infos['engine'], $infos['dbname']);
 	}
 	
-	if( is_array($options) ) {
+	if( is_array($options) && count($options) > 0 ) {
 		$dsn .= '?';
-		foreach( $options as $name => $value ) {
-			$dsn .= rawurlencode($name) . '=' . rawurlencode($value) . '&';
-		}
-		
-		$dsn = substr($dsn, 0, -1);// Suppression dernier esperluette
+		$dsn .= http_build_query($options);
 	}
 	
 	return $dsn;
@@ -139,27 +144,28 @@ function createDSN($infos, $options = null)
  */
 function parseDSN($dsn)
 {
+	global $supported_db;
+	
 	if( !($dsn_parts = parse_url($dsn)) || !isset($dsn_parts['scheme']) ) {
+		trigger_error("Invalid DSN argument", E_USER_ERROR);
 		return false;
 	}
 	
 	$infos = $options = array();
-	$label = array('mysql' => 'MySQL', 'postgres' => 'PostgreSQL', 'sqlite' => 'SQLite');
 	
 	foreach( $dsn_parts as $key => $value ) {
 		switch( $key ) {
 			case 'scheme':
-				if( !in_array($value, array('mysql', 'postgres', 'sqlite')) ) {
+				if( !isset($supported_db[$value]) ) {
 					trigger_error("Unsupported database", E_USER_ERROR);
 					return false;
 				}
-				else {
-					$infos['label']  = $label[$value];
-					$infos['engine'] = $value;
-					
-					if( $value == 'mysql' && extension_loaded('mysqli') ) {
-						$value = 'mysqli';
-					}
+				
+				$infos['label']  = $supported_db[$value]['label'];
+				$infos['engine'] = $value;
+				
+				if( $value == 'mysql' && extension_loaded('mysqli') ) {
+					$value = 'mysqli';
 				}
 				
 				$infos['driver'] = $value;
@@ -173,19 +179,16 @@ function parseDSN($dsn)
 				break;
 			
 			case 'path':
-				$infos['dbname'] = rawurldecode($value);
+				$infos['path']   = rawurldecode($value);
+				$infos['dbname'] = basename($infos['path']);
 				
-				if( $infos['engine'] != 'sqlite' && isset($infos['host']) ) {
-					$infos['dbname'] = ltrim($infos['dbname'], '/');
+				if( $infos['path'][0] != '/' ) {
+					$infos['path'] = WA_ROOTDIR . '/' . $infos['path'];
 				}
 				break;
 			
 			case 'query':
-				preg_match_all('/([^=]+)=([^&]+)(?:&|$)/', $value, $matches, PREG_SET_ORDER);
-				
-				foreach( $matches as $data ) {
-					$options[rawurldecode($data[1])] = rawurldecode($data[2]);
-				}
+				parse_str($value, $options);
 				break;
 		}
 	}
@@ -201,8 +204,8 @@ function parseDSN($dsn)
 			trigger_error("No SQLite3, PDO/SQLite or SQLite extension loaded !", E_USER_ERROR);
 		}
 		
-		if( is_readable($infos['dbname']) && filesize($infos['dbname']) > 0 ) {
-			$fp = fopen($infos['dbname'], 'rb');
+		if( is_readable($infos['path']) && filesize($infos['path']) > 0 ) {
+			$fp = fopen($infos['path'], 'rb');
 			$info = fread($fp, 15);
 			fclose($fp);
 			
@@ -233,7 +236,6 @@ function parseDSN($dsn)
 function WaDatabase($dsn)
 {
 	if( !($tmp = parseDSN($dsn)) ) {
-		trigger_error("Invalid DSN argument", E_USER_ERROR);
 		return false;
 	}
 	
@@ -247,7 +249,7 @@ function WaDatabase($dsn)
 	$infos['username'] = isset($infos['user']) ? $infos['user'] : null;
 	$infos['passwd']   = isset($infos['pass']) ? $infos['pass'] : null;
 	
-	$db = new $dbclass($infos['dbname']);
+	$db = new $dbclass();
 	$db->connect($infos, $options);
 	
 	if( $db->isConnected() &&  $db->engine != 'sqlite' && ($encoding = $db->encoding())

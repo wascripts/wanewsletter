@@ -127,15 +127,12 @@ class Wadb_postgres {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $dbname   Nom de la base de données
 	 * @param array  $options  Options de connexion/utilisation
 	 * 
 	 * @access public
 	 */
-	function Wadb_postgres($dbname, $options = null)
+	function Wadb_postgres($options = null)
 	{
-		$this->dbname = $dbname;
-		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
 		}
@@ -152,10 +149,10 @@ class Wadb_postgres {
 	 */
 	function connect($infos = null, $options = null)
 	{
-		$connectString = "dbname='$this->dbname' ";
+		$connectString = '';
 		
 		if( is_array($infos) ) {
-			foreach( array('host', 'username', 'passwd', 'port') as $info ) {
+			foreach( array('host', 'username', 'passwd', 'port', 'dbname') as $info ) {
 				if( isset($infos[$info]) ) {
 					if( $info == 'username' ) {
 						$connectString .= "user='$infos[$info]' ";
@@ -170,6 +167,7 @@ class Wadb_postgres {
 			}
 			
 			$this->host = $infos['host'] . (!empty($infos['port']) ? ':'.$infos['port'] : '');
+			$this->dbname = $infos['dbname'];
 		}
 		
 		$connect = 'pg_connect';

@@ -119,15 +119,12 @@ class Wadb_mysql {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $dbname   Nom de la base de données
 	 * @param array  $options  Options de connexion/utilisation
 	 * 
 	 * @access public
 	 */
-	function Wadb_mysql($dbname, $options = null)
+	function Wadb_mysql($options = null)
 	{
-		$this->dbname = $dbname;
-		
 		if( is_array($options) ) {
 			$this->options = array_merge($this->options, $options);
 		}
@@ -145,11 +142,12 @@ class Wadb_mysql {
 	function connect($infos = null, $options = null)
 	{
 		if( is_array($infos) ) {
-			foreach( array('host', 'username', 'passwd', 'port') as $info ) {
+			foreach( array('host', 'username', 'passwd', 'port', 'dbname') as $info ) {
 				$$info = ( isset($infos[$info]) ) ? $infos[$info] : null;
 			}
 			
 			$this->host = $host . (!is_null($port) ? ':'.$port : '');
+			$this->dbname = $dbname;
 		}
 		
 		$connect = 'mysql_connect';
@@ -173,7 +171,7 @@ class Wadb_mysql {
 			
 			throw new SQLException($this->error, $this->errno);
 		}
-		else if( !mysql_select_db($this->dbname) ) {
+		else if( !mysql_select_db($dbname) ) {
 			$this->errno = mysql_errno($this->link);
 			$this->error = mysql_error($this->link);
 			mysql_close($this->link);
