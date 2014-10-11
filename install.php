@@ -33,15 +33,22 @@ function message($message)
 }
 
 $prefixe = ( !empty($_POST['prefixe']) ) ? trim($_POST['prefixe']) : 'wa_';
-$infos   = array('engine' => 'mysql', 'host' => null, 'user' => null, 'pass' => null, 'dbname' => null);
+$infos   = array(
+	'engine' => 'mysql',
+	'host'   => null,
+	'user'   => null,
+	'pass'   => null,
+	'dbname' => null,
+	'path'   => 'data/db/wanewsletter.sqlite'
+);
 
-if( !empty($dsn) )
+if( defined('NL_INSTALLED') )
 {
 	$tmp = parseDSN($dsn);
 	$infos = array_merge($infos, $tmp[0]);
 }
 
-foreach( array('engine', 'host', 'user', 'pass', 'dbname') as $varname )
+foreach( array('engine', 'host', 'user', 'pass', 'dbname', 'path') as $varname )
 {
 	$infos[$varname] = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : $infos[$varname];
 }
@@ -72,14 +79,9 @@ if( !isset($supported_db[$infos['engine']]) && defined('NL_INSTALLED') )
 	message($lang['DB_type_undefined']);
 }
 
-if( $infos['engine'] == 'sqlite' )
+if( $infos['engine'] == 'sqlite' && $infos['path'] != '' )
 {
-	$infos['host'] = null;
-	
-	if( !defined('NL_INSTALLED') )
-	{
-		$infos['dbname'] = wa_realpath(WA_ROOTDIR . '/data/db') . '/wanewsletter.sqlite';
-	}
+	$infos['dbname'] = basename($infos['path']);
 }
 
 if( !empty($infos['dbname']) )
@@ -213,25 +215,28 @@ if( $start )
 	}
 	else
 	{
-		if( empty($dsn) )
-		{
-			$error = true;
-			$msg_error[] = sprintf($lang['Connect_db_error'], 'Invalid DB name');
-		}
-		else if( $infos['engine'] == 'sqlite' && !is_writable(dirname($infos['dbname'])) )
-		{
-			$error = true;
-			$msg_error[] = $lang['sqldir_perms_problem'];
-		}
-		else
-		{
-			try {
-				$db = WaDatabase($dsn);
+		try {
+			if( empty($dsn) ) {
+				throw new Exception(sprintf($lang['Connect_db_error'], 'Invalid DB name'));
 			}
-			catch( Exception $e ) {
-				$error = true;
-				$msg_error[] = sprintf($lang['Connect_db_error'], $e->getMessage());
+			
+			if( $infos['engine'] == 'sqlite' ) {
+				$sqlite_dir = dirname($infos['path']);
+				
+				if( !is_writable($sqlite_dir) ) {
+					throw new Exception(sprintf($lang['sqldir_perms_problem'], $sqlite_dir));
+				}
 			}
+			
+			$db = WaDatabase($dsn);
+		}
+		catch( SQLException $e ) {
+			$error = true;
+			$msg_error[] = sprintf($lang['Connect_db_error'], $e->getMessage());
+		}
+		catch( Exception $e ) {
+			$error = true;
+			$msg_error[] = $e->getMessage();
 		}
 	}
 	
@@ -432,6 +437,8 @@ if( !defined('NL_INSTALLED') )
 		'TITLE_DATABASE'    => $lang['Title']['database'],
 		'TITLE_ADMIN'       => $lang['Title']['admin'],
 		'L_DBTYPE'          => $lang['dbtype'],
+		'L_DBPATH'          => $lang['dbpath'],
+		'L_DBPATH_NOTE'     => $lang['dbpath_note'],
 		'L_DBHOST'          => $lang['dbhost'],
 		'L_DBNAME'          => $lang['dbname'],
 		'L_DBUSER'          => $lang['dbuser'],
@@ -444,7 +451,9 @@ if( !defined('NL_INSTALLED') )
 		'L_EMAIL'           => $lang['Email_address'],
 		'L_START_BUTTON'    => $lang['Start_install'],
 		
+		'IS_SQLITE' => $infos['engine'] == 'sqlite' ? 'is-sqlite' : '',
 		'DB_BOX'    => $db_box,
+		'DBPATH'    => wan_htmlspecialchars($infos['path']),
 		'DBHOST'    => wan_htmlspecialchars($infos['host']),
 		'DBNAME'    => wan_htmlspecialchars($infos['dbname']),
 		'DBUSER'    => wan_htmlspecialchars($infos['user']),

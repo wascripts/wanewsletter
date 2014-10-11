@@ -158,7 +158,7 @@ else if( $db->engine == 'postgres' )
 	}
 }
 else if( $db->engine == 'sqlite' ) {
-	$dbsize = filesize($infos['dbname']);
+	$dbsize = filesize($infos['path']);
 }
 else {
 	$dbsize = $lang['Not_available'];

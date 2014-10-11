@@ -663,7 +663,7 @@ $lang['Result_upgrade']             = "Résultat de la mise à jour";
 $lang['mssql_support_end']          = "Désolé mais le support de SQL Server a été retiré dans Wanewsletter 2.3";
 $lang['No_db_support']              = "Désolé mais Wanewsletter %s requiert une base de données MySQL, PostgreSQL ou SQLite";
 $lang['Connect_db_error']           = "Impossible de se connecter à la base de données (%s)";
-$lang['sqldir_perms_problem']       = "Pour utiliser Wanewsletter avec une base de données SQLite, vous devez rendre accessible en lecture et écriture le répertoire <samp>data/db/</samp>";
+$lang['sqldir_perms_problem']       = "Pour utiliser Wanewsletter avec une base de données SQLite, vous devez rendre accessible en lecture et écriture le répertoire <samp>%s</samp> ciblé";
 $lang['DB_type_undefined']          = "Le type de base de données n'est pas défini !";
 
 $lang['Success_install']            = "L'installation s'est bien déroulée.\nVous pouvez maintenant accéder à %sl'administration%s";
@@ -680,6 +680,8 @@ $lang['Need_upgrade_db']            = "Une mise à jour des tables de données du 
 $lang['Need_upgrade_db_link']       = "Cliquez %sici%s pour accéder au script de mise à jour.";
 
 $lang['dbtype']                     = "Type de base de données";
+$lang['dbpath']                     = "Chemin d'installation de la base de données sqlite";
+$lang['dbpath_note']                = "Le répertoire parent de la base de données doit être accessible en lecture et écriture";
 $lang['dbhost']                     = "Nom du serveur de base de données";
 $lang['dbname']                     = "Nom de votre base de données";
 $lang['dbuser']                     = "Nom d'utilisateur";

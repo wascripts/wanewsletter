@@ -9,46 +9,35 @@
 	
 	<link rel="stylesheet" href="templates/wanewsletter.css" />
 	
-	<script>
-	<!--
-	var lang = [];
-	lang['unused'] = 'Unused';
+	<style>
+	div#global form tr.only-sqlite {
+		display: none;
+	}
+	div#global form.is-sqlite tr.only-server {
+		display: none;
+	}
+	div#global form.is-sqlite tr.only-sqlite {
+		display: table-row;
+	}
+	</style>
 	
-	function specialSQLite(db_box)
+	<script>
+	function specialSQLite(engineBox)
 	{
-		var fields = db_box.form.elements;
-		
-		if( db_box.options[db_box.selectedIndex].value == 'sqlite' ) {
-			fields['host'].disabled   = true;
-			fields['host'].value      = lang['unused'];
-			fields['dbname'].disabled = true;
-			fields['dbname'].value    = lang['unused'];
-			fields['user'].disabled   = true;
-			fields['user'].value      = lang['unused'];
-			fields['pass'].type       = 'text';
-			fields['pass'].disabled   = true;
-			fields['pass'].value      = lang['unused'];
+		if( engineBox.value == 'sqlite' ) {
+			engineBox.form.className = 'is-sqlite';
 		}
 		else {
-			fields['host'].disabled   = false;
-			fields['host'].value      = fields['host'].defaultValue;
-			fields['dbname'].disabled = false;
-			fields['dbname'].value    = fields['dbname'].defaultValue;
-			fields['user'].disabled   = false;
-			fields['user'].value      = fields['user'].defaultValue;
-			fields['pass'].type       = 'password';
-			fields['pass'].disabled   = false;
-			fields['pass'].value      = fields['pass'].defaultValue;
+			engineBox.form.className = null;
 		}
 	}
 	
 	window.onload = function() {
-		var SQLiteBox;
-		if( (SQLiteBox = document.getElementById('engine')) != null ) {
-			specialSQLite(SQLiteBox);
+		var engineBox;
+		if( (engineBox = document.getElementById('engine')) != null ) {
+			specialSQLite(engineBox);
 		}
 	};
-	//-->
 	</script>
 </head>
 <body>
@@ -62,7 +51,7 @@
 </div>
 
 <div id="global">
-<form method="post" action="install.php">
+<form method="post" action="install.php" class="{IS_SQLITE}">
 
 	{ERROR_BOX}
 
@@ -77,19 +66,23 @@
 			<td><label for="engine">{install.L_DBTYPE}&nbsp;:</label></td>
 			<td><select id="engine" name="engine" onchange="specialSQLite(this);">{install.DB_BOX}</select></td>
 		</tr>
-		<tr>
+		<tr class="only-sqlite">
+			<td><label for="path">{install.L_DBPATH}&nbsp;:</label><br /><span class="notice">{install.L_DBPATH_NOTE}</span></td>
+			<td><input type="text" id="path" name="path" size="40" value="{install.DBPATH}" /></td>
+		</tr>
+		<tr class="only-server">
 			<td><label for="host">{install.L_DBHOST}&nbsp;:</label></td>
 			<td><input type="text" id="host" name="host" size="30" value="{install.DBHOST}" /> (syntaxe&nbsp;: <em>host[:port]</em>)</td>
 		</tr>
-		<tr>
+		<tr class="only-server">
 			<td><label for="dbname">{install.L_DBNAME}&nbsp;:</label></td>
 			<td><input type="text" id="dbname" name="dbname" size="30" value="{install.DBNAME}" /></td>
 		</tr>
-		<tr>
+		<tr class="only-server">
 			<td><label for="user">{install.L_DBUSER}&nbsp;:</label></td>
 			<td><input type="text" id="user" name="user" size="30" value="{install.DBUSER}" /></td>
 		</tr>
-		<tr>
+		<tr class="only-server">
 			<td><label for="pass">{install.L_DBPWD}&nbsp;:</label></td>
 			<td><input type="password" id="pass" name="pass" size="30" /></td>
 		</tr>
