@@ -744,9 +744,9 @@ class WadbBackup_postgres {
 	 */
 	function get_tables()
 	{
-		$sql = "SELECT tablename 
-			FROM pg_tables 
-			WHERE tablename NOT LIKE 'pg%' 
+		$sql = "SELECT tablename
+			FROM pg_tables
+			WHERE NOT tablename ~ '^(pg|sql)_'
 			ORDER BY tablename";
 		$result = $this->db->query($sql);
 		$tables = array();
@@ -776,7 +776,7 @@ class WadbBackup_postgres {
 		
 		$sql = "SELECT relname
 			FROM pg_class
-			WHERE NOT relname ~ 'pg_.*' AND relkind ='S'
+			WHERE NOT relname ~ '^pg_.*' AND relkind ='S'
 			ORDER BY relname";
 		$result = $this->db->query($sql);
 		
