@@ -39,37 +39,19 @@ $prefixe_to   = 'wa_';
 // End Of Config
 //
 
+if( php_sapi_name() != 'cli' ) {
+	set_time_limit(0);
+	header('Content-Type: text/plain; charset=ISO-8859-1');
+}
+else {
+	define('IN_COMMANDLINE', true);
+}
+
 $prefixe = 'wa_';// Pas touche. Empêche les notices PHP dans wadb_init.php sur les déclarations de constantes...
 
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';
 require WA_ROOTDIR . '/includes/sql/sqlparser.php';
-
-//
-// Gestionnaire d'erreur spécifique
-//
-function wan_error_handler($errno, $errstr, $errfile, $errline)
-{
-	switch( $errno ) {
-		case E_NOTICE: $errno = 'Notice'; break;
-		case E_WARNING: $errno = 'Warning'; break;
-		case E_ERROR: $errno = 'Error'; break;
-		default: $errno = 'Unknown'; break;
-	}
-	
-	if( error_reporting(E_ALL) ) {
-		printf("%s : %s at line %d\n", $errno, strip_tags($errstr), $errline);
-//		debug_print_backtrace();
-		exit(1);
-	}
-}
-
-set_error_handler('wan_error_handler');
-
-if( php_sapi_name() != 'cli' ) {
-	set_time_limit(0);
-	header('Content-Type: text/plain; charset=ISO-8859-1');
-}
 
 //
 // Connect to DB
@@ -80,7 +62,7 @@ $db_to   = WaDatabase($dsn_to);
 // DROP if any
 
 foreach( $sql_schemas as $tablename => $schema ) {
-	if( $db->engine == 'postgres' && !empty($schema['sequence']) )
+	if( $db_to->engine == 'postgres' && !empty($schema['sequence']) )
 	{
 		foreach( $schema['sequence'] as $sequence )
 		{
@@ -90,7 +72,7 @@ foreach( $sql_schemas as $tablename => $schema ) {
 		}
 	}
 	
-/*	if( !empty($schema['index']) )
+	if( !empty($schema['index']) )
 	{
 		foreach( $schema['index'] as $index )
 		{
@@ -98,7 +80,7 @@ foreach( $sql_schemas as $tablename => $schema ) {
 				$db_to->quote(str_replace('wa_', $prefixe_to, $index))
 			));
 		}
-	}*/
+	}
 	
 	$db_to->query(sprintf('DROP TABLE IF EXISTS %s',
 		$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))
@@ -175,25 +157,24 @@ function fields_list($tablename)
 			array_push($fields, $row['name']);
 		}
 	}
-	else {
-		echo "Oops... WTF ?!\n";
-		exit(1);
-	}
 	
 	return $fields;
 }
 
 // Sequence postgresql
-$sequence = array(
-	'wa_abonnes'       => array('seqname' => 'wa_abonnes_id_seq', 'seqval' => 0, 'field' => 'abo_id'),
-	'wa_admin'         => array('seqname' => 'wa_admin_id_seq', 'seqval' => 0, 'field' => 'admin_id'),
-	'wa_ban_list'      => array('seqname' => 'wa_ban_id_seq', 'seqval' => 0, 'field' => 'ban_id'),
-	'wa_config'        => array('seqname' => 'wa_config_id_seq', 'seqval' => 0, 'field' => 'config_id'),
-	'wa_forbidden_ext' => array('seqname' => 'wa_forbidden_ext_id_seq', 'seqval' => 0, 'field' => 'fe_id'),
-	'wa_joined_files'  => array('seqname' => 'wa_joined_files_id_seq', 'seqval' => 0, 'field' => 'file_id'),
-	'wa_liste'         => array('seqname' => 'wa_liste_id_seq', 'seqval' => 0, 'field' => 'liste_id'),
-	'wa_log'           => array('seqname' => 'wa_log_id_seq', 'seqval' => 0, 'field' => 'log_id')
-);
+$sequence = array();
+
+foreach( $sql_schemas as $tablename => $schema ) {
+	if( !empty($schema['sequence']) ) {
+		$seq = each($schema['sequence']);
+		
+		$sequence[$tablename] = array(
+			'field'   => $seq['key'],
+			'seqname' => $seq['value'],
+			'seqval'  => 0
+		);
+	}
+}
 
 // Populate table
 foreach( $sql_schemas as $tablename => $schema ) {
