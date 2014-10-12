@@ -182,7 +182,7 @@ function parseDSN($dsn)
 				$infos['path']   = rawurldecode($value);
 				$infos['dbname'] = basename($infos['path']);
 				
-				if( $infos['path'][0] != '/' ) {
+				if( $infos['path'][0] != '/' && $infos['path'] != ':memory:' ) {
 					$infos['path'] = WA_ROOTDIR . '/' . $infos['path'];
 				}
 				break;
