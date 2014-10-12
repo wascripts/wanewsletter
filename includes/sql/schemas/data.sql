@@ -55,9 +55,3 @@ INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'php3');
 INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'scr');
 INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'pif');
 INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'bat');
-
--- 
--- Insertion d'une liste de diffusion par défaut 
--- 
-INSERT INTO wa_liste (liste_name, liste_format, sender_email, form_url, liste_sig)
-	VALUES('Default list', 1, 'mailing@yourdomaine.com', 'http://www.yourdomaine.com/form.php', 'Signature de la newsletter');
