@@ -461,11 +461,12 @@ BASIC;
 	 * Si $str n'est pas fourni, la pile de messages $this->messageList est utilisée
 	 * 
 	 * @param string $str
+	 * @param string $title
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function displayMessage($str = '')
+	function displayMessage($str = '', $title = '')
 	{
 		global $lang, $message;
 		
@@ -486,7 +487,21 @@ BASIC;
 		}
 		$str = substr($str, 8);
 		
-		$title = '<span style="color: #33DD33;">' . $lang['Title']['info'] . '</span>';
+		if( empty($title) )
+		{
+			$title = $lang['Title']['info'];
+		}
+		else if( !empty($lang['Title'][$title]) )
+		{
+			if( $title == 'error' )
+			{
+				$title = '<span style="color: #F66;">' . $lang['Title']['error'] . '</span>';
+			}
+			else
+			{
+				$title = $lang['Title'][$title];
+			}
+		}
 		
 		if( !defined('HEADER_INC') )
 		{

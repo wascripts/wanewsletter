@@ -499,7 +499,7 @@ function wan_display_error($error, $simpleHTML = false)
 		echo '<p>' . nl2br($message) . '</p>';
 	}
 	else if( $output instanceof output ) {
-		$output->displayMessage($message);
+		$output->displayMessage($message, 'error');
 	}
 	else {
 		$message = nl2br($message);
