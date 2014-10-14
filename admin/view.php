@@ -66,34 +66,10 @@ if( $mode == 'download' )
 }
 
 //
-// Mode export : Export d'une archive et de ses fichiers joints via une archive Tarball ou zip
+// Mode export : Export d'une archive et de ses fichiers joints
 //
 else if( $mode == 'export' )
 {
-	$compressed = null;
-	
-	if( EXPORT_FORMAT == 'Zip' )
-	{
-		$filename  = 'newsletter.zip';
-		$mime_type = 'application/zip';
-		$classname = 'Archive_Zip';
-		$classfile = 'Archive/Zip.php';
-	}
-	else
-	{
-		$filename  = 'newsletter.tar';
-		$mime_type = 'application/x-tar';
-		$classname = 'Archive_Tar';
-		$classfile = 'Archive/Tar.php';
-		
-		if( extension_loaded('zlib') )
-		{
-			$filename  .= '.gz';
-			$compressed = 'gz';
-			$mime_type  = 'application/x-gtar';
-		}
-	}
-	
 	$log_id = ( !empty($_GET['id']) ) ? intval($_GET['id']) : 0;
 	
 	$sql = "SELECT log_subject, log_body_text, log_body_html
@@ -106,25 +82,11 @@ else if( $mode == 'export' )
 		trigger_error('log_not_exists', E_USER_ERROR);
 	}
 	
-	@include $classfile;
+	$filename = sprintf('newsletter-%d.zip', $log_id);
+	$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
 	
-	if( !class_exists($classname) )
-	{
-		//
-		// Le paquet PEAR Archive_Tar ou Archive_Zip n'est pas installé ou n'est pas présent
-		// dans le chemin d'inclusion
-		//
-		$output->displayMessage(sprintf($lang['Message']['Archive_class_needed'], $classname));
-	}
-	
-	$filename = WA_TMPDIR . '/' . $filename;
-	if( file_exists($filename) )
-	{
-		unlink($filename);
-	}
-	
-	$archive = new $classname($filename, $compressed);
-	$archive->setErrorHandling(PEAR_ERROR_TRIGGER, E_USER_ERROR);
+	$zip = new ZipArchive();
+	$zip->open($tmp_filename, ZipArchive::CREATE);
 	
 	$sql = "SELECT jf.file_real_name, jf.file_physical_name
 		FROM " . JOINED_FILES_TABLE . " AS jf
@@ -140,8 +102,10 @@ else if( $mode == 'export' )
 	//
 	while( $row = $result->fetch() )
 	{
-		$data = file_get_contents(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $row['file_physical_name']);
-		$archive->addString('newsletter/files/' . $row['file_real_name'], $data);
+		$zip->addFile(
+			WA_ROOTDIR . '/' . $nl_config['upload_path'] . $row['file_physical_name'],
+			'newsletter/files/' . $row['file_real_name']
+		);
 		
 		$logdata['log_body_html'] = preg_replace(
 			'/<(.+?)"cid:' . preg_quote($row['file_real_name'], '/') . '"([^>]*)?>/si',
@@ -167,15 +131,17 @@ else if( $mode == 'export' )
 		$logdata['log_body_html'] = purge_latin1($logdata['log_body_html']);
 	}
 	
-	$archive->addString('newsletter/newsletter.txt', $logdata['log_body_text']);
-	$archive->addString('newsletter/newsletter.html', $logdata['log_body_html']);
+	$zip->addFromString('newsletter/newsletter.txt', $logdata['log_body_text']);
+	$zip->addFromString('newsletter/newsletter.html', $logdata['log_body_html']);
+	
+	$zip->close();
 	
 	require WA_ROOTDIR . '/includes/class.attach.php';
 	
-	$data = file_get_contents($filename);
-	unlink($filename);
+	$data = file_get_contents($tmp_filename);
+	unlink($tmp_filename);
 	
-	Attach::send_file(basename($filename), $mime_type, $data);
+	Attach::send_file($filename, 'application/zip', $data);
 }
 
 //

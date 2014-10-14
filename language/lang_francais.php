@@ -249,7 +249,6 @@ $lang['Message']['Profil_cp_disabled']      = "Le panneau de gestion de compte e
 $lang['Message']['Inactive_account']        = "Votre compte est actuellement inactif, vous avez dû recevoir un email pour l'activer.";
 $lang['Message']['IDs_sended']              = "Vos identifiants vous ont été envoyés par email";
 $lang['Message']['Logs_sent']               = "Les newsletters sélectionnées ont été envoyées à votre adresse: %s";
-$lang['Message']['Archive_class_needed']    = "Le module d'export nécessite la présence du paquet <abbr title=\"PHP Extension and Application Repository\" lang=\"en\">PEAR</abbr> <q>%s</q>. Consultez la documentation pour plus de détails.";
 $lang['Message']['Twice_sending']           = "Une newsletter est déjà en cours d'envoi pour cette liste. Terminez ou annulez cet envoi avant d'en commencer un autre.";
 
 $lang['Message']['Invalid_cookie_name']     = "Les caractères blancs, ainsi que le signe égal, le point-virgule et la virgule ne sont pas autorisés dans le nom du cookie.";

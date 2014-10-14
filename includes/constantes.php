@@ -59,11 +59,6 @@ define('DISPLAY_ERRORS_IN_LOG', true);
 define('TRANSLITE_INVALID_CHARS', FALSE);
 
 //
-// Format des exportations d'archive
-//
-define('EXPORT_FORMAT', 'Tar'); // Tar ou Zip (Attention, respecter la casse)
-
-//
 // Prise en compte de l'authentification HTTP pour la connexion automatique
 //
 define('ENABLE_HTTP_AUTHENTICATION', TRUE);
