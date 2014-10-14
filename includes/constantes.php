@@ -34,7 +34,7 @@ define('DEBUG_LEVEL_ALL',    3);
 //
 // Configure le niveau de débogage souhaité
 //
-define('DEBUG_MODE', DEBUG_LEVEL_ALL);
+define('DEBUG_MODE', DEBUG_LEVEL_NORMAL);
 
 //
 // Pour visualiser le temps d'exécution du script et le nombre de requètes effectuées
