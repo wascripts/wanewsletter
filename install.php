@@ -22,6 +22,8 @@ function message($message)
 		$message = $lang['Message'][$message];
 	}
 	
+	$output->send_headers();
+	
 	$output->assign_block_vars('result', array(
 		'L_TITLE'    => $lang['Result_install'],
 		'MSG_RESULT' => nl2br($message)
@@ -31,6 +33,19 @@ function message($message)
 	$output->page_footer();
 	exit;
 }
+
+// On prépare dès maintenant install.tpl. C'est nécessaire en cas d'appel
+// précoce à la fonction message()
+$output->set_filenames( array(
+	'body' => 'install.tpl'
+));
+
+$output->assign_vars( array(
+	'PAGE_TITLE'   => ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
+	'CONTENT_LANG' => $lang['CONTENT_LANG'],
+	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
+	'CHARSET'      => $lang['CHARSET']
+));
 
 $prefixe = ( !empty($_POST['prefixe']) ) ? trim($_POST['prefixe']) : 'wa_';
 $infos   = array(
@@ -154,12 +169,9 @@ if( defined('NL_INSTALLED') )
 
 load_settings();
 
-$output->set_filenames( array(
-	'body' => 'install.tpl'
-));
-
-$output->send_headers();
-
+//
+// Idem qu'au début, mais avec éventuellement un fichier de langue différent chargé
+//
 $output->assign_vars( array(
 	'PAGE_TITLE'   => ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
@@ -390,6 +402,8 @@ if( $start )
 				$output->addHiddenField('dbname',  $infos['dbname']);
 				$output->addHiddenField('prefixe', $prefixe);
 				
+				$output->send_headers();
+				
 				$output->assign_block_vars('download_file', array(
 					'L_TITLE'         => $lang['Result_install'],
 					'L_DL_BUTTON'     => $lang['Button']['dl'],
@@ -409,6 +423,8 @@ if( $start )
 		message(sprintf($lang['Success_install'], sprintf('<a href="%s">', $login_page), '</a>'));
 	}
 }
+
+$output->send_headers();
 
 if( !defined('NL_INSTALLED') )
 {
