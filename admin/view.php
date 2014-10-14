@@ -1878,14 +1878,20 @@ else if( $mode == 'log' )
 			$output->assign_vars(array(
 				'L_SUBJECT'  => $lang['Log_subject'],
 				'L_NUMDEST'  => $lang['Log_numdest'],
-				'L_EXPORT_T' => $lang['Export_nl'],
-				'L_EXPORT'   => $lang['Export'],
 				
 				'SUBJECT'    => wan_htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
 				'NUMDEST'    => $logdata['log_numdest'],
 				'FORMAT'     => $format,
 				'LOG_ID'     => $log_id
 			));
+			
+			if( extension_loaded('zip') )
+			{
+				$output->assign_block_vars('export', array(
+					'L_EXPORT_T' => $lang['Export_nl'],
+					'L_EXPORT'   => $lang['Export']
+				));
+			}
 			
 			if( $listdata['liste_format'] == FORMAT_MULTIPLE )
 			{

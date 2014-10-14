@@ -8,14 +8,16 @@
 	</div>
 	<div id="log-details">
 		<span><em>{L_NUMDEST}&nbsp;:</em> {NUMDEST}</span>
+		<!-- BEGIN export -->
 		<span>
-			<a href="view.php?mode=export&amp;id={LOG_ID}" title="{L_EXPORT_T}">
-				<img src="../templates/images/archive.png" alt="{L_EXPORT}"
+			<a href="view.php?mode=export&amp;id={LOG_ID}" title="{export.L_EXPORT_T}">
+				<img src="../templates/images/archive.png" alt="{export.L_EXPORT}"
 					onmouseover="this.src = '../templates/images/archive-hover.png';"
 					onmouseout="this.src = '../templates/images/archive.png';"
 				/>
 			</a>
 		</span>
+		<!-- END export -->
 	</div>
 	
 	{JOINED_FILES_BOX}

@@ -320,7 +320,7 @@ ul#home li {
 
 div#log-details { margin: 1px; padding: .2em .5em; line-height: 1.5; }
 div#log-details { background-color: #E7E5E3; }
-div#log-details span:last-child { float: right; margin-top: 2px; }
+div#log-details span + span:last-child { float: right; margin-top: 2px; }
 
 /* Boîte de visualisation des images jointes */
 div.image-box {
