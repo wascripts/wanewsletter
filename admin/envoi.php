@@ -691,16 +691,19 @@ switch( $mode )
 				// Deux newsletters ne peuvent être simultanément en attente d'envoi
 				// pour une même liste.
 				//
-				$sql = "SELECT COUNT(*) AS test
-					FROM " . LOG_TABLE . "
-					WHERE liste_id = $listdata[liste_id]
-						AND log_status = " . STATUS_STANDBY;
-				$result = $db->query($sql);
-				
-				if( $result->column('test') > 0 )
+				if( $mode == 'send' )
 				{
-					$error = true;
-					$msg_error[] = $lang['Message']['Twice_sending'];
+					$sql = "SELECT COUNT(*) AS test
+						FROM " . LOG_TABLE . "
+						WHERE liste_id = $listdata[liste_id]
+							AND log_status = " . STATUS_STANDBY;
+					$result = $db->query($sql);
+					
+					if( $result->column('test') > 0 )
+					{
+						$error = true;
+						$msg_error[] = $lang['Message']['Twice_sending'];
+					}
 				}
 			}
 			
