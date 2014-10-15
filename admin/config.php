@@ -57,16 +57,22 @@ if( isset($_POST['submit']) )
 	}
 	
 	// Restriction sur le chemin de validité du cookie
-	if( ($len = strlen($new_config['cookie_path'])) == 0 || strncmp($new_config['cookie_path'], $new_config['path'], $len) != 0 )
+	if( $new_config['cookie_path'] == '' )
+	{
+		$new_config['cookie_path'] = '/';
+	}
+	else if( $new_config['cookie_path'] != '/' )
+	{
+		$new_config['cookie_path'] = '/' . trim($new_config['cookie_path'], '/') . '/';
+	}
+	
+	$len = strlen($new_config['cookie_path']);
+	if( strncmp($new_config['cookie_path'], $new_config['path'], $len) != 0 )
 	{
 		$error = true;
 		$msg_error[] = nl2br(sprintf($lang['Message']['Invalid_cookie_path'],
 			wan_htmlspecialchars($new_config['path'])
 		));
-	}
-	else
-	{
-		$new_config['cookie_path'] = '/' . trim($new_config['cookie_path'], '/') . '/';
 	}
 	
 	if( ($new_config['session_length'] = intval($new_config['session_length'])) <= 0 )
