@@ -74,7 +74,7 @@ function send_image($name, $img, $lastModified = null)
 	
 	if( $lastModified <= $cachetime && $canUseCache )
 	{
-		header('Not Modified', true, 304);
+		http_response_code(304);
 		header('Date: ' . gmdate(DATE_RFC1123));
 		exit;
 	}
