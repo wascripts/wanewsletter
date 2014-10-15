@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_NEWSLETTER', true);
@@ -33,7 +16,6 @@ $simple_header = TRUE;
 
 $mode     = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
 $redirect = ( !empty($_REQUEST['redirect']) ) ? trim($_REQUEST['redirect']) : 'index.php';
-$redirect = preg_replace('/(\?|&)sessid=[a-zA-Z0-9]{32}/', '', $redirect);
 
 //
 // Mot de passe perdu
@@ -49,10 +31,7 @@ if( $mode == 'sendpass' )
 			FROM " . ADMIN_TABLE . "
 			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($login)) . "'
 				AND admin_email = '" . $db->escape($email) . "'";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les informations du compte', CRITICAL_ERROR);
-		}
+		$result = $db->query($sql);
 		
 		if( !($admin_id = $result->column('admin_id')) )
 		{
@@ -67,6 +46,7 @@ if( $mode == 'sendpass' )
 			require WAMAILER_DIR . '/class.mailer.php';
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$mailer->signature = WA_X_MAILER;
 			
 			if( $nl_config['use_smtp'] )
 			{
@@ -92,14 +72,16 @@ if( $mode == 'sendpass' )
 			
 			if( !$mailer->send() )
 			{
-				trigger_error('Failed_sending', ERROR);
+				trigger_error('Failed_sending', E_USER_ERROR);
 			}
 			
+			$hasher = new PasswordHash();
+			
 			$db->query("UPDATE " . ADMIN_TABLE . "
-				SET admin_pwd = '" . md5($new_password) . "'
+				SET admin_pwd = '" . $db->escape($hasher->hash($new_password)) . "'
 				WHERE admin_id = " . $admin_id);
 			
-			$output->message('IDs_sended');
+			$output->displayMessage('IDs_sended');
 		}
 	}
 	
@@ -115,8 +97,8 @@ if( $mode == 'sendpass' )
 		'L_EMAIL'        => $lang['Email_address'],
 		'L_VALID_BUTTON' => $lang['Button']['valid'],
 		
-		'S_LOGIN' => htmlspecialchars($login),
-		'S_EMAIL' => htmlspecialchars($email)
+		'S_LOGIN' => wan_htmlspecialchars($login),
+		'S_EMAIL' => wan_htmlspecialchars($email)
 	));
 	
 	$output->pparse('body');
@@ -127,13 +109,13 @@ if( $mode == 'sendpass' )
 //
 // Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
 //
-else if( $mode == 'login' && !$session->is_logged_in )
+else if( isset($_POST['submit']) && !$session->is_logged_in )
 {
 	$login     = ( !empty($_POST['login']) ) ? trim($_POST['login']) : '';
 	$passwd    = ( !empty($_POST['passwd']) ) ? trim($_POST['passwd']) : '';
-	$autologin = ( !empty($_POST['autologin']) ) ? TRUE : FALSE;
+	$autologin = false;// ( !empty($_POST['autologin']) ) ? TRUE : FALSE;
 	
-	$session->login($login, md5($passwd), $autologin);
+	$session->login($login, $passwd, $autologin);
 	
 	if( !$session->is_logged_in )
 	{
@@ -162,12 +144,12 @@ else if( $mode == 'logout' )
 //
 if( $session->is_logged_in )
 {
-	Location($redirect);
+	http_redirect($redirect);
 }
 
 if( !empty($redirect) )
 {
-	$output->addHiddenField('redirect', htmlspecialchars($redirect));
+	$output->addHiddenField('redirect', wan_htmlspecialchars($redirect));
 }
 
 $output->page_header();
@@ -186,6 +168,12 @@ $output->assign_vars(array(
 	
 	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 ));
+
+if( !isset($_COOKIE[$nl_config['cookie_name'] . '_data']) )
+{
+	$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
+}
+
 
 $output->pparse('body');
 

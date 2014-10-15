@@ -1,55 +1,59 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<ul class="links special">
+<div class="compact">
+<ul class="links">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=edit&amp;id={S_ABO_ID}">{L_EDIT_ACCOUNT}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=delete&amp;id={S_ABO_ID}">{L_DELETE_ACCOUNT}</a></li>
 </ul>
 
-<div class="smallbloc">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
-	<table class="content">
+	<table class="dataset">
 		<tr>
-			<td class="row1"><span class="texte">{L_PSEUDO}&#160;:</span></td>
-			<td class="row2"><span class="texte">{S_ABO_PSEUDO}</span></td>
+			<td>{L_PSEUDO}&nbsp;:</td>
+			<td>{S_ABO_PSEUDO}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_EMAIL}&#160;:</span></td>
-			<td class="row2"><span class="texte"><a href="mailto:{S_ABO_EMAIL}">{S_ABO_EMAIL}</a></span></td>
+			<td>{L_EMAIL}&nbsp;:</td>
+			<td><a href="mailto:{S_ABO_EMAIL}">{S_ABO_EMAIL}</a></td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_REGISTER_DATE}&#160;:</span></td>
-			<td class="row2"><span class="texte">{S_REGISTER_DATE}</span></td>
+			<td>{L_REGISTER_DATE}&nbsp;:</td>
+			<td>{S_REGISTER_DATE}</td>
 		</tr>
-		<tr>
-			<td class="explain" colspan="2">{L_LISTE_TO_REGISTER}&#160;:</td>
-		</tr>
+	</table>
+	
+	<div class="explain">{L_LISTE_TO_REGISTER}&nbsp;:</div>
+	
+	<table class="listing">
 		<!-- BEGIN listerow -->
 		<tr>
-			<td class="row1" colspan="2">
-				<span class="texte">&#8211;&#160;<a href="{listerow.U_VIEW_LISTE}">{listerow.LISTE_NAME}</a> {listerow.CHOICE_FORMAT}</span>
+			<td>
+				&ndash;&nbsp;<a href="view.php?mode=abonnes&amp;liste={listerow.LISTE_ID}">{listerow.LISTE_NAME}</a> {listerow.CHOICE_FORMAT}
 			</td>
 		</tr>
 		<!-- END listerow -->
 	</table>
+	
+	<!-- BEGIN tags -->
+	<h2>{tags.L_CAPTION}</h2>
+	
+	<table class="dataset">
+		<tr>
+			<th>{tags.L_NAME}</th>
+			<th>{tags.L_VALUE}</th>
+		</tr>
+		<!-- BEGIN row -->
+		<tr>
+			<td>{tags.row.NAME}</td>
+			<td>{tags.row.VALUE}</td>
+		</tr>
+		<!-- END row -->
+	</table>
+	<!-- END tags -->
 </div>
-
-<!-- BEGIN tags -->
-<table id="tagsList">
-	<caption><span class="texte">{tags.L_CAPTION}</span></caption>
-	<col span="2" width="50%" />
-	<tr>
-		<th>{tags.L_NAME}</th>
-		<th>{tags.L_VALUE}</th>
-	</tr>
-	<!-- BEGIN row -->
-	<tr>
-		<td><span class="texte">{tags.row.NAME}</span></td>
-		<td><span class="texte">{tags.row.VALUE}</span></td>
-	</tr>
-	<!-- END row -->
-</table>
-<!-- END tags -->
+</div>
 
 {LISTBOX}

@@ -1,25 +1,26 @@
-<table class="content">
+
+<h2>{L_JOINED_FILES}</h2>
+
+<table id="files-box" class="listing">
 	<tr>
-		<th> # </th>
-		<th> {L_FILENAME} </th>
-		<th> {L_FILESIZE} </th>
+		<th>#</th>
+		<th>{L_FILENAME}</th>
+		<th>{L_FILESIZE}</th>
 		<!-- BEGIN del_column -->
-		<th> &#160; </th>
+		<th></th>
 		<!-- END del_column -->
 	</tr>
 	<!-- BEGIN file_info -->
 	<tr>
-		<td class="minirow"> &#160;<span class="m-texte"><b>{file_info.OFFSET}</b></span>&#160; </td>
-		<td class="row1"> <span class="texte">{file_info.S_SHOW} <a href="{file_info.U_DOWNLOAD}">{file_info.FILENAME}</a></span> </td>
-		<td class="row1"> <span class="texte">{file_info.FILESIZE}</span> </td>
+		<th scope="row">{file_info.OFFSET}</th>
+		<td>{file_info.S_SHOW} {file_info.FILENAME}</td>
+		<td>{file_info.FILESIZE}</td>
 		<!-- BEGIN delete_options -->
-		<td class="row2"> <input type="checkbox" name="file_ids[]" value="{file_info.delete_options.FILE_ID}" /> </td>
+		<td><input type="checkbox" name="file_ids[]" value="{file_info.delete_options.FILE_ID}" /></td>
 		<!-- END delete_options -->
 	</tr>
 	<!-- END file_info -->
 	<tr>
-		<td class="row2" colspan="{S_ROWSPAN}">
-			<span class="m-texte">{L_TOTAL_LOG_SIZE}&#160;: {TOTAL_LOG_SIZE}</span>
-		</td>
+		<td colspan="{S_ROWSPAN}"><em>{L_TOTAL_LOG_SIZE}&nbsp;:</em> {TOTAL_LOG_SIZE}</td>
 	</tr>
 </table>

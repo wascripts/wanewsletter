@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_NEWSLETTER', true);
@@ -33,7 +16,7 @@ $admin_id = ( !empty($_REQUEST['admin_id']) ) ? intval($_REQUEST['admin_id']) : 
 
 if( isset($_POST['cancel']) )
 {
-	Location('admin.php');
+	http_redirect('admin.php');
 }
 
 if( isset($_POST['delete_user']) )
@@ -47,10 +30,9 @@ if( isset($_POST['delete_user']) )
 if( ( $mode == 'adduser' || $mode == 'deluser' ) && $admindata['admin_level'] != ADMIN )
 {
 	$output->redirect('index.php', 4);
-	
-	$message  = $lang['Message']['Not_authorized'];
-	$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-	$output->message($message);
+	$output->addLine($lang['Message']['Not_authorized']);
+	$output->addLine($lang['Click_return_index'], './index.php');
+	$output->displayMessage();
 }
 
 if( $mode == 'adduser' )
@@ -73,10 +55,7 @@ if( $mode == 'adduser' )
 			$sql = "SELECT COUNT(*) AS login_test 
 				FROM " . ADMIN_TABLE . " 
 				WHERE LOWER(admin_login) = '" . $db->escape(strtolower($new_login)) . "'";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de tester le login', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( $result->column('login_test') > 0 )
 			{
@@ -94,21 +73,20 @@ if( $mode == 'adduser' )
 		if( !$error )
 		{
 			$new_pass = generate_key(10);
+			$hasher = new PasswordHash();
 			
 			$sql_data = array();
 			$sql_data['admin_login']      = $new_login;
-			$sql_data['admin_pwd']        = md5($new_pass);
+			$sql_data['admin_pwd']        = $hasher->hash($new_pass);
 			$sql_data['admin_email']      = $new_email;
 			$sql_data['admin_lang']       = $nl_config['language'];
 			$sql_data['admin_dateformat'] = $nl_config['date_format'];
 			$sql_data['admin_level']      = USER;
 			
-			if( !$db->build(SQL_INSERT, ADMIN_TABLE, $sql_data) )
-			{
-				trigger_error('Impossible d\'ajouter le nouvel administrateur', ERROR);
-			}
+			$db->build(SQL_INSERT, ADMIN_TABLE, $sql_data);
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$mailer->signature = WA_X_MAILER;
 			
 			if( $nl_config['use_smtp'] )
 			{
@@ -131,25 +109,23 @@ if( $mode == 'adduser' )
 				'PSEUDO'     => $new_login,
 				'SITENAME'   => $nl_config['sitename'],
 				'PASSWORD'   => $new_pass,
-				'LINK_ADMIN' => make_script_url('admin/index.php')
+				'LINK_ADMIN' => wan_build_url('admin/index.php')
 			));
 			
 			if( !$mailer->send() )
 			{
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 			}
 			
 			$output->redirect('./admin.php', 6);
-			
-			$message  = $lang['Message']['Admin_added'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php') . '">', '</a>');
-			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			$output->message($message);
+			$output->addLine($lang['Message']['Admin_added']);
+			$output->addLine($lang['Click_return_profile'], './admin.php');
+			$output->addLine($lang['Click_return_index'], './index.php');
+			$output->displayMessage();
 		}
 	}
 	
 	$output->addHiddenField('mode', 'adduser');
-	$output->addHiddenField('sessid', $session->session_id);
 	
 	$output->page_header();
 	
@@ -166,8 +142,8 @@ if( $mode == 'adduser' )
 		'L_VALID_BUTTON'  => $lang['Button']['valid'],
 		'L_CANCEL_BUTTON' => $lang['Button']['cancel'],
 		
-		'LOGIN' => htmlspecialchars($new_login),
-		'EMAIL' => htmlspecialchars($new_email),
+		'LOGIN' => wan_htmlspecialchars($new_login),
+		'EMAIL' => wan_htmlspecialchars($new_email),
 		
 		'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 	));
@@ -180,27 +156,14 @@ else if( $mode == 'deluser' )
 {
 	if( $admindata['admin_id'] == $admin_id )
 	{
-		$output->message('Owner_account');
+		$output->displayMessage('Owner_account');
 	}
 	
 	if( isset($_POST['confirm']) )
 	{
 		$db->beginTransaction();
-		
-		$sql = "DELETE FROM " . ADMIN_TABLE . " 
-			WHERE admin_id = " . $admin_id;
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de supprimer l\'administrateur', ERROR);
-		}
-		
-		$sql = "DELETE FROM " . AUTH_ADMIN_TABLE . " 
-			WHERE admin_id = " . $admin_id;
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de supprimer les permissions de l\'administrateur', ERROR);
-		}
-		
+		$db->query("DELETE FROM " . ADMIN_TABLE . " WHERE admin_id = " . $admin_id);
+		$db->query("DELETE FROM " . AUTH_ADMIN_TABLE . " WHERE admin_id = " . $admin_id);
 		$db->commit();
 		
 		//
@@ -209,17 +172,15 @@ else if( $mode == 'deluser' )
 		$db->vacuum(array(ADMIN_TABLE, AUTH_ADMIN_TABLE));
 		
 		$output->redirect('./admin.php', 6);
-		
-		$message  = $lang['Message']['Admin_deleted'];
-		$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php') . '">', '</a>');
-		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		$output->message($message);
+		$output->addLine($lang['Message']['Admin_deleted']);
+		$output->addLine($lang['Click_return_profile'], './admin.php');
+		$output->addLine($lang['Click_return_index'], './index.php');
+		$output->displayMessage();
 	}
 	else
 	{
 		$output->addHiddenField('mode'    , 'deluser');
 		$output->addHiddenField('admin_id', $admin_id);
-		$output->addHiddenField('sessid'  , $session->session_id);
 		
 		$output->page_header();
 		
@@ -235,7 +196,7 @@ else if( $mode == 'deluser' )
 			'L_NO'  => $lang['No'],
 			
 			'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-			'U_FORM' => sessid('./admin.php')
+			'U_FORM' => 'admin.php'
 		));
 		
 		$output->pparse('body');
@@ -249,10 +210,9 @@ if( isset($_POST['submit']) )
 	if( $admindata['admin_level'] != ADMIN && $admin_id != $admindata['admin_id'] )
 	{
 		$output->redirect('./index.php', 4);
-		
-		$message  = $lang['Message']['Not_authorized'];
-		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		$output->message($message);
+		$output->addLine($lang['Message']['Not_authorized']);
+		$output->addLine($lang['Click_return_index'], './index.php');
+		$output->displayMessage();
 	}
 	
 	$vararray = array('current_pass', 'new_pass', 'confirm_pass', 'email', 'dateformat', 'language');
@@ -277,7 +237,10 @@ if( isset($_POST['submit']) )
 	$email_new_subscribe = ( !empty($_POST['email_new_subscribe']) ) ? intval($_POST['email_new_subscribe']) : SUBSCRIBE_NOTIFY_NO;
 	$email_unsubscribe   = ( !empty($_POST['email_unsubscribe']) ) ? intval($_POST['email_unsubscribe']) : UNSUBSCRIBE_NOTIFY_NO;
 	
-	if( $admin_id == $admindata['admin_id'] && $current_pass != '' && md5($current_pass) != $admindata['admin_pwd'] )
+	$hasher = new PasswordHash();
+	
+	if( $admin_id == $admindata['admin_id'] && $current_pass != ''
+		&& !$hasher->check($current_pass, $admindata['admin_pwd']) )
 	{
 		$error = TRUE;
 		$msg_error[] = $lang['Message']['Error_login'];
@@ -291,7 +254,7 @@ if( isset($_POST['submit']) )
 			$error = TRUE;
 			$msg_error[] = $lang['Message']['Alphanum_pass'];
 		}
-		else if( $new_pass != $confirm_pass )
+		else if( $new_pass !== $confirm_pass )
 		{
 			$error = TRUE;
 			$msg_error[] = $lang['Message']['Bad_confirm_pass'];
@@ -318,7 +281,7 @@ if( isset($_POST['submit']) )
 		
 		if( $set_password )
 		{
-			$sql_data['admin_pwd'] = md5($new_pass);
+			$sql_data['admin_pwd'] = $hasher->hash($new_pass);
 		}
 		
 		if( $admindata['admin_level'] == ADMIN && $admin_id != $admindata['admin_id'] && !empty($_POST['admin_level']) )
@@ -326,10 +289,7 @@ if( isset($_POST['submit']) )
 			$sql_data['admin_level'] = ( $_POST['admin_level'] == ADMIN ) ? ADMIN : USER;
 		}
 		
-		if( !$db->build(SQL_UPDATE, ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id)) )
-		{
-			trigger_error('Impossible de mettre le profil à jour', ERROR);
-		}
+		$db->build(SQL_UPDATE, ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id));
 		
 		if( $admindata['admin_level'] == ADMIN )
 		{
@@ -355,18 +315,12 @@ if( isset($_POST['submit']) )
 					$sql_data['admin_id'] = $admin_id;
 					$sql_data['liste_id'] = $liste_ids[$i];
 					
-					if( !$db->build(SQL_INSERT, AUTH_ADMIN_TABLE, $sql_data) )
-					{
-						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des permissions', ERROR);
-					}
+					$db->build(SQL_INSERT, AUTH_ADMIN_TABLE, $sql_data);
 				}
 				else
 				{
 					$sql_where = array('admin_id' => $admin_id, 'liste_id' => $liste_ids[$i]);
-					if( !$db->build(SQL_UPDATE, AUTH_ADMIN_TABLE, $sql_data, $sql_where) )
-					{
-						trigger_error('Impossible de mettre à jour la table des permissions', ERROR);
-					}
+					$db->build(SQL_UPDATE, AUTH_ADMIN_TABLE, $sql_data, $sql_where);
 				}
 			}
 		}
@@ -376,14 +330,15 @@ if( isset($_POST['submit']) )
 			$sql = "SELECT admin_login
 				FROM " . ADMIN_TABLE . "
 				WHERE admin_id = " . $admin_id;
-			if( !($result = $db->query($sql)) )
+			$result = $db->query($sql);
+			
+			if( ($pseudo = $result->column('admin_login')) === false )
 			{
-				trigger_error('Impossible de récupérer le pseudo de cet utilisateur', ERROR);
+				trigger_error('Impossible de récupérer le pseudo de cet utilisateur', E_USER_ERROR);
 			}
 			
-			$pseudo = $result->column('admin_login');
-			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$mailer->signature = WA_X_MAILER;
 			
 			if( $nl_config['use_smtp'] )
 			{
@@ -409,16 +364,15 @@ if( isset($_POST['submit']) )
 			
 			if( !$mailer->send() )
 			{
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 			}
 		}
 		
 		$output->redirect('./admin.php', 6);
-		
-		$message  = $lang['Message']['Profile_updated'];
-		$message .= '<br /><br />' . sprintf($lang['Click_return_profile'], '<a href="' . sessid('./admin.php?admin_id=' . $admin_id) . '">', '</a>');
-		$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-		$output->message($message);
+		$output->addLine($lang['Message']['Profile_updated']);
+		$output->addLine($lang['Click_return_profile'], './admin.php?admin_id=' . $admin_id);
+		$output->addLine($lang['Click_return_index'], './index.php');
+		$output->displayMessage();
 	}
 }
 
@@ -434,9 +388,11 @@ if( $admindata['admin_level'] == ADMIN )
 				admin_dateformat, admin_level, email_new_subscribe, email_unsubscribe
 			FROM " . ADMIN_TABLE . " 
 			WHERE admin_id = " . $admin_id;
-		if( $result = $db->query($sql) )
+		$result = $db->query($sql);
+		
+		if( !($current_admin = $result->fetch()) )
 		{
-			$current_admin = $result->fetch();
+			trigger_error("Impossible de récupérer les données de l'utilisateur", E_USER_ERROR);
 		}
 	}
 	
@@ -449,10 +405,7 @@ if( $admindata['admin_level'] == ADMIN )
 		FROM " . ADMIN_TABLE . "
 		WHERE admin_id <> $current_admin[admin_id]
 		ORDER BY admin_login ASC";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des administrateurs', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $row = $result->fetch() )
 	{
@@ -461,7 +414,7 @@ if( $admindata['admin_level'] == ADMIN )
 		
 		do
 		{
-			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
+			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], wan_htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
 		}
 		while( $row = $result->fetch() );
 		
@@ -485,11 +438,10 @@ else
 require WA_ROOTDIR . '/includes/functions.box.php';
 
 $output->addHiddenField('admin_id', $current_admin['admin_id']);
-$output->addHiddenField('sessid',   $session->session_id);
 
 if( $admindata['admin_level'] == ADMIN )
 {
-	$output->addLink('section', './admin.php?mode=adduser', $lang['Add_user']);
+	$output->addLink('subsection', './admin.php?mode=adduser', $lang['Add_user']);
 }
 
 $output->page_header();
@@ -499,7 +451,7 @@ $output->set_filenames( array(
 ));
 
 $output->assign_vars(array(
-	'L_TITLE'               => sprintf($lang['Title']['profile'], htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
+	'L_TITLE'               => sprintf($lang['Title']['profile'], wan_htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
 	'L_EXPLAIN'             => nl2br($lang['Explain']['admin']),
 	'L_DEFAULT_LANG'        => $lang['Default_lang'],
 	'L_EMAIL'               => $lang['Email_address'],
@@ -557,7 +509,7 @@ if( $admindata['admin_level'] == ADMIN )
 	foreach( $listdata as $listrow )
 	{
 		$output->assign_block_vars('admin_options.auth', array(
-			'LISTE_NAME'      => $listrow['liste_name'],
+			'LISTE_NAME'      => wan_htmlspecialchars($listrow['liste_name']),
 			'LISTE_ID'        => $listrow['liste_id'],
 			
 			'BOX_AUTH_VIEW'   => $auth->box_auth(AUTH_VIEW,   $listrow),
@@ -573,14 +525,11 @@ if( $admindata['admin_level'] == ADMIN )
 	
 	if( $admin_box != '' )
 	{
-		$output->addHiddenField('sessid', $session->session_id);
-		
 		$output->assign_block_vars('admin_box', array(
 			'L_VIEW_PROFILE'  => $lang['View_profile'],
 			'L_BUTTON_GO'     => $lang['Button']['go'],
 			
-			'ADMIN_BOX'       => $admin_box,
-			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+			'ADMIN_BOX'       => $admin_box
 		));
 	}
 }

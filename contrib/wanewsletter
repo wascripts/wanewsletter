@@ -1,28 +1,11 @@
 #!/usr/bin/php -q
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * 
  * @status experimental
  * 
@@ -60,12 +43,12 @@ if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) // Au cas où le terminal utilise
 	ob_start('convert_output', 1);
 }
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 
 load_settings();
 
 $argv[0]  = basename($argv[0]);
-$version  = WA_VERSION;
+$version  = WANEWSLETTER_VERSION;
 $emails   = array();
 $format   = FORMAT_TEXTE;
 $liste_id = null;
@@ -87,7 +70,7 @@ if( $argc == 1 ) // Aucun argument fourni
 //
 if( $nl_config['engine_send'] == ENGINE_UNIQ )
 {
-	$nl_config['emails_sended'] = 0;
+	$nl_config['sending_limit'] = 0;
 }
 
 for( $i = 1; $i < $argc; $i++ )
@@ -107,7 +90,7 @@ for( $i = 1; $i < $argc; $i++ )
 	else if( $argv[$i] == '--license' )
 	{
 		echo "Wanewsletter $version\n";
-		echo "Copyright (c) 2002-2006 Aurélien Maille\n";
+		echo "Copyright (c) 2002-2014 Aurélien Maille\n";
 		echo "\n";
 		
 		if( preg_match('/^fr[_-]/', getenv('LANG')) )
@@ -217,7 +200,7 @@ WANSHELL;
 	//
 	else if( preg_match('/^-(?:-limit=|l)(\d+)$/', $argv[$i], $match) )
 	{
-		$nl_config['emails_sended'] = $match[1];
+		$nl_config['sending_limit'] = $match[1];
 	}
 	
 	//
@@ -259,7 +242,7 @@ WANSHELL;
 		}
 		else
 		{
-			trigger_error("Bad format. Possible values are 'plain', 'text', 'texte' or 'html'", CRITICAL_ERROR);
+			trigger_error("Bad format. Possible values are 'plain', 'text', 'texte' or 'html'", E_USER_ERROR);
 		}
 	}
 	
@@ -282,14 +265,11 @@ if( !is_null($liste_id) )
 			pop_host, pop_port, pop_user, pop_pass
 		FROM ' . LISTE_TABLE . ' 
 		WHERE liste_id = ' . $liste_id;
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible de récupérer les informations sur cette liste', CRITICAL_ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( !($listdata = $result->fetch()) )
 	{
-		trigger_error('Unknown_list', CRITICAL_ERROR);
+		trigger_error('Unknown_list', E_USER_ERROR);
 	}
 }
 
@@ -305,10 +285,7 @@ if( $process_send == true )
 		WHERE liste_id = $listdata[liste_id]
 			AND log_status = " . STATUS_STANDBY . "
 		LIMIT 1 OFFSET 0";
-	if( !($result = $db->query($sql)) ) // on récupère le dernier log en statut d'envoi
-	{
-		trigger_error('Impossible d\'obtenir les données sur ce log', CRITICAL_ERROR);
-	}
+	$result = $db->query($sql);// on récupère le dernier log en statut d'envoi
 	
 	if( !($logdata = $result->fetch()) )
 	{
@@ -323,10 +300,7 @@ if( $process_send == true )
 				AND l.liste_id = $listdata[liste_id]
 				AND l.log_id   = $logdata[log_id]
 		ORDER BY jf.file_real_name ASC";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des fichiers joints', CRITICAL_ERROR);
-	}
+	$result = $db->query($sql);
 	
 	$logdata['joined_files'] = $result->fetchAll();
 	
@@ -339,36 +313,10 @@ if( $process_send == true )
 }
 else if( $process_subscribe )
 {
-	require WAMAILER_DIR . '/class.mailer.php';
 	require WAMAILER_DIR . '/class.pop.php';
 	require WA_ROOTDIR . '/includes/class.form.php';
 	require WA_ROOTDIR . '/includes/functions.validate.php';
-	include WA_ROOTDIR . '/includes/functions.stats.php';
-	
-	//
-	// Initialisation de la classe mailer
-	//
-	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-	
-	if( $nl_config['use_smtp'] )
-	{
-		$mailer->smtp_path = WAMAILER_DIR . '/';
-		$mailer->use_smtp(
-			$nl_config['smtp_host'],
-			$nl_config['smtp_port'],
-			$nl_config['smtp_user'],
-			$nl_config['smtp_pass']
-		);
-	}
-	
-	$mailer->set_charset($lang['CHARSET']);
-	$mailer->set_format(FORMAT_TEXTE);
-	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
-	
-	if( $listdata['return_email'] != '' )
-	{
-		$mailer->set_return_path($listdata['return_email']);
-	}
+	require WA_ROOTDIR . '/includes/functions.stats.php';
 	
 	$wan = new Wanewsletter($listdata);
 	$pop = new Pop();
@@ -417,11 +365,6 @@ else if( $process_subscribe )
 			case 'confirmation':
 			case 'setformat':
 				break;
-			
-			default:
-				$pop->delete_mail($mail_id);
-				continue 2;
-				break;
 		}
 		
 		$code = $pop->contents[$mail_id]['message'];
@@ -430,11 +373,7 @@ else if( $process_subscribe )
 			$code = substr($code, 0, 20);
 		}
 		
-		if( $action == 'inscription' || $action == 'setformat' || ($action == 'desinscription' && empty($code)) )
-		{
-			$wan->do_action($action, $email);
-		}
-		else
+		if( !empty($code) && ($action =='confirmation' || $action == 'desinscription') )
 		{
 			if( empty($headers['date']) || intval($time = strtotime($headers['date'])) > 0 )
 			{
@@ -442,6 +381,10 @@ else if( $process_subscribe )
 			}
 			
 			$wan->check_code($code, $time);
+		}
+		else if( in_array($action, array('inscription','setformat','desinscription')) )
+		{
+			$wan->do_action($action, $email);
 		}
 		
 		//
@@ -467,11 +410,6 @@ else if( $import_mail == true )
 		}
 		
 		$emails = preg_split('/\s+/', trim($emails));
-	}
-	
-	if( count($emails) == 0 )
-	{
-		
 	}
 	
 	$emails = array_unique($emails);
@@ -508,10 +446,7 @@ else if( $import_mail == true )
 				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id = $listdata[liste_id]
 			WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de tester les tables d\'inscriptions', CRITICAL_ERROR);
-		}
+		$result = $db->query($sql);
 		
 		//
 		// Traitement des adresses email déjà présentes dans la base de données
@@ -528,10 +463,7 @@ else if( $import_mail == true )
 				$sql_data['register_date'] = $current_time;
 				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 				
-				if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-				{
-					trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', CRITICAL_ERROR);
-				}
+				$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
 				
 				$counter++;
 			}
@@ -546,16 +478,8 @@ else if( $import_mail == true )
 		//
 		// Traitement des adresses email inconnues
 		//
-		@include 'PHP/Compat/Function/array_udiff.php';// partie du module PEAR PHP_Compat
+		$emails = array_udiff($emails, $emails_ok, 'strcasecmp');
 		
-		if( function_exists('array_udiff') )
-		{
-			$emails = array_udiff($emails, $emails_ok, 'strcasecmp');
-		}
-		else
-		{
-			$emails = array_diff($emails, $emails_ok);
-		}
 		
 		foreach( $emails as $email )
 		{
@@ -565,9 +489,11 @@ else if( $import_mail == true )
 			$sql_data['abo_email']  = $email;
 			$sql_data['abo_status'] = ABO_ACTIF;
 			
-			if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
-			{
-				printf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error);
+			try {
+				$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
+			}
+			catch( SQLException $e ) {
+				fputs(STDERR, sprintf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error));
 				$db->rollBack();
 				continue;
 			}
@@ -580,10 +506,7 @@ else if( $import_mail == true )
 			$sql_data['register_date'] = $current_time;
 			$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
 			
-			if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-			{
-				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', CRITICAL_ERROR);
-			}
+			$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
 			
 			$counter++;
 			$db->commit();

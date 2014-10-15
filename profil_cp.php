@@ -1,33 +1,16 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR',    '.');
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/class.sessions.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 include WA_ROOTDIR . '/includes/tags.inc.php';
@@ -35,7 +18,7 @@ include WA_ROOTDIR . '/includes/tags.inc.php';
 if( !$nl_config['enable_profil_cp'] )
 {
 	load_settings();
-	$output->message('Profil_cp_disabled');
+	$output->displayMessage('Profil_cp_disabled');
 }
 
 //
@@ -70,10 +53,7 @@ function check_login($email, $regkey = null)
 			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
 		WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible de récupérer les données de l\'abonné', CRITICAL_ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $row = $result->fetch() )
 	{
@@ -86,12 +66,13 @@ function check_login($email, $regkey = null)
 		$abodata['regdate']  = $row['register_date'];
 		$abodata['regkey']   = $row['register_key'];
 		$abodata['status']   = $row['abo_status'];
+		$abodata['tags']     = array();
 		
-		foreach( $other_tags as $data )
+		foreach( $other_tags as $tag )
 		{
-			if( isset($row[$data['column_name']]) )
+			if( isset($row[$tag['column_name']]) )
 			{
-				$abodata[$data['column_name']] = $row[$data['column_name']];
+				$abodata['tags'][$tag['column_name']] = $row[$tag['column_name']];
 			}
 		}
 		
@@ -192,10 +173,10 @@ switch( $mode )
 						'key'   => $regkey_md5
 					)), (time() + 3600));
 					
-					Location('profil_cp.php');
+					http_redirect('profil_cp.php');
 				}
 				
-				$output->message('Inactive_account');
+				$output->displayMessage('Inactive_account');
 			}
 			else
 			{
@@ -217,8 +198,13 @@ switch( $mode )
 			'L_SENDKEY'      => $lang['Lost_password'],
 			'L_VALID_BUTTON' => $lang['Button']['valid'],
 			
-			'S_LOGIN' => htmlspecialchars($email)
+			'S_LOGIN' => wan_htmlspecialchars($email)
 		));
+		
+		if( !isset($_COOKIE[$nl_config['cookie_name'] . '_abo']) )
+		{
+			$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
+		}
 		
 		$output->pparse('body');
 		break;
@@ -233,6 +219,7 @@ switch( $mode )
 				require WAMAILER_DIR . '/class.mailer.php';
 				
 				$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+				$mailer->signature = WA_X_MAILER;
 				
 				if( $nl_config['use_smtp'] )
 				{
@@ -257,7 +244,7 @@ switch( $mode )
 					$address = $abodata['email'];
 				}
 				
-				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+				$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
 				$mailer->set_address($address);
 				$mailer->set_subject($lang['Subject_email']['Sendkey']);
 				$mailer->set_return_path($listdata['return_email']);
@@ -266,15 +253,27 @@ switch( $mode )
 					'EMAIL'   => $abodata['email'],
 					'CODE'    => $abodata['regkey'],
 					'URLSITE' => $nl_config['urlsite'],
-					'SIG'     => $listdata['liste_sig']
+					'SIG'     => $listdata['liste_sig'],
+					'PSEUDO'  => $abodata['pseudo']
 				));
+				
+				if( count($other_tags) > 0 )
+				{
+					$tags = array();
+					foreach( $other_tags as $tag )
+					{
+						$tags[$tag['tag_name']] = $abodata['tags'][$tag['column_name']];
+					}
+					
+					$mailer->assign_tags($tags);
+				}
 				
 				if( !$mailer->send() )
 				{
-					trigger_error('Failed_sending', ERROR);
+					trigger_error('Failed_sending', E_USER_ERROR);
 				}
 				
-				$output->message('IDs_sended');
+				$output->displayMessage('IDs_sended');
 			}
 			else
 			{
@@ -302,7 +301,9 @@ switch( $mode )
 	case 'editprofile':
 		if( isset($_POST['submit']) )
 		{
-			$vararray = array('pseudo', 'language', 'current_pass', 'new_pass', 'confirm_pass');
+			require WAMAILER_DIR . '/class.mailer.php';
+			
+			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language', 'current_pass', 'new_pass', 'confirm_pass');
 			foreach( $vararray as $varname )
 			{
 				${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
@@ -311,6 +312,33 @@ switch( $mode )
 			if( $language == '' || !validate_lang($language) )
 			{
 				$language = $nl_config['language'];
+			}
+			
+			if( $new_email != '' )
+			{
+				if( strcmp($new_email, $confirm_email) != 0 )
+				{
+					$error = TRUE;
+					$msg_error[] = $lang['Message']['Bad_confirm_email'];
+				}
+				else if( !Mailer::validate_email($new_email) )
+				{
+					$error = TRUE;
+					$msg_error[] = $lang['Message']['Invalid_email'];
+				}
+				else
+				{
+					$sql = "SELECT COUNT(*) AS test
+						FROM " . ABONNES_TABLE . "
+						WHERE LOWER(abo_email) = '" . $db->escape(strtolower($new_email)) . "'";
+					$result = $db->query($sql);
+					
+					if( $result->column('test') != 0 )
+					{
+						$error = TRUE;
+						$msg_error[] = $lang['Message']['Allready_reg2'];
+					}
+				}
 			}
 			
 			if( $current_pass != '' && md5($current_pass) != $abodata['passwd'] )
@@ -339,13 +367,18 @@ switch( $mode )
 			if( !$error )
 			{
 				$sql_data = array(
-					'abo_pseudo' => htmlspecialchars($pseudo),
+					'abo_pseudo' => strip_tags($pseudo),
 					'abo_lang'   => $language
 				);
 				
 				if( $set_password )
 				{
 					$sql_data['abo_pwd'] = md5($new_pass);
+				}
+				
+				if( $new_email != '' )
+				{
+					$sql_data['abo_email'] = $new_email;
 				}
 				
 				foreach( $other_tags as $tag )
@@ -360,13 +393,10 @@ switch( $mode )
 					}
 				}
 				
-				if( !$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id'])) )
-				{
-					trigger_error('Impossible de mettre le profil à jour', ERROR);
-				}
+				$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id']));
 				
 				$output->redirect('profil_cp.php', 4);
-				$output->message('Profile_updated');
+				$output->displayMessage('Profile_updated');
 			}
 		}
 		
@@ -381,7 +411,10 @@ switch( $mode )
 		$output->assign_vars(array(
 			'TITLE'          => $lang['Module']['editprofile'],
 			'L_EXPLAIN'      => nl2br($lang['Explain']['editprofile']),
+			'L_EXPLAIN_EMAIL' => nl2br($lang['Explain']['change_email']),
 			'L_EMAIL'        => $lang['Email_address'],
+			'L_NEW_EMAIL'    => $lang['New_Email'],
+			'L_CONFIRM_EMAIL' => $lang['Confirm_Email'],
 			'L_PSEUDO'       => $lang['Abo_pseudo'],
 			'L_LANG'         => $lang['Default_lang'],
 			'L_NEW_PASS'     => $lang['New_pass'],
@@ -393,11 +426,12 @@ switch( $mode )
 			'LANG_BOX' => lang_box($abodata['language'])
 		));
 		
-		foreach( $other_tags as $data )
+		foreach( $other_tags as $tag )
 		{
-			if( isset($abodata[$data['column_name']]) )
+			if( isset($abodata['tags'][$tag['column_name']]) )
 			{
-				$output->assign_var($data['tag_name'], htmlspecialchars($abodata[$data['column_name']]));
+				$output->assign_var($tag['tag_name'],
+					wan_htmlspecialchars($abodata['tags'][$tag['column_name']]));
 			}
 		}
 		
@@ -428,17 +462,15 @@ switch( $mode )
 			
 			if( count($sql_log_id) == 0 )
 			{
-				$output->message('No_log_id');
+				$output->displayMessage('No_log_id');
 			}
 			
-			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype 
+			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name,
+					jf.file_physical_name, jf.file_size, jf.file_mimetype 
 				FROM " . JOINED_FILES_TABLE . " AS jf
 					INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 						AND lf.log_id IN(" . implode(', ', $sql_log_id) . ")";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$files = array();
 			while( $row = $result->fetch() )
@@ -449,11 +481,8 @@ switch( $mode )
 			$sql = "SELECT liste_id, log_id, log_subject, log_body_text, log_body_html 
 				FROM " . LOG_TABLE . " 
 				WHERE log_id IN(" . implode(', ', $sql_log_id) . ") 
-					AND log_status = " . STATUS_SENDED;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer la liste des archives', ERROR);
-			}
+					AND log_status = " . STATUS_SENT;
+			$result = $db->query($sql);
 			
 			require WAMAILER_DIR . '/class.mailer.php';
 			require WA_ROOTDIR . '/includes/class.attach.php';
@@ -462,6 +491,7 @@ switch( $mode )
 			// Initialisation de la classe mailer
 			//
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$mailer->signature = WA_X_MAILER;
 			
 			if( $nl_config['use_smtp'] )
 			{
@@ -518,7 +548,7 @@ switch( $mode )
 				}
 				
 				$mailer->clear_all();
-				$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+				$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
 				$mailer->set_address($address);
 				$mailer->set_format($format);
 				$mailer->set_subject($row['log_subject']);
@@ -563,7 +593,7 @@ switch( $mode )
 					}
 					else
 					{
-						$link = '<a href="' . htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>';
+						$link = '<a href="' . wan_htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>';
 					}
 				}
 				
@@ -630,7 +660,11 @@ switch( $mode )
 				
 				if( $abodata['pseudo'] != '' )
 				{
-					$tags_replace['NAME'] = ( $format == FORMAT_HTML ) ? $abodata['pseudo'] : unhtmlspecialchars($abodata['pseudo']);
+					$tags_replace['NAME'] = $abodata['pseudo'];
+					if( $format == FORMAT_HTML )
+					{
+						$tags_replace['NAME'] = wan_htmlspecialchars($abodata['pseudo']);
+					}
 				}
 				else
 				{
@@ -639,23 +673,23 @@ switch( $mode )
 				
 				if( count($other_tags) > 0 )
 				{
-					foreach( $other_tags as $data )
+					foreach( $other_tags as $tag )
 					{
-						if( $abodata[$data['column_name']] != '' )
+						if( $abodata['tags'][$tag['column_name']] != '' )
 						{
-							if( !is_numeric($abodata[$data['column_name']]) && $format == FORMAT_HTML )
+							if( !is_numeric($abodata['tags'][$tag['column_name']]) && $format == FORMAT_HTML )
 							{
-								$tags_replace[$data['tag_name']] = htmlspecialchars($abodata[$data['column_name']]);
+								$tags_replace[$tag['tag_name']] = wan_htmlspecialchars($abodata['tags'][$tag['column_name']]);
 							}
 							else
 							{
-								$tags_replace[$data['tag_name']] = $abodata[$data['column_name']];
+								$tags_replace[$tag['tag_name']] = $abodata['tags'][$tag['column_name']];
 							}
 							
 							continue;
 						}
 						
-						$tags_replace[$data['tag_name']] = '';
+						$tags_replace[$tag['tag_name']] = '';
 					}
 				}
 				
@@ -672,11 +706,11 @@ switch( $mode )
 				// envoi
 				if( !$mailer->send() )
 				{
-					trigger_error('Failed_sending', ERROR);
+					trigger_error('Failed_sending', E_USER_ERROR);
 				}
 			}
 			
-			$output->message(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
+			$output->displayMessage(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
 		}
 		
 		$liste_ids = array();
@@ -688,12 +722,9 @@ switch( $mode )
 		$sql = "SELECT log_id, liste_id, log_subject, log_date 
 			FROM " . LOG_TABLE . " 
 			WHERE liste_id IN(" . implode(', ', $liste_ids) . ") 
-				AND log_status = " . STATUS_SENDED . " 
+				AND log_status = " . STATUS_SENT . " 
 			ORDER BY log_date DESC";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de récupérer la liste des archives', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		while( $row = $result->fetch() )
 		{
@@ -731,14 +762,14 @@ switch( $mode )
 			{
 				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
 				
-				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
+				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; ' . wan_htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
 				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
 			}
 			$select_log .= '</select>';
 			
 			$output->assign_block_vars('listerow', array(
 				'LISTE_ID'   => $liste_id,
-				'LISTE_NAME' => $listdata['liste_name'],
+				'LISTE_NAME' => wan_htmlspecialchars($listdata['liste_name']),
 				'SELECT_LOG' => $select_log
 			));
 		}

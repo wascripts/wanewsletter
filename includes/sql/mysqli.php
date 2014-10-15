@@ -1,42 +1,25 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('_INC_CLASS_WADB_MYSQLI') ) {
 
 define('_INC_CLASS_WADB_MYSQLI', true);
 
-define('SQL_INSERT', 1);
-define('SQL_UPDATE', 2);
-define('SQL_DELETE', 3);
-
-define('SQL_FETCH_NUM',   MYSQLI_NUM);
-define('SQL_FETCH_ASSOC', MYSQLI_ASSOC);
-define('SQL_FETCH_BOTH',  MYSQLI_BOTH);
-
 class Wadb_mysqli {
+
+	/**
+	 * Type de base de données
+	 *
+	 * @var string
+	 * @access private
+	 */
+	var $engine = 'mysql';
 	
 	/**
 	 * Connexion à la base de données
@@ -47,10 +30,18 @@ class Wadb_mysqli {
 	var $link;
 	
 	/**
+	 * Hôte de la base de données
+	 * 
+	 * @var string
+	 * @access public
+	 */
+	var $host = '';
+	
+	/**
 	 * Nom de la base de données
 	 * 
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
 	var $dbname = '';
 	
@@ -119,19 +110,23 @@ class Wadb_mysqli {
 	var $clientVersion = '';
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_INSERT = 1;
+	var $SQL_UPDATE = 2;
+	var $SQL_DELETE = 3;
+	
+	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $dbname   Nom de la base de données
 	 * @param array  $options  Options de connexion/utilisation
 	 * 
 	 * @access public
 	 */
-	function Wadb_mysqli($dbname, $options = null)
+	function Wadb_mysqli($options = null)
 	{
-		$this->dbname = $dbname;
-		
 		if( is_array($options) ) {
-			$this->options = $options;
+			$this->options = array_merge($this->options, $options);
 		}
 	}
 	
@@ -147,9 +142,12 @@ class Wadb_mysqli {
 	function connect($infos = null, $options = null)
 	{
 		if( is_array($infos) ) {
-			foreach( array('host', 'username', 'passwd', 'port') as $info ) {
+			foreach( array('host', 'username', 'passwd', 'port', 'dbname') as $info ) {
 				$$info = ( isset($infos[$info]) ) ? $infos[$info] : null;
 			}
+			
+			$this->host = $host . (!is_null($port) ? ':'.$port : '');
+			$this->dbname = $dbname;
 		}
 		
 		$connect = 'mysqli_connect';
@@ -158,10 +156,16 @@ class Wadb_mysqli {
 			$this->options = array_merge($this->options, $options);
 		}
 		
-		if( !($this->link = $connect($host, $username, $passwd, $this->dbname, $port)) ) {
+		if( !empty($this->options['persistent']) && version_compare(phpversion(), '5.3.0', '>=') ) {
+			$host = "p:$host";
+		}
+		
+		if( !($this->link = $connect($host, $username, $passwd, $dbname, $port)) ) {
 			$this->errno = mysqli_connect_errno();
 			$this->error = mysqli_connect_error();
 			$this->link  = null;
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->serverVersion = mysqli_get_server_info($this->link);
@@ -194,18 +198,11 @@ class Wadb_mysqli {
 	 */
 	function encoding($encoding = null)
 	{
-		$charsetSupport = version_compare($this->serverVersion, '4.1.1', '>=');
+		$o = mysqli_get_charset($this->link);
+		$curEncoding = $o->charset;
 		
-		if( $charsetSupport ) {
-			$res = $this->query("SHOW VARIABLES LIKE 'character_set_client'");
-			$curEncoding = $res->column('Value');
-		}
-		else {
-			$curEncoding = 'latin1'; // TODO
-		}
-		
-		if( $charsetSupport && !is_null($encoding) ) {
-			$this->query("SET NAMES $encoding");
+		if( !is_null($encoding) ) {
+			mysqli_set_charset($this->link, $encoding);
 		}
 		
 		return $curEncoding;
@@ -232,8 +229,9 @@ class Wadb_mysqli {
 			$this->errno = mysqli_errno($this->link);
 			$this->error = mysqli_error($this->link);
 			$this->lastQuery = $query;
-			
 			$this->rollBack();
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;
@@ -279,10 +277,10 @@ class Wadb_mysqli {
 			array_push($values, $value);
 		}
 		
-		if( $type == SQL_INSERT ) {
+		if( $type == $this->SQL_INSERT ) {
 			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
 		}
-		else if( $type == SQL_UPDATE ) {
+		else if( $type == $this->SQL_UPDATE ) {
 			
 			$query = 'UPDATE ' . $table . ' SET ';
 			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
@@ -465,6 +463,17 @@ class Wadb_mysqli {
 	{
 		$this->close();
 	}
+	
+	/**
+	 * Initialise un objet WadbBackup_{self::$engine}
+	 *
+	 * @access public
+	 * @return object
+	 */
+	function initBackup()
+	{
+		return new WadbBackup_mysqli($this);
+	}
 }
 
 class WadbResult_mysqli {
@@ -492,6 +501,13 @@ class WadbResult_mysqli {
 	 * @access private
 	 */
 	var $fetchMode;
+	
+	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_FETCH_NUM   = MYSQLI_NUM;
+	var $SQL_FETCH_ASSOC = MYSQLI_ASSOC;
+	var $SQL_FETCH_BOTH  = MYSQLI_BOTH;
 	
 	/**
 	 * Constructeur de classe
@@ -623,12 +639,12 @@ class WadbResult_mysqli {
 class WadbBackup_mysqli {
 	
 	/**
-	 * Informations concernant la base de données
+	 * Connexion à la base de données
 	 * 
-	 * @var array
+	 * @var object
 	 * @access private
 	 */
-	var $infos = array();
+	var $db = null;
 	
 	/**
 	 * Fin de ligne
@@ -641,17 +657,13 @@ class WadbBackup_mysqli {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param array $infos  Informations concernant la base de données
+	 * @param object $db  Connexion à la base de données
 	 * 
 	 * @access public
 	 */
-	function WadbBackup_mysqli($infos)
+	function WadbBackup_mysqli($db)
 	{
-		$this->infos = $infos;
-		
-		if( !isset($this->infos['host']) ) {
-			$this->infos['host'] = 'localhost';
-		}
+		$this->db = $db;
 	}
 	
 	/**
@@ -664,22 +676,18 @@ class WadbBackup_mysqli {
 	 */
 	function header($toolname = '')
 	{
-		global $db;
-		
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname MySQL Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		$contents .= "-- Host     : " . $this->infos['host'] . $this->eol;
-		$contents .= "-- Server   : " . $db->serverVersion . $this->eol;
-		$contents .= "-- Database : " . $this->infos['dbname'] . $this->eol;
-		$contents .= '-- Date     : ' . date('d/m/Y H:i:s O') . $this->eol;
+		$contents .= "-- Host     : " . $this->db->host . $this->eol;
+		$contents .= "-- Server   : " . $this->db->serverVersion . $this->eol;
+		$contents .= "-- Database : " . $this->db->dbname . $this->eol;
+		$contents .= '-- Date     : ' . date(DATE_RFC2822) . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
-		if( version_compare($db->serverVersion, '4.1.2', '>=') ) {
-			$contents .= sprintf("SET NAMES '%s';%s", $db->encoding(), $this->eol);
-			$contents .= $this->eol;
-		}
+		$contents .= sprintf("SET NAMES '%s';%s", $this->db->encoding(), $this->eol);
+		$contents .= $this->eol;
 		
 		return $contents;
 	}
@@ -692,15 +700,11 @@ class WadbBackup_mysqli {
 	 */
 	function get_tables()
 	{
-		global $db;
-		
-		if( !($result = $db->query('SHOW TABLE STATUS FROM ' . $db->quote($this->infos['dbname']))) ) {
-			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
-		}
-		
+		$result = $this->db->query('SHOW TABLE STATUS FROM ' . $this->db->quote($this->db->dbname));
 		$tables = array();
+		
 		while( $row = $result->fetch() ) {
-			$tables[$row['Name']] = ( isset($row['Engine']) ) ? $row['Engine'] : $row['Type'];
+			$tables[$row['Name']] = $row['Engine'];
 		}
 		
 		return $tables;
@@ -730,20 +734,15 @@ class WadbBackup_mysqli {
 	 */
 	function get_table_structure($tabledata, $drop_option)
 	{
-		global $db;
-		
 		$contents  = '-- ' . $this->eol;
-		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= '-- Structure de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		
 		if( $drop_option ) {
-			$contents .= 'DROP TABLE IF EXISTS ' . $db->quote($tabledata['name']) . ';' . $this->eol;
+			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
-		if( !($result = $db->query('SHOW CREATE TABLE ' . $db->quote($tabledata['name']))) ) {
-			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
-		}
-		
+		$result = $this->db->query('SHOW CREATE TABLE ' . $this->db->quote($tabledata['name']));
 		$create_table = $result->column('Create Table');
 		$result->free();
 		
@@ -762,16 +761,12 @@ class WadbBackup_mysqli {
 	 */
 	function get_table_data($tablename)
 	{
-		global $db;
-		
 		$contents = '';
 		
-		$sql = 'SELECT * FROM ' . $db->quote($tablename);
-		if( !($result = $db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
-		}
+		$sql = 'SELECT * FROM ' . $this->db->quote($tablename);
+		$result = $this->db->query($sql);
 		
-		$result->setFetchMode(SQL_FETCH_ASSOC);
+		$result->setFetchMode(MYSQLI_ASSOC);
 		
 		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
@@ -782,20 +777,20 @@ class WadbBackup_mysqli {
 			$fields = array();
 			for( $j = 0, $n = mysqli_num_fields($result->result); $j < $n; $j++ ) {
 				$data = mysqli_fetch_field_direct($result->result, $j);
-				$fields[] = $db->quote($data->name);
+				$fields[] = $this->db->quote($data->name);
 			}
 			
 			$fields = implode(', ', $fields);
 			
 			do {
-				$contents .= 'INSERT INTO ' . $db->quote($tablename) . " ($fields) VALUES";
+				$contents .= sprintf("INSERT INTO %s (%s) VALUES", $this->db->quote($tablename), $fields);
 				
 				foreach( $row as $key => $value ) {
 					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
 					else {
-						$row[$key] = '\'' . $db->escape($value) . '\'';
+						$row[$key] = '\'' . $this->db->escape($value) . '\'';
 					}
 				}
 				
@@ -810,4 +805,3 @@ class WadbBackup_mysqli {
 }
 
 }
-?>

@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('CLASS_OUTPUT_INC') ) {
@@ -63,6 +46,14 @@ class output extends Template {
 	var $meta_redirect = '';
 	
 	/**
+	 * Pile des messages
+	 *
+	 * @var array
+	 * @access private
+	 */
+	var $messageList   = array();
+	
+	/**
 	 * @param string $template_root
 	 * 
 	 * @access public
@@ -89,8 +80,8 @@ class output extends Template {
 	 */
 	function addLink($rel, $url, $title = '', $type = '')
 	{
-		$this->links .= "\r\n\t<link rel=\"$rel\" href=\""
-			. (( function_exists('sessid') ) ? sessid($url) : $url) . "\" title=\"$title\" />";
+		$this->links .= "\r\n\t";
+		$this->links .= sprintf('<link rel="%s" href="%s" title="%s" />', $rel, $url, $title);
 	}
 	
 	/**
@@ -114,7 +105,8 @@ class output extends Template {
 	 */
 	function addScript($url)
 	{
-		$this->javascript .= "\r\n\t<script type=\"text/javascript\" src=\"$url\"></script>";
+		$this->javascript .= "\r\n\t";
+		$this->javascript .= sprintf('<script src="%s"></script>', $url);
 	}
 	
 	/**
@@ -139,7 +131,8 @@ class output extends Template {
 	 */
 	function addHiddenField($name, $value)
 	{
-		$this->hidden_fields .= sprintf('<input type="hidden" name="%s" value="%s" />', $name, $value) . "\r\n";
+		$this->hidden_fields .= "\r\n\t";
+		$this->hidden_fields .= sprintf('<input type="hidden" name="%s" value="%s" />', $name, $value);
 	}
 	
 	/**
@@ -167,8 +160,7 @@ class output extends Template {
 	 */
 	function redirect($url, $timer)
 	{
-		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />',
-			$timer, (( function_exists('sessid') ) ? sessid($url) : $url));
+		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, $url);
 	}
 	
 	/**
@@ -195,35 +187,35 @@ class output extends Template {
 		
 		if( defined('IN_ADMIN') )
 		{
-			$this->addLink('top index', './index.php',              $lang['Title']['accueil']);
-			$this->addLink('chapter', './config.php',               $lang['Module']['config']);
-			$this->addLink('chapter', './envoi.php',                $lang['Title']['send']);
-			$this->addLink('chapter', './view.php?mode=abonnes',    $lang['Module']['subscribers']);
-			$this->addLink('chapter', './view.php?mode=liste',      $lang['Module']['list']);
-			$this->addLink('chapter', './view.php?mode=log',        $lang['Module']['log']);
-			$this->addLink('chapter', './tools.php?mode=export',    $lang['Title']['export']);
-			$this->addLink('chapter', './tools.php?mode=import',    $lang['Title']['import']);
-			$this->addLink('chapter', './tools.php?mode=ban',       $lang['Title']['ban']);
-			$this->addLink('chapter', './tools.php?mode=generator', $lang['Title']['generator']);
+			$this->addLink('home', './',              				$lang['Title']['accueil']);
+			$this->addLink('section', './config.php',               $lang['Module']['config']);
+			$this->addLink('section', './envoi.php',                $lang['Title']['send']);
+			$this->addLink('section', './view.php?mode=abonnes',    $lang['Module']['subscribers']);
+			$this->addLink('section', './view.php?mode=liste',      $lang['Module']['list']);
+			$this->addLink('section', './view.php?mode=log',        $lang['Module']['log']);
+			$this->addLink('section', './tools.php?mode=export',    $lang['Title']['export']);
+			$this->addLink('section', './tools.php?mode=import',    $lang['Title']['import']);
+			$this->addLink('section', './tools.php?mode=ban',       $lang['Title']['ban']);
+			$this->addLink('section', './tools.php?mode=generator', $lang['Title']['generator']);
 			
 			if( isset($admindata['admin_level']) && $admindata['admin_level'] == ADMIN )
 			{
-				$this->addLink('chapter', './tools.php?mode=attach' , $lang['Title']['attach']);
-				$this->addLink('chapter', './tools.php?mode=backup' , $lang['Title']['backup']);
-				$this->addLink('chapter', './tools.php?mode=restore', $lang['Title']['restore']);
+				$this->addLink('section', './tools.php?mode=attach' , $lang['Title']['attach']);
+				$this->addLink('section', './tools.php?mode=backup' , $lang['Title']['backup']);
+				$this->addLink('section', './tools.php?mode=restore', $lang['Title']['restore']);
 			}
 			
-			$this->addLink('chapter',   './admin.php', $lang['Module']['users']);
-			$this->addLink('chapter',   './stats.php', $lang['Title']['stats']);
+			$this->addLink('section',   './admin.php', $lang['Module']['users']);
+			$this->addLink('section',   './stats.php', $lang['Title']['stats']);
 			$this->addLink('help',      WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
 			$this->addLink('author',    WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
-			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Copyleft');
+			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
 			
-			$page_title = sprintf($lang['General_title'], htmlspecialchars($nl_config['sitename']));
+			$page_title = $lang['General_title'];
 		}
 		else
 		{
-			$this->addLink('top index', './profil_cp.php',                  $lang['Title']['accueil']);
+			$this->addLink('home', 		'./profil_cp.php',                  $lang['Title']['accueil']);
 			$this->addLink('section',   './profil_cp.php?mode=editprofile', $lang['Module']['editprofile']);
 			$this->addLink('section',   './profil_cp.php?mode=archives',    $lang['Module']['log']);
 			$this->addLink('section',   './profil_cp.php?mode=logout',      $lang['Module']['logout']);
@@ -237,7 +229,7 @@ class output extends Template {
 		}
 		else
 		{
-			$l_logout = sprintf($lang['Module']['logout_2'], htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES));
+			$l_logout = sprintf($lang['Module']['logout_2'], wan_htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES));
 		}
 		
 		$this->assign_vars( array(
@@ -255,6 +247,7 @@ class output extends Template {
 		
 		if( defined('IN_ADMIN') )
 		{
+			$sitename = isset($nl_config['sitename']) ? $nl_config['sitename'] : 'Wanewsletter';
 			$this->assign_vars(array(
 				'L_INDEX'       => $lang['Module']['accueil'],
 				'L_CONFIG'      => $lang['Module']['config'],
@@ -265,15 +258,8 @@ class output extends Template {
 				'L_USERS'       => $lang['Module']['users'],
 				'L_STATS'       => $lang['Module']['stats'],
 				
-				'SITENAME'      => htmlspecialchars($nl_config['sitename'], ENT_NOQUOTES),
+				'SITENAME'      => wan_htmlspecialchars($sitename, ENT_NOQUOTES),
 			));
-			
-			if( isset($auth) && isset($auth->listdata[$admindata['session_liste']]) )
-			{
-				$this->assign_block_vars('display_liste', array(
-					'LISTE_NAME' => $auth->listdata[$admindata['session_liste']]['liste_name']
-				));
-			}
 		}
 		else
 		{
@@ -281,10 +267,6 @@ class output extends Template {
 				'L_EDITPROFILE' => $lang['Module']['editprofile']
 			));
 		}
-		
-		$this->assign_block_vars('meta_content_type', array(
-			'CHARSET' => $lang['CHARSET']
-		));
 		
 		if( $error )
 		{
@@ -309,23 +291,11 @@ class output extends Template {
 		));
 		
 		$dev_infos = (defined('DEV_INFOS') && DEV_INFOS == true);
+		$version = WANEWSLETTER_VERSION;
 		
-		if( $dev_infos )
+		if( $dev_infos && is_object($db) )
 		{
-			$version = sprintf('%s (%s)', WA_VERSION, substr(get_class($db), 5));
-		}
-		else
-		{
-			$version = WA_VERSION;
-		}
-		
-		$this->assign_vars( array(
-			'VERSION'   => $version,
-			'TRANSLATE' => ( !empty($lang['TRANSLATE']) ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
-		));
-		
-		if( $dev_infos )
-		{
+			$version  .= sprintf(' (%s)', substr(get_class($db), 5));
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);
 			
@@ -337,18 +307,38 @@ class output extends Template {
 			));
 		}
 		
-		if( defined('IN_ADMIN') && !defined('IN_LOGIN') && count($GLOBALS['_php_errors']) > 0 )
+		$this->assign_vars( array(
+			'VERSION'   => $version,
+			'TRANSLATE' => ( !empty($lang['TRANSLATE']) ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
+		));
+		
+		$entries = wanlog();
+		
+		if( count($entries) > 0 )
 		{
-			$this->assign_block_vars('php_errors', array());
-			
-			foreach( $GLOBALS['_php_errors'] as $entry )
+			$wanlog_box = '';
+			foreach( $entries as $entry )
 			{
-				if( !is_scalar($entry) ) {
-					$entry = nl2br(print_r($entry, true));
+				if( $entry instanceof Exception ) {
+					if( !DISPLAY_ERRORS_IN_LOG ) {
+						continue;
+					}
+					
+					$entry = wan_format_error($entry);
+				}
+				else if( !is_scalar($entry) ) {
+					$entry = print_r($entry, true);
 				}
 				
-				$this->assign_block_vars('php_errors.item', array(
-					'TEXT' => $entry
+				$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
+			}
+			
+			if( $wanlog_box != '' ) {
+				$this->assign_vars(array(
+					'WANLOG_BOX' => sprintf('<ul class="warning"
+						style="font-family:monospace;font-size:12px;">%s</ul>',
+						$wanlog_box
+					)
 				));
 			}
 		}
@@ -381,12 +371,10 @@ class output extends Template {
 	{
 		global $lang;
 		
-		header('Last-Modified: ' . gmdate(DATE_RFC1123));
-		header('Expires: ' . gmdate(DATE_RFC1123));
-		header('Cache-Control: no-cache, no-store, must-revalidate, private, pre-check=0, post-check=0, max-age=0');
-		header('Pragma: no-cache');
+		header('Expires: ' . gmdate(DATE_RFC1123));// HTTP/1.0
+		header('Pragma: no-cache');// HTTP/1.0
+		header('Cache-Control: no-cache, must-revalidate, max-age=0');
 		header('Content-Language: ' . $lang['CONTENT_LANG']);
-		
 		header('Content-Type: text/html; charset=' . $lang['CHARSET']);
 		
 		ob_start();
@@ -415,13 +403,14 @@ class output extends Template {
 		$this->send_headers();
 		
 		echo <<<BASIC
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="$lg" lang="$lg" dir="$dir">
+<!DOCTYPE html>
+<html lang="$lg" dir="$dir">
 <head>
+	<meta charset="$charset" />
 	$this->meta_redirect
 	<title>$page_title</title>
 	
-	<style type="text/css" media="screen">
+	<style>
 	body { margin: 10px; text-align: left; }
 	</style>
 </head>
@@ -435,7 +424,8 @@ BASIC;
 	}
 	
 	/**
-	 * Affiche de message d'information
+	 * Affiche de message d'information.
+	 * OBSOLÈTE. Voir méthode displayMessage() plus bas.
 	 * 
 	 * @param string $str
 	 * 
@@ -444,68 +434,118 @@ BASIC;
 	 */
 	function message($str)
 	{
+		$this->displayMessage($str);
+	}
+	
+	/**
+	 * Ajoute une entrée à la pile des messages
+	 * 
+	 * @param string $str	le message
+	 * @param string $link	le lien html à intégrer dans le message
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function addLine($str, $link = null)
+	{
+		if( !is_null($link) )
+		{
+			$str = sprintf($str, sprintf('<a href="%s">', $link), '</a>');
+		}
+		
+		array_push($this->messageList, $str);
+	}
+	
+	/**
+	 * Affichage d'un message d'information
+	 * Si $str n'est pas fourni, la pile de messages $this->messageList est utilisée
+	 * 
+	 * @param string $str
+	 * @param string $title
+	 * 
+	 * @access public
+	 * @return void
+	 */
+	function displayMessage($str = '', $title = '')
+	{
 		global $lang, $message;
 		
-		if( !empty($lang['Message'][$str]) )
+		if( !empty($str) )
 		{
-			$str = nl2br($lang['Message'][$str]);
-		}
-		
-		if( defined('IN_CRON') )
-		{
-			exit($str);
-		}
-		
-		if( !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
-		{
-			$title = '<span style="color: #33DD33;">' . $lang['Title']['info'] . '</span>';
-			
-			if( !defined('HEADER_INC') )
+			if( !empty($lang['Message'][$str]) )
 			{
-				$this->page_header();
+				$str = $lang['Message'][$str];
 			}
 			
-			$this->set_filenames(array(
-				'body' => 'message_body.tpl'
-			));
-			
-			$this->assign_vars( array(
-				'MSG_TITLE' => $title,
-				'MSG_TEXT'  => $str
-			));
-			
-			$this->pparse('body');
-			
-			$this->page_footer();
-			exit;
+			array_push($this->messageList, $str);
 		}
 		
-		$message = $str;
+		$str = '';
+		foreach( $this->messageList as $message )
+		{
+			$str .= '<br><br>'.str_replace("\n", "<br>\n", $message);
+		}
+		$str = substr($str, 8);
+		
+		if( empty($title) )
+		{
+			$title = $lang['Title']['info'];
+		}
+		else if( !empty($lang['Title'][$title]) )
+		{
+			if( $title == 'error' )
+			{
+				$title = '<span style="color: #F66;">' . $lang['Title']['error'] . '</span>';
+			}
+			else
+			{
+				$title = $lang['Title'][$title];
+			}
+		}
+		
+		if( !defined('HEADER_INC') )
+		{
+			$this->page_header();
+		}
+		
+		$this->set_filenames(array(
+			'body' => 'message_body.tpl'
+		));
+		
+		$this->assign_vars( array(
+			'MSG_TITLE' => $title,
+			'MSG_TEXT'  => $str
+		));
+		
+		$this->pparse('body');
+		
+		$this->page_footer();
+		exit;
 	}
 	
 	/**
 	 * Génération et affichage de liste d'erreur
 	 * 
-	 * @param string $msg_error
+	 * @param mixed $msg_errors
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	function error_box($msg_error)
+	function error_box($msg_errors)
 	{
-		$error_box = "<ul id=\"errorbox\">\n\t<li> ";
-		if( is_array($msg_error) )
+		if( !is_array($msg_errors) )
 		{
-			$error_box .= implode(" </li>\n\t<li> ", $msg_error);
+			$msg_errors = array($msg_errors);
 		}
-		else
+		
+		$error_box = '';
+		foreach( $msg_errors as $msg_error )
 		{
-			$error_box .= $msg_error;
+			$error_box .= sprintf("<li>%s</li>\n", $msg_error);
 		}
-		$error_box .= " </li>\n</ul>";
 		
 		$this->assign_vars(array(
-			'ERROR_BOX' => $error_box
+			'ERROR_BOX' => sprintf('<ul class="warning">%s</ul>', $error_box)
 		));
 	}
 	
@@ -520,7 +560,7 @@ BASIC;
 	 */
 	function files_list($logdata, $format = 0)
 	{
-		global $lang;
+		global $lang, $nl_config;
 		
 		$page_envoi  = ( strstr(server_info('PHP_SELF'), 'envoi.php') ) ? true : false;
 		$body_size   = (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
@@ -559,6 +599,7 @@ BASIC;
 		));
 		
 		$this->assign_vars(array(
+			'L_JOINED_FILES'   => $lang['Title']['joined_files'],
 			'L_FILENAME'       => $lang['Filename'],
 			'L_FILESIZE'       => $lang['Filesize'],
 			'L_TOTAL_LOG_SIZE' => $lang['Total_log_size'],
@@ -567,22 +608,17 @@ BASIC;
 			'S_ROWSPAN'        => ( $page_envoi ) ? '4' : '3'
 		));
 		
-		if( $page_envoi == true )
+		if( $page_envoi )
 		{
 			$this->assign_block_vars('del_column', array());
-			$this->assign_block_vars('joined_files.files_box', array(
-				'L_TITLE_JOINED_FILES' => $lang['Title']['joined_files'],
-				'L_DEL_FILE_BUTTON'    => $lang['Button']['del_file']
+			$this->assign_block_vars('joined_files.files_box', array( // dans send_body.tpl
+				'L_DEL_FILE_BUTTON' => $lang['Button']['del_file']
 			));
 			
 			$u_download = './envoi.php?mode=download&amp;fid=%d';
 		}
 		else
 		{
-			$this->assign_block_vars('files_box', array(
-				'L_TITLE_JOINED_FILES'	=> $lang['Title']['joined_files']
-			));
-			
 			$u_download = './view.php?mode=download&amp;fid=%d';
 		}
 		
@@ -595,32 +631,40 @@ BASIC;
 			$file_id   = $logdata['joined_files'][$i]['file_id'];
 			$mime_type = $logdata['joined_files'][$i]['file_mimetype'];
 			
-			//
-			// On affiche pas dans la liste les fichiers incorporés dans 
-			// une newsletter au format HTML.
-			//
-			if( $format == FORMAT_HTML && in_array($filename, $embed_files) )
-			{
-				continue;
-			}
+			$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $logdata['joined_files'][$i]['file_physical_name'];
+			$s_show = '';
 			
-			if( strpos($mime_type, 'image') === 0 )
+			if( $nl_config['use_ftp'] || file_exists($tmp_filename) )
 			{
-				$s_show  = '<a rel="show" href="' . sessid(sprintf($u_show, $file_id)) . '">';
-				$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
-				$s_show .= '</a>';
+				//
+				// On affiche pas dans la liste les fichiers incorporés dans 
+				// une newsletter au format HTML.
+				//
+				if( $format == FORMAT_HTML && in_array($filename, $embed_files) )
+				{
+					continue;
+				}
+				
+				$filename = sprintf('<a href="%s">%s</a>', sprintf($u_download, $file_id), wan_htmlspecialchars($filename));
+				
+				if( preg_match('#^image/#', $mime_type) )
+				{
+					$s_show  = sprintf('<a class="show" href="%s" type="%s">', sprintf($u_show, $file_id), $mime_type);
+					$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
+					$s_show .= '</a>';
+				}
 			}
 			else
 			{
-				$s_show = '';
+				$filename = sprintf('<del title="%s">%s</del>',
+					$lang['Message']['File_not_found'], wan_htmlspecialchars($filename));
 			}
 			
 			$this->assign_block_vars('file_info', array(
 				'OFFSET'     => ($i + 1),
-				'FILENAME'   => htmlspecialchars($filename),
+				'FILENAME'   => $filename,
 				'FILESIZE'   => formateSize($filesize),
-				'S_SHOW'     => $s_show,
-				'U_DOWNLOAD' => sessid(sprintf($u_download, $file_id))
+				'S_SHOW'     => $s_show
 			));
 			
 			if( $page_envoi )
@@ -656,12 +700,12 @@ BASIC;
 		
 		if( empty($jump_to) )
 		{
-			$jump_to = './' . htmlspecialchars(basename(server_info('PHP_SELF')));
+			$jump_to = './' . wan_htmlspecialchars(basename(server_info('PHP_SELF')));
 			$query_string = server_info('QUERY_STRING');
 			
 			if( $query_string != '' )
 			{
-				$jump_to .= '?' . htmlspecialchars($query_string);
+				$jump_to .= '?' . wan_htmlspecialchars($query_string);
 			}
 		}
 		
@@ -669,8 +713,11 @@ BASIC;
 		{
 			if( in_array($liste_id, $liste_id_ary) )
 			{
-				$selected = ( $admindata['session_liste'] == $liste_id ) ? ' selected="selected"' : '';
-				$tmp_box .= sprintf("<option value=\"%d\"%s>%s</option>\n\t", $liste_id, $selected, cut_str($data['liste_name'], 30));
+				$tmp_box .= sprintf("<option value=\"%d\"%s>%s</option>\n\t",
+					$liste_id,
+					$admindata['session_liste'] == $liste_id ? ' selected="selected"' : '',
+					wan_htmlspecialchars(cut_str($data['liste_name'], 30))
+				);
 			}
 		}
 		
@@ -678,13 +725,14 @@ BASIC;
 		{
 			if( $display )
 			{
-				$message = $lang['Message']['No_liste_exists'];
+				$this->addLine($lang['Message']['No_liste_exists']);
+				
 				if( $admindata['admin_level'] == ADMIN )
 				{
-					$message .= '<br /><br />' . sprintf($lang['Click_create_liste'], '<a href="' . sessid('./view.php?mode=liste&amp;action=add') . '">', '</a>');
+					$this->addLine($lang['Click_create_liste'], './view.php?mode=liste&amp;action=add');
 				}
 				
-				$this->message($message);
+				$this->displayMessage();
 			}
 			
 			return '';
@@ -696,8 +744,6 @@ BASIC;
 			$list_box .= '<option value="0">' . $lang['Choice_liste'] . '</option>';
 		}
 		$list_box .= $tmp_box . '</select>';
-		
-		$this->addHiddenField('sessid', $session->session_id);
 		
 		if( $display )
 		{
@@ -713,8 +759,7 @@ BASIC;
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
 				
 				'LISTE_BOX'       => $list_box,
-				'S_HIDDEN_FIELDS' => $this->getHiddenFields(),
-				'U_FORM'          => sessid($jump_to)
+				'U_FORM'          => $jump_to
 			));
 			
 			$this->pparse('body');
@@ -732,9 +777,7 @@ BASIC;
 				'L_BUTTON_GO'     => $lang['Button']['go'],
 				
 				'S_LISTBOX'       => $list_box,
-				'S_HIDDEN_FIELDS' => $this->getHiddenFields(),
-				
-				'U_LISTBOX'       => sessid($jump_to)
+				'U_LISTBOX'       => $jump_to
 			));
 			
 			$this->assign_var_from_handle('LISTBOX', 'list_box_body');
@@ -743,4 +786,3 @@ BASIC;
 }
 
 }
-?>

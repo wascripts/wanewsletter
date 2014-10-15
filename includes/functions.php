@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('FUNCTIONS_INC') ) {
@@ -29,93 +12,225 @@ if( !defined('FUNCTIONS_INC') ) {
 define('FUNCTIONS_INC', true);
 
 /**
+ * Vérifie que les numéros de version des tables dans le fichier constantes.php
+ * et dans la table de configuration du script sont synchro
+ *
+ * @param integer $version Version présente dans la base de données (clé 'db_version')
+ *
+ * @return boolean
+ */
+function check_db_version($version)
+{
+	return (WANEWSLETTER_DB_VERSION == $version);
+}
+
+/**
+ * Retourne la configuration du script stockée dans la base de données
+ *
+ * @return array
+ */
+function wa_get_config()
+{
+	global $db;
+	
+	$result = $db->query("SELECT * FROM " . CONFIG_TABLE);
+	$row    = $result->fetch($result->SQL_FETCH_ASSOC);
+	$config = array();
+	
+	if( isset($row['config_name']) ) {// Wanewsletter 2.4-beta2+
+		do {
+			if( $row['config_name'] != null ) {
+				$config[$row['config_name']] = $row['config_value'];
+			}
+		}
+		while( $row = $result->fetch() );
+	}
+	else {
+		trigger_error("La table de configuration du script est obsolète. Mise à jour requise", E_USER_WARNING);
+		$config = $row;
+	}
+	
+	return $config;
+}
+
+/**
+ * Sauvegarde les clés de configuration fournies dans la base de données
+ *
+ * @param mixed $config  Soit le nom de l'option de configuration à mettre à jour,
+ *                       soit un tableau d'options
+ * @param string $value  Si le premier argument est une chaîne, utilisé comme
+ *                       valeur pour l'option ciblée
+ */
+function wa_update_config($config, $value = null)
+{
+	global $db;
+	
+	if( is_string($config) ) {
+		$config = array($config => $value);
+	}
+	
+	foreach( $config as $name => $value ) {
+		$db->query(sprintf(
+			"UPDATE %s SET config_value = '%s' WHERE config_name = '%s'",
+			CONFIG_TABLE,
+			$db->escape($value),
+			$db->escape($name)
+		));
+	}
+}
+
+/**
  * generate_key()
  * 
  * Génération d'une chaîne aléatoire
  * 
- * @param integer $num_char    Nombre de caractères
- * @param integer $use_uniqid  Active/Désactive l'utilisation de uniqid() (très
- *                             consommateur de ressources lors des importations de masse)
+ * @param integer $length       Nombre de caractères
+ * @param integer $specialChars Ajout de caractères spéciaux
  * 
  * @return string
  */
-function generate_key($num_char = 32, $use_uniqid = true)
+function generate_key($length = 32, $specialChars = false)
 {
-	if( $use_uniqid == true )
-	{
-		srand((double) microtime() * 1000000);
-		$rand_str = md5(uniqid(rand()));
-	}
-	else
-	{
-		$rand_str = md5(microtime());
+	static $charList = null;
+	
+	if( $charList == null ) {
+		$charList = range('0', '9');
+		$charList = array_merge($charList, range('A', 'Z'));
+		$charList = array_merge($charList, range('a', 'z'));
+		
+		if( $specialChars ) {
+			$charList = array_merge($charList, range(' ', '/'));
+			$charList = array_merge($charList, range(':', '@'));
+			$charList = array_merge($charList, range('[', '`'));
+			$charList = array_merge($charList, range('{', '~'));
+		}
+		
+		shuffle($charList);
 	}
 	
-	return ( $num_char >= 32 ) ? $rand_str : substr($rand_str, 0, $num_char);
+	$key = '';
+	for( $i = 0, $m = count($charList)-1; $i < $length; $i++ ) {
+		$key .= $charList[mt_rand(0, $m)];
+	}
+	
+	return $key;
 }
 
 /**
- * make_script_url()
+ * wan_ssl_connection()
+ *
+ * Indique si on est sur une connexion sécurisée
+ *
+ * @return boolean
+ */
+function wan_ssl_connection()
+{
+	return ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 443 == $_SERVER['SERVER_PORT'] );
+}
+
+/**
+ * wan_build_url()
  * 
- * Construction de l'url du script
+ * Construction d'une url
  * 
- * @param string $url    Url relative
+ * @param string  $url      Url à compléter
+ * @param array   $params   Paramètres à ajouter en fin d'url
+ * @param boolean $session  Ajout de l'ID de session PHP s'il y a lieu
  * 
  * @return string
  */
-function make_script_url($url = '')
+function wan_build_url($url, $params = array(), $session = false)
 {
-	global $nl_config;
+	$parts = parse_url($url);
 	
-	$excluded_ports = array(80, 8080);
-	$server_port    = server_info('SERVER_PORT');
+	if( !is_array($params) ) {
+		$params = array();
+	}
 	
-	return rtrim($nl_config['urlsite'], '/')
-		. (( !in_array($server_port, $excluded_ports) ) ? ':' . $server_port : '')
-		. (( $nl_config['path'] != '/' ) ? '/' . trim($nl_config['path'], '/') . '/' : '/')
-		. $url;
+	if( empty($parts['scheme']) ) {
+		$proto = wan_ssl_connection() ? 'https' : 'http';
+	}
+	else {
+		$proto = $parts['scheme'];
+	}
+	
+	$server = !empty($parts['host']) ? $parts['host'] : $_SERVER['HTTP_HOST'];
+	
+	if( !empty($parts['port']) ) {
+		$server .= ':'.$parts['port'];
+	}
+	else if( $_SERVER['SERVER_PORT'] != 80 && $_SERVER['SERVER_PORT'] != 443 ) {
+		$server .= ':'.$_SERVER['SERVER_PORT'];
+	}
+	
+	$path  = !empty($parts['path']) ? $parts['path'] : '/';
+	$query = !empty($parts['query']) ? $parts['query'] : '';
+	
+	if( $path[0] != '/' ) {
+		$parts = explode('/', dirname($_SERVER['SCRIPT_NAME']).'/'.$path);
+		$path  = array();
+		
+		foreach( $parts as $part ) {
+			if( $part == '.' || $part == '' ) {
+				continue;
+			}
+			if( $part == '..' ) {
+				array_pop($path);
+			}
+			else {
+				$path[] = $part;
+			}
+		}
+		$path = implode('/', $path);
+	}
+	
+	$cur_params = array();
+	if( $query != '' ) {
+		parse_str($query, $cur_params);
+	}
+	
+	if( defined('SID') && SID != '' ) {
+		list($name, $value) = explode('=', SID);
+		$params[$name] = $value;
+	}
+	
+	$params = array_merge($cur_params, $params);
+	$query  = http_build_query($params);
+	
+	$url = $proto . '://' . $server . '/' . ltrim($path, '/') . ($query != '' ? '?' . $query : '');
+	
+	return $url;
 }
 
 /**
- * Location()
- * 
- * Fonction de redirection du script avec url absolue, d'après les 
- * spécifications HTTP/1.1
- * 
- * @param string $url    Url relative de redirection
- * 
- * @return void
+ * http_redirect()
+ *
+ * Version adaptée de la fonction http_redirect() de pecl_http
+ *
+ * @param string  $url      Url de redirection
+ * @param array   $params   Paramètres à ajouter en fin d'url
+ * @param boolean $session  Ajout de l'ID de session PHP s'il y a lieu
+ * @param integer $status   Code de redirection HTTP
  */
-function Location($url)
+if( !function_exists('http_redirect') ) {
+function http_redirect($url, $params = array(), $session = false, $status = 0)
 {
-	global $db, $output;
-	
-	if( function_exists('sessid') && defined('IN_ADMIN') )
-	{
-		$url = sessid($url);
+	$status = intval($status);
+	if( !in_array($status, array(301, 302, 303, 307, 308)) ) {
+		$status = 302;
 	}
 	
-	//
-	// On ferme la connexion à la base de données, si elle existe 
-	//
-	if( isset($db) && is_object($db) )
-	{
-		$db->close();
-	}
-	
-	$use_refresh   = preg_match("#Microsoft|WebSTAR|Xitami#i", server_info('SERVER_SOFTWARE'));
-	$absolute_url  = make_script_url() . (( defined('IN_ADMIN') ) ? 'admin/' : '');
-	$absolute_url .= unhtmlspecialchars($url);
-	
-	header((( $use_refresh ) ? 'Refresh: 0; URL=' : 'Location: ' ) . $absolute_url);
+	$url = wan_build_url($url, $params, $session);
+	http_response_code($status);
+	header(sprintf('Location: %s', $url));
 	
 	//
 	// Si la fonction header() ne donne rien, on affiche une page de redirection 
 	//
-	$message = '<p>If your browser doesn\'t support meta redirect, click <a href="' . $url . '">here</a> to go on next page.</p>';
-	
-	$output->redirect($url, 0);
-	$output->basic($message, 'Redirection');
+	printf('<p>If your browser doesn\'t support meta redirect, click
+		<a href="%s">here</a> to go on next page.</p>', wan_htmlspecialchars($url));
+	exit;
+}
 }
 
 /**
@@ -131,19 +246,34 @@ function load_settings($admindata = array())
 {
 	global $nl_config, $lang, $datetime;
 	
-	if( !defined('IN_COMMANDLINE') )
+	$check_list = array();
+	$supported_lang = array(
+		'fr' => 'francais',
+		'en' => 'english'
+	);
+	$file_pattern = WA_ROOTDIR . '/language/lang_%s.php';
+	
+	$check_list[] = 'francais';
+	
+	if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
 	{
-		global $output;
+		$accepted_langs = array_map('trim', explode(',', server_info('HTTP_ACCEPT_LANGUAGE')));
 		
-		$template_path = WA_ROOTDIR . '/templates/' . ( ( defined('IN_ADMIN') ) ? 'admin/' : '' );
-		
-		$output = new output($template_path);
-		$output->addScript(WA_ROOTDIR . '/templates/DOM-Compat/DOM-Compat.js');
-		
-		if( defined('IN_ADMIN') )
+		foreach( $accepted_langs as $langcode )
 		{
-			$output->addScript(WA_ROOTDIR . '/templates/admin/admin.js');
+			$langcode = strtolower(substr($langcode, 0, 2));
+			
+			if( isset($supported_lang[$langcode]) )
+			{
+				$check_list[] = $supported_lang[$langcode];
+				break;
+			}
 		}
+	}
+	
+	if( !empty($nl_config['language']) )
+	{
+		$check_list[] = $nl_config['language'];
 	}
 	
 	if( !is_array($admindata) )
@@ -153,7 +283,7 @@ function load_settings($admindata = array())
 	
 	if( !empty($admindata['admin_lang']) )
 	{
-		$nl_config['language'] = $admindata['admin_lang'];
+		$check_list[] = $admindata['admin_lang'];
 	}
 	
 	if( !empty($admindata['admin_dateformat']) )
@@ -161,215 +291,288 @@ function load_settings($admindata = array())
 		$nl_config['date_format'] = $admindata['admin_dateformat'];
 	}
 	
-	$language_path = wa_realpath(WA_ROOTDIR . '/language/lang_' . $nl_config['language'] . '.php');
+	$check_list = array_unique(array_reverse($check_list));
 	
-	if( !file_exists($language_path) )
+	foreach( $check_list as $language )
 	{
-		$nl_config['language'] = 'francais';
-		$language_path = wa_realpath(WA_ROOTDIR . '/language/lang_' . $nl_config['language'] . '.php');
-		
-		if( !file_exists($language_path) )
+		if( @is_readable(sprintf($file_pattern, $language)) )
 		{
-			trigger_error('<b>Les fichiers de localisation sont introuvables !</b>', CRITICAL_ERROR);
+			if( empty($lang) || $supported_lang[$lang['CONTENT_LANG']] != $language )
+			{
+				require sprintf($file_pattern, $language);
+			}
+			
+			break;
 		}
 	}
 	
-	require $language_path;
-	
-	$lang['CHARSET'] = strtoupper($lang['CHARSET']);
+	if( empty($lang) )
+	{
+		trigger_error('<b>Les fichiers de localisation sont introuvables !</b>', E_USER_ERROR);
+	}
 }
 
 /**
- * wan_web_handler()
+ * wan_error_handler()
  * 
  * Gestionnaire d'erreur personnalisé du script (en sortie http)
  * 
  * @param integer $errno      Code de l'erreur
  * @param string  $errstr     Texte proprement dit de l'erreur
  * @param string  $errfile    Fichier où s'est produit l'erreur
- * @param integer $errline    Numéro de la ligne 
- * 
- * @return void
+ * @param integer $errline    Numéro de la ligne
+ *
+ * @return boolean
  */
-function wan_web_handler($errno, $errstr, $errfile, $errline)
+function wan_error_handler($errno, $errstr, $errfile, $errline)
 {
-	global $db, $output, $lang, $message, $php_errormsg;
+	$simple = (defined('IN_COMMANDLINE') || defined('IN_SUBSCRIBE') || defined('IN_WA_FORM') || defined('IN_CRON'));
+	$fatal  = ($errno == E_USER_ERROR || $errno == E_RECOVERABLE_ERROR);
 	
-	$debug_text = '';
-	
-	if( defined('IN_CRON') && $errno == ERROR )
+	//
+	// On affiche pas les erreurs non prises en compte dans le réglage du
+	// error_reporting si error_reporting vaut 0, sauf si DEBUG_MODE est au max
+	//
+	if( !$fatal && (DEBUG_MODE == DEBUG_LEVEL_QUIET
+		|| (DEBUG_MODE == DEBUG_LEVEL_NORMAL && !(error_reporting() & $errno))) )
 	{
-		$errno = CRITICAL_ERROR;
+		return true;
 	}
 	
-	if( $output == null ) {// load_settings() par encore appelé
-		$errno = CRITICAL_ERROR;
+	$error = new WanError(array(
+		'type'    => $errno,
+		'message' => $errstr,
+		'file'    => $errfile,
+		'line'    => $errline
+	));
+	
+	if( $simple || $fatal ) {
+		wan_display_error($error, $simple);
+		
+		if( $fatal ) {
+			exit(1);
+		}
+	}
+	else {
+		wanlog($error);
+		
+		if( !DISPLAY_ERRORS_IN_LOG ) {
+			wan_display_error($error, true);
+		}
 	}
 	
-	if( ( $errno == CRITICAL_ERROR || $errno == ERROR ) && ( defined('IN_ADMIN') || defined('IN_CRON') || DEBUG_MODE ) )
-	{
-		if( !empty($db->error) && DEBUG_MODE > 0 )
-		{
-			$debug_text .= '<b>SQL query</b>&#160;:<br /> ' . nl2br($db->lastQuery) . "<br /><br />\n";
-			$debug_text .= '<b>SQL errno</b>&#160;: ' . $db->errno . "<br />\n";
-			$debug_text .= '<b>SQL error</b>&#160;: ' . $db->error . "<br />\n<br />\n";
+	return true;
+}
+
+/**
+ * wan_exception_handler()
+ * 
+ * Gestionnaire d'erreur personnalisé du script (en sortie http)
+ * 
+ * @param Exception $e  Exception "attrapée" par le gestionnaire
+ */
+function wan_exception_handler($e)
+{
+	wan_display_error($e);
+	exit(1);
+}
+
+/**
+ * wan_format_error()
+ *
+ * Formatage du message d'erreurs
+ *
+ * @param Exception  $error  Exception décrivant l'erreur
+ *
+ * @return string
+ */
+function wan_format_error($error)
+{
+	global $db, $lang;
+	
+	$errno   = $error->getCode();
+	$errstr  = $error->getMessage();
+	$errfile = $error->getFile();
+	$errline = $error->getLine();
+	$backtrace = $error->getTrace();
+	
+	if( $error instanceof WanError ) {
+		// Cas spécial. L'exception personnalisée a été créé dans wan_error_handler()
+		// et contient donc l'appel à wan_error_handler() elle-même. On corrige.
+		array_shift($backtrace);
+	}
+	
+	foreach( $backtrace as $i => &$t ) {
+		$file = wan_htmlspecialchars(str_replace(dirname(dirname(__FILE__)), '~', $t['file']));
+		$call = (isset($t['class']) ? $t['class'].$t['type'] : '') . $t['function'];
+		$t = sprintf('#%d  %s() called at [%s:%d]', $i, $call, $file, $t['line']);
+	}
+	
+	if( count($backtrace) > 0 ) {
+		$backtrace = sprintf("<b>Backtrace:</b>\n%s\n", implode("\n", $backtrace));
+	}
+	else {
+		$backtrace = '';
+	}
+	
+	if( DEBUG_MODE == DEBUG_LEVEL_QUIET ) {
+		// Si on est en mode de non-débogage, on a forcément attrapé une erreur
+		// critique pour arriver ici.
+		$message  = $lang['Message']['Critical_error'];
+	}
+	else if( $error instanceof SQLException ) {
+		$message  = "<b>SQL errno:</b> $errno\n";
+		$message .= sprintf("<b>SQL error:</b> %s\n", wan_htmlspecialchars($errstr));
+		
+		if( is_object($db) ) {
+			$message .= sprintf("<b>SQL query:</b> %s\n", wan_htmlspecialchars($db->lastQuery));
 		}
 		
-		$debug_text .= '<b>Fichier</b>&#160;: ' . basename($errfile) . " \n<b>Ligne</b>&#160;: " . $errline . '<br />';
+		$message .= $backtrace;
+	}
+	else {
+		$labels  = array(
+			E_NOTICE => 'PHP Notice',
+			E_WARNING => 'PHP Warning',
+			E_USER_ERROR => 'Error',
+			E_USER_WARNING => 'Warning',
+			E_USER_NOTICE => 'Notice',
+			E_STRICT => 'PHP Strict',
+			E_DEPRECATED => 'PHP Deprecated',
+			E_USER_DEPRECATED => 'Deprecated',
+			E_RECOVERABLE_ERROR => 'PHP Error'
+		);
+		
+		$label = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
+		$errfile = str_replace(dirname(dirname(__FILE__)), '~', $errfile);
+		
+		if( !empty($lang['Message']) && !empty($lang['Message'][$errstr]) ) {
+			$errstr = $lang['Message'][$errstr];
+		}
+		
+		$message = sprintf(
+			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
+			($error instanceof WanError) ? $label : get_class($error),
+			$errstr,
+			$errfile,
+			$errline
+		);
+		$message .= $backtrace;
 	}
 	
-	if( $errno != CRITICAL_ERROR && !empty($lang['Message'][$errstr]) )
-	{
-		$errstr = nl2br($lang['Message'][$errstr]);
-	}
+	return $message;
+}
+
+/**
+ * wan_display_error()
+ *
+ * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
+ *
+ * @param Exception  $error       Exception décrivant l'erreur
+ * @param boolean    $simpleHTML  Si true, affichage simple dans un paragraphe
+ */
+function wan_display_error($error, $simpleHTML = false)
+{
+	global $output;
 	
-	if( $debug_text != '' )
-	{
-		$errstr .= "<br /><br />\n\n" . $debug_text;
-	}
+	$message = wan_format_error($error);
 	
-	switch( $errno )
-	{
-		case CRITICAL_ERROR:
-			echo <<<BASIC
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr" dir="ltr">
+	if( defined('IN_COMMANDLINE') ) {
+		if( defined('ANSI_TERMINAL') ) {
+			$message = preg_replace("#<b>#",  "\033[1;31m", $message, 1);
+			$message = preg_replace("#</b>#", "\033[0m", $message, 1);
+			
+			$message = preg_replace("#<b>#",  "\033[1;37m", $message);
+			$message = preg_replace("#</b>#", "\033[0m", $message);
+		}
+		
+		$message = htmlspecialchars_decode($message);
+		
+		// Au cas où le terminal utilise l'encodage utf-8
+		if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) {
+			$message = wan_utf8_encode($message);
+		}
+		
+		fputs(STDERR, $message);
+	}
+	else if( $simpleHTML ) {
+		echo '<p>' . nl2br($message) . '</p>';
+	}
+	else if( $output instanceof output ) {
+		$output->displayMessage($message, 'error');
+	}
+	else {
+		$message = nl2br($message);
+		echo <<<BASIC
+<!DOCTYPE html>
+<html dir="ltr">
 <head>
-	<title>Erreur critique&#160;!</title>
+	<title>Erreur critique&nbsp;!</title>
 	
-	<style type="text/css" media="screen">
+	<style>
 	body { margin: 10px; text-align: left; }
 	</style>
 </head>
 <body>
 	<div>
-		<h1>Erreur critique&#160;!</h1>
+		<h1>Erreur critique&nbsp;!</h1>
 		
-		<p>$errstr</p>
+		<p>$message</p>
 	</div>
 </body>
 </html>
 BASIC;
-			
-			exit;
-			break;
-		
-		case ERROR:
-			if( defined('IN_CRON') )
-			{
-				exit($errstr);
-			}
-			
-			if( !defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE') )
-			{
-				$title = '<span style="color: #DD3333;">' . $lang['Title']['error'] . '</span>';
-				
-				if( !defined('HEADER_INC') )
-				{
-					$output->page_header();
-				}
-				
-				$output->set_filenames(array(
-					'body' => 'message_body.tpl'
-				));
-				
-				$output->assign_vars( array(
-					'MSG_TITLE' => $title,
-					'MSG_TEXT'  => $errstr
-				));
-				
-				$output->pparse('body');
-				
-				$output->page_footer();
-			}
-			
-			$message = $errstr;
-			break;
-		
-		default:
-			$label = array(E_NOTICE => 'Notice', E_WARNING => 'Warning', E_STRICT => 'Strict', E_DEPRECATED => 'Deprecated');
-			
-			$php_errormsg  = '<b>'.(isset($label[$errno]) ? $label[$errno] : 'Unknown Error').'</b>&nbsp;: ';
-			$php_errormsg .= $errstr . ' in <b>' . basename($errfile) . '</b> on line <b>' . $errline . '</b>';
-			
-			//
-			// Dans le cas d'une fonction précédée par @, error_reporting() 
-			// retournera 0, dans ce cas, pas d'affichage d'erreur
-			//
-			$display_error = error_reporting(E_ALL);
-			
-			if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
-			{
-				if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
-				{
-					array_push($GLOBALS['_php_errors'], $php_errormsg);
-				}
-				else
-				{
-					echo '<p>' . $php_errormsg . '</p>';
-				}
-			}
-			break;
 	}
 }
 
 /**
- * wan_cli_handler()
+ * wanlog()
+ *
+ * Si elle est appelée avec un argument, ajoute l'entrée dans le journal,
+ * sinon, renvoie le journal.
  * 
- * Gestionnaire d'erreur personnalisé du script (en ligne de commande)
+ * @param mixed  $entry  Peut être un objet Exception, ou une simple chaîne
  * 
- * @param integer $errno      Code de l'erreur
- * @param string  $errstr     Texte proprement dit de l'erreur
- * @param string  $errfile    Fichier où s'est produit l'erreur
- * @param integer $errline    Numéro de la ligne 
- * 
- * @return void
+ * @return array
  */
-function wan_cli_handler($errno, $errstr, $errfile, $errline)
+function wanlog($entry = null)
 {
-	global $db, $lang;
+	static $entries = array();
 	
-	if( !empty($lang['Message'][$errstr]) )
-	{
-		$errstr = $lang['Message'][$errstr];
-	}
-	else {
-		$label = array(E_NOTICE => 'Notice', E_WARNING => 'Warning', E_STRICT => 'Strict', E_DEPRECATED => 'Deprecated');
-		
-		$errstr  = (isset($label[$errno]) ? $label[$errno] : 'Unknown Error').' : "'
-			. $errstr . '" in ' . basename($errfile) . ' on line ' . $errline;
+	if( $entry === null ) {
+		return $entries;
 	}
 	
-	$errstr = strip_tags($errstr);
+	array_push($entries, $entry);
+}
+
+/**
+ * wan_error_get_last()
+ *
+ * Même fonctionnement que la fonction native error_get_last()
+ *
+ * @param mixed  $entry  Peut être un objet Exception, ou une simple chaîne
+ *
+ * @return array
+ */
+function wan_error_get_last()
+{
+	$errors = wanlog();
+	$error  = null;
 	
-	if( !empty($db->error) && DEBUG_MODE > 0 )
-	{
-		$errstr .= "\n";
-		$errstr .= 'SQL query: ' . $db->lastQuery . "\n";
-		$errstr .= 'SQL errno: ' . $db->errno . "\n";
-		$errstr .= 'SQL error: ' . $db->error . "\n\n";
+	while( $e = array_pop($errors) ) {
+		if( $e instanceof Exception ) {
+			$error = array(
+				'type'    => $e->getCode(),
+				'message' => $e->getMessage(),
+				'file'    => $e->getFile(),
+				'line'    => $e->getLine()
+			);
+			break;
+		}
 	}
 	
-	//
-	// Dans le cas d'une fonction précédée par @, error_reporting() 
-	// retournera 0, dans ce cas, pas d'affichage d'erreur
-	//
-	$display_error = error_reporting(E_ALL);
-	
-	if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) // Au cas où le terminal utilise l'encodage utf-8
-	{
-		$errstr = wan_utf8_encode($errstr);
-	}
-	
-	if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
-	{
-		fputs(STDERR, $errstr . "\n");
-	}
-	
-	if( $errno == CRITICAL_ERROR )
-	{
-		exit(0);
-	}
+	return $error;
 }
 
 /**
@@ -399,21 +602,6 @@ function plain_error($var, $exit = true, $verbose = false)
 	
 	if( $exit ) {
 		exit;
-	}
-}
-
-/**
- * wanlog()
- * 
- * @param string $str  Chaîne d'information ou d'erreur à stocker dans
- *                     l'historique de Wanewsletter
- * 
- * @return void
- */
-function wanlog($str)
-{
-	if( isset($GLOBALS['_php_errors']) ) {
-		array_push($GLOBALS['_php_errors'], $str);
 	}
 }
 
@@ -573,10 +761,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			FROM " . LISTE_TABLE . " 
 			WHERE purge_next < " . time() . " 
 				AND auto_purge = " . TRUE;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les listes de diffusion à purger', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		while( $row = $result->fetch() )
 		{
@@ -597,10 +782,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			WHERE liste_id = $liste_id
 				AND confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
 				AND register_date < " . (time() - ($limitevalidate * 86400));
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir les entrées à supprimer de la table abo_liste', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$abo_ids = array();
 		while( $abo_id = $result->column('abo_id') )
@@ -615,55 +797,20 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			
 			$db->beginTransaction();
 			
-			if( !SQL_SUBSELECT_SUPPORTED )
-			{
-				$sql = "SELECT abo_id
+			$sql = "DELETE FROM " . ABONNES_TABLE . "
+				WHERE abo_id IN(
+					SELECT abo_id
 					FROM " . ABO_LISTE_TABLE . "
 					WHERE abo_id IN($sql_abo_ids)
 					GROUP BY abo_id
-					HAVING COUNT(abo_id) = 1";
-				if( $result = $db->query($sql) )
-				{
-					$abo_ids = array();
-					while( $abo_id = $result->column('abo_id') )
-					{
-						array_push($abo_ids, $abo_id);
-					}
-					
-					if( count($abo_ids) > 0 )
-					{
-						$sql = "DELETE FROM " . ABONNES_TABLE . " 
-							WHERE abo_id IN(" . implode(', ', $abo_ids) . ")";
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-						}
-					}
-				}
-			}
-			else
-			{
-				$sql = "DELETE FROM " . ABONNES_TABLE . "
-					WHERE abo_id IN(
-						SELECT abo_id
-						FROM " . ABO_LISTE_TABLE . "
-						WHERE abo_id IN($sql_abo_ids)
-						GROUP BY abo_id
-						HAVING COUNT(abo_id) = 1
-					)";
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les entrées inutiles de la table des abonnés', ERROR);
-				}
-			}
+					HAVING COUNT(abo_id) = 1
+				)";
+			$db->query($sql);
 			
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
 				WHERE abo_id IN($sql_abo_ids)
 					AND liste_id = " . $liste_id;
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer les entrées de la table abo_liste', ERROR);
-			}
+			$db->query($sql);
 			
 			$db->commit();
 		}
@@ -671,10 +818,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 		$sql = "UPDATE " . LISTE_TABLE . " 
 			SET purge_next = " . (time() + ($purge_freq * 86400)) . " 
 			WHERE liste_id = " . $liste_id;
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de mettre à jour la table liste', ERROR);
-		}
+		$db->query($sql);
 		
 		return $num_abo_deleted;
 	}
@@ -725,23 +869,6 @@ function wa_realpath($relative_path)
 	}
 	
 	return str_replace('\\', '/', $absolute_path);
-}
-
-/**
- * unhtmlspecialchars()
- * 
- * Fonction inverse de la fonction htmlspecialchars()
- * 
- * @param string $input
- * 
- * @return string
- */
-function unhtmlspecialchars($input)
-{
-	$html_entities = array('/&lt;/', '/&gt;/', '/&quot;/', '/&amp;/');
-	$html_replace  = array('<', '>', '"', '&');
-	
-	return preg_replace($html_entities, $html_replace, $input);
 }
 
 /**
@@ -796,17 +923,36 @@ function active_urls($str)
 /**
  * config_status()
  * 
- * Retourne le statut d'une directive de configuration (telle que réglée sur On ou Off)
+ * Retourne la valeur d'une directive de configuration
  * 
- * @param string $name    Nom de la directive
+ * @param string  $name          Nom de la directive
  * 
  * @return boolean
  */
 function config_status($name)
 {
+	return config_value($name, true);
+}
+
+/**
+ * config_value()
+ * 
+ * Retourne la valeur d'une directive de configuration
+ * 
+ * @param string  $name          Nom de la directive
+ * @param boolean $need_boolean  Nécessaire pour obtenir un booléen en retour (pour les directives on/off)
+ * 
+ * @return mixed
+ */
+function config_value($name, $need_boolean = false)
+{
 	$value = ini_get($name);
-	if( preg_match('#^off|false$#i', $value) ) {
-		$value = false;
+	if( $need_boolean ) {
+		if( preg_match('#^off|false$#i', $value) ) {
+			$value = false;
+		}
+		
+		settype($value, 'boolean');
 	}
 	return $value;
 }
@@ -989,23 +1135,69 @@ function convert_encoding($data, $charset, $check_bom = true)
 }
 
 /**
- * http_get_contents()
+ * wan_get_contents()
  * 
- * Récupère un contenu via HTTP et le retourne, ainsi que le jeu de caractère de la chaîne,
- * si disponible, et le type de média
+ * Récupère un contenu local ou via HTTP et le retourne, ainsi que le jeu de
+ * caractère et le type de média de la chaîne, si disponible.
  * 
- * @param mixed $URL      L'URL à appeller
+ * @param string $URL      L'URL à appeller
  * @param string $errstr  Conteneur pour un éventuel message d'erreur
  * 
- * @return array
+ * @return mixed
+ */
+function wan_get_contents($URL, &$errstr)
+{
+	global $lang;
+	
+	if( strncmp($URL, 'http://', 7) == 0 )
+	{
+		$result = http_get_contents($URL, $errstr);
+		if( $result == false )
+		{
+			$errstr = sprintf($lang['Message']['Error_load_url'], wan_htmlspecialchars($URL), $errstr);
+		}
+	}
+	else
+	{
+		if( $URL[0] == '~' )
+		{
+			$URL = server_info('DOCUMENT_ROOT') . substr($URL, 1);
+		}
+		else if( $URL[0] != '/' )// Chemin non absolu
+		{
+			$URL = WA_ROOTDIR . '/' . $URL;
+		}
+		
+		if( is_readable($URL) )
+		{
+			$result = array('data' => file_get_contents($URL), 'charset' => null);
+		}
+		else
+		{
+			$result = false;
+			$errstr = sprintf($lang['Message']['File_not_exists'], wan_htmlspecialchars($URL));
+		}
+	}
+	
+	return $result;
+}
+
+/**
+ * http_get_contents()
+ * 
+ * Récupère un contenu via HTTP et le retourne, ainsi que le jeu de
+ * caractère et le type de média de la chaîne, si disponible.
+ * 
+ * @param string $URL      L'URL à appeller
+ * @param string $errstr  Conteneur pour un éventuel message d'erreur
+ * 
+ * @return mixed
  */
 function http_get_contents($URL, &$errstr)
 {
 	global $lang;
 	
-	$part = @parse_url($URL);
-	
-	if( !is_array($part) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http' )
+	if( !($part = parse_url($URL)) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http' )
 	{
 		$errstr = $lang['Message']['Invalid_url'];
 		return false;
@@ -1013,18 +1205,20 @@ function http_get_contents($URL, &$errstr)
 	
 	$port = !isset($part['port']) ? 80 : $part['port'];
 	
-	if( !($fs = @fsockopen($part['host'], $port, $null, $null, 10)) )
+	if( !($fs = fsockopen($part['host'], $port, $null, $null, 5)) )
 	{
-		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
+		$errstr = sprintf($lang['Message']['Unaccess_host'], wan_htmlspecialchars($part['host']));
 		return false;
 	}
+	
+	stream_set_timeout($fs, 5);
 	
 	$path  = !isset($part['path']) ? '/' : $part['path'];
 	$path .= !isset($part['query']) ? '' : '?'.$part['query'];
 	
 	fputs($fs, sprintf("GET %s HTTP/1.0\r\n", $path));// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
 	fputs($fs, sprintf("Host: %s\r\n", $part['host']));
-	fputs($fs, sprintf("User-Agent: Wanewsletter/%s\r\n", WA_VERSION));
+	fputs($fs, sprintf("User-Agent: %s\r\n", WA_SIGNATURE));
 	fputs($fs, "Accept: */*\r\n");
 	
 	if( extension_loaded('zlib') )
@@ -1034,8 +1228,8 @@ function http_get_contents($URL, &$errstr)
 	
 	fputs($fs, "Connection: close\r\n\r\n");
 	
-	$inHeader  = true;
 	$isGzipped = false;
+	$datatype  = $charset = null;
 	$data = '';
 	$tmp  = fgets($fs, 1024);
 	
@@ -1046,42 +1240,40 @@ function http_get_contents($URL, &$errstr)
 		return false;
 	}
 	
-	do {
+	// Entêtes
+	while( !feof($fs) )
+	{
 		$tmp = fgets($fs, 1024);
 		
-		if( $inHeader && strpos($tmp, ':') )
+		if( !strpos($tmp, ':') ) {
+			break;
+		}
+		
+		list($header, $value) = explode(':', $tmp);
+		$header = strtolower($header);
+		$value  = trim($value);
+		
+		if( $header == 'content-type' )
 		{
-			list($header, $value) = explode(':', $tmp);
-			$header = strtolower($header);
-			$value  = trim($value);
-			
-			if( $header == 'content-type' )
+			if( preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $match) )
 			{
-				if( !preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $match) )
-				{
-					$errstr = $lang['Message']['No_data_at_url'] . ' (type manquant)';
-					fclose($fs);
-					return false;
-				}
-				
 				$datatype = $match[1];
 				$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
 			}
-			else if( $header == 'content-encoding' && $value == 'gzip' )
-			{
-				$isGzipped = true;
-			}
 		}
-		else
+		else if( $header == 'content-encoding' && $value == 'gzip' )
 		{
-			$inHeader = false;
-			$data .= $tmp;
+			$isGzipped = true;
 		}
 	}
-	while( !feof($fs) );
+	
+	// Contenu
+	while( !feof($fs) )
+	{
+		$data .= fgets($fs, 1024);
+	}
 	
 	fclose($fs);
-	$data = substr($data, 2);// Skip first CRLF
 	
 	if( $isGzipped && !preg_match('/\.t?gz$/i', $part['path']) )
 	{
@@ -1159,22 +1351,31 @@ function hasCidReferences($body, &$refs)
  */
 function formateSize($size)
 {
-	if( $size >= 1048576 )
+	$k = 1024;
+	$m = $k * $k;
+	$g = $m * $k;
+	
+	if( $size >= $g )
 	{
-		$lsize = $GLOBALS['lang']['MO'];
-		$size /= 1048576;
+		$unit = $GLOBALS['lang']['GO'];
+		$size /= $g;
 	}
-	else if( $size > 1024 )
+	else if( $size >= $m )
 	{
-		$lsize = $GLOBALS['lang']['KO'];
-		$size /= 1024;
+		$unit = $GLOBALS['lang']['MO'];
+		$size /= $m;
+	}
+	else if( $size >= $k )
+	{
+		$unit = $GLOBALS['lang']['KO'];
+		$size /= $k;
 	}
 	else
 	{
-		$lsize = $GLOBALS['lang']['Octets'];
+		$unit = $GLOBALS['lang']['Octets'];
 	}
 	
-	return sprintf("%s\xA0%s", wa_number_format($size), $lsize);
+	return sprintf("%s\xA0%s", wa_number_format($size), $unit);
 }
 
 $CONVMAP = array(
@@ -1266,6 +1467,49 @@ $CONVMAP = array(
 		"\x9f" => "Y"
 	)
 );
+
+/**
+ * wan_htmlspecialchars()
+ * 
+ * Idem que la fonction htmlspecialchars() native, mais avec le jeu de
+ * caractère ISO-8859-1 par défaut.
+ * 
+ * @param string $string
+ * @param int    $flags
+ * @param string $encoding
+ * @param bool   $double_encode
+ * 
+ * @return string
+ */
+function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', $double_encode = true)
+{
+	if( $flags == null ) {
+		$flags = ENT_COMPAT | ENT_HTML401;
+	}
+	
+	return htmlspecialchars($string, $flags, $encoding, $double_encode);
+}
+
+/**
+ * wan_html_entity_decode()
+ * 
+ * Idem que la fonction html_entity_decode() native, mais avec le jeu de
+ * caractère ISO-8859-1 par défaut.
+ * 
+ * @param string $string
+ * @param int    $flags
+ * @param string $encoding
+ * 
+ * @return string
+ */
+function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1')
+{
+	if( $flags == null ) {
+		$flags = ENT_COMPAT | ENT_HTML401;
+	}
+	
+	return html_entity_decode($string, $flags, $encoding);
+}
 
 }
 ?>

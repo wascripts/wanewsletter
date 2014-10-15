@@ -1,61 +1,25 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * 
- * Certaines parties sont inspirées de SQLiteManager 1.2.0RC1
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('_INC_CLASS_WADB_SQLITE_PDO') ) {
 
 define('_INC_CLASS_WADB_SQLITE_PDO', true);
 
-define('SQL_INSERT', 1);
-define('SQL_UPDATE', 2);
-define('SQL_DELETE', 3);
-
-//
-// Les constantes de classe PDO::* n'existent qu'à partir de PHP 5.1.0.
-// Avant cela, ce sont des variables globales. Nous utiliserons celle-ci
-// et les définissons si elles ne sont pas présentes.
-//
-if( !defined('PDO_FETCH_NUM') ) {
-	define('PDO_FETCH_NUM',       PDO::FETCH_NUM);
-	define('PDO_FETCH_ASSOC',     PDO::FETCH_ASSOC);
-	define('PDO_FETCH_BOTH',      PDO::FETCH_BOTH);
-	define('PDO_FETCH_OBJ',       PDO::FETCH_OBJ);
-	define('PDO_ATTR_PERSISTENT', PDO::ATTR_PERSISTENT);
-	define('PDO_ATTR_ERRMODE',    PDO::ATTR_ERRMODE);
-	define('PDO_ATTR_CASE',       PDO::ATTR_CASE);
-	define('PDO_ERRMODE_SILENT',  PDO::ERRMODE_SILENT);
-	define('PDO_CASE_NATURAL',    PDO::CASE_NATURAL);
-}
-
-define('SQL_FETCH_NUM',   PDO_FETCH_NUM);
-define('SQL_FETCH_ASSOC', PDO_FETCH_ASSOC);
-define('SQL_FETCH_BOTH',  PDO_FETCH_BOTH);
-
 class Wadb_sqlite_pdo {
+
+	/**
+	 * Type de base de données
+	 *
+	 * @var string
+	 * @access private
+	 */
+	var $engine = 'sqlite';
 	
 	/**
 	 * Connexion à la base de données
@@ -69,7 +33,7 @@ class Wadb_sqlite_pdo {
 	 * Nom de la base de données
 	 * 
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
 	var $dbname = '';
 	
@@ -154,54 +118,23 @@ class Wadb_sqlite_pdo {
 	var $_affectedRows = 0;
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_INSERT = 1;
+	var $SQL_UPDATE = 2;
+	var $SQL_DELETE = 3;
+	
+	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $sqlite_db   Base de données SQLite
 	 * @param array  $options     Options de connexion/utilisation
 	 * 
 	 * @access public
 	 */
-	function Wadb_sqlite_pdo($sqlite_db, $options = null)
+	function Wadb_sqlite_pdo($options = null)
 	{
-		if( file_exists($sqlite_db) ) {
-			if( !is_readable($sqlite_db) ) {
-				trigger_error("SQLite database isn't readable!", E_USER_WARNING);
-			}
-		}
-		else if( !is_writable(dirname($sqlite_db)) ) {
-			trigger_error(dirname($sqlite_db) . " isn't writable. Cannot create "
-				. basename($sqlite_db) . " database", E_USER_WARNING);
-		}
-		
-		$opt = array();
 		if( is_array($options) ) {
-			$this->options = $options;
-			
-			if( !empty($options['persistent']) ) {
-				$opt[PDO_ATTR_PERSISTENT] = true;
-			}
-		}
-		
-		try {
-			$this->pdo = new PDO('sqlite:' . $sqlite_db, null, null, $opt);
-		}
-		catch( PDOException $e ) {
-			$this->error = $e->getMessage();
-		}
-		
-		if( !is_null($this->pdo) ) {
-			$this->link = true;
-			$this->pdo->query('PRAGMA short_column_names = 1');
-			$this->pdo->query('PRAGMA case_sensitive_like = 0');
-			$this->pdo->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_SILENT);
-			$this->pdo->setAttribute(PDO_ATTR_CASE,    PDO_CASE_NATURAL);
-			
-			$res = $this->pdo->query("SELECT sqlite_version()");
-			$this->libVersion = $res->fetchColumn(0);
-			
-//			if( !empty($this->options['charset']) ) {
-//				$this->encoding($this->options['charset']);
-//			}
+			$this->options = array_merge($this->options, $options);
 		}
 	}
 	
@@ -216,11 +149,52 @@ class Wadb_sqlite_pdo {
 	 */
 	function connect($infos = null, $options = null)
 	{
-		if( is_array($options) ) {
-			$this->options = $options;
+		$sqlite_db = ($infos['path'] != '') ? $infos['path'] : null;
+		
+		if( $sqlite_db != ':memory:' ) {
+			if( file_exists($sqlite_db) ) {
+				if( !is_readable($sqlite_db) ) {
+					trigger_error("SQLite database isn't readable!", E_USER_WARNING);
+				}
+			}
+			else if( !is_writable(dirname($sqlite_db)) ) {
+				trigger_error(dirname($sqlite_db) . " isn't writable. Cannot create "
+					. basename($sqlite_db) . " database", E_USER_WARNING);
+			}
 		}
 		
-		return true;
+		if( is_array($options) ) {
+			$this->options = array_merge($this->options, $options);
+		}
+		
+		$opt = array();
+		if( !empty($options['persistent']) ) {
+			$opt[PDO::ATTR_PERSISTENT] = true;
+		}
+		
+		$this->dbname = $sqlite_db;
+		
+		try {
+			$this->pdo = new PDO('sqlite:' . $sqlite_db, null, null, $opt);
+			
+			$this->link = true;
+			$this->pdo->query('PRAGMA short_column_names = 1');
+			$this->pdo->query('PRAGMA case_sensitive_like = 0');
+			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+			$this->pdo->setAttribute(PDO::ATTR_CASE,    PDO::CASE_NATURAL);
+			
+			$res = $this->pdo->query("SELECT sqlite_version()");
+			$this->libVersion = $res->fetchColumn(0);
+			
+//			if( !empty($this->options['charset']) ) {
+//				$this->encoding($this->options['charset']);
+//			}
+		}
+		catch( PDOException $e ) {
+			$this->errno = $e->getCode();
+			$this->error = $e->getMessage();
+			throw new SQLException($this->error, $this->errno);
+		}
 	}
 	
 	/**
@@ -244,11 +218,15 @@ class Wadb_sqlite_pdo {
 	 */
 	function encoding($encoding = null)
 	{
+		$result = $this->pdo->query('PRAGMA encoding');
+		$row = $result->fetch();
+		$curEncoding = $row['encoding'];
+		
 		if( !is_null($encoding) ) {
-			trigger_error("Setting encoding isn't supported by SQLite", E_USER_WARNING);
+			$this->pdo->exec("PRAGMA encoding = \"$encoding\"");
 		}
 		
-		return 'latin1';// TODO
+		return $curEncoding;
 	}
 	
 	/**
@@ -283,6 +261,8 @@ class Wadb_sqlite_pdo {
 				$this->rollBack();
 			}
 			catch( PDOException $e ) {}
+			
+			throw new SQLException($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;
@@ -333,10 +313,10 @@ class Wadb_sqlite_pdo {
 			array_push($values, $value);
 		}
 		
-		if( $type == SQL_INSERT ) {
+		if( $type == $this->SQL_INSERT ) {
 			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
 		}
-		else if( $type == SQL_UPDATE ) {
+		else if( $type == $this->SQL_UPDATE ) {
 			
 			$query = 'UPDATE ' . $table . ' SET ';
 			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
@@ -502,6 +482,17 @@ class Wadb_sqlite_pdo {
 		
 		return true;
 	}
+	
+	/**
+	 * Initialise un objet WadbBackup_{self::$engine}
+	 *
+	 * @access public
+	 * @return object
+	 */
+	function initBackup()
+	{
+		return new WadbBackup_sqlite_pdo($this);
+	}
 }
 
 class WadbResult_sqlite_pdo {
@@ -523,6 +514,13 @@ class WadbResult_sqlite_pdo {
 	var $fetchMode;
 	
 	/**
+	 * "Constantes" de la classe
+	 */
+	var $SQL_FETCH_NUM   = PDO::FETCH_NUM;
+	var $SQL_FETCH_ASSOC = PDO::FETCH_ASSOC;
+	var $SQL_FETCH_BOTH  = PDO::FETCH_BOTH;
+	
+	/**
 	 * Constructeur de classe
 	 * 
 	 * @param object $result  Ressource de résultat de requète
@@ -532,7 +530,7 @@ class WadbResult_sqlite_pdo {
 	function WadbResult_sqlite_pdo($result)
 	{
 		$this->result = $result;
-		$this->fetchMode = PDO_FETCH_BOTH;
+		$this->fetchMode = PDO::FETCH_BOTH;
 	}
 	
 	/**
@@ -560,7 +558,7 @@ class WadbResult_sqlite_pdo {
 	 */
 	function fetchObject()
 	{
-		return $this->result->fetch(PDO_FETCH_OBJ);
+		return $this->result->fetch(PDO::FETCH_OBJ);
 	}
 	
 	/**
@@ -591,7 +589,7 @@ class WadbResult_sqlite_pdo {
 	 */
 	function column($column)
 	{
-		$row = $this->result->fetch(PDO_FETCH_BOTH);
+		$row = $this->result->fetch(PDO::FETCH_BOTH);
 		
 		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
@@ -606,7 +604,7 @@ class WadbResult_sqlite_pdo {
 	 */
 	function setFetchMode($mode)
 	{
-		if( in_array($mode, array(PDO_FETCH_NUM, PDO_FETCH_ASSOC, PDO_FETCH_BOTH)) ) {
+		if( in_array($mode, array(PDO::FETCH_NUM, PDO::FETCH_ASSOC, PDO::FETCH_BOTH)) ) {
 			$this->fetchMode = $mode;
 			return true;
 		}
@@ -644,12 +642,12 @@ class WadbResult_sqlite_pdo {
 class WadbBackup_sqlite_pdo {
 	
 	/**
-	 * Informations concernant la base de données
+	 * Connexion à la base de données
 	 * 
-	 * @var array
+	 * @var object
 	 * @access private
 	 */
-	var $infos = array();
+	var $db = null;
 	
 	/**
 	 * Fin de ligne
@@ -662,17 +660,13 @@ class WadbBackup_sqlite_pdo {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param array $infos  Informations concernant la base de données
+	 * @param object $db  Connexion à la base de données
 	 * 
 	 * @access public
 	 */
-	function WadbBackup_sqlite_pdo($infos)
+	function WadbBackup_sqlite_pdo($db)
 	{
-		$this->infos = $infos;
-		
-		if( !isset($this->infos['host']) ) {
-			$this->infos['host'] = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'Unknown';
-		}
+		$this->db = $db;
 	}
 	
 	/**
@@ -685,15 +679,18 @@ class WadbBackup_sqlite_pdo {
 	 */
 	function header($toolname = '')
 	{
-		global $db;
+		$host = function_exists('php_uname') ? @php_uname('n') : null;
+		if( empty($host) ) {
+			$host = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'Unknown Host';
+		}
 		
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname SQLite Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		$contents .= "-- Host       : " . $this->infos['host'] . $this->eol;
-		$contents .= "-- SQLite lib : " . $db->libVersion . $this->eol;
-		$contents .= "-- Database   : " . basename($this->infos['dbname']) . $this->eol;
-		$contents .= '-- Date       : ' . date('d/m/Y H:i:s O') . $this->eol;
+		$contents .= "-- Host       : " . $host . $this->eol;
+		$contents .= "-- SQLite lib : " . $this->db->libVersion . $this->eol;
+		$contents .= "-- Database   : " . basename($this->db->dbname) . $this->eol;
+		$contents .= '-- Date       : ' . date(DATE_RFC2822) . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
 		
@@ -708,13 +705,9 @@ class WadbBackup_sqlite_pdo {
 	 */
 	function get_tables()
 	{
-		global $db;
-		
-		if( !($result = $db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")) ) {
-			trigger_error('Impossible d\'obtenir la liste des tables', ERROR);
-		}
-		
+		$result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
 		$tables = array();
+		
 		while( $row = $result->fetch() ) {
 			$tables[$row['tbl_name']] = '';
 		}
@@ -746,23 +739,19 @@ class WadbBackup_sqlite_pdo {
 	 */
 	function get_table_structure($tabledata, $drop_option)
 	{
-		global $db;
-		
 		$contents  = '-- ' . $this->eol;
-		$contents .= '-- Struture de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= '-- Structure de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		
 		if( $drop_option ) {
-			$contents .= 'DROP TABLE ' . $tabledata['name'] . ';' . $this->eol;
+			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
 		}
 		
 		$sql = "SELECT sql, type
 			FROM sqlite_master
 			WHERE tbl_name = '$tabledata[name]'
 				AND sql IS NOT NULL";
-		if( !($result = $db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir la structure de la table', ERROR);
-		}
+		$result = $this->db->query($sql);
 		
 		$indexes = '';
 		while( $row = $result->fetch() ) {
@@ -789,16 +778,10 @@ class WadbBackup_sqlite_pdo {
 	 */
 	function get_table_data($tablename)
 	{
-		global $db;
-		
 		$contents = '';
 		
-		$sql = 'SELECT * FROM ' . $tablename;
-		if( !($result = $db->query($sql)) ) {
-			trigger_error('Impossible d\'obtenir le contenu de la table ' . $tablename, ERROR);
-		}
-		
-		$result->setFetchMode(SQL_FETCH_ASSOC);
+		$result = $this->db->query('SELECT * FROM ' . $this->db->quote($tablename));
+		$result->setFetchMode(PDO::FETCH_ASSOC);
 		
 		if( $row = $result->fetch() ) {
 			$contents  = $this->eol;
@@ -809,20 +792,20 @@ class WadbBackup_sqlite_pdo {
 			$fields = array();
 			for( $j = 0, $n = $result->result->columnCount(); $j < $n; $j++ ) {
 				$data = $result->result->getColumnMeta($j);
-				array_push($fields, $data['name']);
+				array_push($fields, $this->db->quote($data['name']));
 			}
 			
 			$fields = implode(', ', $fields);
 			
 			do {
-				$contents .= "INSERT INTO $tablename ($fields) VALUES";
+				$contents .= sprintf("INSERT INTO %s (%s) VALUES", $this->db->quote($tablename), $fields);
 				
 				foreach( $row as $key => $value ) {
 					if( is_null($value) ) {
 						$row[$key] = 'NULL';
 					}
 					else {
-						$row[$key] = '\'' . $db->escape($value) . '\'';
+						$row[$key] = '\'' . $this->db->escape($value) . '\'';
 					}
 				}
 				
@@ -836,4 +819,3 @@ class WadbBackup_sqlite_pdo {
 }
 
 }
-?>

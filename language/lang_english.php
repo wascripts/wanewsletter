@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * 
  * Vous pouvez très facilement traduire Wanewsletter dans une autre langue.
  * Il vous suffit pour cela de traduire ce qui se trouve entre
@@ -53,8 +36,8 @@ $lang['Title']['config_email']      = "Emails sending options";
 $lang['Title']['config_files']      = "Attached files"; //file attachment ?
 $lang['Title']['config_stats']      = "Statistics Hack"; //show statistics sinon
 $lang['Title']['config_divers']     = "Misc";
-$lang['Title']['profile']           = "Profile for %s";
-$lang['Title']['mod_profile']       = "Profile edition of %s";
+$lang['Title']['profile']           = "Profile for <q>%s</q>";
+$lang['Title']['mod_profile']       = "Profile editing of <q>%s</q>";
 $lang['Title']['manage']            = "User permissions";
 $lang['Title']['other_options']     = "Misc Options";
 $lang['Title']['info_liste']        = "Information about the mailing list";
@@ -62,8 +45,8 @@ $lang['Title']['add_liste']         = "Create a mailing list";
 $lang['Title']['edit_liste']        = "Edit a mailing list";
 $lang['Title']['purge_sys']         = "Purge system";
 $lang['Title']['cron']              = "Cron option";
-$lang['Title']['logs']              = "List of newsletters sent to this mailing list";
-$lang['Title']['abo']               = "Subscribers list for this mailing list";
+$lang['Title']['logs']              = "Newsletters sent to mailing list <q>%s</q>";
+$lang['Title']['abo']               = "List of subscribers to mailing list <q>%s</q>";
 $lang['Title']['stats']             = "Mailing lists statistics";
 $lang['Title']['tools']             = "Wanewsletter tools";
 $lang['Title']['export']            = "Export email adresses";
@@ -73,15 +56,16 @@ $lang['Title']['attach']            = "Files extensions management";
 $lang['Title']['backup']            = "Backup system";
 $lang['Title']['restore']           = "Restore system";
 $lang['Title']['generator']         = "Subscription form generator";
+$lang['Title']['debug']             = "Debug informations";
 $lang['Title']['send']              = "Sending form";
 $lang['Title']['join']              = "Attach a file to the newsletter";
 $lang['Title']['joined_files']      = "Newsletter attached files";
-$lang['Title']['Show_popup']        = "Preview of %s";
 $lang['Title']['profil_cp']         = "Panel of management of account";
 $lang['Title']['sendkey']           = "Receive your identifiers";
 $lang['Title']['archives']          = "logs of the mailing lists";
 $lang['Title']['sendpass']          = "Generate a new password";
 $lang['Title']['form']              = "Subscribe to newsletter";
+$lang['Title']['check_update']      = "Check for updates";
 
 
 //
@@ -126,6 +110,7 @@ $lang['Button']['del_account']      = "Delete this account";
 $lang['Button']['links']            = "Put the unsubscribe link";
 $lang['Button']['dl']               = "Download";
 $lang['Button']['conf']             = "Confirm";
+$lang['Button']['browse']           = "Browse";
 
 
 //
@@ -134,7 +119,6 @@ $lang['Button']['conf']             = "Confirm";
 $lang['Message']['Subscribe_1']             = "Successful subscription!\nA confirmation email has been sent to your address.\nCaution, the confirmation link in the email will be valid for %d days!\nAfter this time, you will have to subscribe again.";
 $lang['Message']['Subscribe_2']             = "Successful subscription!";
 $lang['Message']['Confirm_ok']              = "Your subscription was confirmed!";
-$lang['Message']['Confirm_double']          = "You have already confirmed your subscription";
 $lang['Message']['Unsubscribe_1']           = "Thank you, you will receive an email which will enable you to confirm your choice";
 $lang['Message']['Unsubscribe_2']           = "You are now unsubscribed from this mailing list";
 $lang['Message']['Unsubscribe_3']           = "Your email address was successfully removed from our database";
@@ -144,9 +128,8 @@ $lang['Message']['Unrecognized_email']      = "Unknown domain or unrecognized ac
 $lang['Message']['Unknown_email']           = "Unknown email address";
 $lang['Message']['Email_banned']            = "This email address or this email type was banished";
 $lang['Message']['Allready_reg']            = "You have already subscribed";
+$lang['Message']['Allready_reg2']           = "The email address you entered already exist in the database";
 $lang['Message']['Reg_not_confirmed']       = "You have already subscribed but you didn't confirm yet your inscription.\nConfirmation email has been sent to you.\nAttention, the confirmation link included in th email will be valid for %1\$d days!\nAfter these %1\$d days, you will have to re-subscribe";
-$lang['Message']['Reg_not_confirmed2']      = "You have already subscribed but you didn't confirm yet your inscription";
-$lang['Message']['Allready_confirm']        = "You have already confirmed your subscription!";
 $lang['Message']['Unknown_list']            = "Unknown list";
 $lang['Message']['Failed_sending']          = "The email could not be sent!";
 $lang['Message']['Inactive_format']         = "Impossible to change the format";
@@ -158,7 +141,7 @@ $lang['Message']['Failed_sending2']         = "The email could not be sent! %s";
 $lang['Message']['Success_export']          = "The emails export operation has been successfully carried out. \nYou will find the the backup file in the script's temporary files folder (Do not forget to delete it after saving it!)";
 $lang['Message']['Success_import']          = "The import operation has been successfully carried out.";
 $lang['Message']['Success_import2']         = "The import operation has been successfully carried out, but a few email addresses were rejected.";
-$lang['Message']['Success_import3']         = "The import operation has been successfully carried out, but a few email addresses were rejected. \nClick %shere%s to download the report. (Do not forget to delete the file from the server after downloading it)";
+$lang['Message']['Success_import3']         = "The import operation has been successfully carried out, but a few email addresses were rejected. \nYou can %sdownload the report%s. (Do not forget to delete the file from the server after downloading it)";
 $lang['Message']['Success_import4_0']       = "No email has been imported";
 $lang['Message']['Success_import4_1']       = "%d email has been successfully imported";
 $lang['Message']['Success_import4_n']       = "%d emails has been successfully imported";
@@ -199,10 +182,11 @@ $lang['Message']['Not_auth_attach']         = "You are not authorized to attach 
 $lang['Message']['Error_login']             = "Incorrect login or password!";
 $lang['Message']['Error_sendpass']          = "incorrect login or email!";
 $lang['Message']['Bad_confirm_pass']        = "The new password and confirmed password are not the same";
+$lang['Message']['Bad_confirm_email']       = "The confirmation of your new email address is incorrect";
 $lang['Message']['bad_ftp_param']           = "The connexion to the ftp server could not be established, please check your settings \n(%s)";
 $lang['Message']['bad_smtp_param']          = "The connexion to the smtp server could not be established, please check your settings \n(%s)";
 $lang['Message']['bad_pop_param']           = "The connexion to the pop server could not be established, please check your settings \n(%s)";
-$lang['Message']['Alphanum_pass']           = "The password must contain between 4 and 30 alphanumeric characters, including the hyphen (-) and/or the underscore (_)";
+$lang['Message']['Alphanum_pass']           = "The password must consist of a minimum of 6 ASCII printable characters";
 $lang['Message']['Invalid_session']         = "Invalid session!";
 $lang['Message']['fields_empty']            = "Certain required fields are not filled out";
 $lang['Message']['Owner_account']           = "You cannot delete your own account!";
@@ -212,7 +196,6 @@ $lang['Message']['No_liste_exists']         = "Not an available list";
 $lang['Message']['No_liste_id']             = "No mailing list has been selected";
 $lang['Message']['No_log_id']               = "No newsletter has been selected";
 $lang['Message']['log_not_exists']          = "This newsletter does not exist!";
-$lang['Message']['No_log_to_load']          = "There is currently no newsletter to load";
 $lang['Message']['No_log_to_send']          = "There is currently no sending to resume";
 $lang['Message']['No_abo_id']               = "No subscriber has been selected";
 $lang['Message']['No_abo_email']            = "None of these addresses email is present in this mailing list";
@@ -230,13 +213,13 @@ $lang['Message']['No_log_found']            = "No newsletter ready to be sent ha
 $lang['Message']['Invalid_url']             = "Given URL is not valid";
 $lang['Message']['Unaccess_host']           = "The host %s seems actually unreachable";
 $lang['Message']['Not_found_at_url']        = "The file does not seems to be at indicated URL";
-$lang['Message']['No_data_at_url']          = "No data available about the file";
 $lang['Message']['Error_load_url']          = "Error while loading url \"%1\$s\" (%2\$s)";
 $lang['Message']['No_form_url']             = "you don't have specified the url of the form into the %sconfig of your list%s.\nYou must correct it before starting to send mail(s).";
+$lang['Message']['File_not_found']          = "This file was not found on server";
 
 $lang['Message']['Cannot_create_dir']       = "Cannot create %s directory";
 $lang['Message']['Dir_not_writable']        = "The directory <samp>%s</samp> doesn't exist or is not writable";
-$lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading! (setup/schemas/)";
+$lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading! (includes/sql/schemas/)";
 
 $lang['Message']['Ftp_unable_connect']      = "Unable to connect to the ftp server";
 $lang['Message']['Ftp_error_login']         = "Authentification with the ftp server has failed";
@@ -246,6 +229,7 @@ $lang['Message']['Ftp_error_put']           = "Impossible to upload the file on 
 $lang['Message']['Ftp_error_get']           = "Impossible to get the file from the ftp server";
 $lang['Message']['Ftp_error_del']           = "Impossible to delete the file from the ftp server";
 
+$lang['Message']['Uploaddir_not_writable']  = "The upload dir isn't writable";
 $lang['Message']['Upload_error_1']          = "The file exceeds the size authorized by the upload_max_filesize directive in php.ini";
 $lang['Message']['Upload_error_2']          = "The file exceeds the size authorized by the MAX_FILE_SIZE field";
 $lang['Message']['Upload_error_3']          = "The file has been partially uploaded";
@@ -265,10 +249,12 @@ $lang['Message']['Profil_cp_disabled']      = "The panel of management of accoun
 $lang['Message']['Inactive_account']        = "Your account is actually inactive, you had to receive an email to activate it.";
 $lang['Message']['IDs_sended']              = "Your identifiers were sent to you by email";
 $lang['Message']['Logs_sent']               = "The selected newsletters were sent at your address: %s";
-$lang['Message']['Archive_class_needed']    = "The export module needs the <q>%s</q> <abbr title=\"PHP Extension and Application Repository\">PEAR</abbr> package. Please refer to the documentation for more details.";
-$lang['Message']['Chdir_error']             = "Unable to set current directory with %s (chdir() error)";
 $lang['Message']['Twice_sending']           = "A newsletter is already in the course of sending for this list. Finish or cancel this sending before beginning another of them.";
 
+$lang['Message']['Invalid_cookie_name']     = "The white space characters, equal sign, comma and semi-colon are not allowed in the cookie name.";
+$lang['Message']['Invalid_cookie_path']     = "The cookie path must include the installation directory script (%s)";
+$lang['Message']['Critical_error']          = "A critical error has occured. Enable debug mode if you wish to get more details.";
+$lang['Message']['No_gd_img_support']       = "No image format are available";
 
 //
 // Divers
@@ -278,7 +264,6 @@ $lang['Unsubscribe']                = "Unsubscribe";
 $lang['Setformat']                  = "Format change";
 $lang['Email_address']              = "Email address";
 $lang['Format']                     = "Format";
-$lang['Button_valid']               = "Submit";
 $lang['Diff_list']                  = "Mailing lists";
 $lang['Start']                      = "Start";
 $lang['End']                        = "End";
@@ -312,10 +297,10 @@ $lang['By_desc']                    = "descending";
 $lang['Filename']                   = "Filename";
 $lang['Filesize']                   = "Filesize";
 $lang['No_data']                    = "No data";
-$lang['MO']                         = "Mb";
-$lang['KO']                         = "Kb";
+$lang['GO']                         = "GiB";
+$lang['MO']                         = "MiB";
+$lang['KO']                         = "KiB";
 $lang['Octets']                     = "Bytes";
-$lang['Wait_loading']               = "Please wait while the page is loading";
 $lang['Show']                       = "Show";
 $lang['View']                       = "View";
 $lang['Edit']                       = "Edit";
@@ -334,6 +319,7 @@ $lang['Maximum_size']               = "Maximum size: %s";
 $lang['Lost_password']              = "Lost password?";
 $lang['Name']                       = "Name";
 $lang['Value']                      = "Value";
+$lang['Cookie_notice']              = "You must enable cookies to log in";
 
 $lang['Click_return_index']         = "Click %shere%s to return to the home page";
 $lang['Click_return_back']          = "Click %shere%s to go back to the previous page";
@@ -361,6 +347,10 @@ $lang['Welcome_profil_cp']          = "Welcome on the manage panel of your accou
 $lang['Explain']['editprofile']     = "Here, you have the possibility to modify the data of your account.\nYou can inform your first name or pseudo to personalize the newsletters which you will receive (according to the settings of the administrator). You can also put a password to your account, what will be simpler to type than the code of your account.";
 $lang['Explain']['sendkey']         = "If you lost the identifiers of your account, you can ask them to be sent back to you by email";
 $lang['Explain']['archives']        = "You can ask to receive the previous newsletters sent to the mailing lists to which you are registered.\nBe careful, for each newsletter selected, you will receive an email.";
+$lang['Explain']['change_email']    = "The next two fields let you change the email address of your account. Remember that your email address is used to connect to this interface.";
+
+$lang['New_Email']                  = "Enter your new email address";
+$lang['Confirm_Email']              = "Confirme your email address";
 
 
 //
@@ -386,9 +376,9 @@ $lang['Total_Filesize']             = "Disk space used by files (joined files an
 //
 $lang['Explain']['config']          = "The following form will allow you to configure all of the script's settings";
 $lang['Explain']['config_cookies']  = "These parameters allow you to set the cookies used by the script. \nIf you feel unsure about this, leave the settings to their default values";
-$lang['Explain']['config_files']    = "You can attach files to your outgoing newsletters. \nTo accomplish this, the script has two options. The easiest option is to have files stored on the server, in the folder defined as a storage directory (the folder must have writing permissions). \nIf, for any reason, this option is not possible on your server, the script offers you the possibility to store the files on a <acronym title=\"File Transfert Protocol\" xml:lang=\"en\">smtp</acronym> server.\n For this option, you must enter acces parameters for the ftp server.";
-$lang['Explain']['config_email']    = "These settings allow you to configure the email sending methods you will want to use. \nThe first send engine uses the newsletter's email address as the principal recipient, with all subscribed recipients in hidden copy. The second engine is a bit heavier, but sends a separate email to each subscriber (this last will be automatically used if the host is <strong>Online</strong>).\n If, for any reason, your server does not have the mail() function, or a similar function, you can use a specific <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> server by indicating its access parameters in the script. \nBe carefull though, restrictions might apply in this case. For more information, please refer to the %sscript's FAQ%s.";
-$lang['Explain']['config_stats']    = "The script has a small statistics module. The module requires that the GD libraty is installed on your server to make it work. \nIf the GD library is not installed, it is recommended that you deactivate the statistics module to avoid unnecessary data processing by the script.";
+$lang['Explain']['config_files']    = "You can attach files to your outgoing newsletters. \nTo accomplish this, the script has two options. The easiest option is to have files stored on the server, in the folder defined as a storage directory (the folder must have writing permissions). \nIf, for any reason, this option is not possible on your server, the script offers you the possibility to store the files on a <abbr title=\"File Transfert Protocol\" lang=\"en\">FTP</abbr> server.\n For this option, you must enter acces parameters for the ftp server.";
+$lang['Explain']['config_email']    = "These settings allow you to configure sending emails.\nBy default, the script send a personalized email to each subscriber, but you can configure it to send one or more emails with a list of recipients in a BCC field.\nIf you want to use a specific <abbr title=\"Simple Mail Transfert Protocol\">SMTP</abbr> server, turn on the option and fill in the login informations. By default, the script uses the <abbr title=\"PHP: Hypertext Preprocessor\">PHP</abbr> <code>mail()</code> function. See %sFAQ%s about limitations in the context of using <abbr>SMTP</abbr> server.";
+$lang['Explain']['config_stats']    = "The script has a small statistics module. The module requires that the GD libraty is installed on your server to make it work. \nIf you don't wish to use this functionnality, it is recommended that you deactivate the statistics module to avoid unnecessary data processing by the script.";
 
 $lang['Default_lang']               = "Select the default language";
 $lang['Sitename']                   = "Your site's name";
@@ -422,9 +412,9 @@ $lang['Check_email_note']           = "(Checks if the domain and associated acco
 $lang['Choice_engine_send']         = "Email send method to use";
 $lang['With_engine_bcc']            = "One email with recipients in hidden copy";
 $lang['With_engine_uniq']           = "One email to each subscriber";
-$lang['Emails_paquet']              = "Number of emails per sent packet";
-$lang['Emails_paquet_note']         = "Leave with 0 to send everything in one packet";
-$lang['Use_smtp']                   = "Use of a <acronym title=\"Simple Mail Transfert Protocol\" xml:lang=\"en\">smtp</acronym> server to send emails";
+$lang['Sending_limit']              = "Number of mails sent by process";
+$lang['Sending_limit_note']         = "Leave to 0 to send all mails in one time";
+$lang['Use_smtp']                   = "Use of a <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">smtp</abbr> server to send emails";
 $lang['Use_smtp_note']              = "Use only if your server does not have an email sending function or if you want to use a specific SMTP server!";
 $lang['Smtp_server']                = "smtp server address";
 $lang['Smtp_port']                  = "Connection port";
@@ -433,7 +423,6 @@ $lang['Smtp_user']                  = "Your smtp login";
 $lang['Smtp_pass']                  = "Your smtp password";
 $lang['Auth_smtp_note']             = "Only if your smtp server requires authentication!";
 $lang['Disable_stats']              = "Deactivate the statistics module";
-$lang['GD_version']                 = "GD library version";
 
 
 //
@@ -545,6 +534,7 @@ $lang['Goto_list']                  = "Return at the subscribers list";
 $lang['View_account']               = "View this account";
 $lang['Edit_account']               = "Modify this account";
 $lang['TagsList']                   = "List of tags";
+$lang['TagsEdit']                   = "Edit tags";
 
 
 //
@@ -572,7 +562,7 @@ $lang['Format_to_export']           = "Export subscribers with format";
 $lang['Format_to_import']           = "Subscribers' format";
 $lang['File_upload_restore']        = "Please indicate the backup file access path";
 $lang['File_upload']                = "<i>or</i>, you can specify a text file";
-$lang['File_local']                 = "<i>or</i>, you can specify a local file";
+$lang['File_local']                 = "<i>or</i>, you can specify a file on the server";
 $lang['No_email_banned']            = "No banned email";
 $lang['Ban_email']                  = "Email or part of email to ban";
 $lang['Unban_email']                = "Email or part of email to un-ban";
@@ -590,6 +580,13 @@ $lang['Store_action']               = "Store it on the server";
 $lang['Additionnal_tables']         = "Extra tables to back up";
 $lang['Target_form']                = "Form reception URL";
 
+$lang['Check_update']               = "Check for updates";
+$lang['Used_version']               = "You use <strong>Wanewsletter %s</strong>";
+$lang['New_version_available']      = "A new version is available";
+$lang['Download_page']              = "download page";
+$lang['Version_up_to_date']         = "Your version is up to date";
+$lang['Site_unreachable']           = "The website phpcodeur.net is currently unreachable";
+
 
 //
 // Page : Envoi des newsletters
@@ -598,9 +595,14 @@ $lang['Explain']['send']            = "The sending form allows you to write, sen
 $lang['Explain']['join']            = "Here you can attach files to your newsletter (be carefull not to get your newsletter to big)\nIf file upload is not allowed on your server, you can indicate a distant file (e.g&thinsp;: <samp>http://www.domaine.com/rep/picture.gif</samp>) or a file manually uploaded into the dir of joined files\nYou can also use one the files attached to another newsletter of the same mailing list";
 $lang['Explain']['text']            = "Compose your newsletter in text format here. Do not forget to insert the unsubscribe link, either clicking on the dedicated button if it is available, or by adding manually the tag <code>{LINKS}</code> in your newsletter";
 $lang['Explain']['html']            = "Compose your newsletter in html format here. Do not forget to insert the unsubscribe link, either clicking on the dedicated button if it is available, or by adding manually the tag <code>{LINKS}</code> in your newsletter (the link will be in html format)\nIf you want to use one of the attached files (image, sound...) inside the newsletter, insert cid:file_name instead of the file's address\n\n<em>Example :</em>\n\nYou have uploaded an image named image1.gif and want to use it inside an image tag in your html newsletter. Put the img tag with src attribute : cid:image1.gif ( <code>&lt;img src=\"cid:image1.gif\" alt=\"Alternative text\" /&gt;</code> )";
+$lang['Explain']['load']            = "You can specify external models and the script will load them for you. HTTP urls are allowed, along local path such as:
+<ul>
+<li>/path/to/document &ndash; absolute path</li>
+<li>~/path/to/document &ndash; the tilde (~) is shorthand for the document_root of your web space</li>
+<li>path/to/document &ndash; is relative to the installation directory of Wanewsletter</li>
+</ul>";
 
 $lang['Select_log_to_load']         = "Select a newsletter to load";
-$lang['Select_log_to_send']         = "Select a newsletter that you want to resend";
 $lang['Load_by_URL']                = "Load a newsletter from an URL";
 $lang['From_an_URL']                = "from an URL";
 $lang['Create_log']                 = "Create a newsletter";
@@ -612,6 +614,9 @@ $lang['Model']                      = "Template";
 $lang['Dest']                       = "Recipient";
 $lang['Log_in_text']                = "Text format newsletter";
 $lang['Log_in_html']                = "Html format newsletter";
+$lang['Format_text']                = "Text format";
+$lang['Format_html']                = "HTML format";
+$lang['Last_modified']              = "Last modified : %s";
 $lang['Total_log_size']             = "Approx. newsletter size";
 $lang['Join_file_to_log']           = "File to attach to this newsletter";
 $lang['Subject_empty']              = "You must indicate a subject";
@@ -626,6 +631,9 @@ $lang['File_on_server']             = "existing file";
 $lang['Cancel_send_log']            = "Are you sure you want to cancel this sending? (Only effective for the remaining sendings)";
 $lang['Receive_copy']               = "Receive a copy";
 $lang['Receive_copy_title']         = "If actived, you will receive a copy of the newsletter which has been sent";
+$lang['Test_send_finish']           = "Test performed. Check your mailboxes.";
+$lang['Test_send']                  = "Do a test mailing";
+$lang['Test_send_note']             = "You can do a test mailing to check the display of your newsletter in real conditions. Enter one or more email address separated by a comma and valid";
 
 
 //
@@ -637,35 +645,42 @@ $lang['Subscribe_per_day']          = "Subscriptions/Days";
 $lang['Graph_bar_title']            = "The number of inscriptions per day for the month given";
 $lang['Camembert_title']            = "Shares of the various lists compared to the total number of subscribers";
 $lang['Stats_dir_not_writable']     = "The <samp>stats/</samp> directory doesn't seems to be writable!";
+$lang['Prev_month']                 = "Previous month";
+$lang['Next_month']                 = "Next month";
 
 
 //
 // Installation du script
 //
-$lang['Welcome_in_install']         = "Welcome to Wanewsletter's install script. \nThis script requires php version <b>4.1.0 or higher</b>.\nBefore continuing the installation, please read the %sreadme%s file, it contains important instructions to make the installation work properly.\nPlease read the %slicense agreement of Wanewsletter%s before continuing.";
-$lang['Welcome_in_upgrade']         = "Welcome to Wanewsletter's upgrade script. \nYou currently have Wanewsletter version %s installed.\n For security reasons, it is <strong>strongly advisable</strong> to make a backup of the script's tables before proceeding with the upgrade.";
+$lang['Welcome_in_install']         = "Welcome to Wanewsletter's install script.\nBefore continuing the installation, please read the %sreadme%s file, it contains important instructions to make the installation work properly.\nPlease read the %slicense agreement of Wanewsletter%s before continuing. A copy of this license is readable at %sphpcodeur.net/wascripts/gpl%s";
+$lang['Welcome_in_upgrade']         = "Welcome to Wanewsletter's upgrade script to version <strong>%s</strong>.\n For security reasons, it is <strong>strongly advisable</strong> to make a backup of the script's tables before proceeding with the upgrade.\nOnce you are ready, launch the upgrade with the button below.";
 $lang['Warning_reinstall']          = "<b>Caution!</b> Wanewsletter seems to be already installed. \nIf you wish to reinstall the script, enter your admin login and password. \nAttention, all of your data will be lost if you make a reinstallation of the script. \n if you wish to do an upgrade, use the script upgrade.php";
 $lang['Start_install']              = "Launch install";
 $lang['Start_upgrade']              = "Launch upgrade";
 $lang['Result_install']             = "Install result";
 $lang['Result_upgrade']             = "upgrade result";
-$lang['PHP_version_error']          = "Sorry but Wanewsletter %s requires a php version 4.1.0 or higher";
-$lang['Not_installed']              = "No version of Wanewsletter seems to be present,  the configuration file is empty or is not on the server";
 $lang['mssql_support_end']          = "Sorry but the support for SQL Server has been removed in Wanewsletter 2.3";
-$lang['No_db_support']              = "Sorry but Wanewsletter %s requires a database of type %s";
+$lang['No_db_support']              = "Sorry but Wanewsletter %s requires a MySQL, PostgreSQL or SQLite database";
 $lang['Connect_db_error']           = "Unable to connect to database (%s)";
-$lang['sqldir_perms_problem']       = "To use Wanewsletter with a SQLite database, you have to give the right permissions (read and write) to the includes/sql/ directory";
+$lang['sqldir_perms_problem']       = "To use Wanewsletter with a SQLite database, you have to give the right permissions (read and write) to the targeted <samp>%s</samp> directory";
 $lang['DB_type_undefined']          = "The database type isn't defined!";
 
 $lang['Success_install']            = "The installation was succesfully completed.\nYou can now go to the script %sadministration%s";
-$lang['Success_upgrade']            = "The upgrade was succesfully completed.\nYou can now go to the script %sadministration%s";
-$lang['Success_without_config']     = "The installation was succesfully completed, but the configuration file could not be created.\nYou can dowload the file and upload it in the includes/ directory with your ftp client.";
+$lang['Success_upgrade']            = "The upgrade was succesfully completed.";
+$lang['Success_install_no_config']  = "The installation was succesfully completed, but the configuration file could not be created.\nYou can dowload the file and upload it in the <samp>includes/</samp> directory.\nYou can now access to %sadministration%s.";
+$lang['Success_upgrade_no_config']  = "The upgrade was succesfully completed, but the configuration file needs to be refreshed with the following content:";
 $lang['Error_in_install']           = "Errors occurred during the installation.\n\nError is : %s\nQuery is : %s";
 $lang['Error_in_upgrade']           = "Errors occurred during the upgrade.\n\nError is : %s\nQuery is : %s";
 $lang['Upgrade_not_required']       = "No upgrade is required for your current version of Wanewsletter";
-$lang['Unknown_version']            = "Unknown version, upgrade cannot be continued.";
+$lang['Unsupported_version']        = "This version of Wanewsletter no longer supported by the upgrade script. You should first upgrade your installation to version 2.3.x.";
+$lang['Moved_dirs_notice']          = "<strong>Notice&nbsp;:</strong> The <samp>stats/</samp> and <samp>tmp/</samp> directories are now located into <samp>data/</samp> directory.\n Move the content of <samp>stats/</samp> and <samp>tmp/</samp> to their equivalents in <samp>data/</samp> and delete them.\n Don't forget to give write permissions on these directories.";
+
+$lang['Need_upgrade_db']            = "An upgrade needs to be performed.";
+$lang['Need_upgrade_db_link']       = "Click %shere%s to start the upgrade script.";
 
 $lang['dbtype']                     = "Database Type";
+$lang['dbpath']                     = "Install path of the sqlite database";
+$lang['dbpath_note']                = "The parent directory of the database must have the good rights (read and write)";
 $lang['dbhost']                     = "Database Server Hostname";
 $lang['dbname']                     = "Database Name";
 $lang['dbuser']                     = "Database Username";

@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('CLASS_FORM_INC') ) {
@@ -41,6 +24,7 @@ class Wanewsletter {
 	var $message       = '';
 	
 	var $mailer;
+	var $other_tags;
 	
 	function Wanewsletter($listdata = null)
 	{
@@ -49,6 +33,7 @@ class Wanewsletter {
 		require WAMAILER_DIR . '/class.mailer.php';
 		
 		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+		$mailer->signature = WA_X_MAILER;
 		
 		if( $nl_config['use_smtp'] )
 		{
@@ -75,6 +60,9 @@ class Wanewsletter {
 				$this->format = $listdata['liste_format'];
 			}
 		}
+		
+		@include WA_ROOTDIR . '/includes/tags.inc.php';
+		$this->other_tags = $other_tags;
 	}
 	
 	function check($action, $email)
@@ -97,28 +85,37 @@ class Wanewsletter {
 			$sql = "SELECT ban_email
 				FROM " . BANLIST_TABLE . "
 				WHERE liste_id = " . $this->listdata['liste_id'];
-			if( $result = $db->query($sql) )
+			$result = $db->query($sql);
+			
+			while( $ban_email = $result->column('ban_email') )
 			{
-				while( $ban_email = $result->column('ban_email') )
+				if( preg_match('/\b' . str_replace('*', '.*?', $ban_email) . '\b/i', $email) )
 				{
-					if( preg_match('/\b' . str_replace('*', '.*?', $ban_email) . '\b/i', $email) )
-					{
-						return array('error' => true, 'message' => $lang['Message']['Email_banned']);
-					}
+					return array('error' => true, 'message' => $lang['Message']['Email_banned']);
 				}
 			}
 		}
 		
-		$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang,
+		if( count($this->other_tags) > 0 )
+		{
+			$fields_str = '';
+			foreach( $this->other_tags as $tag )
+			{
+				$fields_str .= 'a.' . $tag['column_name'] . ', ';
+			}
+		}
+		else
+		{
+			$fields_str = '';
+		}
+		
+		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang,
 				a.abo_status, al.format, al.register_key, al.register_date, al.confirmed
 			FROM " . ABONNES_TABLE . " AS a
 				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id = {$this->listdata['liste_id']}
 			WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
-		if( !($result = $db->query($sql)) )
-		{
-			return array('error' => true, 'message' => 'Impossible de tester les tables d\'inscriptions');
-		}
+		$result = $db->query($sql);
 		
 		if( $abodata = $result->fetch() )
 		{
@@ -159,6 +156,8 @@ class Wanewsletter {
 			}
 		}
 		
+		$this->account['tags'] = array();
+		
 		if( is_array($abodata) )
 		{
 			$this->hasAccount   = true;
@@ -168,6 +167,14 @@ class Wanewsletter {
 			$this->account['email']  = $abodata['abo_email'];
 			$this->account['pseudo'] = $abodata['abo_pseudo'];
 			$this->account['status'] = $abodata['abo_status'];
+			
+			foreach( $this->other_tags as $tag )
+			{
+				if( isset($abodata[$tag['column_name']]) )
+				{
+					$this->account['tags'][$tag['column_name']] = $abodata[$tag['column_name']];
+				}
+			}
 		}
 		else
 		{
@@ -231,25 +238,45 @@ class Wanewsletter {
 	{
 		global $db, $lang;
 		
-		$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed, al.register_date, l.liste_id,
+		if( count($this->other_tags) > 0 )
+		{
+			$fields_str = '';
+			foreach( $this->other_tags as $tag )
+			{
+				$fields_str .= 'a.' . $tag['column_name'] . ', ';
+			}
+		}
+		else
+		{
+			$fields_str = '';
+		}
+		
+		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_email, a.abo_status, al.confirmed, al.register_date, l.liste_id,
 				l.liste_format, l.sender_email, l.liste_alias, l.limitevalidate, l.liste_name,
 				l.return_email, l.form_url, l.liste_sig, l.use_cron, l.confirm_subscribe
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.register_key = '" . $db->escape($code) . "'
 				INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id";
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		if( $abodata = $result->fetch() )
 		{
 			$this->account['abo_id'] = $abodata['abo_id'];
 			$this->account['email']  = $abodata['abo_email'];
+			$this->account['pseudo'] = $abodata['abo_pseudo'];
 			$this->account['status'] = $abodata['abo_status'];
 			$this->account['date']   = $abodata['register_date'];
 			$this->account['code']   = $code;
+			$this->account['tags']   = array();
+			
+			foreach( $this->other_tags as $tag )
+			{
+				if( isset($abodata[$tag['column_name']]) )
+				{
+					$this->account['tags'][$tag['column_name']] = $abodata[$tag['column_name']];
+				}
+			}
 			
 			$this->listdata = $abodata;// Récupération des données relatives à la liste
 			
@@ -283,9 +310,7 @@ class Wanewsletter {
 				'abo_status' => $this->account['status']
 			);
 			
-			@include WA_ROOTDIR . '/includes/tags.inc.php';
-			
-			foreach( $other_tags as $tag )
+			foreach( $this->other_tags as $tag )
 			{
 				if( !empty($tag['field_name']) && !empty($_REQUEST[$tag['field_name']]) )
 				{
@@ -295,13 +320,11 @@ class Wanewsletter {
 				{
 					$this->account['tags'][$tag['column_name']] = $_REQUEST[$tag['column_name']];
 				}
+				
+				$sql_data = array_merge($sql_data, $this->account['tags']);
 			}
 			
-			if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
-			{
-				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des abonnés', ERROR);
-				return false;
-			}
+			$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
 			
 			$this->account['abo_id'] = $db->lastInsertId();
 		}
@@ -322,11 +345,7 @@ class Wanewsletter {
 			
 			$sql = "INSERT INTO " . ABO_LISTE_TABLE . " (abo_id, liste_id, format, register_key, register_date, confirmed) 
 				VALUES({$this->account['abo_id']}, {$this->listdata['liste_id']}, $this->format, '{$this->account['code']}', {$this->account['date']}, $confirmed)";
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible d\'insérer une nouvelle entrée dans la table des abonnés[2]', ERROR);
-				return false;
-			}
+			$db->query($sql);
 		}
 		
 		$db->commit();
@@ -363,17 +382,22 @@ class Wanewsletter {
 		}
 		
 		$this->mailer->clear_all();
-		$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+		$this->mailer->set_from($this->listdata['sender_email'], $this->listdata['liste_name']);
 		$this->mailer->set_address($this->account['email']);
 		$this->mailer->set_subject(sprintf($lang['Subject_email']['Subscribe'], $nl_config['sitename']));
 		$this->mailer->set_priority(1);
-		$this->mailer->set_return_path($this->listdata['return_email']);
+		
+		if( $this->listdata['return_email'] != '' )
+		{
+			$this->mailer->set_return_path($this->listdata['return_email']);
+		}
 		
 		$this->mailer->use_template($email_tpl, array(
-			'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
+			'LISTE'    => $this->listdata['liste_name'],
 			'SITENAME' => $nl_config['sitename'],
 			'URLSITE'  => $nl_config['urlsite'],
-			'SIG'      => $this->listdata['liste_sig']
+			'SIG'      => $this->listdata['liste_sig'],
+			'PSEUDO'   => $this->account['pseudo']
 		));
 		
 		if( $this->listdata['use_cron'] )
@@ -396,10 +420,25 @@ class Wanewsletter {
 			));
 		}
 		
+		if( count($this->other_tags) > 0 )
+		{
+			$tags = array();
+			foreach( $this->other_tags as $tag )
+			{
+				if( isset($this->account['tags'][$tag['column_name']]) )
+				{
+					$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+				}
+			}
+			
+			$this->mailer->assign_tags($tags);
+		}
+		
 		if( $nl_config['enable_profil_cp'] )
 		{
+			$link_profil_cp = $nl_config['urlsite'] . $nl_config['path'] . 'profil_cp.php';
 			$this->mailer->assign_block_tags('enable_profil_cp', array(
-				'LINK_PROFIL_CP' => make_script_url('profil_cp.php')
+				'LINK_PROFIL_CP' => $link_profil_cp
 			));
 		}
 		
@@ -416,55 +455,40 @@ class Wanewsletter {
 	{
 		global $db, $nl_config, $lang;
 		
-		if( strcmp($code, $this->account['code']) == 0 )
+		$time = ( is_null($time) ) ? time() : $time;
+		$time_limit = ($time - ($this->listdata['limitevalidate'] * 86400));
+		
+		if( $this->account['date'] > $time_limit )
 		{
-			$time = ( is_null($time) ) ? time() : $time;
-			$time_limit = ($time - ($this->listdata['limitevalidate'] * 86400));
+			$db->beginTransaction();
 			
-			if( $this->account['date'] > $time_limit )
+			if( $this->account['status'] == ABO_INACTIF )
 			{
-				$db->beginTransaction();
-				
-				if( $this->account['status'] == ABO_INACTIF )
-				{
-					$sql = "UPDATE " . ABONNES_TABLE . "
-						SET abo_status = " . ABO_ACTIF . "
-						WHERE abo_id = " . $this->account['abo_id'];
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-						return false;
-					}
-				}
-				
-				$sql = "UPDATE " . ABO_LISTE_TABLE . "
-					SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
-						register_key = '" . generate_key(20) . "'
-					WHERE liste_id = " . $this->listdata['liste_id'] . "
-						AND abo_id = " . $this->account['abo_id'];
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-					return false;
-				}
-				
-				$db->commit();
-				
-				$this->update_stats();
-				$this->alert_admin(true);
-				
-				$this->message = $lang['Message']['Confirm_ok'];
-				
-				return true;
+				$sql = "UPDATE " . ABONNES_TABLE . "
+					SET abo_status = " . ABO_ACTIF . "
+					WHERE abo_id = " . $this->account['abo_id'];
+				$db->query($sql);
 			}
-			else
-			{
-				$this->message = $lang['Message']['Invalid_date'];
-			}
+			
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
+				SET confirmed = " . SUBSCRIBE_CONFIRMED . ",
+					register_key = '" . generate_key(20) . "'
+				WHERE liste_id = " . $this->listdata['liste_id'] . "
+					AND abo_id = " . $this->account['abo_id'];
+			$db->query($sql);
+			
+			$db->commit();
+			
+			$this->update_stats();
+			$this->alert_admin(true);
+			
+			$this->message = $lang['Message']['Confirm_ok'];
+			
+			return true;
 		}
 		else
 		{
-			$this->message = $lang['Message']['Invalid_code'];
+			$this->message = $lang['Message']['Invalid_date'];
 		}
 		
 		return false;
@@ -479,11 +503,7 @@ class Wanewsletter {
 			$sql = "SELECT COUNT(abo_id) AS num_subscribe
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE abo_id = " . $this->account['abo_id'];
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de vérifier la table de jointure', ERROR);
-				return false;
-			}
+			$result = $db->query($sql);
 			
 			$num_subscribe = $result->column('num_subscribe');
 			
@@ -492,21 +512,13 @@ class Wanewsletter {
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
 				WHERE liste_id = " . $this->listdata['liste_id'] . "
 					AND abo_id = " . $this->account['abo_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible d\'effacer l\'entrée de la table abo_liste', ERROR);
-				return false;
-			}
+			$db->query($sql);
 			
 			if( $num_subscribe == 1 )
 			{
 				$sql = 'DELETE FROM ' . ABONNES_TABLE . ' 
 					WHERE abo_id = ' . $this->account['abo_id'];
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible d\'effacer l\'entrée de la table des abonnés', ERROR);
-					return false;
-				}
+				$db->query($sql);
 				
 				$this->message = $lang['Message']['Unsubscribe_3'];
 			}
@@ -528,25 +540,26 @@ class Wanewsletter {
 				SET register_key = '{$this->account['code']}'
 				WHERE abo_id = {$this->account['abo_id']}
 					AND liste_id = " . $this->listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible d\'assigner le nouvelle clé d\'enregistrement', ERROR);
-				return false;
-			}
+			$db->query($sql);
 			
-			$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+			$this->mailer->set_from($this->listdata['sender_email'], $this->listdata['liste_name']);
 			$this->mailer->set_address($this->account['email']);
 			$this->mailer->set_subject($lang['Subject_email']['Unsubscribe_1']);
 			$this->mailer->set_priority(3);
-			$this->mailer->set_return_path($this->listdata['return_email']);
+			
+			if( $this->listdata['return_email'] != '' )
+			{
+				$this->mailer->set_return_path($this->listdata['return_email']);
+			}
 			
 			$email_tpl = ( $this->listdata['use_cron'] ) ? 'unsubscribe_cron' : 'unsubscribe_form';
 			
 			$this->mailer->use_template($email_tpl, array(
-				'LISTE'    => unhtmlspecialchars($this->listdata['liste_name']),
+				'LISTE'    => $this->listdata['liste_name'],
 				'SITENAME' => $nl_config['sitename'],
 				'URLSITE'  => $nl_config['urlsite'],
-				'SIG'      => $this->listdata['liste_sig']
+				'SIG'      => $this->listdata['liste_sig'],
+				'PSEUDO'   => $this->account['pseudo']
 			));
 			
 			if( $this->listdata['use_cron'] )
@@ -561,6 +574,20 @@ class Wanewsletter {
 				$this->mailer->assign_tags(array(
 					'LINK' => $this->make_link()
 				));
+			}
+			
+			if( count($this->other_tags) > 0 )
+			{
+				$tags = array();
+				foreach( $this->other_tags as $tag )
+				{
+					if( isset($this->account['tags'][$tag['column_name']]) )
+					{
+						$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+					}
+				}
+				
+				$this->mailer->assign_tags($tags);
 			}
 			
 			if( !$this->mailer->send() )
@@ -595,11 +622,7 @@ class Wanewsletter {
 				SET format = " . $this->format . "
 				WHERE liste_id = " . $this->listdata['liste_id'] . "
 					AND abo_id = " . $this->account['abo_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-				return false;
-			}
+			$db->query($sql);
 			
 			$this->message = $lang['Message']['Success_setformat'];
 			
@@ -653,15 +676,30 @@ class Wanewsletter {
 			if( $row = $result->fetch() )
 			{
 				$this->mailer->clear_all();
-				$this->mailer->set_from($this->listdata['sender_email'], unhtmlspecialchars($this->listdata['liste_name']));
+				$this->mailer->set_from($this->listdata['sender_email'], $this->listdata['liste_name']);
 				$this->mailer->set_subject($subject);
 				
 				$this->mailer->use_template($template, array(
 					'EMAIL'   => $this->account['email'],
-					'LISTE'   => unhtmlspecialchars($this->listdata['liste_name']),
+					'LISTE'   => $this->listdata['liste_name'],
 					'URLSITE' => $nl_config['urlsite'],
-					'SIG'     => $this->listdata['liste_sig']
+					'SIG'     => $this->listdata['liste_sig'],
+					'PSEUDO'  => $this->account['pseudo']
 				));
+				
+				if( count($this->other_tags) > 0 )
+				{
+					$tags = array();
+					foreach( $this->other_tags as $tag )
+					{
+						if( isset($this->account['tags'][$tag['column_name']]) )
+						{
+							$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
+						}
+					}
+					
+					$this->mailer->assign_tags($tags);
+				}
 				
 				do
 				{

@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * 
  * - Recherche les entrées orphelines dans les tables abonnes et abo_liste
  * et les efface, si demandé.
@@ -41,7 +24,7 @@ exit(0);
 define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR',   '..');
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 
 load_settings();
 
@@ -71,10 +54,7 @@ if( $type == 'subscribers' )
 {
     $sql = "SELECT abo_id 
         FROM " . ABONNES_TABLE;
-    if( !($result = $db->query($sql)) )
-    {
-        trigger_error('Impossible d\'obtenir les identifiants [abonnes]', CRITICAL_ERROR);
-    }
+    $result = $db->query($sql);
     
     $abonnes_id = array();
     while( $abo_id = $result->column('abo_id') )
@@ -85,10 +65,7 @@ if( $type == 'subscribers' )
     $sql = "SELECT abo_id 
         FROM " . ABO_LISTE_TABLE . " 
         GROUP BY abo_id";
-    if( !($result = $db->query($sql)) )
-    {
-        trigger_error('Impossible d\'obtenir les identifiants [abo_liste]', CRITICAL_ERROR);
-    }
+    $result = $db->query($sql);
     
     $abo_liste_id = array();
     while( $abo_id = $result->column('abo_id') )
@@ -108,20 +85,14 @@ if( $type == 'subscribers' )
         {
             $sql = "DELETE FROM " . ABONNES_TABLE . " 
                 WHERE abo_id IN(" . implode(', ', $diff_1) . ")";
-            if( !$db->query($sql) )
-            {
-                trigger_error('Impossible d\'effacer les entrées orphelines de la table ' . ABONNES_TABLE, CRITICAL_ERROR);
-            }
+            $db->query($sql);
         }
         
         if( $total_diff_2 > 0 )
         {
             $sql = "DELETE FROM " . ABO_LISTE_TABLE . " 
                 WHERE abo_id IN(" . implode(', ', $diff_2) . ")";
-            if( !$db->query($sql) )
-            {
-                trigger_error('Impossible d\'effacer les entrées orphelines de la table ' . ABO_LISTE_TABLE, CRITICAL_ERROR);
-            }
+            $db->query($sql);
         }
         
         $output->basic('Opération effectuée');
@@ -143,10 +114,7 @@ else if( $type == 'files' )
 {
     $sql = "SELECT file_id 
         FROM " . JOINED_FILES_TABLE;
-    if( !($result = $db->query($sql)) )
-    {
-        trigger_error('Impossible d\'obtenir les identifiants [joined_files]', CRITICAL_ERROR);
-    }
+    $result = $db->query($sql);
     
     $jf_id = array();
     while( $id = $result->column('file_id') )
@@ -157,10 +125,7 @@ else if( $type == 'files' )
     $sql = "SELECT file_id 
         FROM " . LOG_FILES_TABLE . " 
         GROUP BY file_id";
-    if( !($result = $db->query($sql)) )
-    {
-        trigger_error('Impossible d\'obtenir les identifiants [log_files]', CRITICAL_ERROR);
-    }
+    $result = $db->query($sql);
     
     $lf_id = array();
     while( $id = $result->column('file_id') )
@@ -180,20 +145,14 @@ else if( $type == 'files' )
         {
             $sql = "DELETE FROM " . JOINED_FILES_TABLE . " 
                 WHERE file_id IN(" . implode(', ', $diff_1) . ")";
-            if( !$db->query($sql) )
-            {
-                trigger_error('Impossible d\'effacer les entrées orphelines de la table ' . JOINED_FILES_TABLE, CRITICAL_ERROR);
-            }
+            $db->query($sql);
         }
         
         if( $total_diff_2 > 0 )
         {
             $sql = "DELETE FROM " . LOG_FILES_TABLE . " 
                 WHERE file_id IN(" . implode(', ', $diff_2) . ")";
-            if( !$db->query($sql) )
-            {
-                trigger_error('Impossible d\'effacer les entrées orphelines de la table ' . LOG_FILES_TABLE, CRITICAL_ERROR);
-            }
+            $db->query($sql);
         }
         
         $output->basic('Opération effectuée');
@@ -215,10 +174,7 @@ else if( $type == 'files2' )
 {
 	$sql = "SELECT file_id, file_physical_name
 		FROM " . JOINED_FILES_TABLE;
-	if( !($result = $db->query($sql)) )
-    {
-        trigger_error('Impossible d\'obtenir les identifiants [joined_files]', CRITICAL_ERROR);
-    }
+	$result = $db->query($sql);
 	
 	$upload_path    = WA_ROOTDIR . '/' . $nl_config['upload_path'];
 	$sql_delete_ids = array();

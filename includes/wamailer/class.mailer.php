@@ -1,26 +1,11 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- * 
- * @package Wamailer
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wamailer/
- * @license http://www.gnu.org/copyleft/lesser.html	 GNU Lesser General Public License
- * @version 2.4
+ * @package   Wamailer
+ * @version   2.5
+ * @link      http://phpcodeur.net/wascripts/wamailer/
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/licenses/lgpl.html  GNU Lesser General Public License
  */
 
 if( !defined('CLASS_MAILER_INC') )
@@ -153,10 +138,7 @@ class Mailer {
 	var $html_tpl_ext           = 'html';
 	
 	/**
-	 * Vous devez définir la fonction mail qu'utilise votre hébergeur 
-	 * 
-	 * 1 ou WM_HOST_OTHER pour la fonction mail() classique
-	 * 2 ou WM_HOST_ONLINE pour la fonction email() de online
+	 * OBSOLÈTE. NE PAS MODIFIER.
 	 *
 	 * @var integer
 	 * @access public
@@ -381,12 +363,12 @@ class Mailer {
 	var $fix_bug_mail           = null;
 	
 	/**
-	 * Version actuelle de la classe
+	 * Texte placé dans l'entête X-Mailer
 	 * 
 	 * @var string
-	 * @access private
+	 * @access public
 	 */
-	var $version                = '2.4';
+	var $signature              = 'Wamailer/2.5';
 	
 	/**
 	 * Constructeur de classe
@@ -439,7 +421,7 @@ class Mailer {
 				// 
 				$pattern_ip   = array();
 				$pattern_ip[] = '/^0\..*/'; // Réseau 0 n'existe pas
-				$pattern_ip[] = '/^127\.0\.0\.1/'; // ip locale
+				$pattern_ip[] = '/^127\..*/'; // ip locale
 				
 				// Plages d'ip spécifiques à l'intranet
 				$pattern_ip[] = '/^10\..*/';
@@ -455,11 +437,6 @@ class Mailer {
 				
 				$this->sender_ip = preg_replace($pattern_ip, $this->sender_ip, $private_ip);
 			}
-		}
-		
-		if( $this->hebergeur == WM_HOST_OTHER && Mailer::is_online_host() == true )
-		{
-			$this->hebergeur = WM_HOST_ONLINE;
 		}
 	}
 	
@@ -1335,7 +1312,7 @@ class Mailer {
 		// saut de ligne
 		// - Section 2.2 de la rfc 2822
 		//
-		$value = preg_replace('/[\x0A\x0D]/', '', trim($value));
+		$value = preg_replace('/\s+/', ' ', trim($value));
 		
 		$this->headers[$name] = $value;
 		
@@ -1668,6 +1645,11 @@ class Mailer {
 		$message = $this->compile_message();
 		$Rpath   = $this->get_return_path();
 		
+		if( $do_not_send )
+		{
+			return $headers . "\n\n" . $message;
+		}
+		
 		if( !$this->smtp_mode && !$this->sendmail_mode )
 		{
 			$subject = null;
@@ -1689,16 +1671,11 @@ class Mailer {
 				 * @link http://bugs.php.net/bug.php?id=24805
 				 */
 				$subject = $this->subject;
-				if( $this->fix_bug_mail == -1 )
+				if( $this->fix_bug_mail == -1 )// cette attribut est renseigné dans Mailer::recipients_list()
 				{
 					$subject = str_replace("\n ", "\r\n ", $this->word_wrap($subject));
 				}
 			}
-		}
-		
-		if( $do_not_send )
-		{
-			return $headers . "\n\n" . $message;
 		}
 		
 		switch( $this->hebergeur )
@@ -1709,15 +1686,18 @@ class Mailer {
 				// régler l'adresse email de retour (return-path) avec le
 				// cinquième argument.
 				// En alternative, utilisation de ini_get() et ini_set() sur
-				// l'option sendmail_from de PHP
+				// l'option sendmail_from de PHP ?
 				//
-				$safe_mode     = @ini_get('safe_mode');
-				$safe_mode_gid = @ini_get('safe_mode_gid');// Ajout pour free.fr et sa config php exotique
-				
-				if( $safe_mode || $safe_mode_gid )
+				$safe_mode = ini_get('safe_mode');
+				if( preg_match('#^off|false$#i', $safe_mode) )
 				{
-					$old_Rpath = @ini_get('sendmail_from');
-					@ini_set('sendmail_from', $Rpath);
+					$safe_mode = false;
+				}
+				
+				if( $safe_mode )
+				{
+					$old_Rpath = ini_get('sendmail_from');
+					ini_set('sendmail_from', $Rpath);
 				}
 				
 				if( strncasecmp(PHP_OS, 'Win', 3) == 0 )
@@ -1728,24 +1708,24 @@ class Mailer {
 					$headers = preg_replace('/\r\n?|\n/', "\r\n", $headers);
 				}
 				
-				if( !$safe_mode && !$safe_mode_gid )
+				if( !$safe_mode )
 				{
-					$result = @mail($address, $subject, $message, $headers, '-f' . $Rpath);
+					$result = mail($address, $subject, $message, $headers, '-f' . $Rpath);
 				}
 				else
 				{
-					$result = @mail($address, $subject, $message, $headers);
+					$result = mail($address, $subject, $message, $headers);
 				}
 				
-				if( $safe_mode || $safe_mode_gid )
+				if( $safe_mode )
 				{
-					@ini_set('sendmail_from', $old_Rpath);
+					ini_set('sendmail_from', $old_Rpath);
 				}
 				break;
 			
 			case WM_HOST_ONLINE:
 				list($sender) = explode('@', $this->sender);
-				$result = @email($sender, $address, $subject, $message, $sender, $headers);
+				$result = email($sender, $address, $subject, $message, $sender, $headers);
 				break;
 			
 			case WM_SMTP_MODE:
@@ -1860,10 +1840,7 @@ class Mailer {
 				$this->sendmail_cmd .= ' -- ' . $address;
 			}
 			
-			$mode = ( stristr(PHP_OS, 'WIN') ) ? 'wb' : 'w';
-			$code = 0;
-			
-			if( !($sm = popen($this->sendmail_path . $this->sendmail_cmd, $mode)) )
+			if( !($sm = popen($this->sendmail_path . $this->sendmail_cmd, 'w')) )
 			{
 				$this->error('sendmail() :: Impossible d\'exécuter sendmail');
 				return false;
@@ -1879,7 +1856,7 @@ class Mailer {
 			//
 			fputs($sm, $message . "\n");
 			
-			$code = pclose($sm) >> 8 & 0xFF;
+			$code = pclose($sm);
 			
 			if( $code != 0 )
 			{
@@ -1927,7 +1904,7 @@ class Mailer {
 				// Pas moyen d'obtenir une adresse à utiliser.
 				// En dernier ressort, nous utilisons une adresse factice
 				//
-				$Rpath = 'wamailer@'.$this->server_from;
+				$Rpath = 'postmaster@'.$this->server_from;
 			}
 		}
 		
@@ -2137,7 +2114,12 @@ class Mailer {
 		}
 		
 		$this->headers['Date']         = date(DATE_RFC2822);
-		$this->headers['X-Mailer']     = 'Wamailer/' . $this->version;
+		
+		if( !empty($this->signature) )
+		{
+			$this->headers['X-Mailer'] = $this->signature;
+		}
+		
 		$this->headers['X-AntiAbuse']  = 'Sender IP - ' . $this->sender_ip . '/Server Name - <' . $this->server_from . '>';
 		$this->headers['MIME-Version'] = '1.0'; 
 		$this->headers['Message-ID']   = '<' . md5(microtime() . rand()) . '@' . $this->server_from . '>';

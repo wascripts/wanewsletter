@@ -5,9 +5,8 @@
 // valide sans utiliser le script d'installation de Wanewsletter.
 //
 define('NL_INSTALLED', true);
-define('WA_VERSION',   '2.3-dev');
 
-//$dsn = "<driver>://<username>:<password>@<host>:<port>/<database>";
+//$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
 // exemple de DSN pour MySQL
 //$dsn = 'mysql://username:password@localhost/dbname?charset=latin1';
 // exemple de DSN pour SQLite

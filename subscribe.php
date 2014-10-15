@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_SUBSCRIBE', true);
@@ -34,42 +17,41 @@ $list_box = '';
 $sql = "SELECT liste_id, liste_name, liste_format
 	FROM " . LISTE_TABLE . "
 	WHERE liste_public = " . TRUE;
-if( !($result = $db->query($sql)) )
+$result = $db->query($sql);
+
+$list_box = '<select id="liste" name="liste">';
+
+if( $row = $result->fetch() )
 {
-	trigger_error('Impossible d\'obtenir la liste des listes de diffusion', ERROR);
+	do
+	{
+		if( $row['liste_format'] == FORMAT_TEXTE )
+		{
+			$format = 'txt';
+		}
+		else if( $row['liste_format'] == FORMAT_HTML )
+		{
+			$format = 'html';
+		}
+		else
+		{
+			$format = 'txt &amp; html';
+		}
+		
+		$list_box .= sprintf('<option value="%d"> %s (%s) </option>',
+			$row['liste_id'],
+			wan_htmlspecialchars($row['liste_name']),
+			$format
+		);
+	}
+	while( $row = $result->fetch() );
 }
 else
 {
-	$list_box = '<select id="liste" name="liste">';
-	
-	if( $row = $result->fetch() )
-	{
-		do
-		{
-			if( $row['liste_format'] == FORMAT_TEXTE )
-			{
-				$f = 'txt';
-			}
-			else if( $row['liste_format'] == FORMAT_HTML )
-			{
-				$f = 'html';
-			}
-			else
-			{
-				$f = 'txt &amp; html';
-			}
-			
-			$list_box .= '<option value="' . $row['liste_id'] . '"> ' . $row['liste_name'] . ' (' . $f . ') </option>';
-		}
-		while( $row = $result->fetch() );
-	}
-	else
-	{
-		$message = 'No list found';
-	}
-	
-	$list_box .= '</select>';
+	$message = 'No list found';
 }
+
+$list_box .= '</select>';
 
 $output->send_headers(true);
 

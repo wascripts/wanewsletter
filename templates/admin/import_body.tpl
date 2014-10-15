@@ -1,45 +1,44 @@
-<form method="post" action="./tools.php?mode=import" enctype="{S_ENCTYPE}">
-<div class="smallbloc">
+<form class="compact" method="post" action="./tools.php?mode=import" enctype="{S_ENCTYPE}">
+<div class="block">
 	<h2>{L_TITLE_IMPORT}</h2>
 	
-	<table class="content">
+	<div class="explain">{L_EXPLAIN_IMPORT}</div>
+	
+	<table class="dataset">
 		<tr>
-			<td class="explain" colspan="2">{L_EXPLAIN_IMPORT}</td>
-		</tr>
-		<tr>
-			<td class="row1"><label for="glue">{L_GLUE}&#160;:</label></td>
-			<td class="row2"><input type="text" id="glue" name="glue" maxlength="3" style="width:20px;" class="text" /></td>
+			<td><label for="glue">{L_GLUE}&nbsp;:</label></td>
+			<td><input type="text" id="glue" name="glue" maxlength="3" class="number" /></td>
 		</tr>
 		<!-- BEGIN format_box -->
 		<tr>
-			<td class="row1"><label for="format">{format_box.L_FORMAT}&#160;:</label></td>
-			<td class="row2">{format_box.FORMAT_BOX}</td>
+			<td><label for="format">{format_box.L_FORMAT}&nbsp;:</label></td>
+			<td>{format_box.FORMAT_BOX}</td>
 		</tr>
 		<!-- END format_box -->
 		<tr>
-			<td class="row-full" colspan="2"><textarea name="list_email" rows="6" cols="60"></textarea></td> 
+			<td colspan="2"><textarea name="list_email" rows="8" cols="60"></textarea></td> 
 		</tr>
 		<!-- BEGIN upload_file -->
 		<tr>
-			<td class="row1">
-				<label for="file_upload">{upload_file.L_FILE_UPLOAD}&#160;:</label><br />
-				<span class="m-texte">({upload_file.L_MAXIMUM_SIZE})</span>
+			<td>
+				<label for="file_upload">{upload_file.L_FILE_UPLOAD}&nbsp;:</label><br />
+				<span class="notice">({upload_file.L_MAXIMUM_SIZE})</span>
 			</td>
-			<td class="row2">
+			<td>
 				<input type="hidden" name="MAX_FILE_SIZE" value="{upload_file.MAX_FILE_SIZE}" />
-				<input type="file" id="file_upload" name="file_upload" size="25" />
+				<input type="file" id="file_upload" name="file_upload" data-button-label="{upload_file.L_BROWSE_BUTTON}" />
 			</td>
 		</tr>
 		<!-- END upload_file -->
 		<tr>
-			<td class="row1"> <label for="file_local">{L_FILE_LOCAL}&#160;:</label> </td>
-			<td class="row2"> <input type="text" id="file_local" name="file_local" size="25" class="text" /> </td>
+			<td><label for="file_local">{L_FILE_LOCAL}&nbsp;:</label></td>
+			<td><input type="text" id="file_local" name="file_local" size="25" /></td>
 		</tr>
 	</table>
 	
 	<div class="bottom"> {S_HIDDEN_FIELDS}
-		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
-		<input type="reset" value="{L_RESET_BUTTON}" class="button" />
+		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
+		<button type="reset">{L_RESET_BUTTON}</button>
 	</div>
 </div>
 </form>

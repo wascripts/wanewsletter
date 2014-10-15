@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_NEWSLETTER', true);
@@ -35,11 +18,11 @@ require WA_ROOTDIR . '/includes/functions.stats.php';
 //
 if( $nl_config['disable_stats'] )
 {
-	$output->message('Stats_disabled');
+	$output->displayMessage('Stats_disabled');
 }
 else if( !extension_loaded('gd') )
 {
-	$output->message('No_gd_lib');
+	$output->displayMessage('No_gd_lib');
 }
 
 $liste_ids = $auth->check_auth(AUTH_VIEW);
@@ -51,7 +34,7 @@ if( !$admindata['session_liste'] )
 
 if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 {
-	$output->message('Not_auth_view');
+	$output->displayMessage('Not_auth_view');
 }
 
 $listdata = $auth->listdata[$admindata['session_liste']];
@@ -60,16 +43,48 @@ $img   = ( !empty($_GET['img']) ) ? trim($_GET['img']) : '';
 $year  = ( !empty($_GET['year']) ) ? intval($_GET['year']) : date('Y');
 $month = ( !empty($_GET['month']) ) ? intval($_GET['month']) : date('n');
 
-$img_type = $nl_config['gd_img_type'];
+$img_type = (imagetypes() & IMG_GIF) ? 'gif' : null;
+$img_type = (imagetypes() & IMG_PNG) ? 'png' : $img_type;
 
-function send_image($name, $img)
+if( is_null($img_type) ) {
+	// WTF ?!
+	$output->displayMessage($lang['Message']['No_gd_img_support']);
+}
+
+function send_image($name, $img, $lastModified = null)
 {
 	global $img_type;
 	
-	header('Last-Modified: ' . gmdate(DATE_RFC1123));
-	header('Expires: ' . gmdate(DATE_RFC1123));
-	header('Cache-Control: no-cache, no-store, must-revalidate, proxy-revalidate, private, max-age=0');
-	header('Pragma: no-cache');
+	if( !is_numeric($lastModified) )
+	{
+		$lastModified = time();
+	}
+	
+	$canUseCache = true;
+	$cachetime   = !empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
+	
+	if( !empty($_SERVER['HTTP_CACHE_CONTROL']) )
+	{
+		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_CACHE_CONTROL']);
+	}
+	else if( !empty($_SERVER['HTTP_PRAGMA']) )// HTTP 1.0
+	{
+		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_PRAGMA']);
+	}
+	
+	if( $lastModified <= $cachetime && $canUseCache )
+	{
+		http_response_code(304);
+		header('Date: ' . gmdate(DATE_RFC1123));
+		exit;
+	}
+	
+	$maxAge = 0;
+	
+	header('Last-Modified: ' . gmdate(DATE_RFC1123, $lastModified));
+	header('Expires: ' . gmdate(DATE_RFC1123, (time() + $maxAge)));// HTTP 1.0
+	header('Pragma: private');// HTTP 1.0
+	header('Cache-Control: private, must-revalidate, max-age='.$maxAge);
 	header('Content-Disposition: inline; filename="' . $name . '.' . $img_type . '"');
 	header('Content-Type: image/' . $img_type);
 	
@@ -259,7 +274,7 @@ if( $img == 'graph' )
 		}
 	}
 	
-	send_image('subscribers_per_day', $im);
+	send_image('subscribers_per_day', $im, filemtime(WA_STATSDIR . '/' . $filename));
 }
 
 if( $img == 'camembert' )
@@ -269,10 +284,7 @@ if( $img == 'camembert' )
 		WHERE al.liste_id IN(" . implode(', ', $liste_ids) . ")
 			AND confirmed = " . SUBSCRIBE_CONFIRMED . "
 		GROUP BY al.liste_id";
-	if( !($result = $db->query($sql)) )
-	{
-		display_img_error('An error has occured while generating image!');
-	}
+	$result = $db->query($sql);
 	
 	$tmpdata = array();
 	while( $row = $result->fetch() )
@@ -284,10 +296,10 @@ if( $img == 'camembert' )
 	$listes = array();
 	foreach( $liste_ids as $liste_id )
 	{
-		$liste_name   = cut_str(unhtmlspecialchars($auth->listdata[$liste_id]['liste_name']), 30);
+		$liste_name   = cut_str($auth->listdata[$liste_id]['liste_name'], 30);
 		$num_inscrits = ( !empty($tmpdata[$liste_id]) ) ? $tmpdata[$liste_id] : 0;
 		
-		$listes[] = array('name' => htmlspecialchars($liste_name), 'num' => $num_inscrits);
+		$listes[] = array('name' => $liste_name, 'num' => $num_inscrits);
 		$total_inscrits += $num_inscrits;
 	}
 	
@@ -433,11 +445,6 @@ $output->build_listbox(AUTH_VIEW, false);
 
 require WA_ROOTDIR . '/includes/functions.box.php';
 
-if( $session->sessid_url != '' )
-{
-	$output->addHiddenField('sessid', $session->session_id);
-}
-
 $output->page_header();
 
 $output->set_filenames( array(
@@ -449,7 +456,7 @@ $m_list = '';
 
 $y = date('Y', $listdata['liste_startdate']);
 $n = date('n', $listdata['liste_startdate']);
-$c = date('Y');
+$c = max(date('Y'), $year);
 
 if( $y == $c )
 {
@@ -474,6 +481,26 @@ for(; $n <= $m; $n++ )
 		convert_time('F', mktime(0, 0, 0, $n, 1, $y)));
 }
 
+$prev_m = $month-1;
+$prev_y = $year;
+
+if( $prev_m < 1 )
+{
+	$prev_m = 12;
+	$prev_y--;
+}
+
+$next_m = $month+1;
+$next_y = $year;
+
+if( $next_m > 12 )
+{
+	$next_m = 1;
+	$next_y++;
+}
+
+$aTitle = sprintf('%s &ndash; %%s', $lang['Module']['stats']);
+
 $output->assign_vars(array(
 	'L_TITLE'         => $lang['Title']['stats'],
 	'L_EXPLAIN_STATS' => nl2br($lang['Explain']['stats']),
@@ -483,10 +510,13 @@ $output->assign_vars(array(
 	
 	'YEAR_LIST'       => $y_list,
 	'MONTH_LIST'      => $m_list,
-	'U_IMG_GRAPH'     => sessid('./stats.php?img=graph&amp;year=' . $year . '&amp;month=' . $month),
-	'U_IMG_CAMEMBERT' => sessid('./stats.php?img=camembert'),
-	
-	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+	'L_PREV_PERIOD'   => $lang['Prev_month'],
+	'L_NEXT_PERIOD'   => $lang['Next_month'],
+	'L_PREV_TITLE'    => sprintf($aTitle, convert_time('F Y', mktime(0, 0, 0, $prev_m, 1, $prev_y))),
+	'L_NEXT_TITLE'    => sprintf($aTitle, convert_time('F Y', mktime(0, 0, 0, $next_m, 1, $next_y))),
+	'U_PREV_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $prev_y, $prev_m),
+	'U_NEXT_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $next_y, $next_m),
+	'U_IMG_GRAPH'     => sprintf('stats.php?img=graph&amp;year=%d&amp;month=%d', $year, $month)
 ));
 
 //

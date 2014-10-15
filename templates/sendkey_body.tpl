@@ -1,20 +1,19 @@
-<form method="post" action="./profil_cp.php">
-<div class="smallbloc">
+<form class="compact" method="post" action="./profil_cp.php">
+<div class="block">
 	<h2>{TITLE}</h2>
 	
-	<table class="content">
+	<div class="explain">{L_EXPLAIN}</div>
+	
+	<table class="dataset">
 		<tr>
-			<td class="explain" colspan="2">{L_EXPLAIN}</td>
-		</tr>
-		<tr>
-			<td class="row1"> <label for="email">{L_LOGIN}&#160;:</label> </td>
-			<td class="row1"> <input type="text" id="email" name="email" maxlength="250" size="30" class="text" /> </td>
+			<td><label for="email">{L_LOGIN}&nbsp;:</label></td>
+			<td><input type="text" id="email" name="email" maxlength="254" size="30" /></td>
 		</tr>
 	</table>
 	
 	<div class="bottom">
 		<input type="hidden" name="mode" value="sendkey" />
-		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
+		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>
 </form>

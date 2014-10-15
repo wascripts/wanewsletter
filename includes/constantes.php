@@ -1,38 +1,40 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 //
-// Mode de débugguage du script 
-// 
-// 3 - Toutes les erreurs sont affichées à l'écran
-// 2 - Toutes les erreurs provenant de variables/fonctions/autres non précédés d'un @ sont affichées à l'écran 
-// 1 - Seules les erreurs en rapport avec la base de données sont affichées (le script donne des détails sur l'erreur)
-// 0 - Le script affiche simplement un message d'erreur lors de problèmes SQL, sans donner plus de détails 
+// Version correspondant au code source en place sur le serveur.
+// Remplace la constante obsolète WA_VERSION, jadis définie dans le fichier de configuration.
 //
-define('DEBUG_MODE', 3);
+define('WANEWSLETTER_VERSION', '2.4-beta2');
+
+//
+// identifiant de version des tables du script.
+// Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
+// le script invite l'utilisateur à lancer la procédure de mise à jour des tables
+//
+define('WANEWSLETTER_DB_VERSION', 14);
+
+//
+// Modes de débogage du script
+//
+// Le script annonce les erreurs critiques, sans donner de détails
+define('DEBUG_LEVEL_QUIET',  1);
+// Le script affiche les erreurs PHP et SQL en donnant des détails
+define('DEBUG_LEVEL_NORMAL', 2);
+// Le script affiche aussi les erreurs non inclues dans le niveau d'erreurs PHP
+// configuré par error_reporting() ou masquées avec l'opérateur @
+define('DEBUG_LEVEL_ALL',    3);
+
+//
+// Configure le niveau de débogage souhaité
+//
+define('DEBUG_MODE', DEBUG_LEVEL_NORMAL);
 
 //
 // Pour visualiser le temps d'exécution du script et le nombre de requètes effectuées
@@ -41,9 +43,10 @@ define('DEV_INFOS', TRUE);
 //define('DEV_INFOS', FALSE);
 
 //
-// Active/Désactive l'affichage des erreurs proprement dans un bloc html en bas de page
+// Active/Désactive l'affichage des messages d'erreur en pied de page.
+// Si false, les erreurs sont affichées dès qu'elles sont traitées.
 //
-define('DISPLAY_ERRORS_IN_BLOCK', TRUE);
+define('DISPLAY_ERRORS_IN_LOG', true);
 
 //
 // Active/Désactive le passage automatique à l'UTF-8 au moment de l'envoi en présence de 
@@ -56,11 +59,6 @@ define('DISPLAY_ERRORS_IN_BLOCK', TRUE);
 define('TRANSLITE_INVALID_CHARS', FALSE);
 
 //
-// Format des exportations d'archive
-//
-define('EXPORT_FORMAT', 'Tar'); // Tar ou Zip (Attention, respecter la casse)
-
-//
 // Prise en compte de l'authentification HTTP pour la connexion automatique
 //
 define('ENABLE_HTTP_AUTHENTICATION', TRUE);
@@ -69,27 +67,6 @@ define('ENABLE_HTTP_AUTHENTICATION', TRUE);
 //
 // Il est recommandé de ne rien modifier au-delà de cette ligne
 //
-
-//
-// Codes des messages d'erreur et d'information 
-//
-define('CRITICAL_ERROR', E_USER_ERROR);
-define('ERROR',          E_USER_WARNING);
-
-if( !defined('E_STRICT') ) // Compatibilité PHP5
-{
-	define('E_STRICT', 2048);
-}
-
-if( !defined('E_DEPRECATED') ) // Compatibilité PHP5.3
-{
-	define('E_DEPRECATED', 8192);
-}
-
-if( !defined('DATE_RFC1123') ) // Compatibilité PHP 5.1.1
-{
-	define('DATE_RFC1123', 'D, d M Y H:i:s T');
-}
 
 //
 // Formats d'emails 
@@ -103,7 +80,7 @@ define('FORMAT_MULTIPLE', 3);
 //
 define('STATUS_WRITING', 0);
 define('STATUS_STANDBY', 1);
-define('STATUS_SENDED',  2);
+define('STATUS_SENT',    2);
 define('STATUS_MODEL',   3);
 
 //
@@ -139,33 +116,11 @@ define('CONFIRM_ONCE',   1);
 define('CONFIRM_NONE',   0);
 
 //
-// Codes d'erreur lors de l'upload 
-//
-if( !defined('UPLOAD_ERR_OK') ) // Introduites en PHP 4.3.0
-{
-    define('UPLOAD_ERR_OK',         0);
-    define('UPLOAD_ERR_INI_SIZE',   1);
-    define('UPLOAD_ERR_FORM_SIZE',  2);
-    define('UPLOAD_ERR_PARTIAL',    3);
-    define('UPLOAD_ERR_NO_FILE',    4);
-}
-
-if( !defined('UPLOAD_ERR_NO_TMP_DIR') ) // Introduite en PHP 4.3.10 et 5.0.3
-{
-	define('UPLOAD_ERR_NO_TMP_DIR', 6);
-}
-
-if( !defined('UPLOAD_ERR_CANT_WRITE') ) // Introduite en PHP 5.1.0
-{
-	define('UPLOAD_ERR_CANT_WRITE', 7);
-}
-
-//
-// Si nous un accés restreint à cause de open_basedir, certains fichiers uploadés 
+// Si nous avons un accés restreint à cause de open_basedir, certains fichiers uploadés 
 // devront être déplacés vers le dossier des fichiers temporaires du script pour être 
 // accessible en lecture
 //
-$open_basedir = config_status('open_basedir');
+$open_basedir = config_value('open_basedir');
 if( !empty($open_basedir) )
 {
 	define('OPEN_BASEDIR_RESTRICTION', TRUE);
@@ -207,13 +162,13 @@ if( config_status('file_uploads') )
 		return $size;
 	}
 	
-	if( !($filesize = @ini_get('upload_max_filesize')) )
+	if( !($filesize = config_value('upload_max_filesize')) )
 	{
         $filesize = '2M'; // 2 Méga-Octets
     }
 	$upload_max_size = get_integer_byte_value($filesize);
 	
-    if( $postsize = @ini_get('post_max_size') )
+    if( $postsize = config_value('post_max_size') )
 	{
         $postsize = get_integer_byte_value($postsize);
         if( $postsize < $upload_max_size )
@@ -282,4 +237,28 @@ else
 	define('WA_USER_BROWSER', 'other');
 }
 
-?>
+//
+// Signature du script pour divers cas de figure (entête X-Mailer dans les emails
+// envoyés, entête User-Agent lors des requètes HTTP, etc)
+//
+define('WA_SIGNATURE', sprintf('Wanewsletter/%s', WANEWSLETTER_VERSION));
+define('WA_X_MAILER', WA_SIGNATURE);
+
+//
+// Utilisées dans le cadre de la classe de vérification de mise à jour
+//
+define('WA_DOWNLOAD_PAGE', 'http://phpcodeur.net/wascripts/wanewsletter/telecharger');
+define('WA_CHECK_UPDATE_URL', 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version');
+define('WA_CHECK_UPDATE_CACHE', 'wa-check-update.cache');
+define('WA_CHECK_UPDATE_CACHE_TTL', 3600);
+
+//
+// Déclaration des dossiers et fichiers spéciaux utilisés par le script
+//
+define('WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
+define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
+define('WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
+
+define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
+define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
+

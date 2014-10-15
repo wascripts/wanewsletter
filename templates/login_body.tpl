@@ -1,25 +1,34 @@
-<form method="post" action="./profil_cp.php">
-<ul class="links special">
-	<li> <a href="profil_cp.php?mode=sendkey">{L_SENDKEY}</a> </li>
+<form class="compact" method="post" action="./profil_cp.php">
+<ul class="links">
+	<li><a href="profil_cp.php?mode=sendkey">{L_SENDKEY}</a></li>
 </ul>
 
-<div class="smallbloc">
+<div class="block">
 	<h2>{TITLE}</h2>
 	
-	<table class="content">
+	<table class="dataset">
 		<tr>
-			<td class="row1"> <label for="email">{L_LOGIN}&#160;:</label> </td>
-			<td class="row1"> <input type="text" id="email" name="email" value="{S_LOGIN}" maxlength="250" size="30" class="text" /> </td>
+			<td><label for="email">{L_LOGIN}&nbsp;:</label></td>
+			<td><input type="text" id="email" name="email" value="{S_LOGIN}" maxlength="254" size="25" autofocus /></td>
 		</tr>
 		<tr>
-			<td class="row1"> <label for="passwd">{L_PASS}&#160;:</label> </td>
-			<td class="row1"> <input type="password" id="passwd" name="passwd" maxlength="32" size="30" class="text" /> </td>
+			<td><label for="passwd">{L_PASS}&nbsp;:</label></td>
+			<td><input type="password" id="passwd" name="passwd" size="25" /></td>
 		</tr>
 	</table>
 	
 	<div class="bottom">
 		<input type="hidden" name="mode" value="login" />
-		<input type="submit" name="submit" value="{L_VALID_BUTTON}" class="pbutton" />
+		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>
+
+<!-- BEGIN cookie_notice -->
+<p id="cookie-notice" class="warning">{cookie_notice.L_TEXT}</p>
+<script>
+if( navigator.cookieEnabled ) {
+	document.getElementById('cookie-notice').style.display = 'none';
+}
+</script>
+<!-- END cookie_notice -->
 </form>

@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('CLASS_SESSION_INC') ) {
@@ -42,14 +25,6 @@ class Session {
 	 * @access private
 	 */
 	var $user_ip      = '';
-	
-	/**
-	 * Chaine éventuelle à ajouter à la fin des urls (contient l'identifiant de session)
-	 * 
-	 * @var string
-	 * @access private
-	 */
-	var $sessid_url   = '';
 	
 	/**
 	 * Identifiant de la session
@@ -92,6 +67,14 @@ class Session {
 	var $is_logged_in = false;
 	
 	/**
+	 * Mise à jour du hash de mot de passe à chaque identification réussie
+	 
+	 * @var boolean
+	 * @access public
+	 */
+	var $update_hash  = true;
+	
+	/**
 	 * Intialisation de la classe, récupération de l'ip ..
 	 * 
 	 * @return void
@@ -127,7 +110,7 @@ class Session {
 			//
 			$pattern_ip = array();
 			$pattern_ip[] = '/^0\..*/'; // Réseau 0 n'existe pas 
-			$pattern_ip[] = '/^127\.0\.0\.1/'; // ip locale 
+			$pattern_ip[] = '/^127\..*/'; // ip locale
 			
 			// Plages d'ip spécifiques à l'intranet 
 			$pattern_ip[] = '/^10\..*/';
@@ -145,12 +128,11 @@ class Session {
 		
 		$this->user_ip = $this->encode_ip($client_ip);
 		
-		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $nl_config['urlsite'], $match);
-		
 		$this->cfg_cookie['cookie_name']   = $nl_config['cookie_name'];
 		$this->cfg_cookie['cookie_path']   = $nl_config['cookie_path'];
-		$this->cfg_cookie['cookie_domain'] = '';//$match[2];
-		$this->cfg_cookie['cookie_secure'] = ( !empty($match[1]) ) ? 1 : 0;
+		$this->cfg_cookie['cookie_domain'] = null;
+		$this->cfg_cookie['cookie_secure'] = wan_ssl_connection();
+		$this->cfg_cookie['cookie_httponly'] = true;
 	}
 	
 	/**
@@ -175,6 +157,7 @@ class Session {
 		}
 		
 		$sql_data = array(
+			'session_id'    => generate_key(),
 			'admin_id'      => $admindata['admin_id'],
 			'session_start' => $current_time,
 			'session_time'  => $current_time,
@@ -182,19 +165,24 @@ class Session {
 			'session_liste' => $liste
 		);
 		
-		if( $this->session_id == '' || !$db->build(SQL_UPDATE, SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id))
-			|| $db->affectedRows() == 0 )
+		if( $this->session_id != '' )
 		{
-			$this->new_session = true;
-			$this->session_id  = $sql_data['session_id'] = generate_key();
+			$db->build(SQL_UPDATE, SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id));
 			
-			if( !$db->build(SQL_INSERT, SESSIONS_TABLE, $sql_data) )
+			if( $db->affectedRows() == 0 )
 			{
-				trigger_error('Impossible de démarrer une nouvelle session', CRITICAL_ERROR);
+				$this->session_id = '';
 			}
 		}
 		
+		if( $this->session_id == '' )
+		{
+			$this->new_session = true;
+			$db->build(SQL_INSERT, SESSIONS_TABLE, $sql_data);
+		}
+		
 		$admindata = array_merge($admindata, $sql_data);
+		$this->session_id = $admindata['session_id'];
 		
 		$sessiondata = array(
 			'adminloginkey' => ( $autologin ) ? $admindata['admin_pwd'] : '',
@@ -202,9 +190,8 @@ class Session {
 		);
 		
 		$this->send_cookie('sessid', $this->session_id, 0);
-		$this->send_cookie('data', serialize($sessiondata), $current_time + 31536000);
+		$this->send_cookie('data', serialize($sessiondata), strtotime('+1 month'));
 		
-		$this->sessid_url   = 'sessid=' . $this->session_id;
 		$this->is_logged_in = true;
 		
 		return $admindata;
@@ -229,13 +216,7 @@ class Session {
 		}
 		else
 		{
-			$this->session_id = ( !empty($_GET['sessid']) ) ? $_GET['sessid'] : '';
 			$sessiondata = '';
-			
-			if( $this->session_id != '' )
-			{
-				$this->sessid_url = 'sessid=' . $this->session_id;
-			}
 		}
 		
 		$current_time = time();
@@ -258,17 +239,12 @@ class Session {
 			//
 			// Récupération des infos sur la session et l'utilisateur 
 			//
-			$sql = "SELECT s.session_id, s.session_start, s.session_time, s.session_ip, s.session_liste,
-					a.admin_id, a.admin_login, a.admin_pwd, a.admin_email, a.admin_lang, a.admin_dateformat,
-					a.admin_level, a.email_new_subscribe, a.email_unsubscribe
+			$sql = "SELECT s.*, a.*
 				FROM " . SESSIONS_TABLE . " AS s
 					INNER JOIN " . ADMIN_TABLE . " AS a ON a.admin_id = s.admin_id
 				WHERE s.session_id = '{$this->session_id}'
 					AND s.session_start > " . $expiry_time;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible de récupérer les infos sur la session et l\'utilisateur', CRITICAL_ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( $row = $result->fetch() )
 			{
@@ -293,14 +269,11 @@ class Session {
 							SET session_time  = $current_time, 
 								session_liste = $row[session_liste]
 							WHERE session_id = '{$this->session_id}'";
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de mettre à jour la session en cours', CRITICAL_ERROR);
-						}
+						$db->query($sql);
 						
 						if( $force_update )
 						{
-							$this->send_cookie('listeid', $row['session_liste'], $current_time + 31536000);
+							$this->send_cookie('listeid', $row['session_liste'], strtotime('+1 month'));
 						}
 					}
 					
@@ -368,9 +341,6 @@ class Session {
 		}
 		else
 		{
-			$this->send_cookie('sessid', '', $current_time - 31536000);
-			$this->send_cookie('data', '', $current_time - 31536000);
-			
 			return false;
 		}
 	}
@@ -394,15 +364,14 @@ class Session {
 			$sql = "DELETE FROM " . SESSIONS_TABLE . " 
 				WHERE session_id = '{$this->session_id}'
 					AND admin_id = " . $admin_id;
-			if( !$db->query($sql) )
-			{
-				trigger_error('Erreur lors de la fermeture de la session', CRITICAL_ERROR);
-			}
+			$db->query($sql);
 		}
 		
 		$this->is_logged_in = false;
-		$this->send_cookie('sessid', '', $current_time - 31536000);
-		$this->send_cookie('data', '', $current_time - 31536000);
+		$ts_expire = strtotime('-1 month');
+		$this->send_cookie('sessid', '', $ts_expire);
+		$this->send_cookie('data', '', $ts_expire);
+
 	}
 	
 	/**
@@ -419,9 +388,7 @@ class Session {
 	{
 		global $db;
 		
-		$sql = 'SELECT s.session_id, s.session_start, s.session_time, s.session_ip, s.session_liste,
-					a.admin_id, a.admin_login, a.admin_pwd, a.admin_email, a.admin_lang, a.admin_dateformat,
-					a.admin_level, a.email_new_subscribe, a.email_unsubscribe
+		$sql = 'SELECT s.*, a.*
 			FROM ' . ADMIN_TABLE . ' AS a
 			LEFT JOIN ' . SESSIONS_TABLE . ' AS s ON s.admin_id = a.admin_id WHERE ';
 		if( is_numeric($admin_mixed) )
@@ -433,13 +400,41 @@ class Session {
 			$sql .= 'LOWER(a.admin_login) = \'' . $db->escape(strtolower($admin_mixed)) . '\'';
 		}
 		
-		if( !($result = $db->query($sql)) )
+		$result = $db->query($sql);
+		$login  = false;
+		$hasher = new PasswordHash();
+		
+		if( $admindata = $result->fetch() )
 		{
-			trigger_error('Impossible d\'obtenir les données sur cet utilisateur', CRITICAL_ERROR);
+			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
+			if( $admindata['admin_pwd'][0] != '$' )
+			{
+				if( $admindata['admin_pwd'] === md5($admin_pwd) )
+				{
+					$login = true;
+				}
+			}
+			// New password hash using phpass
+			else if( $hasher->check($admin_pwd, $admindata['admin_pwd']) )
+			{
+				$login = true;
+			}
 		}
 		
-		if( ($admindata = $result->fetch()) && $admindata['admin_pwd'] == $admin_pwd )
+		if( $login )
 		{
+			if( $this->update_hash )
+			{
+				$admindata['admin_pwd'] = $hasher->hash($admin_pwd);
+				
+				$sql = sprintf("UPDATE %s SET admin_pwd = '%s' WHERE admin_id = %d",
+					ADMIN_TABLE,
+					$db->escape($admindata['admin_pwd']),
+					$admindata['admin_id']
+				);
+				$db->query($sql);
+			}
+			
 			return $this->open($admindata, $autologin);
 		}
 		
@@ -464,8 +459,38 @@ class Session {
 			$cookie_time,
 			$this->cfg_cookie['cookie_path'],
 			$this->cfg_cookie['cookie_domain'],
-			$this->cfg_cookie['cookie_secure']
+			$this->cfg_cookie['cookie_secure'],
+			$this->cfg_cookie['cookie_httponly']
 		);
+	}
+	
+	/**
+	 * Renomme les cookies précédemment envoyés par la classe Session
+	 *
+	 * @param string  $new_prefix  Nouveau préfixe pour les cookies envoyés
+	 *
+	 * @access public
+	 */
+	function rename_cookies($new_prefix)
+	{
+		$old_prefix = $this->cfg_cookie['cookie_name'];
+		$cookies_to_rename = array();
+		
+		foreach( $_COOKIE as $name => $value ) {
+			$len = strlen($old_prefix)+1;
+			if( strncmp($name, $old_prefix.'_', $len) === 0 ) {
+				$name = substr($name, $len);
+				$cookies_to_rename[$name] = $value;
+				$this->send_cookie($name, '', strtotime('-1 month'));
+			}
+		}
+		
+		$this->cfg_cookie['cookie_name'] = $new_prefix;
+		
+		foreach( $cookies_to_rename as $name => $value ) {
+			$expires = ($name == 'sessid') ? 0 : strtotime('+1 month');
+			$this->send_cookie($name, $value, $expires);
+		}
 	}
 	
 	/**
@@ -501,32 +526,5 @@ class Session {
 	}
 }
 
-/**
- * Ajout de l'identifiant de session dans l'url si les cookies sont refusés
- * 
- * @param string  $var       Url, texte (si $is_str à true)
- * @param boolean $is_str    True si on doit scanner du texte et rechercher les endroits où ajouter l'id de session
- * 
- * @return string
- */
-function sessid($var, $is_str = false)
-{
-	global $session;
-	
-	if( $session->sessid_url != '' )
-	{
-		if( $is_str )
-		{
-			$var = preg_replace('/(action|a href)="(?!ftp|http|mailto|javascript|{)([^"]+)"/e', '\'\\1="\' . sessid(\'\\2\') . \'"\'', $var);
-		}
-		else if( !preg_match('/sessid=[[:alnum:]]+/', $var) )
-		{
-			$var .= ( ( strpos($var, '?') ) ? '&amp;' : '?' ) . $session->sessid_url;
-		}
-	}
-	
-	return $var;
 }
 
-}
-?>

@@ -1,5 +1,5 @@
 -- 
--- Schéma des tables de WAnewsletter 2.3.x pour SQLite
+-- Schéma des tables de WAnewsletter pour SQLite
 -- 
 
 -- 
@@ -24,8 +24,8 @@ CREATE TABLE wa_abo_liste (
 CREATE TABLE wa_abonnes (
 	abo_id     INTEGER      NOT NULL,
 	abo_pseudo VARCHAR(30)  NOT NULL DEFAULT '',
-	abo_pwd    VARCHAR(32)  NOT NULL DEFAULT '',
-	abo_email  VARCHAR(255) NOT NULL DEFAULT '',
+	abo_pwd    VARCHAR(255) NOT NULL DEFAULT '',
+	abo_email  VARCHAR(254) NOT NULL DEFAULT '',
 	abo_lang   VARCHAR(30)  NOT NULL DEFAULT '',
 	abo_status INTEGER      NOT NULL DEFAULT 0,
 	CONSTRAINT wa_abonnes_pk PRIMARY KEY (abo_id),
@@ -40,8 +40,8 @@ CREATE INDEX abo_status_idx ON wa_abonnes (abo_status);
 CREATE TABLE wa_admin (
 	admin_id            INTEGER      NOT NULL,
 	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
-	admin_pwd           VARCHAR(32)  NOT NULL DEFAULT '',
-	admin_email         VARCHAR(255) NOT NULL DEFAULT '',
+	admin_pwd           VARCHAR(255) NOT NULL DEFAULT '',
+	admin_email         VARCHAR(254) NOT NULL DEFAULT '',
 	admin_lang          VARCHAR(30)  NOT NULL DEFAULT '',
 	admin_dateformat    VARCHAR(20)  NOT NULL DEFAULT '',
 	admin_level         INTEGER      NOT NULL DEFAULT 1,
@@ -76,7 +76,7 @@ CREATE INDEX admin_id_idx ON wa_auth_admin (admin_id);
 CREATE TABLE wa_ban_list (
 	ban_id    INTEGER      NOT NULL,
 	liste_id  INTEGER      NOT NULL DEFAULT 0,
-	ban_email VARCHAR(250) NOT NULL DEFAULT '',
+	ban_email VARCHAR(254) NOT NULL DEFAULT '',
 	CONSTRAINT wa_ban_list_pk PRIMARY KEY (ban_id)
 );
 
@@ -85,35 +85,11 @@ CREATE TABLE wa_ban_list (
 -- Structure de la table "wa_config"
 -- 
 CREATE TABLE wa_config (
-	sitename          VARCHAR(100) NOT NULL DEFAULT '',
-	urlsite           VARCHAR(100) NOT NULL DEFAULT '',
-	path              VARCHAR(100) NOT NULL DEFAULT '',
-	date_format       VARCHAR(20)  NOT NULL DEFAULT '',
-	session_length    INTEGER      NOT NULL DEFAULT 0,
-	language          VARCHAR(30)  NOT NULL DEFAULT '',
-	cookie_name       VARCHAR(100) NOT NULL DEFAULT '',
-	cookie_path       VARCHAR(100) NOT NULL DEFAULT '',
-	upload_path       VARCHAR(100) NOT NULL DEFAULT '',
-	max_filesize      INTEGER      NOT NULL DEFAULT 0,
-	use_ftp           INTEGER      NOT NULL DEFAULT 0,
-	ftp_server        VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_port          INTEGER      NOT NULL DEFAULT 21,
-	ftp_pasv          INTEGER      NOT NULL DEFAULT 0,
-	ftp_path          VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_user          VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_pass          VARCHAR(100) NOT NULL DEFAULT '',
-	engine_send       INTEGER      NOT NULL DEFAULT 0,
-	emails_sended     INTEGER      NOT NULL DEFAULT 0,
-	use_smtp          INTEGER      NOT NULL DEFAULT 0,
-	smtp_host         VARCHAR(100) NOT NULL DEFAULT '',
-	smtp_port         INTEGER      NOT NULL DEFAULT 25,
-	smtp_user         VARCHAR(100) NOT NULL DEFAULT '',
-	smtp_pass         VARCHAR(100) NOT NULL DEFAULT '',
-	disable_stats     INTEGER      NOT NULL DEFAULT 0,
-	gd_img_type       VARCHAR(5)   NOT NULL DEFAULT '',
-	check_email_mx    INTEGER      NOT NULL DEFAULT 0,
-	enable_profil_cp  INTEGER      NOT NULL DEFAULT 0,
-	mailing_startdate INTEGER      NOT NULL DEFAULT 0
+	config_id     INTEGER      NOT NULL,
+	config_name   VARCHAR(255),
+	config_value  VARCHAR(255),
+	CONSTRAINT wa_config_pk PRIMARY KEY (config_id),
+	CONSTRAINT config_name_idx UNIQUE (config_name)
 );
 
 
@@ -149,8 +125,8 @@ CREATE TABLE wa_liste (
 	liste_name        VARCHAR(100) NOT NULL DEFAULT '',
 	liste_public      INTEGER      NOT NULL DEFAULT 1,
 	liste_format      INTEGER      NOT NULL DEFAULT 1,
-	sender_email      VARCHAR(250) NOT NULL DEFAULT '',
-	return_email      VARCHAR(250) NOT NULL DEFAULT '',
+	sender_email      VARCHAR(254) NOT NULL DEFAULT '',
+	return_email      VARCHAR(254) NOT NULL DEFAULT '',
 	confirm_subscribe INTEGER      NOT NULL DEFAULT 0,
 	limitevalidate    INTEGER      NOT NULL DEFAULT 3,
 	form_url          VARCHAR(255) NOT NULL DEFAULT '',
@@ -159,7 +135,7 @@ CREATE TABLE wa_liste (
 	purge_freq        INTEGER      NOT NULL DEFAULT 0,
 	purge_next        INTEGER      NOT NULL DEFAULT 0,
 	liste_startdate   INTEGER      NOT NULL DEFAULT 0,
-	liste_alias       VARCHAR(250) NOT NULL DEFAULT '',
+	liste_alias       VARCHAR(254) NOT NULL DEFAULT '',
 	liste_numlogs     INTEGER      NOT NULL DEFAULT 0,
 	use_cron          INTEGER      NOT NULL DEFAULT 0,
 	pop_host          VARCHAR(100) NOT NULL DEFAULT '',

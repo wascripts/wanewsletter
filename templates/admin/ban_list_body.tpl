@@ -1,26 +1,28 @@
-<form method="post" action="./tools.php?mode=ban">
-<div class="smallbloc">
+<form class="compact" method="post" action="./tools.php?mode=ban">
+<div class="block">
 	<h2>{L_TITLE_BAN}</h2>
 	
-	<table class="content">
+	<div class="explain">{L_EXPLAIN_BAN}</div>
+	
+	<table class="dataset">
 		<tr>
-			<td class="explain" colspan="2"> {L_EXPLAIN_BAN} </td>
+			<td><label for="pattern">{L_BAN_EMAIL}&nbsp;:</label></td>
+			<td><input type="text" id="pattern" name="pattern" size="30" maxlength="254" /></td>
 		</tr>
+	</table>
+	
+	<div class="explain">{L_EXPLAIN_UNBAN}</div>
+	
+	<table class="dataset">
 		<tr>
-			<td class="row1"> <label for="pattern">{L_BAN_EMAIL}&#160;:</label> </td>
-			<td class="row2"> <input type="text" id="pattern" name="pattern" size="30" maxlength="100" class="text" /> </td>
-		</tr>
-		<tr>
-			<td class="explain" colspan="2"> {L_EXPLAIN_UNBAN} </td>
-		</tr>
-		<tr>
-			<td class="row1"> <label for="unban_list_id">{L_UNBAN_EMAIL}&#160;:</label> </td>
-			<td class="row2"> {UNBAN_EMAIL_BOX} </td>
+			<td><label for="unban_list_id">{L_UNBAN_EMAIL}&nbsp;:</label></td>
+			<td>{UNBAN_EMAIL_BOX}</td>
 		</tr>
 	</table>
 	
 	<div class="bottom"> {S_HIDDEN_FIELDS}
-		<input type="submit" name="submit" class="pbutton" value="{L_VALID_BUTTON}" /> <input type="reset" value="{L_RESET_BUTTON}" class="button" />
+		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
+		<button type="reset">{L_RESET_BUTTON}</button>
 	</div>
 </div>
 </form>

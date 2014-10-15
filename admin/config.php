@@ -1,27 +1,10 @@
 <?php 
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_NEWSLETTER', true);
@@ -32,19 +15,12 @@ require WAMAILER_DIR . '/class.mailer.php';
 if( $admindata['admin_level'] != ADMIN )
 {
 	$output->redirect('./index.php', 6);
-	
-	$message  = $lang['Message']['Not_authorized'];
-	$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-	$output->message($message);
+	$output->addLine($lang['Message']['Not_authorized']);
+	$output->addLine($lang['Click_return_index'], './index.php');
+	$output->displayMessage();
 }
 
-$sql = "SELECT * FROM " . CONFIG_TABLE;
-if( !($result = $db->query($sql)) )
-{
-	trigger_error('Impossible de récupérer la configuration du script', ERROR);
-}
-
-$old_config = $result->fetch(SQL_FETCH_ASSOC);
+$old_config = $nl_config;
 $move_files = false;
 
 if( isset($_POST['submit']) )
@@ -73,6 +49,32 @@ if( isset($_POST['submit']) )
 	
 	$new_config['date_format'] = ( $new_config['date_format'] == '' ) ? 'd M Y H:i' : $new_config['date_format'];
 	
+	// Restriction de caractères sur le nom du cookie
+	if( preg_match("/[=,;\s\v]/", $new_config['cookie_name']) )
+	{
+		$error = true;
+		$msg_error[] = nl2br($lang['Message']['Invalid_cookie_name']);
+	}
+	
+	// Restriction sur le chemin de validité du cookie
+	if( $new_config['cookie_path'] == '' )
+	{
+		$new_config['cookie_path'] = '/';
+	}
+	else if( $new_config['cookie_path'] != '/' )
+	{
+		$new_config['cookie_path'] = '/' . trim($new_config['cookie_path'], '/') . '/';
+	}
+	
+	$len = strlen($new_config['cookie_path']);
+	if( strncmp($new_config['cookie_path'], $new_config['path'], $len) != 0 )
+	{
+		$error = true;
+		$msg_error[] = nl2br(sprintf($lang['Message']['Invalid_cookie_path'],
+			wan_htmlspecialchars($new_config['path'])
+		));
+	}
+	
 	if( ($new_config['session_length'] = intval($new_config['session_length'])) <= 0 )
 	{
 		$new_config['session_length'] = 3600;
@@ -95,14 +97,14 @@ if( isset($_POST['submit']) )
 				{
 					$error = true;
 					$msg_error[] = sprintf($lang['Message']['Cannot_create_dir'],
-						htmlspecialchars(wa_realpath($dest_upload)));
+						wan_htmlspecialchars(wa_realpath($dest_upload)));
 				}
 			}
 			else if( !is_writable($dest_upload) )
 			{
 				$error = true;
 				$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-					htmlspecialchars(wa_realpath($dest_upload)));
+					wan_htmlspecialchars(wa_realpath($dest_upload)));
 			}
 		}
 	}
@@ -113,7 +115,7 @@ if( isset($_POST['submit']) )
 	}
 	
 	$new_config['ftp_server']    = preg_replace('/^(?:ftp:\/\/)?(.*)$/i', '\\1', $new_config['ftp_server']);
-	$new_config['emails_sended'] = intval($new_config['emails_sended']);
+	$new_config['sending_limit'] = intval($new_config['sending_limit']);
 	
 	if( !($new_config['ftp_port'] = intval($new_config['ftp_port'])) )
 	{
@@ -148,17 +150,12 @@ if( isset($_POST['submit']) )
 		}
 		else
 		{
-			@ftp_quit($result['connect_id']);
+			@ftp_close($result['connect_id']);
 		}
 	}
 	else
 	{
 		$new_config['use_ftp'] = 0;
-	}
-	
-	if( Mailer::is_online_host() == true )
-	{
-		$new_config['engine_send'] = ENGINE_UNIQ;
 	}
 	
 	if( empty($new_config['smtp_pass']) )
@@ -186,7 +183,7 @@ if( isset($_POST['submit']) )
 		{
 			$error = true;
 			$msg_error[] = sprintf(nl2br($lang['Message']['bad_smtp_param']),
-				htmlspecialchars($smtp->msg_error));
+				wan_htmlspecialchars($smtp->msg_error));
 		}
 		else
 		{
@@ -206,7 +203,7 @@ if( isset($_POST['submit']) )
 		{
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-				htmlspecialchars(wa_realpath(WA_STATSDIR)));
+				wan_htmlspecialchars(wa_realpath(WA_STATSDIR)));
 		}
 	}
 	else
@@ -216,9 +213,15 @@ if( isset($_POST['submit']) )
 	
 	if( !$error )
 	{
-		if( !$db->build(SQL_UPDATE, CONFIG_TABLE, $new_config) )
+		wa_update_config(array_merge($old_config, $new_config));
+		
+		//
+		// Si le préfixe des cookie a changé, on envoie de nouveaux cookies et
+		// on supprime ceux qui sont obsolètes.
+		//
+		if( $new_config['cookie_name'] !== $old_config['cookie_name'] )
 		{
-			trigger_error('Impossible de mettre à jour la configuration', ERROR);
+			$session->rename_cookies($new_config['cookie_name']);
 		}
 		
 		//
@@ -253,7 +256,7 @@ if( isset($_POST['submit']) )
 			}
 		}
 		
-		$output->message('Success_modif');
+		$output->displayMessage('Success_modif');
 	}
 }
 else
@@ -300,8 +303,8 @@ $output->assign_vars( array(
 	'L_OCTETS'                  => $lang['Octets'],
 	'L_CHECK_EMAIL'             => $lang['Check_email'],
 	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p11">', '</a>')),
-	'L_EMAILS_SENDED'           => $lang['Emails_paquet'],
-	'L_EMAILS_SENDED_NOTE'      => nl2br($lang['Emails_paquet_note']),
+	'L_SENDING_LIMIT'           => $lang['Sending_limit'],
+	'L_SENDING_LIMIT_NOTE'      => nl2br($lang['Sending_limit_note']),
 	'L_USE_SMTP'                => $lang['Use_smtp'],
 	'L_USE_SMTP_NOTE'           => nl2br($lang['Use_smtp_note']),
 	'L_YES'                     => $lang['Yes'],
@@ -316,7 +319,7 @@ $output->assign_vars( array(
 	'L_RESET_BUTTON'            => $lang['Button']['reset'],
 	
 	'LANG_BOX'                  => lang_box($new_config['language']),
-	'SITENAME'                  => htmlspecialchars($new_config['sitename']),
+	'SITENAME'                  => wan_htmlspecialchars($new_config['sitename']),
 	'URLSITE'                   => $new_config['urlsite'],
 	'URLSCRIPT'                 => $new_config['path'],
 	'DATE_FORMAT'               => $new_config['date_format'],
@@ -329,17 +332,15 @@ $output->assign_vars( array(
 	'MAX_FILESIZE'              => $new_config['max_filesize'],
 	'CHECKED_CHECK_EMAIL_ON'    => ( $new_config['check_email_mx'] ) ? ' checked="checked"' : '',
 	'CHECKED_CHECK_EMAIL_OFF'   => ( !$new_config['check_email_mx'] ) ? ' checked="checked"' : '',
-	'EMAILS_SENDED'             => $new_config['emails_sended'],
+	'SENDING_LIMIT'             => $new_config['sending_limit'],
+	'SMTP_ROW_CLASS'            => ( $new_config['use_smtp'] ) ? '' : 'inactive',
 	'CHECKED_USE_SMTP_ON'       => ( $new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'CHECKED_USE_SMTP_OFF'      => ( !$new_config['use_smtp'] ) ? ' checked="checked"' : '',
 	'DISABLED_SMTP'             => ( !function_exists('fsockopen') ) ? ' disabled="disabled"' : '',
 	'WARNING_SMTP'              => ( !function_exists('fsockopen') ) ? ' <span style="color: red;">[not available]</span>' : '',
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
-	'SMTP_USER'                 => $new_config['smtp_user'],
-	
-	'USE_FTP_STATUS'            => ( $new_config['use_ftp'] ) ? 'true' : 'false',
-	'USE_SMTP_STATUS'           => ( $new_config['use_smtp'] ) ? 'true' : 'false'
+	'SMTP_USER'                 => $new_config['smtp_user']
 ));
 
 if( extension_loaded('ftp') )
@@ -356,6 +357,7 @@ if( extension_loaded('ftp') )
 		'L_FTP_USER'           => $lang['Ftp_user'],
 		'L_FTP_PASS'           => $lang['Ftp_pass'],
 		
+		'FTP_ROW_CLASS'        => ( $new_config['use_ftp'] ) ? '' : 'inactive',
 		'CHECKED_USE_FTP_ON'   => ( $new_config['use_ftp'] ) ? ' checked="checked"' : '',
 		'CHECKED_USE_FTP_OFF'  => ( !$new_config['use_ftp'] ) ? ' checked="checked"' : '',
 		'CHECKED_FTP_PASV_ON'  => ( $new_config['ftp_pasv'] ) ? ' checked="checked"' : '',
@@ -367,17 +369,14 @@ if( extension_loaded('ftp') )
 	));
 }
 
-if( Mailer::is_online_host() == false )
-{
-	$output->assign_block_vars('choice_engine_send', array(
-		'L_ENGINE_SEND'       => $lang['Choice_engine_send'],
-		'L_ENGINE_BCC'        => $lang['With_engine_bcc'],
-		'L_ENGINE_UNIQ'       => $lang['With_engine_uniq'],
-		
-		'CHECKED_ENGINE_BCC'  => ( $new_config['engine_send'] == ENGINE_BCC ) ? ' checked="checked"' : '',
-		'CHECKED_ENGINE_UNIQ' => ( $new_config['engine_send'] == ENGINE_UNIQ ) ? ' checked="checked"' : ''
-	));
-}
+$output->assign_block_vars('choice_engine_send', array(
+	'L_ENGINE_SEND'       => $lang['Choice_engine_send'],
+	'L_ENGINE_BCC'        => $lang['With_engine_bcc'],
+	'L_ENGINE_UNIQ'       => $lang['With_engine_uniq'],
+	
+	'CHECKED_ENGINE_BCC'  => ( $new_config['engine_send'] == ENGINE_BCC ) ? ' checked="checked"' : '',
+	'CHECKED_ENGINE_UNIQ' => ( $new_config['engine_send'] == ENGINE_UNIQ ) ? ' checked="checked"' : ''
+));
 
 if( extension_loaded('gd') )
 {
@@ -385,12 +384,9 @@ if( extension_loaded('gd') )
 		'TITLE_CONFIG_STATS'        => $lang['Title']['config_stats'],
 		'L_EXPLAIN_STATS'           => nl2br($lang['Explain']['config_stats']),
 		'L_DISABLE_STATS'           => $lang['Disable_stats'],
-		'L_GD_VERSION'              => $lang['GD_version'],
 		
 		'CHECKED_DISABLE_STATS_ON'  => ( $new_config['disable_stats'] ) ? ' checked="checked"' : '',
-		'CHECKED_DISABLE_STATS_OFF' => ( !$new_config['disable_stats'] ) ? ' checked="checked"' : '',
-		'SELECTED_GD_PNG'           => ( $new_config['gd_img_type'] == 'png' ) ? ' selected="selected"' : '',
-		'SELECTED_GD_GIF'           => ( $new_config['gd_img_type'] == 'gif' ) ? ' selected="selected"' : ''
+		'CHECKED_DISABLE_STATS_OFF' => ( !$new_config['disable_stats'] ) ? ' checked="checked"' : ''
 	));
 }
 else
@@ -398,7 +394,6 @@ else
 	$output->addHiddenField('disable_stats', '1');
 }
 
-$output->addHiddenField('sessid', $session->session_id);
 $output->assign_var('S_HIDDEN_FIELDS', $output->getHiddenFields());
 
 $output->pparse('body');

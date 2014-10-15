@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('ENGINE_SEND_INC') ) {
@@ -89,10 +72,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				SET send = 1
 				WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
 					AND liste_id = " . $listdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-			}
+			$db->query($sql);
 		}
 		
 		ftruncate($fp, 0);
@@ -102,9 +82,10 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	// Initialisation de la classe mailer
 	//
-	require WAMAILER_DIR . '/class.mailer.php';
+	require_once WAMAILER_DIR . '/class.mailer.php';
 	
 	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+	$mailer->signature = WA_X_MAILER;
 	
 	if( $nl_config['use_smtp'] )
 	{
@@ -118,7 +99,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	
 	$mailer->set_charset($lang['CHARSET']);
-	$mailer->set_from($listdata['sender_email'], unhtmlspecialchars($listdata['liste_name']));
+	$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
 	
 	if( $listdata['return_email'] != '' )
 	{
@@ -223,9 +204,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	if( count($other_tags) > 0 )
 	{
 		$fields_str = '';
-		foreach( $other_tags as $data )
+		foreach( $other_tags as $tag )
 		{
-			$fields_str .= 'a.' . $data['column_name'] . ', ';
+			$fields_str .= 'a.' . $tag['column_name'] . ', ';
 		}
 	}
 	else
@@ -243,10 +224,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			FROM " . ADMIN_TABLE . " AS a
 				INNER JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = a.admin_id
 					AND aa.cc_admin = " . TRUE;
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		while( $email = $result->column('admin_email') )
 		{
@@ -257,65 +235,64 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		$supp_address = array_unique($supp_address); // Au cas où...
 	}
 	
-	//
-	// On récupère les infos sur les abonnés destinataires
-	//
-	$sql = "SELECT COUNT(a.abo_id) AS total
-		FROM " . ABONNES_TABLE . " AS a
-			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
-				AND al.liste_id  = $listdata[liste_id]
-				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-				AND al.send      = 0
-		WHERE a.abo_status = " . ABO_ACTIF;
-	if( !($result = $db->query($sql)) )
+	$abo_ids     = array();
+	$total_abo   = 0;
+	$abo_address = array();
+	$format      = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
+	
+	if( $logdata['log_status'] == STATUS_STANDBY )
 	{
-		trigger_error('Impossible d\'obtenir le nombre d\'adresses emails', ERROR);
+		//
+		// On récupère les infos sur les abonnés destinataires
+		//
+		$sql = "SELECT COUNT(a.abo_id) AS total
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+					AND al.liste_id  = $listdata[liste_id]
+					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
+					AND al.send      = 0
+			WHERE a.abo_status = " . ABO_ACTIF;
+		$result = $db->query($sql);
+		
+		$total_abo = $result->column('total');
+		if( $nl_config['sending_limit'] > 0 )
+		{
+			$total_abo = min($total_abo, $nl_config['sending_limit']);
+		}
+		
+		$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, al.register_key, al.format
+			FROM " . ABONNES_TABLE . " AS a
+				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
+					AND al.liste_id  = $listdata[liste_id]
+					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
+					AND al.send      = 0
+			WHERE a.abo_status = " . ABO_ACTIF;
+		if( $nl_config['sending_limit'] > 0 )
+		{
+			$sql .= " LIMIT $nl_config[sending_limit] OFFSET 0";
+		}
+		
+		$result = $db->query($sql);
+		
+		while( $row = $result->fetch() )
+		{
+			array_push($abo_address, $row);
+		}
 	}
 	
-	$total_abo = $result->column('total');
-	if( $nl_config['emails_sended'] > 0 )
-	{
-		$total_abo = min($total_abo, $nl_config['emails_sended']);
-	}
-	
-	$sql = "SELECT a.abo_id, a.abo_pseudo, $fields_str a.abo_email, al.register_key, al.format
-		FROM " . ABONNES_TABLE . " AS a
-			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
-				AND al.liste_id  = $listdata[liste_id]
-				AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-				AND al.send      = 0
-		WHERE a.abo_status = " . ABO_ACTIF;
-	if( $nl_config['emails_sended'] > 0 )
-	{
-		$sql .= " LIMIT $nl_config[emails_sended] OFFSET 0";
-	}
-	
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des adresses emails', ERROR);
-	}
-	
-	$abo_ids = array();
-	$format  = ( $listdata['liste_format'] != FORMAT_MULTIPLE ) ? $listdata['liste_format'] : false;
-	
-	if( $row = $result->fetch() )
+	if( count($abo_address) > 0 || ($logdata['log_status'] != STATUS_STANDBY && count($supp_address) > 0) )
 	{
 		if( $nl_config['engine_send'] == ENGINE_BCC )
 		{
-			fake_header(false);
-			
 			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			$abo_ids = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			
-			do
+			foreach( $abo_address as $row )
 			{
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				array_push($abo_ids[$abo_format], $row['abo_id']);
 				array_push($abonnes[$abo_format], $row['abo_email']);
-				
-				fake_header(true);
 			}
-			while( $row = $result->fetch() );
 			
 			if( $listdata['liste_format'] != FORMAT_HTML )
 			{
@@ -331,12 +308,12 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			// Tableau pour remplacer les tags par des chaines vides
 			// Non utilisation des tags avec le moteur d'envoi en copie cachée
 			//
-			$tags_replace = array('NAME' => '');
+			$tags_replace = array('NAME' => '', 'PSEUDO' => '');
 			if( count($other_tags) > 0 )
 			{
-				foreach( $other_tags as $data )
+				foreach( $other_tags as $tag )
 				{
-					$tags_replace[$data['tag_name']] = '';
+					$tags_replace[$tag['tag_name']] = '';
 				}
 			}
 			
@@ -349,7 +326,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( !$mailer->send() )
 				{
-					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 				}
 				
 				fwrite($fp, implode("\n", $abo_ids[FORMAT_TEXTE])."\n");
@@ -371,7 +348,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( !$mailer->send() )
 				{
-					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 				}
 				
 				fwrite($fp, implode("\n", $abo_ids[FORMAT_HTML])."\n");
@@ -402,16 +379,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				fake_header(false);
 			}
 			
-			if( ($isPHP5 = version_compare(phpversion(), '5.0.0', '>=')) == true )
-			{
-				eval('$mailerText = clone $mailer;');
-				eval('$mailerHTML = clone $mailer;');
-			}
-			else
-			{
-				$mailerText = $mailer;
-				$mailerHTML = $mailer;
-			}
+			$mailerText = clone $mailer;
+			$mailerHTML = clone $mailer;
 			
 			if( !$listdata['use_cron'] )
 			{
@@ -459,33 +428,13 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			$counter = 0;
 			$sendError = 0;
 			
-			do
+			while( ($row = array_pop($abo_address)) != null || ($row = array_pop($supp_address_ok)) != null )
 			{
 				$counter++;
 				$abo_format = ( !$format ) ? $row['format'] : $format;
 				
-				if( $abo_format == FORMAT_TEXTE )
-				{
-					if( $isPHP5 == true )
-					{
-						eval('$mailer = clone $mailerText;');
-					}
-					else
-					{
-						$mailer = $mailerText;
-					}
-				}
-				else
-				{
-					if( $isPHP5 == true )
-					{
-						eval('$mailer = clone $mailerHTML;');
-					}
-					else
-					{
-						$mailer = $mailerHTML;
-					}
-				}
+				// Choix de l'instance de Wamailer en fonction du format voulu
+				$mailer = ($abo_format == FORMAT_TEXTE) ? $mailerText : $mailerHTML;
 				
 				if( $row['abo_pseudo'] != '' )
 				{
@@ -506,30 +455,35 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				
 				if( $row['abo_pseudo'] != '' )
 				{
-					$tags_replace['NAME'] = ( $abo_format == FORMAT_HTML ) ? $row['abo_pseudo'] : unhtmlspecialchars($row['abo_pseudo']);
+					$tags_replace['NAME'] = $row['abo_pseudo'];
+					if( $abo_format == FORMAT_HTML )
+					{
+						$tags_replace['NAME'] = wan_htmlspecialchars($row['abo_pseudo']);
+					}
 				}
 				else
 				{
 					$tags_replace['NAME'] = '';
 				}
+				$tags_replace['PSEUDO'] = $tags_replace['NAME'];// Cohérence avec d'autres parties du script
 				
 				if( count($other_tags) > 0 )
 				{
-					foreach( $other_tags as $data )
+					foreach( $other_tags as $tag )
 					{
-						if( isset($row[$data['column_name']]) )
+						if( isset($row[$tag['column_name']]) )
 						{
-							if( !is_numeric($row[$data['column_name']]) && $abo_format == FORMAT_HTML )
+							if( !is_numeric($row[$tag['column_name']]) && $abo_format == FORMAT_HTML )
 							{
-								$row[$data['column_name']] = htmlspecialchars($row[$data['column_name']]);
+								$row[$tag['column_name']] = wan_htmlspecialchars($row[$tag['column_name']]);
 							}
 							
-							$tags_replace[$data['tag_name']] = $row[$data['column_name']];
+							$tags_replace[$tag['tag_name']] = $row[$tag['column_name']];
 							
 							continue;
 						}
 						
-						$tags_replace[$data['tag_name']] = '';
+						$tags_replace[$tag['tag_name']] = '';
 					}
 				}
 				
@@ -537,7 +491,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				{
 					$tags_replace = array_merge($tags_replace, array(
 						'WA_CODE'  => $row['register_key'],
-						'WA_EMAIL' => rawurlencode($row['abo_email'])
+						'WA_EMAIL' => $row['abo_email']
 					));
 				}
 				
@@ -569,23 +523,22 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					fake_header(true);
 				}
 			}
-			while( ($row = $result->fetch()) || ($row = array_pop($supp_address_ok)) != null );
 			
 			//
 			// Aucun email envoyé, il y a manifestement un problème, on affiche le message d'erreur
 			//
-			if( $sendError == $total_abo )
+			if( $total_abo > 0 && $sendError == $total_abo )
 			{
 				flock($fp, LOCK_UN);
 				fclose($fp);
 				unlink($lockfile);
 				
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), ERROR);
+				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 			}
 		}
 		else
 		{
-			trigger_error('Unknown_engine', ERROR);
+			trigger_error('Unknown_engine', E_USER_ERROR);
 		}
 		
 		$result->free();
@@ -611,19 +564,19 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	unset($tmp_files);
 	
-	$no_send = $sended = 0;
+	$no_sent = $sent = 0;
 	
 	if( !$db->ping() ) {
 		//
 		// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
 		//
-		if( SQL_DRIVER == 'mysqli' ) {
+		if( $db->engine == 'mysql' ) {
 			trigger_error("La connexion à la base de données a été perdue.<br />
 Vous devriez mettre l'option PHP mysqli.reconnect à On dans le php.ini,<br />
-pour permettre la reconnexion automatique au serveur.", ERROR);
+pour permettre la reconnexion automatique au serveur.", E_USER_ERROR);
 		}
 		else {
-			trigger_error("La connexion à la base de données a été perdue", ERROR);
+			trigger_error("La connexion à la base de données a été perdue", E_USER_ERROR);
 		}
 	}
 	
@@ -633,10 +586,7 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 			SET send = 1
 			WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
 				AND liste_id = " . $listdata['liste_id'];
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de mettre à jour la table des abonnés (connexion au serveur sql perdue)', ERROR);
-		}
+		$db->query($sql);
 	}
 	
 	$sql = "SELECT COUNT(*) AS num_dest, al.send
@@ -646,20 +596,17 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 		WHERE al.liste_id    = $listdata[liste_id]
 			AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 		GROUP BY al.send";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre d\'envois restants à faire', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	while( $row = $result->fetch() )
 	{
 		if( $row['send'] == 1 )
 		{
-			$sended  = $row['num_dest'];
+			$sent  = $row['num_dest'];
 		}
 		else
 		{
-			$no_send = $row['num_dest'];
+			$no_sent = $row['num_dest'];
 		}
 	}
 	$result->free();
@@ -668,55 +615,54 @@ pour permettre la reconnexion automatique au serveur.", ERROR);
 	flock($fp, LOCK_UN);
 	fclose($fp);
 	
-	if( $no_send > 0 )
+	if( $logdata['log_status'] == STATUS_STANDBY && $no_sent > 0 )
 	{
-		$message = sprintf($lang['Message']['Success_send'], $nl_config['emails_sended'], $sended, ($sended + $no_send));
+		$message = sprintf($lang['Message']['Success_send'], $nl_config['sending_limit'], $sent, ($sent + $no_sent));
 		
 		if( !defined('IN_COMMANDLINE') )
 		{
 			if( !empty($_GET['step']) && $_GET['step'] == 'auto' )
 			{
-				Location("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
+				http_redirect("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
 			}
 			
-			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id'] . '&amp;step=auto') . '">', '</a>');
-			$message .= '<br /><br />' .  sprintf($lang['Click_resend_manuel'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id']) . '">', '</a>');
+			$message .= '<br /><br />' .  sprintf($lang['Click_resend_auto'], sprintf('<a href="envoi.php?mode=progress&amp;id=%d&amp;step=auto">', $logdata['log_id']), '</a>');
+			$message .= '<br /><br />' .  sprintf($lang['Click_resend_manuel'], sprintf('<a href="envoi.php?mode=progress&amp;id=%d">', $logdata['log_id']), '</a>');
 		}
 	}
 	else
 	{
 		unlink($lockfile);
 		
-		$db->beginTransaction();
-		
-		$sql = "UPDATE " . LOG_TABLE . "
-			SET log_status = " . STATUS_SENDED . ",
-				log_numdest = $sended
-			WHERE log_id = " . $logdata['log_id'];
-		if( !$db->query($sql) )
+		if( $logdata['log_status'] == STATUS_STANDBY )
 		{
-			trigger_error('Impossible de mettre à jour la table des logs', ERROR);
+			$db->beginTransaction();
+			
+			$sql = "UPDATE " . LOG_TABLE . "
+				SET log_status = " . STATUS_SENT . ",
+					log_numdest = $sent
+				WHERE log_id = " . $logdata['log_id'];
+			$db->query($sql);
+			
+			$sql = "UPDATE " . ABO_LISTE_TABLE . "
+				SET send = 0
+				WHERE liste_id = " . $listdata['liste_id'];
+			$db->query($sql);
+			
+			$sql = "UPDATE " . LISTE_TABLE . "
+				SET liste_numlogs = liste_numlogs + 1
+				WHERE liste_id = " . $listdata['liste_id'];
+			$db->query($sql);
+			
+			$db->commit();
+			
+			$message = sprintf($lang['Message']['Success_send_finish'], $sent);
 		}
-		
-		$sql = "UPDATE " . ABO_LISTE_TABLE . "
-			SET send = 0
-			WHERE liste_id = " . $listdata['liste_id'];
-		if( !$db->query($sql) )
+		else // mode test
 		{
-			trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
+			$message  = $lang['Test_send_finish'];
+			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], sprintf('<a href="envoi.php?mode=load&amp;id=%d">', $logdata['log_id']), '</a>');
 		}
-		
-		$sql = "UPDATE " . LISTE_TABLE . "
-			SET liste_numlogs = liste_numlogs + 1
-			WHERE liste_id = " . $listdata['liste_id'];
-		if( !$db->query($sql) )
-		{
-			trigger_error('Impossible de mettre à jour la table des listes', ERROR);
-		}
-		
-		$db->commit();
-		
-		$message = sprintf($lang['Message']['Success_send_finish'], $sended);
 	}
 	
 	return $message;
@@ -752,7 +698,7 @@ function newsletter_links($listdata)
 		{
 			$link = array(
 				FORMAT_TEXTE => $listdata['form_url'],
-				FORMAT_HTML  => '<a href="' . htmlspecialchars($listdata['form_url']) . '">' . $lang['Label_link'] . '</a>'
+				FORMAT_HTML  => '<a href="' . wan_htmlspecialchars($listdata['form_url']) . '">' . $lang['Label_link'] . '</a>'
 			);
 		}
 		else
@@ -761,7 +707,7 @@ function newsletter_links($listdata)
 			
 			$link = array(
 				FORMAT_TEXTE => $tmp_link,
-				FORMAT_HTML  => '<a href="' . htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>'
+				FORMAT_HTML  => '<a href="' . wan_htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>'
 			);
 			
 			unset($tmp_link);

@@ -1,10 +1,11 @@
 -- 
--- Schéma des tables de WAnewsletter 2.3.x pour PostgreSQL
+-- Schéma des tables de WAnewsletter pour PostgreSQL
 -- 
 
 CREATE SEQUENCE wa_abonnes_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1; 
 CREATE SEQUENCE wa_admin_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
 CREATE SEQUENCE wa_ban_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
+CREATE SEQUENCE wa_config_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
 CREATE SEQUENCE wa_forbidden_ext_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
 CREATE SEQUENCE wa_joined_files_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
 CREATE SEQUENCE wa_liste_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
@@ -33,8 +34,8 @@ CREATE TABLE wa_abo_liste (
 CREATE TABLE wa_abonnes (
 	abo_id     INTEGER      NOT NULL DEFAULT nextval('wa_abonnes_id_seq'::text),
 	abo_pseudo VARCHAR(30)  NOT NULL DEFAULT '',
-	abo_pwd    VARCHAR(32)  NOT NULL DEFAULT '',
-	abo_email  VARCHAR(255) NOT NULL DEFAULT '',
+	abo_pwd    VARCHAR(255) NOT NULL DEFAULT '',
+	abo_email  VARCHAR(254) NOT NULL DEFAULT '',
 	abo_lang   VARCHAR(30)  NOT NULL DEFAULT '',
 	abo_status SMALLINT     NOT NULL DEFAULT 0,
 	CONSTRAINT wa_abonnes_pk PRIMARY KEY (abo_id),
@@ -49,8 +50,8 @@ CREATE INDEX abo_status_idx ON wa_abonnes (abo_status);
 CREATE TABLE wa_admin (
 	admin_id            SMALLINT     NOT NULL DEFAULT nextval('wa_admin_id_seq'::text),
 	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
-	admin_pwd           VARCHAR(32)  NOT NULL DEFAULT '',
-	admin_email         VARCHAR(255) NOT NULL DEFAULT '',
+	admin_pwd           VARCHAR(255) NOT NULL DEFAULT '',
+	admin_email         VARCHAR(254) NOT NULL DEFAULT '',
 	admin_lang          VARCHAR(30)  NOT NULL DEFAULT '',
 	admin_dateformat    VARCHAR(20)  NOT NULL DEFAULT '',
 	admin_level         SMALLINT     NOT NULL DEFAULT 1,
@@ -85,7 +86,7 @@ CREATE INDEX admin_id_idx ON wa_auth_admin (admin_id);
 CREATE TABLE wa_ban_list (
 	ban_id    INTEGER      NOT NULL DEFAULT nextval('wa_ban_id_seq'::text),
 	liste_id  SMALLINT     NOT NULL DEFAULT 0,
-	ban_email VARCHAR(250) NOT NULL DEFAULT '',
+	ban_email VARCHAR(254) NOT NULL DEFAULT '',
 	CONSTRAINT wa_ban_list_pk PRIMARY KEY (ban_id)
 );
 
@@ -94,35 +95,11 @@ CREATE TABLE wa_ban_list (
 -- Structure de la table "wa_config"
 -- 
 CREATE TABLE wa_config (
-	sitename          VARCHAR(100) NOT NULL DEFAULT '',
-	urlsite           VARCHAR(100) NOT NULL DEFAULT '',
-	path              VARCHAR(100) NOT NULL DEFAULT '',
-	date_format       VARCHAR(20)  NOT NULL DEFAULT '',
-	session_length    SMALLINT     NOT NULL DEFAULT 0,
-	language          VARCHAR(30)  NOT NULL DEFAULT '',
-	cookie_name       VARCHAR(100) NOT NULL DEFAULT '',
-	cookie_path       VARCHAR(100) NOT NULL DEFAULT '',
-	upload_path       VARCHAR(100) NOT NULL DEFAULT '',
-	max_filesize      INTEGER      NOT NULL DEFAULT 0,
-	use_ftp           SMALLINT     NOT NULL DEFAULT 0,
-	ftp_server        VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_port          SMALLINT     NOT NULL DEFAULT 21,
-	ftp_pasv          SMALLINT     NOT NULL DEFAULT 0,
-	ftp_path          VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_user          VARCHAR(100) NOT NULL DEFAULT '',
-	ftp_pass          VARCHAR(100) NOT NULL DEFAULT '',
-	engine_send       SMALLINT     NOT NULL DEFAULT 0,
-	emails_sended     SMALLINT     NOT NULL DEFAULT 0,
-	use_smtp          SMALLINT     NOT NULL DEFAULT 0,
-	smtp_host         VARCHAR(100) NOT NULL DEFAULT '',
-	smtp_port         SMALLINT     NOT NULL DEFAULT 25,
-	smtp_user         VARCHAR(100) NOT NULL DEFAULT '',
-	smtp_pass         VARCHAR(100) NOT NULL DEFAULT '',
-	disable_stats     SMALLINT     NOT NULL DEFAULT 0,
-	gd_img_type       VARCHAR(5)   NOT NULL DEFAULT '',
-	check_email_mx    SMALLINT     NOT NULL DEFAULT 0,
-	enable_profil_cp  SMALLINT     NOT NULL DEFAULT 0,
-	mailing_startdate INTEGER      NOT NULL DEFAULT 0
+	config_id     SMALLINT     NOT NULL DEFAULT nextval('wa_config_id_seq'::text),
+	config_name   VARCHAR(255),
+	config_value  VARCHAR(255),
+	CONSTRAINT wa_config_pk PRIMARY KEY (config_id),
+	CONSTRAINT config_name_idx UNIQUE (config_name)
 );
 
 
@@ -158,8 +135,8 @@ CREATE TABLE wa_liste (
 	liste_name        VARCHAR(100) NOT NULL DEFAULT '',
 	liste_public      SMALLINT     NOT NULL DEFAULT 1,
 	liste_format      SMALLINT     NOT NULL DEFAULT 1,
-	sender_email      VARCHAR(250) NOT NULL DEFAULT '',
-	return_email      VARCHAR(250) NOT NULL DEFAULT '',
+	sender_email      VARCHAR(254) NOT NULL DEFAULT '',
+	return_email      VARCHAR(254) NOT NULL DEFAULT '',
 	confirm_subscribe SMALLINT     NOT NULL DEFAULT 0,
 	limitevalidate    SMALLINT     NOT NULL DEFAULT 3,
 	form_url          VARCHAR(255) NOT NULL DEFAULT '',
@@ -168,7 +145,7 @@ CREATE TABLE wa_liste (
 	purge_freq        SMALLINT     NOT NULL DEFAULT 0,
 	purge_next        INTEGER      NOT NULL DEFAULT 0,
 	liste_startdate   INTEGER      NOT NULL DEFAULT 0,
-	liste_alias       VARCHAR(250) NOT NULL DEFAULT '',
+	liste_alias       VARCHAR(254) NOT NULL DEFAULT '',
 	liste_numlogs     SMALLINT     NOT NULL DEFAULT 0,
 	use_cron          SMALLINT     NOT NULL DEFAULT 0,
 	pop_host          VARCHAR(100) NOT NULL DEFAULT '',

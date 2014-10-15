@@ -1,94 +1,15 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_NEWSLETTER', true);
 
 require './pagestart.php';
-
-/**
- * Imported from PHP_Compat PEAR package
- * Replace array_udiff()
- *
- * @category    PHP
- * @package     PHP_Compat
- * @link        http://php.net/function.array_udiff
- * @author      Stephan Schmidt <schst@php.net>
- * @author      Aidan Lister <aidan@php.net>
- * @version     $Revision$
- * @since       PHP 5
- * @require     PHP 4.0.6 (is_callable)
- */
-if (!function_exists('array_udiff')) {
-    function array_udiff()
-    {
-        $args = func_get_args();
-
-        if (count($args) < 3) {
-            user_error('Wrong parameter count for array_udiff()', E_USER_WARNING);
-            return;
-        }
-
-        // Get compare function
-        $compare_func = array_pop($args);
-        if (!is_callable($compare_func)) {
-            if (is_array($compare_func)) {
-                $compare_func = $compare_func[0] . '::' . $compare_func[1];
-            }
-            user_error('array_udiff() Not a valid callback ' .
-                $compare_func, E_USER_WARNING);
-            return;
-        }
-
-        // Check arrays
-        $cnt = count($args);
-        for ($i = 0; $i < $cnt; $i++) {
-            if (!is_array($args[$i])) {
-                user_error('array_udiff() Argument #' .
-                    ($i + 1). ' is not an array', E_USER_WARNING);
-                return;
-            }
-        }
-
-        $diff = array ();
-        // Traverse values of the first array
-        foreach ($args[0] as $key => $value) {
-            // Check all arrays
-            for ($i = 1; $i < $cnt; $i++) {
-                foreach ($args[$i] as $cmp_value) {
-                    $result = call_user_func($compare_func, $value, $cmp_value);
-                    if ($result === 0) {
-                        continue 3;
-                    }
-                }
-            }
-            $diff[$key] = $value;
-        }
-        return $diff;
-    }
-}
 
 //
 // Compression éventuelle des données et réglage du mime-type et du
@@ -99,15 +20,19 @@ function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 	switch( $compress )
 	{
 		case 'zip':
+			$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
 			$mime_type = 'application/zip';
-			$zip = new zipfile;
-			$zip->addFile($contents, $filename, time());
-			$contents  = $zip->file();
+			$zip = new ZipArchive();
+			$zip->open($tmp_filename, ZipArchive::CREATE);
+			$zip->addFromString($filename, $contents);
+			$zip->close();
+			$contents = file_get_contents($tmp_filename);
+			unlink($tmp_filename);
 			$filename .= '.zip';
 			break;
 		
 		case 'gzip':
-			$mime_type = 'application/x-gzip-compressed';
+			$mime_type = 'application/x-gzip';
 			$contents  = gzencode($contents);
 			$filename .= '.gz';
 			break;
@@ -129,29 +54,24 @@ function decompress_filedata($filename, $file_ext)
 {
 	if( $file_ext != 'zip' )
 	{
-		switch( $file_ext )
+		if( $file_ext == 'gz' )
 		{
-			case 'gz':
-				$open  = 'gzopen';
-				$eof   = 'gzeof';
-				$gets  = 'gzgets';
-				$close = 'gzclose';
-				break;
-			
-			case 'bz2':
-			case 'txt':
-			case 'sql':
-			case 'xml':
-				$open  = 'fopen';
-				$eof   = 'feof';
-				$gets  = 'fgets';
-				$close = 'fclose';
-				break;
+			$open  = 'gzopen';
+			$eof   = 'gzeof';
+			$gets  = 'gzgets';
+			$close = 'gzclose';
+		}
+		else
+		{
+			$open  = 'fopen';
+			$eof   = 'feof';
+			$gets  = 'fgets';
+			$close = 'fclose';
 		}
 		
 		if( !($fp = @$open($filename, 'rb')) )
 		{
-			trigger_error('Failed_open_file', ERROR);
+			trigger_error('Failed_open_file', E_USER_ERROR);
 		}
 		
 		$data = '';
@@ -170,13 +90,13 @@ function decompress_filedata($filename, $file_ext)
 	{
 		if( !($zip = zip_open($filename)) )
 		{
-			trigger_error('Failed_open_file', ERROR);
+			trigger_error('Failed_open_file', E_USER_ERROR);
 		}
 		
 		$zip_entry = zip_read($zip);
 		if( !zip_entry_open($zip, $zip_entry, 'rb') )
 		{
-			trigger_error('Failed_open_file', ERROR);
+			trigger_error('Failed_open_file', E_USER_ERROR);
 		}
 		
 		$data = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
@@ -218,27 +138,24 @@ switch( $mode )
 	
 	case 'backup':
 	case 'restore':
-		$backupclass = 'WadbBackup_' . SQL_DRIVER;
-		
-		if( !class_exists($backupclass) )
-		{
-			$output->message('Database_unsupported');
-		}
-		
+	case 'debug':
 	case 'attach':
 		if( $admindata['admin_level'] != ADMIN )
 		{
 			$output->redirect('./index.php', 4);
-			
-			$message  = $lang['Message']['Not_authorized'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			$output->message($message);
+			$output->addLine($lang['Message']['Not_authorized']);
+			$output->addLine($lang['Click_return_index'], './index.php');
+			$output->displayMessage();
 		}
 		
 	case 'generator':
 		$auth_type = AUTH_VIEW;
 		break;
-	
+		
+	case 'check_update':
+		$auth_type = AUTH_VIEW;
+		break;
+		
 	default:
 		$mode = '';
 		$auth_type = AUTH_VIEW;
@@ -248,7 +165,7 @@ switch( $mode )
 $url_page  = './tools.php';
 $url_page .= ( $mode != '' ) ? '?mode=' . $mode : '';
 
-if( $mode != 'backup' && $mode != 'restore' && !$admindata['session_liste'] )
+if( !in_array($mode, array('backup','restore','debug','check_update')) && !$admindata['session_liste'] )
 {
 	$output->build_listbox($auth_type, true, $url_page);
 }
@@ -256,7 +173,7 @@ else if( $admindata['session_liste'] )
 {
 	if( !$auth->check_auth($auth_type, $admindata['session_liste']) )
 	{
-		$output->message('Not_' . $auth->auth_ary[$auth_type]);
+		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
 	}
 	
 	$listdata = $auth->listdata[$admindata['session_liste']];
@@ -265,34 +182,37 @@ else if( $admindata['session_liste'] )
 //
 // Affichage de la boîte de sélection des modules
 //
-if( !isset($_POST['submit']) )
+
+// Exception téléchargement du rapport post-importation
+$getreport = ($mode == 'import' && isset($_GET['action']) && $_GET['action'] == 'getreport');
+
+if( !isset($_POST['submit']) && !$getreport )
 {
 	if( $mode != 'backup' && $mode != 'restore' )
 	{
 		$output->build_listbox($auth_type, false, $url_page);
 	}
 	
-	$tools_ary = array('export', 'import', 'ban', 'generator');
+	$tools_ary = array('export', 'import', 'ban', 'generator', 'check_update');
 	
 	if( $admindata['admin_level'] == ADMIN )
 	{
-		array_push($tools_ary, 'attach', 'backup', 'restore');
+		array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
 	}
 	
 	$tools_box = '<select id="mode" name="mode">';
 	foreach( $tools_ary as $tool_name )
 	{
-		$selected = ( $mode == $tool_name ) ? ' selected="selected"' : '';
-		$tools_box .= sprintf("<option value=\"%s\"%s> %s </option>\n\t", $tool_name, $selected, $lang['Title'][$tool_name]);
+		$tools_box .= sprintf(
+			"<option value=\"%s\"%s> %s </option>\n\t",
+			$tool_name,
+			$mode == $tool_name ? ' selected="selected"' : '',
+			$lang['Title'][$tool_name]
+		);
 	}
 	$tools_box .= '</select>';
 	
 	$output->page_header();
-	
-	if( $session->sessid_url != '' )
-	{
-		$output->addHiddenField('sessid', $session->session_id);
-	}
 	
 	$output->set_filenames(array(
 		'body' => 'tools_body.tpl'
@@ -312,14 +232,9 @@ if( !isset($_POST['submit']) )
 //
 // On vérifie la présence des extensions nécessaires pour les différents formats de fichiers proposés
 //
-$zziplib_loaded = extension_loaded('zip');
-$zlib_loaded    = extension_loaded('zlib');
-$bzip2_loaded   = extension_loaded('bz2');
-
-if( $zlib_loaded )
-{
-	require WA_ROOTDIR . '/includes/zip.lib.php';
-}
+define('ZIPLIB_LOADED', extension_loaded('zip'));
+define('ZLIB_LOADED',   extension_loaded('zlib'));
+define('BZIP2_LOADED',  extension_loaded('bz2'));
 
 if( WA_USER_OS == 'win' )
 {
@@ -343,17 +258,129 @@ define('WA_EOL', $eol);
 //
 @set_time_limit(1200);
 
+function wan_subdir_status($dir)
+{
+	if( file_exists($dir) ) {
+		if( !is_readable($dir) ) {
+			$str = "non [pas d'accès en lecture]";
+		}
+		else if( !is_writable($dir) ) {
+			$str = "non [pas d'accès en écriture]";
+		}
+		else {
+			$str = "ok";
+		}
+	}
+	else {
+		$str = "non [n'existe pas]";
+	}
+	
+	return $str;
+}
+
+function wan_print_row($name, $value)
+{
+	echo str_pad($name, 30);
+	echo ' : ';
+	echo wan_htmlspecialchars($value);
+	echo "\r\n";
+}
+
 switch( $mode )
 {
+	case 'debug':
+		printf("<h2>%s</h2>", $lang['Title']['debug']);
+		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;'>";
+		
+		wan_print_row('Version Wanewsletter', WANEWSLETTER_VERSION);
+		wan_print_row(' - db_version',     $nl_config['db_version']);
+		wan_print_row(' - session_length', $nl_config['session_length']);
+		wan_print_row(' - language',       $nl_config['language']);
+		wan_print_row(' - Upload dir',     wan_subdir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
+		
+		if( !$nl_config['disable_stats'] ) {
+			require WA_ROOTDIR . '/includes/functions.stats.php';
+			wan_print_row(' - Stats dir',     wan_subdir_status(WA_STATSDIR));
+		}
+		wan_print_row(' - max_filesize',   $nl_config['max_filesize']);
+		wan_print_row(' - use_ftp',        $nl_config['use_ftp'] ? 'oui' : 'non');
+		wan_print_row(' - engine_send',    $nl_config['engine_send']);
+		wan_print_row(' - sending_limit',  $nl_config['sending_limit']);
+		wan_print_row(' - use_smtp',       $nl_config['use_smtp'] ? 'oui' : 'non');
+		wan_print_row(' - check_email_mx', $nl_config['check_email_mx'] ? 'oui' : 'non');
+		
+		wan_print_row('Version de PHP',    phpversion());
+		wan_print_row(' - Extension Bz2', extension_loaded('zlib') ? 'oui' : 'non');
+		wan_print_row(' - Extension FTP',  extension_loaded('ftp') ? 'oui' : 'non');
+		
+		if( extension_loaded('gd') ) {
+			$tmp = gd_info();
+			$format = (imagetypes() & IMG_GIF) ? 'GIF' : 'Unavailable';
+			$format = (imagetypes() & IMG_PNG) ? 'PNG' : $format;
+			$str = sprintf('oui - Version %s - Format %s', $tmp['GD Version'], $format);
+		}
+		else {
+			$str = 'non';
+		}
+		wan_print_row(' - Extension GD', $str);
+		wan_print_row(' - Extension Iconv',
+			extension_loaded('iconv') ?
+				sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
+		);
+		wan_print_row(' - Extension Mcrypt',  extension_loaded('mcrypt') ? 'oui' : 'non');
+		wan_print_row(' - Extension Mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
+		wan_print_row(' - Extension OpenSSL',
+			extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
+		);
+		// TODO : Fix! Le module PCRE est toujours actif à partir de PHP 5.3
+		wan_print_row(' - Extension PCRE',
+			extension_loaded('pcre') ? sprintf('oui - Version %s', PCRE_VERSION) : 'non'
+		);
+		wan_print_row(' - Extension SimpleXML', extension_loaded('simplexml') ? 'oui' : 'non');
+		wan_print_row(' - Extension XML', extension_loaded('xml') ? 'oui' : 'non');
+		wan_print_row(' - Extension Zip', extension_loaded('zip') ? 'oui' : 'non');
+		wan_print_row(' - Extension Zlib', extension_loaded('zlib') ? 'oui' : 'non');
+		
+		wan_print_row(' - safe_mode', config_status('safe_mode') ? 'on' : 'off');
+		wan_print_row(' - magic_quotes_gpc', config_status('magic_quotes_gpc') ? 'on' : 'off');
+		wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
+		wan_print_row(' - allow_url_fopen', config_status('allow_url_fopen') ? 'on' : 'off');
+		wan_print_row(' - file_uploads', config_status('file_uploads') ? 'on' : 'off');
+		wan_print_row(' - upload_max_filesize', config_value('upload_max_filesize'));
+		wan_print_row(' - post_max_size', config_value('post_max_size'));
+		wan_print_row(' - memory_limit', config_value('memory_limit'));
+		wan_print_row(' - mail.add_x_header', config_value('mail.add_x_header'));
+		wan_print_row(' - mail.force_extra_parameters', config_value('mail.force_extra_parameters'));
+		wan_print_row(' - open_basedir',  config_value('open_basedir'));
+		wan_print_row(' - sendmail_from', config_value('sendmail_from'));
+		wan_print_row(' - sendmail_path', config_value('sendmail_path'));
+		wan_print_row(' - SMTP',          config_value('SMTP'));
+		
+		list($infos) = parseDSN($dsn);
+
+		wan_print_row('Type de serveur', $_SERVER['SERVER_SOFTWARE']);
+		wan_print_row('Connexion sécurisée', wan_ssl_connection() ? 'oui' : 'non');
+
+		if( $db->engine == 'sqlite' ) {
+			wan_print_row('Base de données', sprintf('%s %s - Driver : %s', $infos['label'], $db->libVersion, $infos['driver']));
+		}
+		else {
+			wan_print_row('Base de données', sprintf('%s %s - Client : %s - Jeu de caractères : %s - Driver : %s',
+				$infos['label'], $db->serverVersion, $db->clientVersion, $db->encoding(), $infos['driver']));
+		}
+
+		wan_print_row('Agent utilisateur',
+			isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'Inconnu');
+
+		echo "</pre>";
+		
+		$output->page_footer();
+		exit;
+		break;
+	
 	case 'export':
 		if( isset($_POST['submit']) )
 		{
-			if( $action == 'store' && !is_writable(WA_TMPDIR) )
-			{
-				$output->message(sprintf($lang['Message']['Dir_not_writable'],
-					htmlspecialchars(wa_realpath(WA_TMPDIR))));
-			}
-			
 			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
 			{
 				$format = $listdata['liste_format'];
@@ -368,10 +395,7 @@ switch( $mode )
 						AND al.format    = $format
 						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 				WHERE a.abo_status = " . ABO_ACTIF;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des emails à exporter', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$contents = '';
 			if( $eformat == 'xml' )
@@ -383,7 +407,7 @@ switch( $mode )
 				
 				$format = ( $format == FORMAT_HTML ) ? 'HTML' : 'text';
 				$contents  = '<' . '?xml version="1.0"?' . ">\n"
-					. "<!-- Date : " . date('d/m/Y H:i:s O') . " - Format : $format -->\n"
+					. "<!-- Date : " . date(DATE_RFC2822) . " - Format : $format -->\n"
 					. "<Wanliste>\n" . $contents . "</Wanliste>\n";
 				
 				$mime_type = 'application/xml';
@@ -418,17 +442,15 @@ switch( $mode )
 			{
 				if( !($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb')) )
 				{
-					trigger_error('Impossible d\'écrire le fichier de sauvegarde', ERROR);
+					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 				
 				fwrite($fw, $contents);
 				fclose($fw);
 				
-				$output->message('Success_export');
+				$output->displayMessage('Success_export');
 			}
 		}
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames(array(
 			'tool_body' => 'export_body.tpl'
@@ -449,19 +471,24 @@ switch( $mode )
 			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
 		));
 		
-		if( $zlib_loaded || $bzip2_loaded )
+		if( ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED )
 		{
 			$output->assign_block_vars('compress_option', array(
 				'L_COMPRESS' => $lang['Compress'],
 				'L_NO'       => $lang['No']
 			)); 
 			
-			if( $zlib_loaded )
+			if( ZIPLIB_LOADED )
+			{
+				$output->assign_block_vars('compress_option.zip_compress', array());
+			}
+			
+			if( ZLIB_LOADED )
 			{
 				$output->assign_block_vars('compress_option.gzip_compress', array());
 			}
 			
-			if( $bzip2_loaded )
+			if( BZIP2_LOADED )
 			{
 				$output->assign_block_vars('compress_option.bz2_compress', array());
 			}
@@ -481,6 +508,22 @@ switch( $mode )
 		break;
 	
 	case 'import':
+		$report_filename = WA_TMPDIR . '/wa_import_report.txt';
+		
+		if( isset($_GET['action']) && $_GET['action'] == 'getreport' )
+		{
+			if( !is_readable($report_filename) )
+			{
+				trigger_error("Impossible de récupérer le rapport. Le fichier est absent ou inaccessible", E_USER_ERROR);
+			}
+			
+			$data = file_get_contents($report_filename);
+			
+			include WA_ROOTDIR . '/includes/class.attach.php';
+			
+			Attach::send_file(basename($report_filename), 'text/plain', $data);
+		}
+		
 		if( isset($_POST['submit']) )
 		{
 			$list_email  = ( !empty($_POST['list_email']) ) ? trim($_POST['list_email']) : '';
@@ -502,10 +545,9 @@ switch( $mode )
 					if( !file_exists($tmp_filename) )
 					{
 						$output->redirect('./tools.php?mode=import', 4);
-						
-						$message  = sprintf($lang['Message']['Error_local'], htmlspecialchars($filename));
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=import') . '">', '</a>');
-						$output->message($message);
+						$output->addLine(sprintf($lang['Message']['Error_local'], wan_htmlspecialchars($filename)));
+						$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
+						$output->displayMessage();
 					}
 				}
 				else
@@ -530,7 +572,7 @@ switch( $mode )
 							$upload_error = 'Upload_error_5';
 						}
 						
-						$output->message($upload_error);
+						$output->displayMessage($upload_error);
 					}
 					
 					//
@@ -544,21 +586,20 @@ switch( $mode )
 						
 						if( !move_uploaded_file($file_upload['tmp_name'], $tmp_filename) )
 						{
-							$output->message('Upload_error_5');
+							$output->displayMessage('Upload_error_5');
 						}
 					}
 				}
 				
-				if( !preg_match('/\.(txt|xml|zip|gz|bz2)$/i', $filename, $match) )
+				$file_ext = '';
+				if( preg_match('/\.(zip|gz|bz2)$/i', $filename, $m) )
 				{
-					$output->message('Bad_file_type');
+					$file_ext = $m[1];
 				}
 				
-				$file_ext = $match[1];
-				
-				if( ( !$zziplib_loaded && $file_ext == 'zip' ) || ( !$zlib_loaded && $file_ext == 'gz' ) || ( !$bzip2_loaded && $file_ext == 'bz2' ) )
+				if( ( !ZIPLIB_LOADED && $file_ext == 'zip' ) || ( !ZLIB_LOADED && $file_ext == 'gz' ) || ( !BZIP2_LOADED && $file_ext == 'bz2' ) )
 				{
-					$output->message('Compress_unsupported');
+					$output->displayMessage('Compress_unsupported');
 				}
 				
 				$list_tmp = decompress_filedata($tmp_filename, $file_ext);
@@ -594,10 +635,9 @@ switch( $mode )
 			if( empty($list_tmp) )
 			{
 				$output->redirect('./tools.php?mode=import', 4);
-				
-				$message  = $lang['Message']['No_data_received'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=import') . '">', '</a>');
-				$output->message($message);
+				$output->addLine($lang['Message']['No_data_received']);
+				$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
+				$output->displayMessage();
 			}
 			
 			if( $listdata['liste_format'] != FORMAT_MULTIPLE )
@@ -645,9 +685,9 @@ switch( $mode )
 					
 					if( !xml_parse($parser, $list_tmp) )
 					{
-						$output->message(sprintf(
+						$output->displayMessage(sprintf(
 							$lang['Message']['Invalid_xml_data'],
-							htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
+							wan_htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
 							xml_get_current_line_number($parser)
 						));
 					}
@@ -656,7 +696,7 @@ switch( $mode )
 				}
 				else
 				{
-					$output->message('Xml_ext_needed');
+					$output->displayMessage('Xml_ext_needed');
 				}
 			}
 			else
@@ -704,10 +744,7 @@ switch( $mode )
 						LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 							AND al.liste_id = $listdata[liste_id]
 					WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible de tester les tables d\'inscriptions', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				//
 				// Traitement des adresses email déjà présentes dans la base de données
@@ -724,10 +761,7 @@ switch( $mode )
 						$sql_data['register_date'] = $current_time;
 						$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 						
-						if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-						{
-							trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
-						}
+						$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
 					}
 					else
 					{
@@ -750,8 +784,10 @@ switch( $mode )
 					$sql_data['abo_email']  = $email;
 					$sql_data['abo_status'] = ABO_ACTIF;
 					
-					if( !$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data) )
-					{
+					try {
+						$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
+					}
+					catch( SQLException $e ) {
 						$report .= sprintf('%s : SQL error (#%d: %s)%s', $email, $db->errno, $db->error, WA_EOL);
 						$db->rollBack();
 						continue;
@@ -765,10 +801,7 @@ switch( $mode )
 					$sql_data['register_date'] = $current_time;
 					$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
 					
-					if( !$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data) )
-					{
-						trigger_error('Impossible d\'insérer une nouvelle entrée dans la table abo_liste', ERROR);
-					}
+					$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
 					
 					$db->commit();
 					
@@ -782,7 +815,7 @@ switch( $mode )
 			//
 			if( $report != '' )
 			{
-				if( is_writable(WA_TMPDIR) && ($fw = fopen(WA_TMPDIR . '/wa_import_report.txt', 'w')) )
+				if( $fw = fopen($report_filename, 'w') )
 				{
 					$report_str  = '#' . WA_EOL;
 					$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
@@ -794,22 +827,20 @@ switch( $mode )
 					fwrite($fw, $report_str);
 					fclose($fw);
 					
-					$message = nl2br(sprintf($lang['Message']['Success_import3'], '<a href="' . WA_TMPDIR . '/wa_import_report.txt">', '</a>'));
+					$output->addLine($lang['Message']['Success_import3'], 'tools.php?mode=import&action=getreport');
 				}
 				else
 				{
-					$message = $lang['Message']['Success_import2'];
+					$output->addLine($lang['Message']['Success_import2']);
 				}
 			}
 			else
 			{
-				$message = $lang['Message']['Success_import'];
+				$output->addLine($lang['Message']['Success_import']);
 			}
 			
-			$output->message($message);
+			$output->displayMessage();
 		}
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames(array(
 			'tool_body' => 'import_body.tpl'
@@ -844,9 +875,10 @@ switch( $mode )
 			// Affichage du champ file pour importation
 			//
 			$output->assign_block_vars('upload_file', array(
-				'L_FILE_UPLOAD'  => $lang['File_upload'],
-				'L_MAXIMUM_SIZE' => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
-				'MAX_FILE_SIZE'  => MAX_FILE_SIZE
+				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
+				'L_FILE_UPLOAD'   => $lang['File_upload'],
+				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
+				'MAX_FILE_SIZE'   => MAX_FILE_SIZE
 			));
 		}
 		
@@ -866,20 +898,16 @@ switch( $mode )
 				
 				foreach( $pattern_ary as $pattern )
 				{
-					switch( SQL_DRIVER )
+					switch( $db->engine )
 					{
 						case 'mysql':
-						case 'mysqli':
 							$sql_values[] = "($listdata[liste_id], '" . $db->escape($pattern) . "')";
 							break;
 						
 						default:
 							$sql = "INSERT INTO " . BANLIST_TABLE . " (liste_id, ban_email) 
 								VALUES($listdata[liste_id], '" . $db->escape($pattern) . "')";
-							if( !$db->query($sql) )
-							{
-								trigger_error('Impossible de mettre à jour la table des bannis', ERROR);
-							}
+							$db->query($sql);
 							break;
 					}
 				}
@@ -888,10 +916,7 @@ switch( $mode )
 				{
 					$sql = "INSERT INTO " . BANLIST_TABLE . " (liste_id, ban_email) 
 						VALUES " . implode(', ', $sql_values);
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible d\'insérer les données dans la table des bannis', ERROR);
-					}
+					$db->query($sql);
 				}
 			}
 			
@@ -899,10 +924,7 @@ switch( $mode )
 			{
 				$sql = "DELETE FROM " . BANLIST_TABLE . " 
 					WHERE ban_id IN (" . implode(', ', $unban_list_id) . ")";
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les emails bannis sélectionnés', ERROR);
-				}
+				$db->query($sql);
 				
 				//
 				// Optimisation des tables
@@ -911,20 +933,16 @@ switch( $mode )
 			}
 			
 			$output->redirect('./tools.php?mode=ban', 4);
-			
-			$message  = $lang['Message']['Success_modif'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=ban') . '">', '</a>');
-			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			$output->message($message);
+			$output->addLine($lang['Message']['Success_modif']);
+			$output->addLine($lang['Click_return_back'], './tools.php?mode=ban');
+			$output->addLine($lang['Click_return_index'], './index.php');
+			$output->displayMessage();
 		}
 		
 		$sql = "SELECT ban_id, ban_email 
 			FROM " . BANLIST_TABLE . " 
 			WHERE liste_id = " . $listdata['liste_id'];
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des masques de bannissement', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$unban_email_box = '<select id="unban_list_id" name="unban_list_id[]" multiple="multiple" size="10">';
 		if( $row = $result->fetch() )
@@ -940,8 +958,6 @@ switch( $mode )
 			$unban_email_box .= '<option value="0">' . $lang['No_email_banned'] . '</option>';
 		}
 		$unban_email_box .= '</select>';
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames( array(
 			'tool_body' => 'ban_list_body.tpl'
@@ -980,20 +996,16 @@ switch( $mode )
 					
 					if( preg_match('/^[\w_-]+$/', $ext) )
 					{
-						switch( SQL_DRIVER )
+						switch( $db->engine )
 						{
 							case 'mysql':
-							case 'mysqli':
 								$sql_values[] = "($listdata[liste_id], '$ext')";
 								break;
 							
 							default:
 								$sql = "INSERT INTO " . FORBIDDEN_EXT_TABLE . " (liste_id, fe_ext) 
 									VALUES($listdata[liste_id], '$ext')";
-								if( !$db->query($sql) )
-								{
-									trigger_error('Impossible de mettre à jour la table des extensions interdites', ERROR);
-								}
+								$db->query($sql);
 								break;
 						}
 					}
@@ -1003,10 +1015,7 @@ switch( $mode )
 				{
 					$sql = "INSERT INTO " . FORBIDDEN_EXT_TABLE . " (liste_id, fe_ext) 
 						VALUES " . implode(', ', $sql_values);
-					if( !$db->query($sql) )
-					{
-						trigger_error('Impossible de mettre à jour la table des extensions interdites', ERROR);
-					}
+					$db->query($sql);
 				}
 			}
 			
@@ -1014,10 +1023,7 @@ switch( $mode )
 			{
 				$sql = "DELETE FROM " . FORBIDDEN_EXT_TABLE . " 
 					WHERE fe_id IN (" . implode(', ', $ext_list_id) . ")";
-				if( !$db->query($sql) )
-				{
-					trigger_error('Impossible de supprimer les extensions interdites sélectionnées', ERROR);
-				}
+				$db->query($sql);
 				
 				//
 				// Optimisation des tables
@@ -1026,20 +1032,16 @@ switch( $mode )
 			}
 			
 			$output->redirect('./tools.php?mode=attach', 4);
-			
-			$message  = $lang['Message']['Success_modif'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=attach') . '">', '</a>');
-			$message .= '<br /><br />' . sprintf($lang['Click_return_index'], '<a href="' . sessid('./index.php') . '">', '</a>');
-			$output->message($message);
+			$output->addLine($lang['Message']['Success_modif']);
+			$output->addLine($lang['Click_return_back'], './tools.php?mode=attach');
+			$output->addLine($lang['Click_return_index'], './index.php');
+			$output->displayMessage();
 		}
 		
 		$sql = "SELECT fe_id, fe_ext 
 			FROM " . FORBIDDEN_EXT_TABLE . " 
 			WHERE liste_id = " . $listdata['liste_id'];
-		if( !($result = $db->query($sql)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des extensions interdites', ERROR);
-		}
+		$result = $db->query($sql);
 		
 		$reallow_ext_box = '<select id="ext_list_id" name="ext_list_id[]" multiple="multiple" size="10">';
 		if( $row = $result->fetch() )
@@ -1055,8 +1057,6 @@ switch( $mode )
 			$reallow_ext_box .= '<option value="0">' . $lang['No_forbidden_ext'] . '</option>';
 		}
 		$reallow_ext_box .= '</select>';
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames( array(
 			'tool_body' => 'forbidden_ext_body.tpl'
@@ -1084,14 +1084,18 @@ switch( $mode )
 			JOINED_FILES_TABLE, FORBIDDEN_EXT_TABLE, LISTE_TABLE, LOG_TABLE, LOG_FILES_TABLE, SESSIONS_TABLE
 		);
 		
-		list($infos) = parseDSN($dsn);
-		
 		$tables      = array();
 		$tables_plus = ( !empty($_POST['tables_plus']) ) ? array_map('trim', $_POST['tables_plus']) : array();
 		$backup_type = ( isset($_POST['backup_type']) ) ? intval($_POST['backup_type']) : 0;
 		$drop_option = ( !empty($_POST['drop_option']) ) ? true : false;
 		
-		$backup = new $backupclass($infos);// Voir ligne 160 pour $infos et $backupclass
+		$backup = $db->initBackup();
+		
+		if( $backup == null )
+		{
+			$output->displayMessage('Database_unsupported');
+		}
+
 		$backup->eol = WA_EOL;
 		$tables_ary  = $backup->get_tables();
 		
@@ -1115,16 +1119,10 @@ switch( $mode )
 		
 		if( isset($_POST['submit']) )
 		{
-			if( $action == 'store' && !is_writable(WA_TMPDIR) )
-			{
-				$output->message(sprintf($lang['Message']['Dir_not_writable'],
-					htmlspecialchars(wa_realpath(WA_TMPDIR))));
-			}
-			
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql 
 			//
-			$contents  = $backup->header('Wanewsletter ' . WA_VERSION);
+			$contents  = $backup->header(WA_SIGNATURE);
 			$contents .= $backup->get_other_queries($drop_option);
 			
 			fake_header(false);
@@ -1164,17 +1162,15 @@ switch( $mode )
 			{
 				if( !($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb')) )
 				{
-					trigger_error('Impossible d\'écrire le fichier de sauvegarde', ERROR);
+					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 				
 				fwrite($fw, $contents);
 				fclose($fw);
 				
-				$output->message('Success_backup');
+				$output->displayMessage('Success_backup');
 			}
 		}
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames(array(
 			'tool_body' => 'backup_body.tpl'
@@ -1223,18 +1219,23 @@ switch( $mode )
 			));
 		}
 		
-		if( $zlib_loaded || $bzip2_loaded )
+		if( ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED )
 		{
 			$output->assign_block_vars('compress_option', array(
 				'L_COMPRESS' => $lang['Compress']
 			));
 			
-			if( $zlib_loaded )
+			if( ZIPLIB_LOADED )
+			{
+				$output->assign_block_vars('compress_option.zip_compress', array());
+			}
+			
+			if( ZLIB_LOADED )
 			{
 				$output->assign_block_vars('compress_option.gzip_compress', array());
 			}
 			
-			if( $bzip2_loaded )
+			if( BZIP2_LOADED )
 			{
 				$output->assign_block_vars('compress_option.bz2_compress', array());
 			}
@@ -1269,10 +1270,9 @@ switch( $mode )
 					if( !file_exists($tmp_filename) )
 					{
 						$output->redirect('./tools.php?mode=restore', 4);
-						
-						$message  = sprintf($lang['Message']['Error_local'], htmlspecialchars($filename));
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=restore') . '">', '</a>');
-						$output->message($message);
+						$output->addLine(sprintf($lang['Message']['Error_local'], wan_htmlspecialchars($filename)));
+						$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
+						$output->displayMessage();
 					}
 				}
 				else
@@ -1296,7 +1296,7 @@ switch( $mode )
 							$upload_error = 'Upload_error_5';
 						}
 						
-						$output->message($upload_error);
+						$output->displayMessage($upload_error);
 					}
 					
 					//
@@ -1310,21 +1310,21 @@ switch( $mode )
 						
 						if( !move_uploaded_file($file_upload['tmp_name'], $tmp_filename) )
 						{
-							$output->message('Upload_error_5');
+							$output->displayMessage('Upload_error_5');
 						}
 					}
 				}
 				
 				if( !preg_match('/\.(sql|zip|gz|bz2)$/i', $filename, $match) )
 				{
-					$output->message('Bad_file_type');
+					$output->displayMessage('Bad_file_type');
 				}
 				
 				$file_ext = $match[1];
 				
-				if( ( !$zziplib_loaded && $file_ext == 'zip' ) || ( !$zlib_loaded && $file_ext == 'gz' ) || ( !$bzip2_loaded && $file_ext == 'bz2' ) )
+				if( ( !ZIPLIB_LOADED && $file_ext == 'zip' ) || ( !ZLIB_LOADED && $file_ext == 'gz' ) || ( !BZIP2_LOADED && $file_ext == 'bz2' ) )
 				{
-					$output->message('Compress_unsupported');
+					$output->displayMessage('Compress_unsupported');
 				}
 				
 				$data = decompress_filedata($tmp_filename, $file_ext);
@@ -1347,10 +1347,9 @@ switch( $mode )
 			else
 			{
 				$output->redirect('./tools.php?mode=restore', 4);
-				
-				$message  = $lang['Message']['No_data_received'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./tools.php?mode=restore') . '">', '</a>');
-				$output->message($message);
+				$output->addLine($lang['Message']['No_data_received']);
+				$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
+				$output->displayMessage();
 			}
 			
 			$queries = parseSQL($data);
@@ -1361,17 +1360,14 @@ switch( $mode )
 			
 			foreach( $queries as $query )
 			{
-				$db->query($query) || trigger_error('Erreur sql lors de la restauration', ERROR);
-				
+				$db->query($query);
 				fake_header(true);
 			}
 			
 			$db->commit();
 			
-			$output->message('Success_restore');
+			$output->displayMessage('Success_restore');
 		}
-		
-		$output->addHiddenField('sessid', $session->session_id);
 		
 		$output->set_filenames(array(
 			'tool_body' => 'restore_body.tpl'
@@ -1395,9 +1391,10 @@ switch( $mode )
 			// Affichage du champ file pour importation
 			//
 			$output->assign_block_vars('upload_file', array(
-				'L_FILE_UPLOAD' => $lang['File_upload_restore'],
-				'L_MAXIMUM_SIZE' => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
-				'MAX_FILE_SIZE'  => MAX_FILE_SIZE
+				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
+				'L_FILE_UPLOAD'   => $lang['File_upload_restore'],
+				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
+				'MAX_FILE_SIZE'   => MAX_FILE_SIZE
 			));
 		}
 		
@@ -1409,7 +1406,7 @@ switch( $mode )
 		{
 			$url_form = ( !empty($_POST['url_form']) ) ? trim($_POST['url_form']) : '';
 			
-			$code_html  = "<form method=\"post\" action=\"" . htmlspecialchars($url_form) . "\">\n";
+			$code_html  = "<form method=\"post\" action=\"" . wan_htmlspecialchars($url_form) . "\">\n";
 			$code_html .= $lang['Email_address'] . " : <input type=\"text\" name=\"email\" maxlength=\"100\" /> &nbsp; \n";
 			
 			if( $listdata['liste_format'] == FORMAT_MULTIPLE )
@@ -1450,14 +1447,12 @@ switch( $mode )
 				'L_EXPLAIN_CODE_HTML' => nl2br($lang['Explain']['code_html']),
 				'L_EXPLAIN_CODE_PHP'  => nl2br($lang['Explain']['code_php']),
 				
-				'CODE_HTML' => nl2br(htmlspecialchars($code_html, ENT_NOQUOTES)),
-				'CODE_PHP'  => nl2br(htmlspecialchars($code_php, ENT_NOQUOTES))
+				'CODE_HTML' => wan_htmlspecialchars($code_html, ENT_NOQUOTES),
+				'CODE_PHP'  => wan_htmlspecialchars($code_php, ENT_NOQUOTES)
 			));
 		}
 		else
 		{
-			$output->addHiddenField('sessid', $session->session_id);
-			
 			$output->set_filenames(array(
 				'tool_body' => 'generator_body.tpl'
 			));
@@ -1473,6 +1468,53 @@ switch( $mode )
 		}
 		
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		break;
+	
+	case 'check_update':
+		require WA_ROOTDIR . '/includes/class.updater.php';
+
+		$updater = new Wa_Updater();
+		$updater->cache    = sprintf('%s/%s', WA_TMPDIR, WA_CHECK_UPDATE_CACHE);
+		$updater->cacheTtl = WA_CHECK_UPDATE_CACHE_TTL;
+		$updater->url      = WA_CHECK_UPDATE_URL;
+		$result = $updater->check(true);
+
+		if( isset($_GET['output']) && $_GET['output'] == 'json' )
+		{
+			ob_end_clean();
+			header('Content-Type: application/json');
+
+			if( $result !== false )
+			{
+				printf('{"code":"%d"}', $result);
+			}
+			else
+			{
+				echo '{"code":"2"}';
+			}
+			exit;
+		}
+		else
+		{
+			if( $result !== false )
+			{
+				if( $result === 1 )
+				{
+					$output->addLine($lang['New_version_available']);
+					$output->addLine(sprintf('<a href="%s">%s</a>', WA_DOWNLOAD_PAGE, $lang['Download_page']));
+				}
+				else
+				{
+					$output->addLine($lang['Version_up_to_date']);
+				}
+			}
+			else
+			{
+				$output->addLine($lang['Site_unreachable']);
+			}
+			
+			$output->displayMessage();
+		}
 		break;
 }
 

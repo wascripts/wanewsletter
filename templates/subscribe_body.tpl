@@ -1,34 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!--
-	Copyright (c) 2002-2006 Aurélien Maille
-	
-	Wanewsletter is free software; you can redistribute it and/or
-	modify it under the terms of the GNU General Public License 
-	as published by the Free Software Foundation; either version 2 
-	of the License, or (at your option) any later version.
-	
-	Wanewsletter is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU General Public License for more details.
-	
-	You should have received a copy of the GNU General Public License
-	along with Wanewsletter; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
--->
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-	<meta http-equiv="Content-Script-Type" content="text/javascript" />
-	<meta http-equiv="Content-Style-Type" content="text/css" />
+	<meta charset="ISO-8859-1" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	
 	<title>{PAGE_TITLE}</title>
 	
-	<meta name="Author" content="Bobe" />
-	<meta name="Editor" content="jEdit" />
-	
-	<style type="text/css" media="screen">
-	body { font: .8em "Bitstream Vera Sans", Verdana, Arial, sans-serif; }
+	<style>
+	body { font: .8em "DejaVu Sans", "Bitstream Vera Sans", Verdana, Geneva, sans-serif; }
 	
 	form#subscribe-form { width: 60%; margin: 30px auto 15px; }
 	form#subscribe-form fieldset	   { border: 1px dashed #79C; padding: 10px; }
@@ -51,11 +30,11 @@
 	}
 	</style>
 	
-	<script type="text/javascript">
+	<script>
 	<!--
 	var submitted = false;
 	
-	function check_form(evt)
+	function check_form()
 	{
 		var emailAddr   = document.forms['subscribe-form'].elements['email'].value;
 		var cancelEvent = null;
@@ -72,40 +51,29 @@
 			submitted = true;
 		}
 		
-		if( cancelEvent == true ) {
-			if( evt && typeof(evt.preventDefault) != 'undefined' ) { // standard
-				evt.preventDefault();
-			}
-			else { // MS
-				window.event.returnValue = false;
-			}
-		}
-	}
-	
-	window.onload = function() {
-		document.forms['subscribe-form'].onsubmit = check_form;
+		return !cancelEvent;
 	}
 	//-->
 	</script>
 </head>
 <body>
 
-<form id="subscribe-form" method="post" action="./subscribe.php">
+<form id="subscribe-form" method="post" action="./subscribe.php" onsubmit="return check_form();">
 <fieldset>
-	<legend xml:lang="en" lang="en">Mailing liste</legend>
+	<legend lang="en">Mailing liste</legend>
 	
 	<div class="bloc">
-		<label for="email">{L_EMAIL}&#160;:</label>
-		<input type="text" id="email" name="email" size="25" maxlength="250" />
+		<label for="email">{L_EMAIL}&nbsp;:</label>
+		<input type="text" id="email" name="email" size="25" maxlength="254" />
 	</div>
 	
 	<div class="bloc">
-		<label for="format">{L_FORMAT}&#160;:</label>
+		<label for="format">{L_FORMAT}&nbsp;:</label>
 		<select id="format" name="format"><option value="1">TXT</option><option value="2">HTML</option></select>
 	</div>
 	
 	<div class="bloc">
-		<label for="liste">{L_DIFF_LIST}&#160;:</label>
+		<label for="liste">{L_DIFF_LIST}&nbsp;:</label>
 		{LIST_BOX}
 	</div>
 	
@@ -123,9 +91,9 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&#8211;2006 | Wanewsletter<br />
-Ce script est distribu&eacute; librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
-licence <abbr title="General Public Licence" xml:lang="en" lang="en">GPL</abbr></a>
+phpCodeur</a> &copy; 2002&ndash;2014 | Wanewsletter<br />
+Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
+licence <abbr title="General Public Licence" lang="en">GPL</abbr></a>
 </address>
 
 </body>

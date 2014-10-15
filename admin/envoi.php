@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_NEWSLETTER', true);
@@ -35,7 +18,7 @@ if( !$admindata['session_liste'] )
 
 if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 {
-	$output->message('Not_auth_view');
+	$output->displayMessage('Not_auth_view');
 }
 
 //
@@ -64,16 +47,17 @@ $logdata['log_subject']   = ( !empty($_POST['subject']) ) ? trim($_POST['subject
 $logdata['log_body_text'] = ( !empty($_POST['body_text']) ) ? trim($_POST['body_text']) : '';
 $logdata['log_body_html'] = ( !empty($_POST['body_html']) ) ? trim($_POST['body_html']) : '';
 $logdata['log_status']    = ( !empty($_POST['log_status']) ) ? STATUS_MODEL : STATUS_WRITING;
+$logdata['log_date']      = ( !empty($_POST['log_date']) ) ? intval($_POST['log_date']) : -1;
 
 $mode = ( !empty($_REQUEST['mode']) ) ? $_REQUEST['mode'] : '';
 $prev_status = ( isset($_POST['prev_status']) ) ? intval($_POST['prev_status']) : $logdata['log_status'];
 
 if( isset($_POST['cancel']) )
 {
-	Location('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
+	http_redirect('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 }
 
-$vararray = array('send', 'save', 'delete', 'attach', 'unattach');
+$vararray = array('test', 'send', 'save', 'delete', 'attach', 'unattach');
 foreach( $vararray as $varname )
 {
 	if( isset($_REQUEST[$varname]) )
@@ -104,25 +88,18 @@ switch( $mode )
 			$sql = "SELECT log_id, liste_id, log_status
 				FROM " . LOG_TABLE . "
 				WHERE log_id = " . $logdata['log_id'];
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste d\'appartenance du log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( !($logdata = $result->fetch()) || $logdata['log_status'] != STATUS_STANDBY )
 			{
-				Location('envoi.php');
+				http_redirect('envoi.php');
 			}
 			
-			$sql = "SELECT COUNT(send) AS sended
+			$sql = "SELECT COUNT(send) AS sent
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE liste_id = $logdata[liste_id] AND send = 1";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
-			}
-			
-			$sended = $result->column('sended');
+			$result = $db->query($sql);
+			$sent = $result->column('sent');
 			
 			//
 			// Suppression du fichier lock correspondant s'il existe
@@ -134,35 +111,26 @@ switch( $mode )
 			if( !flock($fp, LOCK_EX|LOCK_NB) )
 			{
 				fclose($fp);
-				$output->message('List_is_busy');
+				$output->displayMessage('List_is_busy');
 			}
 			
 			$db->beginTransaction();
 			
 			$sql = "UPDATE " . LOG_TABLE . "
-				SET log_status  = " . STATUS_SENDED . ",
-					log_numdest = $sended
+				SET log_status  = " . STATUS_SENT . ",
+					log_numdest = $sent
 				WHERE log_id = " . $logdata['log_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des logs', ERROR);
-			}
+			$db->query($sql);
 			
 			$sql = "UPDATE " . ABO_LISTE_TABLE . "
 				SET send = 0
 				WHERE liste_id = " . $logdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-			}
+			$db->query($sql);
 			
 			$sql = "UPDATE " . LISTE_TABLE . " 
 				SET liste_numlogs = liste_numlogs + 1 
 				WHERE liste_id = " . $logdata['liste_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de mettre à jour la table des listes', ERROR);
-			}
+			$db->query($sql);
 			
 			$db->commit();
 			
@@ -170,12 +138,11 @@ switch( $mode )
 			fclose($fp);
 			unlink($lockfile);
 			
-			$output->message('Send_canceled');
+			$output->displayMessage('Send_canceled');
 		}
 		else
 		{
 			$output->addHiddenField('id', $logdata['log_id']);
-			$output->addHiddenField('sessid', $session->session_id);
 			
 			$output->page_header();
 			
@@ -191,7 +158,7 @@ switch( $mode )
 				'L_NO'  => $lang['No'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => sessid('./envoi.php?mode=cancel')
+				'U_FORM' => 'envoi.php?mode=cancel'
 			));
 			
 			$output->pparse('body');
@@ -210,24 +177,20 @@ switch( $mode )
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
 					AND log_id = $logdata[log_id]
 					AND log_status = " . STATUS_STANDBY;
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( !($logdata = $result->fetch()) )
 			{
 				$output->redirect('envoi.php?mode=progress', 4);
-				
-				$message  = $lang['Message']['No_log_found'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=progress') . '">', '</a>');
-				$output->message($message);
+				$output->addLine($lang['Message']['No_log_found']);
+				$output->addLine($lang['Click_return_back'], './envoi.php?mode=progress');
+				$output->displayMessage();
 			}
 			
 			if( DISABLE_CHECK_LINKS == false && empty($listdata['form_url']) )
 			{
-				$message = nl2br(sprintf($lang['Message']['No_form_url'], '<a href="' . sessid('view.php?mode=liste&amp;action=edit') . '">', '</a>'));
-				$output->message($message);
+				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&amp;action=edit');
+				$output->displayMessage();
 			}
 		}
 		else
@@ -253,10 +216,7 @@ switch( $mode )
 								SET send = 1
 								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
 									AND liste_id = " . $liste_id;
-							if( !$db->query($sql) )
-							{
-								trigger_error('Impossible de mettre à jour la table des abonnés', ERROR);
-							}
+							$db->query($sql);
 						}
 						
 						ftruncate($fp, 0);
@@ -271,10 +231,7 @@ switch( $mode )
 				FROM " . ABO_LISTE_TABLE . "
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
 				GROUP BY liste_id, send";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir les données d\'envoi des log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			$data = array();
 			while( $row = $result->fetch() )
@@ -292,18 +249,14 @@ switch( $mode )
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
 					AND log_status = " . STATUS_STANDBY . "
 				ORDER BY log_subject ASC";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
-			}
+			$result = $db->query($sql);
 			
 			if( !($row = $result->fetch()) )
 			{
 				$output->redirect('envoi.php', 4);
-				
-				$message  = $lang['Message']['No_log_to_send'];
-				$message .= '<br /><br />' . sprintf($lang['Click_return_form'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-				$output->message($message);
+				$output->addLine($lang['Message']['No_log_to_send']);
+				$output->addLine($lang['Click_return_form'], './envoi.php');
+				$output->displayMessage();
 			}
 			
 			$output->page_header();
@@ -332,7 +285,7 @@ switch( $mode )
 				
 				$output->assign_block_vars('logrow', array(
 					'LOG_ID'       => $row['log_id'],
-					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
+					'LOG_SUBJECT'  => wan_htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
 					'SEND_PERCENT' => $percent
 				));
 			}
@@ -354,13 +307,13 @@ switch( $mode )
 			{
 				if( !empty($_POST['body_text_url']) )
 				{
-					$result = http_get_contents($_POST['body_text_url'], $errstr);
+					$result = wan_get_contents($_POST['body_text_url'], $errstr);
 					
 					if( $result == false )
 					{
-						$message  = $errstr;
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-						$output->message($message);
+						$output->addLine($errstr);
+						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
+						$output->displayMessage();
 					}
 					
 					$logdata['log_body_text'] = convert_encoding($result['data'], $result['charset']);
@@ -368,13 +321,13 @@ switch( $mode )
 				
 				if( !empty($_POST['body_html_url']) )
 				{
-					$result = http_get_contents($_POST['body_html_url'], $errstr);
+					$result = wan_get_contents($_POST['body_html_url'], $errstr);
 					
 					if( $result == false )
 					{
-						$message  = $errstr;
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-						$output->message($message);
+						$output->addLine($errstr);
+						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
+						$output->displayMessage();
 					}
 					
 					if( preg_match('/<head[^>]*>(.+?)<\/head>/is', $result['data'], $match_head) )
@@ -390,18 +343,26 @@ switch( $mode )
 								{
 									$result['charset'] = $match[2];
 								}
+								// HTML5 style <meta charset="<character_set>">
+								else if( preg_match('/charset\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match) )
+								{
+									$result['charset'] = $match[2];
+								}
 							}
 						}
 						
 						if( preg_match('/<title[^>]*>(.+?)<\/title>/is', $match_head[1], $match) )
 						{
 							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
-							$logdata['log_subject'] = html_entity_decode($logdata['log_subject']);
+							$logdata['log_subject'] = wan_html_entity_decode($logdata['log_subject']);
 						}
 						
-						$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
-						$result['data'] = preg_replace('/<(head[^>]*)>/si',
-							"<\\1>\n<base href=\"" . htmlspecialchars($URL) . "/\">", $result['data']);
+						if( strncmp($_POST['body_html_url'], 'http://', 7) == 0 )
+						{
+							$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
+							$result['data'] = preg_replace('/<(head[^>]*)>/si',
+								"<\\1>\n<base href=\"" . wan_htmlspecialchars($URL) . "/\">", $result['data']);
+						}
 					}
 					
 					$logdata['log_body_html'] = convert_encoding($result['data'], $result['charset']);
@@ -409,23 +370,19 @@ switch( $mode )
 			}
 			else
 			{
-				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status 
+				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, log_date
 					FROM " . LOG_TABLE . " 
 					WHERE liste_id = $listdata[liste_id]
 						AND log_id = $logdata[log_id]
 						AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")";
-				if( !($result = $db->query($sql)) )
-				{
-					trigger_error('Impossible d\'obtenir les données sur ce log', ERROR);
-				}
+				$result = $db->query($sql);
 				
 				if( !($logdata = $result->fetch()) )
 				{
 					$output->redirect('envoi.php?mode=load', 4);
-					
-					$message  = $lang['Message']['log_not_exists'];
-					$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load') . '">', '</a>');
-					$output->message($message);
+					$output->addLine($lang['Message']['log_not_exists']);
+					$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
+					$output->displayMessage();
 				}
 				
 				$prev_status = $logdata['log_status'];
@@ -433,18 +390,14 @@ switch( $mode )
 		}
 		else
 		{
-			$sql = "SELECT log_id, log_subject, log_status 
+			$sql = "SELECT log_id, log_subject, log_status, log_date
 				FROM " . LOG_TABLE . " 
 				WHERE liste_id = $listdata[liste_id]
 					AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")
-				ORDER BY log_subject ASC";
-			if( !($result = $db->query($sql)) )
-			{
-				trigger_error('Impossible d\'obtenir la liste des log', ERROR);
-			}
+				ORDER BY log_date DESC";
+			$result = $db->query($sql);
 			
-			$output->addHiddenField('mode',   'load');
-			$output->addHiddenField('sessid', $session->session_id);
+			$output->addHiddenField('mode', 'load');
 			
 			$output->page_header();
 			
@@ -470,8 +423,12 @@ switch( $mode )
 					}
 					
 					$log_box .= sprintf(
-						"<option style=\"%s\" value=\"%d\"> %s %s</option>\n",
-						$style, $row['log_id'], htmlspecialchars(cut_str($row['log_subject'], 40)), $status
+						"<option style=\"%s\" value=\"%d\">%s - %s %s</option>\n",
+						$style,
+						$row['log_id'],
+						wan_htmlspecialchars(cut_str($row['log_subject'], 40)),
+						convert_time('d F Y', $row['log_date']),
+						$status
 					);
 				}
 				while( $row = $result->fetch() );
@@ -491,9 +448,10 @@ switch( $mode )
 			$output->assign_vars(array(
 				'L_TITLE'         => $lang['Title']['select'],
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
+				'L_EXPLAIN_LOAD'  => $lang['Explain']['load'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM'          => sessid('./envoi.php')
+				'U_FORM'          => 'envoi.php'
 			));
 			
 			switch( $listdata['liste_format'] )
@@ -511,11 +469,11 @@ switch( $mode )
 			
 			$output->assign_block_vars($bloc_name, array(
 				'L_LOAD_BY_URL' => $lang['Load_by_URL'],
-				'L_FORMAT_TEXT' => $lang['Log_in_text'],
-				'L_FORMAT_HTML' => $lang['Log_in_html'],
+				'L_FORMAT_TEXT' => $lang['Format_text'],
+				'L_FORMAT_HTML' => $lang['Format_html'],
 				
-				'BODY_TEXT_URL' => ( !empty($_POST['body_text_url']) ) ? htmlspecialchars(trim($_POST['body_text_url'])) : '',
-				'BODY_HTML_URL' => ( !empty($_POST['body_html_url']) ) ? htmlspecialchars(trim($_POST['body_html_url'])) : ''
+				'BODY_TEXT_URL' => ( !empty($_POST['body_text_url']) ) ? wan_htmlspecialchars(trim($_POST['body_text_url'])) : '',
+				'BODY_HTML_URL' => ( !empty($_POST['body_html_url']) ) ? wan_htmlspecialchars(trim($_POST['body_html_url'])) : ''
 			));
 			
 			$output->pparse('body');
@@ -531,10 +489,9 @@ switch( $mode )
 		if( !$logdata['log_id'] )
 		{
 			$output->redirect('envoi.php', 4);
-			
-			$message  = $lang['Message']['No_log_id'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-			$output->message($message);
+			$output->addLine($lang['Message']['No_log_id']);
+			$output->addLine($lang['Click_return_back'], './envoi.php');
+			$output->displayMessage();
 		}
 		
 		if( isset($_POST['confirm']) )
@@ -543,10 +500,7 @@ switch( $mode )
 			
 			$sql = 'DELETE FROM ' . LOG_TABLE . ' 
 				WHERE log_id = ' . $logdata['log_id'];
-			if( !$db->query($sql) )
-			{
-				trigger_error('Impossible de supprimer le log', ERROR);
-			}
+			$db->query($sql);
 			
 			require WA_ROOTDIR . '/includes/class.attach.php';
 			
@@ -560,17 +514,15 @@ switch( $mode )
 			//
 			$db->vacuum(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
 			
-			$output->redirect('./envoi.php', 4);
-			
-			$message  = $lang['Message']['log_deleted'];
-			$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php') . '">', '</a>');
-			$output->message($message);
+			$output->redirect('envoi.php', 4);
+			$output->addLine($lang['Message']['log_deleted']);
+			$output->addLine($lang['Click_return_back'], './envoi.php');
+			$output->displayMessage();
 		}
 		else
 		{
-			$output->addHiddenField('mode',   'delete');
-			$output->addHiddenField('sessid', $session->session_id);
-			$output->addHiddenField('id',     $logdata['log_id']);
+			$output->addHiddenField('mode', 'delete');
+			$output->addHiddenField('id',   $logdata['log_id']);
 			
 			$output->page_header();
 			
@@ -586,7 +538,7 @@ switch( $mode )
 				'L_NO'  => $lang['No'],
 				
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => sessid('./envoi.php')
+				'U_FORM' => 'envoi.php'
 			));
 			
 			$output->pparse('body');
@@ -598,6 +550,7 @@ switch( $mode )
 	case 'attach':
 	case 'send':
 	case 'save':
+	case 'test':
 		$cc_admin = ( !empty($_POST['cc_admin']) ) ? 1 : 0;
 		
 		if( ($mode == 'save' || $mode == 'send') && $listdata['cc_admin'] != $cc_admin )
@@ -623,13 +576,13 @@ switch( $mode )
 				$msg_error[] = $lang['Subject_empty'];
 			}
 			
-			if( $listdata['liste_format'] != FORMAT_HTML && $logdata['log_body_text'] == '' )
+			if( $mode == 'send' && $listdata['liste_format'] != FORMAT_HTML && $logdata['log_body_text'] == '' )
 			{
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
 			}
 			
-			if( $listdata['liste_format'] != FORMAT_TEXTE && $logdata['log_body_html'] == '' )
+			if( $mode == 'send' && $listdata['liste_format'] != FORMAT_TEXTE && $logdata['log_body_html'] == '' )
 			{
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
@@ -666,35 +619,7 @@ switch( $mode )
 					return $match[0];
 				}
 				
-				if( substr($resource, 0, 7) == 'http://' )
-				{
-					$result = http_get_contents($resource, $errstr);
-					if( $result == false )
-					{
-						$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($resource), $errstr);
-					}
-				}
-				else
-				{
-					if( $resource[0] != '/' )// Chemin non absolu
-					{
-						$resource = WA_ROOTDIR . '/' . $resource;
-					}
-					
-					if( is_readable($resource) )
-					{
-						$fp = fopen($resource, 'r');
-						$data = fread($fp, filesize($resource));
-						fclose($fp);
-						
-						$result = array('data' => $data, 'charset' => '');
-					}
-					else
-					{
-						$result = false;
-						$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($resource));
-					}
-				}
+				$result = wan_get_contents($resource, $errstr);
 				
 				if( $result == false )
 				{
@@ -712,7 +637,7 @@ switch( $mode )
 			$logdata['log_body_text'] = preg_replace_callback($regexp, 'replace_include', $logdata['log_body_text']);
 			$logdata['log_body_html'] = preg_replace_callback($regexp, 'replace_include', $logdata['log_body_html']);
 			
-			if( $mode == 'send' )
+			if( $mode == 'test' || $mode == 'send' )
 			{
 				if( DISABLE_CHECK_LINKS == false && $listdata['liste_format'] != FORMAT_HTML && !strstr($logdata['log_body_text'], '{LINKS}') )
 				{
@@ -734,10 +659,7 @@ switch( $mode )
 							INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 								AND l.liste_id = $listdata[liste_id]
 						ORDER BY jf.file_real_name ASC";
-					if( !($result = $db->query($sql)) )
-					{
-						trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-					}
+					$result = $db->query($sql);
 					
 					$files = $files_error = array();
 					while( $row = $result->fetch() )
@@ -754,7 +676,7 @@ switch( $mode )
 					{
 						if( !in_array($refs[$i], $files) )
 						{
-							$files_error[] = htmlspecialchars($refs[$i]);
+							$files_error[] = wan_htmlspecialchars($refs[$i]);
 						}
 					}
 					
@@ -769,19 +691,19 @@ switch( $mode )
 				// Deux newsletters ne peuvent être simultanément en attente d'envoi
 				// pour une même liste.
 				//
-				$sql = "SELECT COUNT(*) AS test
-					FROM " . LOG_TABLE . "
-					WHERE liste_id = $listdata[liste_id]
-						AND log_status = " . STATUS_STANDBY;
-				if( !($result = $db->query($sql)) )
+				if( $mode == 'send' )
 				{
-					trigger_error('Impossible de tester la présence de newsletter déjà en attente d\'envoi', ERROR);
-				}
-				
-				if( $result->column('test') > 0 )
-				{
-					$error = true;
-					$msg_error[] = $lang['Message']['Twice_sending'];
+					$sql = "SELECT COUNT(*) AS test
+						FROM " . LOG_TABLE . "
+						WHERE liste_id = $listdata[liste_id]
+							AND log_status = " . STATUS_STANDBY;
+					$result = $db->query($sql);
+					
+					if( $result->column('test') > 0 )
+					{
+						$error = true;
+						$msg_error[] = $lang['Message']['Twice_sending'];
+					}
 				}
 			}
 			
@@ -833,10 +755,7 @@ switch( $mode )
 					$sql_where = array('log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']);
 				}
 				
-				if( !$db->build($sql_type, LOG_TABLE, $logdata, $sql_where) )
-				{
-					trigger_error('Impossible de sauvegarder la newsletter', ERROR);
-				}
+				$db->build($sql_type, LOG_TABLE, $logdata, $sql_where);
 				
 				if( $sql_type == SQL_INSERT )
 				{
@@ -851,10 +770,7 @@ switch( $mode )
 					$handle_id = $tmp_id;
 					$logdata['log_status'] = STATUS_STANDBY;
 					
-					if( !$db->build(SQL_INSERT, LOG_TABLE, $logdata) )
-					{
-						trigger_error('Impossible de dupliquer la newsletter', ERROR);
-					}
+					$db->build(SQL_INSERT, LOG_TABLE, $logdata);
 					
 					$tmp_id = $db->lastInsertId();
 				}
@@ -867,29 +783,22 @@ switch( $mode )
 					$sql = "SELECT file_id 
 						FROM " . LOG_FILES_TABLE . " 
 						WHERE log_id = " . $handle_id;
-					if( !($result = $db->query($sql)) )
-					{
-						trigger_error('Impossible d\'obtenir les fichiers joints de ce log', ERROR);
-					}
+					$result = $db->query($sql);
 					
 					$sql_values = array();
 					
 					while( $row = $result->fetch() )
 					{
-						switch( SQL_DRIVER )
+						switch( $db->engine )
 						{
 							case 'mysql':
-							case 'mysqli':
 								$sql_values[] = '(' . $tmp_id . ', ' . $row['file_id'] . ')';
 								break;
 							
 							default:
 								$sqldata = array('log_id' => $tmp_id, 'file_id' => $row['file_id']);
 								
-								if( !$db->build(SQL_INSERT, LOG_FILES_TABLE, $sqldata) )
-								{
-									trigger_error('Impossible de dupliquer les fichiers joints', ERROR);
-								}
+								$db->build(SQL_INSERT, LOG_FILES_TABLE, $sqldata);
 								break;
 						}
 					}
@@ -898,10 +807,7 @@ switch( $mode )
 					{
 						$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id) 
 							VALUES " . implode(', ', $sql_values);
-						if( !$db->query($sql) )
-						{
-							trigger_error('Impossible de dupliquer les fichiers joints', ERROR);
-						}
+						$db->query($sql);
 					}
 				}
 				
@@ -914,17 +820,16 @@ switch( $mode )
 					if( $mode == 'save' )
 					{
 						$output->redirect('./envoi.php?mode=load&amp;id=' . $logdata['log_id'], 4);
-						
-						$message  = $lang['Message']['log_saved'];
-						$message .= '<br /><br />' . sprintf($lang['Click_return_back'], '<a href="' . sessid('./envoi.php?mode=load&amp;id=' . $logdata['log_id']) . '">', '</a>');
+						$output->addLine($lang['Message']['log_saved']);
+						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 					}
 					else
 					{
-						$message  = $lang['Message']['log_ready'];
-						$message .= '<br /><br />' . sprintf($lang['Click_start_send'], '<a href="' . sessid('./envoi.php?mode=progress&amp;id=' . $logdata['log_id']) . '">', '</a>');
+						$output->addLine($lang['Message']['log_ready']);
+						$output->addLine($lang['Click_start_send'], './envoi.php?mode=progress&amp;id=' . $logdata['log_id']);
 					}
 					
-					$output->message($message);
+					$output->displayMessage();
 				}
 			}
 		}
@@ -1025,15 +930,12 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 				AND l.liste_id = $listdata[liste_id]
 		ORDER BY jf.file_real_name ASC";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la liste des fichiers joints', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	$other_files = $joined_files_id = array();
 	
 	//
-	// On dispatches les données selon que le fichier appartient à la newsletter en cours ou non.
+	// On dispatche les données selon que le fichier appartient à la newsletter en cours ou non.
 	//
 	while( $row = $result->fetch() )
 	{
@@ -1045,7 +947,7 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 		else
 		{
 			//
-			// file_id sert d'index dans le tableau, pour éviter les doublons ramenés par la requï¿½te
+			// file_id sert d'index dans le tableau, pour éviter les doublons ramenés par la requête
 			//
 			$other_files[$row['file_id']] = $row;
 		}
@@ -1055,7 +957,7 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	{
 		if( !in_array($tmp_id, $joined_files_id) )
 		{
-			$file_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $tmp_id, htmlspecialchars($row['file_real_name']));
+			$file_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $tmp_id, wan_htmlspecialchars($row['file_real_name']));
 		}
 	}
 	
@@ -1070,11 +972,24 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 //
 // Envois des emails
 //
-if( $mode == 'progress' )
+$supp_address = array();
+if( $mode == 'test' && !empty($_POST['test_address']) )
+{
+	require_once WAMAILER_DIR . '/class.mailer.php';
+	
+	$supp_address = explode(',', $_POST['test_address']);
+	$supp_address = array_map('trim', $supp_address);
+	$supp_address = array_unique($supp_address);
+	$supp_address = array_filter($supp_address, create_function('$email',
+		'return Mailer::validate_email($email);'
+	));
+}
+
+if( ($mode == 'test' && count($supp_address) > 0) || $mode == 'progress' )
 {
 	if( !$auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
 	{
-		$output->message('Not_auth_send');
+		$output->displayMessage('Not_auth_send');
 	}
 	
 	require WA_ROOTDIR . '/includes/engine_send.php';
@@ -1096,22 +1011,27 @@ if( $mode == 'progress' )
 	//
 	// On lance l'envoi
 	//
-	$message = launch_sending($listdata, $logdata);
+	if( $mode == 'test' )
+	{
+		$logdata['log_subject'] = '[test] '.$logdata['log_subject'];
+	}
 	
-	$output->message(nl2br($message));
+	$message = launch_sending($listdata, $logdata, $supp_address);
+	
+	$output->displayMessage($message);
 }
 
-$subject   = htmlspecialchars($logdata['log_subject']);
-$body_text = htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
-$body_html = htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
+$subject   = wan_htmlspecialchars($logdata['log_subject']);
+$body_text = wan_htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
+$body_html = wan_htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
 
-$output->addLink('section', './envoi.php?mode=load', $lang['Load_log']);
-$output->addLink('section', './envoi.php?mode=progress', $lang['List_send']);
+$output->addLink('subsection', './envoi.php?mode=load', $lang['Load_log']);
+$output->addLink('subsection', './envoi.php?mode=progress', $lang['List_send']);
 $output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $prev_status);
-$output->addHiddenField('sessid',      $session->session_id);
+$output->addHiddenField('log_date',    $logdata['log_date']);
 
 $output->page_header();
 
@@ -1120,7 +1040,7 @@ $output->set_filenames(array(
 ));
 
 $output->assign_vars(array(
-	'L_EXPLAIN'               => nl2br(sprintf($lang['Explain']['send'],'<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p27">', '</a>')),	
+	'L_EXPLAIN'               => nl2br(sprintf($lang['Explain']['send'],'<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p26">', '</a>')),	
 	'L_LOAD_LOG'              => $lang['Load_log'],
 	'L_LIST_SEND'             => $lang['List_send'],
 	'L_DEST'                  => $lang['Dest'],
@@ -1129,7 +1049,8 @@ $output->assign_vars(array(
 	'L_STATUS_WRITING'        => $lang['Status_writing'],
 	'L_STATUS_MODEL'          => $lang['Status_model'],
 	'L_CC_ADMIN'              => $lang['Receive_copy'],
-	'L_CC_ADMIN_TITLE'        => htmlspecialchars($lang['Receive_copy_title']),
+	'L_CC_ADMIN_TITLE'        => wan_htmlspecialchars($lang['Receive_copy_title']),
+	
 	'L_SEND_BUTTON'           => $lang['Button']['send'],
 	'L_SAVE_BUTTON'           => $lang['Button']['save'],
 	'L_DELETE_BUTTON'         => $lang['Button']['delete'],
@@ -1138,38 +1059,52 @@ $output->assign_vars(array(
 	'L_YES'                   => $lang['Yes'],
 	'L_NO'                    => $lang['No'],
 	
-	'S_DEST'                  => $listdata['liste_name'],
+	'S_DEST'                  => wan_htmlspecialchars($listdata['liste_name']),
 	'S_SUBJECT'               => $subject,
 	'SELECTED_STATUS_WRITING' => ( $logdata['log_status'] == STATUS_WRITING ) ? ' selected="selected"' : '',
 	'SELECTED_STATUS_MODEL'   => ( $logdata['log_status'] == STATUS_MODEL ) ? ' selected="selected"' : '',
-	'SELECTED_CC_ADMIN_ON'    => ( $listdata['cc_admin'] ) ? ' selected="selected"' : '',
-	'SELECTED_CC_ADMIN_OFF'   => ( !$listdata['cc_admin'] ) ? ' selected="selected"' : '',
+	'CHECKED_CC_ADMIN_ON'     => ( $listdata['cc_admin'] ) ? ' checked="checked"' : '',
+	'CHECKED_CC_ADMIN_OFF'    => ( !$listdata['cc_admin'] ) ? ' checked="checked"' : '',
 	
-	'S_ENCTYPE'               => ( FILE_UPLOADS_ON ) ? 'multipart/form-data' : 'application/x-www-form-urlencoded', 
+	'S_ENCTYPE'               => ( FILE_UPLOADS_ON ) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
+	'S_DELETE_BUTTON_DISABLED' => $logdata['log_id'] == 0 ? ' disabled="disabled"' : '',
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
 ));
 
+if( $logdata['log_date'] != -1 )
+{
+	$output->assign_block_vars('last_modified', array(
+		'S_LAST_MODIFIED' => sprintf($lang['Last_modified'],
+			convert_time($admindata['admin_dateformat'], $logdata['log_date']))
+	));
+}
+
 if( $listdata['liste_format'] != FORMAT_HTML )
 {
-	$output->assign_block_vars('formulaire', array(
-		'L_TITLE'         => $lang['Log_in_text'],
-		'L_EXPLAIN_BODY'  => nl2br($lang['Explain']['text']),
+	$output->assign_block_vars('nl_text_textarea', array(
+		'L_TITLE'    => $lang['Log_in_text'],
+		'L_EXPLAIN'  => nl2br($lang['Explain']['text']),
 		
-		'S_TEXTAREA_NAME' => 'body_text',
-		'S_BODY'          => $body_text,
-		'S_FORMAT'        => FORMAT_TEXTE
+		'S_BODY'     => $body_text
 	));
 }
 
 if( $listdata['liste_format'] != FORMAT_TEXTE )
 {
-	$output->assign_block_vars('formulaire', array(
-		'L_TITLE'         => $lang['Log_in_html'],
-		'L_EXPLAIN_BODY'  => nl2br($lang['Explain']['html']),
+	$output->assign_block_vars('nl_html_textarea', array(
+		'L_TITLE'    => $lang['Log_in_html'],
+		'L_EXPLAIN'  => nl2br($lang['Explain']['html']),
 		
-		'S_TEXTAREA_NAME' => 'body_html',
-		'S_BODY'          => $body_html,
-		'S_FORMAT'        => FORMAT_HTML
+		'S_BODY'     => $body_html
+	));
+}
+
+if( $auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
+{
+	$output->assign_block_vars('test_send', array(
+		'L_TEST_SEND'      => $lang['Test_send'],
+		'L_TEST_SEND_NOTE' => $lang['Test_send_note'],
+		'L_SEND_BUTTON'    => $lang['Button']['send']
 	));
 }
 
@@ -1201,8 +1136,9 @@ if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
 	if( FILE_UPLOADS_ON )
 	{
 		$output->assign_block_vars('joined_files.upload_input', array(
-			'L_MAXIMUM_SIZE' => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
-			'MAX_FILE_SIZE'  => MAX_FILE_SIZE
+			'L_BROWSE_BUTTON' => $lang['Button']['browse'],
+			'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
+			'MAX_FILE_SIZE'   => MAX_FILE_SIZE
 		));
 	}
 	

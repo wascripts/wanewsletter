@@ -1,32 +1,17 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('_INC_WADB_INIT') ) {
 
 define('_INC_WADB_INIT', true);
+
+class SQLException extends Exception { }
 
 //
 // Tables du script 
@@ -37,12 +22,68 @@ define('ADMIN_TABLE',         $prefixe . 'admin');
 define('AUTH_ADMIN_TABLE',    $prefixe . 'auth_admin');
 define('BANLIST_TABLE',       $prefixe . 'ban_list');
 define('CONFIG_TABLE',        $prefixe . 'config');
-define('JOINED_FILES_TABLE',  $prefixe . 'joined_files');
 define('FORBIDDEN_EXT_TABLE', $prefixe . 'forbidden_ext');
+define('JOINED_FILES_TABLE',  $prefixe . 'joined_files');
 define('LISTE_TABLE',         $prefixe . 'liste');
 define('LOG_TABLE',           $prefixe . 'log');
 define('LOG_FILES_TABLE',     $prefixe . 'log_files');
 define('SESSIONS_TABLE',      $prefixe . 'session');
+
+$GLOBALS['supported_db'] = array(
+	'mysql' => array(
+		'label'        => 'MySQL',
+		'Name'         => 'MySQL &#8805; 5.0.7',
+		'extension'    => (extension_loaded('mysql') || extension_loaded('mysqli'))
+	),
+	'postgres' => array(
+		'label'        => 'PostgreSQL',
+		'Name'         => 'PostgreSQL &#8805; 8.x, 9.x',
+		'extension'    => extension_loaded('pgsql')
+	),
+	'sqlite' => array(
+		'label'        => 'SQLite',
+		'Name'         => 'SQLite &#8805; 2.8, 3.x',
+		'extension'    => (class_exists('SQLite3') || extension_loaded('sqlite') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
+	)
+);
+
+$GLOBALS['sql_schemas'] = array(
+	ABO_LISTE_TABLE     => array(
+		'index'    => array('register_key_idx')
+	),
+	ABONNES_TABLE       => array(
+		'index'    => array('abo_email_idx', 'abo_status_idx'),
+		'sequence' => array('abo_id' => 'wa_abonnes_id_seq')
+	),
+	ADMIN_TABLE         => array(
+		'sequence' => array('admin_id' => 'wa_admin_id_seq')
+	),
+	AUTH_ADMIN_TABLE    => array(
+		'index'    => array('admin_id_idx')
+	),
+	BANLIST_TABLE       => array(
+		'sequence' => array('ban_id' => 'wa_ban_id_seq')
+	),
+	CONFIG_TABLE        => array(
+		'index'    => array('config_name_idx'),
+		'sequence' => array('config_id' => 'wa_config_id_seq')
+	),
+	FORBIDDEN_EXT_TABLE => array(
+		'sequence' => array('fe_id' => 'wa_forbidden_ext_id_seq')
+	),
+	JOINED_FILES_TABLE  => array(
+		'sequence' => array('file_id' => 'wa_joined_files_id_seq')
+	),
+	LISTE_TABLE         => array(
+		'sequence' => array('liste_id' => 'wa_liste_id_seq')
+	),
+	LOG_TABLE           => array(
+		'index'    => array('liste_id_idx', 'log_status_idx'),
+		'sequence' => array('log_id' => 'wa_log_id_seq')
+	),
+	LOG_FILES_TABLE     => array(),
+	SESSIONS_TABLE      => array()
+);
 
 /**
  * Génère une chaîne DSN
@@ -52,19 +93,18 @@ define('SESSIONS_TABLE',      $prefixe . 'session');
  */
 function createDSN($infos, $options = null)
 {
-	if( $infos['driver'] == 'mysqli' ) {
-		$infos['driver'] = 'mysql';
-	}
-	else if( $infos['driver'] == 'sqlite_pdo' ) {
-		$infos['driver'] = 'sqlite';
-	}
-	
 	$connect = '';
 	
-	if( isset($infos['user']) ) {
+	if( $infos['engine'] == 'sqlite' ) {
+		$infos['host']   = null;
+		$infos['user']   = null;
+		$infos['dbname'] = $infos['path'];
+	}
+	
+	if( !empty($infos['user']) ) {
 		$connect .= rawurlencode($infos['user']);
 		
-		if( isset($infos['pass']) ) {
+		if( !empty($infos['pass']) ) {
 			$connect .= ':' . rawurlencode($infos['pass']);
 		}
 		
@@ -77,25 +117,21 @@ function createDSN($infos, $options = null)
 	
 	if( !empty($infos['host']) ) {
 		$connect .= rawurlencode($infos['host']);
-		if( isset($infos['port']) ) {
+		if( !empty($infos['port']) ) {
 			$connect .= ':' . intval($infos['port']);
 		}
 	}
 	
 	if( !empty($connect) ) {
-		$dsn = sprintf('%s://%s/%s', $infos['driver'], $connect, $infos['dbname']);
+		$dsn = sprintf('%s://%s/%s', $infos['engine'], $connect, $infos['dbname']);
 	}
 	else {
-		$dsn = sprintf('%s:%s', $infos['driver'], $infos['dbname']);
+		$dsn = sprintf('%s:%s', $infos['engine'], $infos['dbname']);
 	}
 	
-	if( is_array($options) ) {
+	if( is_array($options) && count($options) > 0 ) {
 		$dsn .= '?';
-		foreach( $options as $name => $value ) {
-			$dsn .= rawurlencode($name) . '=' . rawurlencode($value) . '&';
-		}
-		
-		$dsn = substr($dsn, 0, -1);// Suppression dernier esperluette
+		$dsn .= http_build_query($options);
 	}
 	
 	return $dsn;
@@ -108,7 +144,10 @@ function createDSN($infos, $options = null)
  */
 function parseDSN($dsn)
 {
+	global $supported_db;
+	
 	if( !($dsn_parts = parse_url($dsn)) || !isset($dsn_parts['scheme']) ) {
+		trigger_error("Invalid DSN argument", E_USER_ERROR);
 		return false;
 	}
 	
@@ -117,11 +156,15 @@ function parseDSN($dsn)
 	foreach( $dsn_parts as $key => $value ) {
 		switch( $key ) {
 			case 'scheme':
-				if( !in_array($value, array('firebird', 'mysql', 'postgres', 'sqlite')) ) {
+				if( !isset($supported_db[$value]) ) {
 					trigger_error("Unsupported database", E_USER_ERROR);
 					return false;
 				}
-				else if( $value == 'mysql' && extension_loaded('mysqli') ) {
+				
+				$infos['label']  = $supported_db[$value]['label'];
+				$infos['engine'] = $value;
+				
+				if( $value == 'mysql' && extension_loaded('mysqli') ) {
 					$value = 'mysqli';
 				}
 				
@@ -136,36 +179,49 @@ function parseDSN($dsn)
 				break;
 			
 			case 'path':
-				$infos['dbname'] = rawurldecode($value);
+				$infos['path']   = rawurldecode($value);
+				$infos['dbname'] = basename($infos['path']);
 				
-				if( $infos['driver'] != 'sqlite' && isset($infos['host']) ) {
-					$infos['dbname'] = ltrim($infos['dbname'], '/');
+				if( $infos['path'][0] != '/' && $infos['path'] != ':memory:' ) {
+					$infos['path'] = WA_ROOTDIR . '/' . $infos['path'];
 				}
 				break;
 			
 			case 'query':
-				preg_match_all('/([^=]+)=([^&]+)(?:&|$)/', $value, $matches, PREG_SET_ORDER);
-				
-				foreach( $matches as $data ) {
-					$options[rawurldecode($data[1])] = rawurldecode($data[2]);
-				}
+				parse_str($value, $options);
 				break;
 		}
 	}
 	
-	if( $infos['driver'] == 'sqlite' ) {
+	if( $infos['engine'] == 'sqlite' ) {
+		if( class_exists('SQLite3') ) {
+			$infos['driver'] = 'sqlite3';
+		}
+		else if( extension_loaded('pdo') && extension_loaded('pdo_sqlite') ) {
+			$infos['driver'] = 'sqlite_pdo';
+		}
+		else if( !extension_loaded('sqlite') ) {
+			trigger_error("No SQLite3, PDO/SQLite or SQLite extension loaded !", E_USER_ERROR);
+		}
 		
-		if( is_readable($infos['dbname']) && filesize($infos['dbname']) > 0 ) {
-			$fp = fopen($infos['dbname'], 'rb');
+		if( is_readable($infos['path']) && filesize($infos['path']) > 0 ) {
+			$fp = fopen($infos['path'], 'rb');
 			$info = fread($fp, 15);
 			fclose($fp);
 			
 			if( strcmp($info, 'SQLite format 3') == 0 ) {
-				$infos['driver'] = 'sqlite_pdo';
+				if( $infos['driver'] == 'sqlite' ) {
+					trigger_error("No SQLite3 or PDO/SQLite extension loaded !", E_USER_ERROR);
+				}
 			}
-		}
-		else if( extension_loaded('pdo') && extension_loaded('pdo_sqlite') ) {
-			$infos['driver'] = 'sqlite_pdo';
+			else if( $infos['driver'] != 'sqlite' ) {
+				if( !extension_loaded('sqlite') ) {
+					trigger_error("SQLite extension isn't loaded !", E_USER_ERROR);
+				}
+				else {
+					$infos['driver'] = 'sqlite';
+				}
+			}
 		}
 	}
 	
@@ -180,7 +236,6 @@ function parseDSN($dsn)
 function WaDatabase($dsn)
 {
 	if( !($tmp = parseDSN($dsn)) ) {
-		trigger_error("Invalid DSN argument", E_USER_ERROR);
 		return false;
 	}
 	
@@ -194,33 +249,114 @@ function WaDatabase($dsn)
 	$infos['username'] = isset($infos['user']) ? $infos['user'] : null;
 	$infos['passwd']   = isset($infos['pass']) ? $infos['pass'] : null;
 	
-	$db = new $dbclass($infos['dbname']);
+	$db = new $dbclass();
 	$db->connect($infos, $options);
 	
-	$encoding = $db->encoding();
-	if( strncmp($infos['driver'], 'sqlite', 6) != 0 && preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding) ) {
+	if( $db->isConnected() &&  $db->engine != 'sqlite' && ($encoding = $db->encoding())
+		&& preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding) )
+	{
 		/*
 		 * WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
 		 * Si le jeu de caractères de la connexion est multi-octet, on le change
-		 * arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur.
+		 * arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur
+		 * en cas d'échec.
 		 */
 		$newEncoding = 'latin1';
 		$db->encoding($newEncoding);
 		
-		wanlog("<p>Wanewsletter a détecté que le <strong>jeu de caractères de connexion</strong>
-à votre base de données est réglé sur <q>$encoding</q>. Wanewsletter ne gère
-pas les codages de caractères multi-octets et a donc changé cette valeur pour
-<q>$newEncoding</q>.</p>
-<p>Vous devriez éditer le fichier <samp>includes/config.inc.php</samp> et fixer
-ce réglage en ajoutant la chaîne <code>?charset=latin1</code> après le nom de votre
-base de données dans la variable <code>\$dsn</code> (<q>latin1</q> est utilisé
-dans l'exemple mais vous pouvez spécifier n'importe quel jeu de caractère 8 bit
-convenant le mieux à votre langue. Référez-vous à la documentation de votre base
-de données pour connaître les jeux de caractères utilisables).</p>");
+		if( strcasecmp($encoding, $db->encoding()) === 0 ) {
+			global $output;
+			
+			$message = <<<ERR
+Wanewsletter a détecté que le <strong>jeu de caractères</strong>
+de connexion à votre base de données est <q>$encoding</q>.
+Wanewsletter ne gère pas les codages de caractères multi-octets et a donc tenté
+de changer ce réglage en faveur du jeu de caractères <q>$newEncoding</q>, mais sans succès.<br />
+Consultez la documentation de votre base de données pour trouver le réglage adéquat
+et définir le paramètre charset dans la variable \$dsn du fichier de configuration
+(consultez le fichier config.sample.inc.php pour voir un exemple de DSN configuré
+de cette manière)."
+ERR;
+			$output->displayMessage(str_replace("\n", " ", $message));
+		}
 	}
 	
 	return $db;
 }
 
+/**
+ * Exécute une ou plusieurs requètes SQL sur la base de données
+ *
+ * @param mixed $queries  Une ou plusieurs requètes SQL à exécuter
+ */
+function exec_queries(&$queries)
+{
+	global $db;
+	
+	if( !is_array($queries) )
+	{
+		$queries = array($queries);
+	}
+	
+	foreach( $queries as $query )
+	{
+		if( !empty($query) )
+		{
+			$db->query($query);
+		}
+	}
+	
+	$queries = array();
 }
-?>
+
+/**
+ * SQLite a un support très limité de la commande ALTER TABLE
+ * Impossible de modifier ou supprimer une colonne donnée
+ * On réécrit les tables dont la structure a changé
+ *
+ * @param string $tablename  Nom de la table à recréer
+ */
+function wa_sqlite_recreate_table($tablename)
+{
+	global $db, $prefixe, $sql_create, $sql_schemas;
+	
+	$schema = &$sql_schemas[$tablename];
+	
+	if( !empty($schema['updated']) )
+	{
+		return null;
+	}
+	
+	$schema['updated'] = true;
+	$columns = array();
+	
+	$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
+	while( $row = $result->fetch() )
+	{
+		$columns[] = $row['name'];
+	}
+	
+	$sql_update   = array();
+	
+	if( isset($schema['index']) )
+	{
+		foreach( $schema['index'] as $index )
+		{
+			$sql_update[] = sprintf("DROP INDEX IF EXISTS %s",
+				str_replace('wa_', $prefixe, $index)
+			);
+		}
+	}
+	
+	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
+	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
+	$sql_update[] = sprintf('INSERT INTO %1$s (%2$s) SELECT %2$s FROM %1$s_tmp;',
+		$tablename,
+		implode(',', $columns)
+	);
+	$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
+	
+	exec_queries($sql_update);
+}
+
+}

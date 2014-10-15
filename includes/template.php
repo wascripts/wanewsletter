@@ -95,8 +95,7 @@ class Template {
             return false;
         }
 
-        reset($filename_array);
-        while(list($handle, $filename) = each($filename_array))
+        foreach( $filename_array as $handle => $filename )
         {
             $this->files[$handle] = $this->make_filename($filename);
         }
@@ -163,25 +162,22 @@ class Template {
      */
     function assign_block_vars($blockname, $vararray)
     {
-        if (strstr($blockname, '.'))
+        if( strpos($blockname, '.') !== false )
         {
             // Nested block.
             $blocks = explode('.', $blockname);
-            $blockcount = sizeof($blocks) - 1;
-            $str = '$this->_tpldata';
-            for ($i = 0; $i < $blockcount; $i++)
-            {
-                $str .= '[\'' . $blocks[$i] . '.\']';
-                eval('$lastiteration = sizeof(' . $str . ') - 1;');
-                $str .= '[' . $lastiteration . ']';
+            $blockcount = count($blocks) - 1;
+            
+            $str = &$this->_tpldata;
+            for( $i = 0; $i < $blockcount; $i++ ) {
+                $str = &$str[$blocks[$i].'.']; 
+                $str = &$str[count($str) - 1]; 
             }
+            
             // Now we add the block that we're actually assigning to.
             // We're adding a new iteration to this block with the given
             // variable assignments.
-            $str .= '[\'' . $blocks[$blockcount] . '.\'][] = $vararray;';
-
-            // Now we evaluate this assignment we've built up.
-            eval($str);
+            $str[$blocks[$blockcount].'.'][] = $vararray;
         }
         else
         {
@@ -200,8 +196,7 @@ class Template {
      */
     function assign_vars($vararray)
     {
-        reset ($vararray);
-        while (list($key, $val) = each($vararray))
+        foreach( $vararray as $key => $val )
         {
             $this->_tpldata['.'][0][$key] = $val;
         }
@@ -229,7 +224,7 @@ class Template {
     function make_filename($filename)
     {
         // Check if it's an absolute or relative path.
-        if (substr($filename, 0, 1) != '/')
+        if ($filename[0] != '/')
         {
             $filename = $this->root . '/' . $filename;
         }
@@ -263,17 +258,12 @@ class Template {
 
         $filename = $this->files[$handle];
 
-        $str = implode("", @file($filename));
-        if (empty($str))
+        if (!($str = @file_get_contents($filename)))
         {
             die("Template->loadfile(): Le fichier $filename pour le modèle $handle est vide");
         }
         
-        //
-        // Ajout traitement par sessid() pour ajout des sessid au bout des urls si besoin 
-        // Cela évite d'appeller la fonction à chaque insertion d'url dans le template 
-        //
-        $this->uncompiled_code[$handle] = ( function_exists('sessid') ) ? sessid($str, true) : $str;
+        $this->uncompiled_code[$handle] = $str;
 
         return true;
     }
@@ -425,7 +415,7 @@ class Template {
     function generate_block_varref($namespace, $varname)
     {
         // Strip the trailing period.
-        $namespace = substr($namespace, 0, strlen($namespace) - 1);
+        $namespace = substr($namespace, 0, -1);
 
         // Get a reference to the data block for this namespace.
         $varref = $this->generate_block_data_ref($namespace, true);
@@ -434,7 +424,7 @@ class Template {
         // Append the variable reference.
         $varref .= '[\'' . $varname . '\']';
 
-        $varref = '\' . ( ( isset(' . $varref . ') ) ? ' . $varref . ' : \'\' ) . \'';
+        $varref = "' . (isset($varref) ? $varref : '') . '";
 
         return $varref;
 

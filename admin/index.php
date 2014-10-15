@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 define('IN_NEWSLETTER', true);
@@ -39,42 +22,15 @@ if( count($liste_ids) > 0 )
 	//
 	// Récupération des nombres d'inscrits
 	//
-	$sql_abo_ids = "SELECT DISTINCT(abo_id)
-		FROM " . ABO_LISTE_TABLE . "
-		WHERE liste_id IN($sql_liste_ids)";
-	if( !SQL_SUBSELECT_SUPPORTED )
-	{
-		if( !($result = $db->query($sql_abo_ids)) )
-		{
-			trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
-		}
-		
-		$abo_ids = array();
-		
-		if( $abo_id = $result->column('abo_id') )
-		{
-			do
-			{
-				array_push($abo_ids, $abo_id);
-			}
-			while( $abo_id = $result->column('abo_id') );
-		}
-		else
-		{
-			$abo_ids[] = 0;
-		}
-		
-		$sql_abo_ids = implode(', ', $abo_ids);
-	}
-	
 	$sql = "SELECT COUNT(abo_id) AS num_abo, abo_status
 		FROM " . ABONNES_TABLE . "
-		WHERE abo_id IN($sql_abo_ids)
+		WHERE abo_id IN(
+			SELECT DISTINCT(abo_id)
+			FROM " . ABO_LISTE_TABLE . "
+			WHERE liste_id IN($sql_liste_ids)
+		)
 		GROUP BY abo_status";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre d\'inscrits/inscrits en attente', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	while( $row = $result->fetch() )
 	{
@@ -94,10 +50,7 @@ if( count($liste_ids) > 0 )
 	$sql = "SELECT SUM(liste_numlogs) AS num_logs 
 		FROM " . LISTE_TABLE . " 
 		WHERE liste_id IN($sql_liste_ids)";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir le nombre de logs envoyés', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $tmp = $result->column('num_logs') )
 	{
@@ -109,12 +62,9 @@ if( count($liste_ids) > 0 )
 	//
 	$sql = "SELECT MAX(log_date) AS last_log 
 		FROM " . LOG_TABLE . " 
-		WHERE log_status = " . STATUS_SENDED . "
+		WHERE log_status = " . STATUS_SENT . "
 			AND liste_id IN($sql_liste_ids)";
-	if( !($result = $db->query($sql)) )
-	{
-		trigger_error('Impossible d\'obtenir la date du dernier envoyé', ERROR);
-	}
+	$result = $db->query($sql);
 	
 	if( $tmp = $result->column('last_log') )
 	{
@@ -124,39 +74,14 @@ if( count($liste_ids) > 0 )
 	//
 	// Espace disque occupé
 	//
-	$sql_file_ids = "SELECT lf.file_id
-		FROM " . LOG_FILES_TABLE . " AS lf
-			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-				AND l.liste_id IN($sql_liste_ids)";
-	
-	if( !SQL_SUBSELECT_SUPPORTED )
-	{
-		if( !($result = $db->query($sql_file_ids)) )
-		{
-			trigger_error('Impossible d\'obtenir la liste des identifiants de fichiers', ERROR);
-		}
-		
-		$file_ids = array();
-		
-		if( $file_id = $result->column('file_id') )
-		{
-			do
-			{
-				array_push($file_ids, $file_id);
-			}
-			while( $file_id = $result->column('file_id') );
-		}
-		else
-		{
-			$file_ids[] = 0;
-		}
-		
-		$sql_file_ids = implode(', ', $file_ids);
-	}
-	
 	$sql = "SELECT SUM(jf.file_size) AS totalsize
 		FROM " . JOINED_FILES_TABLE . " AS jf
-		WHERE jf.file_id IN($sql_file_ids)";
+		WHERE jf.file_id IN(
+			SELECT lf.file_id
+			FROM " . LOG_FILES_TABLE . " AS lf
+				INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+					AND l.liste_id IN($sql_liste_ids)
+		)";
 	$result   = $db->query($sql);
 	$filesize = $result->column('totalsize');
 	
@@ -181,50 +106,62 @@ if( count($liste_ids) > 0 )
 //
 list($infos) = parseDSN($dsn);
 
-switch( SQL_DRIVER )
+if( $db->engine == 'mysql' )
 {
-	case 'mysql':
-	case 'mysqli':
-		$sql = 'SHOW TABLE STATUS FROM ' . $infos['dbname'];
-		if( $result = $db->query($sql) )
+	$sql = sprintf("SHOW TABLE STATUS FROM %s", $db->quote($infos['dbname']));
+	
+	try {
+		$result = $db->query($sql);
+		$dbsize = 0;
+		
+		while( $row = $result->fetch() )
 		{
-			$dbsize = 0;
-			while( $row = $result->fetch() )
+			$add = false;
+			
+			if( $prefixe != '' )
 			{
-				$add = false;
-				
-				if( $prefixe != '' )
-				{
-					if( $row['Name'] != SESSIONS_TABLE && preg_match('/^' . $prefixe . '/', $row['Name']) )
-					{
-						$add = true;
-					}
-				}
-				else
+				if( $row['Name'] != SESSIONS_TABLE && strncmp($row['Name'], $prefixe, strlen($prefixe)) == 0 )
 				{
 					$add = true;
 				}
-				
-				if( $add )
-				{
-					$dbsize += ($row['Data_length'] + $row['Index_length']);
-				}
+			}
+			else
+			{
+				$add = true;
+			}
+			
+			if( $add )
+			{
+				$dbsize += ($row['Data_length'] + $row['Index_length']);
 			}
 		}
-		else
-		{
-			$dbsize = $lang['Not_available'];
-		}
-		break;
-	
-	case 'sqlite':
-	case 'sqlite_pdo':
-		$dbsize = filesize($infos['dbname']);
-		break;
-	
-	default:
+	}
+	catch( SQLException $e ) {
+		wanlog($e);
 		$dbsize = $lang['Not_available'];
-		break;
+	}
+}
+else if( $db->engine == 'postgres' )
+{
+	$sql = "SELECT sum(pg_total_relation_size(schemaname||'.'||tablename))
+		FROM pg_tables WHERE schemaname = 'public'
+			AND tablename ~ '^$prefixe'";
+	
+	try {
+		$result = $db->query($sql);
+		$row    = $result->fetch();
+		$dbsize = $row[0];
+	}
+	catch( SQLException $e ) {
+		wanlog($e);
+		$dbsize = $lang['Not_available'];
+	}
+}
+else if( $db->engine == 'sqlite' ) {
+	$dbsize = filesize($infos['path']);
+}
+else {
+	$dbsize = $lang['Not_available'];
 }
 
 if( !($days	 = round(( time() - $nl_config['mailing_startdate'] ) / 86400)) )
@@ -300,8 +237,47 @@ $output->assign_vars( array(
 	'TEMP_SUBSCRIBERS'       => $l_num_temp,
 	'NEWSLETTERS_SENDED'     => $l_num_logs,
 	'DBSIZE'                 => (is_numeric($dbsize)) ? formateSize($dbsize) : $dbsize,
-	'FILESIZE'               => formateSize($filesize)
+	'FILESIZE'               => formateSize($filesize),
+	'USED_VERSION'           => sprintf($lang['Used_version'], WANEWSLETTER_VERSION)
 ));
+
+require WA_ROOTDIR . '/includes/class.updater.php';
+
+$updater = new Wa_Updater();
+$updater->cache    = sprintf('%s/%s', WA_TMPDIR, WA_CHECK_UPDATE_CACHE);
+$updater->cacheTtl = WA_CHECK_UPDATE_CACHE_TTL;
+$result = $updater->check();
+
+if( $result !== false )
+{
+	if( $result === 1 )
+	{
+		$output->assign_block_vars('new_version_available', array(
+			'L_NEW_VERSION_AVAILABLE' => $lang['New_version_available'],
+			'L_DOWNLOAD_PAGE'         => $lang['Download_page'],
+			
+			'U_DOWNLOAD_PAGE' => WA_DOWNLOAD_PAGE
+		));
+	}
+	else
+	{
+		$output->assign_block_vars('version_up_to_date', array(
+			'L_VERSION_UP_TO_DATE' => $lang['Version_up_to_date'],
+		));
+	}
+}
+else
+{
+	$output->assign_block_vars('check_update', array(
+		'L_CHECK_UPDATE'          => $lang['Check_update'],
+		'L_NEW_VERSION_AVAILABLE' => str_replace('\'', '\\\'', $lang['New_version_available']),
+		'L_VERSION_UP_TO_DATE'    => str_replace('\'', '\\\'', $lang['Version_up_to_date']),
+		'L_SITE_UNREACHABLE'      => str_replace('\'', '\\\'', $lang['Site_unreachable']),
+		'L_DOWNLOAD_PAGE'         => str_replace('\'', '\\\'', $lang['Download_page']),
+		
+		'U_DOWNLOAD_PAGE' => WA_DOWNLOAD_PAGE
+	));
+}
 
 $output->pparse('body');
 

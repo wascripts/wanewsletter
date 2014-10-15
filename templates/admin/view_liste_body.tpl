@@ -15,77 +15,77 @@
 </ul>
 <!-- END admin_options -->
 
-<div class="bloc">
+<div class="block">
 	<h2>{L_TITLE}</h2>
 	
-	<table width="100%" cellspacing="1" cellpadding="3" align="center" class="content">
+	<table class="dataset">
 		<tr>
-			<td class="row1"><span class="texte">{L_LISTE_ID}&#160;:</span></td>
-			<td class="row2"><span class="texte">{LISTE_ID}</span></td>
+			<td>{L_LISTE_ID}&nbsp;:</td>
+			<td>{LISTE_ID}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_LISTE_NAME}&#160;:</span></td>
-			<td class="row2"><span class="texte">{LISTE_NAME}</span></td>
+			<td>{L_LISTE_NAME}&nbsp;:</td>
+			<td>{LISTE_NAME}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_LISTE_PUBLIC}&#160;:</span></td>
-			<td class="row2"><span class="texte">{LISTE_PUBLIC}</span></td>
+			<td>{L_LISTE_PUBLIC}&nbsp;:</td>
+			<td>{LISTE_PUBLIC}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_AUTH_FORMAT}&#160;:</span></td>
-			<td class="row2"><span class="texte">{AUTH_FORMAT}</span></td>
+			<td>{L_AUTH_FORMAT}&nbsp;:</td>
+			<td>{AUTH_FORMAT}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_SENDER_EMAIL}&#160;:</span></td>
-			<td class="row2"><span class="texte">{SENDER_EMAIL}</span></td>
+			<td>{L_SENDER_EMAIL}&nbsp;:</td>
+			<td>{SENDER_EMAIL}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_RETURN_EMAIL}&#160;:</span></td>
-			<td class="row2"><span class="texte">{RETURN_EMAIL}</span></td>
+			<td>{L_RETURN_EMAIL}&nbsp;:</td>
+			<td>{RETURN_EMAIL}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_CONFIRM_SUBSCRIBE}&#160;:</span></td>
-			<td class="row2"><span class="texte">{CONFIRM_SUBSCRIBE}</span></td>
-		</tr>
-		<!-- BEGIN liste_confirm -->
-		<tr>
-			<td class="row1"><span class="texte">{liste_confirm.L_LIMITEVALIDATE}&#160;:</span></td>
-			<td class="row2"><span class="texte">{liste_confirm.LIMITEVALIDATE} {liste_confirm.L_DAYS}</span></td>
-		</tr>
-		<!-- END liste_confirm -->
-		<tr>
-			<td class="row1"><span class="texte">{L_NUM_SUBSCRIBERS}&#160;:</span></td>
-			<td class="row2"><span class="texte">{NUM_SUBSCRIBERS}</span></td>
+			<td>{L_CONFIRM_SUBSCRIBE}&nbsp;:</td>
+			<td>{CONFIRM_SUBSCRIBE}</td>
 		</tr>
 		<!-- BEGIN liste_confirm -->
 		<tr>
-			<td class="row1"><span class="texte">{liste_confirm.L_NUM_TEMP}&#160;:</span></td>
-			<td class="row2"><span class="texte">{liste_confirm.NUM_TEMP}</span></td>
+			<td>{liste_confirm.L_LIMITEVALIDATE}&nbsp;:</td>
+			<td>{liste_confirm.LIMITEVALIDATE}&nbsp;{liste_confirm.L_DAYS}</td>
 		</tr>
 		<!-- END liste_confirm -->
 		<tr>
-			<td class="row1"><span class="texte">{L_NUM_LOGS}&#160;:</span></td>
-			<td class="row2"><span class="texte">{NUM_LOGS}</span></td>
+			<td>{L_NUM_SUBSCRIBERS}&nbsp;:</td>
+			<td>{NUM_SUBSCRIBERS}</td>
+		</tr>
+		<!-- BEGIN liste_confirm -->
+		<tr>
+			<td>{liste_confirm.L_NUM_TEMP}&nbsp;:</td>
+			<td>{liste_confirm.NUM_TEMP}</td>
+		</tr>
+		<!-- END liste_confirm -->
+		<tr>
+			<td>{L_NUM_LOGS}&nbsp;:</td>
+			<td>{NUM_LOGS}</td>
 		</tr>
 		<!-- BEGIN date_last_log -->
 		<tr>
-			<td class="row1"><span class="texte">{date_last_log.L_LAST_LOG}&#160;:</span></td>
-			<td class="row2"><span class="texte">{date_last_log.LAST_LOG}</span></td>
+			<td>{date_last_log.L_LAST_LOG}&nbsp;:</td>
+			<td>{date_last_log.LAST_LOG}</td>
 		</tr>
 		<!-- END date_last_log -->
 		<tr>
-			<td class="row1"><span class="texte">{L_FORM_URL}&#160;:</span></td>
-			<td class="row2"><span class="texte">{FORM_URL}</span></td>
+			<td>{L_FORM_URL}&nbsp;:</td>
+			<td>{FORM_URL}</td>
 		</tr>
 		<tr>
-			<td class="row1"><span class="texte">{L_STARTDATE}&#160;:</span></td>
-			<td class="row2"><span class="texte">{STARTDATE}</span></td>
+			<td>{L_STARTDATE}&nbsp;:</td>
+			<td>{STARTDATE}</td>
 		</tr>
 	</table>
 	
 	<!-- BEGIN purge_option -->
 	<div class="bottom">{purge_option.S_HIDDEN_FIELDS}
-		<input type="submit" name="purge" value="{purge_option.L_PURGE_BUTTON}" class="pbutton" />
+		<button type="submit" name="purge" class="primary">{purge_option.L_PURGE_BUTTON}</button>
 	</div>
 	<!-- END purge_option -->
 </div>

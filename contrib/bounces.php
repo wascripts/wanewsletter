@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  * 
  * @link http://www.cru.fr/listes/atelier/bounce.html
  * 
@@ -29,12 +12,12 @@
  * @see RFC 1893 - Enhanced Mail System Status Codes
  * @see RFC 3462 - The Multipart/Report Content Type for the Reporting of Mail System Administrative Messages
  * 
- * Ce script se charge de scanner le compte mail indiqué pour récupérer les mail-daemon renvoyés 
- * en cas de compte inexistant ou de boite pleine et supprime les emails indiqués de la base des 
+ * Ce script se charge de scanner le compte mail indiqué pour récupérer les mail-daemon renvoyés
+ * en cas de compte inexistant ou de boite pleine et supprime les emails indiqués de la base des
  * inscrits (si boite inexistante).
  * 
- * Si vous utilisez ce script pour scanner le compte sur lequel vous avez demandé que soient renvoyés 
- * les emails de retours d'erreur, faites attention de décommenter ensuite la ligne plus haut pour éviter 
+ * Si vous utilisez ce script pour scanner le compte sur lequel vous avez demandé que soient renvoyés
+ * les emails de retours d'erreur, faites attention de décommenter ensuite la ligne plus haut pour éviter
  * d'éventuels actes malveillants.
  */
 
@@ -102,7 +85,7 @@ function process_bounce($deliveryReport)
 define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR',    '..');
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 
 $process = false;
 foreach( $_SERVER['argv'] as $arg ) {

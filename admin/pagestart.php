@@ -1,27 +1,10 @@
 <?php
 /**
- * Copyright (c) 2002-2006 Aurélien Maille
- * 
- * This file is part of Wanewsletter.
- * 
- * Wanewsletter is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 2 
- * of the License, or (at your option) any later version.
- * 
- * Wanewsletter is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Wanewsletter; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- * 
- * @package Wanewsletter
- * @author  Bobe <wascripts@phpcodeur.net>
- * @link    http://phpcodeur.net/wascripts/wanewsletter/
- * @license http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @package   Wanewsletter
+ * @author    Bobe <wascripts@phpcodeur.net>
+ * @link      http://phpcodeur.net/wascripts/wanewsletter/
+ * @copyright 2002-2014 Aurélien Maille
+ * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 if( !defined('IN_NEWSLETTER') )
@@ -32,9 +15,9 @@ if( !defined('IN_NEWSLETTER') )
 define('IN_ADMIN',   true);
 define('WA_ROOTDIR', '..');
 
-$secure = TRUE;
+$secure = true;
 
-require WA_ROOTDIR . '/start.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/class.sessions.php';
 require WA_ROOTDIR . '/includes/class.auth.php';
 
@@ -44,7 +27,7 @@ $liste = ( !empty($_REQUEST['liste']) ) ? intval($_REQUEST['liste']) : 0;
 //// Start session and load settings 
 //
 $session = new Session();
-
+$session->update_hash = (isset($nl_config['db_version']) && $nl_config['db_version'] > 8);
 $admindata = $session->check($liste);
 load_settings($admindata);
 //
@@ -58,37 +41,60 @@ if( !defined('IN_LOGIN') )
 		$redirect  = '?redirect=' . basename(server_info('PHP_SELF'));
 		$redirect .= ( server_info('QUERY_STRING') != '' ) ? rawurlencode('?' . server_info('QUERY_STRING')) : '';
 		
-		Location('login.php' . $redirect);
+		http_redirect('login.php' . $redirect);
 	}
 	
-	$auth = new Auth();
-	
-	//
-	// Si la liste en session n'existe pas, on met à jour la session
-	//
-	if( !isset($auth->listdata[$admindata['session_liste']]) )
+	if( !defined('IN_UPGRADE') )
 	{
-		$admindata['session_liste'] = 0;
-		
-		$sql = "UPDATE " . SESSIONS_TABLE . "
-			SET session_liste = 0 
-			WHERE session_id = '" . $session->session_id . "' 
-				AND admin_id = " . $admindata['admin_id'];
-		if( !$db->query($sql) )
+		//
+		// On vérifie si les tables du script sont bien à jour
+		//
+		if( !check_db_version(@$nl_config['db_version']) )
 		{
-			trigger_error('Impossible de mettre à jour le session_liste', ERROR);
+			$output->addLine($lang['Need_upgrade_db']);
+			$output->addLine($lang['Need_upgrade_db_link'], WA_ROOTDIR.'/admin/upgrade.php');
+			$output->displayMessage();
+		}
+		
+		if( !is_writable(WA_TMPDIR) )
+		{
+			$output->displayMessage(sprintf(
+				$lang['Message']['Dir_not_writable'],
+				wan_htmlspecialchars(wa_realpath(WA_TMPDIR))
+			));
+		}
+		
+		$auth = new Auth();
+		
+		//
+		// Si la liste en session n'existe pas, on met à jour la session
+		//
+		if( !isset($auth->listdata[$admindata['session_liste']]) )
+		{
+			$admindata['session_liste'] = 0;
+			
+			$sql = sprintf("UPDATE %s
+				SET session_liste = 0 
+				WHERE session_id = '%s' 
+					AND admin_id = %d",
+				SESSIONS_TABLE,
+				$session->session_id,
+				$admindata['admin_id']
+			);
+			$db->query($sql);
 		}
 	}
 	
-	if( $secure && strtoupper(server_info('REQUEST_METHOD')) == 'POST' )
+	if( $secure && strtoupper(server_info('REQUEST_METHOD')) == 'POST' && $session->new_session )
 	{
-		$sessid = ( !empty($_POST['sessid']) ) ? trim($_POST['sessid']) : '';
-		
-		if( $session->new_session || $sessid != $session->session_id )
-		{
-			$output->message('Invalid_session');
-		}
+		$output->displayMessage('Invalid_session');
 	}
 }
 
-?>
+//
+// Purge 'automatique' des listes (comptes non activés au-delà du temps limite)
+//
+if( !(time() % 10) )
+{
+	purge_liste();
+}
