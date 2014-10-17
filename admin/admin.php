@@ -83,7 +83,7 @@ if( $mode == 'adduser' )
 			$sql_data['admin_dateformat'] = $nl_config['date_format'];
 			$sql_data['admin_level']      = USER;
 			
-			$db->build(SQL_INSERT, ADMIN_TABLE, $sql_data);
+			$db->insert(ADMIN_TABLE, $sql_data);
 			
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			$mailer->signature = WA_X_MAILER;
@@ -289,7 +289,7 @@ if( isset($_POST['submit']) )
 			$sql_data['admin_level'] = ( $_POST['admin_level'] == ADMIN ) ? ADMIN : USER;
 		}
 		
-		$db->build(SQL_UPDATE, ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id));
+		$db->update(ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id));
 		
 		if( $admindata['admin_level'] == ADMIN )
 		{
@@ -315,12 +315,12 @@ if( isset($_POST['submit']) )
 					$sql_data['admin_id'] = $admin_id;
 					$sql_data['liste_id'] = $liste_ids[$i];
 					
-					$db->build(SQL_INSERT, AUTH_ADMIN_TABLE, $sql_data);
+					$db->insert(AUTH_ADMIN_TABLE, $sql_data);
 				}
 				else
 				{
 					$sql_where = array('admin_id' => $admin_id, 'liste_id' => $liste_ids[$i]);
-					$db->build(SQL_UPDATE, AUTH_ADMIN_TABLE, $sql_data, $sql_where);
+					$db->update(AUTH_ADMIN_TABLE, $sql_data, $sql_where);
 				}
 			}
 		}

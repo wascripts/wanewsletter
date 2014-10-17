@@ -160,13 +160,5 @@ if( !defined('IN_INSTALL') )
 	// On récupère la configuration du script 
 	//
 	$nl_config = wa_get_config();
-	
-	//
-	// "Constantes" de classe dans le scope global
-	// Pas plus haut car on a besoin d'une instance de Wadb_* et WadbResult_*
-	//
-	define('SQL_INSERT', $db->SQL_INSERT);
-	define('SQL_UPDATE', $db->SQL_UPDATE);
-	define('SQL_DELETE', $db->SQL_DELETE);
 }
 

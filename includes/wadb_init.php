@@ -11,8 +11,6 @@ if( !defined('_INC_WADB_INIT') ) {
 
 define('_INC_WADB_INIT', true);
 
-class SQLException extends Exception { }
-
 //
 // Tables du script 
 //

@@ -497,13 +497,13 @@ class Attach {
 				'file_mimetype'      => $filetype
 			);
 			
-			$db->build(SQL_INSERT, JOINED_FILES_TABLE, $filedata);
+			$db->insert(JOINED_FILES_TABLE, $filedata);
 			
-			$file_id = $db->lastInsertId();
-			
-			$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id) 
-				VALUES($log_id, $file_id)";
-			$db->query($sql);
+			$data = array(
+				'log_id'  => $log_id,
+				'file_id' => $db->lastInsertId()
+			);
+			$db->insert(LOG_FILES_TABLE, $data);
 			
 			$db->commit();
 		}

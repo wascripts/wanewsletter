@@ -393,7 +393,7 @@ switch( $mode )
 					}
 				}
 				
-				$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id']));
+				$db->update(ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id']));
 				
 				$output->redirect('profil_cp.php', 4);
 				$output->displayMessage('Profile_updated');

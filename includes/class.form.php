@@ -324,7 +324,7 @@ class Wanewsletter {
 				$sql_data = array_merge($sql_data, $this->account['tags']);
 			}
 			
-			$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
+			$db->insert(ABONNES_TABLE, $sql_data);
 			
 			$this->account['abo_id'] = $db->lastInsertId();
 		}

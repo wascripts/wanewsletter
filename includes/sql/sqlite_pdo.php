@@ -11,143 +11,42 @@ if( !defined('_INC_CLASS_WADB_SQLITE_PDO') ) {
 
 define('_INC_CLASS_WADB_SQLITE_PDO', true);
 
-class Wadb_sqlite_pdo {
+require dirname(__FILE__) . '/wadb.php';
+
+class Wadb_sqlite_pdo extends Wadb {
 
 	/**
 	 * Type de base de données
 	 *
 	 * @var string
-	 * @access private
 	 */
-	var $engine = 'sqlite';
-	
-	/**
-	 * Connexion à la base de données
-	 * 
-	 * @var resource
-	 * @access private
-	 */
-	var $link;
-	
-	/**
-	 * Nom de la base de données
-	 * 
-	 * @var string
-	 * @access public
-	 */
-	var $dbname = '';
-	
-	/**
-	 * Options de connexion
-	 * 
-	 * @var array
-	 * @access private
-	 */
-	var $options = array();
-	
-	/**
-	 * Code d'erreur
-	 * 
-	 * @var integer
-	 * @access public
-	 */
-	var $errno = 0;
-	
-	/**
-	 * Message d'erreur
-	 * 
-	 * @var string
-	 * @access public
-	 */
-	var $error = '';
-	
-	/**
-	 * Dernière requète SQL exécutée (en cas d'erreur seulement)
-	 * 
-	 * @var string
-	 * @access public
-	 */
-	var $lastQuery = '';
-	
-	/**
-	 * Nombre de requètes SQL exécutées depuis le début de la connexion
-	 * 
-	 * @var integer
-	 * @access public
-	 */
-	var $queries = 0;
-	
-	/**
-	 * Durée totale d'exécution des requètes SQL
-	 * 
-	 * @var integer
-	 * @access public
-	 */
-	var $sqltime = 0;
-	
+	public $engine = 'sqlite';
+
 	/**
 	 * Version de la librairie SQLite
 	 * 
 	 * @var string
-	 * @access public
 	 */
-	var $libVersion = '';
+	public $libVersion = '';
+
+	/**
+	 * @var PDO
+	 */
+	protected $pdo;
 	
 	/**
-	 * Objet PDO
-	 * 
-	 * @var object
-	 * @access private
+	 * @var PDOStatement
 	 */
-	var $pdo;
-	
-	/**
-	 * Objet PDOStatement
-	 * 
-	 * @var object
-	 * @access private
-	 */
-	var $result;
+	protected $result;
 	
 	/**
 	 * Nombre de lignes affectées par la dernière requète DML
 	 * 
 	 * @var integer
-	 * @access private
 	 */
-	var $_affectedRows = 0;
+	protected $_affectedRows = 0;
 	
-	/**
-	 * "Constantes" de la classe
-	 */
-	var $SQL_INSERT = 1;
-	var $SQL_UPDATE = 2;
-	var $SQL_DELETE = 3;
-	
-	/**
-	 * Constructeur de classe
-	 * 
-	 * @param array  $options     Options de connexion/utilisation
-	 * 
-	 * @access public
-	 */
-	function Wadb_sqlite_pdo($options = null)
-	{
-		if( is_array($options) ) {
-			$this->options = array_merge($this->options, $options);
-		}
-	}
-	
-	/**
-	 * Connexion à la base de données
-	 * 
-	 * @param array $infos    Informations de connexion
-	 * @param array $options  Options de connexion/utilisation
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function connect($infos = null, $options = null)
+	public function connect($infos = null, $options = null)
 	{
 		$sqlite_db = ($infos['path'] != '') ? $infos['path'] : null;
 		
@@ -197,26 +96,7 @@ class Wadb_sqlite_pdo {
 		}
 	}
 	
-	/**
-	 * @access public
-	 * @return boolean
-	 */
-	function isConnected()
-	{
-		return !is_null($this->link);
-	}
-	
-	/**
-	 * Renvoie le jeu de caractères courant utilisé.
-	 * Si l'argument $encoding est fourni, il est utilisé pour définir
-	 * le nouveau jeu de caractères de la connexion en cours
-	 * 
-	 * @param string $encoding
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function encoding($encoding = null)
+	public function encoding($encoding = null)
 	{
 		$result = $this->pdo->query('PRAGMA encoding');
 		$row = $result->fetch();
@@ -229,15 +109,7 @@ class Wadb_sqlite_pdo {
 		return $curEncoding;
 	}
 	
-	/**
-	 * Exécute une requète sur la base de données
-	 * 
-	 * @param string $query
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function query($query)
+	public function query($query)
 	{
 		if( ($this->result instanceof PDOStatement) ) {
 			$this->result->closeCursor();
@@ -282,93 +154,12 @@ class Wadb_sqlite_pdo {
 		return $result;
 	}
 	
-	/**
-	 * Construit une requète de type INSERT ou UPDATE à partir des diverses données fournies
-	 * 
-	 * @param string $type      Type de requète (peut valoir INSERT ou UPDATE)
-	 * @param string $table     Table sur laquelle effectuer la requète
-	 * @param array  $data      Tableau des données à insérer. Le tableau a la structure suivante:
-	 *                          array(column_name => column_value[, column_name => column_value])
-	 * @param array $sql_where  Chaîne de condition
-	 * 
-	 * @access public
-	 * @return mixed
-	 */
-	function build($type, $table, $data, $sql_where = null)
-	{
-		$fields = $values = array();
-		
-		foreach( $data as $field => $value ) {
-			if( is_null($value) ) {
-				$value = 'NULL';
-			}
-			else if( is_bool($value) ) {
-				$value = intval($value);
-			}
-			else if( !is_int($value) && !is_float($value) ) {
-				$value = '\'' . $this->escape($value) . '\'';
-			}
-			
-			array_push($fields, $this->quote($field));
-			array_push($values, $value);
-		}
-		
-		if( $type == $this->SQL_INSERT ) {
-			$query = sprintf('INSERT INTO %s (%s) VALUES(%s)', $table, implode(', ', $fields), implode(', ', $values));
-		}
-		else if( $type == $this->SQL_UPDATE ) {
-			
-			$query = 'UPDATE ' . $table . ' SET ';
-			for( $i = 0, $m = count($fields); $i < $m; $i++ ) {
-				$query .= $fields[$i] . ' = ' . $values[$i] . ', ';
-			}
-			
-			$query = substr($query, 0, -2);
-			
-			if( is_array($sql_where) && count($sql_where) > 0 ) {
-				$query .= ' WHERE ';
-				foreach( $sql_where as $field => $value ) {
-					if( is_null($value) ) {
-						$value = 'NULL';
-					}
-					else if( is_bool($value) ) {
-						$value = intval($value);
-					}
-					else if( !is_int($value) && !is_float($value) ) {
-						$value = '\'' . $this->escape($value) . '\'';
-					}
-					
-					$query .= sprintf('%s = %s AND ', $this->quote($field), $value);
-				}
-				
-				$query = substr($query, 0, -5);
-			}
-		}
-		
-		return $this->query($query);
-	}
-	
-	/**
-	 * Protège un nom de base, de table ou de colonne en prévision de son utilisation
-	 * dans une requète
-	 * 
-	 * @param string $name
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function quote($name)
+	public function quote($name)
 	{
 		return '[' . $name . ']';
 	}
 	
-	/**
-	 * @param mixed $tables  Nom de table ou tableau de noms de table
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function vacuum($tables)
+	public function vacuum($tables)
 	{
 		if( !is_array($tables) ) {
 			$tables = array($tables); 
@@ -379,25 +170,12 @@ class Wadb_sqlite_pdo {
 		}
 	}
 	
-	/**
-	 * Démarre le mode transactionnel
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function beginTransaction()
+	public function beginTransaction()
 	{
 		return $this->pdo->beginTransaction();
 	}
 	
-	/**
-	 * Envoie une commande COMMIT à la base de données pour validation de la
-	 * transaction courante
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function commit()
+	public function commit()
 	{
 		if( !($result = $this->pdo->commit()) )
 		{
@@ -407,73 +185,32 @@ class Wadb_sqlite_pdo {
 		return $result;
 	}
 	
-	/**
-	 * Envoie une commande ROLLBACK à la base de données pour annulation de la
-	 * transaction courante
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function rollBack()
+	public function rollBack()
 	{
 		return $this->pdo->rollBack();
 	}
 	
-	/**
-	 * Renvoie le nombre de lignes affectées par la dernière requète DML
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function affectedRows()
+	public function affectedRows()
 	{
 		return $this->_affectedRows;
 	}
 	
-	/**
-	 * Retourne l'identifiant généré automatiquement par la dernière requète
-	 * INSERT sur la base de données
-	 * 
-	 * @access public
-	 * @return integer
-	 */
-	function lastInsertId()
+	public function lastInsertId()
 	{
 		return $this->pdo->lastInsertId();
 	}
 	
-	/**
-	 * Échappe une chaîne en prévision de son insertion dans une requète sur
-	 * la base de données
-	 * 
-	 * @param string $string
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function escape($string)
+	public function escape($string)
 	{
 		return substr($this->pdo->quote($string), 1, -1);
 	}
 	
-	/**
-	 * Vérifie l'état de la connexion courante et effectue si besoin une reconnexion
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function ping()
+	public function ping()
 	{
 		return true;
 	}
 	
-	/**
-	 * Ferme la connexion à la base de données
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function close()
+	public function close()
 	{
 		try {
 			$this->rollBack();
@@ -483,201 +220,59 @@ class Wadb_sqlite_pdo {
 		return true;
 	}
 	
-	/**
-	 * Initialise un objet WadbBackup_{self::$engine}
-	 *
-	 * @access public
-	 * @return object
-	 */
-	function initBackup()
+	public function initBackup()
 	{
 		return new WadbBackup_sqlite_pdo($this);
 	}
 }
 
-class WadbResult_sqlite_pdo {
-	
-	/**
-	 * Objet de résultat PDO de requète
-	 * 
-	 * @var object
-	 * @access private
-	 */
-	var $result;
-	
-	/**
-	 * Mode de récupération des données
-	 * 
-	 * @var integer
-	 * @access private
-	 */
-	var $fetchMode;
-	
-	/**
-	 * "Constantes" de la classe
-	 */
-	var $SQL_FETCH_NUM   = PDO::FETCH_NUM;
-	var $SQL_FETCH_ASSOC = PDO::FETCH_ASSOC;
-	var $SQL_FETCH_BOTH  = PDO::FETCH_BOTH;
-	
-	/**
-	 * Constructeur de classe
-	 * 
-	 * @param object $result  Ressource de résultat de requète
-	 * 
-	 * @access public
-	 */
-	function WadbResult_sqlite_pdo($result)
+class WadbResult_sqlite_pdo extends WadbResult {
+
+	public function fetch($mode = null)
 	{
-		$this->result = $result;
-		$this->fetchMode = PDO::FETCH_BOTH;
-	}
-	
-	/**
-	 * Renvoie la ligne suivante dans le jeu de résultat
-	 * 
-	 * @param integer $mode  Mode de récupération des données
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function fetch($mode = null)
-	{
-		if( is_null($mode) ) {
-			$mode = $this->fetchMode;
-		}
+		$modes = array(
+			self::FETCH_NUM   => PDO::FETCH_NUM,
+			self::FETCH_ASSOC => PDO::FETCH_ASSOC,
+			self::FETCH_BOTH  => PDO::FETCH_BOTH
+		);
 		
-		return $this->result->fetch($mode);
+		return $this->result->fetch($this->getFetchMode($modes, $mode));
 	}
 	
-	/**
-	 * Renvoie sous forme d'objet la ligne suivante dans le jeu de résultat
-	 * 
-	 * @access public
-	 * @return object
-	 */
-	function fetchObject()
+	public function fetchObject()
 	{
 		return $this->result->fetch(PDO::FETCH_OBJ);
 	}
 	
-	/**
-	 * Renvoie un tableau de toutes les lignes du jeu de résultat
-	 * 
-	 * @param integer $mode  Mode de récupération des données
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function fetchAll($mode = null)
+	public function fetchAll($mode = null)
 	{
-		if( is_null($mode) ) {
-			$mode = $this->fetchMode;
-		}
+		$modes = array(
+			self::FETCH_NUM   => PDO::FETCH_NUM,
+			self::FETCH_ASSOC => PDO::FETCH_ASSOC,
+			self::FETCH_BOTH  => PDO::FETCH_BOTH
+		);
 		
-		return $this->result->fetchAll($mode);
+		return $this->result->fetchAll($this->getFetchMode($modes, $mode));
 	}
 	
-	/**
-	 * Retourne le contenu de la colonne pour l'index ou le nom donné
-	 * à l'index suivant dans le jeu de résultat.
-	 * 
-	 * @param mixed $column  Index ou nom de la colonne
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function column($column)
+	public function column($column)
 	{
 		$row = $this->result->fetch(PDO::FETCH_BOTH);
 		
 		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
 	
-	/**
-	 * Configure le mode de récupération par défaut
-	 * 
-	 * @param integer $mode  Mode de récupération des données
-	 * 
-	 * @access public
-	 * @return boolean
-	 */
-	function setFetchMode($mode)
-	{
-		if( in_array($mode, array(PDO::FETCH_NUM, PDO::FETCH_ASSOC, PDO::FETCH_BOTH)) ) {
-			$this->fetchMode = $mode;
-			return true;
-		}
-		else {
-			trigger_error("Invalid fetch mode", E_USER_WARNING);
-			return false;
-		}
-	}
-	
-	/**
-	 * Libère la mémoire allouée
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function free()
+	public function free()
 	{
 		if( !is_null($this->result) ) {
 			$this->result = null;
 		}
 	}
-	
-	/**
-	 * Destructeur de classe
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	function __destruct()
-	{
-		$this->free();
-	}
 }
 
-class WadbBackup_sqlite_pdo {
+class WadbBackup_sqlite_pdo extends WadbBackup {
 	
-	/**
-	 * Connexion à la base de données
-	 * 
-	 * @var object
-	 * @access private
-	 */
-	var $db = null;
-	
-	/**
-	 * Fin de ligne
-	 * 
-	 * @var boolean
-	 * @access public
-	 */
-	var $eol = "\n";
-	
-	/**
-	 * Constructeur de classe
-	 * 
-	 * @param object $db  Connexion à la base de données
-	 * 
-	 * @access public
-	 */
-	function WadbBackup_sqlite_pdo($db)
-	{
-		$this->db = $db;
-	}
-	
-	/**
-	 * Génération de l'en-tête du fichier de sauvegarde
-	 * 
-	 * @param string $toolname  Nom de l'outil utilisé pour générer la sauvegarde
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function header($toolname = '')
+	public function header($toolname = '')
 	{
 		$host = function_exists('php_uname') ? @php_uname('n') : null;
 		if( empty($host) ) {
@@ -697,13 +292,7 @@ class WadbBackup_sqlite_pdo {
 		return $contents;
 	}
 	
-	/**
-	 * Retourne la liste des tables présentes dans la base de données considérée
-	 * 
-	 * @access public
-	 * @return array
-	 */
-	function get_tables()
+	public function get_tables()
 	{
 		$result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
 		$tables = array();
@@ -715,29 +304,7 @@ class WadbBackup_sqlite_pdo {
 		return $tables;
 	}
 	
-	/**
-	 * Utilisable pour l'ajout de requète supplémentaires (séquences, configurations diverses, etc)
-	 * 
-	 * @param boolean $drop_option
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function get_other_queries($drop_option)
-	{
-		return '';
-	}
-	
-	/**
-	 * Retourne la structure d'une table de la base de données sous forme de requète SQL de type DDL
-	 * 
-	 * @param array   $tabledata    Informations sur la table (provenant de self::get_tables())
-	 * @param boolean $drop_option  Ajouter une requète de suppression conditionnelle de table
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function get_table_structure($tabledata, $drop_option)
+	public function get_table_structure($tabledata, $drop_option)
 	{
 		$contents  = '-- ' . $this->eol;
 		$contents .= '-- Structure de la table ' . $tabledata['name'] . ' ' . $this->eol;
@@ -764,55 +331,6 @@ class WadbBackup_sqlite_pdo {
 		}
 		
 		$contents .= $create_table . $indexes;
-		
-		return $contents;
-	}
-	
-	/**
-	 * Retourne les données d'une table de la base de données sous forme de requètes SQL de type DML
-	 * 
-	 * @param string $tablename  Nom de la table à considérer
-	 * 
-	 * @access public
-	 * @return string
-	 */
-	function get_table_data($tablename)
-	{
-		$contents = '';
-		
-		$result = $this->db->query('SELECT * FROM ' . $this->db->quote($tablename));
-		$result->setFetchMode(PDO::FETCH_ASSOC);
-		
-		if( $row = $result->fetch() ) {
-			$contents  = $this->eol;
-			$contents .= '-- ' . $this->eol;
-			$contents .= '-- Contenu de la table ' . $tablename . ' ' . $this->eol;
-			$contents .= '-- ' . $this->eol;
-			
-			$fields = array();
-			for( $j = 0, $n = $result->result->columnCount(); $j < $n; $j++ ) {
-				$data = $result->result->getColumnMeta($j);
-				array_push($fields, $this->db->quote($data['name']));
-			}
-			
-			$fields = implode(', ', $fields);
-			
-			do {
-				$contents .= sprintf("INSERT INTO %s (%s) VALUES", $this->db->quote($tablename), $fields);
-				
-				foreach( $row as $key => $value ) {
-					if( is_null($value) ) {
-						$row[$key] = 'NULL';
-					}
-					else {
-						$row[$key] = '\'' . $this->db->escape($value) . '\'';
-					}
-				}
-				
-				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
-			}
-			while( $row = $result->fetch() );
-		}
 		
 		return $contents;
 	}

@@ -487,7 +487,7 @@ else if( $mode == 'abonnes' )
 					}
 				}
 				
-				$db->build(SQL_UPDATE, ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id));
+				$db->update(ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id));
 				
 				$formatList = ( !empty($_POST['format']) && is_array($_POST['format']) ) ? $_POST['format'] : array();
 				
@@ -1070,19 +1070,10 @@ else if( $mode == 'liste' )
 				
 				if( $action == 'add' )
 				{
-					$sql_type = SQL_INSERT;
 					$sql_data['liste_startdate'] = time();
-				}
-				else
-				{
-					$sql_type = SQL_UPDATE;
-					$sql_where['liste_id'] = $listdata['liste_id'];
-				}
-				
-				$db->build($sql_type, LISTE_TABLE, $sql_data, $sql_where);
-				
-				if( $action == 'add' )
-				{
+					
+					$db->insert(LISTE_TABLE, $sql_data);
+					
 					$new_liste_id = $db->lastInsertId();
 					
 					$sql = "UPDATE " . SESSIONS_TABLE . " 
@@ -1090,6 +1081,11 @@ else if( $mode == 'liste' )
 						WHERE session_id = '{$session->session_id}' 
 							AND admin_id = " . $admindata['admin_id'];
 					$db->query($sql);
+				}
+				else
+				{
+					$sql_where['liste_id'] = $listdata['liste_id'];
+					$db->update(LISTE_TABLE, $sql_data, $sql_where);
 				}
 				
 				$target = './view.php?mode=liste';

@@ -167,7 +167,7 @@ class Session {
 		
 		if( $this->session_id != '' )
 		{
-			$db->build(SQL_UPDATE, SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id));
+			$db->update(SESSIONS_TABLE, $sql_data, array('session_id' => $this->session_id));
 			
 			if( $db->affectedRows() == 0 )
 			{
@@ -178,7 +178,7 @@ class Session {
 		if( $this->session_id == '' )
 		{
 			$this->new_session = true;
-			$db->build(SQL_INSERT, SESSIONS_TABLE, $sql_data);
+			$db->insert(SESSIONS_TABLE, $sql_data);
 		}
 		
 		$admindata = array_merge($admindata, $sql_data);
@@ -265,11 +265,11 @@ class Session {
 					
 					if( ($current_time - $row['session_time']) > 60 || $force_update )
 					{
-						$sql = "UPDATE " . SESSIONS_TABLE . " 
-							SET session_time  = $current_time, 
-								session_liste = $row[session_liste]
-							WHERE session_id = '{$this->session_id}'";
-						$db->query($sql);
+						$data = array(
+							'session_time'  => $current_time, 
+							'session_liste' => $row['session_liste']
+						);
+						$db->update(SESSIONS_TABLE, $data, array('session_id' => $this->session_id));
 						
 						if( $force_update )
 						{
@@ -427,12 +427,9 @@ class Session {
 			{
 				$admindata['admin_pwd'] = $hasher->hash($admin_pwd);
 				
-				$sql = sprintf("UPDATE %s SET admin_pwd = '%s' WHERE admin_id = %d",
-					ADMIN_TABLE,
-					$db->escape($admindata['admin_pwd']),
-					$admindata['admin_id']
-				);
-				$db->query($sql);
+				$data = array('admin_pwd' => $admindata['admin_pwd']);
+				$cond = array('admin_id' => $admindata['admin_id']);
+				$db->update(ADMIN_TABLE, $data, $cond);
 			}
 			
 			return $this->open($admindata, $autologin);

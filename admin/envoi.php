@@ -560,11 +560,11 @@ switch( $mode )
 			$sql_data  = array('cc_admin' => $cc_admin);
 			$sql_where = array('admin_id' => $admindata['admin_id'], 'liste_id' => $listdata['liste_id']);
 			
-			$db->build(SQL_UPDATE, AUTH_ADMIN_TABLE, $sql_data, $sql_where);
+			$db->update(AUTH_ADMIN_TABLE, $sql_data, $sql_where);
 			if( $db->affectedRows() == 0 )
 			{
 				$sql_data = array_merge($sql_data, $sql_where);
-				$db->build(SQL_INSERT, AUTH_ADMIN_TABLE, $sql_data);
+				$db->insert(AUTH_ADMIN_TABLE, $sql_data);
 			}
 		}
 		
@@ -747,19 +747,13 @@ switch( $mode )
 				
 				if( empty($tmp_id) )
 				{
-					$sql_type  = SQL_INSERT;
+					$db->insert(LOG_TABLE, $logdata);
+					$tmp_id = $db->lastInsertId();
 				}
 				else
 				{
-					$sql_type  = SQL_UPDATE;
 					$sql_where = array('log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']);
-				}
-				
-				$db->build($sql_type, LOG_TABLE, $logdata, $sql_where);
-				
-				if( $sql_type == SQL_INSERT )
-				{
-					$tmp_id = $db->lastInsertId();
+					$db->update(LOG_TABLE, $logdata, $sql_where);
 				}
 				
 				//
@@ -770,7 +764,7 @@ switch( $mode )
 					$handle_id = $tmp_id;
 					$logdata['log_status'] = STATUS_STANDBY;
 					
-					$db->build(SQL_INSERT, LOG_TABLE, $logdata);
+					$db->insert(LOG_TABLE, $logdata);
 					
 					$tmp_id = $db->lastInsertId();
 				}
@@ -798,7 +792,7 @@ switch( $mode )
 							default:
 								$sqldata = array('log_id' => $tmp_id, 'file_id' => $row['file_id']);
 								
-								$db->build(SQL_INSERT, LOG_FILES_TABLE, $sqldata);
+								$db->insert(LOG_FILES_TABLE, $sqldata);
 								break;
 						}
 					}

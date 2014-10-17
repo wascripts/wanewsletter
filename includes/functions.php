@@ -34,7 +34,8 @@ function wa_get_config()
 	global $db;
 	
 	$result = $db->query("SELECT * FROM " . CONFIG_TABLE);
-	$row    = $result->fetch($result->SQL_FETCH_ASSOC);
+	$result->setFetchMode(WadbResult::FETCH_ASSOC);
+	$row    = $result->fetch();
 	$config = array();
 	
 	if( isset($row['config_name']) ) {// Wanewsletter 2.4-beta2+
@@ -424,7 +425,7 @@ function wan_format_error($error)
 		$message  = "<b>SQL errno:</b> $errno\n";
 		$message .= sprintf("<b>SQL error:</b> %s\n", wan_htmlspecialchars($errstr));
 		
-		if( is_object($db) ) {
+		if( $db instanceof Wadb && $db->lastQuery != '' ) {
 			$message .= sprintf("<b>SQL query:</b> %s\n", wan_htmlspecialchars($db->lastQuery));
 		}
 		

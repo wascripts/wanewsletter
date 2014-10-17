@@ -761,7 +761,7 @@ switch( $mode )
 						$sql_data['register_date'] = $current_time;
 						$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 						
-						$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
+						$db->insert(ABO_LISTE_TABLE, $sql_data);
 					}
 					else
 					{
@@ -785,7 +785,7 @@ switch( $mode )
 					$sql_data['abo_status'] = ABO_ACTIF;
 					
 					try {
-						$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
+						$db->insert(ABONNES_TABLE, $sql_data);
 					}
 					catch( SQLException $e ) {
 						$report .= sprintf('%s : SQL error (#%d: %s)%s', $email, $db->errno, $db->error, WA_EOL);
@@ -801,7 +801,7 @@ switch( $mode )
 					$sql_data['register_date'] = $current_time;
 					$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
 					
-					$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
+					$db->insert(ABO_LISTE_TABLE, $sql_data);
 					
 					$db->commit();
 					
