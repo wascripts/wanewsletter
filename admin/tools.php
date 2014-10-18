@@ -341,9 +341,13 @@ switch( $mode )
 		wan_print_row(' - Extension Zip', extension_loaded('zip') ? 'oui' : 'non');
 		wan_print_row(' - Extension Zlib', extension_loaded('zlib') ? 'oui' : 'non');
 		
-		wan_print_row(' - safe_mode', config_status('safe_mode') ? 'on' : 'off');
-		wan_print_row(' - magic_quotes_gpc', config_status('magic_quotes_gpc') ? 'on' : 'off');
-		wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
+		// Le safe mode et les magic quotes ont été supprimés à partir de PHP 5.4
+		if( version_compare(PHP_VERSION, '5.4.0-dev', '<') ) {
+			wan_print_row(' - safe_mode', config_status('safe_mode') ? 'on' : 'off');
+			wan_print_row(' - magic_quotes_gpc', config_status('magic_quotes_gpc') ? 'on' : 'off');
+			wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
+		}
+		
 		wan_print_row(' - allow_url_fopen', config_status('allow_url_fopen') ? 'on' : 'off');
 		wan_print_row(' - file_uploads', config_status('file_uploads') ? 'on' : 'off');
 		wan_print_row(' - upload_max_filesize', config_value('upload_max_filesize'));
