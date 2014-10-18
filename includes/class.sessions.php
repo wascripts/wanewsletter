@@ -22,64 +22,55 @@ class Session {
 	 * Ip de l'utilisateur
 	 * 
 	 * @var string
-	 * @access private
 	 */
-	var $user_ip      = '';
+	private $user_ip      = '';
 	
 	/**
 	 * Identifiant de la session
 	 * 
 	 * @var string
-	 * @access private
 	 */
-	var $session_id   = '';
+	private $session_id   = '';
 	
 	/**
 	 * Données de la session
 	 * 
 	 * @var array
-	 * @access private
 	 */
-	var $sessiondata  = array();
+	private $sessiondata  = array();
 	
 	/**
 	 * Configuration pour l'envoi des cookies
 	 * 
 	 * @var array
-	 * @access private
 	 */
-	var $cfg_cookie   = array();
+	private $cfg_cookie   = array();
 	
 	/**
 	 * La session vient elle d'être créée ?
 	 * 
 	 * @var boolean
-	 * @access private
 	 */
-	var $new_session  = false;
+	public $new_session  = false;
 	
 	/**
 	 * Statut utilisateur connecté/non connecté
 	 * 
 	 * @var boolean
-	 * @access private
 	 */
-	var $is_logged_in = false;
+	public $is_logged_in = false;
 	
 	/**
 	 * Mise à jour du hash de mot de passe à chaque identification réussie
 	 
 	 * @var boolean
-	 * @access public
 	 */
-	var $update_hash  = true;
+	public $update_hash  = true;
 	
 	/**
 	 * Intialisation de la classe, récupération de l'ip ..
-	 * 
-	 * @return void
 	 */
-	function session()
+	public function __construct()
 	{
 		global $nl_config;
 		
@@ -136,15 +127,24 @@ class Session {
 	}
 	
 	/**
+	 * Renvoie l'identifiant de la session actuelle
+	 * 
+	 * @return string
+	 */
+	public function getId()
+	{
+		return $this->session_id;
+	}
+	
+	/**
 	 * Ouverture d'une nouvelle session
 	 * 
-	 * @param array   $admindata    Données utilisateur
-	 * @param boolean $autologin    True si activer l'autoconnexion
+	 * @param array   $admindata Données utilisateur
+	 * @param boolean $autologin True si activer l'autoconnexion
 	 * 
-	 * @access public
 	 * @return array
 	 */
-	function open($admindata, $autologin)
+	public function open($admindata, $autologin)
 	{
 		global $db;
 		
@@ -200,12 +200,11 @@ class Session {
 	/**
 	 * Vérification de la session et de l'utilisateur
 	 * 
-	 * @param integer $liste    Id de la liste actuellement gérée
+	 * @param integer $liste Id de la liste actuellement gérée
 	 * 
-	 * @access public
 	 * @return mixed
 	 */ 
-	function check($liste = 0)
+	public function check($liste = 0)
 	{
 		global $db, $nl_config;
 		
@@ -348,12 +347,9 @@ class Session {
 	/**
 	 * Déconnexion de l'administration
 	 * 
-	 * @param integer $admin_id    Id de l'utilisateur concerné
-	 * 
-	 * @access public
-	 * @return void
+	 * @param integer $admin_id Id de l'utilisateur concerné
 	 */
-	function logout($admin_id)
+	public function logout($admin_id)
 	{
 		global $db;
 		
@@ -377,14 +373,13 @@ class Session {
 	/**
 	 * Connexion à l'administration
 	 * 
-	 * @param mixed   $admin_mixed    Id ou pseudo de l'utilisateur concerné
-	 * @param string  $admin_pwd      Mot de passe de l'utilisateur
-	 * @param boolean $autologin      True si autoconnexion demandée
+	 * @param mixed   $admin_mixed Id ou pseudo de l'utilisateur concerné
+	 * @param string  $admin_pwd   Mot de passe de l'utilisateur
+	 * @param boolean $autologin   True si autoconnexion demandée
 	 * 
-	 * @access public
 	 * @return mixed
 	 */
-	function login($admin_mixed, $admin_pwd, $autologin)
+	public function login($admin_mixed, $admin_pwd, $autologin)
 	{
 		global $db;
 		
@@ -441,16 +436,15 @@ class Session {
 	/**
 	 * Envoi des cookies
 	 * 
-	 * @param string  $name           Nom du cookie
-	 * @param string  $cookie_data    Données à insérer dans le cookie
-	 * @param integer $cookie_time    Durée de validité du cookie
+	 * @param string  $name        Nom du cookie
+	 * @param string  $cookie_data Données à insérer dans le cookie
+	 * @param integer $cookie_time Durée de validité du cookie
 	 * 
-	 * @access public
-	 * @return void
+	 * @return boolean
 	 */
-	function send_cookie($name, $cookie_data, $cookie_time)
+	public function send_cookie($name, $cookie_data, $cookie_time)
 	{
-		setcookie(
+		return setcookie(
 			$this->cfg_cookie['cookie_name'] . '_' . $name,
 			$cookie_data,
 			$cookie_time,
@@ -464,11 +458,9 @@ class Session {
 	/**
 	 * Renomme les cookies précédemment envoyés par la classe Session
 	 *
-	 * @param string  $new_prefix  Nouveau préfixe pour les cookies envoyés
-	 *
-	 * @access public
+	 * @param string $new_prefix Nouveau préfixe pour les cookies envoyés
 	 */
-	function rename_cookies($new_prefix)
+	public function rename_cookies($new_prefix)
 	{
 		$old_prefix = $this->cfg_cookie['cookie_name'];
 		$cookies_to_rename = array();
@@ -496,10 +488,9 @@ class Session {
 	 * 
 	 * @param string $dotquat_ip
 	 * 
-	 * @access public
 	 * @return string
 	 */
-	function encode_ip($dotquad_ip)
+	public function encode_ip($dotquad_ip)
 	{
 		$ip_sep = explode('.', $dotquad_ip);
 		return sprintf('%02x%02x%02x%02x', $ip_sep[0], $ip_sep[1], $ip_sep[2], $ip_sep[3]);
@@ -509,12 +500,11 @@ class Session {
 	 * Décodage des IP 
 	 * Importé de phpBB et modifié 
 	 * 
-	 * @param string $hex_ip    Ip en hexadécimal
+	 * @param string $hex_ip Ip en hexadécimal
 	 * 
-	 * @access public
 	 * @return string
 	 */
-	function decode_ip($hex_ip)
+	public function decode_ip($hex_ip)
 	{
 		$hexip_parts = explode('.', chunk_split($hex_ip, 2, '.'));
 		array_pop($hexip_parts);

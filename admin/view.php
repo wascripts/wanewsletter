@@ -1080,10 +1080,14 @@ else if( $mode == 'liste' )
 					
 					$new_liste_id = $db->lastInsertId();
 					
-					$sql = "UPDATE " . SESSIONS_TABLE . " 
-						SET session_liste = $new_liste_id 
-						WHERE session_id = '{$session->session_id}' 
-							AND admin_id = " . $admindata['admin_id'];
+					$sql = sprintf("UPDATE %s
+						SET session_liste = %d
+						WHERE session_id = '%s' AND admin_id = %d",
+						SESSIONS_TABLE,
+						$new_liste_id,
+						$session->getId(),
+						$admindata['admin_id']
+					);
 					$db->query($sql);
 				}
 				else

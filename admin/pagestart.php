@@ -78,7 +78,7 @@ if( !defined('IN_LOGIN') )
 				WHERE session_id = '%s' 
 					AND admin_id = %d",
 				SESSIONS_TABLE,
-				$session->session_id,
+				$session->getId(),
 				$admindata['admin_id']
 			);
 			$db->query($sql);
