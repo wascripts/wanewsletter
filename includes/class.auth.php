@@ -11,47 +11,40 @@ if( !defined('CLASS_AUTH_INC') ) {
 
 define('CLASS_AUTH_INC', true);
 
-//
-// permissions 
-//
-define('AUTH_VIEW',   1);
-define('AUTH_EDIT',   2);
-define('AUTH_DEL',    3);
-define('AUTH_SEND',   4);
-define('AUTH_IMPORT', 5);
-define('AUTH_EXPORT', 6);
-define('AUTH_BAN',    7);
-define('AUTH_ATTACH', 8);
-
 /**
  * Class Auth
  * 
  * Gestion des permissions des utilisateurs
  */ 
 class Auth {
+
+	const VIEW   = 1;
+	const EDIT   = 2;
+	const DEL    = 3;
+	const SEND   = 4;
+	const IMPORT = 5;
+	const EXPORT = 6;
+	const BAN    = 7;
+	const ATTACH = 8;
 	
-	var $listdata  = array();
-	var $rowset    = array();
+	public $listdata = array();
+	private $rowset  = array();
 	
-	var $auth_ary  = array(
-			AUTH_VIEW   => 'auth_view',
-			AUTH_EDIT   => 'auth_edit',
-			AUTH_DEL    => 'auth_del',
-			AUTH_SEND   => 'auth_send',
-			AUTH_IMPORT => 'auth_import',
-			AUTH_EXPORT => 'auth_export',
-			AUTH_BAN    => 'auth_ban',
-			AUTH_ATTACH => 'auth_attach'
-		);
+	public $auth_ary = array(
+		self::VIEW   => 'auth_view',
+		self::EDIT   => 'auth_edit',
+		self::DEL    => 'auth_del',
+		self::SEND   => 'auth_send',
+		self::IMPORT => 'auth_import',
+		self::EXPORT => 'auth_export',
+		self::BAN    => 'auth_ban',
+		self::ATTACH => 'auth_attach'
+	);
 	
 	/**
-	 * Auth::Auth()
-	 * 
 	 * Initialisation de la classe, et récupération des permissions de l'utilisateur courant
-	 * 
-	 * @return void
 	 */
-	function Auth()
+	public function __construct()
 	{
 		global $admindata;
 		
@@ -59,15 +52,11 @@ class Auth {
 	}
 	
 	/**
-	 * Auth::read_data()
-	 * 
 	 * Récupèration des permissions pour l'utilisateur demandé
 	 * 
-	 * @param integer $admin_id    Identifiant de l'utilisateur concerné
-	 * 
-	 * @return void
+	 * @param integer $admin_id Identifiant de l'utilisateur concerné
 	 */
-	function read_data($admin_id)
+	public function read_data($admin_id)
 	{
 		global $db, $admindata;
 		
@@ -97,18 +86,16 @@ class Auth {
 	}
 	
 	/**
-	 * Auth::check_auth()
-	 * 
 	 * Fonction de vérification des permissions, selon la permission concernée et la liste concernée
 	 * Si vérification pour une liste particulière, retourne un booléen, sinon retourne un tableau d'identifiant 
 	 * des listes pour lesquelles la permission est accordée
 	 * 
-	 * @param integer $auth_type    Code de la permission concernée
-	 * @param integer $liste_id     Identifiant de la liste concernée
+	 * @param integer $auth_type Code de la permission concernée
+	 * @param integer $liste_id  Identifiant de la liste concernée
 	 * 
-	 * @return array/boolean
+	 * @return array|boolean
 	 */
-	function check_auth($auth_type, $liste_id = null)
+	public function check_auth($auth_type, $liste_id = null)
 	{
 		global $admindata;
 		
@@ -140,16 +127,14 @@ class Auth {
 	}
 	
 	/**
-	 * Auth::box_auth()
-	 * 
 	 * Construction de la liste déroulante oui/non pour la permission concernée et la liste concernée
 	 * 
-	 * @param integer $auth_type    Code de la permission
-	 * @param array   $listdata     Tableau des permissions pour la liste en cours
+	 * @param integer $auth_type Code de la permission
+	 * @param array   $listdata  Tableau des permissions pour la liste en cours
 	 * 
 	 * @return string
 	 */
-	function box_auth($auth_type, $listdata)
+	public function box_auth($auth_type, $listdata)
 	{
 		global $lang;
 		

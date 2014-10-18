@@ -13,7 +13,7 @@ require './pagestart.php';
 
 $num_inscrits = $num_temp = $num_logs = $last_log = $filesize = 0;
 
-$liste_ids = $auth->check_auth(AUTH_VIEW);
+$liste_ids = $auth->check_auth(Auth::VIEW);
 
 if( count($liste_ids) > 0 )
 {
@@ -200,7 +200,7 @@ else
 	$l_num_temp = $lang['No_tmp_subscriber'];
 }
 
-$output->build_listbox(AUTH_VIEW, false, './view.php?mode=liste');
+$output->build_listbox(Auth::VIEW, false, './view.php?mode=liste');
 $output->page_header();
 
 $output->set_filenames( array(

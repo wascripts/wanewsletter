@@ -25,14 +25,14 @@ else if( !extension_loaded('gd') )
 	$output->displayMessage('No_gd_lib');
 }
 
-$liste_ids = $auth->check_auth(AUTH_VIEW);
+$liste_ids = $auth->check_auth(Auth::VIEW);
 
 if( !$admindata['session_liste'] )
 {
-	$output->build_listbox(AUTH_VIEW);
+	$output->build_listbox(Auth::VIEW);
 }
 
-if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
+if( !$auth->check_auth(Auth::VIEW, $admindata['session_liste']) )
 {
 	http_response_code(401);
 	$output->displayMessage('Not_auth_view');
@@ -447,7 +447,7 @@ if( $img == 'camembert' )
 	send_image('parts_by_liste', $im);
 }
 
-$output->build_listbox(AUTH_VIEW, false);
+$output->build_listbox(Auth::VIEW, false);
 
 require WA_ROOTDIR . '/includes/functions.box.php';
 

@@ -514,14 +514,14 @@ if( $admindata['admin_level'] == ADMIN )
 			'LISTE_NAME'      => wan_htmlspecialchars($listrow['liste_name']),
 			'LISTE_ID'        => $listrow['liste_id'],
 			
-			'BOX_AUTH_VIEW'   => $auth->box_auth(AUTH_VIEW,   $listrow),
-			'BOX_AUTH_EDIT'   => $auth->box_auth(AUTH_EDIT,   $listrow),
-			'BOX_AUTH_DEL'    => $auth->box_auth(AUTH_DEL,    $listrow),
-			'BOX_AUTH_SEND'   => $auth->box_auth(AUTH_SEND,   $listrow),
-			'BOX_AUTH_IMPORT' => $auth->box_auth(AUTH_IMPORT, $listrow),
-			'BOX_AUTH_EXPORT' => $auth->box_auth(AUTH_EXPORT, $listrow),
-			'BOX_AUTH_BACKUP' => $auth->box_auth(AUTH_BAN,    $listrow),
-			'BOX_AUTH_ATTACH' => $auth->box_auth(AUTH_ATTACH, $listrow)
+			'BOX_AUTH_VIEW'   => $auth->box_auth(Auth::VIEW,   $listrow),
+			'BOX_AUTH_EDIT'   => $auth->box_auth(Auth::EDIT,   $listrow),
+			'BOX_AUTH_DEL'    => $auth->box_auth(Auth::DEL,    $listrow),
+			'BOX_AUTH_SEND'   => $auth->box_auth(Auth::SEND,   $listrow),
+			'BOX_AUTH_IMPORT' => $auth->box_auth(Auth::IMPORT, $listrow),
+			'BOX_AUTH_EXPORT' => $auth->box_auth(Auth::EXPORT, $listrow),
+			'BOX_AUTH_BACKUP' => $auth->box_auth(Auth::BAN,    $listrow),
+			'BOX_AUTH_ATTACH' => $auth->box_auth(Auth::ATTACH, $listrow)
 		));
 	}
 	

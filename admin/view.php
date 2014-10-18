@@ -39,21 +39,21 @@ foreach( $vararray as $varname )
 
 if( ( $mode != 'liste' || ( $mode == 'liste' && $action != 'add' ) ) && !$admindata['session_liste'] )
 {
-	$output->build_listbox(AUTH_VIEW);
+	$output->build_listbox(Auth::VIEW);
 }
 else if( $admindata['session_liste'] )
 {
 	$listdata = $auth->listdata[$admindata['session_liste']];
 }
 
-$output->build_listbox(AUTH_VIEW, false, './view.php?mode=' . $mode);
+$output->build_listbox(Auth::VIEW, false, './view.php?mode=' . $mode);
 
 //
 // Mode download : téléchargement des fichiers joints à un log
 //
 if( $mode == 'download' )
 {
-	if( !$auth->check_auth(AUTH_VIEW, $listdata['liste_id']) )
+	if( !$auth->check_auth(Auth::VIEW, $listdata['liste_id']) )
 	{
 		http_response_code(401);
 		$output->displayMessage('Not_auth_view');
@@ -150,7 +150,7 @@ else if( $mode == 'export' )
 //
 else if( $mode == 'iframe' )
 {
-	if( !$auth->check_auth(AUTH_VIEW, $listdata['liste_id']) )
+	if( !$auth->check_auth(Auth::VIEW, $listdata['liste_id']) )
 	{
 		http_response_code(401);
 		$output->basic($lang['Message']['Not_auth_view']);
@@ -223,12 +223,12 @@ else if( $mode == 'abonnes' )
 	switch( $action )
 	{
 		case 'delete':
-			$auth_type = AUTH_DEL;
+			$auth_type = Auth::DEL;
 			break;
 		
 		case 'view':
 		default:
-			$auth_type = AUTH_VIEW;
+			$auth_type = Auth::VIEW;
 			break;
 	}
 	
@@ -312,7 +312,7 @@ else if( $mode == 'abonnes' )
 	//
 	if( $action == 'view' )
 	{
-		$liste_ids = $auth->check_auth(AUTH_VIEW);
+		$liste_ids = $auth->check_auth(Auth::VIEW);
 		
 		//
 		// Récupération des champs des tags personnalisés
@@ -433,7 +433,7 @@ else if( $mode == 'abonnes' )
 	//
 	else if( $action == 'edit' )
 	{
-		$liste_ids = $auth->check_auth(AUTH_EDIT);
+		$liste_ids = $auth->check_auth(Auth::EDIT);
 		
 		if( isset($_POST['submit']) )
 		{
@@ -498,7 +498,7 @@ else if( $mode == 'abonnes' )
 				
 				foreach( $formatList as $liste_id => $format )
 				{
-					if( in_array($format, array(FORMAT_TEXTE, FORMAT_HTML)) && $auth->check_auth(AUTH_EDIT, $liste_id) )
+					if( in_array($format, array(FORMAT_TEXTE, FORMAT_HTML)) && $auth->check_auth(Auth::EDIT, $liste_id) )
 					{
 						array_push($update[$format], $liste_id);
 					}
@@ -869,7 +869,7 @@ else if( $mode == 'abonnes' )
 	if( $num_abo = count($aborow) )
 	{
 		$display_checkbox = false;
-		if( $auth->check_auth(AUTH_DEL, $listdata['liste_id']) )
+		if( $auth->check_auth(Auth::DEL, $listdata['liste_id']) )
 		{
 			$output->assign_block_vars('delete_option', array(
 				'L_FAST_DELETION'      => $lang['Fast_deletion'],
@@ -935,15 +935,15 @@ else if( $mode == 'liste' )
 			break;
 		
 		case 'purge':
-			$auth_type = AUTH_DEL;
+			$auth_type = Auth::DEL;
 			break;
 		
 		case 'edit':
-			$auth_type = AUTH_EDIT;
+			$auth_type = Auth::EDIT;
 			break;
 		
 		default:
-			$auth_type = AUTH_VIEW;
+			$auth_type = Auth::VIEW;
 			break;
 	}
 	
@@ -1362,7 +1362,7 @@ else if( $mode == 'liste' )
 		else
 		{
 			$list_box     = '';
-			$liste_ids = $auth->check_auth(AUTH_VIEW);
+			$liste_ids = $auth->check_auth(Auth::VIEW);
 			
 			foreach( $auth->listdata as $liste_id => $data )
 			{
@@ -1550,7 +1550,7 @@ else if( $mode == 'liste' )
 		));
 	}
 	
-	if( $auth->check_auth(AUTH_DEL, $listdata['liste_id']) || $auth->check_auth(AUTH_EDIT, $listdata['liste_id']) )
+	if( $auth->check_auth(Auth::DEL, $listdata['liste_id']) || $auth->check_auth(Auth::EDIT, $listdata['liste_id']) )
 	{
 		$output->assign_block_vars('admin_options', array());
 		
@@ -1565,14 +1565,14 @@ else if( $mode == 'liste' )
 			));
 		}
 		
-		if( $auth->check_auth(AUTH_EDIT, $listdata['liste_id']) )
+		if( $auth->check_auth(Auth::EDIT, $listdata['liste_id']) )
 		{
 			$output->assign_block_vars('admin_options.auth_edit', array(				
 				'L_EDIT_LISTE' => $lang['Edit_liste']
 			));
 		}
 		
-		if( $auth->check_auth(AUTH_DEL, $listdata['liste_id']) )
+		if( $auth->check_auth(Auth::DEL, $listdata['liste_id']) )
 		{
 			$output->assign_block_vars('purge_option', array(
 				'L_PURGE_BUTTON'  => $lang['Button']['purge'],
@@ -1590,11 +1590,11 @@ else if( $mode == 'log' )
 	switch( $action )
 	{
 		case 'delete':
-			$auth_type = AUTH_DEL;
+			$auth_type = Auth::DEL;
 			break;
 		
 		default:
-			$auth_type = AUTH_VIEW;
+			$auth_type = Auth::VIEW;
 			break;
 	}
 	
@@ -1827,7 +1827,7 @@ else if( $mode == 'log' )
 	if( $num_logs = count($logrow) )
 	{
 		$display_checkbox = false;
-		if( $auth->check_auth(AUTH_DEL, $listdata['liste_id']) )
+		if( $auth->check_auth(Auth::DEL, $listdata['liste_id']) )
 		{
 			$output->assign_block_vars('delete_option', array(
 				'L_DELETE' => $lang['Button']['del_logs']

@@ -13,10 +13,10 @@ require './pagestart.php';
 
 if( !$admindata['session_liste'] )
 {
-	$output->build_listbox(AUTH_VIEW);
+	$output->build_listbox(Auth::VIEW);
 }
 
-if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
+if( !$auth->check_auth(Auth::VIEW, $admindata['session_liste']) )
 {
 	http_response_code(401);
 	$output->displayMessage('Not_auth_view');
@@ -68,7 +68,7 @@ foreach( $vararray as $varname )
 	}
 }
 
-$output->build_listbox(AUTH_VIEW, false);
+$output->build_listbox(Auth::VIEW, false);
 
 switch( $mode )
 {
@@ -169,7 +169,7 @@ switch( $mode )
 		break;
 	
 	case 'progress':
-		$liste_ids = $auth->check_auth(AUTH_SEND);
+		$liste_ids = $auth->check_auth(Auth::SEND);
 		
 		if( $logdata['log_id'] )
 		{
@@ -832,7 +832,7 @@ switch( $mode )
 		//
 		// Attachement de fichiers
 		//
-		if( $mode == 'attach' && !empty($logdata['log_id']) && $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
+		if( $mode == 'attach' && !empty($logdata['log_id']) && $auth->check_auth(Auth::ATTACH, $listdata['liste_id']) )
 		{
 			$join_file  = ( isset($_FILES['join_file']) ) ? $_FILES['join_file'] : array();
 			$local_file = ( !empty($_POST['join_file']) ) ? trim($_POST['join_file']) : '';
@@ -889,7 +889,7 @@ switch( $mode )
 	case 'unattach':
 		$file_ids = ( !empty($_POST['file_ids']) ) ? (array) $_POST['file_ids'] : array();
 		
-		if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) && count($file_ids) > 0 )
+		if( $auth->check_auth(Auth::ATTACH, $listdata['liste_id']) && count($file_ids) > 0 )
 		{
 			//
 			// Suppression du fichier joint spécifié
@@ -913,7 +913,7 @@ $logdata['joined_files'] = array();
 //
 // Récupération des fichiers joints de la liste
 //
-if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
+if( $auth->check_auth(Auth::ATTACH, $listdata['liste_id']) )
 {
 	//
 	// On récupère tous les fichiers joints de la liste pour avoir les fichiers joints de la newsletter
@@ -982,7 +982,7 @@ if( $mode == 'test' && !empty($_POST['test_address']) )
 
 if( ($mode == 'test' && count($supp_address) > 0) || $mode == 'progress' )
 {
-	if( !$auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
+	if( !$auth->check_auth(Auth::SEND, $listdata['liste_id']) )
 	{
 		http_response_code(401);
 		$output->displayMessage('Not_auth_send');
@@ -1095,7 +1095,7 @@ if( $listdata['liste_format'] != FORMAT_TEXTE )
 	));
 }
 
-if( $auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
+if( $auth->check_auth(Auth::SEND, $listdata['liste_id']) )
 {
 	$output->assign_block_vars('test_send', array(
 		'L_TEST_SEND'      => $lang['Test_send'],
@@ -1104,7 +1104,7 @@ if( $auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
 	));
 }
 
-if( $auth->check_auth(AUTH_ATTACH, $listdata['liste_id']) )
+if( $auth->check_auth(Auth::ATTACH, $listdata['liste_id']) )
 {
 	$rowspan = 2;
 	if( FILE_UPLOADS_ON )

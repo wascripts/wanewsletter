@@ -11,7 +11,7 @@ define('IN_NEWSLETTER', true);
 
 require '../admin/pagestart.php';
 
-if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
+if( !$auth->check_auth(Auth::VIEW, $admindata['session_liste']) )
 {
 	http_response_code(401);
 	plain_error($lang['Message']['Not_auth_view']);

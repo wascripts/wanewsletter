@@ -125,15 +125,15 @@ if( !in_array($format, array(FORMAT_TEXTE, FORMAT_HTML)) )
 switch( $mode )
 {
 	case 'export':
-		$auth_type = AUTH_EXPORT;
+		$auth_type = Auth::EXPORT;
 		break;
 	
 	case 'import':
-		$auth_type = AUTH_IMPORT;
+		$auth_type = Auth::IMPORT;
 		break;
 	
 	case 'ban':
-		$auth_type = AUTH_BAN;
+		$auth_type = Auth::BAN;
 		break;
 	
 	case 'backup':
@@ -150,16 +150,16 @@ switch( $mode )
 		}
 		
 	case 'generator':
-		$auth_type = AUTH_VIEW;
+		$auth_type = Auth::VIEW;
 		break;
 		
 	case 'check_update':
-		$auth_type = AUTH_VIEW;
+		$auth_type = Auth::VIEW;
 		break;
 		
 	default:
 		$mode = '';
-		$auth_type = AUTH_VIEW;
+		$auth_type = Auth::VIEW;
 		break;
 }
 
