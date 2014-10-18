@@ -101,25 +101,17 @@ else
 }
 
 //
-// Les guillemets magiques ont été supprimés dans PHP 5.4.0
+// Désactivation de magic_quotes_runtime +
+// magic_quotes_gpc et retrait éventuel des backslashes
 //
-if( version_compare(PHP_VERSION, '5.4.0', '<') )
-{
-	//
-	// Désactivation de magic_quotes_runtime +
-	// magic_quotes_gpc et retrait éventuel des backslashes
-	//
-	@ini_set('magic_quotes_runtime', 0);
+@ini_set('magic_quotes_runtime', 0);
 
-	if( get_magic_quotes_gpc() )
-	{
-		strip_magic_quotes_gpc($_GET);
-		strip_magic_quotes_gpc($_POST);
-		strip_magic_quotes_gpc($_COOKIE);
-		strip_magic_quotes_gpc($_FILES, true);
-		strip_magic_quotes_gpc($_REQUEST);
-	}
-}
+strip_magic_quotes_gpc($_GET);
+strip_magic_quotes_gpc($_POST);
+strip_magic_quotes_gpc($_COOKIE);
+strip_magic_quotes_gpc($_FILES, true);
+strip_magic_quotes_gpc($_REQUEST);
+
 
 //
 // Intialisation de la connexion à la base de données 

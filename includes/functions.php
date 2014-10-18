@@ -188,6 +188,8 @@ function wan_build_url($url, $params = array(), $session = false)
 	$cur_params = array();
 	if( $query != '' ) {
 		parse_str($query, $cur_params);
+		// parse_str est affecté par l'option magic_quotes_gpc donc...
+		strip_magic_quotes_gpc($cur_params);
 	}
 	
 	if( defined('SID') && SID != '' ) {
@@ -841,7 +843,16 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  */
 function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 {
-	if( is_array($data) )
+	static $doStrip = null;
+	
+	if( is_null($doStrip) ) {
+		$doStrip = false;
+		if( version_compare(PHP_VERSION, '5.4.0-dev', '<') && get_magic_quotes_gpc() ) {
+			$doStrip = true;
+		}
+	}
+	
+	if( $doStrip && is_array($data) )
 	{
 		foreach( $data as $key => $val )
 		{

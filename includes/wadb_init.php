@@ -187,6 +187,8 @@ function parseDSN($dsn)
 			
 			case 'query':
 				parse_str($value, $options);
+				// parse_str est affecté par l'option magic_quotes_gpc donc...
+				strip_magic_quotes_gpc($options);
 				break;
 		}
 	}
