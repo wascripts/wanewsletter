@@ -34,6 +34,7 @@ if( !$admindata['session_liste'] )
 
 if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 {
+	http_response_code(401);
 	$output->displayMessage('Not_auth_view');
 }
 
@@ -57,7 +58,7 @@ function send_image($name, $img, $lastModified = null)
 	
 	if( !is_numeric($lastModified) )
 	{
-		$lastModified = time();
+		$lastModified = null;
 	}
 	
 	$canUseCache = true;
@@ -72,7 +73,7 @@ function send_image($name, $img, $lastModified = null)
 		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_PRAGMA']);
 	}
 	
-	if( $lastModified <= $cachetime && $canUseCache )
+	if( !is_null($lastModified) && $lastModified <= $cachetime && $canUseCache )
 	{
 		http_response_code(304);
 		header('Date: ' . gmdate(DATE_RFC1123));
@@ -81,7 +82,11 @@ function send_image($name, $img, $lastModified = null)
 	
 	$maxAge = 0;
 	
-	header('Last-Modified: ' . gmdate(DATE_RFC1123, $lastModified));
+	if( !is_null($lastModified) )
+	{
+		header('Last-Modified: ' . gmdate(DATE_RFC1123, $lastModified));
+	}
+	
 	header('Expires: ' . gmdate(DATE_RFC1123, (time() + $maxAge)));// HTTP 1.0
 	header('Pragma: private');// HTTP 1.0
 	header('Cache-Control: private, must-revalidate, max-age='.$maxAge);
@@ -122,6 +127,7 @@ function display_img_error($str)
 	$startH = (($imageH - imagefontheight($text_font)) / 2);
 	imagestring($im, $text_font, $startW, $startH, $str, $black);
 	
+	http_response_code(500);
 	send_image('error', $im);
 }
 

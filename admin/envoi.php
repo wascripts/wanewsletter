@@ -18,6 +18,7 @@ if( !$admindata['session_liste'] )
 
 if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 {
+	http_response_code(401);
 	$output->displayMessage('Not_auth_view');
 }
 
@@ -983,6 +984,7 @@ if( ($mode == 'test' && count($supp_address) > 0) || $mode == 'progress' )
 {
 	if( !$auth->check_auth(AUTH_SEND, $listdata['liste_id']) )
 	{
+		http_response_code(401);
 		$output->displayMessage('Not_auth_send');
 	}
 	

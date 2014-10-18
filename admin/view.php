@@ -55,6 +55,7 @@ if( $mode == 'download' )
 {
 	if( !$auth->check_auth(AUTH_VIEW, $listdata['liste_id']) )
 	{
+		http_response_code(401);
 		$output->displayMessage('Not_auth_view');
 	}
 	
@@ -151,6 +152,7 @@ else if( $mode == 'iframe' )
 {
 	if( !$auth->check_auth(AUTH_VIEW, $listdata['liste_id']) )
 	{
+		http_response_code(401);
 		$output->basic($lang['Message']['Not_auth_view']);
 	}
 	
@@ -465,6 +467,7 @@ else if( $mode == 'abonnes' )
 				//
 				if( count($result_ids) == 0 )
 				{
+					http_response_code(401);
 					$output->displayMessage('Not_auth_edit');
 				}
 				
@@ -920,6 +923,7 @@ else if( $mode == 'liste' )
 		case 'delete':
 			if( $admindata['admin_level'] != ADMIN )
 			{
+				http_response_code(401);
 				$target = './view.php?mode=liste';
 				$output->redirect($target, 4);
 				$output->addLine($lang['Message']['Not_authorized']);

@@ -13,6 +13,7 @@ require '../admin/pagestart.php';
 
 if( !$auth->check_auth(AUTH_VIEW, $admindata['session_liste']) )
 {
+	http_response_code(401);
 	plain_error($lang['Message']['Not_auth_view']);
 }
 
@@ -54,6 +55,7 @@ if( $filedata = $result->fetch() )
 	
 	if( !is_readable($tmp_filename) )
 	{
+		http_response_code(500);
 		plain_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
 	}
 	
@@ -120,6 +122,7 @@ if( $filedata = $result->fetch() )
 }
 else
 {
+	http_response_code(404);
 	plain_error('Unknown file !');
 }
 

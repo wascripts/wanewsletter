@@ -142,6 +142,7 @@ switch( $mode )
 	case 'attach':
 		if( $admindata['admin_level'] != ADMIN )
 		{
+			http_response_code(401);
 			$output->redirect('./index.php', 4);
 			$output->addLine($lang['Message']['Not_authorized']);
 			$output->addLine($lang['Click_return_index'], './index.php');

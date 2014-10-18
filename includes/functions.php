@@ -499,12 +499,15 @@ function wan_display_error($error, $simpleHTML = false)
 	else if( $simpleHTML ) {
 		echo '<p>' . nl2br($message) . '</p>';
 	}
-	else if( $output instanceof output ) {
-		$output->displayMessage($message, 'error');
-	}
 	else {
-		$message = nl2br($message);
-		echo <<<BASIC
+		http_response_code(500);
+		
+		if( $output instanceof output ) {
+			$output->displayMessage($message, 'error');
+		}
+		else {
+			$message = nl2br($message);
+			echo <<<BASIC
 <!DOCTYPE html>
 <html dir="ltr">
 <head>
@@ -523,6 +526,7 @@ function wan_display_error($error, $simpleHTML = false)
 </body>
 </html>
 BASIC;
+		}
 	}
 }
 
