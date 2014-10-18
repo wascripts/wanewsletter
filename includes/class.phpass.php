@@ -18,6 +18,7 @@
  * - Utilisation si possible de la fonction openssl_random_pseudo_bytes() dans PasswordHash::getRandomBytes()
  * - Ajout d'une fonction de compatibilité hash_equals() pour PHP < 5.6.0
  * - Utilisation en deuxième alternative de mcrypt_create_iv() dans PasswordHash::getRandomBytes()
+ * - __construct() + visibilité des propriétés et méthodes
  */
 
 #
@@ -46,13 +47,14 @@
 # requirements (there can be none), but merely suggestions.
 #
 class PasswordHash {
-	var $itoa64;
-	var $blowfish_mode = '2y';
-	var $iteration_count_log2 = 10;
-	var $portable_hashes;
-	var $random_state;
 
-	function PasswordHash($iteration_count_log2 = null, $portable_hashes = false)
+	private $itoa64;
+	private $blowfish_mode = '2y';
+	private $iteration_count_log2 = 10;
+	private $portable_hashes;
+	private $random_state;
+
+	public function __construct($iteration_count_log2 = null, $portable_hashes = false)
 	{
 		$this->itoa64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
@@ -68,7 +70,7 @@ class PasswordHash {
 		}
 	}
 
-	function getRandomBytes($count)
+	public function getRandomBytes($count)
 	{
 		$is_win = (strncasecmp(PHP_OS, 'WIN', 3) === 0);
 		$output = '';
@@ -104,7 +106,7 @@ class PasswordHash {
 		return $output;
 	}
 
-	function encode64($input, $count)
+	private function encode64($input, $count)
 	{
 		$output = '';
 		$i = 0;
@@ -127,7 +129,7 @@ class PasswordHash {
 		return $output;
 	}
 
-	function gensaltPrivate($input)
+	private function gensaltPrivate($input)
 	{
 		$output = '$P$';
 		$output .= $this->itoa64[min($this->iteration_count_log2 +
@@ -137,7 +139,7 @@ class PasswordHash {
 		return $output;
 	}
 
-	function cryptPrivate($password, $setting)
+	private function cryptPrivate($password, $setting)
 	{
 		$output = '*0';
 		if (substr($setting, 0, 2) == $output)
@@ -182,7 +184,7 @@ class PasswordHash {
 		return $output;
 	}
 
-	function gensaltExtended($input)
+	private function gensaltExtended($input)
 	{
 		$count_log2 = min($this->iteration_count_log2 + 8, 24);
 		# This should be odd to not reveal weak DES keys, and the
@@ -200,7 +202,7 @@ class PasswordHash {
 		return $output;
 	}
 
-	function gensaltBlowfish($input)
+	private function gensaltBlowfish($input)
 	{
 		# This one needs to use a different order of characters and a
 		# different encoding scheme from the one in encode64() above.
@@ -238,7 +240,7 @@ class PasswordHash {
 		return $output;
 	}
 
-	function hash($password)
+	public function hash($password)
 	{
 		$random = '';
 
@@ -273,7 +275,7 @@ class PasswordHash {
 		return '*';
 	}
 
-	function check($password, $stored_hash)
+	public function check($password, $stored_hash)
 	{
 		$hash = $this->cryptPrivate($password, $stored_hash);
 		if ($hash[0] == '*')

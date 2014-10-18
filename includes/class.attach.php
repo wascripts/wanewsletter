@@ -23,37 +23,34 @@ class Attach {
 	 * 
 	 * @var string
 	 */
-	var $upload_path = '';
+	private $upload_path = '';
 	
 	/**
 	 * Utilisation ou non de l'option ftp
 	 * 
 	 * @var boolean
 	 */
-	var $use_ftp     = FALSE;
+	private $use_ftp     = false;
 	
 	/**
 	 * Chemin vers le dossier de stockage des fichiers sur le ftp
 	 * 
 	 * @var string
 	 */
-	var $ftp_path    = '';
+	private $ftp_path    = '';
 	
 	/**
 	 * Identifiant de ressource au serveur ftp
 	 * 
 	 * @var resource
 	 */
-	var $connect_id  = NULL;
+	private $connect_id  = null;
 	
 	/**
 	 * Initialisation des variables de la classe
 	 * Initialisation de la connexion au serveur ftp le cas échéant
-	 * 
-	 * @return void
-	 * @access public
 	 */
-	function Attach()
+	public function __construct()
 	{
 		global $nl_config;
 		
@@ -86,17 +83,16 @@ class Attach {
 	 * La fonction a été affranchi de façon à être utilisable sans créer 
 	 * une instance de la classe. (pour tester la connexion dans la config. générale)
 	 * 
-	 * @param string  $ftp_server  Nom du serveur ftp
-	 * @param integer $ftp_port    Port de connexion
-	 * @param string  $ftp_user    Nom d'utilisateur si besoin
-	 * @param string  $ftp_pass    Mot de passe si besoin
-	 * @param integer $ftp_pasv    Mode actif ou passif
-	 * @param string  $ftp_path    Chemin vers le dossier des fichiers joints
+	 * @param string  $ftp_server Nom du serveur ftp
+	 * @param integer $ftp_port   Port de connexion
+	 * @param string  $ftp_user   Nom d'utilisateur si besoin
+	 * @param string  $ftp_pass   Mot de passe si besoin
+	 * @param integer $ftp_pasv   Mode actif ou passif
+	 * @param string  $ftp_path   Chemin vers le dossier des fichiers joints
 	 * 
 	 * @return array
-	 * @access public
 	 */
-	function connect_to_ftp($ftp_server, $ftp_port, $ftp_user, $ftp_pass, $ftp_pasv, $ftp_path)
+	public static function connect_to_ftp($ftp_server, $ftp_port, $ftp_user, $ftp_pass, $ftp_pasv, $ftp_path)
 	{
 		if( !($connect_id = @ftp_connect($ftp_server, $ftp_port)) )
 		{
@@ -127,14 +123,13 @@ class Attach {
 	/**
 	 * Verifie la présence du fichier demandé dans le dossier des fichier joints ou sur le ftp
 	 * 
-	 * @param string  $filename   Nom du fichier
-	 * @param boolean $error      True si une erreur s'est produite
-	 * @param array   $msg_error  Tableau des erreurs
+	 * @param string  $filename  Nom du fichier
+	 * @param boolean $error     True si une erreur s'est produite
+	 * @param array   $msg_error Tableau des erreurs
 	 * 
 	 * @return integer
-	 * @access public
 	 */
-	function joined_file_exists($filename, &$error, &$msg_error)
+	public function joined_file_exists($filename, &$error, &$msg_error)
 	{
 		global $lang;
 		
@@ -184,12 +179,11 @@ class Attach {
 	 * Génération d'un nom de fichier unique
 	 * Fonction récursive
 	 * 
-	 * @param string $prev_filename  Nom du fichier temporaire précédemment généré et refusé
+	 * @param string $prev_filename Nom du fichier temporaire précédemment généré et refusé
 	 * 
 	 * @return string
-	 * @access public
 	 */
-	function make_filename($prev_filename = '')
+	public function make_filename($prev_filename = '')
 	{
 		global $db;
 		
@@ -219,20 +213,17 @@ class Attach {
 	 * Le fichier peut être uploadé via le formulaire adéquat, être sur un serveur distant, 
 	 * ou avoir été uploadé manuellement sur le serveur
 	 * 
-	 * @param string  $upload_mode   Mode d'upload du fichier (upload http, à distance, fichier local)
-	 * @param integer $log_id        Identifiant du log
-	 * @param string  $filename      Nom du fichier
-	 * @param string  $tmp_filename  Nom temporaire du fichier/nom du fichier local/url du fichier distant
-	 * @param integer $filesize      Taille du fichier
-	 * @param string  $filetype      Type mime du fichier
-	 * @param string  $errno_code    Code erreur éventuel de l'upload http
-	 * @param boolean $error         True si une erreur survient
-	 * @param array   $msg_error     Tableau des messages d'erreur
-	 * 
-	 * @return void
-	 * @access public
+	 * @param string  $upload_mode  Mode d'upload du fichier (upload http, à distance, fichier local)
+	 * @param integer $log_id       Identifiant du log
+	 * @param string  $filename     Nom du fichier
+	 * @param string  $tmp_filename Nom temporaire du fichier/nom du fichier local/url du fichier distant
+	 * @param integer $filesize     Taille du fichier
+	 * @param string  $filetype     Type mime du fichier
+	 * @param string  $errno_code   Code erreur éventuel de l'upload http
+	 * @param boolean $error        True si une erreur survient
+	 * @param array   $msg_error    Tableau des messages d'erreur
 	 */
-	function upload_file($upload_mode, $log_id, $filename, $tmp_filename, $filesize, $filetype, $errno_code, &$error, &$msg_error)
+	public function upload_file($upload_mode, $log_id, $filename, $tmp_filename, $filesize, $filetype, $errno_code, &$error, &$msg_error)
 	{
 		global $db, $lang, $nl_config;
 		
@@ -514,17 +505,12 @@ class Attach {
 	/**
 	 * Ajoute une entrée pour le log courant avec l'identifiant d'un fichier existant
 	 * 
-	 * @param integer $file_id    Identifiant du fichier
-	 * @param integer $log_id     Identifiant du log
-	 * @param boolean $error      True si erreur
-	 * @param array	  $msg_error  Tableau des messages d'erreur
-	 * 
-	 * @access public
-	 * 
-	 * @return void
-	 * @access public
+	 * @param integer $file_id   Identifiant du fichier
+	 * @param integer $log_id    Identifiant du log
+	 * @param boolean $error     True si erreur
+	 * @param array	  $msg_error Tableau des messages d'erreur
 	 */
-	function use_file_exists($file_id, $log_id, &$error, &$msg_error)
+	public function use_file_exists($file_id, $log_id, &$error, &$msg_error)
 	{
 		global $db, $nl_config, $lang, $listdata;
 		
@@ -579,9 +565,8 @@ class Attach {
 	 * @param string $filename
 	 * 
 	 * @return boolean
-	 * @access public
 	 */
-	function check_filename($filename)
+	public function check_filename($filename)
 	{
 		return ( preg_match('/[\\:*\/?<">|\x00-\x1F\x7F-\x9F]/', $filename) ) ? false : true;
 	}
@@ -592,9 +577,8 @@ class Attach {
 	 * @param string $extension
 	 * 
 	 * @return integer
-	 * @access public
 	 */
-	function check_extension($extension)
+	public function check_extension($extension)
 	{
 		global $db, $listdata;
 		
@@ -610,14 +594,13 @@ class Attach {
 	/**
 	 * Vérification de la taille du fichier par rapport à la taille du log et la taille maximale
 	 * 
-	 * @param integer $log_id      Identifiant du log
-	 * @param integer $filesize    Taille du fichier
-	 * @param integer $total_size  Taille totale du log
+	 * @param integer $log_id     Identifiant du log
+	 * @param integer $filesize   Taille du fichier
+	 * @param integer $total_size Taille totale du log
 	 * 
 	 * @return boolean
-	 * @access public
 	 */
-	function check_maxsize($log_id, $filesize, &$total_size)
+	private function check_maxsize($log_id, $filesize, &$total_size)
 	{
 		global $db, $nl_config;
 		
@@ -633,12 +616,9 @@ class Attach {
 	/**
 	 * Récupère les infos sur le fichier joint à télécharger (envoyer au client)
 	 * 
-	 * @param integer $file_id  Identifiant du fichier joint
-	 * 
-	 * @return void
-	 * @access public
+	 * @param integer $file_id Identifiant du fichier joint
 	 */
-	function download_file($file_id)
+	public function download_file($file_id)
 	{
 		global $db, $listdata, $lang, $output;
 		
@@ -685,12 +665,11 @@ class Attach {
 	 * Déplacement du fichier demandé du serveur ftp vers le dossier temporaire
 	 * Retourne le nom du fichier temporaire
 	 * 
-	 * @param array $data  Données du fichier joint
+	 * @param array $data Données du fichier joint
 	 * 
 	 * @return string
-	 * @access public
 	 */
-	function ftp_to_tmp($data)
+	public function ftp_to_tmp($data)
 	{
 		$mode         = $this->get_mode($data['file_mimetype']);
 		$tmp_path     = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : sys_get_temp_dir();
@@ -707,12 +686,11 @@ class Attach {
 	/**
 	 * Mode à utiliser pour le ftp, ascii ou binaire
 	 * 
-	 * @param string $mime_type  Type mime du fichier concerné
+	 * @param string $mime_type Type mime du fichier concerné
 	 * 
 	 * @return integer
-	 * @access public
 	 */
-	function get_mode($mime_type)
+	private function get_mode($mime_type)
 	{
 		return ( preg_match('/text|html|xml/i', $mime_type) ) ? FTP_ASCII : FTP_BINARY;
 	}
@@ -721,14 +699,13 @@ class Attach {
 	 * Fonction de suppression de fichiers joints
 	 * Retourne le nombre des fichiers supprimés, en cas de succés
 	 * 
-	 * @param boolean $massive_delete  Si true, suppression des fichiers joints du ou des logs concernés
-	 * @param mixed   $log_id_ary      id ou tableau des id des logs concernés
-	 * @param mixed   $file_id_ary     id ou tableau des id des fichiers joints concernés (si $massive_delete à false)
+	 * @param boolean $massive_delete Si true, suppression des fichiers joints du ou des logs concernés
+	 * @param mixed   $log_id_ary     id ou tableau des id des logs concernés
+	 * @param mixed   $file_id_ary    id ou tableau des id des fichiers joints concernés (si $massive_delete à false)
 	 * 
 	 * @return mixed
-	 * @access public
 	 */
-	function delete_joined_files($massive_delete, $log_ids, $file_ids = array())
+	public function delete_joined_files($massive_delete, $log_ids, $file_ids = array())
 	{
 		global $db;
 		
@@ -818,12 +795,9 @@ class Attach {
 	/**
 	 * Suppression d'un fichier du serveur
 	 * 
-	 * @param string $filename  Nom du fichier sur le serveur
-	 * 
-	 * @return void
-	 * @access public
+	 * @param string $filename Nom du fichier sur le serveur
 	 */
-	function remove_file($filename)
+	public static function remove_file($filename)
 	{
 		if( file_exists($filename) )
 		{
@@ -835,14 +809,11 @@ class Attach {
 	 * Fonction d'envois des entêtes nécessaires au téléchargement et 
 	 * des données du fichier à télécharger
 	 * 
-	 * @param string $filename   Nom réel du fichier
-	 * @param string $mime_type  Mime type du fichier
-	 * @param string $filedata   Contenu du fichier
-	 * 
-	 * @return void
-	 * @access public
+	 * @param string $filename  Nom réel du fichier
+	 * @param string $mime_type Mime type du fichier
+	 * @param string $filedata  Contenu du fichier
 	 */
-	function send_file($filename, $mime_type, $data)
+	public static function send_file($filename, $mime_type, $data)
 	{
 		//
 		// Si aucun type de média n'est indiqué, on utilisera par défaut 
@@ -879,11 +850,8 @@ class Attach {
 	
 	/**
 	 * Fermeture de la connexion au serveur ftp
-	 * 
-	 * @return void
-	 * @access public
 	 */
-	function quit()
+	public function quit()
 	{
 		if( $this->use_ftp )
 		{

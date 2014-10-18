@@ -17,49 +17,41 @@ class output extends Template {
 	 * Liens relatifs au document
 	 * 
 	 * @var string
-	 * @access private
 	 */
-	var $links         = '';
+	private $links         = '';
 	
 	/**
 	 * Scripts clients liés au document
 	 * 
 	 * @var string
-	 * @access private
 	 */
-	var $javascript    = '';
+	private $javascript    = '';
 	
 	/**
 	 * Champs cachés d'un formulaire du document
 	 * 
 	 * @var string
-	 * @access private
 	 */
-	var $hidden_fields = '';
+	private $hidden_fields = '';
 	
 	/**
 	 * Meta de redirection
 	 * 
 	 * @var string
-	 * @access private
 	 */
-	var $meta_redirect = '';
+	private $meta_redirect = '';
 	
 	/**
 	 * Pile des messages
 	 *
 	 * @var array
-	 * @access private
 	 */
-	var $messageList   = array();
+	private $messageList   = array();
 	
 	/**
 	 * @param string $template_root
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function output($template_root)
+	public function __construct($template_root)
 	{
 		//
 		// Réglage du dossier contenant les templates
@@ -70,15 +62,12 @@ class output extends Template {
 	/**
 	 * Ajout d'un lien relatif au document
 	 * 
-	 * @param string $rel      Relation qui lie le document cible au document courant
-	 * @param string $url      URL du document cible
-	 * @param string $title    Titre éventuel
-	 * @param string $type     Type MIME du document cible
-	 * 
-	 * @access public
-	 * @return void
+	 * @param string $rel   Relation qui lie le document cible au document courant
+	 * @param string $url   URL du document cible
+	 * @param string $title Titre éventuel
+	 * @param string $type  Type MIME du document cible
 	 */
-	function addLink($rel, $url, $title = '', $type = '')
+	public function addLink($rel, $url, $title = '', $type = '')
 	{
 		$this->links .= "\r\n\t";
 		$this->links .= sprintf('<link rel="%s" href="%s" title="%s" />', $rel, $url, $title);
@@ -86,11 +75,10 @@ class output extends Template {
 	
 	/**
 	 * Retourne les liens relatifs au document
-	 * 
-	 * @access private
+	 *
 	 * @return string
 	 */
-	function getLinks()
+	public function getLinks()
 	{
 		return trim($this->links);
 	}
@@ -99,11 +87,8 @@ class output extends Template {
 	 * Ajout d'un script client
 	 * 
 	 * @param string $url
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function addScript($url)
+	public function addScript($url)
 	{
 		$this->javascript .= "\r\n\t";
 		$this->javascript .= sprintf('<script src="%s"></script>', $url);
@@ -111,11 +96,10 @@ class output extends Template {
 	
 	/**
 	 * Retourne les scripts clients liés au document
-	 * 
-	 * @access private
+	 *
 	 * @return string
 	 */
-	function getScripts()
+	public function getScripts()
 	{
 		return trim($this->javascript);
 	}
@@ -125,11 +109,8 @@ class output extends Template {
 	 * 
 	 * @param string $name
 	 * @param string $value
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function addHiddenField($name, $value)
+	public function addHiddenField($name, $value)
 	{
 		$this->hidden_fields .= "\r\n\t";
 		$this->hidden_fields .= sprintf('<input type="hidden" name="%s" value="%s" />', $name, $value);
@@ -137,11 +118,10 @@ class output extends Template {
 	
 	/**
 	 * Retourne l'ensemble des champs cachés ajoutés et réinitialise la propriété hidden_fields
-	 * 
-	 * @access public
+	 *
 	 * @return string
 	 */
-	function getHiddenFields()
+	public function getHiddenFields()
 	{
 		$tmp = $this->hidden_fields;
 		$this->hidden_fields = '';
@@ -154,11 +134,8 @@ class output extends Template {
 	 * 
 	 * @param string  $url
 	 * @param integer $timer
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function redirect($url, $timer)
+	public function redirect($url, $timer)
 	{
 		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, $url);
 	}
@@ -168,11 +145,8 @@ class output extends Template {
 	 * 
 	 * @param boolean $use_template
 	 * @param string  $page_title
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function page_header($use_template = true, $page_title = '')
+	public function page_header($use_template = true, $page_title = '')
 	{
 		global $nl_config, $lang, $template, $admindata, $auth;
 		global $meta, $simple_header, $error, $msg_error;
@@ -278,11 +252,8 @@ class output extends Template {
 	
 	/**
 	 * Envoi le pied de page et termine l'exécution du script
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function page_footer()
+	public function page_footer()
 	{
 		global $db, $lang, $starttime;
 		
@@ -363,11 +334,8 @@ class output extends Template {
 	
 	/**
 	 * Envoie des en-têtes HTTP
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function send_headers()
+	public function send_headers()
 	{
 		global $lang;
 		
@@ -387,11 +355,8 @@ class output extends Template {
 	 * 
 	 * @param string $content
 	 * @param string $page_title
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function basic($content, $page_title = '')
+	public function basic($content, $page_title = '')
 	{
 		global $lang;
 		
@@ -429,10 +394,9 @@ BASIC;
 	 * 
 	 * @param string $str
 	 * 
-	 * @access public
-	 * @return void
+	 * @deprecated since 2.4-beta2
 	 */
-	function message($str)
+	public function message($str)
 	{
 		$this->displayMessage($str);
 	}
@@ -440,13 +404,10 @@ BASIC;
 	/**
 	 * Ajoute une entrée à la pile des messages
 	 * 
-	 * @param string $str	le message
-	 * @param string $link	le lien html à intégrer dans le message
-	 * 
-	 * @access public
-	 * @return void
+	 * @param string $str  le message
+	 * @param string $link le lien html à intégrer dans le message
 	 */
-	function addLine($str, $link = null)
+	public function addLine($str, $link = null)
 	{
 		if( !is_null($link) )
 		{
@@ -462,11 +423,8 @@ BASIC;
 	 * 
 	 * @param string $str
 	 * @param string $title
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function displayMessage($str = '', $title = '')
+	public function displayMessage($str = '', $title = '')
 	{
 		global $lang, $message;
 		
@@ -527,11 +485,8 @@ BASIC;
 	 * Génération et affichage de liste d'erreur
 	 * 
 	 * @param mixed $msg_errors
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function error_box($msg_errors)
+	public function error_box($msg_errors)
 	{
 		if( !is_array($msg_errors) )
 		{
@@ -552,13 +507,12 @@ BASIC;
 	/**
 	 * Affichage des fichiers joints 
 	 * 
-	 * @param array   $logdata    Données du log concerné
-	 * @param integer $format     Format du log visualisé (si dans view.php)
+	 * @param array   $logdata Données du log concerné
+	 * @param integer $format  Format du log visualisé (si dans view.php)
 	 * 
-	 * @access public
 	 * @return boolean
 	 */
-	function files_list($logdata, $format = 0)
+	public function files_list($logdata, $format = 0)
 	{
 		global $lang, $nl_config;
 		
@@ -687,11 +641,8 @@ BASIC;
 	 * @param integer $auth_type
 	 * @param boolean $display
 	 * @param string  $jump_to
-	 * 
-	 * @access public
-	 * @return void
 	 */
-	function build_listbox($auth_type, $display = true, $jump_to = '')
+	public function build_listbox($auth_type, $display = true, $jump_to = '')
 	{
 		global $admindata, $auth, $session, $lang;
 		
