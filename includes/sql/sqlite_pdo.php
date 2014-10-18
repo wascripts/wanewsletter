@@ -103,7 +103,12 @@ class Wadb_sqlite_pdo extends Wadb {
 		$curEncoding = $row['encoding'];
 		
 		if( !is_null($encoding) ) {
-			$this->pdo->exec("PRAGMA encoding = \"$encoding\"");
+			if( preg_match('#^UTF-(8|16(le|be)?)$#', $encoding) ) {
+				$this->pdo->exec("PRAGMA encoding = \"$encoding\"");
+			}
+			else {
+				trigger_error('Invalid encoding name given. Must be UTF-8 or UTF-16(le|be)', E_USER_WARNING);
+			}
 		}
 		
 		return $curEncoding;
