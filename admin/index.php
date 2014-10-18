@@ -241,12 +241,7 @@ $output->assign_vars( array(
 	'USED_VERSION'           => sprintf($lang['Used_version'], WANEWSLETTER_VERSION)
 ));
 
-require WA_ROOTDIR . '/includes/class.updater.php';
-
-$updater = new Wa_Updater();
-$updater->cache    = sprintf('%s/%s', WA_TMPDIR, WA_CHECK_UPDATE_CACHE);
-$updater->cacheTtl = WA_CHECK_UPDATE_CACHE_TTL;
-$result = $updater->check();
+$result = wa_check_update();
 
 if( $result !== false )
 {

@@ -1476,13 +1476,7 @@ switch( $mode )
 		break;
 	
 	case 'check_update':
-		require WA_ROOTDIR . '/includes/class.updater.php';
-
-		$updater = new Wa_Updater();
-		$updater->cache    = sprintf('%s/%s', WA_TMPDIR, WA_CHECK_UPDATE_CACHE);
-		$updater->cacheTtl = WA_CHECK_UPDATE_CACHE_TTL;
-		$updater->url      = WA_CHECK_UPDATE_URL;
-		$result = $updater->check(true);
+		$result = wa_check_update(true);
 
 		if( isset($_GET['output']) && $_GET['output'] == 'json' )
 		{

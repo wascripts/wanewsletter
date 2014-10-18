@@ -25,6 +25,40 @@ function check_db_version($version)
 }
 
 /**
+ * Vérifie la présence d'une mise à jour
+ *
+ * @param boolean $complete true pour vérifier aussi l'URL distante
+ *
+ * @return boolean|integer
+ */
+function wa_check_update($complete = false)
+{
+	$cache_file = sprintf('%s/%s', WA_TMPDIR, WA_CHECK_UPDATE_CACHE);
+	$cache_ttl  = WA_CHECK_UPDATE_CACHE_TTL;
+
+	$result = false;
+	$data   = '';
+
+	if( is_readable($cache_file) && filemtime($cache_file) > (time() - $cache_ttl) ) {
+		$data = file_get_contents($cache_file);
+	}
+	else if( $complete ) {
+		$result = http_get_contents(WA_CHECK_UPDATE_URL, $errstr);
+		$data = $result['data'];
+
+		if( $data != false ) {
+			file_put_contents($cache_file, $data);
+		}
+	}
+
+	if( $data != '' ) {
+		$result = intval(version_compare(WANEWSLETTER_VERSION, trim($data), '<'));
+	}
+
+	return $result;
+}
+
+/**
  * Retourne la configuration du script stockée dans la base de données
  *
  * @return array
