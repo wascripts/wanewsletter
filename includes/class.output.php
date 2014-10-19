@@ -149,7 +149,7 @@ class output extends Template {
 	public function page_header($use_template = true, $page_title = '')
 	{
 		global $nl_config, $lang, $template, $admindata, $auth;
-		global $meta, $simple_header, $error, $msg_error;
+		global $simple_header, $error, $msg_error;
 		
 		define('HEADER_INC', true);
 		
@@ -261,10 +261,9 @@ class output extends Template {
 			'footer' => 'footer.tpl'
 		));
 		
-		$dev_infos = (defined('DEV_INFOS') && DEV_INFOS == true);
 		$version = WANEWSLETTER_VERSION;
 		
-		if( $dev_infos && is_object($db) )
+		if( defined('DEV_INFOS') && DEV_INFOS && $db instanceof Wadb )
 		{
 			$version  .= sprintf(' (%s)', substr(get_class($db), 5));
 			$endtime   = array_sum(explode(' ', microtime()));
@@ -324,7 +323,7 @@ class output extends Template {
 		//
 		// On ferme la connexion à la base de données, si elle existe 
 		//
-		if( isset($db) && is_object($db) )
+		if( $db instanceof Wadb )
 		{
 			$db->close();
 		}
@@ -644,7 +643,7 @@ BASIC;
 	 */
 	public function build_listbox($auth_type, $display = true, $jump_to = '')
 	{
-		global $admindata, $auth, $session, $lang;
+		global $admindata, $auth, $lang;
 		
 		$tmp_box = '';
 		$liste_id_ary = $auth->check_auth($auth_type);
