@@ -130,12 +130,12 @@ class Auth
 	 */
 	public function box_auth($auth_type, $listdata)
 	{
-		global $lang;
+		global $output, $lang;
 
 		$auth_name = $this->auth_ary[$auth_type];
 
-		$selected_yes = (!empty($listdata[$auth_name])) ? ' selected="selected"' : '';
-		$selected_no  = (empty($listdata[$auth_name])) ? ' selected="selected"' : '';
+		$selected_yes = $output->getBoolAttr('selected', !empty($listdata[$auth_name]));
+		$selected_no  = $output->getBoolAttr('selected', empty($listdata[$auth_name]));
 
 		$box_auth  = '<select name="' . $auth_name . '[]">';
 		$box_auth .= '<option value="1"' . $selected_yes . '> ' . $lang['Yes'] . ' </option>';

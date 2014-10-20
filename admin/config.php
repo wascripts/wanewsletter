@@ -293,20 +293,20 @@ $output->assign_vars( array(
 	'URLSITE'                   => $new_config['urlsite'],
 	'URLSCRIPT'                 => $new_config['path'],
 	'DATE_FORMAT'               => $new_config['date_format'],
-	'CHECKED_PROFIL_CP_ON'      => ($new_config['enable_profil_cp']) ? ' checked="checked"' : '',
-	'CHECKED_PROFIL_CP_OFF'     => (!$new_config['enable_profil_cp']) ? ' checked="checked"' : '',
+	'CHECKED_PROFIL_CP_ON'      => $output->getBoolAttr('checked', $new_config['enable_profil_cp']),
+	'CHECKED_PROFIL_CP_OFF'     => $output->getBoolAttr('checked', !$new_config['enable_profil_cp']),
 	'COOKIE_NAME'               => $new_config['cookie_name'],
 	'COOKIE_PATH'               => $new_config['cookie_path'],
 	'LENGTH_SESSION'            => $new_config['session_length'],
 	'UPLOAD_PATH'               => $new_config['upload_path'],
 	'MAX_FILESIZE'              => $new_config['max_filesize'],
-	'CHECKED_CHECK_EMAIL_ON'    => ($new_config['check_email_mx']) ? ' checked="checked"' : '',
-	'CHECKED_CHECK_EMAIL_OFF'   => (!$new_config['check_email_mx']) ? ' checked="checked"' : '',
+	'CHECKED_CHECK_EMAIL_ON'    => $output->getBoolAttr('checked', $new_config['check_email_mx']),
+	'CHECKED_CHECK_EMAIL_OFF'   => $output->getBoolAttr('checked', !$new_config['check_email_mx']),
 	'SENDING_LIMIT'             => $new_config['sending_limit'],
 	'SMTP_ROW_CLASS'            => ($new_config['use_smtp']) ? '' : 'inactive',
-	'CHECKED_USE_SMTP_ON'       => ($new_config['use_smtp']) ? ' checked="checked"' : '',
-	'CHECKED_USE_SMTP_OFF'      => (!$new_config['use_smtp']) ? ' checked="checked"' : '',
-	'DISABLED_SMTP'             => (!function_exists('fsockopen')) ? ' disabled="disabled"' : '',
+	'CHECKED_USE_SMTP_ON'       => $output->getBoolAttr('checked', $new_config['use_smtp']),
+	'CHECKED_USE_SMTP_OFF'      => $output->getBoolAttr('checked', !$new_config['use_smtp']),
+	'DISABLED_SMTP'             => $output->getBoolAttr('disabled', !function_exists('fsockopen')),
 	'WARNING_SMTP'              => (!function_exists('fsockopen')) ? ' <span style="color: red;">[not available]</span>' : '',
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
@@ -327,10 +327,10 @@ if (extension_loaded('ftp')) {
 		'L_FTP_PASS'           => $lang['Ftp_pass'],
 
 		'FTP_ROW_CLASS'        => ($new_config['use_ftp']) ? '' : 'inactive',
-		'CHECKED_USE_FTP_ON'   => ($new_config['use_ftp']) ? ' checked="checked"' : '',
-		'CHECKED_USE_FTP_OFF'  => (!$new_config['use_ftp']) ? ' checked="checked"' : '',
-		'CHECKED_FTP_PASV_ON'  => ($new_config['ftp_pasv']) ? ' checked="checked"' : '',
-		'CHECKED_FTP_PASV_OFF' => (!$new_config['ftp_pasv']) ? ' checked="checked"' : '',
+		'CHECKED_USE_FTP_ON'   => $output->getBoolAttr('checked', $new_config['use_ftp']),
+		'CHECKED_USE_FTP_OFF'  => $output->getBoolAttr('checked', !$new_config['use_ftp']),
+		'CHECKED_FTP_PASV_ON'  => $output->getBoolAttr('checked', $new_config['ftp_pasv']),
+		'CHECKED_FTP_PASV_OFF' => $output->getBoolAttr('checked', !$new_config['ftp_pasv']),
 		'FTP_SERVER'           => $new_config['ftp_server'],
 		'FTP_PORT'             => $new_config['ftp_port'],
 		'FTP_PATH'             => $new_config['ftp_path'],
@@ -343,8 +343,8 @@ $output->assign_block_vars('choice_engine_send', array(
 	'L_ENGINE_BCC'        => $lang['With_engine_bcc'],
 	'L_ENGINE_UNIQ'       => $lang['With_engine_uniq'],
 
-	'CHECKED_ENGINE_BCC'  => ($new_config['engine_send'] == ENGINE_BCC) ? ' checked="checked"' : '',
-	'CHECKED_ENGINE_UNIQ' => ($new_config['engine_send'] == ENGINE_UNIQ) ? ' checked="checked"' : ''
+	'CHECKED_ENGINE_BCC'  => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_BCC)),
+	'CHECKED_ENGINE_UNIQ' => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_UNIQ))
 ));
 
 if (extension_loaded('gd')) {
@@ -353,8 +353,8 @@ if (extension_loaded('gd')) {
 		'L_EXPLAIN_STATS'           => nl2br($lang['Explain']['config_stats']),
 		'L_DISABLE_STATS'           => $lang['Disable_stats'],
 
-		'CHECKED_DISABLE_STATS_ON'  => ($new_config['disable_stats']) ? ' checked="checked"' : '',
-		'CHECKED_DISABLE_STATS_OFF' => (!$new_config['disable_stats']) ? ' checked="checked"' : ''
+		'CHECKED_DISABLE_STATS_ON'  => $output->getBoolAttr('checked', $new_config['disable_stats']),
+		'CHECKED_DISABLE_STATS_OFF' => $output->getBoolAttr('checked', !$new_config['disable_stats'])
 	));
 }
 else {

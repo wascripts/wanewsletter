@@ -426,11 +426,11 @@ $output->assign_vars(array(
 	'EMAIL'                 => $current_admin['admin_email'],
 	'DATEFORMAT'            => $current_admin['admin_dateformat'],
 
-	'EMAIL_NEW_SUBSCRIBE_YES' => ($current_admin['email_new_subscribe'] == SUBSCRIBE_NOTIFY_YES) ? ' checked="checked"' : '',
-	'EMAIL_NEW_SUBSCRIBE_NO'  => ($current_admin['email_new_subscribe'] == SUBSCRIBE_NOTIFY_NO) ? ' checked="checked"' : '',
+	'EMAIL_NEW_SUBSCRIBE_YES' => $output->getBoolAttr('checked', ($current_admin['email_new_subscribe'] == SUBSCRIBE_NOTIFY_YES)),
+	'EMAIL_NEW_SUBSCRIBE_NO'  => $output->getBoolAttr('checked', ($current_admin['email_new_subscribe'] == SUBSCRIBE_NOTIFY_NO)),
 
-	'EMAIL_UNSUBSCRIBE_YES' => ($current_admin['email_unsubscribe'] == UNSUBSCRIBE_NOTIFY_YES) ? ' checked="checked"' : '',
-	'EMAIL_UNSUBSCRIBE_NO'  => ($current_admin['email_unsubscribe'] == UNSUBSCRIBE_NOTIFY_NO) ? ' checked="checked"' : '',
+	'EMAIL_UNSUBSCRIBE_YES' => $output->getBoolAttr('checked', ($current_admin['email_unsubscribe'] == UNSUBSCRIBE_NOTIFY_YES)),
+	'EMAIL_UNSUBSCRIBE_NO'  => $output->getBoolAttr('checked', ($current_admin['email_unsubscribe'] == UNSUBSCRIBE_NOTIFY_NO)),
 
 	'S_HIDDEN_FIELDS'       => $output->getHiddenFields()
 ));
@@ -455,8 +455,8 @@ if ($admindata['admin_level'] == ADMIN) {
 		'L_DELETE_ADMIN'  => $lang['Del_user'],
 		'L_NOTE_DELETE'   => nl2br($lang['Del_note']),
 
-		'SELECTED_ADMIN'  => ($current_admin['admin_level'] == ADMIN) ? ' selected="selected"' : '',
-		'SELECTED_USER'   => ($current_admin['admin_level'] == USER) ? ' selected="selected"' : ''
+		'SELECTED_ADMIN'  => $output->getBoolAttr('selected', ($current_admin['admin_level'] == ADMIN)),
+		'SELECTED_USER'   => $output->getBoolAttr('selected', ($current_admin['admin_level'] == USER))
 	));
 
 	foreach ($listdata as $listrow) {

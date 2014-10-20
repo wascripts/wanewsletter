@@ -20,6 +20,8 @@ define('FUNCTIONS_BOX_INC', true);
  */
 function lang_box($default_lang = '')
 {
+	global $output;
+
 	$lang_ary = array();
 	$browse   = dir(WA_ROOTDIR . '/language');
 
@@ -35,7 +37,7 @@ function lang_box($default_lang = '')
 
 		$lang_box = '<select id="language" name="language">';
 		foreach ($lang_ary as $lang_name) {
-			$selected  = ($default_lang == $lang_name) ? ' selected="selected"' : '';
+			$selected  = $output->getBoolAttr('selected', ($default_lang == $lang_name));
 			$lang_box .= sprintf('<option value="%1$s"%2$s>%1$s</option>', $lang_name, $selected);
 		}
 		$lang_box .= '</select>';
@@ -61,6 +63,8 @@ function lang_box($default_lang = '')
  */
 function format_box($select_name, $default_format = 0, $option_submit = false, $multi_format = false, $no_id = false)
 {
+	global $output;
+
 	$format_box = '<select' . (!$no_id ? ' id="' . $select_name . '"' : '') . ' name="' . $select_name . '"';
 
 	if ($option_submit) {
@@ -70,11 +74,11 @@ function format_box($select_name, $default_format = 0, $option_submit = false, $
 		$format_box .= '>';
 	}
 
-	$format_box .= '<option value="1"' . (($default_format == FORMAT_TEXTE) ? ' selected="selected"' : '') . '>texte</option>';
-	$format_box .= '<option value="2"' . (($default_format == FORMAT_HTML) ? ' selected="selected"' : '') . '>html</option>';
+	$format_box .= '<option value="1"' . $output->getBoolAttr('selected', ($default_format == FORMAT_TEXTE)) . '>texte</option>';
+	$format_box .= '<option value="2"' . $output->getBoolAttr('selected', ($default_format == FORMAT_HTML)) . '>html</option>';
 
 	if ($multi_format) {
-		$format_box .= '<option value="3"' . (($default_format == FORMAT_MULTIPLE) ? ' selected="selected"' : '') . '>texte &amp; html</option>';
+		$format_box .= '<option value="3"' . $output->getBoolAttr('selected', ($default_format == FORMAT_MULTIPLE)) . '>texte &amp; html</option>';
 	}
 
 	$format_box .= '</select>';

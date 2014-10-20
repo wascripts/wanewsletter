@@ -393,7 +393,7 @@ if (!defined('NL_INSTALLED')) {
 
 	$db_box = '';
 	foreach ($supported_db as $name => $data) {
-		$selected = ($infos['engine'] == $name) ? ' selected="selected"' : '';
+		$selected = $output->getBoolAttr('selected', ($infos['engine'] == $name));
 		$db_box  .= '<option value="' . $name . '"' . $selected . '> ' . $data['Name'] . ' </option>';
 	}
 

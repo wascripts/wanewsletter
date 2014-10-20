@@ -443,12 +443,12 @@ else {
 }
 
 for (; $y <= $c; $y++) {
-	$selected = ($y == $year) ? ' selected="selected"' : '';
+	$selected = $output->getBoolAttr('selected', ($y == $year));
 	$y_list .= sprintf("\n\t<option value=\"%1\$d\"%2\$s>%1\$d</option>", $y, $selected);
 }
 
 for (; $n <= $m; $n++) {
-	$selected = ($n == $month) ? ' selected="selected"' : '';
+	$selected = $output->getBoolAttr('selected', ($n == $month));
 	$m_list  .= sprintf("\n\t<option value=\"%d\"%s>%s</option>", $n, $selected,
 		convert_time('F', mktime(0, 0, 0, $n, 1, $y))
 	);

@@ -725,11 +725,11 @@ else if ($mode == 'abonnes') {
 	$search_days_box  = '<select name="days">';
 	$search_days_box .= '<option value="0">' . $lang['All_abo'] . '</option>';
 
-	$selected = ( $search_date == -1 ) ? ' selected="selected"' : '';
+	$selected = $output->getBoolAttr('selected', ($search_date == -1));
 	$search_days_box .= '<option value="-1"' . $selected . '>' . $lang['Inactive_account'] . '</option>';
 
 	for ($i = 0, $days = 10; $i < 4; $i++, $days *= 3) {
-		$selected = ( $search_date == $days ) ? ' selected="selected"' : '';
+		$selected = $output->getBoolAttr('selected', ($search_date == $days));
 		$search_days_box .= '<option value="' . $days . '"' . $selected . '>' . sprintf($lang['Days_interval'], $days) . '</option>';
 	}
 	$search_days_box .= '</select>';
@@ -760,11 +760,11 @@ else if ($mode == 'abonnes') {
 
 		'KEYWORD'              => wan_htmlspecialchars($search_keyword),
 		'SEARCH_DAYS_BOX'      => $search_days_box,
-		'SELECTED_TYPE_EMAIL'  => ($sql_type == 'abo_email') ? ' selected="selected"' : '',
-		'SELECTED_TYPE_DATE'   => ($sql_type == 'register_date') ? ' selected="selected"' : '',
-		'SELECTED_TYPE_FORMAT' => ($sql_type == 'format') ? ' selected="selected"' : '',
-		'SELECTED_ORDER_ASC'   => ($sql_order == 'ASC') ? ' selected="selected"' : '',
-		'SELECTED_ORDER_DESC'  => ($sql_order == 'DESC') ? ' selected="selected"' : '',
+		'SELECTED_TYPE_EMAIL'  => $output->getBoolAttr('selected', ($sql_type == 'abo_email')),
+		'SELECTED_TYPE_DATE'   => $output->getBoolAttr('selected', ($sql_type == 'register_date')),
+		'SELECTED_TYPE_FORMAT' => $output->getBoolAttr('selected', ($sql_type == 'format')),
+		'SELECTED_ORDER_ASC'   => $output->getBoolAttr('selected', ($sql_order == 'ASC')),
+		'SELECTED_ORDER_DESC'  => $output->getBoolAttr('selected', ($sql_order == 'DESC')),
 
 		'PAGINATION'           => $navigation,
 		'PAGEOF'               => ($total_abo > 0) ? sprintf($lang['Page_of'], $page_id, ceil($total_abo / $abo_per_page)) : '',
@@ -1048,16 +1048,16 @@ else if ($mode == 'liste') {
 			'SIG_EMAIL'            => wan_htmlspecialchars($liste_sig),
 			'LIMITEVALIDATE'       => intval($limitevalidate),
 			'PURGE_FREQ'           => intval($purge_freq),
-			'CHECK_CONFIRM_ALWAYS' => ($confirm_subscribe == CONFIRM_ALWAYS) ? ' checked="checked"' : '',
-			'CHECK_CONFIRM_ONCE'   => ($confirm_subscribe == CONFIRM_ONCE) ? ' checked="checked"' : '',
-			'CHECK_CONFIRM_NO'     => ($confirm_subscribe == CONFIRM_NONE) ? ' checked="checked"' : '',
-			'CHECK_PUBLIC_YES'     => ($liste_public) ? ' checked="checked"' : '',
-			'CHECK_PUBLIC_NO'      => (!$liste_public) ? ' checked="checked"' : '',
-			'CHECKED_PURGE_ON'     => ($auto_purge) ? ' checked="checked"' : '',
-			'CHECKED_PURGE_OFF'    => (!$auto_purge) ? ' checked="checked"' : '',
-			'CHECKED_USE_CRON_ON'  => ($use_cron) ? ' checked="checked"' : '',
-			'CHECKED_USE_CRON_OFF' => (!$use_cron) ? ' checked="checked"' : '',
-			'DISABLED_CRON'        => (!function_exists('fsockopen')) ? ' disabled="disabled"' : '',
+			'CHECK_CONFIRM_ALWAYS' => $output->getBoolAttr('checked', ($confirm_subscribe == CONFIRM_ALWAYS)),
+			'CHECK_CONFIRM_ONCE'   => $output->getBoolAttr('checked', ($confirm_subscribe == CONFIRM_ONCE)),
+			'CHECK_CONFIRM_NO'     => $output->getBoolAttr('checked', ($confirm_subscribe == CONFIRM_NONE)),
+			'CHECK_PUBLIC_YES'     => $output->getBoolAttr('checked', $liste_public),
+			'CHECK_PUBLIC_NO'      => $output->getBoolAttr('checked', !$liste_public),
+			'CHECKED_PURGE_ON'     => $output->getBoolAttr('checked', $auto_purge),
+			'CHECKED_PURGE_OFF'    => $output->getBoolAttr('checked', !$auto_purge),
+			'CHECKED_USE_CRON_ON'  => $output->getBoolAttr('checked', $use_cron),
+			'CHECKED_USE_CRON_OFF' => $output->getBoolAttr('checked', !$use_cron),
+			'DISABLED_CRON'        => $output->getBoolAttr('disabled', !function_exists('fsockopen')),
 			'WARNING_CRON'         => (!function_exists('fsockopen')) ? ' <span style="color: red;">[not available]</span>' : '',
 			'POP_HOST'             => wan_htmlspecialchars($pop_host),
 			'POP_PORT'             => intval($pop_port),
@@ -1234,7 +1234,7 @@ else if ($mode == 'liste') {
 
 			foreach ($auth->listdata as $liste_id => $data) {
 				if (in_array($liste_id, $liste_ids) && $liste_id != $listdata['liste_id']) {
-					$selected  = ($admindata['session_liste'] == $liste_id) ? ' selected="selected"' : '';
+					$selected  = $output->getBoolAttr('selected', ($admindata['session_liste'] == $liste_id));
 					$list_box .= '<option value="' . $liste_id . '"' . $selected . '> - '
 						. wan_htmlspecialchars(cut_str($data['liste_name'], 30)) . ' - </option>';
 				}
@@ -1633,10 +1633,10 @@ else if ($mode == 'log') {
 		'L_SUBJECT'             => $lang['Log_subject'],
 		'L_DATE'                => $lang['Log_date'],
 
-		'SELECTED_TYPE_SUBJECT' => ($sql_type == 'log_subject') ? ' selected="selected"' : '',
-		'SELECTED_TYPE_DATE'    => ($sql_type == 'log_date') ? ' selected="selected"' : '',
-		'SELECTED_ORDER_ASC'    => ($sql_order == 'ASC') ? ' selected="selected"' : '',
-		'SELECTED_ORDER_DESC'   => ($sql_order == 'DESC') ? ' selected="selected"' : '',
+		'SELECTED_TYPE_SUBJECT' => $output->getBoolAttr('selected', ($sql_type == 'log_subject')),
+		'SELECTED_TYPE_DATE'    => $output->getBoolAttr('selected', ($sql_type == 'log_date')),
+		'SELECTED_ORDER_ASC'    => $output->getBoolAttr('selected', ($sql_order == 'ASC')),
+		'SELECTED_ORDER_DESC'   => $output->getBoolAttr('selected', ($sql_order == 'DESC')),
 
 		'PAGINATION'            => $navigation,
 		'PAGEOF'                => ($total_logs > 0) ? sprintf($lang['Page_of'], $page_id, ceil($total_logs / $log_per_page)) : '',

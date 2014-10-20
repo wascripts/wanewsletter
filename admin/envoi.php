@@ -960,13 +960,13 @@ $output->assign_vars(array(
 
 	'S_DEST'                  => wan_htmlspecialchars($listdata['liste_name']),
 	'S_SUBJECT'               => $subject,
-	'SELECTED_STATUS_WRITING' => ($logdata['log_status'] == STATUS_WRITING) ? ' selected="selected"' : '',
-	'SELECTED_STATUS_MODEL'   => ($logdata['log_status'] == STATUS_MODEL) ? ' selected="selected"' : '',
-	'CHECKED_CC_ADMIN_ON'     => ($listdata['cc_admin']) ? ' checked="checked"' : '',
-	'CHECKED_CC_ADMIN_OFF'    => (!$listdata['cc_admin']) ? ' checked="checked"' : '',
+	'SELECTED_STATUS_WRITING' => $output->getBoolAttr('selected', ($logdata['log_status'] == STATUS_WRITING)),
+	'SELECTED_STATUS_MODEL'   => $output->getBoolAttr('selected', ($logdata['log_status'] == STATUS_MODEL)),
+	'CHECKED_CC_ADMIN_ON'     => $output->getBoolAttr('checked', $listdata['cc_admin']),
+	'CHECKED_CC_ADMIN_OFF'    => $output->getBoolAttr('checked', !$listdata['cc_admin']),
 
 	'S_ENCTYPE'               => (FILE_UPLOADS_ON) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
-	'S_DELETE_BUTTON_DISABLED' => ($logdata['log_id'] == 0) ? ' disabled="disabled"' : '',
+	'S_DELETE_BUTTON_DISABLED' => $output->getBoolAttr('disabled', ($logdata['log_id'] == 0)),
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
 ));
 

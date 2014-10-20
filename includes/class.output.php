@@ -143,6 +143,21 @@ class Output extends Template
 	}
 
 	/**
+	 * Retourne un attribut HTML booléen si $return vaut true.
+	 * Appel typique : ... $o->getBoolAttr('checked', ($var1 == $var2))
+	 * L'attribut est dans le format court.
+	 *
+	 * @param string  $name   Nom de l'attribut booléen (checked, selected, ...)
+	 * @param boolean $return Résultat du test conditionnel
+	 *
+	 * @return string
+	 */
+	public function getBoolAttr($name, $return = true)
+	{
+		return ($return) ? " $name " : '';
+	}
+
+	/**
 	 * Envoie en sortie les en-têtes HTTP appropriés et l'en-tête du document
 	 *
 	 * @param boolean $use_template
@@ -612,7 +627,7 @@ BASIC;
 	 */
 	public function build_listbox($auth_type, $display = true, $jump_to = '')
 	{
-		global $admindata, $auth, $lang;
+		global $output, $admindata, $auth, $lang;
 
 		$tmp_box = '';
 		$liste_id_ary = $auth->check_auth($auth_type);
@@ -631,7 +646,7 @@ BASIC;
 				$tmp_box .= sprintf(
 					"<option value=\"%d\"%s>%s</option>\n\t",
 					$liste_id,
-					($admindata['session_liste'] == $liste_id) ? ' selected="selected"' : '',
+					$output->getBoolAttr('selected', ($admindata['session_liste'] == $liste_id)),
 					wan_htmlspecialchars(cut_str($data['liste_name'], 30))
 				);
 			}

@@ -180,7 +180,7 @@ if (!isset($_POST['submit']) && !$getreport) {
 		$tools_box .= sprintf(
 			"<option value=\"%s\"%s> %s </option>\n\t",
 			$tool_name,
-			($mode == $tool_name) ? ' selected="selected"' : '',
+			$output->getBoolAttr('selected', ($mode == $tool_name)),
 			$lang['Title'][$tool_name]
 		);
 	}
