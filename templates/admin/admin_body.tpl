@@ -9,7 +9,7 @@
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="language">{L_DEFAULT_LANG}&nbsp;:</label></td>
@@ -56,45 +56,45 @@
 			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" autocomplete="off" /></td>
 		</tr>
 	</table>
-	
+
 	<!-- BEGIN admin_options -->
 	<h2>{admin_options.L_TITLE_MANAGE}</h2>
-	
+
 	<script>
 	<!--
 	function switch_selectbox(evt)
 	{
 		var node = evt.target.parentNode.parentNode;
-		
+
 		var boxList = node.getElementsByTagName('select');
 		var val = boxList[0].value;
-		
-		for( var i = 0, m = boxList.length; i < m; i++ ) {
+
+		for (var i = 0, m = boxList.length; i < m; i++) {
 			boxList[i].options[val].selected = true;
 		}
-		
+
 		evt.preventDefault();
 	}
-	
+
 	document.addEventListener('DOMContentLoaded', function() {
- 		var rows = document.getElementById('admin_authlist').rows;
- 		var switchLink = null;
- 		
- 		for( var i = 1, m = rows.length; i < m; i++ ) {
- 			switchLink = document.createElement('a');
- 			switchLink.appendChild(document.createTextNode('switch'));
- 			switchLink.setAttribute('href', '#switch/selectbox');
- 			switchLink.setAttribute('class', 'notice');
+		var rows = document.getElementById('admin_authlist').rows;
+		var switchLink = null;
+
+		for (var i = 1, m = rows.length; i < m; i++) {
+			switchLink = document.createElement('a');
+			switchLink.appendChild(document.createTextNode('switch'));
+			switchLink.setAttribute('href', '#switch/selectbox');
+			switchLink.setAttribute('class', 'notice');
 			switchLink.style.cssFloat = 'right';
 			switchLink.style.marginTop = '0.18em';
 			switchLink.addEventListener('click', switch_selectbox, false);
- 			
- 			rows[i].cells[0].appendChild(switchLink);
- 		}
+
+			rows[i].cells[0].appendChild(switchLink);
+		}
 	}, false);
 	//-->
 	</script>
-	
+
 	<table id="admin_authlist" class="dataset">
 		<tr>
 			<th>{admin_options.L_LISTE_NAME}</th>
@@ -121,9 +121,9 @@
 		</tr>
 		<!-- END auth -->
 	</table>
-	
+
 	<h2>{admin_options.L_TITLE_OPTIONS}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="admin_level">{admin_options.L_ADMIN_LEVEL}&nbsp;:</label></td>
@@ -135,7 +135,7 @@
 		</tr>
 	</table>
 	<!-- END admin_options -->
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="reset">{L_RESET_BUTTON}</button>

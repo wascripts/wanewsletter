@@ -4,11 +4,11 @@
 	<meta charset="{CHARSET}" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="Robots" content="noindex, nofollow, none" />
-	
+
 	<title>{PAGE_TITLE}</title>
-	
+
 	<link rel="stylesheet" href="templates/wanewsletter.css" />
-	
+
 	<style>
 	div#global form tr.only-sqlite {
 		display: none;
@@ -20,21 +20,21 @@
 		display: table-row;
 	}
 	</style>
-	
+
 	<script>
 	function specialSQLite(engineBox)
 	{
-		if( engineBox.value == 'sqlite' ) {
+		if (engineBox.value == 'sqlite') {
 			engineBox.form.className = 'is-sqlite';
 		}
 		else {
 			engineBox.form.className = null;
 		}
 	}
-	
+
 	window.onload = function() {
 		var engineBox;
-		if( (engineBox = document.getElementById('engine')) != null ) {
+		if ((engineBox = document.getElementById('engine')) != null) {
 			specialSQLite(engineBox);
 		}
 	};
@@ -46,7 +46,7 @@
 	<div id="logo">
 		<img src="images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" />
 	</div>
-	
+
 	<h1>{PAGE_TITLE}</h1>
 </div>
 
@@ -57,10 +57,10 @@
 
 	<!-- BEGIN install -->
 	<div class="block"><p>{install.L_EXPLAIN}</p></div>
-	
+
 	<div class="block">
 	<h2>{install.TITLE_DATABASE}</h2>
-	
+
 	<table class="dataset compact">
 		<tr>
 			<td><label for="engine">{install.L_DBTYPE}&nbsp;:</label></td>
@@ -91,9 +91,9 @@
 			<td><input type="text" id="prefixe" name="prefixe" size="10" value="{install.PREFIXE}" /></td>
 		</tr>
 	</table>
-	
+
 	<h2>{install.TITLE_ADMIN}</h2>
-	
+
 	<table class="dataset compact">
 		<tr>
 			<td><label for="language">{install.L_DEFAULT_LANG}&nbsp;:</label></td>
@@ -116,20 +116,20 @@
 			<td><input type="text" id="admin_email" name="admin_email" value="{install.EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 	</table>
-	
+
 	<div class="bottom">
 		<button type="submit" name="start" class="primary">{install.L_START_BUTTON}</button>
 	</div>
-	
+
 	</div>
 	<!-- END welcome -->
-	
+
 	<!-- BEGIN reinstall -->
 	<div class="block"><p>{reinstall.L_EXPLAIN}</p></div>
-	
+
 	<div class="block">
 	<h2>{PAGE_TITLE}</h2>
-	
+
 	<table class="dataset compact">
 		<tr>
 			<td><label for="admin_login">{reinstall.L_LOGIN}&nbsp;:</label></td>
@@ -140,32 +140,32 @@
 			<td><input type="password" id="admin_pass" name="admin_pass" size="30" /></td>
 		</tr>
 	</table>
-	
+
 	<div class="bottom">
 		<button type="submit" name="start" class="primary">{reinstall.L_START_BUTTON}</button>
 	</div>
 	</div>
 	<!-- END reinstall -->
-	
+
 	<!-- BEGIN download_file -->
 	<div class="block">
 	<h2>{download_file.L_TITLE}</h2>
-	
+
 	<p>{download_file.MSG_RESULT}</p>
-	
+
 	<div class="bottom"> {download_file.S_HIDDEN_FIELDS}
 		<button type="submit" name="sendfile" class="primary">{download_file.L_DL_BUTTON}</button>
 	</div>
 	</div>
 	<!-- END download_file -->
-	
+
 	<!-- BEGIN result -->
 	<div class="block">
 	<h2>{result.L_TITLE}</h2>
-	
+
 	<p>{result.MSG_RESULT}</p>
 	</div>
 	<!-- END result -->
-	
+
 	<input type="hidden" name="prev_language" value="{S_PREV_LANGUAGE}" />
 </form>

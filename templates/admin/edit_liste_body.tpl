@@ -3,7 +3,7 @@
 <form method="post" action="./view.php?mode=liste">
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="liste_name">{L_LISTE_NAME}&nbsp;:</label></td>
@@ -16,7 +16,7 @@
 				<label for="liste_public_yes" class="notice">{L_YES}</label>
 				<input type="radio" id="liste_public_no" name="liste_public" value="0"{CHECK_PUBLIC_NO} />
 				<label for="liste_public_no" class="notice">{L_NO}</label>
-			</td>					   
+			</td>
 		</tr>
 		<tr>
 			<td><label for="liste_format">{L_AUTH_FORMAT}&nbsp;:</label></td>
@@ -54,11 +54,11 @@
 			<td><textarea id="liste_sig" name="liste_sig" rows="3" cols="35">{SIG_EMAIL}</textarea></td>
 		</tr>
 	</table>
-	
+
 	<h2>{L_TITLE_PURGE}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_PURGE}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label>{L_ENABLE_PURGE}&nbsp;:</label></td>
@@ -74,11 +74,11 @@
 			<td><input type="text" id="purge_freq" name="purge_freq" value="{PURGE_FREQ}" size="5" maxlength="3" class="number" /> <span class="notice">{L_DAYS}</span></td>
 		</tr>
 	</table>
-	
+
 	<h2>{L_TITLE_CRON}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_CRON}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label>{L_USE_CRON}&nbsp;:{WARNING_CRON}</label></td>
@@ -110,7 +110,7 @@
 			<td><input type="text" id="liste_alias" name="liste_alias" value="{LISTE_ALIAS}" size="30" maxlength="254"{DISABLED_CRON} /></td>
 		</tr>
 	</table>
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="submit" name="cancel">{L_CANCEL_BUTTON}</button>

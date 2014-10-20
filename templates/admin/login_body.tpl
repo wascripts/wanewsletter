@@ -1,7 +1,7 @@
 <form class="compact" id="login-form" method="post" action="login.php">
 <div class="block">
 	<h2>{TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="login">{L_LOGIN}&nbsp;:</label></td>
@@ -19,7 +19,7 @@
 			</td>
 		</tr>
 	</table>
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
@@ -28,7 +28,7 @@
 <!-- BEGIN cookie_notice -->
 <p id="cookie-notice" class="warning">{cookie_notice.L_TEXT}</p>
 <script>
-if( navigator.cookieEnabled ) {
+if (navigator.cookieEnabled) {
 	document.getElementById('cookie-notice').style.display = 'none';
 }
 </script>

@@ -43,10 +43,10 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 			</td>
 		</tr>
 	</table>
-	
+
 	<!-- BEGIN test_send -->
 	<div class="explain">{test_send.L_TEST_SEND_NOTE}</div>
-	
+
 	<table class="dataset compact">
 		<tr>
 			<td><label for="test_address">{test_send.L_TEST_SEND}&nbsp;:</label></td>
@@ -65,9 +65,9 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 <!-- BEGIN nl_text_textarea -->
 <div class="block" id="textarea1">
 	<h2>{nl_text_textarea.L_TITLE}</h2>
-	
+
 	<div class="explain">{nl_text_textarea.L_EXPLAIN}</div>
-	
+
 	<div class="textinput">
 		<textarea name="body_text" cols="90" rows="20">{nl_text_textarea.S_BODY}</textarea>
 	</div>
@@ -77,9 +77,9 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 <!-- BEGIN nl_html_textarea -->
 <div class="block" id="textarea2">
 	<h2>{nl_html_textarea.L_TITLE}</h2>
-	
+
 	<div class="explain">{nl_html_textarea.L_EXPLAIN}</div>
-	
+
 	<div class="textinput">
 		<textarea name="body_html" cols="90" rows="20">{nl_html_textarea.S_BODY}</textarea>
 	</div>
@@ -89,9 +89,9 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 <!-- BEGIN joined_files -->
 <div class="block">
 	<h2>{joined_files.L_TITLE_ADD_FILE}</h2>
-	
+
 	<div class="explain">{joined_files.L_EXPLAIN_ADD_FILE}</div>
-	
+
 	<table class="dataset compact">
 		<tr>
 			<td rowspan="{joined_files.S_ROWSPAN}"><label for="join_file">{joined_files.L_ADD_FILE}&nbsp;:</label></td>
@@ -115,7 +115,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 			<td><button type="submit" name="attach">{joined_files.L_ADD_FILE_BUTTON}</button></td>
 		</tr>
 	</table>
-	
+
 	{JOINED_FILES_BOX}
 </div>
 

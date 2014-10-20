@@ -7,22 +7,22 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('COMPAT_PHP_INC') ) {
+if (!defined('COMPAT_PHP_INC')) {
 
 define('COMPAT_PHP_INC', true);
 
 // PHP 5.3.0
-if( !defined('E_DEPRECATED') ) {
+if (!defined('E_DEPRECATED')) {
 	define('E_DEPRECATED', 8192);
 	define('E_USER_DEPRECATED', 16384);
 }
 
 // PHP 5.4.0
-if( !defined('ENT_HTML401') ) {
+if (!defined('ENT_HTML401')) {
 	define('ENT_HTML401', 0);
 }
 
-if( !function_exists('http_response_code') ) {
+if (!function_exists('http_response_code')) {
 	/**
 	 * Récupère ou change le code de la réponse HTTP
 	 *
@@ -111,7 +111,7 @@ if( !function_exists('http_response_code') ) {
 			$defaultCode = $code;
 
 			$sapi = substr(PHP_SAPI, 0, 3);
-			if( $sapi == 'cgi' || $sapi == 'fpm' ) {
+			if ($sapi == 'cgi' || $sapi == 'fpm') {
 				header(sprintf('Status: %d %s', $code, $text));
 			}
 			else {
@@ -126,7 +126,7 @@ if( !function_exists('http_response_code') ) {
 
 // PHP 5.6.0
 // Déclaration également présente dans la librairie phpass pour la portabilité de la librairie
-if( !function_exists('hash_equals') ) {
+if (!function_exists('hash_equals')) {
 	/**
 	 * Timing attack safe string comparison
 	 * Native function in PHP >= 5.6.0

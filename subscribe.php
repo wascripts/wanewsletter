@@ -16,44 +16,38 @@ $list_box = '';
 
 $sql = "SELECT liste_id, liste_name, liste_format
 	FROM " . LISTE_TABLE . "
-	WHERE liste_public = " . TRUE;
+	WHERE liste_public = 1";
 $result = $db->query($sql);
 
 $list_box = '<select id="liste" name="liste">';
 
-if( $row = $result->fetch() )
-{
-	do
-	{
-		if( $row['liste_format'] == FORMAT_TEXTE )
-		{
+if ($row = $result->fetch()) {
+	do {
+		if ($row['liste_format'] == FORMAT_TEXTE) {
 			$format = 'txt';
 		}
-		else if( $row['liste_format'] == FORMAT_HTML )
-		{
+		else if ($row['liste_format'] == FORMAT_HTML) {
 			$format = 'html';
 		}
-		else
-		{
+		else {
 			$format = 'txt &amp; html';
 		}
-		
+
 		$list_box .= sprintf('<option value="%d"> %s (%s) </option>',
 			$row['liste_id'],
 			wan_htmlspecialchars($row['liste_name']),
 			$format
 		);
 	}
-	while( $row = $result->fetch() );
+	while ($row = $result->fetch());
 }
-else
-{
+else {
 	$message = 'No list found';
 }
 
 $list_box .= '</select>';
 
-$output->send_headers(true);
+$output->send_headers();
 
 $output->set_filenames(array(
 	'body' => 'subscribe_body.tpl'
@@ -70,7 +64,7 @@ $output->assign_vars(array(
 	'L_SETFORMAT'     => $lang['Setformat'],
 	'L_UNSUBSCRIBE'   => $lang['Unsubscribe'],
 	'L_VALID_BUTTON'  => $lang['Button']['valid'],
-	
+
 	'LIST_BOX' => $list_box,
 	'MESSAGE'  => $message
 ));
@@ -81,5 +75,3 @@ $output->pparse('body');
 // On réactive le gestionnaire d'erreur précédent
 //
 @restore_error_handler();
-
-?>

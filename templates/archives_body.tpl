@@ -3,7 +3,7 @@
 <form method="post" action="./profil_cp.php">
 <div class="block">
 	<h2>{TITLE}</h2>
-	
+
 	<table class="dataset compact">
 		<!-- BEGIN listerow -->
 		<tr>
@@ -12,7 +12,7 @@
 		</tr>
 		<!-- END listerow -->
 	</table>
-	
+
 	<div class="bottom"> {S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>

@@ -12,8 +12,8 @@
  */
 class SQLException extends Exception { }
 
-abstract class Wadb {
-
+abstract class Wadb
+{
 	/**
 	 * Type de base de données
 	 *
@@ -91,7 +91,7 @@ abstract class Wadb {
 	 */
 	public function __construct($options = null)
 	{
-		if( is_array($options) ) {
+		if (is_array($options)) {
 			$this->options = array_merge($this->options, $options);
 		}
 	}
@@ -173,17 +173,17 @@ abstract class Wadb {
 		$data = $this->prepareData($data);
 
 		$query = sprintf('UPDATE %s SET ', $this->quote($tablename));
-		foreach( $data as $field => $value ) {
+		foreach ($data as $field => $value) {
 			$query .= sprintf('%s = %s, ', $this->quote($field), $value);
 		}
 
 		$query = substr($query, 0, -2);
 
-		if( is_array($conditions) && count($conditions) > 0 ) {
+		if (is_array($conditions) && count($conditions) > 0) {
 			$query .= ' WHERE ';
 			$conditions = $this->prepareData($conditions);
 
-			foreach( $conditions as $field => $value ) {
+			foreach ($conditions as $field => $value) {
 				$query .= sprintf('%s = %s AND ', $this->quote($field), $value);
 			}
 
@@ -203,14 +203,14 @@ abstract class Wadb {
 	 */
 	public function prepareData($data)
 	{
-		foreach( $data as &$value ) {
-			if( is_null($value) ) {
+		foreach ($data as &$value) {
+			if (is_null($value)) {
 				$value = 'NULL';
 			}
-			else if( is_bool($value) ) {
+			else if (is_bool($value)) {
 				$value = intval($value);
 			}
-			else if( !is_int($value) && !is_float($value) ) {
+			else if (!is_int($value) && !is_float($value)) {
 				$value = '\'' . $this->escape($value) . '\'';
 			}
 		}
@@ -311,8 +311,8 @@ abstract class Wadb {
 	}
 }
 
-abstract class WadbResult {
-
+abstract class WadbResult
+{
 	const FETCH_NUM    = 1;
 	const FETCH_ASSOC  = 2;
 	const FETCH_BOTH   = 3;
@@ -367,8 +367,8 @@ abstract class WadbResult {
 	public function fetchAll($mode = null)
 	{
 		$rowset = array();
-		while( $row = $this->fetch($mode) ) {
-			array_push($rowset, $row);
+		while ($row = $this->fetch($mode)) {
+			$rowset[] = $row;
 		}
 
 		return $rowset;
@@ -393,7 +393,7 @@ abstract class WadbResult {
 	 */
 	final public function setFetchMode($mode)
 	{
-		if( in_array($mode, array(self::FETCH_NUM, self::FETCH_ASSOC, self::FETCH_BOTH)) ) {
+		if (in_array($mode, array(self::FETCH_NUM, self::FETCH_ASSOC, self::FETCH_BOTH))) {
 			$this->fetchMode = $mode;
 			return true;
 		}
@@ -413,11 +413,11 @@ abstract class WadbResult {
 	 */
 	final protected function getFetchMode($modes, $mode)
 	{
-		if( is_null($mode) ) {
+		if (is_null($mode)) {
 			$mode = $this->fetchMode;
 		}
 
-		if( is_null($mode) || !isset($modes[$mode]) ) {
+		if (is_null($mode) || !isset($modes[$mode])) {
 			$mode = self::FETCH_BOTH;
 		}
 
@@ -438,8 +438,8 @@ abstract class WadbResult {
 	}
 }
 
-abstract class WadbBackup {
-
+abstract class WadbBackup
+{
 	/**
 	 * Connexion à la base de données
 	 *
@@ -516,7 +516,7 @@ abstract class WadbBackup {
 		$result = $this->db->query('SELECT * FROM ' . $this->db->quote($tablename));
 		$result->setFetchMode(WadbResult::FETCH_ASSOC);
 
-		if( $row = $result->fetch() ) {
+		if ($row = $result->fetch()) {
 			$contents  = $this->eol;
 			$contents .= '-- ' . $this->eol;
 			$contents .= '-- Contenu de la table ' . $tablename . $this->eol;
@@ -528,8 +528,8 @@ abstract class WadbBackup {
 			do {
 				$contents .= sprintf("INSERT INTO %s (%s) VALUES", $this->db->quote($tablename), $fields);
 
-				foreach( $row as $key => $value ) {
-					if( is_null($value) ) {
+				foreach ($row as $key => $value) {
+					if (is_null($value)) {
 						$row[$key] = 'NULL';
 					}
 					else {
@@ -539,7 +539,7 @@ abstract class WadbBackup {
 
 				$contents .= '(' . implode(', ', $row) . ');' . $this->eol;
 			}
-			while( $row = $result->fetch() );
+			while ($row = $result->fetch());
 		}
 		$result->free();
 

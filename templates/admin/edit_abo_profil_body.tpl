@@ -3,13 +3,13 @@
 function checkForm_editAboProfil()
 {
 	var inputEmail = document.forms[0].elements['email'];
-	
-	if( inputEmail.defaultValue.toLowerCase() != inputEmail.value.toLowerCase() ) {
-		if( !window.confirm('{L_WARNING_EMAIL_DIFF}') ) {
+
+	if (inputEmail.defaultValue.toLowerCase() != inputEmail.value.toLowerCase()) {
+		if (!window.confirm('{L_WARNING_EMAIL_DIFF}')) {
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 //-->
@@ -26,7 +26,7 @@ function checkForm_editAboProfil()
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="pseudo">{L_PSEUDO}&nbsp;:</label></td>
@@ -37,9 +37,9 @@ function checkForm_editAboProfil()
 			<td><input type="text" id="email" name="email" value="{S_ABO_EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 	</table>
-	
+
 	<div class="explain">{L_LISTE_TO_REGISTER}</div>
-	
+
 	<table class="dataset">
 		<!-- BEGIN listerow -->
 		<tr>
@@ -48,10 +48,10 @@ function checkForm_editAboProfil()
 		</tr>
 		<!-- END listerow -->
 	</table>
-	
+
 	<!-- BEGIN tags -->
 	<h2>{tags.L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<!-- BEGIN row -->
 		<tr>
@@ -61,7 +61,7 @@ function checkForm_editAboProfil()
 		<!-- END row -->
 	</table>
 	<!-- END tags -->
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>

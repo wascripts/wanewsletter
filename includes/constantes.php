@@ -39,7 +39,7 @@ define('DEBUG_MODE', DEBUG_LEVEL_NORMAL);
 //
 // Pour visualiser le temps d'exécution du script et le nombre de requètes effectuées
 //
-define('DEV_INFOS', TRUE);
+define('DEV_INFOS', true);
 //define('DEV_INFOS', FALSE);
 
 //
@@ -49,19 +49,19 @@ define('DEV_INFOS', TRUE);
 define('DISPLAY_ERRORS_IN_LOG', true);
 
 //
-// Active/Désactive le passage automatique à l'UTF-8 au moment de l'envoi en présence de 
+// Active/Désactive le passage automatique à l'UTF-8 au moment de l'envoi en présence de
 // caractères invalides provenant de Windows-1252 dans les newsletters.
 //
 // Si cette constante est placée à TRUE, les caractères en cause subiront une transformation
 // vers un caractère simple ou composé graphiquement proche (voir la fonction purge_latin1()
 // dans le fichier includes/functions.php).
 //
-define('TRANSLITE_INVALID_CHARS', FALSE);
+define('TRANSLITE_INVALID_CHARS', false);
 
 //
 // Prise en compte de l'authentification HTTP pour la connexion automatique
 //
-define('ENABLE_HTTP_AUTHENTICATION', TRUE);
+define('ENABLE_HTTP_AUTHENTICATION', true);
 
 
 //
@@ -69,14 +69,14 @@ define('ENABLE_HTTP_AUTHENTICATION', TRUE);
 //
 
 //
-// Formats d'emails 
+// Formats d'emails
 //
 define('FORMAT_TEXTE',    1);
 define('FORMAT_HTML',     2);
 define('FORMAT_MULTIPLE', 3);
 
 //
-// Statut des newsletter 
+// Statut des newsletter
 //
 define('STATUS_WRITING', 0);
 define('STATUS_STANDBY', 1);
@@ -84,7 +84,7 @@ define('STATUS_SENT',    2);
 define('STATUS_MODEL',   3);
 
 //
-// Statut des abonnés 
+// Statut des abonnés
 //
 define('ABO_ACTIF',   1);
 define('ABO_INACTIF', 0);
@@ -93,13 +93,13 @@ define('SUBSCRIBE_CONFIRMED',     1);
 define('SUBSCRIBE_NOT_CONFIRMED', 0);
 
 //
-// Niveau des utilisateurs, ne pas modifier !! 
+// Niveau des utilisateurs, ne pas modifier !!
 //
 define('ADMIN', 2);
 define('USER',  1);
 
 //
-// divers 
+// divers
 //
 define('SUBSCRIBE_NOTIFY_YES', 1);
 define('SUBSCRIBE_NOTIFY_NO',  0);
@@ -116,123 +116,95 @@ define('CONFIRM_ONCE',   1);
 define('CONFIRM_NONE',   0);
 
 //
-// Si nous avons un accés restreint à cause de open_basedir, certains fichiers uploadés 
-// devront être déplacés vers le dossier des fichiers temporaires du script pour être 
+// Si nous avons un accés restreint à cause de open_basedir, certains fichiers uploadés
+// devront être déplacés vers le dossier des fichiers temporaires du script pour être
 // accessible en lecture
 //
 $open_basedir = config_value('open_basedir');
-if( !empty($open_basedir) )
-{
-	define('OPEN_BASEDIR_RESTRICTION', TRUE);
-}
-else
-{
-	define('OPEN_BASEDIR_RESTRICTION', FALSE);
-}
+define('OPEN_BASEDIR_RESTRICTION', !empty($open_basedir));
 
 //
 // On vérifie si l'upload est autorisé sur le serveur
 //
-if( config_status('file_uploads') )
-{
+if (config_status('file_uploads')) {
 	function get_integer_byte_value($size)
 	{
-		if( preg_match('/^([0-9]+)([KMG])$/i', $size, $match) )
-		{
-			switch( strtoupper($match[2]) )
-			{
+		if (preg_match('/^([0-9]+)([KMG])$/i', $size, $m)) {
+			switch (strtoupper($m[2])) {
 				case 'K':
-					$size = ($match[1] * 1024);
+					$size = ($m[1] * 1024);
 					break;
-				
 				case 'M':
-					$size = ($match[1] * 1024 * 1024);
+					$size = ($m[1] * 1024 * 1024);
 					break;
-				
 				case 'G': // Since php 5.1.0
-					$size = ($match[1] * 1024 * 1024 * 1024);
+					$size = ($m[1] * 1024 * 1024 * 1024);
 					break;
 			}
 		}
-		else
-		{
+		else {
 			$size = intval($size);
 		}
-		
+
 		return $size;
 	}
-	
-	if( !($filesize = config_value('upload_max_filesize')) )
-	{
+
+	if (!($filesize = config_value('upload_max_filesize'))) {
         $filesize = '2M'; // 2 Méga-Octets
     }
 	$upload_max_size = get_integer_byte_value($filesize);
-	
-    if( $postsize = config_value('post_max_size') )
-	{
+
+    if ($postsize = config_value('post_max_size')) {
         $postsize = get_integer_byte_value($postsize);
-        if( $postsize < $upload_max_size )
-		{
+        if ($postsize < $upload_max_size) {
             $upload_max_size = $postsize;
         }
     }
-	
-	define('FILE_UPLOADS_ON', TRUE);
+
+	define('FILE_UPLOADS_ON', true);
 	define('MAX_FILE_SIZE',   $upload_max_size);
 }
-else
-{
-	define('FILE_UPLOADS_ON', FALSE);
+else {
+	define('FILE_UPLOADS_ON', false);
 	define('MAX_FILE_SIZE',   0);
 }
 
 //
-// Infos sur l'utilisateur 
+// Infos sur l'utilisateur
 //
 $user_agent = server_info('HTTP_USER_AGENT');
 
-if( $user_agent != '' )
-{
-	if( stristr($user_agent, 'win') )
-	{
+if ($user_agent != '') {
+	if (stristr($user_agent, 'win')) {
 		define('WA_USER_OS', 'win');
 	}
-	else if( stristr($user_agent, 'mac') )
-	{
+	else if (stristr($user_agent, 'mac')) {
 		define('WA_USER_OS', 'mac');
 	}
-	else if( stristr($user_agent, 'linux') )
-	{
+	else if (stristr($user_agent, 'linux')) {
 		define('WA_USER_OS', 'linux');
 	}
-	else
-	{
+	else {
 		define('WA_USER_OS', 'other');
 	}
-	
-	if( stristr($user_agent, 'opera') )
-	{
+
+	if (stristr($user_agent, 'opera')) {
 		define('WA_USER_BROWSER', 'opera');
 	}
-	else if( stristr($user_agent, 'msie') )
-	{
+	else if (stristr($user_agent, 'msie')) {
 		define('WA_USER_BROWSER', 'msie');
 	}
-	else if( stristr($user_agent, 'konqueror') )
-	{
+	else if (stristr($user_agent, 'konqueror')) {
 		define('WA_USER_BROWSER', 'konqueror');
 	}
-	else if( stristr($user_agent, 'mozilla') )
-	{
+	else if (stristr($user_agent, 'mozilla')) {
 		define('WA_USER_BROWSER', 'mozilla');
 	}
-	else
-	{
+	else {
 		define('WA_USER_BROWSER', 'other');
 	}
 }
-else
-{
+else {
 	define('WA_USER_OS',      'other');
 	define('WA_USER_BROWSER', 'other');
 }

@@ -9,7 +9,7 @@
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td>{L_PSEUDO}&nbsp;:</td>
@@ -24,9 +24,9 @@
 			<td>{S_REGISTER_DATE}</td>
 		</tr>
 	</table>
-	
+
 	<div class="explain">{L_LISTE_TO_REGISTER}&nbsp;:</div>
-	
+
 	<table class="listing">
 		<!-- BEGIN listerow -->
 		<tr>
@@ -36,10 +36,10 @@
 		</tr>
 		<!-- END listerow -->
 	</table>
-	
+
 	<!-- BEGIN tags -->
 	<h2>{tags.L_CAPTION}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<th>{tags.L_NAME}</th>

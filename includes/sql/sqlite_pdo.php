@@ -7,14 +7,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('_INC_CLASS_WADB_SQLITE_PDO') ) {
+if (!defined('_INC_CLASS_WADB_SQLITE_PDO')) {
 
 define('_INC_CLASS_WADB_SQLITE_PDO', true);
 
 require dirname(__FILE__) . '/wadb.php';
 
-class Wadb_sqlite_pdo extends Wadb {
-
+class Wadb_sqlite_pdo extends Wadb
+{
 	/**
 	 * Type de base de données
 	 *
@@ -24,7 +24,7 @@ class Wadb_sqlite_pdo extends Wadb {
 
 	/**
 	 * Version de la librairie SQLite
-	 * 
+	 *
 	 * @var string
 	 */
 	public $libVersion = '';
@@ -33,112 +33,112 @@ class Wadb_sqlite_pdo extends Wadb {
 	 * @var PDO
 	 */
 	protected $pdo;
-	
+
 	/**
 	 * @var PDOStatement
 	 */
 	protected $result;
-	
+
 	/**
 	 * Nombre de lignes affectées par la dernière requète DML
-	 * 
+	 *
 	 * @var integer
 	 */
 	protected $_affectedRows = 0;
-	
+
 	public function connect($infos = null, $options = null)
 	{
 		$sqlite_db = ($infos['path'] != '') ? $infos['path'] : null;
-		
-		if( $sqlite_db != ':memory:' ) {
-			if( file_exists($sqlite_db) ) {
-				if( !is_readable($sqlite_db) ) {
+
+		if ($sqlite_db != ':memory:') {
+			if (file_exists($sqlite_db)) {
+				if (!is_readable($sqlite_db)) {
 					trigger_error("SQLite database isn't readable!", E_USER_WARNING);
 				}
 			}
-			else if( !is_writable(dirname($sqlite_db)) ) {
+			else if (!is_writable(dirname($sqlite_db))) {
 				trigger_error(dirname($sqlite_db) . " isn't writable. Cannot create "
 					. basename($sqlite_db) . " database", E_USER_WARNING);
 			}
 		}
-		
-		if( is_array($options) ) {
+
+		if (is_array($options)) {
 			$this->options = array_merge($this->options, $options);
 		}
-		
+
 		$opt = array();
-		if( !empty($options['persistent']) ) {
+		if (!empty($options['persistent'])) {
 			$opt[PDO::ATTR_PERSISTENT] = true;
 		}
-		
+
 		$this->dbname = $sqlite_db;
-		
+
 		try {
 			$this->pdo = new PDO('sqlite:' . $sqlite_db, null, null, $opt);
-			
+
 			$this->link = true;
 			$this->pdo->query('PRAGMA short_column_names = 1');
 			$this->pdo->query('PRAGMA case_sensitive_like = 0');
 			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 			$this->pdo->setAttribute(PDO::ATTR_CASE,    PDO::CASE_NATURAL);
-			
+
 			$res = $this->pdo->query("SELECT sqlite_version()");
 			$this->libVersion = $res->fetchColumn(0);
-			
-//			if( !empty($this->options['charset']) ) {
+
+//			if (!empty($this->options['charset'])) {
 //				$this->encoding($this->options['charset']);
 //			}
 		}
-		catch( PDOException $e ) {
+		catch (PDOException $e) {
 			$this->errno = $e->getCode();
 			$this->error = $e->getMessage();
 			throw new SQLException($this->error, $this->errno);
 		}
 	}
-	
+
 	public function encoding($encoding = null)
 	{
 		$result = $this->pdo->query('PRAGMA encoding');
 		$row = $result->fetch();
 		$curEncoding = $row['encoding'];
-		
-		if( !is_null($encoding) ) {
-			if( preg_match('#^UTF-(8|16(le|be)?)$#', $encoding) ) {
+
+		if (!is_null($encoding)) {
+			if (preg_match('#^UTF-(8|16(le|be)?)$#', $encoding)) {
 				$this->pdo->exec("PRAGMA encoding = \"$encoding\"");
 			}
 			else {
 				trigger_error('Invalid encoding name given. Must be UTF-8 or UTF-16(le|be)', E_USER_WARNING);
 			}
 		}
-		
+
 		return $curEncoding;
 	}
-	
+
 	public function query($query)
 	{
-		if( ($this->result instanceof PDOStatement) ) {
+		if ($this->result instanceof PDOStatement) {
 			$this->result->closeCursor();
 		}
-		
+
 		$curtime = array_sum(explode(' ', microtime()));
 		$result  = $this->pdo->query($query);
 		$endtime = array_sum(explode(' ', microtime()));
-		
+
 		$this->sqltime += ($endtime - $curtime);
 		$this->queries++;
-		
-		if( !$result ) {
+
+		if (!$result) {
 			$tmp = $this->pdo->errorInfo();
 			$this->errno = $tmp[1];
 			$this->error = $tmp[2];
 			$this->lastQuery = $query;
 			$this->result = null;
-			
+
 			try {
 				$this->rollBack();
 			}
-			catch( PDOException $e ) {}
-			
+			catch (PDOException $e) {}
+
 			throw new SQLException($this->error, $this->errno);
 		}
 		else {
@@ -146,8 +146,8 @@ class Wadb_sqlite_pdo extends Wadb {
 			$this->error = '';
 			$this->lastQuery = '';
 			$this->result = $result;
-			
-			if( in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE')) ) {
+
+			if (in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE'))) {
 				$this->_affectedRows = $result->rowCount();
 				$result = true;
 			}
@@ -155,84 +155,83 @@ class Wadb_sqlite_pdo extends Wadb {
 				$result = new WadbResult_sqlite_pdo($result);
 			}
 		}
-		
+
 		return $result;
 	}
-	
+
 	public function quote($name)
 	{
 		return '[' . $name . ']';
 	}
-	
+
 	public function vacuum($tables)
 	{
-		if( !is_array($tables) ) {
-			$tables = array($tables); 
+		if (!is_array($tables)) {
+			$tables = array($tables);
 		}
-		
-		foreach( $tables as $tablename ) {
+
+		foreach ($tables as $tablename) {
 			$this->pdo->query('VACUUM ' . $tablename);
 		}
 	}
-	
+
 	public function beginTransaction()
 	{
 		return $this->pdo->beginTransaction();
 	}
-	
+
 	public function commit()
 	{
-		if( !($result = $this->pdo->commit()) )
-		{
+		if (!($result = $this->pdo->commit())) {
 			$this->pdo->rollBack();
 		}
-		
+
 		return $result;
 	}
-	
+
 	public function rollBack()
 	{
 		return $this->pdo->rollBack();
 	}
-	
+
 	public function affectedRows()
 	{
 		return $this->_affectedRows;
 	}
-	
+
 	public function lastInsertId()
 	{
 		return $this->pdo->lastInsertId();
 	}
-	
+
 	public function escape($string)
 	{
 		return substr($this->pdo->quote($string), 1, -1);
 	}
-	
+
 	public function ping()
 	{
 		return true;
 	}
-	
+
 	public function close()
 	{
 		try {
 			$this->rollBack();
 		}
-		catch( PDOException $e ) {}
-		
+		catch (PDOException $e) {}
+
 		return true;
 	}
-	
+
 	public function initBackup()
 	{
 		return new WadbBackup_sqlite_pdo($this);
 	}
 }
 
-class WadbResult_sqlite_pdo extends WadbResult {
-
+class WadbResult_sqlite_pdo extends WadbResult
+{
 	public function fetch($mode = null)
 	{
 		$modes = array(
@@ -240,15 +239,15 @@ class WadbResult_sqlite_pdo extends WadbResult {
 			self::FETCH_ASSOC => PDO::FETCH_ASSOC,
 			self::FETCH_BOTH  => PDO::FETCH_BOTH
 		);
-		
+
 		return $this->result->fetch($this->getFetchMode($modes, $mode));
 	}
-	
+
 	public function fetchObject()
 	{
 		return $this->result->fetch(PDO::FETCH_OBJ);
 	}
-	
+
 	public function fetchAll($mode = null)
 	{
 		$modes = array(
@@ -256,34 +255,34 @@ class WadbResult_sqlite_pdo extends WadbResult {
 			self::FETCH_ASSOC => PDO::FETCH_ASSOC,
 			self::FETCH_BOTH  => PDO::FETCH_BOTH
 		);
-		
+
 		return $this->result->fetchAll($this->getFetchMode($modes, $mode));
 	}
-	
+
 	public function column($column)
 	{
 		$row = $this->result->fetch(PDO::FETCH_BOTH);
-		
+
 		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
-	
+
 	public function free()
 	{
-		if( !is_null($this->result) ) {
+		if (!is_null($this->result)) {
 			$this->result = null;
 		}
 	}
 }
 
-class WadbBackup_sqlite_pdo extends WadbBackup {
-	
+class WadbBackup_sqlite_pdo extends WadbBackup
+{
 	public function header($toolname = '')
 	{
-		$host = function_exists('php_uname') ? @php_uname('n') : null;
-		if( empty($host) ) {
-			$host = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'Unknown Host';
+		$host = (function_exists('php_uname')) ? php_uname('n') : null;
+		if (empty($host)) {
+			$host = (isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : 'Unknown Host';
 		}
-		
+
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname SQLite Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
@@ -293,50 +292,50 @@ class WadbBackup_sqlite_pdo extends WadbBackup {
 		$contents .= '-- Date       : ' . date(DATE_RFC2822) . $this->eol;
 		$contents .= '-- ' . $this->eol;
 		$contents .= $this->eol;
-		
+
 		return $contents;
 	}
-	
+
 	public function get_tables()
 	{
 		$result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
 		$tables = array();
-		
-		while( $row = $result->fetch() ) {
+
+		while ($row = $result->fetch()) {
 			$tables[$row['tbl_name']] = '';
 		}
-		
+
 		return $tables;
 	}
-	
+
 	public function get_table_structure($tabledata, $drop_option)
 	{
 		$contents  = '-- ' . $this->eol;
 		$contents .= '-- Structure de la table ' . $tabledata['name'] . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		
-		if( $drop_option ) {
+
+		if ($drop_option) {
 			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
 		}
-		
+
 		$sql = "SELECT sql, type
 			FROM sqlite_master
 			WHERE tbl_name = '$tabledata[name]'
 				AND sql IS NOT NULL";
 		$result = $this->db->query($sql);
-		
+
 		$indexes = '';
-		while( $row = $result->fetch() ) {
-			if( $row['type'] == 'table' ) {
+		while ($row = $result->fetch()) {
+			if ($row['type'] == 'table') {
 				$create_table = str_replace(',', ',' . $this->eol, $row['sql']) . ';' . $this->eol;
 			}
 			else {
 				$indexes .= $row['sql'] . ';' . $this->eol;
 			}
 		}
-		
+
 		$contents .= $create_table . $indexes;
-		
+
 		return $contents;
 	}
 }

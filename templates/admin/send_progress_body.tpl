@@ -6,7 +6,7 @@
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table id="progress-list" class="listing">
 		<tr>
 			<th>{L_SUBJECT}</th>

@@ -2,7 +2,7 @@
 
 $testfile = 'wanewsletter.bat';
 
-if( !file_exists($testfile) ) {
+if (!file_exists($testfile)) {
 	echo "Test file [$testfile] was not found!\n";
 	exit;
 }
@@ -10,10 +10,10 @@ if( !file_exists($testfile) ) {
 $result = 'FAILED';
 $fp = fopen($testfile, 'r');
 
-if( flock($fp, LOCK_EX|LOCK_NB) ) {
+if (flock($fp, LOCK_EX|LOCK_NB)) {
 	$fw = fopen($testfile, 'r');
-	
-	if( !flock($fw, LOCK_EX|LOCK_NB) ) {
+
+	if (!flock($fw, LOCK_EX|LOCK_NB)) {
 		$result = 'SUCCESS';
 	}
 	fclose($fw);

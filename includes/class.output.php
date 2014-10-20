@@ -7,47 +7,49 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('CLASS_OUTPUT_INC') ) {
+if (!defined('CLASS_OUTPUT_INC')) {
 
 define('CLASS_OUTPUT_INC', true);
 
-class output extends Template {
+require dirname(__FILE__) . '/template.php';
 
+class Output extends Template
+{
 	/**
 	 * Liens relatifs au document
-	 * 
+	 *
 	 * @var string
 	 */
 	private $links         = '';
-	
+
 	/**
 	 * Scripts clients liés au document
-	 * 
+	 *
 	 * @var string
 	 */
 	private $javascript    = '';
-	
+
 	/**
 	 * Champs cachés d'un formulaire du document
-	 * 
+	 *
 	 * @var string
 	 */
 	private $hidden_fields = '';
-	
+
 	/**
 	 * Meta de redirection
-	 * 
+	 *
 	 * @var string
 	 */
 	private $meta_redirect = '';
-	
+
 	/**
 	 * Pile des messages
 	 *
 	 * @var array
 	 */
 	private $messageList   = array();
-	
+
 	/**
 	 * @param string $template_root
 	 */
@@ -58,10 +60,10 @@ class output extends Template {
 		//
 		$this->set_rootdir($template_root);
 	}
-	
+
 	/**
 	 * Ajout d'un lien relatif au document
-	 * 
+	 *
 	 * @param string $rel   Relation qui lie le document cible au document courant
 	 * @param string $url   URL du document cible
 	 * @param string $title Titre éventuel
@@ -72,7 +74,7 @@ class output extends Template {
 		$this->links .= "\r\n\t";
 		$this->links .= sprintf('<link rel="%s" href="%s" title="%s" />', $rel, $url, $title);
 	}
-	
+
 	/**
 	 * Retourne les liens relatifs au document
 	 *
@@ -82,10 +84,10 @@ class output extends Template {
 	{
 		return trim($this->links);
 	}
-	
+
 	/**
 	 * Ajout d'un script client
-	 * 
+	 *
 	 * @param string $url
 	 */
 	public function addScript($url)
@@ -93,7 +95,7 @@ class output extends Template {
 		$this->javascript .= "\r\n\t";
 		$this->javascript .= sprintf('<script src="%s"></script>', $url);
 	}
-	
+
 	/**
 	 * Retourne les scripts clients liés au document
 	 *
@@ -103,10 +105,10 @@ class output extends Template {
 	{
 		return trim($this->javascript);
 	}
-	
+
 	/**
 	 * Ajoute un champs caché pour un formulaire
-	 * 
+	 *
 	 * @param string $name
 	 * @param string $value
 	 */
@@ -115,7 +117,7 @@ class output extends Template {
 		$this->hidden_fields .= "\r\n\t";
 		$this->hidden_fields .= sprintf('<input type="hidden" name="%s" value="%s" />', $name, $value);
 	}
-	
+
 	/**
 	 * Retourne l'ensemble des champs cachés ajoutés et réinitialise la propriété hidden_fields
 	 *
@@ -125,13 +127,13 @@ class output extends Template {
 	{
 		$tmp = $this->hidden_fields;
 		$this->hidden_fields = '';
-		
+
 		return trim($tmp);
 	}
-	
+
 	/**
 	 * Ajoute un meta de redirection pour la page en cours
-	 * 
+	 *
 	 * @param string  $url
 	 * @param integer $timer
 	 */
@@ -139,10 +141,10 @@ class output extends Template {
 	{
 		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, $url);
 	}
-	
+
 	/**
 	 * Envoie en sortie les en-têtes HTTP appropriés et l'en-tête du document
-	 * 
+	 *
 	 * @param boolean $use_template
 	 * @param string  $page_title
 	 */
@@ -150,17 +152,16 @@ class output extends Template {
 	{
 		global $nl_config, $lang, $template, $admindata, $auth;
 		global $simple_header, $error, $msg_error;
-		
+
 		define('HEADER_INC', true);
-		
+
 		$this->send_headers();
-		
+
 		$this->set_filenames(array(
-			'header' => ( $simple_header ) ? 'simple_header.tpl' :'header.tpl'
+			'header' => ($simple_header) ? 'simple_header.tpl' :'header.tpl'
 		));
-		
-		if( defined('IN_ADMIN') )
-		{
+
+		if (defined('IN_ADMIN')) {
 			$this->addLink('home', './',              				$lang['Title']['accueil']);
 			$this->addLink('section', './config.php',               $lang['Module']['config']);
 			$this->addLink('section', './envoi.php',                $lang['Title']['send']);
@@ -171,41 +172,40 @@ class output extends Template {
 			$this->addLink('section', './tools.php?mode=import',    $lang['Title']['import']);
 			$this->addLink('section', './tools.php?mode=ban',       $lang['Title']['ban']);
 			$this->addLink('section', './tools.php?mode=generator', $lang['Title']['generator']);
-			
-			if( isset($admindata['admin_level']) && $admindata['admin_level'] == ADMIN )
-			{
+
+			if (isset($admindata['admin_level']) && $admindata['admin_level'] == ADMIN) {
 				$this->addLink('section', './tools.php?mode=attach' , $lang['Title']['attach']);
 				$this->addLink('section', './tools.php?mode=backup' , $lang['Title']['backup']);
 				$this->addLink('section', './tools.php?mode=restore', $lang['Title']['restore']);
 			}
-			
+
 			$this->addLink('section',   './admin.php', $lang['Module']['users']);
 			$this->addLink('section',   './stats.php', $lang['Title']['stats']);
 			$this->addLink('help',      WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
 			$this->addLink('author',    WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
 			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
-			
+
 			$page_title = $lang['General_title'];
 		}
-		else
-		{
+		else {
 			$this->addLink('home', 		'./profil_cp.php',                  $lang['Title']['accueil']);
 			$this->addLink('section',   './profil_cp.php?mode=editprofile', $lang['Module']['editprofile']);
 			$this->addLink('section',   './profil_cp.php?mode=archives',    $lang['Module']['log']);
 			$this->addLink('section',   './profil_cp.php?mode=logout',      $lang['Module']['logout']);
-			
+
 			$page_title = $lang['Title']['profil_cp'];
 		}
-		
-		if( !defined('IN_ADMIN') || empty($admindata['admin_login']) )
-		{
+
+		if (!defined('IN_ADMIN') || empty($admindata['admin_login'])) {
 			$l_logout = $lang['Module']['logout'];
 		}
-		else
-		{
-			$l_logout = sprintf($lang['Module']['logout_2'], wan_htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES));
+		else {
+			$l_logout = sprintf(
+				$lang['Module']['logout_2'],
+				wan_htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
+			);
 		}
-		
+
 		$this->assign_vars( array(
 			'PAGE_TITLE'   => $page_title,
 			'META'         => $this->meta_redirect,
@@ -213,15 +213,14 @@ class output extends Template {
 			'CONTENT_DIR'  => $lang['CONTENT_DIR'],
 			'CHARSET'      => $lang['CHARSET'],
 			'L_LOG'        => $lang['Module']['log'],
-			
+
 			'L_LOGOUT'     => $l_logout,
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts()
 		));
-		
-		if( defined('IN_ADMIN') )
-		{
-			$sitename = isset($nl_config['sitename']) ? $nl_config['sitename'] : 'Wanewsletter';
+
+		if (defined('IN_ADMIN')) {
+			$sitename = (isset($nl_config['sitename'])) ? $nl_config['sitename'] : 'Wanewsletter';
 			$this->assign_vars(array(
 				'L_INDEX'       => $lang['Module']['accueil'],
 				'L_CONFIG'      => $lang['Module']['config'],
@@ -231,44 +230,41 @@ class output extends Template {
 				'L_TOOLS'       => $lang['Module']['tools'],
 				'L_USERS'       => $lang['Module']['users'],
 				'L_STATS'       => $lang['Module']['stats'],
-				
+
 				'SITENAME'      => wan_htmlspecialchars($sitename, ENT_NOQUOTES),
 			));
 		}
-		else
-		{
+		else {
 			$this->assign_vars(array(
 				'L_EDITPROFILE' => $lang['Module']['editprofile']
 			));
 		}
-		
-		if( $error )
-		{
+
+		if ($error) {
 			$this->error_box($msg_error);
 		}
-		
+
 		$this->pparse('header');
 	}
-	
+
 	/**
 	 * Envoi le pied de page et termine l'exécution du script
 	 */
 	public function page_footer()
 	{
 		global $db, $lang, $starttime;
-		
+
 		$this->set_filenames(array(
 			'footer' => 'footer.tpl'
 		));
-		
+
 		$version = WANEWSLETTER_VERSION;
-		
-		if( defined('DEV_INFOS') && DEV_INFOS && $db instanceof Wadb )
-		{
+
+		if (defined('DEV_INFOS') && DEV_INFOS && $db instanceof Wadb) {
 			$version  .= sprintf(' (%s)', substr(get_class($db), 5));
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);
-			
+
 			$this->assign_block_vars('dev_infos', array(
 				'TIME_TOTAL' => sprintf('%.8f', $totaltime),
 				'TIME_PHP'   => sprintf('%.3f', $totaltime - $db->sqltime),
@@ -276,34 +272,32 @@ class output extends Template {
 				'QUERIES'    => $db->queries
 			));
 		}
-		
+
 		$this->assign_vars( array(
 			'VERSION'   => $version,
-			'TRANSLATE' => ( !empty($lang['TRANSLATE']) ) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
+			'TRANSLATE' => (!empty($lang['TRANSLATE'])) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 		));
-		
+
 		$entries = wanlog();
-		
-		if( count($entries) > 0 )
-		{
+
+		if (count($entries) > 0) {
 			$wanlog_box = '';
-			foreach( $entries as $entry )
-			{
-				if( $entry instanceof Exception ) {
-					if( !DISPLAY_ERRORS_IN_LOG ) {
+			foreach ($entries as $entry) {
+				if ($entry instanceof Exception) {
+					if (!DISPLAY_ERRORS_IN_LOG) {
 						continue;
 					}
-					
+
 					$entry = wan_format_error($entry);
 				}
-				else if( !is_scalar($entry) ) {
+				else if (!is_scalar($entry)) {
 					$entry = print_r($entry, true);
 				}
-				
+
 				$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
 			}
-			
-			if( $wanlog_box != '' ) {
+
+			if ($wanlog_box != '') {
 				$this->assign_vars(array(
 					'WANLOG_BOX' => sprintf('<ul class="warning"
 						style="font-family:monospace;font-size:12px;">%s</ul>',
@@ -312,60 +306,59 @@ class output extends Template {
 				));
 			}
 		}
-		
+
 		$this->pparse('footer');
-		
+
 		$data = ob_get_contents();
 		ob_end_clean();
-		
+
 		echo purge_latin1($data);
-		
+
 		//
-		// On ferme la connexion à la base de données, si elle existe 
+		// On ferme la connexion à la base de données, si elle existe
 		//
-		if( $db instanceof Wadb )
-		{
+		if ($db instanceof Wadb) {
 			$db->close();
 		}
-		
+
 		exit;
 	}
-	
+
 	/**
 	 * Envoie des en-têtes HTTP
 	 */
 	public function send_headers()
 	{
 		global $lang;
-		
+
 		header('Expires: ' . gmdate(DATE_RFC1123));// HTTP/1.0
 		header('Pragma: no-cache');// HTTP/1.0
 		header('Cache-Control: no-cache, must-revalidate, max-age=0');
 		header('Content-Language: ' . $lang['CONTENT_LANG']);
 		header('Content-Type: text/html; charset=' . $lang['CHARSET']);
-		
+
 		ob_start();
 		ob_implicit_flush(0);
 	}
-	
+
 	/**
 	 * Envoi des en-têtes appropriés et d'une page html simplifiée avec les données fournies
 	 * Termine également l'exécution du script
-	 * 
+	 *
 	 * @param string $content
 	 * @param string $page_title
 	 */
 	public function basic($content, $page_title = '')
 	{
 		global $lang;
-		
-		$lg      = ( !empty($lang['CONTENT_LANG']) ) ? $lang['CONTENT_LANG'] : 'fr';
-		$dir     = ( !empty($lang['CONTENT_DIR']) ) ? $lang['CONTENT_DIR'] : 'ltr';
-		$charset = ( !empty($lang['CHARSET']) ) ? $lang['CHARSET'] : 'ISO-8859-1';
+
+		$lg      = (!empty($lang['CONTENT_LANG'])) ? $lang['CONTENT_LANG'] : 'fr';
+		$dir     = (!empty($lang['CONTENT_DIR'])) ? $lang['CONTENT_DIR'] : 'ltr';
+		$charset = (!empty($lang['CHARSET'])) ? $lang['CHARSET'] : 'ISO-8859-1';
 		$content = purge_latin1($content);
-		
+
 		$this->send_headers();
-		
+
 		echo <<<BASIC
 <!DOCTYPE html>
 <html lang="$lg" dir="$dir">
@@ -373,7 +366,7 @@ class output extends Template {
 	<meta charset="$charset" />
 	$this->meta_redirect
 	<title>$page_title</title>
-	
+
 	<style>
 	body { margin: 10px; text-align: left; }
 	</style>
@@ -383,260 +376,236 @@ class output extends Template {
 </body>
 </html>
 BASIC;
-		
+
 		exit;
 	}
-	
+
 	/**
 	 * Affiche de message d'information.
 	 * OBSOLÈTE. Voir méthode displayMessage() plus bas.
-	 * 
+	 *
 	 * @param string $str
-	 * 
+	 *
 	 * @deprecated since 2.4-beta2
 	 */
 	public function message($str)
 	{
 		$this->displayMessage($str);
 	}
-	
+
 	/**
 	 * Ajoute une entrée à la pile des messages
-	 * 
+	 *
 	 * @param string $str  le message
 	 * @param string $link le lien html à intégrer dans le message
 	 */
 	public function addLine($str, $link = null)
 	{
-		if( !is_null($link) )
-		{
+		if (!is_null($link)) {
 			$str = sprintf($str, sprintf('<a href="%s">', $link), '</a>');
 		}
-		
-		array_push($this->messageList, $str);
+
+		$this->messageList[] = $str;
 	}
-	
+
 	/**
 	 * Affichage d'un message d'information
 	 * Si $str n'est pas fourni, la pile de messages $this->messageList est utilisée
-	 * 
+	 *
 	 * @param string $str
 	 * @param string $title
 	 */
 	public function displayMessage($str = '', $title = '')
 	{
 		global $lang, $message;
-		
-		if( !empty($str) )
-		{
-			if( !empty($lang['Message'][$str]) )
-			{
+
+		if (!empty($str)) {
+			if (!empty($lang['Message'][$str])) {
 				$str = $lang['Message'][$str];
 			}
-			
-			array_push($this->messageList, $str);
+
+			$this->messageList[] = $str;
 		}
-		
+
 		$str = '';
-		foreach( $this->messageList as $message )
-		{
+		foreach ($this->messageList as $message) {
 			$str .= '<br><br>'.str_replace("\n", "<br>\n", $message);
 		}
 		$str = substr($str, 8);
-		
-		if( empty($title) )
-		{
+
+		if (empty($title)) {
 			$title = $lang['Title']['info'];
 		}
-		else if( !empty($lang['Title'][$title]) )
-		{
-			if( $title == 'error' )
-			{
+		else if (!empty($lang['Title'][$title])) {
+			if ($title == 'error') {
 				$title = '<span style="color: #F66;">' . $lang['Title']['error'] . '</span>';
 			}
-			else
-			{
+			else {
 				$title = $lang['Title'][$title];
 			}
 		}
-		
-		if( !defined('HEADER_INC') )
-		{
+
+		if (!defined('HEADER_INC')) {
 			$this->page_header();
 		}
-		
+
 		$this->set_filenames(array(
 			'body' => 'message_body.tpl'
 		));
-		
+
 		$this->assign_vars( array(
 			'MSG_TITLE' => $title,
 			'MSG_TEXT'  => $str
 		));
-		
+
 		$this->pparse('body');
-		
+
 		$this->page_footer();
 		exit;
 	}
-	
+
 	/**
 	 * Génération et affichage de liste d'erreur
-	 * 
+	 *
 	 * @param mixed $msg_errors
 	 */
 	public function error_box($msg_errors)
 	{
-		if( !is_array($msg_errors) )
-		{
+		if (!is_array($msg_errors)) {
 			$msg_errors = array($msg_errors);
 		}
-		
+
 		$error_box = '';
-		foreach( $msg_errors as $msg_error )
-		{
+		foreach ($msg_errors as $msg_error) {
 			$error_box .= sprintf("<li>%s</li>\n", $msg_error);
 		}
-		
+
 		$this->assign_vars(array(
 			'ERROR_BOX' => sprintf('<ul class="warning">%s</ul>', $error_box)
 		));
 	}
-	
+
 	/**
-	 * Affichage des fichiers joints 
-	 * 
+	 * Affichage des fichiers joints
+	 *
 	 * @param array   $logdata Données du log concerné
 	 * @param integer $format  Format du log visualisé (si dans view.php)
-	 * 
+	 *
 	 * @return boolean
 	 */
 	public function files_list($logdata, $format = 0)
 	{
 		global $lang, $nl_config;
-		
-		$page_envoi  = ( strstr(server_info('PHP_SELF'), 'envoi.php') ) ? true : false;
+
+		$page_envoi  = (strpos(server_info('PHP_SELF'), 'envoi.php') !== false);
 		$body_size   = (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
 		$total_size  = 1024; // ~ 1024 correspond au poids de base d'un email (en-têtes)
-		$total_size += ( $body_size > 0 ) ? ($body_size / 2) : 0;
+		$total_size += ($body_size > 0) ? ($body_size / 2) : 0;
 		$num_files   = count($logdata['joined_files']);
-		
-		if( $num_files == 0 )
-		{
+
+		if ($num_files == 0) {
 			return false;
 		}
-		
+
 		$test_ary = array();
-		for( $i = 0; $i < $num_files; $i++ )
-		{
+		for ($i = 0; $i < $num_files; $i++) {
 			$total_size  += $logdata['joined_files'][$i]['file_size'];
 			$test_files[] = $logdata['joined_files'][$i]['file_real_name'];
 		}
-		
-		if( $format == FORMAT_HTML && hasCidReferences($logdata['log_body_html'], $refs) > 0 )
-		{
+
+		if ($format == FORMAT_HTML && hasCidReferences($logdata['log_body_html'], $refs) > 0) {
 			$embed_files = array_intersect($test_files, $refs);
-			
-			if( ($num_files - count($embed_files)) == 0 )
-			{
+
+			if (($num_files - count($embed_files)) == 0) {
 				return false;
 			}
 		}
-		else
-		{
+		else {
 			$embed_files = array();
 		}
-		
+
 		$this->set_filenames(array(
 			'files_box_body' => 'files_box.tpl'
 		));
-		
+
 		$this->assign_vars(array(
 			'L_JOINED_FILES'   => $lang['Title']['joined_files'],
 			'L_FILENAME'       => $lang['Filename'],
 			'L_FILESIZE'       => $lang['Filesize'],
 			'L_TOTAL_LOG_SIZE' => $lang['Total_log_size'],
-			
+
 			'TOTAL_LOG_SIZE'   => formateSize($total_size),
-			'S_ROWSPAN'        => ( $page_envoi ) ? '4' : '3'
+			'S_ROWSPAN'        => ($page_envoi) ? '4' : '3'
 		));
-		
-		if( $page_envoi )
-		{
+
+		if ($page_envoi) {
 			$this->assign_block_vars('del_column', array());
 			$this->assign_block_vars('joined_files.files_box', array( // dans send_body.tpl
 				'L_DEL_FILE_BUTTON' => $lang['Button']['del_file']
 			));
-			
+
 			$u_download = './envoi.php?mode=download&amp;fid=%d';
 		}
-		else
-		{
+		else {
 			$u_download = './view.php?mode=download&amp;fid=%d';
 		}
-		
+
 		$u_show = '../options/show.php?fid=%d';
-		
-		for( $i = 0; $i < $num_files; $i++ )
-		{
+
+		for ($i = 0; $i < $num_files; $i++) {
 			$filesize  = $logdata['joined_files'][$i]['file_size'];
 			$filename  = $logdata['joined_files'][$i]['file_real_name'];
 			$file_id   = $logdata['joined_files'][$i]['file_id'];
 			$mime_type = $logdata['joined_files'][$i]['file_mimetype'];
-			
+
 			$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $logdata['joined_files'][$i]['file_physical_name'];
 			$s_show = '';
-			
-			if( $nl_config['use_ftp'] || file_exists($tmp_filename) )
-			{
+
+			if ($nl_config['use_ftp'] || file_exists($tmp_filename)) {
 				//
-				// On affiche pas dans la liste les fichiers incorporés dans 
+				// On affiche pas dans la liste les fichiers incorporés dans
 				// une newsletter au format HTML.
 				//
-				if( $format == FORMAT_HTML && in_array($filename, $embed_files) )
-				{
+				if ($format == FORMAT_HTML && in_array($filename, $embed_files)) {
 					continue;
 				}
-				
+
 				$filename = sprintf('<a href="%s">%s</a>', sprintf($u_download, $file_id), wan_htmlspecialchars($filename));
-				
-				if( preg_match('#^image/#', $mime_type) )
-				{
+
+				if (preg_match('#^image/#', $mime_type)) {
 					$s_show  = sprintf('<a class="show" href="%s" type="%s">', sprintf($u_show, $file_id), $mime_type);
 					$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
 					$s_show .= '</a>';
 				}
 			}
-			else
-			{
+			else {
 				$filename = sprintf('<del title="%s">%s</del>',
 					$lang['Message']['File_not_found'], wan_htmlspecialchars($filename));
 			}
-			
+
 			$this->assign_block_vars('file_info', array(
-				'OFFSET'     => ($i + 1),
-				'FILENAME'   => $filename,
-				'FILESIZE'   => formateSize($filesize),
-				'S_SHOW'     => $s_show
+				'OFFSET'   => ($i + 1),
+				'FILENAME' => $filename,
+				'FILESIZE' => formateSize($filesize),
+				'S_SHOW'   => $s_show
 			));
-			
-			if( $page_envoi )
-			{
+
+			if ($page_envoi) {
 				$this->assign_block_vars('file_info.delete_options', array(
 					'FILE_ID' => $file_id
 				));
 			}
 		}
-		
+
 		$this->assign_var_from_handle('JOINED_FILES_BOX', 'files_box_body');
-		
+
 		return true;
 	}
-	
+
 	/**
-	 * Affichage de la page de sélection de liste ou insertion du select de choix de liste dans 
+	 * Affichage de la page de sélection de liste ou insertion du select de choix de liste dans
 	 * le coin inférieur gauche de l'administration
-	 * 
+	 *
 	 * @param integer $auth_type
 	 * @param boolean $display
 	 * @param string  $jump_to
@@ -644,92 +613,83 @@ BASIC;
 	public function build_listbox($auth_type, $display = true, $jump_to = '')
 	{
 		global $admindata, $auth, $lang;
-		
+
 		$tmp_box = '';
 		$liste_id_ary = $auth->check_auth($auth_type);
-		
-		if( empty($jump_to) )
-		{
+
+		if (empty($jump_to)) {
 			$jump_to = './' . wan_htmlspecialchars(basename(server_info('PHP_SELF')));
 			$query_string = server_info('QUERY_STRING');
-			
-			if( $query_string != '' )
-			{
+
+			if ($query_string != '') {
 				$jump_to .= '?' . wan_htmlspecialchars($query_string);
 			}
 		}
-		
-		foreach( $auth->listdata as $liste_id => $data )
-		{
-			if( in_array($liste_id, $liste_id_ary) )
-			{
-				$tmp_box .= sprintf("<option value=\"%d\"%s>%s</option>\n\t",
+
+		foreach ($auth->listdata as $liste_id => $data) {
+			if (in_array($liste_id, $liste_id_ary)) {
+				$tmp_box .= sprintf(
+					"<option value=\"%d\"%s>%s</option>\n\t",
 					$liste_id,
-					$admindata['session_liste'] == $liste_id ? ' selected="selected"' : '',
+					($admindata['session_liste'] == $liste_id) ? ' selected="selected"' : '',
 					wan_htmlspecialchars(cut_str($data['liste_name'], 30))
 				);
 			}
 		}
-		
-		if( $tmp_box == '' )
-		{
-			if( $display )
-			{
+
+		if ($tmp_box == '') {
+			if ($display) {
 				$this->addLine($lang['Message']['No_liste_exists']);
-				
-				if( $admindata['admin_level'] == ADMIN )
-				{
+
+				if ($admindata['admin_level'] == ADMIN) {
 					$this->addLine($lang['Click_create_liste'], './view.php?mode=liste&amp;action=add');
 				}
-				
+
 				$this->displayMessage();
 			}
-			
+
 			return '';
 		}
-		
+
 		$list_box = '<select id="liste" name="liste">';
-		if( !$display )
-		{
+		if (!$display) {
 			$list_box .= '<option value="0">' . $lang['Choice_liste'] . '</option>';
 		}
 		$list_box .= $tmp_box . '</select>';
-		
-		if( $display )
-		{
+
+		if ($display) {
 			$this->page_header();
-			
+
 			$this->set_filenames(array(
 				'body' => 'select_liste_body.tpl'
 			));
-			
+
 			$this->assign_vars(array(
 				'L_TITLE'         => $lang['Title']['select'],
 				'L_SELECT_LISTE'  => $lang['Choice_liste'],
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
-				
+
 				'LISTE_BOX'       => $list_box,
 				'U_FORM'          => $jump_to
 			));
-			
+
 			$this->pparse('body');
-			
+
 			$this->page_footer();
 		}
-		else
-		{
+		else {
 			$this->set_filenames(array(
 				'list_box_body' => 'list_box.tpl'
 			));
-			
+
 			$this->assign_vars(array(
-				'L_VIEW_LIST'     => $lang['View_liste'],
-				'L_BUTTON_GO'     => $lang['Button']['go'],
-				
-				'S_LISTBOX'       => $list_box,
-				'U_LISTBOX'       => $jump_to
+				'L_VIEW_LIST' => $lang['View_liste'],
+				'L_BUTTON_GO' => $lang['Button']['go'],
+
+				'S_LISTBOX'   => $list_box,
+				'U_LISTBOX'   => $jump_to
 			));
-			
+
 			$this->assign_var_from_handle('LISTBOX', 'list_box_body');
 		}
 	}

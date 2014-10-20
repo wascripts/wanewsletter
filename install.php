@@ -16,19 +16,18 @@ require WA_ROOTDIR . '/includes/common.inc.php';
 function message($message)
 {
 	global $lang, $output;
-	
-	if( !empty($lang['Message'][$message]) )
-	{
+
+	if (!empty($lang['Message'][$message])) {
 		$message = $lang['Message'][$message];
 	}
-	
+
 	$output->send_headers();
-	
+
 	$output->assign_block_vars('result', array(
 		'L_TITLE'    => $lang['Result_install'],
 		'MSG_RESULT' => nl2br($message)
 	));
-	
+
 	$output->pparse('body');
 	$output->page_footer();
 	exit;
@@ -41,13 +40,13 @@ $output->set_filenames( array(
 ));
 
 $output->assign_vars( array(
-	'PAGE_TITLE'   => ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
+	'PAGE_TITLE'   => (defined('NL_INSTALLED')) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
 	'CHARSET'      => $lang['CHARSET']
 ));
 
-$prefixe = ( !empty($_POST['prefixe']) ) ? trim($_POST['prefixe']) : 'wa_';
+$prefixe = (!empty($_POST['prefixe'])) ? trim($_POST['prefixe']) : 'wa_';
 $infos   = array(
 	'engine' => 'mysql',
 	'host'   => null,
@@ -57,60 +56,50 @@ $infos   = array(
 	'path'   => 'data/db/wanewsletter.sqlite'
 );
 
-if( defined('NL_INSTALLED') )
-{
+if (defined('NL_INSTALLED')) {
 	$tmp = parseDSN($dsn);
 	$infos = array_merge($infos, $tmp[0]);
 }
 
-foreach( array('engine', 'host', 'user', 'pass', 'dbname', 'path') as $varname )
-{
-	$infos[$varname] = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : $infos[$varname];
+foreach (array('engine', 'host', 'user', 'pass', 'dbname', 'path') as $varname) {
+	$infos[$varname] = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : $infos[$varname];
 }
 
 // Récupération du port, si associé avec le nom d'hôte
-if( strpos($infos['host'], ':') )
-{
+if (strpos($infos['host'], ':')) {
 	$tmp = explode(':', $infos['host']);
 	$infos['host'] = $tmp[0];
 	$infos['port'] = $tmp[1];
 }
 
-foreach( $supported_db as $name => $data )
-{
-	if( $data['extension'] === false )
-	{
+foreach ($supported_db as $name => $data) {
+	if (!$data['extension']) {
 		unset($supported_db[$name]);
 	}
 }
 
-if( count($supported_db) == 0 )
-{
+if (count($supported_db) == 0) {
 	message(sprintf($lang['No_db_support'], WANEWSLETTER_VERSION));
 }
 
-if( !isset($supported_db[$infos['engine']]) && defined('NL_INSTALLED') )
-{
+if (!isset($supported_db[$infos['engine']]) && defined('NL_INSTALLED')) {
 	message($lang['DB_type_undefined']);
 }
 
-if( $infos['engine'] == 'sqlite' && $infos['path'] != '' )
-{
+if ($infos['engine'] == 'sqlite' && $infos['path'] != '') {
 	$infos['dbname'] = basename($infos['path']);
 }
 
-if( !empty($infos['dbname']) )
-{
+if (!empty($infos['dbname'])) {
 	$dsn = createDSN($infos);
 }
 
 $vararray = array(
-	'language', 'prev_language', 'admin_login', 'admin_email', 'admin_pass', 
+	'language', 'prev_language', 'admin_login', 'admin_email', 'admin_pass',
 	'confirm_pass', 'urlsite', 'urlscript'
 );
-foreach( $vararray as $varname )
-{
-	${$varname} = ( !empty($_POST[$varname]) ) ? trim($_POST[$varname]) : '';
+foreach ($vararray as $varname) {
+	${$varname} = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : '';
 }
 
 //
@@ -131,10 +120,9 @@ $config_file .= "\$dsn = '$dsn';\n";
 $config_file .= "\$prefixe = '$prefixe';\n";
 $config_file .= "\n";
 
-if( isset($_POST['sendfile']) )
-{
+if (isset($_POST['sendfile'])) {
 	require WA_ROOTDIR . '/includes/class.attach.php';
-	
+
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
 }
 
@@ -143,28 +131,26 @@ $supported_lang = array(
 	'en' => 'english'
 );
 
-$language = ( $language != '' ) ? $language : $supported_lang[$lang['CONTENT_LANG']];
+$language = ($language != '') ? $language : $supported_lang[$lang['CONTENT_LANG']];
 
 $start = isset($_POST['start']);
 
-if( $start && $language != $prev_language )
-{
+if ($start && $language != $prev_language) {
 	$start = false;
 }
 
 $nl_config['language'] = $language;
 
-if( defined('NL_INSTALLED') )
-{
+if (defined('NL_INSTALLED')) {
 	try {
 		$db = WaDatabase($dsn);
 	}
-	catch( Exception $e ) {
+	catch (Exception $e) {
 		message(sprintf($lang['Connect_db_error'], $e->getMessage()));
 	}
-	
+
 	$nl_config = wa_get_config();
-	$language   = $nl_config['language'];
+	$language  = $nl_config['language'];
 }
 
 load_settings();
@@ -173,181 +159,159 @@ load_settings();
 // Idem qu'au début, mais avec éventuellement un fichier de langue différent chargé
 //
 $output->assign_vars( array(
-	'PAGE_TITLE'   => ( defined('NL_INSTALLED') ) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
+	'PAGE_TITLE'   => (defined('NL_INSTALLED')) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
 	'CHARSET'      => $lang['CHARSET']
 ));
 
-if( $start )
-{
+if ($start) {
 	require WA_ROOTDIR . '/includes/functions.validate.php';
 	require WAMAILER_DIR . '/class.mailer.php';
-	
-	if( defined('NL_INSTALLED') )
-	{
+
+	if (defined('NL_INSTALLED')) {
 		$login = false;
-		
-		$sql = "SELECT admin_email, admin_pwd, admin_level 
-			FROM " . ADMIN_TABLE . " 
+
+		$sql = "SELECT admin_email, admin_pwd, admin_level
+			FROM " . ADMIN_TABLE . "
 			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($login)) . "'
 				AND admin_level = " . ADMIN;
 		$result = $db->query($sql);
-		
-		if( $row = $result->fetch() )
-		{
+
+		if ($row = $result->fetch()) {
 			$hasher = new PasswordHash();
-			
+
 			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
-			if( $row['admin_pwd'][0] != '$' )
-			{
-				if( $row['admin_pwd'] === md5($passwd) )
-				{
+			if ($row['admin_pwd'][0] != '$') {
+				if ($row['admin_pwd'] === md5($passwd)) {
 					$login = true;
 				}
 			}
 			// New password hash using phpass
-			else if( $hasher->check($passwd, $row['admin_pwd']) )
-			{
+			else if ($hasher->check($passwd, $row['admin_pwd'])) {
 				$login = true;
 			}
-			
-			if( $login )
-			{
+
+			if ($login) {
 				$admin_email  = $row['admin_email'];
 				$confirm_pass = $admin_pass;
 			}
 		}
-		
-		if( !$login )
-		{
+
+		if (!$login) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Error_login'];
 		}
 	}
-	else
-	{
+	else {
 		try {
-			if( empty($dsn) ) {
+			if (empty($dsn)) {
 				throw new Exception(sprintf($lang['Connect_db_error'], 'Invalid DB name'));
 			}
-			
-			if( $infos['engine'] == 'sqlite' ) {
+
+			if ($infos['engine'] == 'sqlite') {
 				$sqlite_dir = dirname($infos['path']);
-				
-				if( !is_writable($sqlite_dir) ) {
+
+				if (!is_writable($sqlite_dir)) {
 					throw new Exception(sprintf($lang['sqldir_perms_problem'], $sqlite_dir));
 				}
 			}
-			
+
 			$db = WaDatabase($dsn);
 		}
-		catch( SQLException $e ) {
+		catch (SQLException $e) {
 			$error = true;
 			$msg_error[] = sprintf($lang['Connect_db_error'], $e->getMessage());
 		}
-		catch( Exception $e ) {
+		catch (Exception $e) {
 			$error = true;
 			$msg_error[] = $e->getMessage();
 		}
 	}
-	
+
 	$sql_create = WA_ROOTDIR . '/includes/sql/schemas/' . $infos['engine'] . '_tables.sql';
 	$sql_data   = WA_ROOTDIR . '/includes/sql/schemas/data.sql';
-	
-	if( !is_readable($sql_create) || !is_readable($sql_data) )
-	{
+
+	if (!is_readable($sql_create) || !is_readable($sql_data)) {
 		$error = true;
 		$msg_error[] = $lang['Message']['sql_file_not_readable'];
 	}
-	
-	if( !$error )
-	{
-		if( $infos['dbname'] == '' || $prefixe == '' || $admin_login == '' )
-		{
+
+	if (!$error) {
+		if ($infos['dbname'] == '' || $prefixe == '' || $admin_login == '') {
 			$error = true;
 			$msg_error[] = $lang['Message']['fields_empty'];
 		}
-		
-		if( !validate_pass($admin_pass) )
-		{
+
+		if (!validate_pass($admin_pass)) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Alphanum_pass'];
 		}
-		else if( $admin_pass !== $confirm_pass )
-		{
+		else if ($admin_pass !== $confirm_pass) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Bad_confirm_pass'];
 		}
-		
-		if( !Mailer::validate_email($admin_email) )
-		{
+
+		if (!Mailer::validate_email($admin_email)) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Invalid_email'];
 		}
 	}
-	
-	if( !$error )
-	{
+
+	if (!$error) {
 		require WA_ROOTDIR . '/includes/sql/sqlparser.php';
-		
+
 		//
-		// On allonge le temps maximum d'execution du script. 
+		// On allonge le temps maximum d'execution du script.
 		//
 		@set_time_limit(300);
-		
-		if( defined('NL_INSTALLED') )
-		{
+
+		if (defined('NL_INSTALLED')) {
 			$sql_drop = array();
-			
-			foreach( $sql_schemas as $tablename => $schema )
-			{
-				if( $db->engine == 'postgres' && !empty($schema['sequence']) )
-				{
-					foreach( $schema['sequence'] as $sequence )
-					{
+
+			foreach ($sql_schemas as $tablename => $schema) {
+				if ($db->engine == 'postgres' && !empty($schema['sequence'])) {
+					foreach ($schema['sequence'] as $sequence) {
 						$sql_drop[] = sprintf("DROP SEQUENCE IF EXISTS %s",
 							str_replace('wa_', $prefixe, $sequence)
 						);
 					}
 				}
-				
-				if( !empty($schema['index']) )
-				{
-					foreach( $schema['index'] as $index )
-					{
+
+				if (!empty($schema['index'])) {
+					foreach ($schema['index'] as $index) {
 						$sql_drop[] = sprintf("DROP INDEX IF EXISTS %s",
 							str_replace('wa_', $prefixe, $index)
 						);
 					}
 				}
-				
+
 				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
 					str_replace('wa_', $prefixe, $tablename)
 				);
 			}
-			
+
 			exec_queries($sql_drop);
 		}
-		
+
 		//
-		// Création des tables du script 
+		// Création des tables du script
 		//
 		$sql_create = parseSQL(file_get_contents($sql_create), $prefixe);
 		exec_queries($sql_create);
-		
+
 		//
-		// Insertion des données de base 
+		// Insertion des données de base
 		//
 		$sql_data = parseSQL(file_get_contents($sql_data), $prefixe);
-		
-		$urlsite  = wan_ssl_connection() ? 'https' : 'http';
+
+		$urlsite  = (wan_ssl_connection()) ? 'https' : 'http';
 		$urlsite .= '://' . $_SERVER['HTTP_HOST'];
-		
+
 		$urlscript = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
-		
+
 		$hasher = new PasswordHash();
-		
+
 		$sql_data[] = "UPDATE " . ADMIN_TABLE . "
 			SET admin_login = '" . $db->escape($admin_login) . "',
 				admin_pwd   = '" . $db->escape($hasher->hash($admin_pass)) . "',
@@ -384,70 +348,66 @@ if( $start )
 				sender_email    = '" . $db->escape($admin_email) . "',
 				liste_startdate = " . time() . "
 			WHERE liste_id = 1";
-		
+
 		exec_queries($sql_data);
-		
+
 		$db->close();
-		
+
 		$login_page = WA_ROOTDIR . '/admin/login.php';
-		
-		if( !defined('NL_INSTALLED') )
-		{
-			if( !($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w')) )
-			{
+
+		if (!defined('NL_INSTALLED')) {
+			if (!($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w'))) {
 				$output->addHiddenField('engine',  $infos['engine']);
 				$output->addHiddenField('host',    $infos['host']);
 				$output->addHiddenField('user',    $infos['user']);
 				$output->addHiddenField('pass',    $infos['pass']);
 				$output->addHiddenField('dbname',  $infos['dbname']);
 				$output->addHiddenField('prefixe', $prefixe);
-				
+
 				$output->send_headers();
-				
+
 				$output->assign_block_vars('download_file', array(
 					'L_TITLE'         => $lang['Result_install'],
 					'L_DL_BUTTON'     => $lang['Button']['dl'],
-					
-					'MSG_RESULT'      => nl2br(sprintf($lang['Success_install_no_config'], sprintf('<a href="%s">', $login_page), '</a>')),						
+
+					'MSG_RESULT'      => nl2br(sprintf($lang['Success_install_no_config'], sprintf('<a href="%s">', $login_page), '</a>')),
 					'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 				));
-				
+
 				$output->pparse('body');
 				exit;
 			}
-			
+
 			fwrite($fw, $config_file);
 			fclose($fw);
 		}
-		
+
 		message(sprintf($lang['Success_install'], sprintf('<a href="%s">', $login_page), '</a>'));
 	}
 }
 
 $output->send_headers();
 
-if( !defined('NL_INSTALLED') )
-{
+if (!defined('NL_INSTALLED')) {
 	require WA_ROOTDIR . '/includes/functions.box.php';
-	
+
 	$db_box = '';
-	foreach( $supported_db as $name => $data )
-	{
-		$selected = ( $infos['engine'] == $name ) ? ' selected="selected"' : '';
-		$db_box .= '<option value="' . $name . '"' . $selected . '> ' . $data['Name'] . ' </option>';
+	foreach ($supported_db as $name => $data) {
+		$selected = ($infos['engine'] == $name) ? ' selected="selected"' : '';
+		$db_box  .= '<option value="' . $name . '"' . $selected . '> ' . $data['Name'] . ' </option>';
 	}
-	
+
 	$l_explain = nl2br(sprintf(
 		$lang['Welcome_in_install'],
 		'<a href="' . WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
 		'<a href="' . WA_ROOTDIR . '/COPYING">', '</a>',
 		'<a href="http://phpcodeur.net/wascripts/GPL">', '</a>'
 	));
-	
-	if( $infos['host'] == '' ) {
+
+	if ($infos['host'] == '') {
 		$infos['host'] = 'localhost';
 	}
-	
+
 	$output->assign_block_vars('install', array(
 		'L_EXPLAIN'         => $l_explain,
 		'TITLE_DATABASE'    => $lang['Title']['database'],
@@ -466,8 +426,8 @@ if( !defined('NL_INSTALLED') )
 		'L_PASS_CONF'       => $lang['Conf_pass'],
 		'L_EMAIL'           => $lang['Email_address'],
 		'L_START_BUTTON'    => $lang['Start_install'],
-		
-		'IS_SQLITE' => $infos['engine'] == 'sqlite' ? 'is-sqlite' : '',
+
+		'IS_SQLITE' => ($infos['engine'] == 'sqlite') ? 'is-sqlite' : '',
 		'DB_BOX'    => $db_box,
 		'DBPATH'    => wan_htmlspecialchars($infos['path']),
 		'DBHOST'    => wan_htmlspecialchars($infos['host']),
@@ -479,22 +439,20 @@ if( !defined('NL_INSTALLED') )
 		'LANG_BOX'  => lang_box($language)
 	));
 }
-else
-{
+else {
 	$output->assign_block_vars('reinstall', array(
 		'L_EXPLAIN'      => nl2br($lang['Warning_reinstall']),
 		'L_LOGIN'        => $lang['Login'],
 		'L_PASS'         => $lang['Password'],
 		'L_START_BUTTON' => $lang['Start_install'],
-		
+
 		'LOGIN' => wan_htmlspecialchars($admin_login)
 	));
 }
 
 $output->assign_var('S_PREV_LANGUAGE', $language);
 
-if( $error )
-{
+if ($error) {
 	$output->error_box($msg_error);
 }
 

@@ -3,9 +3,9 @@
 <form method="post" action="./profil_cp.php">
 <div class="block">
 	<h2>{TITLE}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_EMAIL}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label>{L_EMAIL}&nbsp;:</label></td>
@@ -42,7 +42,7 @@
 			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" autocomplete="off" /></td>
 		</tr>
 	</table>
-	
+
 	<div class="bottom"> <input type="hidden" name="mode" value="editprofile" />
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>

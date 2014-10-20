@@ -38,7 +38,7 @@
 
 <div id="aside-top" class="aside">
 	<div>{PAGEOF} {NUM_SUBSCRIBERS}</div>
-	
+
 	<div>{S_HIDDEN_FIELDS}
 		<span>{L_CLASSEMENT}&nbsp;:</span>
 		<select name="type">
@@ -54,7 +54,7 @@
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="listing">
 		<tr>
 			<th>{L_EMAIL}</th>
@@ -88,7 +88,7 @@
 
 <div id="aside-bottom" class="aside">
 	<div>{PAGINATION}</div>
-	
+
 	<!-- BEGIN delete_option -->
 	<div><button type="submit" name="delete">{delete_option.L_DELETE_ABO_BUTTON}</button></div>
 	<!-- END delete_option -->

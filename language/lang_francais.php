@@ -5,11 +5,11 @@
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
  * @copyright 2002-2014 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * 
+ *
  * Vous pouvez très facilement traduire Wanewsletter dans une autre langue.
  * Il vous suffit pour cela de traduire ce qui se trouve entre
  * guillemets. Attention, ne touchez pas à la partie $lang['....']
- * 
+ *
  * des %1\$s, %s, %d ou autre signe de ce genre signifient qu'ils
  * vont être remplacés par un contenu variable. Placez les de façon
  * adéquat dans la phrase mais ne les enlevez pas.
@@ -744,5 +744,3 @@ $lang['TRANSLATE']      = '';
 // Formatage de nombres
 $lang['DEC_POINT']      = ",";
 $lang['THOUSANDS_SEP']  = "\xA0"; // Espace insécable
-
-?>

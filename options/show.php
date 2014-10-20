@@ -11,23 +11,20 @@ define('IN_NEWSLETTER', true);
 
 require '../admin/pagestart.php';
 
-if( !$auth->check_auth(Auth::VIEW, $admindata['session_liste']) )
-{
+if (!$auth->check_auth(Auth::VIEW, $admindata['session_liste'])) {
 	http_response_code(401);
 	plain_error($lang['Message']['Not_auth_view']);
 }
 
 $listdata = $auth->listdata[$admindata['session_liste']];
 
-$file_id  = ( !empty($_GET['fid']) ) ? intval($_GET['fid']) : 0;
-$filename = ( !empty($_GET['file']) ) ? trim($_GET['file']) : '';
+$file_id  = (!empty($_GET['fid'])) ? intval($_GET['fid']) : 0;
+$filename = (!empty($_GET['file'])) ? trim($_GET['file']) : '';
 
-if( $filename != '' )
-{
+if ($filename != '') {
 	$sql_where = 'jf.file_real_name = \'' . $db->escape($filename) . '\'';
 }
-else
-{
+else {
 	$sql_where = 'jf.file_id = ' . $file_id;
 }
 
@@ -39,47 +36,40 @@ $sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_m
 	WHERE $sql_where";
 $result = $db->query($sql);
 
-if( $filedata = $result->fetch() )
-{
-	if( $nl_config['use_ftp'] )
-	{
+if ($filedata = $result->fetch()) {
+	if ($nl_config['use_ftp']) {
 		require WA_ROOTDIR . '/includes/class.attach.php';
-		
+
 		$attach = new Attach();
 		$tmp_filename = $attach->ftp_to_tmp($filedata);
 	}
-	else
-	{
+	else {
 		$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $filedata['file_physical_name']);
 	}
-	
-	if( !is_readable($tmp_filename) )
-	{
+
+	if (!is_readable($tmp_filename)) {
 		http_response_code(500);
 		plain_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
 	}
-	
+
 	$maxAge = 0;
 	$lastModified = filemtime($tmp_filename);
 	$canUseCache  = true;
-	$cachetime    = !empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
-	
-	if( !empty($_SERVER['HTTP_CACHE_CONTROL']) )
-	{
+	$cachetime    = (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
+
+	if (!empty($_SERVER['HTTP_CACHE_CONTROL'])) {
 		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_CACHE_CONTROL']);
 	}
-	else if( !empty($_SERVER['HTTP_PRAGMA']) )// HTTP 1.0
-	{
+	else if (!empty($_SERVER['HTTP_PRAGMA'])) {// HTTP 1.0
 		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_PRAGMA']);
 	}
-	
-	if( $lastModified <= $cachetime && $canUseCache )
-	{
+
+	if ($lastModified <= $cachetime && $canUseCache) {
 		http_response_code(304);
 		header('Date: ' . gmdate(DATE_RFC1123));
 		exit;
 	}
-	
+
 	header('Date: ' . gmdate(DATE_RFC1123));
 	header('Last-Modified: ' . gmdate(DATE_RFC1123, $lastModified));
 	header('Expires: ' . gmdate(DATE_RFC1123, (time() + $maxAge)));// HTTP 1.0
@@ -87,43 +77,35 @@ if( $filedata = $result->fetch() )
 	header('Cache-Control: private, must-revalidate, max-age='.$maxAge);
 	header('Content-Disposition: inline; filename="' . $filedata['file_real_name'] . '"');
 	header('Content-Length: ' . $filedata['file_size']);
-	
+
 	$data = file_get_contents($tmp_filename);
-	
-	if( strcasecmp($filedata['file_mimetype'], 'image/svg+xml') === 0 )
-	{
+
+	if (strcasecmp($filedata['file_mimetype'], 'image/svg+xml') === 0) {
 		$charset = 'UTF-8';
-		if( preg_match('/^<\?xml(.+?)\?>/', $data, $match) )
-		{
-			if( preg_match('/encoding="([a-z0-9.:_-]+)"/i', $match[0], $match2) )
-			{
-				$charset = $match2[1];
+		if (preg_match('/^<\?xml(.+?)\?>/', $data, $m)) {
+			if (preg_match('/encoding="([a-z0-9.:_-]+)"/i', $m[0], $m2)) {
+				$charset = $m2[1];
 			}
 		}
-		
+
 		header('Content-Type: ' . $filedata['file_mimetype'] . '; charset=' . $charset);
 	}
-	else
-	{
+	else {
 		header('Content-Type: ' . $filedata['file_mimetype']);
 	}
-	
+
 	echo $data;
-	
+
 	//
 	// Si l'option FTP est utilisée, suppression du fichier temporaire
 	//
-	if( $nl_config['use_ftp'] )
-	{
+	if ($nl_config['use_ftp']) {
 		$attach->remove_file($tmp_filename);
 	}
-	
+
 	exit;
 }
-else
-{
+else {
 	http_response_code(404);
 	plain_error('Unknown file !');
 }
-
-?>

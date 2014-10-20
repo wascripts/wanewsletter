@@ -22,7 +22,7 @@
 			<td><input type="text" id="file_local" name="file_local" size="25" /></td>
 		</tr>
 	</table>
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="reset">{L_RESET_BUTTON}</button>

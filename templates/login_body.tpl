@@ -5,7 +5,7 @@
 
 <div class="block">
 	<h2>{TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="email">{L_LOGIN}&nbsp;:</label></td>
@@ -16,7 +16,7 @@
 			<td><input type="password" id="passwd" name="passwd" size="25" /></td>
 		</tr>
 	</table>
-	
+
 	<div class="bottom">
 		<input type="hidden" name="mode" value="login" />
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
@@ -26,7 +26,7 @@
 <!-- BEGIN cookie_notice -->
 <p id="cookie-notice" class="warning">{cookie_notice.L_TEXT}</p>
 <script>
-if( navigator.cookieEnabled ) {
+if (navigator.cookieEnabled) {
 	document.getElementById('cookie-notice').style.display = 'none';
 }
 </script>

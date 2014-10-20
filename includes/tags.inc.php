@@ -7,8 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('IN_NEWSLETTER') )
-{
+if (!defined('IN_NEWSLETTER')) {
     exit('<b>No hacking</b>');
 }
 
@@ -38,5 +37,3 @@ $t = 0;
 //$t++;
 
 // etc... Reproduisez les trois lignes si nécessaires.
-
-?>

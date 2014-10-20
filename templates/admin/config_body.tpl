@@ -2,9 +2,9 @@
 <!--
 function toggleView(evt)
 {
-	if( this.checked == true ) {
+	if (this.checked) {
 		document.getElementById(this.name + '_choice').className =
-			( this.value == 1 ) ? '' : 'inactive';
+			(this.value == 1) ? '' : 'inactive';
 	}
 }
 
@@ -13,12 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
 		'table.dataset tr.inactive ~ tr { display: none; }',
 		document.styleSheets[0].cssRules.length-1
 	);
-	
+
 	var configForm = document.forms['config-form'];
-	
+
 	configForm.elements['use_ftp'][0].addEventListener('change', toggleView, false);
 	configForm.elements['use_ftp'][1].addEventListener('change', toggleView, false);
-	
+
 	configForm.elements['use_smtp'][0].addEventListener('change', toggleView, false);
 	configForm.elements['use_smtp'][1].addEventListener('change', toggleView, false);
 }, false);
@@ -30,16 +30,16 @@ document.addEventListener('DOMContentLoaded', function() {
 <form id="config-form" method="post" action="./config.php">
 <div class="block">
 	<h2>{TITLE_CONFIG_LANGUAGE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="language">{L_DEFAULT_LANG}&nbsp;:</label></td>
 			<td>{LANG_BOX}</td>
 		</tr>
 	</table>
-	
+
 	<h2>{TITLE_CONFIG_PERSO}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="sitename">{L_SITENAME}&nbsp;:</label></td>
@@ -67,11 +67,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			</td>
 		</tr>
 	</table>
-	
+
 	<h2>{TITLE_CONFIG_COOKIES}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_COOKIES}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="cookie_name">{L_COOKIE_NAME}&nbsp;:</label></td>
@@ -86,11 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			<td><input type="text" id="session_length" name="session_length" value="{LENGTH_SESSION}" size="5" maxlength="5" /> <span class="notice">{L_SECONDS}</span></td>
 		</tr>
 	</table>
-	
+
 	<h2>{TITLE_CONFIG_JOINED_FILES}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_JOINED_FILES}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="upload_path">{L_UPLOAD_PATH}&nbsp;:</label></td>
@@ -141,11 +141,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<!-- END extension_ftp -->
 	</table>
-	
+
 	<h2>{TITLE_CONFIG_EMAIL}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_EMAIL}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label>{L_CHECK_EMAIL}&nbsp;:</label><br /><span class="notice">{L_CHECK_EMAIL_NOTE}</span></td>
@@ -197,12 +197,12 @@ document.addEventListener('DOMContentLoaded', function() {
 			<td><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="100"{DISABLED_SMTP} autocomplete="off" /></td>
 		</tr>
 	</table>
-	
+
 	<!-- BEGIN extension_gd -->
 	<h2>{extension_gd.TITLE_CONFIG_STATS}</h2>
-	
+
 	<div class="explain">{extension_gd.L_EXPLAIN_STATS}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label>{extension_gd.L_DISABLE_STATS}&nbsp;:</label></td>
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 	</table>
 	<!-- END extension_gd -->
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="reset">{L_RESET_BUTTON}</button>

@@ -3,15 +3,15 @@
 document.addEventListener('DOMContentLoaded', function() {
 	document._glueBox_ = document.getElementById('glue').parentNode.parentNode;
 	var form = document.forms['export-form'];
-	
+
 	form.elements['export-format-text'].addEventListener('change', function() {
-		if( this.checked == true ) {
+		if (this.checked) {
 			document._glueBox_.style.display = 'table-row';
 		}
 	}, false);
-	
+
 	form.elements['export-format-xml'].addEventListener('change', function() {
-		if( this.checked == true ) {
+		if (this.checked) {
 			document._glueBox_.style.display = 'none';
 		}
 	}, false);
@@ -22,9 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <form class="compact" id="export-form" method="post" action="./tools.php?mode=export">
 <div class="block">
 	<h2>{L_TITLE_EXPORT}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_EXPORT}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label>{L_EXPORT_FORMAT}&nbsp;:</label></td>
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<!-- END compress_option -->
 	</table>
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="reset">{L_RESET_BUTTON}</button>

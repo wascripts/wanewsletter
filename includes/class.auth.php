@@ -7,17 +7,17 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('CLASS_AUTH_INC') ) {
+if (!defined('CLASS_AUTH_INC')) {
 
 define('CLASS_AUTH_INC', true);
 
 /**
  * Class Auth
- * 
+ *
  * Gestion des permissions des utilisateurs
- */ 
-class Auth {
-
+ */
+class Auth
+{
 	const VIEW   = 1;
 	const EDIT   = 2;
 	const DEL    = 3;
@@ -26,10 +26,10 @@ class Auth {
 	const EXPORT = 6;
 	const BAN    = 7;
 	const ATTACH = 8;
-	
+
 	public $listdata = array();
 	private $rowset  = array();
-	
+
 	public $auth_ary = array(
 		self::VIEW   => 'auth_view',
 		self::EDIT   => 'auth_edit',
@@ -40,26 +40,26 @@ class Auth {
 		self::BAN    => 'auth_ban',
 		self::ATTACH => 'auth_attach'
 	);
-	
+
 	/**
 	 * Initialisation de la classe, et récupération des permissions de l'utilisateur courant
 	 */
 	public function __construct()
 	{
 		global $admindata;
-		
+
 		$this->read_data($admindata['admin_id']);
 	}
-	
+
 	/**
 	 * Récupèration des permissions pour l'utilisateur demandé
-	 * 
+	 *
 	 * @param integer $admin_id Identifiant de l'utilisateur concerné
 	 */
 	public function read_data($admin_id)
 	{
 		global $db, $admindata;
-		
+
 		$sql = "SELECT li.liste_id, li.liste_name, li.liste_format, li.sender_email, li.return_email,
 				li.confirm_subscribe, li.liste_public, li.limitevalidate, li.form_url, li.liste_sig,
 				li.auto_purge, li.purge_freq, li.purge_next, li.liste_startdate, li.use_cron, li.pop_host,
@@ -70,87 +70,80 @@ class Auth {
 					AND aa.liste_id = li.liste_id
 			ORDER BY li.liste_name ASC";
 		$result = $db->query($sql);
-		
+
 		$tmp_ary = array();
-		while( $row = $result->fetch() )
-		{
+		while ($row = $result->fetch()) {
 			$tmp_ary[$row['liste_id']] = $row;
 		}
-		
-		if( $admindata['admin_id'] != $admin_id )
-		{
+
+		if ($admindata['admin_id'] != $admin_id) {
 			return $tmp_ary;
 		}
-		
+
 		$this->listdata = $tmp_ary;
 	}
-	
+
 	/**
 	 * Fonction de vérification des permissions, selon la permission concernée et la liste concernée
-	 * Si vérification pour une liste particulière, retourne un booléen, sinon retourne un tableau d'identifiant 
+	 * Si vérification pour une liste particulière, retourne un booléen, sinon retourne un tableau d'identifiant
 	 * des listes pour lesquelles la permission est accordée
-	 * 
+	 *
 	 * @param integer $auth_type Code de la permission concernée
 	 * @param integer $liste_id  Identifiant de la liste concernée
-	 * 
+	 *
 	 * @return array|boolean
 	 */
 	public function check_auth($auth_type, $liste_id = null)
 	{
 		global $admindata;
-		
+
 		$auth_name = $this->auth_ary[$auth_type];
-		
-		if( $liste_id == null )
-		{
+
+		if ($liste_id == null) {
 			$liste_id_ary = array();
-			foreach( $this->listdata as $liste_id => $auth_list )
-			{
-				if( $admindata['admin_level'] == ADMIN || !empty($auth_list[$auth_name]) )
-				{
+			foreach ($this->listdata as $liste_id => $auth_list) {
+				if ($admindata['admin_level'] == ADMIN || !empty($auth_list[$auth_name])) {
 					$liste_id_ary[] = $liste_id;
 				}
 			}
-			
+
 			return $liste_id_ary;
 		}
-		else
-		{
-			if( isset($this->listdata[$liste_id])
-				&& ($admindata['admin_level'] == ADMIN || !empty($this->listdata[$liste_id][$auth_name])) )
-			{
+		else {
+			if (isset($this->listdata[$liste_id]) &&
+				($admindata['admin_level'] == ADMIN || !empty($this->listdata[$liste_id][$auth_name]))
+			) {
 				return true;
 			}
-			
+
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Construction de la liste déroulante oui/non pour la permission concernée et la liste concernée
-	 * 
+	 *
 	 * @param integer $auth_type Code de la permission
 	 * @param array   $listdata  Tableau des permissions pour la liste en cours
-	 * 
+	 *
 	 * @return string
 	 */
 	public function box_auth($auth_type, $listdata)
 	{
 		global $lang;
-		
+
 		$auth_name = $this->auth_ary[$auth_type];
-		
-		$selected_yes = ( !empty($listdata[$auth_name]) ) ? ' selected="selected"' : '';
-		$selected_no  = ( empty($listdata[$auth_name]) ) ? ' selected="selected"' : '';
-		
+
+		$selected_yes = (!empty($listdata[$auth_name])) ? ' selected="selected"' : '';
+		$selected_no  = (empty($listdata[$auth_name])) ? ' selected="selected"' : '';
+
 		$box_auth  = '<select name="' . $auth_name . '[]">';
 		$box_auth .= '<option value="1"' . $selected_yes . '> ' . $lang['Yes'] . ' </option>';
 		$box_auth .= '<option value="0"' . $selected_no . '> ' . $lang['No'] . ' </option>';
 		$box_auth .= '</select>';
-		
+
 		return $box_auth;
 	}
 }
 
 }
-?>

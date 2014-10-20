@@ -12,22 +12,18 @@ if( !defined('FUNCTIONS_VALIDATE_INC') ) {
 define('FUNCTIONS_VALIDATE_INC', true);
 
 /**
- * validate_pseudo()
- * 
  * @param string $pseudo
- * 
+ *
  * @return boolean
  */
 function validate_pseudo($pseudo)
 {
-	return ( strlen($pseudo) >= 2 && strlen($pseudo) <= 30 );
+	return (strlen($pseudo) >= 2 && strlen($pseudo) <= 30);
 }
 
 /**
- * validate_pass()
- * 
  * @param string $passwd
- * 
+ *
  * @return boolean
  */
 function validate_pass($passwd)
@@ -36,16 +32,15 @@ function validate_pass($passwd)
 }
 
 /**
- * validate_lang()
- * 
  * @param string $language
- * 
+ *
  * @return boolean
  */
 function validate_lang($language)
 {
-	return preg_match('/^[\w_-]+$/', $language) && file_exists(WA_ROOTDIR . '/language/lang_' . $language . '.php');
+	return (bool) (preg_match('/^[\w_-]+$/', $language) &&
+		file_exists(WA_ROOTDIR . '/language/lang_' . $language . '.php')
+	);
 }
 
 }
-?>

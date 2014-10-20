@@ -12,19 +12,17 @@ if( !defined('CLASS_WANERROR_INC') ) {
 define('CLASS_WANERROR_INC', true);
 
 /**
- * Class WanError
- *
  * Wrapper pour les erreurs générées par PHP
  * Utilisé comme simple contenant pour les informations sur une erreur donnée
  */
-class WanError extends Exception {
-	
+class WanError extends Exception
+{
 	public function __construct($error)
 	{
-		$this->code = $error['type'];
+		$this->code    = $error['type'];
 		$this->message = $error['message'];
-		$this->file = $error['file'];
-		$this->line = $error['line'];
+		$this->file    = $error['file'];
+		$this->line    = $error['line'];
 	}
 }
 
