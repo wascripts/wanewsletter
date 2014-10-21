@@ -942,11 +942,6 @@ switch ($mode) {
 		break;
 
 	case 'backup':
-		$tables_wa = array(
-			ABO_LISTE_TABLE, ABONNES_TABLE, ADMIN_TABLE, AUTH_ADMIN_TABLE, BANLIST_TABLE, CONFIG_TABLE,
-			JOINED_FILES_TABLE, FORBIDDEN_EXT_TABLE, LISTE_TABLE, LOG_TABLE, LOG_FILES_TABLE, SESSIONS_TABLE
-		);
-
 		$tables      = array();
 		$tables_plus = (!empty($_POST['tables_plus'])) ? array_map('trim', $_POST['tables_plus']) : array();
 		$backup_type = (isset($_POST['backup_type'])) ? intval($_POST['backup_type']) : 0;
@@ -963,12 +958,12 @@ switch ($mode) {
 
 		foreach ($tables_ary as $tablename => $tabletype) {
 			if (!isset($_POST['submit'])) {
-				if (!in_array($tablename, $tables_wa)) {
+				if (!isset($sql_schemas[$tablename])) {
 					$tables_plus[] = $tablename;
 				}
 			}
 			else {
-				if (in_array($tablename, $tables_wa) || in_array($tablename, $tables_plus)) {
+				if (isset($sql_schemas[$tablename]) || in_array($tablename, $tables_plus)) {
 					$tables[] = array('name' => $tablename, 'type' => $tabletype);
 				}
 			}
