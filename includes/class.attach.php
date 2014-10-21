@@ -389,7 +389,6 @@ class Attach
 		//
 		// Vérification de la taille du fichier par rapport à la taille maximale autorisée
 		//
-		$total_size = 0;
 		if (!$this->check_maxsize($log_id, $filesize, $total_size)) {
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['weight_too_big'],
@@ -498,7 +497,6 @@ class Attach
 			$filesize = $this->joined_file_exists($physical_name, $error, $msg_error);
 		}
 
-		$total_size = 0;
 		if (!$error && !$this->check_maxsize($log_id, $filesize, $total_size)) {
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['weight_too_big'],
@@ -567,8 +565,9 @@ class Attach
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = " . $log_id;
 		$result = $db->query($sql);
+		$total_size = $result->column('total_size');
 
-		return (($result->column('total_size') + $filesize) <= $nl_config['max_filesize']);
+		return (($total_size + $filesize) <= $nl_config['max_filesize']);
 	}
 
 	/**
