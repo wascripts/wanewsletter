@@ -1417,4 +1417,16 @@ function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1'
 	return html_entity_decode($string, $flags, $encoding);
 }
 
+/**
+ * Vérifie si l'utilisateur concerné est administrateur
+ *
+ * @param array $admin Tableau des données de l'utilisateur
+ *
+ * @return boolean
+ */
+function wan_is_admin($admin)
+{
+	return ($admin['admin_level'] == ADMIN_LEVEL);
+}
+
 }

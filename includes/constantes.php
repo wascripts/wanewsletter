@@ -95,8 +95,8 @@ define('SUBSCRIBE_NOT_CONFIRMED', 0);
 //
 // Niveau des utilisateurs, ne pas modifier !!
 //
-define('ADMIN', 2);
-define('USER',  1);
+define('ADMIN_LEVEL', 2);
+define('USER_LEVEL',  1);
 
 //
 // divers

@@ -102,7 +102,7 @@ class Auth
 		if ($liste_id == null) {
 			$liste_id_ary = array();
 			foreach ($this->listdata as $liste_id => $auth_list) {
-				if ($admindata['admin_level'] == ADMIN || !empty($auth_list[$auth_name])) {
+				if (wan_is_admin($admindata) || !empty($auth_list[$auth_name])) {
 					$liste_id_ary[] = $liste_id;
 				}
 			}
@@ -111,7 +111,7 @@ class Auth
 		}
 		else {
 			if (isset($this->listdata[$liste_id]) &&
-				($admindata['admin_level'] == ADMIN || !empty($this->listdata[$liste_id][$auth_name]))
+				(wan_is_admin($admindata) || !empty($this->listdata[$liste_id][$auth_name]))
 			) {
 				return true;
 			}

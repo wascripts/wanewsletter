@@ -631,7 +631,7 @@ class Wanewsletter
 				}
 
 				do {
-					if ($row['admin_level'] != ADMIN && !$row['auth_view']) {
+					if (!wan_is_admin($row) && !$row['auth_view']) {
 						continue;
 					}
 

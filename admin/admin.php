@@ -25,7 +25,7 @@ if (isset($_POST['delete_user'])) {
 //
 // Seuls les administrateurs peuvent ajouter ou supprimer un utilisateur
 //
-if (($mode == 'adduser' || $mode == 'deluser') && $admindata['admin_level'] != ADMIN) {
+if (($mode == 'adduser' || $mode == 'deluser') && !wan_is_admin($admindata)) {
 	http_response_code(401);
 	$output->redirect('index.php', 4);
 	$output->addLine($lang['Message']['Not_authorized']);
@@ -72,7 +72,7 @@ if ($mode == 'adduser') {
 			$sql_data['admin_email']      = $new_email;
 			$sql_data['admin_lang']       = $nl_config['language'];
 			$sql_data['admin_dateformat'] = $nl_config['date_format'];
-			$sql_data['admin_level']      = USER;
+			$sql_data['admin_level']      = USER_LEVEL;
 
 			$db->insert(ADMIN_TABLE, $sql_data);
 
@@ -191,7 +191,7 @@ else if ($mode == 'deluser') {
 }
 
 if (isset($_POST['submit'])) {
-	if ($admindata['admin_level'] != ADMIN && $admin_id != $admindata['admin_id']) {
+	if (!wan_is_admin($admindata) && $admin_id != $admindata['admin_id']) {
 		http_response_code(401);
 		$output->redirect('./index.php', 4);
 		$output->addLine($lang['Message']['Not_authorized']);
@@ -259,13 +259,13 @@ if (isset($_POST['submit'])) {
 			$sql_data['admin_pwd'] = $hasher->hash($new_pass);
 		}
 
-		if ($admindata['admin_level'] == ADMIN && $admin_id != $admindata['admin_id'] && !empty($_POST['admin_level'])) {
-			$sql_data['admin_level'] = ($_POST['admin_level'] == ADMIN) ? ADMIN : USER;
+		if (wan_is_admin($admindata) && $admin_id != $admindata['admin_id'] && !empty($_POST['admin_level'])) {
+			$sql_data['admin_level'] = ($_POST['admin_level'] == ADMIN_LEVEL) ? ADMIN_LEVEL : USER_LEVEL;
 		}
 
 		$db->update(ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id));
 
-		if ($admindata['admin_level'] == ADMIN) {
+		if (wan_is_admin($admindata)) {
 			$auth_data = ($admindata['admin_id'] == $admin_id) ? $auth->listdata : $auth->read_data($admin_id);
 			$liste_ids = (!empty($_POST['liste_id']) && is_array($_POST['liste_id'])) ? $_POST['liste_id'] : array();
 
@@ -342,7 +342,7 @@ if (isset($_POST['submit'])) {
 
 $admin_box = '';
 
-if ($admindata['admin_level'] == ADMIN) {
+if (wan_is_admin($admindata)) {
 	$current_admin = null;
 
 	if (!empty($admin_id) && $admin_id != $admindata['admin_id']) {
@@ -394,7 +394,7 @@ require WA_ROOTDIR . '/includes/functions.box.php';
 
 $output->addHiddenField('admin_id', $current_admin['admin_id']);
 
-if ($admindata['admin_level'] == ADMIN) {
+if (wan_is_admin($admindata)) {
 	$output->addLink('subsection', './admin.php?mode=adduser', $lang['Add_user']);
 }
 
@@ -435,7 +435,7 @@ $output->assign_vars(array(
 	'S_HIDDEN_FIELDS'       => $output->getHiddenFields()
 ));
 
-if ($admindata['admin_level'] == ADMIN) {
+if (wan_is_admin($admindata)) {
 	$output->assign_block_vars('admin_options', array(
 		'L_ADD_ADMIN'     => $lang['Add_user'],
 		'L_TITLE_MANAGE'  => $lang['Title']['manage'],
@@ -455,8 +455,8 @@ if ($admindata['admin_level'] == ADMIN) {
 		'L_DELETE_ADMIN'  => $lang['Del_user'],
 		'L_NOTE_DELETE'   => nl2br($lang['Del_note']),
 
-		'SELECTED_ADMIN'  => $output->getBoolAttr('selected', ($current_admin['admin_level'] == ADMIN)),
-		'SELECTED_USER'   => $output->getBoolAttr('selected', ($current_admin['admin_level'] == USER))
+		'SELECTED_ADMIN'  => $output->getBoolAttr('selected', wan_is_admin($current_admin)),
+		'SELECTED_USER'   => $output->getBoolAttr('selected', !wan_is_admin($current_admin))
 	));
 
 	foreach ($listdata as $listrow) {

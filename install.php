@@ -175,7 +175,7 @@ if ($start) {
 		$sql = "SELECT admin_email, admin_pwd, admin_level
 			FROM " . ADMIN_TABLE . "
 			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($login)) . "'
-				AND admin_level = " . ADMIN;
+				AND admin_level = " . ADMIN_LEVEL;
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {

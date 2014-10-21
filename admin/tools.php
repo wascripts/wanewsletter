@@ -123,7 +123,7 @@ switch ($mode) {
 	case 'restore':
 	case 'debug':
 	case 'attach':
-		if ($admindata['admin_level'] != ADMIN) {
+		if (!wan_is_admin($admindata)) {
 			http_response_code(401);
 			$output->redirect('./index.php', 4);
 			$output->addLine($lang['Message']['Not_authorized']);
@@ -171,7 +171,7 @@ if (!isset($_POST['submit']) && !$getreport) {
 
 	$tools_ary = array('export', 'import', 'ban', 'generator', 'check_update');
 
-	if ($admindata['admin_level'] == ADMIN) {
+	if (wan_is_admin($admindata)) {
 		array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
 	}
 

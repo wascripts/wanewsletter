@@ -12,7 +12,7 @@ define('IN_UPGRADE', true);
 
 require './pagestart.php';
 
-if ($admindata['admin_level'] != ADMIN) {
+if (!wan_is_admin($admindata)) {
 	http_response_code(401);
 	$output->redirect('./index.php', 6);
 	$output->addLine($lang['Message']['Not_authorized']);

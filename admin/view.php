@@ -827,7 +827,7 @@ else if ($mode == 'liste') {
 	switch ($action) {
 		case 'add':
 		case 'delete':
-			if ($admindata['admin_level'] != ADMIN) {
+			if (!wan_is_admin($admindata)) {
 				http_response_code(401);
 				$target = './view.php?mode=liste';
 				$output->redirect($target, 4);
@@ -1406,7 +1406,7 @@ else if ($mode == 'liste') {
 	if ($auth->check_auth(Auth::DEL, $listdata['liste_id']) || $auth->check_auth(Auth::EDIT, $listdata['liste_id'])) {
 		$output->assign_block_vars('admin_options', array());
 
-		if ($admindata['admin_level'] == ADMIN) {
+		if (wan_is_admin($admindata)) {
 			$output->assign_block_vars('admin_options.auth_add', array(
 				'L_ADD_LISTE' => $lang['Create_liste']
 			));

@@ -188,7 +188,7 @@ class Output extends Template
 			$this->addLink('section', './tools.php?mode=ban',       $lang['Title']['ban']);
 			$this->addLink('section', './tools.php?mode=generator', $lang['Title']['generator']);
 
-			if (isset($admindata['admin_level']) && $admindata['admin_level'] == ADMIN) {
+			if (wan_is_admin($admindata)) {
 				$this->addLink('section', './tools.php?mode=attach' , $lang['Title']['attach']);
 				$this->addLink('section', './tools.php?mode=backup' , $lang['Title']['backup']);
 				$this->addLink('section', './tools.php?mode=restore', $lang['Title']['restore']);
@@ -656,7 +656,7 @@ BASIC;
 			if ($display) {
 				$this->addLine($lang['Message']['No_liste_exists']);
 
-				if ($admindata['admin_level'] == ADMIN) {
+				if (wan_is_admin($admindata)) {
 					$this->addLine($lang['Click_create_liste'], './view.php?mode=liste&amp;action=add');
 				}
 
