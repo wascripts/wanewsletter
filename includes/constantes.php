@@ -40,7 +40,7 @@ define('DEBUG_MODE', DEBUG_LEVEL_NORMAL);
 // Pour visualiser le temps d'exécution du script et le nombre de requètes effectuées
 //
 define('DEV_INFOS', true);
-//define('DEV_INFOS', FALSE);
+//define('DEV_INFOS', false);
 
 //
 // Active/Désactive l'affichage des messages d'erreur en pied de page.
