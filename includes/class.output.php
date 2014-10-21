@@ -420,7 +420,7 @@ BASIC;
 	public function addLine($str, $link = null)
 	{
 		if (!is_null($link)) {
-			$str = sprintf($str, sprintf('<a href="%s">', $link), '</a>');
+			$str = sprintf($str, sprintf('<a href="%s">', wan_htmlspecialchars($link)), '</a>');
 		}
 
 		$this->messageList[] = $str;
@@ -660,7 +660,7 @@ BASIC;
 				$this->addLine($lang['Message']['No_liste_exists']);
 
 				if (wan_is_admin($admindata)) {
-					$this->addLine($lang['Click_create_liste'], './view.php?mode=liste&amp;action=add');
+					$this->addLine($lang['Click_create_liste'], './view.php?mode=liste&action=add');
 				}
 
 				$this->displayMessage();

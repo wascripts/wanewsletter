@@ -177,7 +177,7 @@ switch ($mode) {
 			}
 
 			if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
-				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&amp;action=edit');
+				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
 				$output->displayMessage();
 			}
 		}
@@ -738,11 +738,11 @@ switch ($mode) {
 					if ($mode == 'save') {
 						$output->redirect('./envoi.php?mode=load&amp;id=' . $logdata['log_id'], 4);
 						$output->addLine($lang['Message']['log_saved']);
-						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load&amp;id=' . $logdata['log_id']);
+						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load&id=' . $logdata['log_id']);
 					}
 					else {
 						$output->addLine($lang['Message']['log_ready']);
-						$output->addLine($lang['Click_start_send'], './envoi.php?mode=progress&amp;id=' . $logdata['log_id']);
+						$output->addLine($lang['Click_start_send'], './envoi.php?mode=progress&id=' . $logdata['log_id']);
 					}
 
 					$output->displayMessage();

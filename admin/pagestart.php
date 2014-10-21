@@ -47,7 +47,7 @@ if (!defined('IN_LOGIN')) {
 		//
 		if (!check_db_version(@$nl_config['db_version'])) {
 			$output->addLine($lang['Need_upgrade_db']);
-			$output->addLine($lang['Need_upgrade_db_link'], WA_ROOTDIR.'/admin/upgrade.php');
+			$output->addLine($lang['Need_upgrade_db_link'], 'upgrade.php');
 			$output->displayMessage();
 		}
 
