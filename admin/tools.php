@@ -49,50 +49,25 @@ function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 //
 function decompress_filedata($filename, $file_ext)
 {
-	if ($file_ext != 'zip') {
-		if ($file_ext == 'gz') {
-			$open  = 'gzopen';
-			$eof   = 'gzeof';
-			$gets  = 'gzgets';
-			$close = 'gzclose';
-		}
-		else {
-			$open  = 'fopen';
-			$eof   = 'feof';
-			$gets  = 'fgets';
-			$close = 'fclose';
-		}
+	global $output;
 
-		if (!($fp = @$open($filename, 'rb'))) {
-			trigger_error('Failed_open_file', E_USER_ERROR);
-		}
-
-		$data = '';
-		while (!@$eof($fp)) {
-			$data .= $gets($fp, 1024);
-		}
-		$close($fp);
-
-		if ($file_ext == 'bz2') {
-			$data = bzdecompress($data);
-		}
-	}
-	else {
-		if (!($zip = zip_open($filename))) {
-			trigger_error('Failed_open_file', E_USER_ERROR);
-		}
-
-		$zip_entry = zip_read($zip);
-		if (!zip_entry_open($zip, $zip_entry, 'rb')) {
-			trigger_error('Failed_open_file', E_USER_ERROR);
-		}
-
-		$data = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
-		zip_entry_close($zip_entry);
-		zip_close($zip);
+	if ((!ZLIB_LOADED && $file_ext == 'gz') || (!BZIP2_LOADED && $file_ext == 'bz2')) {
+		$output->displayMessage('Compress_unsupported');
 	}
 
-	return $data;
+	switch ($file_ext) {
+		case 'gz':
+			$scheme = 'compress.zlib://';
+			break;
+		case 'bz2':
+			$scheme = 'compress.bzip2://';
+			break;
+		default:
+			$scheme = '';
+			break;
+	}
+
+	return file_get_contents($scheme . $filename);
 }
 
 $mode     = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
@@ -548,19 +523,7 @@ switch ($mode) {
 					}
 				}
 
-				$file_ext = '';
-				if (preg_match('/\.(zip|gz|bz2)$/i', $filename, $m)) {
-					$file_ext = $m[1];
-				}
-
-				if ((!ZIPLIB_LOADED && $file_ext == 'zip') ||
-					(!ZLIB_LOADED && $file_ext == 'gz') ||
-					(!BZIP2_LOADED && $file_ext == 'bz2')
-				) {
-					$output->displayMessage('Compress_unsupported');
-				}
-
-				$list_tmp = decompress_filedata($tmp_filename, $file_ext);
+				$list_tmp = decompress_filedata($tmp_filename, pathinfo($filename, PATHINFO_EXTENSION));
 
 				if (!empty($file_local)) {
 					$data_is_xml = (strncmp($list_tmp, '<?xml', 5) == 0);
@@ -1206,20 +1169,7 @@ switch ($mode) {
 					}
 				}
 
-				if (!preg_match('/\.(sql|zip|gz|bz2)$/i', $filename, $match)) {
-					$output->displayMessage('Bad_file_type');
-				}
-
-				$file_ext = $match[1];
-
-				if ((!ZIPLIB_LOADED && $file_ext == 'zip') ||
-					(!ZLIB_LOADED && $file_ext == 'gz') ||
-					(!BZIP2_LOADED && $file_ext == 'bz2')
-				) {
-					$output->displayMessage('Compress_unsupported');
-				}
-
-				$data = decompress_filedata($tmp_filename, $file_ext);
+				$data = decompress_filedata($tmp_filename, pathinfo($filename, PATHINFO_EXTENSION));
 
 				//
 				// S'il y a une restriction d'accés par l'open_basedir, et que c'est un fichier uploadé,
