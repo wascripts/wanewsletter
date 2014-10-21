@@ -221,7 +221,7 @@ function wan_build_url($url, $params = array(), $session = false)
 		strip_magic_quotes_gpc($cur_params);
 	}
 
-	if (defined('SID') && SID != '') {
+	if ($session && defined('SID') && SID != '') {
 		list($name, $value) = explode('=', SID);
 		$params[$name] = $value;
 	}
