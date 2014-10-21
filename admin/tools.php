@@ -135,11 +135,7 @@ else if ($admindata['session_liste']) {
 //
 // Affichage de la boîte de sélection des modules
 //
-
-// Exception téléchargement du rapport post-importation
-$getreport = ($mode == 'import' && isset($_GET['action']) && $_GET['action'] == 'getreport');
-
-if (!isset($_POST['submit']) && !$getreport) {
+if (!isset($_POST['submit'])) {
 	if ($mode != 'backup' && $mode != 'restore') {
 		$output->build_listbox($auth_type, false, $url_page);
 	}
@@ -453,20 +449,6 @@ switch ($mode) {
 		break;
 
 	case 'import':
-		$report_filename = WA_TMPDIR . '/wa_import_report.txt';
-
-		if (isset($_GET['action']) && $_GET['action'] == 'getreport') {
-			if (!is_readable($report_filename)) {
-				trigger_error("Impossible de récupérer le rapport. Le fichier est absent ou inaccessible", E_USER_ERROR);
-			}
-
-			$data = file_get_contents($report_filename);
-
-			include WA_ROOTDIR . '/includes/class.attach.php';
-
-			Attach::send_file(basename($report_filename), 'text/plain', $data);
-		}
-
 		if (isset($_POST['submit'])) {
 			$list_email  = (!empty($_POST['list_email'])) ? trim($_POST['list_email']) : '';
 			$list_tmp    = '';
@@ -723,25 +705,20 @@ switch ($mode) {
 
 			//
 			// Selon que des emails ont été refusés ou pas, affichage du message correspondant
-			// et écriture éventuelle du rapport d'erreur
+			// et mise à disposition éventuelle du rapport d'erreurs
 			//
 			if ($report != '') {
-				if ($fw = fopen($report_filename, 'w')) {
-					$report_str  = '#' . WA_EOL;
-					$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
-					$report_str .= '#' . WA_EOL;
-					$report_str .= WA_EOL;
-					$report_str .= $report . WA_EOL;
-					$report_str .= '# END' . WA_EOL;
+				$report_str  = '#' . WA_EOL;
+				$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
+				$report_str .= '#' . WA_EOL;
+				$report_str .= WA_EOL;
+				$report_str .= $report . WA_EOL;
+				$report_str .= '# END' . WA_EOL;
 
-					fwrite($fw, $report_str);
-					fclose($fw);
+				$url = 'data:text/plain;base64,' . base64_encode($report_str);
+				$output->addLine($lang['Message']['Success_import3'], $url);
 
-					$output->addLine($lang['Message']['Success_import3'], 'tools.php?mode=import&action=getreport');
-				}
-				else {
-					$output->addLine($lang['Message']['Success_import2']);
-				}
+				file_put_contents(WA_TMPDIR . '/wa_import_report.txt', $report_str);
 			}
 			else {
 				$output->addLine($lang['Message']['Success_import']);

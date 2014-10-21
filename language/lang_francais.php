@@ -140,8 +140,7 @@ $lang['Message']['Failed_sending2']         = "L'email n'a pu être envoyé ! %s";
 
 $lang['Message']['Success_export']          = "L'exportation des emails a été effectuée avec succès. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l'avoir récupéré !)";
 $lang['Message']['Success_import']          = "Les emails ont été importés avec succès";
-$lang['Message']['Success_import2']         = "L'importation s'est effectuée avec succès mais certains emails ont été refusés";
-$lang['Message']['Success_import3']         = "L'importation s'est effectuée avec succès mais certains emails ont été refusés. \nVous pouvez %stélécharger le rapport%s (N'oubliez pas de supprimer le fichier du serveur par la suite)";
+$lang['Message']['Success_import3']         = "L'importation s'est effectuée avec succès mais certains emails ont été refusés. \nVous pouvez %sconsulter le rapport d'erreurs%s (aussi disponible dans le répertoire des fichiers temporaires du script).";
 $lang['Message']['Success_import4_0']       = "Aucun email n'a été importé";
 $lang['Message']['Success_import4_1']       = "%d email a été importé avec succès";
 $lang['Message']['Success_import4_n']       = "%d emails ont été importés avec succès";
