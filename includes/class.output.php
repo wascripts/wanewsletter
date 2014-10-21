@@ -160,10 +160,9 @@ class Output extends Template
 	/**
 	 * Envoie en sortie les en-têtes HTTP appropriés et l'en-tête du document
 	 *
-	 * @param boolean $use_template
 	 * @param string  $page_title
 	 */
-	public function page_header($use_template = true, $page_title = '')
+	public function page_header($page_title = '')
 	{
 		global $nl_config, $lang, $template, $admindata, $auth;
 		global $simple_header, $error, $msg_error;
@@ -200,7 +199,9 @@ class Output extends Template
 			$this->addLink('author',    WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
 			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
 
-			$page_title = $lang['General_title'];
+			if ($page_title == '') {
+				$page_title = $lang['General_title'];
+			}
 		}
 		else {
 			$this->addLink('home', 		'./profil_cp.php',                  $lang['Title']['accueil']);
@@ -208,7 +209,9 @@ class Output extends Template
 			$this->addLink('section',   './profil_cp.php?mode=archives',    $lang['Module']['log']);
 			$this->addLink('section',   './profil_cp.php?mode=logout',      $lang['Module']['logout']);
 
-			$page_title = $lang['Title']['profil_cp'];
+			if ($page_title == '') {
+				$page_title = $lang['Title']['profil_cp'];
+			}
 		}
 
 		if (!defined('IN_ADMIN') || empty($admindata['admin_login'])) {
