@@ -431,23 +431,14 @@ $y_list = '';
 $m_list = '';
 
 $y = date('Y', $listdata['liste_startdate']);
-$n = date('n', $listdata['liste_startdate']);
 $c = max(date('Y'), $year);
-
-if ($y == $c) {
-	$m = date('n');
-}
-else {
-	$m = 12;
-	$n = 1;
-}
 
 for (; $y <= $c; $y++) {
 	$selected = $output->getBoolAttr('selected', ($y == $year));
 	$y_list .= sprintf("\n\t<option value=\"%1\$d\"%2\$s>%1\$d</option>", $y, $selected);
 }
 
-for (; $n <= $m; $n++) {
+for ($n = 1; $n <= 12; $n++) {
 	$selected = $output->getBoolAttr('selected', ($n == $month));
 	$m_list  .= sprintf("\n\t<option value=\"%d\"%s>%s</option>", $n, $selected,
 		convert_time('F', mktime(0, 0, 0, $n, 1, $y))
