@@ -474,7 +474,6 @@ switch ($mode) {
 				else {
 					$tmp_filename = $file_upload['tmp_name'];
 					$filename     = $file_upload['name'];
-					$data_is_xml  = preg_match('#(?:/|\+)xml#', $file_upload['type']);
 
 					if (!isset($file_upload['error']) && empty($tmp_filename)) {
 						$file_upload['error'] = -1;
@@ -507,9 +506,7 @@ switch ($mode) {
 
 				$list_tmp = decompress_filedata($tmp_filename, pathinfo($filename, PATHINFO_EXTENSION));
 
-				if (!empty($file_local)) {
-					$data_is_xml = (strncmp($list_tmp, '<?xml', 5) == 0);
-				}
+				$data_is_xml = (strncmp($list_tmp, '<?xml', 5) == 0 || strncmp($list_tmp, '<Wanliste>', 10) == 0);
 
 				//
 				// S'il y a une restriction d'accés par l'open_basedir, et que c'est un fichier uploadé,
