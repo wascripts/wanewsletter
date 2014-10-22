@@ -47,15 +47,24 @@ function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 //
 // Lecture et décompression éventuelle des données
 //
-function decompress_filedata($filename, $file_ext)
+function decompress_filedata($tmp_filename, $filename)
 {
 	global $output;
 
-	if ((!ZLIB_LOADED && $file_ext == 'gz') || (!BZIP2_LOADED && $file_ext == 'bz2')) {
+	$ext = pathinfo($filename, PATHINFO_EXTENSION);
+
+	if ((!ZIPLIB_LOADED && $ext == 'zip') ||
+		(!ZLIB_LOADED && $ext == 'gz') ||
+		(!BZIP2_LOADED && $ext == 'bz2')
+	) {
 		$output->displayMessage('Compress_unsupported');
 	}
 
-	switch ($file_ext) {
+	switch ($ext) {
+		case 'zip':
+			$scheme = 'zip://';
+			$tmp_filename .= '#' . pathinfo($filename, PATHINFO_FILENAME);
+			break;
 		case 'gz':
 			$scheme = 'compress.zlib://';
 			break;
@@ -67,7 +76,7 @@ function decompress_filedata($filename, $file_ext)
 			break;
 	}
 
-	return file_get_contents($scheme . $filename);
+	return file_get_contents($scheme . $tmp_filename);
 }
 
 $mode     = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
@@ -504,7 +513,7 @@ switch ($mode) {
 					}
 				}
 
-				$list_tmp = decompress_filedata($tmp_filename, pathinfo($filename, PATHINFO_EXTENSION));
+				$list_tmp = decompress_filedata($tmp_filename, $filename);
 
 				$data_is_xml = (strncmp($list_tmp, '<?xml', 5) == 0 || strncmp($list_tmp, '<Wanliste>', 10) == 0);
 
@@ -518,22 +527,11 @@ switch ($mode) {
 					Attach::remove_file($tmp_filename);
 				}
 			}
-
 			//
 			// Mode importation via le textarea
 			//
 			else if (strlen($list_email) > 5) {
 				$list_tmp = $list_email;
-			}
-
-			//
-			// Aucun fichier d'import reçu et textarea vide
-			//
-			if (empty($list_tmp)) {
-				$output->redirect('./tools.php?mode=import', 4);
-				$output->addLine($lang['Message']['No_data_received']);
-				$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
-				$output->displayMessage();
 			}
 
 			if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
@@ -542,7 +540,7 @@ switch ($mode) {
 
 			require WAMAILER_DIR . '/class.mailer.php';
 
-			if ($data_is_xml) {
+			if (!empty($list_tmp) && $data_is_xml) {
 				$emails = array();
 
 				if (extension_loaded('simplexml')) {
@@ -597,15 +595,21 @@ switch ($mode) {
 				$emails = explode($glue, trim($list_tmp));
 			}
 
+			//
+			// Aucun fichier d'import valide reçu et textarea vide
+			//
+			if (count($emails) == 0) {
+				$output->redirect('./tools.php?mode=import', 4);
+				$output->addLine($lang['Message']['No_data_received']);
+				$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
+				$output->displayMessage();
+			}
+
 			$report = '';
+
 			$emails = array_slice($emails, 0, MAX_IMPORT);
 			$emails = array_map('trim', $emails);
 			$emails = array_unique($emails);
-
-			$current_time = time();
-			$emails_ok    = array();
-
-			fake_header(false);
 
 			//
 			// Vérification syntaxique des emails
@@ -623,6 +627,11 @@ switch ($mode) {
 			));
 
 			if (count($emails) > 0) {
+				$current_time = time();
+				$emails_ok    = array();
+
+				fake_header(false);
+
 				$sql_emails = array_map(create_function('$email',
 					'return $GLOBALS["db"]->escape(strtolower($email));'
 					),
@@ -1138,7 +1147,7 @@ switch ($mode) {
 					}
 				}
 
-				$data = decompress_filedata($tmp_filename, pathinfo($filename, PATHINFO_EXTENSION));
+				$data = decompress_filedata($tmp_filename, $filename);
 
 				//
 				// S'il y a une restriction d'accés par l'open_basedir, et que c'est un fichier uploadé,
