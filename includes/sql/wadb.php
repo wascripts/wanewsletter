@@ -158,7 +158,7 @@ abstract class Wadb
 	}
 
 	/**
-	 * Construit une requète INSERT à partir des diverses données fournies
+	 * Construit une requète UPDATE à partir des diverses données fournies
 	 *
 	 * @param string $tablename  Table sur laquelle effectuer la requète
 	 * @param array  $data       Tableau des données à insérer.
@@ -168,7 +168,7 @@ abstract class Wadb
 	 *
 	 * @return boolean
 	 */
-	public function update($tablename, $data, $conditions)
+	public function update($tablename, $data, $conditions = null)
 	{
 		$data = $this->prepareData($data);
 
