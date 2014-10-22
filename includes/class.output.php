@@ -272,6 +272,24 @@ class Output extends Template
 	{
 		global $db, $lang, $starttime;
 
+		$entries = wanlog();
+		$wanlog_box = '';
+
+		foreach ($entries as $entry) {
+			if ($entry instanceof Exception) {
+				if (!DISPLAY_ERRORS_IN_LOG) {
+					continue;
+				}
+
+				$entry = wan_format_error($entry);
+			}
+			else if (!is_scalar($entry)) {
+				$entry = print_r($entry, true);
+			}
+
+			$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
+		}
+
 		$this->set_filenames(array(
 			'footer' => 'footer.tpl'
 		));
@@ -298,33 +316,13 @@ class Output extends Template
 			'TRANSLATE' => (!empty($lang['TRANSLATE'])) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 		));
 
-		$entries = wanlog();
-
-		if (count($entries) > 0) {
-			$wanlog_box = '';
-			foreach ($entries as $entry) {
-				if ($entry instanceof Exception) {
-					if (!DISPLAY_ERRORS_IN_LOG) {
-						continue;
-					}
-
-					$entry = wan_format_error($entry);
-				}
-				else if (!is_scalar($entry)) {
-					$entry = print_r($entry, true);
-				}
-
-				$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
-			}
-
-			if ($wanlog_box != '') {
-				$this->assign_vars(array(
-					'WANLOG_BOX' => sprintf('<ul class="warning"
-						style="font-family:monospace;font-size:12px;">%s</ul>',
-						$wanlog_box
-					)
-				));
-			}
+		if ($wanlog_box != '') {
+			$this->assign_vars(array(
+				'WANLOG_BOX' => sprintf('<ul class="warning"
+					style="font-family:monospace;font-size:12px;">%s</ul>',
+					$wanlog_box
+				)
+			));
 		}
 
 		$this->pparse('footer');

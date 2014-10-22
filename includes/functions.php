@@ -552,7 +552,19 @@ function wanlog($entry = null)
 		return $entries;
 	}
 
-	$entries[] = $entry;
+	if ($entry instanceof Exception) {
+		$hash = md5(
+			$entry->getCode() .
+			$entry->getMessage() .
+			$entry->getFile() .
+			$entry->getLine()
+		);
+
+		$entries[$hash] = $entry;
+	}
+	else {
+		$entries[] = $entry;
+	}
 }
 
 /**
