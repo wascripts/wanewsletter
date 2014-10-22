@@ -13,7 +13,11 @@ licence <abbr title="General Public Licence" lang="en">GPL</abbr></a>
 
 <!-- BEGIN dev_infos -->
 <div id="dev">
-	[ Time total&nbsp;: {dev_infos.TIME_TOTAL}&nbsp;s | php&nbsp;: {dev_infos.TIME_PHP}&nbsp;s | SQL&nbsp;: {dev_infos.TIME_SQL}&nbsp;s | Queries&nbsp;: {dev_infos.QUERIES} ]
+	[&nbsp;Time total&nbsp;: {dev_infos.TIME_TOTAL}&nbsp;s |
+	php&nbsp;: {dev_infos.TIME_PHP}&nbsp;s |
+	SQL&nbsp;: {dev_infos.TIME_SQL}&nbsp;s |
+	Queries&nbsp;: {dev_infos.QUERIES} |
+	Mem Usage&nbsp;: {dev_infos.MEM_USAGE}&nbsp;]
 </div>
 <!-- END dev_infos -->
 

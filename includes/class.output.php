@@ -287,6 +287,8 @@ class Output extends Template
 				'TIME_TOTAL' => sprintf('%.8f', $totaltime),
 				'TIME_PHP'   => sprintf('%.3f', $totaltime - $db->sqltime),
 				'TIME_SQL'   => sprintf('%.3f', $db->sqltime),
+				'MEM_USAGE'  => (function_exists('memory_get_usage'))
+					? formateSize(memory_get_usage()) : 'Unavailable',
 				'QUERIES'    => $db->queries
 			));
 		}
