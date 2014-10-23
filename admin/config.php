@@ -210,17 +210,7 @@ if (isset($_POST['submit'])) {
 					$dest_file   = $dest_upload . $entry;
 
 					if (is_file($source_file)) {
-						//
-						// Copie du fichier
-						//
-						if (copy($source_file, $dest_file)) {
-							@chmod($dest_file, 0644);
-
-							//
-							// Suppression du fichier de l'ancien répertoire
-							//
-							Attach::remove_file($source_file);
-						}
+						rename($source_file, $dest_file);
 					}
 				}
 				$browse->close();
