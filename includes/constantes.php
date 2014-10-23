@@ -116,14 +116,6 @@ define('CONFIRM_ONCE',   1);
 define('CONFIRM_NONE',   0);
 
 //
-// Si nous avons un accés restreint à cause de open_basedir, certains fichiers uploadés
-// devront être déplacés vers le dossier des fichiers temporaires du script pour être
-// accessible en lecture
-//
-$open_basedir = config_value('open_basedir');
-define('OPEN_BASEDIR_RESTRICTION', !empty($open_basedir));
-
-//
 // On vérifie si l'upload est autorisé sur le serveur
 //
 if (config_status('file_uploads')) {

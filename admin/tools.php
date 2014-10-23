@@ -505,14 +505,16 @@ switch ($mode) {
 					}
 
 					//
-					// Si nous avons un accés restreint à cause de open_basedir, le fichier doit être déplacé
-					// vers le dossier des fichiers temporaires du script pour être accessible en lecture
+					// Si nous n'avons pas d'accès direct au fichier uploadé,
+					// il doit être déplacé vers le dossier des fichiers
+					// temporaires du script pour être accessible en lecture.
 					//
-					if (OPEN_BASEDIR_RESTRICTION) {
+					if (!is_readable($tmp_filename)) {
 						$unlink = true;
-						$tmp_filename = wa_realpath(WA_TMPDIR . '/' . $filename);
+						$tmp_filename = tempnam(WA_TMPDIR, 'wa');
 
 						if (!move_uploaded_file($file_upload['tmp_name'], $tmp_filename)) {
+							unlink($tmp_filename);
 							$output->displayMessage('Upload_error_5');
 						}
 					}
@@ -522,14 +524,8 @@ switch ($mode) {
 
 				$data_is_xml = (strncmp($list_tmp, '<?xml', 5) == 0 || strncmp($list_tmp, '<Wanliste>', 10) == 0);
 
-				//
-				// S'il y a une restriction d'accés par l'open_basedir, et que c'est un fichier uploadé,
-				// nous avons dù le déplacer dans le dossier tmp/ du script, on le supprime.
-				//
 				if ($unlink) {
-					require WA_ROOTDIR . '/includes/class.attach.php';
-
-					Attach::remove_file($tmp_filename);
+					unlink($tmp_filename);
 				}
 			}
 			//
@@ -1139,14 +1135,16 @@ switch ($mode) {
 					}
 
 					//
-					// Si nous avons un accés restreint à cause de open_basedir, le fichier doit être déplacé
-					// vers le dossier des fichiers temporaires du script pour être accessible en lecture
+					// Si nous n'avons pas d'accès direct au fichier uploadé,
+					// il doit être déplacé vers le dossier des fichiers
+					// temporaires du script pour être accessible en lecture.
 					//
-					if (OPEN_BASEDIR_RESTRICTION) {
+					if (!is_readable($tmp_filename)) {
 						$unlink = true;
-						$tmp_filename = wa_realpath(WA_TMPDIR . '/' . $filename);
+						$tmp_filename = tempnam(WA_TMPDIR, 'wa');
 
 						if (!move_uploaded_file($file_upload['tmp_name'], $tmp_filename)) {
+							unlink($tmp_filename);
 							$output->displayMessage('Upload_error_5');
 						}
 					}
@@ -1154,17 +1152,10 @@ switch ($mode) {
 
 				$data = decompress_filedata($tmp_filename, $filename);
 
-				//
-				// S'il y a une restriction d'accés par l'open_basedir, et que c'est un fichier uploadé,
-				// nous avons dù le déplacer dans le dossier des fichiers temporaires du script, on le supprime.
-				//
 				if ($unlink) {
-					require WA_ROOTDIR . '/includes/class.attach.php';
-
-					Attach::remove_file($tmp_filename);
+					unlink($tmp_filename);
 				}
 			}
-
 			//
 			// Aucun fichier de restauration reçu
 			//
