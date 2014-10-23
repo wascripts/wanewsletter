@@ -283,6 +283,7 @@ class Attach
 				if (!($fw = @fopen($tmp_filename, 'wb'))) {
 					$error = true;
 					$msg_error[] = $lang['Message']['Upload_error_5'];
+					$this->remove_file($tmp_filename);
 
 					return;
 				}
@@ -293,6 +294,7 @@ class Attach
 					if (!$result) {
 						$error = true;
 						$msg_error[] = $errstr;
+						$this->remove_file($tmp_filename);
 
 						return;
 					}
@@ -319,6 +321,7 @@ class Attach
 							$lang['Message']['Unaccess_host'],
 							wan_htmlspecialchars($part['host'])
 						);
+						$this->remove_file($tmp_filename);
 
 						return;
 					}
@@ -331,6 +334,7 @@ class Attach
 					if (!ftp_fget($cid, $fw, $path, FTP_BINARY)) {
 						$error = true;
 						$msg_error[] = $lang['Message']['Not_found_at_url'];
+						$this->remove_file($tmp_filename);
 
 						return;
 					}
@@ -604,6 +608,7 @@ class Attach
 		$tmp_filename = tempnam($tmp_path, 'wa1');
 
 		if (!@ftp_get($this->connect_id, $tmp_filename, $data['file_physical_name'], $mode)) {
+			$this->remove_file($tmp_filename);
 			trigger_error('Ftp_error_get', E_USER_ERROR);
 		}
 
