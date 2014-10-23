@@ -105,11 +105,6 @@ strip_magic_quotes_gpc($_COOKIE);
 strip_magic_quotes_gpc($_FILES, true);
 strip_magic_quotes_gpc($_REQUEST);
 
-
-//
-// Intialisation de la connexion à la base de données
-//
-
 // Compatibilité avec wanewsletter < 2.3-beta2
 if (empty($dsn)) {
 	$infos['engine'] = (!empty($dbtype)) ? $dbtype : 'mysql';
@@ -131,8 +126,14 @@ if (empty($dsn)) {
 	$dsn = createDSN($infos);
 
 	define('UPDATE_CONFIG_FILE', true);
+
+	// Pas la peine de polluer le scope global
+	unset($infos, $dbtype, $dbhost, $dbuser, $dbpassword, $dbname);
 }
 
+//
+// Intialisation de la connexion à la base de données et récupération de la configuration
+//
 if (!defined('IN_INSTALL')) {
 	$db = WaDatabase($dsn);
 
