@@ -259,7 +259,7 @@ switch ($mode) {
 		wan_print_row(' - use_smtp',       $nl_config['use_smtp'] ? 'oui' : 'non');
 		wan_print_row(' - check_email_mx', $nl_config['check_email_mx'] ? 'oui' : 'non');
 
-		wan_print_row('Version de PHP',    phpversion());
+		wan_print_row('Version de PHP', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
 		wan_print_row(' - Extension Bz2', extension_loaded('zlib') ? 'oui' : 'non');
 		wan_print_row(' - Extension FTP',  extension_loaded('ftp') ? 'oui' : 'non');
 
@@ -298,10 +298,15 @@ switch ($mode) {
 			wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
 		}
 
+		wan_print_row(' - sys_temp_dir', sys_get_temp_dir());
+		wan_print_row(' - filter.default', config_value('filter.default'));
 		wan_print_row(' - allow_url_fopen', config_status('allow_url_fopen') ? 'on' : 'off');
+		wan_print_row(' - allow_url_include', config_status('allow_url_include') ? 'on' : 'off');
 		wan_print_row(' - file_uploads', config_status('file_uploads') ? 'on' : 'off');
+		wan_print_row(' - upload_tmp_dir', config_value('upload_tmp_dir'));
 		wan_print_row(' - upload_max_filesize', config_value('upload_max_filesize'));
 		wan_print_row(' - post_max_size', config_value('post_max_size'));
+		wan_print_row(' - max_input_time', config_value('max_input_time'));
 		wan_print_row(' - memory_limit', config_value('memory_limit'));
 		wan_print_row(' - mail.add_x_header', config_value('mail.add_x_header'));
 		wan_print_row(' - mail.force_extra_parameters', config_value('mail.force_extra_parameters'));
