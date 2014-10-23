@@ -236,6 +236,7 @@ $lang['Message']['Upload_error_4']          = "No file has been uploaded";
 $lang['Message']['Upload_error_5']          = "The file could not be uploaded due to a unknown error";
 $lang['Message']['Upload_error_6']          = "Missing a temporary folder";
 $lang['Message']['Upload_error_7']          = "Failed to write file to disk";
+$lang['Message']['Upload_error_8']          = "An unknown PHP extension has blocked the file upload";
 $lang['Message']['Invalid_filename']        = "Invalid file name";
 $lang['Message']['Invalid_action']          = "Invalid action";
 $lang['Message']['Invalid_ext']             = "This file extension has been prohibited";

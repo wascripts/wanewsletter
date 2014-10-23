@@ -245,39 +245,15 @@ class Attach
 		if (!$error) {
 			//
 			// Si l'upload a échoué, on récupère le message correspondant à l'erreur survenue
-			// Voir fichier constantes.php pour les codes d'erreur
 			//
 			if ($upload_mode == 'upload' && $errno_code != UPLOAD_ERR_OK) {
 				$error = true;
 
-				switch ($errno_code) {
-					case UPLOAD_ERR_INI_SIZE:
-						$msg_error[] = $lang['Message']['Upload_error_1'];
-						break;
-
-					case UPLOAD_ERR_FORM_SIZE:
-						$msg_error[] = $lang['Message']['Upload_error_2'];
-						break;
-
-					case UPLOAD_ERR_PARTIAL:
-						$msg_error[] = $lang['Message']['Upload_error_3'];
-						break;
-
-					case UPLOAD_ERR_NO_FILE:
-						$msg_error[] = $lang['Message']['Upload_error_4'];
-						break;
-
-					case UPLOAD_ERR_NO_TMP_DIR:
-						$msg_error[] = $lang['Message']['Upload_error_6'];
-						break;
-
-					case UPLOAD_ERR_CANT_WRITE:
-						$msg_error[] = $lang['Message']['Upload_error_7'];
-						break;
-
-					default:
-						$msg_error[] = $lang['Message']['Upload_error_5'];
-						break;
+				if (isset($lang['Message']['Upload_error_'.$errno_code])) {
+					$msg_error[] = $lang['Message']['Upload_error_'.$errno_code];
+				}
+				else {
+					$msg_error[] = $lang['Message']['Upload_error_5'];
 				}
 
 				return;
