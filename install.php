@@ -174,7 +174,7 @@ if ($start) {
 
 		$sql = "SELECT admin_email, admin_pwd, admin_level
 			FROM " . ADMIN_TABLE . "
-			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($login)) . "'
+			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($admin_login)) . "'
 				AND admin_level = " . ADMIN_LEVEL;
 		$result = $db->query($sql);
 
@@ -183,12 +183,12 @@ if ($start) {
 
 			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
 			if ($row['admin_pwd'][0] != '$') {
-				if ($row['admin_pwd'] === md5($passwd)) {
+				if ($row['admin_pwd'] === md5($admin_pass)) {
 					$login = true;
 				}
 			}
 			// New password hash using phpass
-			else if ($hasher->check($passwd, $row['admin_pwd'])) {
+			else if ($hasher->check($admin_pass, $row['admin_pwd'])) {
 				$login = true;
 			}
 
@@ -270,6 +270,10 @@ if ($start) {
 			$sql_drop = array();
 
 			foreach ($sql_schemas as $tablename => $schema) {
+				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
+					str_replace('wa_', $prefixe, $tablename)
+				);
+
 				if ($db->engine == 'postgres' && !empty($schema['sequence'])) {
 					foreach ($schema['sequence'] as $sequence) {
 						$sql_drop[] = sprintf("DROP SEQUENCE IF EXISTS %s",
@@ -285,10 +289,6 @@ if ($start) {
 						);
 					}
 				}
-
-				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
-					str_replace('wa_', $prefixe, $tablename)
-				);
 			}
 
 			exec_queries($sql_drop);
