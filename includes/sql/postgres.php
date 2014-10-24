@@ -424,12 +424,13 @@ class WadbBackup_postgres extends WadbBackup
 			ORDER BY index_name, tab_name, column_name";
 		$result = $this->db->query($sql);
 
-		$primary_key = $primary_key_name = '';
+		$primary_key_name = '';
+		$primary_key_fields = array();
 		$index_rows  = array();
 
 		while ($row = $result->fetch()) {
 			if ($row['primary_key'] == 't') {
-				$primary_key .= (($primary_key != '') ? ', ' : '') . $row['column_name'];
+				$primary_key_fields[] = $row['column_name'];
 				$primary_key_name = $row['index_name'];
 			}
 			else {
@@ -444,15 +445,16 @@ class WadbBackup_postgres extends WadbBackup
 					$index_rows[$row['index_name']]['column_names'] = array();
 				}
 
-				$index_rows[$row['index_name']]['column_names'][] = $this->db->quote($row['column_name']);
+				$index_rows[$row['index_name']]['column_names'][] = $row['column_name'];
 			}
 		}
 		$result->free();
 
-		if (!empty($primary_key)) {
+		if (!empty($primary_key_name)) {
+			$primary_key_fields = array_map(array($this->db, 'quote'), $primary_key_fields);
 			$contents .= sprintf("CONSTRAINT %s PRIMARY KEY (%s),",
 				$this->db->quote($primary_key_name),
-				$this->db->quote($primary_key)
+				implode(', ', $primary_key_fields)
 			);
 			$contents .= $this->eol;
 		}
@@ -461,6 +463,7 @@ class WadbBackup_postgres extends WadbBackup
 
 		if (count($index_rows) > 0) {
 			foreach ($index_rows as $idx_name => $props) {
+				$props['column_names'] = array_map(array($this->db, 'quote'), $props['column_names']);
 				$props['column_names'] = implode(', ', $props['column_names']);
 
 				if (!empty($props['unique'])) {
