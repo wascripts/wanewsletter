@@ -586,6 +586,14 @@ if (isset($_POST['start'])) {
 				WHERE config_name = 'gd_img_type'";
 		}
 
+		//
+		// Ajout de l'entrée de configuration 'debug_level'.
+		//
+		if ($nl_config['db_version'] < 15) {
+			$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
+				VALUES('debug_level', '1')";
+		}
+
 		exec_queries($sql_update);
 
 		//

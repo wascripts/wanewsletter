@@ -36,6 +36,7 @@ $lang['Title']['config_email']      = "Envois des emails";
 $lang['Title']['config_files']      = "Fichiers joints";
 $lang['Title']['config_stats']      = "Module de statistiques";
 $lang['Title']['config_divers']     = "Divers";
+$lang['Title']['config_debug']      = "Débogage";
 $lang['Title']['profile']           = "Profil de <q>%s</q>";
 $lang['Title']['mod_profile']       = "Édition du profil de <q>%s</q>";
 $lang['Title']['manage']            = "Actions possibles de l'utilisateur";
@@ -255,6 +256,7 @@ $lang['Message']['Invalid_cookie_name']     = "Les caractères blancs, ainsi que 
 $lang['Message']['Invalid_cookie_path']     = "Le chemin de validité du cookie doit inclure le répertoire d'installation du script (%s)";
 $lang['Message']['Critical_error']          = "Une erreur critique s'est produite. Activez le mode de débogage pour obtenir plus de détails.";
 $lang['Message']['No_gd_img_support']       = "Aucun format d'image valable n'est disponible";
+$lang['Message']['Warning_debug_active']    = "<strong>Note&nbsp;:</strong> Le débogage est activé&nbsp;!";
 
 //
 // Divers
@@ -378,6 +380,7 @@ $lang['Explain']['config_cookies']  = "Ces paramètres vous permettent de régler 
 $lang['Explain']['config_files']    = "Vous avez la possibilité de joindre des fichiers à vos envois de newsletters. \nPour ce faire, le script offre deux options. Le plus simple est de stocker les fichiers sur le serveur, dans le répertoire défini comme répertoire de stockage (le répertoire en question doit être accessible en écriture). \nSi, pour une raison ou une autre, cela n'est pas rendu possible sur votre serveur, le script a la possibilité de stocker les fichiers sur un serveur <abbr title=\"File Transfert Protocol\" lang=\"en\">ftp</abbr>.\n Vous devez alors entrer les paramètres d'accès au serveur ftp en question.";
 $lang['Explain']['config_email']    = "Ces paramètres vous permettent de configurer vos envois d'emails.\nPar défaut, le script envoie un email personnalisé à chaque abonné, mais vous pouvez le configurer pour qu'il envoie un ou plusieurs emails avec une liste de destinataires en copie cachée.\nSi vous souhaitez utiliser un serveur <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">SMTP</abbr> spécifique, activez l'option puis renseignez les informations de connexion. Par défaut, le script utilise la fonction <code>mail()</code> de <abbr title=\"PHP: Hypertext Preprocessor\" lang=\"en\">PHP</abbr>. Consultez la %sFAQ%s au sujet des limitations existantes dans le cadre de l'utilisation d'un serveur <abbr>SMTP</abbr>.";
 $lang['Explain']['config_stats']    = "Le script dispose d'un petit module de statistique. Celui ci demande que la librairie GD soit installée sur votre serveur pour fonctionner. \nSi vous ne souhaitez pas utiliser cette fonctionnalité, il est recommandé de désactiver le module de statistiques pour éviter des traitement de données superflus par le script.";
+$lang['Explain']['config_debug']    = "Le débogueur permet d'afficher les erreurs non fatales survenant lors de l'exécution du script. Cela peut aider à trouver l'origine d'un dysfonctionnement.\n Les informations de débogage sont visibles uniquement aux administrateurs.";
 
 $lang['Default_lang']               = "Sélectionnez la langue par défaut";
 $lang['Sitename']                   = "Nom de votre site";
@@ -422,6 +425,10 @@ $lang['Smtp_user']                  = "Votre login smtp";
 $lang['Smtp_pass']                  = "Votre mot de passe smtp";
 $lang['Auth_smtp_note']             = "Seulement si votre serveur smtp requiert une authentification !";
 $lang['Disable_stats']              = "Désactiver le module de statistiques";
+$lang['Debug_level']                = "Niveau de débogage";
+$lang['Debug_level_1']              = "désactivé";
+$lang['Debug_level_2']              = "normal";
+$lang['Debug_level_3']              = "développement";
 
 
 //

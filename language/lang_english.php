@@ -36,6 +36,7 @@ $lang['Title']['config_email']      = "Emails sending options";
 $lang['Title']['config_files']      = "Attached files"; //file attachment ?
 $lang['Title']['config_stats']      = "Statistics Hack"; //show statistics sinon
 $lang['Title']['config_divers']     = "Misc";
+$lang['Title']['config_debug']      = "Debugging";
 $lang['Title']['profile']           = "Profile for <q>%s</q>";
 $lang['Title']['mod_profile']       = "Profile editing of <q>%s</q>";
 $lang['Title']['manage']            = "User permissions";
@@ -255,6 +256,7 @@ $lang['Message']['Invalid_cookie_name']     = "The white space characters, equal
 $lang['Message']['Invalid_cookie_path']     = "The cookie path must include the installation directory script (%s)";
 $lang['Message']['Critical_error']          = "A critical error has occured. Enable debug mode if you wish to get more details.";
 $lang['Message']['No_gd_img_support']       = "No image format are available";
+$lang['Message']['Warning_debug_active']    = "<strong>Notice&nbsp;:</strong> The debugging is active&nbsp;!";
 
 //
 // Divers
@@ -348,6 +350,7 @@ $lang['Explain']['editprofile']     = "Here, you have the possibility to modify 
 $lang['Explain']['sendkey']         = "If you lost the identifiers of your account, you can ask them to be sent back to you by email";
 $lang['Explain']['archives']        = "You can ask to receive the previous newsletters sent to the mailing lists to which you are registered.\nBe careful, for each newsletter selected, you will receive an email.";
 $lang['Explain']['change_email']    = "The next two fields let you change the email address of your account. Remember that your email address is used to connect to this interface.";
+$lang['Explain']['config_debug']    = "The debugger displays the non-fatal error occuring during the run-time of the script.  It can help to find the source of a bug.\n The debug informations are shown only to administrators.";
 
 $lang['New_Email']                  = "Enter your new email address";
 $lang['Confirm_Email']              = "Confirme your email address";
@@ -423,6 +426,10 @@ $lang['Smtp_user']                  = "Your smtp login";
 $lang['Smtp_pass']                  = "Your smtp password";
 $lang['Auth_smtp_note']             = "Only if your smtp server requires authentication!";
 $lang['Disable_stats']              = "Deactivate the statistics module";
+$lang['Debug_level']                = "Debug level";
+$lang['Debug_level_1']              = "disabled";
+$lang['Debug_level_2']              = "normal";
+$lang['Debug_level_3']              = "development";
 
 
 //

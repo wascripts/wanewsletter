@@ -216,6 +216,17 @@ document.addEventListener('DOMContentLoaded', function() {
 	</table>
 	<!-- END extension_gd -->
 
+	<h2>{TITLE_DEBUG_MODE}</h2>
+
+	<div class="explain">{L_EXPLAIN_DEBUG_MODE}</div>
+
+	<table class="dataset">
+		<tr>
+			<td><label>{L_DEBUG_LEVEL}&nbsp;:</label></td>
+			<td>{DEBUG_BOX}</td>
+		</tr>
+	</table>
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="reset">{L_RESET_BUTTON}</button>

@@ -339,16 +339,23 @@ function load_settings($admindata = array())
  */
 function wan_error_handler($errno, $errstr, $errfile, $errline)
 {
+	global $nl_config;
+
 	$simple = (defined('IN_COMMANDLINE') || defined('IN_SUBSCRIBE') || defined('IN_WA_FORM') || defined('IN_CRON'));
 	$fatal  = ($errno == E_USER_ERROR || $errno == E_RECOVERABLE_ERROR);
+
+	$debug_level = DEBUG_MODE;
+	if (isset($nl_config['debug_level']) && $nl_config['debug_level'] > DEBUG_MODE) {
+		$debug_level = min(DEBUG_LEVEL_ALL, $nl_config['debug_level']);
+	}
 
 	//
 	// On affiche pas les erreurs non prises en compte dans le réglage du
 	// error_reporting si error_reporting vaut 0, sauf si DEBUG_MODE est au max
 	//
-	if (!$fatal && (DEBUG_MODE == DEBUG_LEVEL_QUIET ||
-		(DEBUG_MODE == DEBUG_LEVEL_NORMAL && !(error_reporting() & $errno)))
-	) {
+	if (!$fatal && ($debug_level == DEBUG_LEVEL_QUIET ||
+		($debug_level == DEBUG_LEVEL_NORMAL && !(error_reporting() & $errno))
+	)) {
 		return true;
 	}
 
@@ -397,7 +404,12 @@ function wan_exception_handler($e)
  */
 function wan_format_error($error)
 {
-	global $db, $lang;
+	global $db, $lang, $nl_config;
+
+	$debug_level = DEBUG_MODE;
+	if (isset($nl_config['debug_level']) && $nl_config['debug_level'] > DEBUG_MODE) {
+		$debug_level = min(DEBUG_LEVEL_ALL, $nl_config['debug_level']);
+	}
 
 	$errno   = $error->getCode();
 	$errstr  = $error->getMessage();
@@ -424,7 +436,7 @@ function wan_format_error($error)
 		$backtrace = '';
 	}
 
-	if (DEBUG_MODE == DEBUG_LEVEL_QUIET) {
+	if ($debug_level == DEBUG_LEVEL_QUIET) {
 		// Si on est en mode de non-débogage, on a forcément attrapé une erreur
 		// critique pour arriver ici.
 		$message  = $lang['Message']['Critical_error'];

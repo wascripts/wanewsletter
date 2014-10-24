@@ -226,6 +226,16 @@ else {
 
 require WA_ROOTDIR . '/includes/functions.box.php';
 
+$debug_box  = '<select name="debug_level">';
+foreach (array(DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL) as $debug_level) {
+	$debug_box .= sprintf('<option value="%d"%s>%s</option>',
+		$debug_level,
+		$output->getBoolAttr('selected', ($nl_config['debug_level'] == $debug_level)),
+		$lang['Debug_level_'.$debug_level]
+	);
+}
+$debug_box .= '</select>';
+
 $output->page_header();
 
 $output->set_filenames( array(
@@ -238,11 +248,13 @@ $output->assign_vars( array(
 	'TITLE_CONFIG_COOKIES'      => $lang['Title']['config_cookies'],
 	'TITLE_CONFIG_JOINED_FILES' => $lang['Title']['config_files'],
 	'TITLE_CONFIG_EMAIL'        => $lang['Title']['config_email'],
+	'TITLE_DEBUG_MODE'          => $lang['Title']['config_debug'],
 
 	'L_EXPLAIN'                 => nl2br($lang['Explain']['config']),
 	'L_EXPLAIN_COOKIES'         => nl2br($lang['Explain']['config_cookies']),
 	'L_EXPLAIN_JOINED_FILES'    => nl2br($lang['Explain']['config_files']),
 	'L_EXPLAIN_EMAIL'           => nl2br(sprintf($lang['Explain']['config_email'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p9">', '</a>')),
+	'L_EXPLAIN_DEBUG_MODE'      => nl2br($lang['Explain']['config_debug']),
 
 	'L_DEFAULT_LANG'            => $lang['Default_lang'],
 	'L_SITENAME'                => $lang['Sitename'],
@@ -277,6 +289,7 @@ $output->assign_vars( array(
 	'L_AUTH_SMTP_NOTE'          => nl2br($lang['Auth_smtp_note']),
 	'L_VALID_BUTTON'            => $lang['Button']['valid'],
 	'L_RESET_BUTTON'            => $lang['Button']['reset'],
+	'L_DEBUG_LEVEL'             => $lang['Debug_level'],
 
 	'LANG_BOX'                  => lang_box($new_config['language']),
 	'SITENAME'                  => wan_htmlspecialchars($new_config['sitename']),
@@ -300,7 +313,8 @@ $output->assign_vars( array(
 	'WARNING_SMTP'              => (!function_exists('fsockopen')) ? ' <span style="color: red;">[not available]</span>' : '',
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
-	'SMTP_USER'                 => $new_config['smtp_user']
+	'SMTP_USER'                 => $new_config['smtp_user'],
+	'DEBUG_BOX'                 => $debug_box
 ));
 
 if (extension_loaded('ftp')) {
