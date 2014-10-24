@@ -40,9 +40,8 @@ $GLOBALS['supported_db'] = array(
 	),
 	'sqlite' => array(
 		'label'        => 'SQLite',
-		'Name'         => 'SQLite &#8805; 2.8, 3.x',
-		'extension'    => (class_exists('SQLite3') || extension_loaded('sqlite') ||
-			(extension_loaded('pdo') && extension_loaded('pdo_sqlite'))
+		'Name'         => 'SQLite 3',
+		'extension'    => (class_exists('SQLite3') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite'))
 		)
 	)
 );
@@ -203,11 +202,11 @@ function parseDSN($dsn)
 		if (class_exists('SQLite3')) {
 			$infos['driver'] = 'sqlite3';
 		}
-		else if (extension_loaded('pdo') && extension_loaded('pdo_sqlite')) {
+		else {
+			if (!extension_loaded('pdo') || !extension_loaded('pdo_sqlite')) {
+				trigger_error("No SQLite3 or PDO/SQLite extension loaded !", E_USER_ERROR);
+			}
 			$infos['driver'] = 'sqlite_pdo';
-		}
-		else if (!extension_loaded('sqlite')) {
-			trigger_error("No SQLite3, PDO/SQLite or SQLite extension loaded !", E_USER_ERROR);
 		}
 
 		if (is_readable($infos['path']) && filesize($infos['path']) > 0) {
@@ -215,18 +214,8 @@ function parseDSN($dsn)
 			$info = fread($fp, 15);
 			fclose($fp);
 
-			if (strcmp($info, 'SQLite format 3') == 0) {
-				if ($infos['driver'] == 'sqlite') {
-					trigger_error("No SQLite3 or PDO/SQLite extension loaded !", E_USER_ERROR);
-				}
-			}
-			else if ($infos['driver'] != 'sqlite') {
-				if (!extension_loaded('sqlite')) {
-					trigger_error("SQLite extension isn't loaded !", E_USER_ERROR);
-				}
-				else {
-					$infos['driver'] = 'sqlite';
-				}
+			if (strcmp($info, 'SQLite format 3') !== 0) {
+				trigger_error("Your database is not in SQLite format 3 !", E_USER_ERROR);
 			}
 		}
 	}
