@@ -39,7 +39,6 @@ if ($mode == 'adduser') {
 
 	if (isset($_POST['submit'])) {
 		require WA_ROOTDIR . '/includes/functions.validate.php';
-		require WAMAILER_DIR . '/class.mailer.php';
 
 		if (!validate_pseudo($new_login)) {
 			$error = true;
@@ -205,7 +204,6 @@ if (isset($_POST['submit'])) {
 	}
 
 	require WA_ROOTDIR . '/includes/functions.validate.php';
-	require WAMAILER_DIR . '/class.mailer.php';
 
 	if ($dateformat == '') {
 		$dateformat = $nl_config['date_format'];

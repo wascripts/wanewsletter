@@ -7,10 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('CLASS_FORM_INC')) {
-
-define('CLASS_FORM_INC', true);
-
 class Wanewsletter
 {
 	private $code        = '';
@@ -29,8 +25,6 @@ class Wanewsletter
 	public function __construct($listdata = null)
 	{
 		global $nl_config, $lang;
-
-		require WAMAILER_DIR . '/class.mailer.php';
 
 		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 		$mailer->signature = WA_X_MAILER;
@@ -657,6 +651,4 @@ class Wanewsletter
 			update_stats($this->listdata);
 		}
 	}
-}
-
 }

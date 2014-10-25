@@ -7,12 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('_INC_CLASS_WADB_MYSQL')) {
-
-define('_INC_CLASS_WADB_MYSQL', true);
-
-require dirname(__FILE__) . '/wadb.php';
-
 class Wadb_mysql extends Wadb
 {
 	/**
@@ -291,6 +285,4 @@ class WadbBackup_mysql extends WadbBackup
 
 		return $contents;
 	}
-}
-
 }

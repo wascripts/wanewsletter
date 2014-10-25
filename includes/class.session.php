@@ -7,10 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('CLASS_SESSION_INC')) {
-
-define('CLASS_SESSION_INC', true);
-
 /**
  * Gestion des connexions à l'administration
  */
@@ -481,6 +477,3 @@ class Session
 		return implode('.', array_map('hexdec', $hexip_parts));
 	}
 }
-
-}
-

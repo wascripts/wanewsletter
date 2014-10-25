@@ -10,7 +10,6 @@
 define('IN_NEWSLETTER', true);
 
 require './pagestart.php';
-require WAMAILER_DIR . '/class.mailer.php';
 
 if (!wan_is_admin($admindata)) {
 	http_response_code(401);
@@ -24,7 +23,6 @@ $old_config = $nl_config;
 $move_files = false;
 
 if (isset($_POST['submit'])) {
-	require WA_ROOTDIR . '/includes/class.attach.php';
 	require WA_ROOTDIR . '/includes/functions.validate.php';
 
 	$new_config = array();
@@ -149,8 +147,6 @@ if (isset($_POST['submit'])) {
 
 	if ($new_config['use_smtp'] && function_exists('fsockopen')) {
 		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $new_config['urlsite'], $match);
-
-		require WAMAILER_DIR . '/class.smtp.php';
 
 		$smtp = new Smtp();
 

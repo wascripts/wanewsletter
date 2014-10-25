@@ -8,10 +8,6 @@
  * @license   http://www.gnu.org/licenses/lgpl.html  GNU Lesser General Public License
  */
 
-if( !defined('CLASS_MAILER_INC') )
-{
-
-define('CLASS_MAILER_INC', true);
 define('WM_HOST_OTHER',    1);
 define('WM_HOST_ONLINE',   2);
 define('WM_SMTP_MODE',     3);
@@ -2559,6 +2555,3 @@ class Mailer {
 		$this->statut = false;
 	}
 }// fin de la classe
-
-}
-?>

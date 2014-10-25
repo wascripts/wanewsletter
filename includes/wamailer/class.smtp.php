@@ -8,11 +8,6 @@
  * @license   http://www.gnu.org/licenses/lgpl.html  GNU Lesser General Public License
  */
 
-if( !defined('CLASS_SMTP_INC') )
-{
-
-define('CLASS_SMTP_INC', true);
-
 /**
  * Classe de connexion et d'envois d'emails via un serveur SMTP
  * 
@@ -553,6 +548,3 @@ class Smtp {
 		}
 	}
 }
-
-}
-?>

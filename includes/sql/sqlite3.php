@@ -7,12 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('_INC_CLASS_WADB_SQLITE3')) {
-
-define('_INC_CLASS_WADB_SQLITE3', true);
-
-require dirname(__FILE__) . '/wadb.php';
-
 class Wadb_sqlite3 extends Wadb
 {
 	/**
@@ -299,6 +293,4 @@ class WadbBackup_sqlite3 extends WadbBackup
 
 		return $contents;
 	}
-}
-
 }

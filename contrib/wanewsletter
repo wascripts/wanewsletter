@@ -288,8 +288,6 @@ if ($process_send) {
 	echo "\n";
 }
 else if ($process_subscribe) {
-	require WAMAILER_DIR . '/class.pop.php';
-	require WA_ROOTDIR . '/includes/class.form.php';
 	require WA_ROOTDIR . '/includes/functions.validate.php';
 	require WA_ROOTDIR . '/includes/functions.stats.php';
 
@@ -363,8 +361,6 @@ else if ($process_subscribe) {
 	$message = $lang['Message']['Success_operation'];
 }
 else if ($import_mail) {
-	require WAMAILER_DIR . '/class.mailer.php';
-
 	if (count($emails) == 0) {
 		$emails = '';
 		while (!feof(STDIN)) {

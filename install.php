@@ -121,8 +121,6 @@ $config_file .= "\$prefixe = '$prefixe';\n";
 $config_file .= "\n";
 
 if (isset($_POST['sendfile'])) {
-	require WA_ROOTDIR . '/includes/class.attach.php';
-
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
 }
 
@@ -167,7 +165,6 @@ $output->assign_vars( array(
 
 if ($start) {
 	require WA_ROOTDIR . '/includes/functions.validate.php';
-	require WAMAILER_DIR . '/class.mailer.php';
 
 	if (defined('NL_INSTALLED')) {
 		$login = false;

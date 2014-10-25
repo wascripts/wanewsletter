@@ -61,8 +61,6 @@ if (!empty($action) || !empty($code)) {
 	//
 	purge_liste();
 
-	require WA_ROOTDIR . '/includes/class.form.php';
-
 	if (!empty($action)) {
 		if (in_array($action, array('inscription', 'setformat', 'desinscription'))) {
 			$sql = "SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,

@@ -126,7 +126,6 @@ if ($process) {
 	}
 	else {
 		require 'Mail/mimeDecode.php';
-		require WAMAILER_DIR . '/class.pop.php';
 
 		$pop = new Pop();
 		$pop->connect($pop_server, $pop_port, $pop_user, $pop_passwd);

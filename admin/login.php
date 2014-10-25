@@ -39,8 +39,6 @@ if ($mode == 'sendpass') {
 		if (!$error) {
 			$new_password = generate_key(12);
 
-			require WAMAILER_DIR . '/class.mailer.php';
-
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			$mailer->signature = WA_X_MAILER;
 

@@ -7,12 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('_INC_CLASS_WADB_SQLITE_PDO')) {
-
-define('_INC_CLASS_WADB_SQLITE_PDO', true);
-
-require dirname(__FILE__) . '/wadb.php';
-
 class Wadb_sqlite_pdo extends Wadb
 {
 	/**
@@ -338,6 +332,4 @@ class WadbBackup_sqlite_pdo extends WadbBackup
 
 		return $contents;
 	}
-}
-
 }

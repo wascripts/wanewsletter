@@ -8,11 +8,6 @@
  * @license   http://www.gnu.org/licenses/lgpl.html  GNU Lesser General Public License
  */
 
-if( !defined('CLASS_POP_INC') )
-{
-
-define('CLASS_POP_INC', true);
-
 /**
  * Classe de connexion et consultation de serveur POP
  * 
@@ -655,6 +650,3 @@ class Pop {
 		}
 	}
 }
-
-}
-?>

@@ -7,12 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('_INC_CLASS_WADB_POSTGRES')) {
-
-define('_INC_CLASS_WADB_POSTGRES', true);
-
-require dirname(__FILE__) . '/wadb.php';
-
 class Wadb_postgres extends Wadb
 {
 	/**
@@ -519,6 +513,4 @@ class WadbBackup_postgres extends WadbBackup
 
 		return $contents;
 	}
-}
-
 }

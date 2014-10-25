@@ -11,7 +11,6 @@ define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR',    '.');
 
 require WA_ROOTDIR . '/includes/common.inc.php';
-require WA_ROOTDIR . '/includes/class.sessions.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 include WA_ROOTDIR . '/includes/tags.inc.php';
 
@@ -188,8 +187,6 @@ switch ($mode) {
 			if ($abodata = check_login($email)) {
 				list($liste_id, $listdata) = each($abodata['listes']);
 
-				require WAMAILER_DIR . '/class.mailer.php';
-
 				$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 				$mailer->signature = WA_X_MAILER;
 
@@ -265,8 +262,6 @@ switch ($mode) {
 
 	case 'editprofile':
 		if (isset($_POST['submit'])) {
-			require WAMAILER_DIR . '/class.mailer.php';
-
 			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language', 'current_pass', 'new_pass', 'confirm_pass');
 			foreach ($vararray as $varname) {
 				${$varname} = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : '';
@@ -423,9 +418,6 @@ switch ($mode) {
 				WHERE log_id IN(" . implode(', ', $sql_log_id) . ")
 					AND log_status = " . STATUS_SENT;
 			$result = $db->query($sql);
-
-			require WAMAILER_DIR . '/class.mailer.php';
-			require WA_ROOTDIR . '/includes/class.attach.php';
 
 			//
 			// Initialisation de la classe mailer

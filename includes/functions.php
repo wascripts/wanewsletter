@@ -12,6 +12,51 @@ if (!defined('FUNCTIONS_INC')) {
 define('FUNCTIONS_INC', true);
 
 /**
+ * Fonction de chargement automatique de classes.
+ * Implémentation à la barbare sans égard pour PSR-0. On verra plus tard pour
+ * faire quelque chose de plus propre...
+ *
+ * @param string $classname Nom de la classe
+ */
+function wan_autoloader($classname)
+{
+	$catalog = array();
+	$catalog['passwordhash'] = '%s/includes/class.phpass.php';
+	$catalog['wanerror']     = '%s/includes/class.error.php';
+	$catalog['wanewsletter'] = '%s/includes/class.form.php';
+	$catalog['console_progressbar'] = '%s/contrib/Console/ProgressBar.php';
+
+	$classname = strtolower($classname);
+
+	if (!isset($catalog[$classname])) {
+		// Couches d'abstraction pour les bases de données
+		// Wadb ou Wadb_{driver}
+		if (strncmp($classname, 'wadb', 4) === 0) {
+			$filename = sprintf('%s/includes/sql/%s.php',
+				WA_ROOTDIR,
+				// Si on a une classe Wadb_{driver}, on retire le préfixe
+				($classname == 'wadb') ? $classname : substr($classname, 5)
+			);
+		}
+		// Wamailer
+		else if (in_array($classname, array('mailer','pop','smtp'))) {
+			$filename = sprintf('%s/class.%s.php', WAMAILER_DIR, $classname);
+		}
+		// Default
+		else {
+			$filename = sprintf('%s/includes/class.%s.php', WA_ROOTDIR, $classname);
+		}
+	}
+	else {
+		$filename = sprintf($catalog[$classname], WA_ROOTDIR);
+	}
+
+	if (is_readable($filename)) {
+		require $filename;
+	}
+}
+
+/**
  * Vérifie que les numéros de version des tables dans le fichier constantes.php
  * et dans la table de configuration du script sont synchro
  *

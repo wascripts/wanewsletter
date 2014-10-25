@@ -17,8 +17,6 @@ define('WA_ROOTDIR', '..');
 $secure = true;
 
 require WA_ROOTDIR . '/includes/common.inc.php';
-require WA_ROOTDIR . '/includes/class.sessions.php';
-require WA_ROOTDIR . '/includes/class.auth.php';
 
 $liste = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
 

@@ -7,12 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('CLASS_OUTPUT_INC')) {
-
-define('CLASS_OUTPUT_INC', true);
-
-require dirname(__FILE__) . '/template.php';
-
 class Output extends Template
 {
 	/**
@@ -711,6 +705,4 @@ BASIC;
 			$this->assign_var_from_handle('LISTBOX', 'list_box_body');
 		}
 	}
-}
-
 }

@@ -175,8 +175,6 @@ function remove_stats($liste_from, $liste_to = false)
 	@set_time_limit(300);
 
 	if ($browse = dir(WA_STATSDIR . '/')) {
-		require WA_ROOTDIR . '/includes/class.attach.php';
-
 		$old_stats = array();
 
 		while (($filename = $browse->read()) !== false) {

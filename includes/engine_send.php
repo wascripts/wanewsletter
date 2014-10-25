@@ -77,8 +77,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	// Initialisation de la classe mailer
 	//
-	require_once WAMAILER_DIR . '/class.mailer.php';
-
 	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 	$mailer->signature = WA_X_MAILER;
 
@@ -145,7 +143,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	$total_files = count($logdata['joined_files']);
 	$tmp_files   = array();
 
-	require WA_ROOTDIR . '/includes/class.attach.php';
 	$attach = new Attach();
 
 	hasCidReferences($body[FORMAT_HTML], $refs);
@@ -322,8 +319,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 		else if ($nl_config['engine_send'] == ENGINE_UNIQ) {
 			if (defined('IN_COMMANDLINE')) {
-				require WA_ROOTDIR . '/contrib/Console/ProgressBar.php';
-
 				//
 				// Initialisation de la barre de progression des envois
 				//

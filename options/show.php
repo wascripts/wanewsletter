@@ -38,8 +38,6 @@ $result = $db->query($sql);
 
 if ($filedata = $result->fetch()) {
 	if ($nl_config['use_ftp']) {
-		require WA_ROOTDIR . '/includes/class.attach.php';
-
 		$attach = new Attach();
 		$tmp_filename = $attach->ftp_to_tmp($filedata);
 	}

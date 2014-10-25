@@ -51,8 +51,6 @@ if ($mode == 'download') {
 		$output->displayMessage('Not_auth_view');
 	}
 
-	require WA_ROOTDIR . '/includes/class.attach.php';
-
 	$file_id = (!empty($_GET['fid'])) ? intval($_GET['fid']) : 0;
 	$attach  = new Attach();
 	$attach->download_file($file_id);
@@ -124,8 +122,6 @@ else if ($mode == 'export') {
 
 	$zip->close();
 
-	require WA_ROOTDIR . '/includes/class.attach.php';
-
 	$data = file_get_contents($tmp_filename);
 	unlink($tmp_filename);
 
@@ -175,8 +171,6 @@ else if ($mode == 'iframe') {
 				);
 			}
 			else {
-				require WAMAILER_DIR . '/class.mailer.php';
-
 				$body = Mailer::word_wrap(trim($body), false);
 				$body = active_urls(wan_htmlspecialchars($body, ENT_NOQUOTES));
 				$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
@@ -397,8 +391,6 @@ else if ($mode == 'abonnes') {
 
 		if (isset($_POST['submit'])) {
 			$email = (!empty($_POST['email'])) ? trim($_POST['email']) : '';
-
-			require WAMAILER_DIR . '/class.mailer.php';
 
 			if (!Mailer::validate_email($email)) {
 				$error = true;
@@ -908,8 +900,6 @@ else if ($mode == 'liste') {
 				$msg_error[] = $lang['Unknown_format'];
 			}
 
-			require WAMAILER_DIR . '/class.mailer.php';
-
 			if (!Mailer::validate_email($sender_email)) {
 				$error = true;
 				$msg_error[] = $lang['Message']['Invalid_email'];
@@ -930,8 +920,6 @@ else if ($mode == 'liste') {
 			}
 
 			if ($use_cron && function_exists('fsockopen')) {
-				require WAMAILER_DIR . '/class.pop.php';
-
 				$pop = new Pop();
 
 				$result = $pop->connect(
@@ -1136,8 +1124,6 @@ else if ($mode == 'liste') {
 				while ($log_id = $result->column('log_id')) {
 					$log_ids[] = $log_id;
 				}
-
-				require WA_ROOTDIR . '/includes/class.attach.php';
 
 				$attach = new Attach();
 				$attach->delete_joined_files(true, $log_ids);
@@ -1466,8 +1452,6 @@ else if ($mode == 'log') {
 			$sql = "DELETE FROM " . LOG_TABLE . "
 				WHERE log_id IN(" . implode(', ', $log_ids) . ")";
 			$db->query($sql);
-
-			require WA_ROOTDIR . '/includes/class.attach.php';
 
 			$attach = new Attach();
 			$attach->delete_joined_files(true, $log_ids);

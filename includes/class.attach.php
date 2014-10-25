@@ -7,10 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('CLASS_ATTACH_INC')) {
-
-define('CLASS_ATTACH_INC', true);
-
 /**
  * Class Attach
  *
@@ -340,8 +336,6 @@ class Attach
 					}
 					ftp_close($cid);
 
-					require WAMAILER_DIR . '/class.mailer.php';
-
 					$filetype = Mailer::mime_type(substr($filename, (strrpos($filename, '.') + 1)));
 				}
 
@@ -352,8 +346,6 @@ class Attach
 			// Fichier uploadé manuellement sur le serveur
 			//
 			else if ($upload_mode == 'local') {
-				require WAMAILER_DIR . '/class.mailer.php';
-
 				$filetype = Mailer::mime_type($extension);
 
 				//
@@ -776,6 +768,4 @@ class Attach
 			@ftp_close($this->connect_id);
 		}
 	}
-}
-
 }

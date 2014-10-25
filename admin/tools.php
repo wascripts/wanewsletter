@@ -396,8 +396,6 @@ switch ($mode) {
 			$contents = compress_filedata($filename, $mime_type, $contents, $compress);
 
 			if ($action == 'download') {
-				include WA_ROOTDIR . '/includes/class.attach.php';
-
 				Attach::send_file($filename, $mime_type, $contents);
 			}
 			else {
@@ -538,8 +536,6 @@ switch ($mode) {
 			if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
 				$format = $listdata['liste_format'];
 			}
-
-			require WAMAILER_DIR . '/class.mailer.php';
 
 			if (!empty($list_tmp) && $data_is_xml) {
 				$emails = array();
@@ -1008,8 +1004,6 @@ switch ($mode) {
 			$contents = compress_filedata($filename, $mime_type, $contents, $compress);
 
 			if ($action == 'download') {
-				include WA_ROOTDIR . '/includes/class.attach.php';
-
 				Attach::send_file($filename, $mime_type, $contents);
 			}
 			else {

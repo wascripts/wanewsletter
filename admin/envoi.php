@@ -70,8 +70,6 @@ switch ($mode) {
 	// Téléchargement d'un fichier joint
 	//
 	case 'download':
-		require WA_ROOTDIR . '/includes/class.attach.php';
-
 		$file_id = (!empty($_GET['fid'])) ? intval($_GET['fid']) : 0;
 		$attach  = new Attach();
 		$attach->download_file($file_id);
@@ -460,8 +458,6 @@ switch ($mode) {
 				WHERE log_id = ' . $logdata['log_id'];
 			$db->query($sql);
 
-			require WA_ROOTDIR . '/includes/class.attach.php';
-
 			$attach = new Attach();
 			$attach->delete_joined_files(true, $logdata['log_id']);
 
@@ -765,8 +761,6 @@ switch ($mode) {
 			$errno_code   = (!empty($join_file['error'])) ? intval($join_file['error']) : UPLOAD_ERR_OK;
 			$file_id      = (!empty($_POST['fid'])) ? intval($_POST['fid']) : 0;
 
-			require WA_ROOTDIR . '/includes/class.attach.php';
-
 			$attach = new Attach();
 
 			if (!empty($file_id)) {
@@ -808,8 +802,6 @@ switch ($mode) {
 			//
 			// Suppression du fichier joint spécifié
 			//
-			require WA_ROOTDIR . '/includes/class.attach.php';
-
 			$attach = new Attach();
 			$attach->delete_joined_files(false, $logdata['log_id'], $file_ids);
 
@@ -876,8 +868,6 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 //
 $supp_address = array();
 if ($mode == 'test' && !empty($_POST['test_address'])) {
-	require_once WAMAILER_DIR . '/class.mailer.php';
-
 	$supp_address = explode(',', $_POST['test_address']);
 	$supp_address = array_map('trim', $supp_address);
 	$supp_address = array_unique($supp_address);

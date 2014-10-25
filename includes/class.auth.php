@@ -7,10 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('CLASS_AUTH_INC')) {
-
-define('CLASS_AUTH_INC', true);
-
 /**
  * Class Auth
  *
@@ -144,6 +140,4 @@ class Auth
 
 		return $box_auth;
 	}
-}
-
 }

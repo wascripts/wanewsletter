@@ -74,8 +74,6 @@ if ($listdata = $result->fetch()) {
 		$output->displayMessage($message);
 	}
 	else if ($mode == 'validate') {
-		require WAMAILER_DIR . '/class.pop.php';
-		require WA_ROOTDIR . '/includes/class.form.php';
 		require WA_ROOTDIR . '/includes/functions.validate.php';
 		require WA_ROOTDIR . '/includes/functions.stats.php';
 

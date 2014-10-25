@@ -7,10 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('CLASS_WANERROR_INC') ) {
-
-define('CLASS_WANERROR_INC', true);
-
 /**
  * Wrapper pour les erreurs générées par PHP
  * Utilisé comme simple contenant pour les informations sur une erreur donnée
@@ -24,6 +20,4 @@ class WanError extends Exception
 		$this->file    = $error['file'];
 		$this->line    = $error['line'];
 	}
-}
-
 }
