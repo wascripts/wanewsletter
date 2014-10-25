@@ -35,7 +35,7 @@ $GLOBALS['supported_db'] = array(
 	),
 	'postgres' => array(
 		'label'        => 'PostgreSQL',
-		'Name'         => 'PostgreSQL &#8805; 8.x, 9.x',
+		'Name'         => 'PostgreSQL &#8805; 8.3',
 		'extension'    => extension_loaded('pgsql')
 	),
 	'sqlite' => array(
