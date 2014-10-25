@@ -62,13 +62,9 @@ $db_to   = WaDatabase($dsn_to);
 // DROP if any
 
 foreach ($sql_schemas as $tablename => $schema) {
-	if ($db_to->engine == 'postgres' && !empty($schema['sequence'])) {
-		foreach ($schema['sequence'] as $sequence) {
-			$db_to->query(sprintf('DROP SEQUENCE IF EXISTS %s',
-				$db_to->quote(str_replace('wa_', $prefixe_to, $sequence))
-			));
-		}
-	}
+	$db_to->query(sprintf('DROP TABLE IF EXISTS %s',
+		$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))
+	));
 
 	if (!empty($schema['index'])) {
 		foreach ($schema['index'] as $index) {
@@ -77,10 +73,6 @@ foreach ($sql_schemas as $tablename => $schema) {
 			));
 		}
 	}
-
-	$db_to->query(sprintf('DROP TABLE IF EXISTS %s',
-		$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))
-	));
 }
 
 // Create table
@@ -91,11 +83,33 @@ foreach ($sql_create as $query) {
 	$db_to->query($query);
 }
 
+// On récupère les séquences PostgreSQL pour les initialiser correctement après les insertions
+if ($db_to->engine == 'postgres') {
+	$sequences = array();
+
+	$sql = "SELECT t.relname AS tablename, a.attname AS fieldname, s.relname AS seqname
+		FROM pg_class s
+			JOIN pg_depend d ON d.objid = s.oid
+			JOIN pg_class t ON d.refobjid = t.oid
+			JOIN pg_attribute a ON (d.refobjid, d.refobjsubid) = (a.attrelid, a.attnum)
+			JOIN pg_namespace n ON n.oid = s.relnamespace
+		WHERE s.relkind = 'S' AND n.nspname = 'public'";
+	$res = $db_to->query($sql);
+
+	while ($row = $res->fetch()) {
+		if (isset($sql_schemas[$row['tablename']])) {
+			$sequences[$row['tablename']] = array(
+				'seqname' => $row['seqname'],
+				'seqval'  => 1,
+				'field'   => $row['fieldname']
+			);
+		}
+	}
+}
+
 //
 // Si la base de données de destination est SQLite, on travaille en mémoire et
 // on fait la copie sur disque à la fin, c'est beaucoup plus rapide.
-//
-// Voir ligne ~272 pour la 2e partie du boulot
 //
 if ($db_to->engine == 'sqlite') {
 	$sqlite_db = $db_to->dbname;
@@ -157,21 +171,6 @@ function fields_list($tablename)
 	return $fields;
 }
 
-// Sequence postgresql
-$sequence = array();
-
-foreach ($sql_schemas as $tablename => $schema) {
-	if (!empty($schema['sequence'])) {
-		$seq = each($schema['sequence']);
-
-		$sequence[$tablename] = array(
-			'field'   => $seq['key'],
-			'seqname' => $seq['value'],
-			'seqval'  => 0
-		);
-	}
-}
-
 // Populate table
 foreach ($sql_schemas as $tablename => $schema) {
 	printf("Populate table %s...\n", str_replace('wa_', $prefixe_to, $tablename));
@@ -204,16 +203,19 @@ foreach ($sql_schemas as $tablename => $schema) {
 				exit(1);
 			}
 
-			if (isset($sequence[$tablename]) && $row[$sequence[$tablename]['field']] > $sequence[$tablename]['seqval']) {
-				$sequence[$tablename]['seqval'] = $row[$sequence[$tablename]['field']];
+			if ($db_to->engine == 'postgres' && isset($sequences[$tablename])) {
+				$sequences[$tablename]['seqval'] = max(
+					$sequences[$tablename]['seqval'],
+					++$row[$sequences[$tablename]['field']]
+				);
 			}
 		}
 		while ($row = $result->fetch());
 
-		if ($db_to->engine == 'postgres' && isset($sequence[$tablename])) {
-			$db_to->query(sprintf('ALTER SEQUENCE %s RESTART WITH %d',
-				$db_to->quote(str_replace('wa_', $prefixe_to, $sequence[$tablename]['seqname'])),
-				$sequence[$tablename]['seqval'] + 1
+		if ($db_to->engine == 'postgres' && isset($sequences[$tablename])) {
+			$db_to->query(sprintf("SELECT setval('%s', %d, false)",
+				$sequences[$tablename]['seqname'],
+				$sequences[$tablename]['seqval']
 			));
 		}
 	}

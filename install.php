@@ -271,14 +271,6 @@ if ($start) {
 					str_replace('wa_', $prefixe, $tablename)
 				);
 
-				if ($db->engine == 'postgres' && !empty($schema['sequence'])) {
-					foreach ($schema['sequence'] as $sequence) {
-						$sql_drop[] = sprintf("DROP SEQUENCE IF EXISTS %s",
-							str_replace('wa_', $prefixe, $sequence)
-						);
-					}
-				}
-
 				if (!empty($schema['index'])) {
 					foreach ($schema['index'] as $index) {
 						$sql_drop[] = sprintf("DROP INDEX IF EXISTS %s",

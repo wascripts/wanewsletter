@@ -2,15 +2,6 @@
 -- Schéma des tables de WAnewsletter pour PostgreSQL
 -- 
 
-CREATE SEQUENCE wa_abonnes_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1; 
-CREATE SEQUENCE wa_admin_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
-CREATE SEQUENCE wa_ban_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
-CREATE SEQUENCE wa_config_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
-CREATE SEQUENCE wa_forbidden_ext_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
-CREATE SEQUENCE wa_joined_files_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
-CREATE SEQUENCE wa_liste_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
-CREATE SEQUENCE wa_log_id_seq start 1 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
-
 
 -- 
 -- Structure de la table "wa_abo_liste"
@@ -32,7 +23,7 @@ CREATE TABLE wa_abo_liste (
 -- Structure de la table "wa_abonnes"
 -- 
 CREATE TABLE wa_abonnes (
-	abo_id     INTEGER      NOT NULL DEFAULT nextval('wa_abonnes_id_seq'::text),
+	abo_id     SERIAL,
 	abo_pseudo VARCHAR(30)  NOT NULL DEFAULT '',
 	abo_pwd    VARCHAR(255) NOT NULL DEFAULT '',
 	abo_email  VARCHAR(254) NOT NULL DEFAULT '',
@@ -48,7 +39,7 @@ CREATE INDEX abo_status_idx ON wa_abonnes (abo_status);
 -- Structure de la table "wa_admin"
 -- 
 CREATE TABLE wa_admin (
-	admin_id            SMALLINT     NOT NULL DEFAULT nextval('wa_admin_id_seq'::text),
+	admin_id            SERIAL,
 	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
 	admin_pwd           VARCHAR(255) NOT NULL DEFAULT '',
 	admin_email         VARCHAR(254) NOT NULL DEFAULT '',
@@ -84,7 +75,7 @@ CREATE INDEX admin_id_idx ON wa_auth_admin (admin_id);
 -- Structure de la table "wa_ban_list"
 -- 
 CREATE TABLE wa_ban_list (
-	ban_id    INTEGER      NOT NULL DEFAULT nextval('wa_ban_id_seq'::text),
+	ban_id    SERIAL,
 	liste_id  SMALLINT     NOT NULL DEFAULT 0,
 	ban_email VARCHAR(254) NOT NULL DEFAULT '',
 	CONSTRAINT wa_ban_list_pk PRIMARY KEY (ban_id)
@@ -95,7 +86,7 @@ CREATE TABLE wa_ban_list (
 -- Structure de la table "wa_config"
 -- 
 CREATE TABLE wa_config (
-	config_id     SMALLINT     NOT NULL DEFAULT nextval('wa_config_id_seq'::text),
+	config_id     SERIAL,
 	config_name   VARCHAR(255),
 	config_value  VARCHAR(255),
 	CONSTRAINT wa_config_pk PRIMARY KEY (config_id),
@@ -107,7 +98,7 @@ CREATE TABLE wa_config (
 -- Structure de la table "wa_forbidden_ext"
 -- 
 CREATE TABLE wa_forbidden_ext (
-	fe_id    SMALLINT    NOT NULL DEFAULT nextval('wa_forbidden_ext_id_seq'::text),
+	fe_id    SERIAL,
 	liste_id SMALLINT    NOT NULL DEFAULT 0,
 	fe_ext   VARCHAR(10) NOT NULL DEFAULT '',
 	CONSTRAINT wa_forbidden_ext_pk PRIMARY KEY (fe_id)
@@ -118,7 +109,7 @@ CREATE TABLE wa_forbidden_ext (
 -- Structure de la table "wa_joined_files"
 -- 
 CREATE TABLE wa_joined_files (
-	file_id            INTEGER      NOT NULL DEFAULT nextval('wa_joined_files_id_seq'::text),
+	file_id            SERIAL,
 	file_real_name     VARCHAR(200) NOT NULL DEFAULT '',
 	file_physical_name VARCHAR(200) NOT NULL DEFAULT '',
 	file_size          INTEGER      NOT NULL DEFAULT 0,
@@ -131,7 +122,7 @@ CREATE TABLE wa_joined_files (
 -- Structure de la table "wa_liste"
 -- 
 CREATE TABLE wa_liste (
-	liste_id          SMALLINT     NOT NULL DEFAULT nextval('wa_liste_id_seq'::text),
+	liste_id          SERIAL,
 	liste_name        VARCHAR(100) NOT NULL DEFAULT '',
 	liste_public      SMALLINT     NOT NULL DEFAULT 1,
 	liste_format      SMALLINT     NOT NULL DEFAULT 1,
@@ -160,7 +151,7 @@ CREATE TABLE wa_liste (
 -- Structure de la table "wa_log"
 -- 
 CREATE TABLE wa_log (
-	log_id        INTEGER      NOT NULL DEFAULT nextval('wa_log_id_seq'::text),
+	log_id        SERIAL,
 	liste_id      SMALLINT     NOT NULL DEFAULT 0,
 	log_subject   VARCHAR(100) NOT NULL DEFAULT '',
 	log_body_html TEXT,

@@ -51,34 +51,21 @@ $GLOBALS['sql_schemas'] = array(
 		'index'    => array('register_key_idx')
 	),
 	ABONNES_TABLE       => array(
-		'index'    => array('abo_email_idx', 'abo_status_idx'),
-		'sequence' => array('abo_id' => 'wa_abonnes_id_seq')
+		'index'    => array('abo_email_idx', 'abo_status_idx')
 	),
-	ADMIN_TABLE         => array(
-		'sequence' => array('admin_id' => 'wa_admin_id_seq')
-	),
+	ADMIN_TABLE         => array(),
 	AUTH_ADMIN_TABLE    => array(
 		'index'    => array('admin_id_idx')
 	),
-	BANLIST_TABLE       => array(
-		'sequence' => array('ban_id' => 'wa_ban_id_seq')
-	),
+	BANLIST_TABLE       => array(),
 	CONFIG_TABLE        => array(
-		'index'    => array('config_name_idx'),
-		'sequence' => array('config_id' => 'wa_config_id_seq')
+		'index'    => array('config_name_idx')
 	),
-	FORBIDDEN_EXT_TABLE => array(
-		'sequence' => array('fe_id' => 'wa_forbidden_ext_id_seq')
-	),
-	JOINED_FILES_TABLE  => array(
-		'sequence' => array('file_id' => 'wa_joined_files_id_seq')
-	),
-	LISTE_TABLE         => array(
-		'sequence' => array('liste_id' => 'wa_liste_id_seq')
-	),
+	FORBIDDEN_EXT_TABLE => array(),
+	JOINED_FILES_TABLE  => array(),
+	LISTE_TABLE         => array(),
 	LOG_TABLE           => array(
-		'index'    => array('liste_id_idx', 'log_status_idx'),
-		'sequence' => array('log_id' => 'wa_log_id_seq')
+		'index'    => array('liste_id_idx', 'log_status_idx')
 	),
 	LOG_FILES_TABLE     => array(),
 	SESSIONS_TABLE      => array()

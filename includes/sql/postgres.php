@@ -37,6 +37,13 @@ class Wadb_postgres extends Wadb
 	 */
 	protected $_affectedRows = 0;
 
+	/**
+	 * Liste de séquences telle que ['dbname.tablename' => 'seqname']
+	 *
+	 * @var array
+	 */
+	protected static $seqlist = array();
+
 	public function connect($infos = null, $options = null)
 	{
 		$connectString = '';
@@ -186,9 +193,29 @@ class Wadb_postgres extends Wadb
 	public function lastInsertId()
 	{
 		if (preg_match('/^INSERT\s+INTO\s+([^\s]+)\s+/i', $this->lastQuery, $m)) {
-			$result = pg_query($this->link, "SELECT currval('{$m[1]}_id_seq') AS lastId");
+			$tablename = trim($m[1], '"');// Revert éventuel de l'appel à self::quote()
+			$key = $this->dbname . '.' . $tablename;
 
-			if (is_resource($result)) {
+			if (!isset(self::$seqlist[$key]) ) {
+				$sql = sprintf("SELECT s.relname AS seqname
+					FROM pg_class s
+						JOIN pg_depend d ON d.objid = s.oid
+						JOIN pg_class t ON t.relname = '%s' AND d.refobjid = t.oid
+						JOIN pg_namespace n ON n.oid = s.relnamespace
+					WHERE s.relkind = 'S' AND n.nspname = 'public'", $tablename
+				);
+				$result = pg_query($this->link, $sql);
+
+				if ($seqname = pg_fetch_result($result, 0, 'seqname')) {
+					self::$seqlist[$key] = $seqname;
+				}
+			}
+			else {
+				$seqname = self::$seqlist[$key];
+			}
+
+			if ($seqname) {
+				$result = pg_query($this->link, "SELECT currval('$seqname') AS lastId");
 				return pg_fetch_result($result, 0, 'lastId');
 			}
 		}
@@ -301,54 +328,69 @@ class WadbBackup_postgres extends WadbBackup
 		return $tables;
 	}
 
-	public function get_other_queries($drop_option)
+	public function get_table_structure($tabledata, $drop_option)
 	{
-		global $backup_type;
+		$contents = '';
+		$sequences = array();
 
-		$contents  = '-- ' . $this->eol;
-		$contents .= '-- Sequences ' . $this->eol;
-		$contents .= '-- ' . $this->eol;
-
-		$sql = "SELECT relname
-			FROM pg_class
-			WHERE NOT relname ~ '^pg_.*' AND relkind ='S'
-			ORDER BY relname";
+		$sql = sprintf("SELECT a.attname AS fieldname, s.relname AS seqname
+			FROM pg_class s
+				JOIN pg_depend d ON d.objid = s.oid
+				JOIN pg_class t ON t.relname = '%s' AND d.refobjid = t.oid
+				JOIN pg_attribute a ON (d.refobjid, d.refobjsubid) = (a.attrelid, a.attnum)
+				JOIN pg_namespace n ON n.oid = s.relnamespace
+			WHERE s.relkind = 'S' AND n.nspname = 'public'", $tabledata['name']);
 		$result = $this->db->query($sql);
 
-		$contents = '';
-		while ($sequence = $result->column('relname')) {
+		while ($row = $result->fetch()) {
+			$sql = sprintf('SELECT * FROM %s', $this->db->quote($row['seqname']));
+			$result_seq = $this->db->query($sql);
 
-			$result_seq = $this->db->query('SELECT * FROM ' . $this->db->quote($sequence));
-
-			if ($row = $result_seq->fetch()) {
-				if ($drop_option) {
-					$contents .= "DROP SEQUENCE IF EXISTS ".$this->db->quote($sequence).";" . $this->eol;
+			if ($seq = $result_seq->fetch()) {
+				if (!isset($sequences[$tabledata['name']])) {
+					$sequences[$tabledata['name']] = array();
 				}
-
-				$contents .= 'CREATE SEQUENCE ' . $this->db->quote($sequence)
-					. ' start ' . $row['last_value']
-					. ' increment ' . $row['increment_by']
-					. ' maxvalue ' . $row['max_value']
-					. ' minvalue ' . $row['min_value']
-					. ' cache ' . $row['cache_value'] . '; ' . $this->eol;
-
-				if ($row['last_value'] > 1 && $backup_type != 1) {
-					//$contents .= 'SELECT NEXTVAL(\'' . $sequence . '\'); ' . $this->eol;
-				}
+				$sequences[$tabledata['name']][$row['fieldname']] = $seq;
 			}
 		}
 
-		return $contents . $this->eol;
-	}
-
-	public function get_table_structure($tabledata, $drop_option)
-	{
-		$contents  = '-- ' . $this->eol;
+		$contents .= '--' . $this->eol;
 		$contents .= '-- Structure de la table ' . $tabledata['name'] . $this->eol;
-		$contents .= '-- ' . $this->eol;
+		$contents .= '--' . $this->eol;
 
 		if ($drop_option) {
-			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
+			$contents .= sprintf("DROP TABLE IF EXISTS %s;%s", $this->db->quote($tabledata['name']), $this->eol);
+		}
+
+		if (isset($sequences[$tabledata['name']])) {
+			$contents .= $this->eol;
+
+			foreach ($sequences[$tabledata['name']] as $seq) {
+				// Création de la séquence
+				$contents .= sprintf("CREATE SEQUENCE %s start %d increment %d maxvalue %d minvalue %d cache %d;%s",
+					$this->db->quote($seq['sequence_name']),
+					$seq['start_value'],
+					$seq['increment_by'],
+					$seq['max_value'],
+					$seq['min_value'],
+					$seq['cache_value'],
+					$this->eol
+				);
+
+				// Initialisation à sa valeur courante
+				$last_value = $seq['last_value'];
+				if ($seq['is_called'] == 't') {
+					$last_value++;
+				}
+
+				$contents .= sprintf("SELECT setval('%s', %d, false);%s",
+					$seq['sequence_name'],
+					$last_value,
+					$this->eol
+				);
+			}
+
+			$contents .= $this->eol;
 		}
 
 		$sql = "SELECT a.attnum, a.attname AS field, t.typname as type, a.attlen AS length,
@@ -361,20 +403,17 @@ class WadbBackup_postgres extends WadbBackup
 			ORDER BY a.attnum";
 		$result = $this->db->query($sql);
 
-		$contents .= 'CREATE TABLE ' . $this->db->quote($tabledata['name']) . ' (' . $this->eol;
+		$contents .= sprintf("CREATE TABLE %s (%s", $this->db->quote($tabledata['name']), $this->eol);
 
 		while ($row = $result->fetch()) {
-			$sql = "SELECT d.adsrc AS rowdefault
-				FROM pg_attrdef d, pg_class c
-				WHERE (c.relname = '" . $tabledata['name'] . "')
-					AND (c.oid = d.adrelid)
-					AND d.adnum = " . $row['attnum'];
-			try {
+			if ($row['notnull'] == 't') {
+				$sql = "SELECT d.adsrc AS rowdefault
+					FROM pg_attrdef d, pg_class c
+					WHERE (c.relname = '" . $tabledata['name'] . "')
+						AND (c.oid = d.adrelid)
+						AND d.adnum = " . $row['attnum'];
 				$res = $this->db->query($sql);
 				$row['rowdefault'] = $res->column('rowdefault');
-			}
-			catch (Exception $e) {
-				unset($row['rowdefault']);
 			}
 
 			if ($row['type'] == 'bpchar') {
@@ -446,11 +485,11 @@ class WadbBackup_postgres extends WadbBackup
 
 		if (!empty($primary_key_name)) {
 			$primary_key_fields = array_map(array($this->db, 'quote'), $primary_key_fields);
-			$contents .= sprintf("CONSTRAINT %s PRIMARY KEY (%s),",
+			$contents .= sprintf("CONSTRAINT %s PRIMARY KEY (%s),%s",
 				$this->db->quote($primary_key_name),
-				implode(', ', $primary_key_fields)
+				implode(', ', $primary_key_fields),
+				$this->eol
 			);
-			$contents .= $this->eol;
 		}
 
 		$index_create = '';
@@ -461,20 +500,20 @@ class WadbBackup_postgres extends WadbBackup
 				$props['column_names'] = implode(', ', $props['column_names']);
 
 				if (!empty($props['unique'])) {
-					$contents .= sprintf("CONSTRAINT %s UNIQUE (%s),",
+					$contents .= sprintf("CONSTRAINT %s UNIQUE (%s),%s",
 						$this->db->quote($idx_name),
-						$props['column_names']
+						$props['column_names'],
+						$this->eol
 					);
-					$contents .= $this->eol;
 				}
 				else {
-					$index_create .= sprintf("CREATE %s INDEX %s ON %s (%s);",
+					$index_create .= sprintf("CREATE %s INDEX %s ON %s (%s);%s",
 						$props['unique'],
 						$this->db->quote($idx_name),
 						$this->db->quote($tabledata['name']),
-						$props['column_names']
+						$props['column_names'],
+						$this->eol
 					);
-					$index_create .= $this->eol;
 				}
 			}
 		}
@@ -482,10 +521,10 @@ class WadbBackup_postgres extends WadbBackup
 		//
 		// Generate constraint clauses for CHECK constraints
 		//
-/*		$sql = "SELECT rcname as index_name, rcsrc
+/*		$sql = sprintf("SELECT rcname as index_name, rcsrc
 			FROM pg_relcheck, pg_class bc
 			WHERE rcrelid = bc.oid
-				AND bc.relname = '" . $tabledata['name'] . "'
+				AND bc.relname = '%s'
 				AND NOT EXISTS (
 					SELECT *
 					FROM pg_relcheck as c, pg_inherits as i
@@ -493,16 +532,22 @@ class WadbBackup_postgres extends WadbBackup
 						AND c.rcname = pg_relcheck.rcname
 						AND c.rcsrc = pg_relcheck.rcsrc
 						AND c.rcrelid = i.inhparent
-				)";
+			)",
+			$tabledata['name']
+		);
 		$result = $this->db->query($sql);
 
 		//
 		// Add the constraints to the sql file.
 		//
 		while ($row = $result->fetch()) {
-			$contents .= 'CONSTRAINT ' . $this->db->quote($row['index_name']) . ' CHECK ' . $row['rcsrc'] . ',' . $this->eol;
-		}
-		*/
+			$contents .= sprintf("CONSTRAINT %s CHECK %s,%s",
+				$this->db->quote($row['index_name']),
+				$row['rcsrc'],
+				$this->eol
+			);
+		}*/
+
 		$len = strlen(',' . $this->eol);
 		$contents = substr($contents, 0, -$len);
 		$contents .= $this->eol . ');' . $this->eol;
@@ -511,6 +556,18 @@ class WadbBackup_postgres extends WadbBackup
 			$contents .= $index_create;
 		}
 
-		return $contents;
+		if (isset($sequences[$tabledata['name']])) {
+			// Rattachement des séquences sur les champs liés
+			foreach ($sequences[$tabledata['name']] as $field => $seq) {
+				$contents .= sprintf("ALTER SEQUENCE %s OWNED BY %s.%s;%s",
+					$this->db->quote($seq['sequence_name']),
+					$this->db->quote($tabledata['name']),
+					$this->db->quote($field),
+					$this->eol
+				);
+			}
+		}
+
+		return $contents . $this->eol;
 	}
 }

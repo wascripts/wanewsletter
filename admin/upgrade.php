@@ -75,12 +75,10 @@ if (isset($_POST['start'])) {
 		$sql_create = parseSQL(file_get_contents($sql_create), $prefixe);
 		$sql_data   = parseSQL(file_get_contents($sql_data), $prefixe);
 
-		$pattern = ($db->engine == 'postgres' ? 'SEQUENCE|' : '') . 'TABLE|INDEX';
-
 		$sql_create_by_table = $sql_data_by_table = array();
 
 		foreach ($sql_create as $query) {
-			if (preg_match("/CREATE\s+($pattern)\s+([A-Za-z0-9_$]+?)\s+/", $query, $m)) {
+			if (preg_match("/CREATE\s+(TABLE|INDEX)\s+([A-Za-z0-9_$]+?)\s+/", $query, $m)) {
 				foreach ($sql_schemas as $tablename => $schema) {
 					if ($m[1] == 'TABLE') {
 						if ($tablename != $m[2]) {
@@ -592,6 +590,24 @@ if (isset($_POST['start'])) {
 		if ($nl_config['db_version'] < 15) {
 			$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
 				VALUES('debug_level', '1')";
+		}
+
+		//
+		// Corrections sur les séquences PostgreSQL créées manuellement et donc
+		// non liées à leur table
+		//
+		if ($nl_config['db_version'] < 16 && $db->engine == 'postgres') {
+			// La séquence pour la table ban_list ne suit pas le nommage {tablename}_id_seq
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$sban_id_seq RENAME TO %2$s_ban_id_seq', $prefixe, BANLIST_TABLE);
+
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.abo_id', ABONNES_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.admin_id', ADMIN_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.ban_id', BANLIST_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.config_id', CONFIG_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.fe_id', FORBIDDEN_EXT_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.file_id', JOINED_FILES_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.liste_id', LISTE_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.log_id', LOG_TABLE);
 		}
 
 		exec_queries($sql_update);
