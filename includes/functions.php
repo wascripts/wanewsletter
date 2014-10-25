@@ -469,6 +469,10 @@ function wan_format_error($error)
 	}
 
 	foreach ($backtrace as $i => &$t) {
+		if (!isset($t['file'])) {
+			$t['file'] = 'unknown';
+			$t['line'] = 0;
+		}
 		$file = wan_htmlspecialchars(str_replace(dirname(dirname(__FILE__)), '~', $t['file']));
 		$call = (isset($t['class']) ? $t['class'].$t['type'] : '') . $t['function'];
 		$t = sprintf('#%d  %s() called at [%s:%d]', $i, $call, $file, $t['line']);
