@@ -152,7 +152,14 @@ class Wadb_postgres extends Wadb
 
 	public function quote($name)
 	{
-		return '"' . $name . '"';
+		if (function_exists('pg_escape_identifier')) {// TODO PHP 5.4.4+
+			$name = pg_escape_identifier($this->link, $name);
+		}
+		else {
+			$name = '"' . $name . '"';
+		}
+
+		return $name;
 	}
 
 	public function vacuum($tables)
@@ -225,7 +232,7 @@ class Wadb_postgres extends Wadb
 
 	public function escape($string)
 	{
-		return pg_escape_string($string);
+		return pg_escape_string($this->link, $string);
 	}
 
 	public function ping()
