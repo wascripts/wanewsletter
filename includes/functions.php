@@ -549,6 +549,9 @@ function wan_display_error($error, $simpleHTML = false)
 			$message = preg_replace("#<b>#",  "\033[1;37m", $message);
 			$message = preg_replace("#</b>#", "\033[0m", $message);
 		}
+		else {
+			$message = preg_replace("#</?b>#", "", $message);
+		}
 
 		$message = htmlspecialchars_decode($message);
 
