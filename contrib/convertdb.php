@@ -135,7 +135,7 @@ function fields_list($tablename)
 		}
 	}
 	else if ($db_to->engine == 'postgres') {
-		$sql = "SELECT a.attname AS Field
+		$sql = "SELECT a.attname AS field
 			FROM pg_class c, pg_attribute a
 			WHERE c.relname = '$tablename'
 				AND a.attnum > 0
@@ -143,7 +143,7 @@ function fields_list($tablename)
 		$result = $db_to->query($sql);
 
 		while ($row = $result->fetch()) {
-			$fields[] = $row['Field'];
+			$fields[] = $row['field'];
 		}
 	}
 	else if ($db_to->engine == 'sqlite') {
