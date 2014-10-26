@@ -1500,7 +1500,7 @@ function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1'
  */
 function wan_is_admin($admin)
 {
-	return ($admin['admin_level'] == ADMIN_LEVEL);
+	return (isset($admin['admin_level']) && $admin['admin_level'] == ADMIN_LEVEL);
 }
 
 }
