@@ -373,7 +373,7 @@ function load_settings($admindata = array())
 }
 
 /**
- * Gestionnaire d'erreur personnalisé du script (en sortie http)
+ * Gestionnaire d'erreur personnalisé du script
  *
  * @param integer $errno   Code de l'erreur
  * @param string  $errstr  Texte proprement dit de l'erreur
@@ -430,7 +430,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 }
 
 /**
- * Gestionnaire d'erreur personnalisé du script (en sortie http)
+ * Gestionnaire d'erreur personnalisé du script
  *
  * @param Exception $e Exception "attrapée" par le gestionnaire
  */
@@ -637,8 +637,6 @@ function wanlog($entry = null)
 
 /**
  * Même fonctionnement que la fonction native error_get_last()
- *
- * @param mixed $entry Peut être un objet Exception, ou une simple chaîne
  *
  * @return array
  */
@@ -888,8 +886,6 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  * Fonction récursive
  *
  * @param array $data Tableau des données
- *
- * @return array
  */
 function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 {
@@ -903,17 +899,15 @@ function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 	}
 
 	if ($doStrip && is_array($data)) {
-		foreach ($data as $key => $val) {
+		foreach ($data as $key => &$val) {
 			if (is_array($val)) {
-				$data[$key] = strip_magic_quotes_gpc($val, $isFilesArray);
+				strip_magic_quotes_gpc($val, $isFilesArray);
 			}
 			else if (is_string($val) && (!$isFilesArray || $key != 'tmp_name')) {
 				$data[$key] = stripslashes($val);
 			}
 		}
 	}
-
-	return $data;
 }
 
 /**
@@ -991,7 +985,7 @@ function config_status($name)
  * @param string  $name         Nom de la directive
  * @param boolean $need_boolean Nécessaire pour obtenir un booléen en retour (pour les directives on/off)
  *
- * @return mixed
+ * @return boolean|string
  */
 function config_value($name, $need_boolean = false)
 {
