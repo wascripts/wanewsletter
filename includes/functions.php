@@ -491,7 +491,11 @@ function wan_format_error($error)
 		$message  = $lang['Message']['Critical_error'];
 	}
 	else if ($error instanceof SQLException) {
-		$message  = "<b>SQL errno:</b> $errno\n";
+		if ($db instanceof Wadb && $db->sqlstate != '') {
+			$errno = $db->sqlstate;
+		}
+
+		$message  = sprintf("<b>SQL errno:</b> %s\n", $errno);
 		$message .= sprintf("<b>SQL error:</b> %s\n", wan_htmlspecialchars($errstr));
 
 		if ($db instanceof Wadb && $db->lastQuery != '') {

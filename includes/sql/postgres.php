@@ -119,10 +119,9 @@ class Wadb_postgres extends Wadb
 
 		if ($result) {
 			$result   = pg_get_result($this->link);
-			$sqlstate = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
+			$this->sqlstate = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
 
-			if (0 == $sqlstate) {
-				$this->errno = 0;
+			if (0 == $this->sqlstate) {
 				$this->error = '';
 
 				if (in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE'))) {
@@ -136,14 +135,12 @@ class Wadb_postgres extends Wadb
 				return $result;
 			}
 			else {
-				$this->errno = $sqlstate;
 				$this->error = pg_result_error_field($result, PGSQL_DIAG_MESSAGE_PRIMARY);
 
 				$this->rollBack();
 			}
 		}
 		else {
-			$this->errno = -1;
 			$this->error = 'Unknown error with database';
 		}
 

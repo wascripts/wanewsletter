@@ -50,6 +50,13 @@ abstract class Wadb
 	protected $options = array();
 
 	/**
+	 * Code d'erreur SQLSTATE
+	 *
+	 * @var string
+	 */
+	public $sqlstate = '';
+
+	/**
 	 * Code d'erreur
 	 *
 	 * @var integer
