@@ -232,15 +232,22 @@ function WaDatabase($dsn)
 	$db = new $dbclass();
 	$db->connect($infos, $options);
 
-	if ($db->isConnected() &&  $db->engine != 'sqlite' && ($encoding = $db->encoding()) &&
+	if (!empty($options['charset'])) {
+		return $db;
+	}
+
+	//
+	// Charset non précisé dans le DSN. On tente une auto-configuration.
+	//
+	if ($db->engine != 'sqlite' && ($encoding = $db->encoding()) &&
 		preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding)
 	) {
-		/*
-		 * WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
-		 * Si le jeu de caractères de la connexion est multi-octet, on le change
-		 * arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur
-		 * en cas d'échec.
-		 */
+		//
+		// WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
+		// Si le jeu de caractères de la connexion est multi-octet, on le change
+		// arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur
+		// en cas d'échec.
+		//
 		$newEncoding = 'latin1';
 		$db->encoding($newEncoding);
 
