@@ -18,6 +18,22 @@ $secure = true;
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 
+//
+// Initialisation de la connexion à la base de données et récupération de la configuration
+//
+$db = WaDatabase($dsn);
+$nl_config = wa_get_config();
+
+//
+// Hors phase de développement ou beta, on affiche une alerte si
+// l'administrateur a activé le débogage.
+//
+if (DEBUG_MODE == DEBUG_LEVEL_QUIET && isset($nl_config['debug_level']) &&
+	$nl_config['debug_level'] > DEBUG_LEVEL_QUIET
+) {
+	wanlog($lang['Message']['Warning_debug_active']);
+}
+
 $liste = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
 
 //

@@ -12,6 +12,12 @@ define('WA_ROOTDIR',    '..');
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 
+//
+// Initialisation de la connexion à la base de données et récupération de la configuration
+//
+$db = WaDatabase($dsn);
+$nl_config = wa_get_config();
+
 load_settings();
 
 $liste_ids = (!empty($_GET['liste'])) ? $_GET['liste'] : 0;

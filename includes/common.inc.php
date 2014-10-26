@@ -72,11 +72,23 @@ set_exception_handler('wan_exception_handler');
 //
 spl_autoload_register('wan_autoloader');
 
-
+//
+// Pas installé ?
+//
 if (!defined('IN_INSTALL') && !defined('NL_INSTALLED')) {
-	http_redirect(sprintf('%s/install.php', WA_ROOTDIR));
+	if (!defined('IN_COMMANDLINE')) {
+		http_redirect(sprintf('%s/install.php', WA_ROOTDIR));
+	}
+	else {
+		echo "Wanewsletter seems not to be installed!\n";
+		echo "Call install.php in your web browser.\n";
+		exit(1);
+	}
 }
 
+//
+// Configuration par défaut
+//
 load_settings();
 
 if (defined('IN_COMMANDLINE')) {
@@ -132,26 +144,3 @@ if (empty($dsn)) {
 	// Pas la peine de polluer le scope global
 	unset($infos, $dbtype, $dbhost, $dbuser, $dbpassword, $dbname);
 }
-
-//
-// Intialisation de la connexion à la base de données et récupération de la configuration
-//
-if (!defined('IN_INSTALL')) {
-	$db = WaDatabase($dsn);
-
-	//
-	// On récupère la configuration du script
-	//
-	$nl_config = wa_get_config();
-
-	//
-	// Hors phase de développement ou beta, on affiche une alerte si
-	// l'administrateur a activé le débogage.
-	//
-	if (DEBUG_MODE == DEBUG_LEVEL_QUIET && isset($nl_config['debug_level']) &&
-		$nl_config['debug_level'] > DEBUG_LEVEL_QUIET
-	) {
-		wanlog($lang['Message']['Warning_debug_active']);
-	}
-}
-

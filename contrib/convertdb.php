@@ -25,7 +25,8 @@ exit(0);
 //
 // Configuration
 //
-define('WA_ROOTDIR', '..');
+define('ANSI_TERMINAL', true);
+define('WA_ROOTDIR', dirname(dirname(__FILE__)));
 
 $schemas_dir  = WA_ROOTDIR . '/includes/sql/schemas';
 
@@ -39,6 +40,8 @@ $prefixe_to   = 'wa_';
 // End Of Config
 //
 
+define('IN_NEWSLETTER', true);
+
 if (PHP_SAPI != 'cli') {
 	set_time_limit(0);
 	header('Content-Type: text/plain; charset=ISO-8859-1');
@@ -47,10 +50,7 @@ else {
 	define('IN_COMMANDLINE', true);
 }
 
-$prefixe = 'wa_';// Pas touche. Empêche les notices PHP dans wadb_init.php sur les déclarations de constantes...
-
-require WA_ROOTDIR . '/includes/functions.php';
-require WA_ROOTDIR . '/includes/wadb_init.php';
+require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
 //

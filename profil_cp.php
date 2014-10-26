@@ -14,6 +14,12 @@ require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 include WA_ROOTDIR . '/includes/tags.inc.php';
 
+//
+// Initialisation de la connexion à la base de données et récupération de la configuration
+//
+$db = WaDatabase($dsn);
+$nl_config = wa_get_config();
+
 if (!$nl_config['enable_profil_cp']) {
 	load_settings();
 	$output->displayMessage('Profil_cp_disabled');

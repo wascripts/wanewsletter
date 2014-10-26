@@ -26,6 +26,8 @@ define('WA_ROOTDIR',   '..');
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 
+$db = WaDatabase($dsn);
+
 load_settings();
 
 $type = (!empty($_GET['type'])) ? $_GET['type'] : '';

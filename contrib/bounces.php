@@ -87,6 +87,8 @@ define('WA_ROOTDIR',    '..');
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 
+$db = WaDatabase($dsn);
+
 $process = false;
 foreach ($_SERVER['argv'] as $arg) {
 	if ($arg == '--process' || $arg == 'process=true') {

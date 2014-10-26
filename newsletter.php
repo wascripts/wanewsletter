@@ -29,6 +29,12 @@ $default_error_reporting = error_reporting();
 require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 
+//
+// Initialisation de la connexion à la base de données et récupération de la configuration
+//
+$db = WaDatabase($dsn);
+$nl_config = wa_get_config();
+
 if (!empty($language) && validate_lang($language)) {
 	load_settings(array('admin_lang' => $language));
 }
