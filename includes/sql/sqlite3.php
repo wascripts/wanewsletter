@@ -51,6 +51,7 @@ class Wadb_sqlite3 extends Wadb
 				(!empty($options['encryption_key'])) ? $options['encryption_key'] : null
 			);
 
+			$this->link->exec('PRAGMA busy_timeout = 60000');
 			$this->link->exec('PRAGMA short_column_names = 1');
 			$this->link->exec('PRAGMA case_sensitive_like = 0');
 
