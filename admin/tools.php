@@ -778,27 +778,20 @@ switch ($mode) {
 
 			if ($pattern != '') {
 				$pattern_ary = array_map('trim', explode(',', $pattern));
-				$sql_values  = array();
+				$sql_dataset = array();
 
 				foreach ($pattern_ary as $pattern) {
-					switch ($db->engine) {
-						case 'mysql':
-							$sql_values[] = "($listdata[liste_id], '" . $db->escape($pattern) . "')";
-							break;
-						default:
-							$sql = "INSERT INTO " . BANLIST_TABLE . " (liste_id, ban_email)
-								VALUES($listdata[liste_id], '" . $db->escape($pattern) . "')";
-							$db->query($sql);
-							break;
-					}
+					$sql_dataset[] = array(
+						'liste_id'  => $listdata['liste_id'],
+						'ban_email' => $pattern
+					);
 				}
 
-				if (count($sql_values) > 0) {
-					$sql = "INSERT INTO " . BANLIST_TABLE . " (liste_id, ban_email)
-						VALUES " . implode(', ', $sql_values);
-					$db->query($sql);
-					unset($sql_values);
+				if (count($sql_dataset) > 0) {
+					$db->insert(BANLIST_TABLE, $sql_dataset);
 				}
+
+				unset($sql_dataset);
 			}
 
 			if (count($unban_list_id) > 0) {
@@ -863,30 +856,24 @@ switch ($mode) {
 
 			if ($ext_list != '') {
 				$ext_ary	= array_map('trim', explode(',', $ext_list));
-				$sql_values = array();
+				$sql_dataset = array();
 
 				foreach ($ext_ary as $ext) {
 					$ext = strtolower($ext);
 
 					if (preg_match('/^[\w_-]+$/', $ext)) {
-						switch ($db->engine) {
-							case 'mysql':
-								$sql_values[] = "($listdata[liste_id], '$ext')";
-								break;
-							default:
-								$sql = "INSERT INTO " . FORBIDDEN_EXT_TABLE . " (liste_id, fe_ext)
-									VALUES($listdata[liste_id], '$ext')";
-								$db->query($sql);
-								break;
-						}
+						$sql_dataset[] = array(
+							'liste_id' => $listdata['liste_id'],
+							'fe_ext'   => $ext
+						);
 					}
 				}
 
-				if (count($sql_values) > 0) {
-					$sql = "INSERT INTO " . FORBIDDEN_EXT_TABLE . " (liste_id, fe_ext)
-						VALUES " . implode(', ', $sql_values);
-					$db->query($sql);
+				if (count($sql_dataset) > 0) {
+					$db->insert(FORBIDDEN_EXT_TABLE, $sql_dataset);
 				}
+
+				unset($sql_dataset);
 			}
 
 			if (count($ext_list_id) > 0) {

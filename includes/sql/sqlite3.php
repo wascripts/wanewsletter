@@ -118,6 +118,36 @@ class Wadb_sqlite3 extends Wadb
 		return $result;
 	}
 
+	public function insert($tablename, $dataset)
+	{
+		if (empty($dataset)) {
+			trigger_error("Empty data array given", E_USER_WARNING);
+			return false;
+		}
+
+		// voir parent::insert()
+		if (!is_array($dataset[0])) {
+			$dataset = array($dataset);
+		}
+
+		//
+		// SQLite ne supporte les insertions multiples qu'à partir de la version 3.7.11
+		//
+		if (!version_compare($this->libVersion, '3.7.11', '>=')) {
+			// On veut renvoyer false si au moins un appel à parent::insert() renvoie false
+			$result = false;
+			foreach ($dataset as $data) {
+				$result |= !parent::insert($tablename, $data);
+			}
+			$result = !$result;
+		}
+		else {
+			$result = parent::insert($tablename, $dataset);
+		}
+
+		return $result;
+	}
+
 	public function quote($name)
 	{
 		return '[' . $name . ']';

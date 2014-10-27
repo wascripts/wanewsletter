@@ -703,27 +703,17 @@ switch ($mode) {
 						WHERE log_id = " . $handle_id;
 					$result = $db->query($sql);
 
-					$sql_values = array();
+					$sql_dataset = array();
 
 					while ($row = $result->fetch()) {
-						switch ($db->engine) {
-							case 'mysql':
-								$sql_values[] = '(' . $tmp_id . ', ' . $row['file_id'] . ')';
-								break;
-							default:
-								$sqldata = array('log_id' => $tmp_id, 'file_id' => $row['file_id']);
-
-								$db->insert(LOG_FILES_TABLE, $sqldata);
-								break;
-						}
+						$sql_dataset[] = array('log_id' => $tmp_id, 'file_id' => $row['file_id']);
 					}
 
-					if (count($sql_values) > 0) {
-						$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id)
-							VALUES " . implode(', ', $sql_values);
-						$db->query($sql);
-						unset($sql_values);
+					if (count($sql_dataset) > 0) {
+						$db->insert(LOG_FILES_TABLE, $sql_dataset);
 					}
+
+					unset($sql_dataset);
 				}
 
 				$logdata['log_id'] = $tmp_id;

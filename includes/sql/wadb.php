@@ -147,20 +147,37 @@ abstract class Wadb
 	 * Construit une requète INSERT à partir des diverses données fournies
 	 *
 	 * @param string $tablename Table sur laquelle effectuer la requète
-	 * @param array  $data      Tableau des données à insérer.
-	 *                          Le tableau a la structure suivante:
+	 * @param array  $dataset   Tableau des données à insérer ou tableau multi-dimensionnel
+	 *                          dans le cas où on veut insérer plusieurs lignes.
+	 *                          Le tableau des données a la structure suivante:
 	 *                          array(column_name => column_value[, column_name => column_value])
 	 *
 	 * @return boolean
 	 */
-	public function insert($tablename, $data)
+	public function insert($tablename, $dataset)
 	{
-		$data = $this->prepareData($data);
+		if (empty($dataset)) {
+			trigger_error("Empty data array given", E_USER_WARNING);
+			return false;
+		}
 
-		return $this->query(sprintf('INSERT INTO %s (%s) VALUES(%s)',
+		// Simpliste, mais si la première entrée est un tableau, on a à faire
+		// à un tableau multi-dimensionnel pour l'insertion de plusieurs lignes
+		// consécutives. Si ce n'est pas le cas, on créé un tableau multi-dimensionnel
+		// pour traiter correctement dans notre boucle l'unique ligne à insérer.
+		if (!is_array($dataset[0])) {
+			$dataset = array($dataset);
+		}
+
+		$values = array();
+		foreach ($dataset as $data) {
+			$values[] = '(' . implode(', ', $this->prepareData($data)) . ')';
+		}
+
+		return $this->query(sprintf('INSERT INTO %s (%s) VALUES %s',
 			$this->quote($tablename),
 			implode(', ', array_keys($data)),
-			implode(', ', array_values($data))
+			implode(', ', $values)
 		));
 	}
 
