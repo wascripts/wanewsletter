@@ -26,7 +26,9 @@ if (!version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=')) {
 	exit;
 }
 
-error_reporting(E_ALL & ~(E_STRICT|E_DEPRECATED));
+// $default_error_reporting est utilisé ultérieurement dans le gestionnaire d'erreurs
+$default_error_reporting = (E_ALL & ~(E_STRICT|E_DEPRECATED));
+error_reporting($default_error_reporting);
 
 $starttime = array_sum(explode(' ', microtime()));
 

@@ -405,6 +405,15 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 		return true;
 	}
 
+	//
+	// On s'assure que si des erreurs surviennent au sein même du gestionnaire
+	// d'erreurs alors que l'opérateur @ a été utilisé en amont, elles seront
+	// bien traitées correctement, soit par le gestionnaire d'erreurs personnalisé,
+	// soit par le gestionnaire d'erreurs natif de PHP
+	// (dans le cas d'erreurs fatales par exemple <= C'est du vécu :().
+	//
+	error_reporting($GLOBALS['default_error_reporting']);
+
 	$error = new WanError(array(
 		'type'    => $errno,
 		'message' => $errstr,
