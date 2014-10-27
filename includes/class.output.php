@@ -290,7 +290,7 @@ class Output extends Template
 
 		$version = WANEWSLETTER_VERSION;
 
-		if (defined('DEV_INFOS') && DEV_INFOS && $db instanceof Wadb) {
+		if (wan_get_debug_level() > DEBUG_LEVEL_QUIET && $db instanceof Wadb) {
 			$version  .= sprintf(' (%s)', substr(get_class($db), 5));
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);

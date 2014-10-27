@@ -22,6 +22,9 @@ define('WANEWSLETTER_DB_VERSION', 16);
 
 //
 // Modes de débogage du script
+// Sauf en mode silencieux, le script affiche aussi des informations
+// complémentaires en bas de page (durée d'exécution, nbre de requètes SQL,
+// mémoire utilisée, ...)
 //
 // Le script annonce les erreurs critiques, sans donner de détails
 define('DEBUG_LEVEL_QUIET',  1);
@@ -35,12 +38,6 @@ define('DEBUG_LEVEL_ALL',    3);
 // Configure le niveau de débogage souhaité
 //
 define('DEBUG_MODE', DEBUG_LEVEL_NORMAL);
-
-//
-// Pour visualiser le temps d'exécution du script et le nombre de requètes effectuées
-//
-define('DEV_INFOS', true);
-//define('DEV_INFOS', false);
 
 //
 // Active/Désactive l'affichage des messages d'erreur en pied de page.

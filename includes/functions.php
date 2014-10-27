@@ -390,10 +390,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	$simple = (defined('IN_COMMANDLINE') || defined('IN_SUBSCRIBE') || defined('IN_WA_FORM') || defined('IN_CRON'));
 	$fatal  = ($errno == E_USER_ERROR || $errno == E_RECOVERABLE_ERROR);
 
-	$debug_level = DEBUG_MODE;
-	if (isset($nl_config['debug_level']) && $nl_config['debug_level'] > DEBUG_MODE) {
-		$debug_level = min(DEBUG_LEVEL_ALL, $nl_config['debug_level']);
-	}
+	$debug_level = wan_get_debug_level();
 
 	//
 	// On affiche pas les erreurs non prises en compte dans le réglage du
@@ -461,11 +458,6 @@ function wan_format_error($error)
 {
 	global $db, $lang, $nl_config;
 
-	$debug_level = DEBUG_MODE;
-	if (isset($nl_config['debug_level']) && $nl_config['debug_level'] > DEBUG_MODE) {
-		$debug_level = min(DEBUG_LEVEL_ALL, $nl_config['debug_level']);
-	}
-
 	$errno   = $error->getCode();
 	$errstr  = $error->getMessage();
 	$errfile = $error->getFile();
@@ -495,7 +487,7 @@ function wan_format_error($error)
 		$backtrace = '';
 	}
 
-	if ($debug_level == DEBUG_LEVEL_QUIET) {
+	if (wan_get_debug_level() == DEBUG_LEVEL_QUIET) {
 		// Si on est en mode de non-débogage, on a forcément attrapé une erreur
 		// critique pour arriver ici.
 		$message  = $lang['Message']['Critical_error'];
@@ -1511,6 +1503,24 @@ function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1'
 function wan_is_admin($admin)
 {
 	return (isset($admin['admin_level']) && $admin['admin_level'] == ADMIN_LEVEL);
+}
+
+/**
+ * Retourne le niveau de débogage, dépendant de la valeur de la constante DEBUG_MODE
+ * ainsi que de la clé de configuration 'debug_level'.
+ *
+ * @return integer
+ */
+function wan_get_debug_level()
+{
+	global $nl_config;
+
+	$debug_level = DEBUG_MODE;
+	if (isset($nl_config['debug_level']) && $nl_config['debug_level'] > DEBUG_MODE) {
+		$debug_level = min(DEBUG_LEVEL_ALL, $nl_config['debug_level']);
+	}
+
+	return $debug_level;
 }
 
 }
