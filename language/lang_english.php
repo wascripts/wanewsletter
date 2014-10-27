@@ -257,6 +257,7 @@ $lang['Message']['Invalid_cookie_path']     = "The cookie path must include the 
 $lang['Message']['Critical_error']          = "A critical error has occured. Enable debug mode if you wish to get more details.";
 $lang['Message']['No_gd_img_support']       = "No image format are available";
 $lang['Message']['Warning_debug_active']    = "<strong>Notice&nbsp;:</strong> The debugging is active&nbsp;!";
+$lang['Message']['Invalid_prefix']          = "The table prefix must start with a letter , optionally followed by other alphanumeric characters, and ends with an underscore.";
 
 //
 // Divers

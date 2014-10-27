@@ -257,6 +257,7 @@ $lang['Message']['Invalid_cookie_path']     = "Le chemin de validité du cookie d
 $lang['Message']['Critical_error']          = "Une erreur critique s'est produite. Activez le mode de débogage pour obtenir plus de détails.";
 $lang['Message']['No_gd_img_support']       = "Aucun format d'image valable n'est disponible";
 $lang['Message']['Warning_debug_active']    = "<strong>Note&nbsp;:</strong> Le débogage est activé&nbsp;!";
+$lang['Message']['Invalid_prefix']          = "Le préfixe de table doit commencer par une lettre, éventuellement suivie d'autres caractères alphanumériques, et se terminer par un tiret bas ou underscore.";
 
 //
 // Divers

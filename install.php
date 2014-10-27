@@ -234,8 +234,16 @@ if ($start) {
 		$msg_error[] = $lang['Message']['sql_file_not_readable'];
 	}
 
+	if (!preg_match('#^[a-z][a-z0-9]*_?$#i', $prefixe)) {
+		$error = true;
+		$msg_error[] = $lang['Message']['Invalid_prefix'];
+	}
+	else if (strpos($prefixe, '_') == false) {
+		$prefixe .= '_';
+	}
+
 	if (!$error) {
-		if ($infos['dbname'] == '' || $prefixe == '' || $admin_login == '') {
+		if ($infos['dbname'] == '' || $admin_login == '') {
 			$error = true;
 			$msg_error[] = $lang['Message']['fields_empty'];
 		}
