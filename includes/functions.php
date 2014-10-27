@@ -560,7 +560,7 @@ function wan_display_error($error, $simpleHTML = false)
 	$message = wan_format_error($error);
 
 	if (defined('IN_COMMANDLINE')) {
-		if (defined('ANSI_TERMINAL')) {
+		if (ANSI_TERMINAL) {
 			$message = preg_replace("#<b>#",  "\033[1;31m", $message, 1);
 			$message = preg_replace("#</b>#", "\033[0m", $message, 1);
 

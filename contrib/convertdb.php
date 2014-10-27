@@ -25,7 +25,6 @@ exit(0);
 //
 // Configuration
 //
-define('ANSI_TERMINAL', true);
 define('WA_ROOTDIR', dirname(dirname(__FILE__)));
 
 $schemas_dir  = WA_ROOTDIR . '/includes/sql/schemas';

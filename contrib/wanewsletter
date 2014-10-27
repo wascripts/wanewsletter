@@ -17,7 +17,6 @@
 
 define('IN_NEWSLETTER',  true);
 define('IN_COMMANDLINE', true);
-define('ANSI_TERMINAL',  true);
 define('WA_ROOTDIR',     dirname(dirname(__FILE__)));
 
 //

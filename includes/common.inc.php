@@ -109,6 +109,8 @@ if (defined('IN_COMMANDLINE')) {
 		define('STDOUT', fopen('php://stdout', 'w'));
 		define('STDERR', fopen('php://stderr', 'w'));
 	}
+
+	define('ANSI_TERMINAL', function_exists('posix_isatty') && posix_isatty(STDOUT));
 }
 else {
 	$output = new Output(sprintf(
