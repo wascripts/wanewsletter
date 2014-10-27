@@ -28,9 +28,7 @@ $nl_config = wa_get_config();
 // Hors phase de développement ou beta, on affiche une alerte si
 // l'administrateur a activé le débogage.
 //
-if (DEBUG_MODE == DEBUG_LEVEL_QUIET && isset($nl_config['debug_level']) &&
-	$nl_config['debug_level'] > DEBUG_LEVEL_QUIET
-) {
+if (DEBUG_MODE == DEBUG_LEVEL_QUIET && wan_get_debug_level() > DEBUG_MODE) {
 	wanlog($lang['Message']['Warning_debug_active']);
 }
 
