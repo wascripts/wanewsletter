@@ -26,6 +26,7 @@ function wan_autoloader($classname)
 	$catalog['wanewsletter'] = '%s/includes/class.form.php';
 	$catalog['console_progressbar'] = '%s/contrib/Console/ProgressBar.php';
 
+	$rootdir   = dirname(dirname(__FILE__));
 	$classname = strtolower($classname);
 
 	if (!isset($catalog[$classname])) {
@@ -33,22 +34,22 @@ function wan_autoloader($classname)
 		// Wadb ou Wadb_{driver}
 		if (strncmp($classname, 'wadb', 4) === 0) {
 			$filename = sprintf('%s/includes/sql/%s.php',
-				WA_ROOTDIR,
+				$rootdir,
 				// Si on a une classe Wadb_{driver}, on retire le préfixe
 				($classname == 'wadb') ? $classname : substr($classname, 5)
 			);
 		}
 		// Wamailer
 		else if (in_array($classname, array('mailer','pop','smtp'))) {
-			$filename = sprintf('%s/class.%s.php', WAMAILER_DIR, $classname);
+			$filename = sprintf('%s/includes/wamailer/class.%s.php', $rootdir, $classname);
 		}
 		// Default
 		else {
-			$filename = sprintf('%s/includes/class.%s.php', WA_ROOTDIR, $classname);
+			$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
 		}
 	}
 	else {
-		$filename = sprintf($catalog[$classname], WA_ROOTDIR);
+		$filename = sprintf($catalog[$classname], $rootdir);
 	}
 
 	if (is_readable($filename)) {
