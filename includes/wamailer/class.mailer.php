@@ -55,10 +55,12 @@ class Mailer {
 	 * Si laissée vide, le script tentera de reconstituer le chemin vers la classe smtp
 	 * (la classe smtp doit alors être dans le même dossier que la présente classe)
 	 * 
+	 * @deprecated le chargement de la classe smtp est pris en chargement par
+	 *             l'autoloader déclaré au niveau supérieur de l'application
 	 * @var string
 	 * @access public
 	 */
-	var $smtp_path             = '';
+	var $smtp_path             = null;
 	
 	/**
 	 * Variable qui contiendra l'objet smtp
@@ -488,24 +490,10 @@ class Mailer {
 	 * @param boolean $debug
 	 * 
 	 * @access private
-	 * @return object
+	 * @return Smtp
 	 */
 	function init_smtp($debug = false)
 	{
-		if( !class_exists('Smtp') )
-		{
-			if( isset($this) && !empty($this->smtp_path) )
-			{
-				$smtp_path = rtrim($this->smtp_path, '/');
-			}
-			else
-			{
-				$smtp_path = dirname(__FILE__);
-			}
-			
-			require $smtp_path . '/class.smtp.php';
-		}
-		
 		$smtp = new Smtp();
 		$smtp->debug = $debug;
 		

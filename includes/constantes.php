@@ -223,6 +223,5 @@ define('WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
 define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
 define('WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
 
-define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
 define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
 

@@ -30,7 +30,6 @@ class Wanewsletter
 		$mailer->signature = WA_X_MAILER;
 
 		if ($nl_config['use_smtp']) {
-			$mailer->smtp_path = WAMAILER_DIR . '/';
 			$mailer->use_smtp(
 				$nl_config['smtp_host'],
 				$nl_config['smtp_port'],
