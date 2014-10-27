@@ -54,8 +54,15 @@ $logs_dir  = '~/data/logs';
 $stats_dir = '~/data/stats';
 $tmp_dir   = '~/data/tmp';
 
-if (file_exists(WA_ROOTDIR . '/includes/config.inc.php')) {
-	@include WA_ROOTDIR . '/includes/config.inc.php';
+$config_file = WA_ROOTDIR . '/includes/config.inc.php';
+if (file_exists($config_file)) {
+	if (!is_readable($config_file)) {
+		echo "Cannot read the config file. Please fix this mistake and reload.";
+		exit;
+	}
+
+	include $config_file;
+	unset($config_file);
 }
 
 require WA_ROOTDIR . '/includes/compat.inc.php';
