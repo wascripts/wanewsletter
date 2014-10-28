@@ -12,23 +12,23 @@ class Output extends Template
 	/**
 	 * Liens relatifs au document
 	 *
-	 * @var string
+	 * @var array
 	 */
-	private $links         = '';
+	private $links         = array();
 
 	/**
 	 * Scripts clients liés au document
 	 *
-	 * @var string
+	 * @var array
 	 */
-	private $javascript    = '';
+	private $scripts       = array();
 
 	/**
 	 * Champs cachés d'un formulaire du document
 	 *
-	 * @var string
+	 * @var array
 	 */
-	private $hidden_fields = '';
+	private $hidden_fields = array();
 
 	/**
 	 * Meta de redirection
@@ -59,14 +59,27 @@ class Output extends Template
 	 * Ajout d'un lien relatif au document
 	 *
 	 * @param string $rel   Relation qui lie le document cible au document courant
-	 * @param string $url   URL du document cible
+	 * @param string $href  URL du document cible
 	 * @param string $title Titre éventuel
 	 * @param string $type  Type MIME du document cible
 	 */
-	public function addLink($rel, $url, $title = '', $type = '')
+	public function addLink($rel, $href = null, $title = null, $type = null)
 	{
-		$this->links .= "\r\n\t";
-		$this->links .= sprintf('<link rel="%s" href="%s" title="%s" />', $rel, $url, $title);
+		if (is_array($rel)) {
+			// Si le premier argument fourni est un tableau, c'est qu'on reçoit
+			// directement un tableau d'attributs
+			$attrs = $rel;
+		}
+		else {
+			$attrs = array(
+				'rel'   => $rel,
+				'href'  => $href,
+				'title' => $title,
+				'type'  => $type
+			);
+		}
+
+		$this->links[] = $attrs;
 	}
 
 	/**
@@ -76,18 +89,41 @@ class Output extends Template
 	 */
 	public function getLinks()
 	{
-		return trim($this->links);
+		foreach ($this->links as &$link) {
+			$link = $this->getHTMLElement('link', $link);
+		}
+
+		$links = implode("\r\n\t", $this->links);
+		$this->links = array();
+
+		return $links;
 	}
 
 	/**
 	 * Ajout d'un script client
 	 *
-	 * @param string $url
+	 * @param string $src    URL du script
+	 * @param string $type   Type MIME
+	 * @param boolean $async Chargement asynchrone
+	 * @param boolean $defer Chargement après le chargement de la page elle-même
 	 */
-	public function addScript($url)
+	public function addScript($src, $type = null, $async = null, $defer = null)
 	{
-		$this->javascript .= "\r\n\t";
-		$this->javascript .= sprintf('<script src="%s"></script>', $url);
+		if (is_array($src)) {
+			// Si le premier argument fourni est un tableau, c'est qu'on reçoit
+			// directement un tableau d'attributs
+			$attrs = $src;
+		}
+		else {
+			$attrs = array(
+				'src'   => $src,
+				'type'  => $type,
+				'async' => $async,
+				'defer' => $defer
+			);
+		}
+
+		$this->scripts[] = $attrs;
 	}
 
 	/**
@@ -97,7 +133,14 @@ class Output extends Template
 	 */
 	public function getScripts()
 	{
-		return trim($this->javascript);
+		foreach ($this->scripts as &$script) {
+			$script = $this->getHTMLElement('script', $script, null, true);
+		}
+
+		$scripts = implode("\r\n\t", $this->scripts);
+		$this->scripts = array();
+
+		return $scripts;
 	}
 
 	/**
@@ -108,8 +151,7 @@ class Output extends Template
 	 */
 	public function addHiddenField($name, $value)
 	{
-		$this->hidden_fields .= "\r\n\t";
-		$this->hidden_fields .= sprintf('<input type="hidden" name="%s" value="%s" />', $name, $value);
+		$this->hidden_fields[] = array('name' => $name, 'value' => $value);
 	}
 
 	/**
@@ -119,10 +161,55 @@ class Output extends Template
 	 */
 	public function getHiddenFields()
 	{
-		$tmp = $this->hidden_fields;
-		$this->hidden_fields = '';
+		$type = array('type' => 'hidden');
+		foreach ($this->hidden_fields as &$field) {
+			$field = array_merge($type, $field);
+			$field = $this->getHTMLElement('input', $field);
+		}
 
-		return trim($tmp);
+		$fields = implode("\r\n\t", $this->hidden_fields);
+		$this->hidden_fields = array();
+
+		return $fields;
+	}
+
+	/**
+	 * Retourne un élément HTML formaté à partir de son nom, du tableau d'attributs,
+	 * et de son contenu éventuel.
+	 *
+	 * @param string  $name
+	 * @param array   $attrs
+	 * @param string  $data
+	 * @param boolean $closetag true pour forcer l'ajout d'une balise de fermeture
+	 *
+	 * @return string
+	 */
+	public function getHTMLElement($name, $attrs, $data = null, $closetag = false)
+	{
+		$html = '<'.$name;
+		foreach ($attrs as $attrname => $value) {
+			if (is_null($value)) {
+				continue;
+			}
+
+			$html .= ' ';
+			if (is_bool($value)) {
+				$attr = $attrname;
+			}
+			else {
+				$attr = sprintf('%s="%s"', $attrname, wan_htmlspecialchars($value));
+			}
+
+			$html .= $attr;
+		}
+
+		if (!is_null($data)) {
+			$data = wan_htmlspecialchars($data);
+		}
+
+		$html .= ($closetag || $data) ? '>'.$data.'</'.$name.'>' : ' />';
+
+		return $html;
 	}
 
 	/**
@@ -133,7 +220,9 @@ class Output extends Template
 	 */
 	public function redirect($url, $timer)
 	{
-		$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, $url);
+		if (wan_get_debug_level() == DEBUG_LEVEL_QUIET) {
+			$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, $url);
+		}
 	}
 
 	/**
