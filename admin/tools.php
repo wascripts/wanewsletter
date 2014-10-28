@@ -118,9 +118,6 @@ switch ($mode) {
 	case 'generator':
 		$auth_type = Auth::VIEW;
 		break;
-	case 'check_update':
-		$auth_type = Auth::VIEW;
-		break;
 	default:
 		$mode = '';
 		$auth_type = Auth::VIEW;
@@ -130,7 +127,7 @@ switch ($mode) {
 $url_page  = './tools.php';
 $url_page .= ($mode != '') ? '?mode=' . $mode : '';
 
-if (!in_array($mode, array('backup','restore','debug','check_update')) && !$admindata['session_liste']) {
+if (!in_array($mode, array('backup','restore','debug')) && !$admindata['session_liste']) {
 	$output->build_listbox($auth_type, true, $url_page);
 }
 else if ($admindata['session_liste']) {
@@ -149,7 +146,7 @@ if (!isset($_POST['submit'])) {
 		$output->build_listbox($auth_type, false, $url_page);
 	}
 
-	$tools_ary = array('export', 'import', 'ban', 'generator', 'check_update');
+	$tools_ary = array('export', 'import', 'ban', 'generator');
 
 	if (wan_is_admin($admindata)) {
 		array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
@@ -1257,39 +1254,6 @@ switch ($mode) {
 		}
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
-		break;
-
-	case 'check_update':
-		$result = wa_check_update(true);
-
-		if (isset($_GET['output']) && $_GET['output'] == 'json') {
-			ob_end_clean();
-			header('Content-Type: application/json');
-
-			if ($result !== false) {
-				printf('{"code":"%d"}', $result);
-			}
-			else {
-				echo '{"code":"2"}';
-			}
-			exit;
-		}
-		else {
-			if ($result !== false) {
-				if ($result === 1) {
-					$output->addLine($lang['New_version_available']);
-					$output->addLine(sprintf('<a href="%s">%s</a>', WA_DOWNLOAD_PAGE, $lang['Download_page']));
-				}
-				else {
-					$output->addLine($lang['Version_up_to_date']);
-				}
-			}
-			else {
-				$output->addLine($lang['Site_unreachable']);
-			}
-
-			$output->displayMessage();
-		}
 		break;
 }
 

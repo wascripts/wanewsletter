@@ -12,6 +12,39 @@ define('IN_UPGRADE', true);
 
 require './pagestart.php';
 
+if (filter_input(INPUT_GET, 'mode') == 'check') {
+	$result = wa_check_update(true);
+
+	if (filter_input(INPUT_GET, 'output') == 'json') {
+		header('Content-Type: application/json');
+
+		if ($result !== false) {
+			printf('{"code":"%d"}', $result);
+		}
+		else {
+			echo '{"code":"2"}';
+		}
+	}
+	else {
+		if ($result !== false) {
+			if ($result === 1) {
+				$output->addLine($lang['New_version_available']);
+				$output->addLine(sprintf('<a href="%s">%s</a>', WA_DOWNLOAD_PAGE, $lang['Download_page']));
+			}
+			else {
+				$output->addLine($lang['Version_up_to_date']);
+			}
+		}
+		else {
+			$output->addLine($lang['Site_unreachable']);
+		}
+
+		$output->displayMessage();
+	}
+
+	exit;
+}
+
 if (!wan_is_admin($admindata)) {
 	http_response_code(401);
 	$output->redirect('./index.php', 6);

@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			&ndash; <a href="{new_version_available.U_DOWNLOAD_PAGE}">{new_version_available.L_DOWNLOAD_PAGE}</a>
 			<!-- END new_version_available -->
 			<!-- BEGIN check_update -->
-			<a id="check-update" href="tools.php?mode=check_update">{check_update.L_CHECK_UPDATE}</a>
+			<a id="check-update" href="upgrade.php?mode=check">{check_update.L_CHECK_UPDATE}</a>
 			<!-- END check_update -->
 		</li>
 	</ul>
