@@ -97,7 +97,7 @@ if ($mode == 'adduser') {
 				'PSEUDO'     => $new_login,
 				'SITENAME'   => $nl_config['sitename'],
 				'PASSWORD'   => $new_pass,
-				'LINK_ADMIN' => wan_build_url('admin/index.php')
+				'LINK_ADMIN' => wan_build_url('index.php')
 			));
 
 			if (!$mailer->send()) {
