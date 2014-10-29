@@ -161,11 +161,12 @@ abstract class Wadb
 			return false;
 		}
 
-		// Simpliste, mais si la première entrée est un tableau, on a à faire
-		// à un tableau multi-dimensionnel pour l'insertion de plusieurs lignes
-		// consécutives. Si ce n'est pas le cas, on créé un tableau multi-dimensionnel
-		// pour traiter correctement dans notre boucle l'unique ligne à insérer.
-		if (!is_array($dataset[0])) {
+		// Simpliste, mais si un index 0 existe et contient un tableau, on a à
+		// faire à un tableau multi-dimensionnel pour l'insertion de plusieurs
+		// lignes consécutives.
+		// Si ce n'est pas le cas, on créé un tableau multi-dimensionnel pour
+		// traiter correctement dans notre boucle l'unique ligne à insérer.
+		if (!isset($dataset[0]) || !is_array($dataset[0])) {
 			$dataset = array($dataset);
 		}
 
