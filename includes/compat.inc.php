@@ -11,12 +11,6 @@ if (!defined('COMPAT_PHP_INC')) {
 
 define('COMPAT_PHP_INC', true);
 
-// PHP 5.3.0
-if (!defined('E_DEPRECATED')) {
-	define('E_DEPRECATED', 8192);
-	define('E_USER_DEPRECATED', 16384);
-}
-
 // PHP 5.4.0
 if (!defined('ENT_HTML401')) {
 	define('ENT_HTML401', 0);

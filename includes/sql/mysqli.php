@@ -45,7 +45,7 @@ class Wadb_mysqli extends Wadb
 			$this->options = array_merge($this->options, $options);
 		}
 
-		if (!empty($this->options['persistent']) && version_compare(phpversion(), '5.3.0', '>=')) {
+		if (!empty($this->options['persistent'])) {
 			$host = "p:$host";
 		}
 

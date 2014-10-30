@@ -279,10 +279,6 @@ switch ($mode) {
 		wan_print_row(' - Extension OpenSSL',
 			extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
 		);
-		// TODO : Fix! Le module PCRE est toujours actif à partir de PHP 5.3
-		wan_print_row(' - Extension PCRE',
-			extension_loaded('pcre') ? sprintf('oui - Version %s', PCRE_VERSION) : 'non'
-		);
 		wan_print_row(' - Extension SimpleXML', extension_loaded('simplexml') ? 'oui' : 'non');
 		wan_print_row(' - Extension XML', extension_loaded('xml') ? 'oui' : 'non');
 		wan_print_row(' - Extension Zip', extension_loaded('zip') ? 'oui' : 'non');
