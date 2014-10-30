@@ -99,7 +99,7 @@ if (count($liste_ids) > 0) {
 //
 list($infos) = parseDSN($dsn);
 
-if ($db->engine == 'mysql') {
+if ($db::ENGINE == 'mysql') {
 	$sql = sprintf("SHOW TABLE STATUS FROM %s", $db->quote($infos['dbname']));
 
 	try {
@@ -128,7 +128,7 @@ if ($db->engine == 'mysql') {
 		$dbsize = $lang['Not_available'];
 	}
 }
-else if ($db->engine == 'postgres') {
+else if ($db::ENGINE == 'postgres') {
 	$sql = "SELECT sum(pg_total_relation_size(schemaname||'.'||tablename))
 		FROM pg_tables WHERE schemaname = 'public'
 			AND tablename ~ '^$prefixe'";
@@ -143,7 +143,7 @@ else if ($db->engine == 'postgres') {
 		$dbsize = $lang['Not_available'];
 	}
 }
-else if ($db->engine == 'sqlite') {
+else if ($db::ENGINE == 'sqlite') {
 	$dbsize = filesize($infos['path']);
 }
 else {

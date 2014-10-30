@@ -11,10 +11,8 @@ class Wadb_sqlite_pdo extends Wadb
 {
 	/**
 	 * Type de base de données
-	 *
-	 * @var string
 	 */
-	public $engine = 'sqlite';
+	const ENGINE = 'sqlite';
 
 	/**
 	 * Version de la librairie SQLite

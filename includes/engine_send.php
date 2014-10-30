@@ -499,7 +499,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		//
 		// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
 		//
-		if ($db->engine == 'mysql') {
+		if ($db::ENGINE == 'mysql') {
 			trigger_error("La connexion à la base de données a été perdue.<br />
 Vous devriez mettre l'option PHP mysqli.reconnect à On dans le php.ini,<br />
 pour permettre la reconnexion automatique au serveur.", E_USER_ERROR);

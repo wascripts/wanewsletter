@@ -16,10 +16,8 @@ abstract class Wadb
 {
 	/**
 	 * Type de base de données
-	 *
-	 * @var string
 	 */
-	public $engine = '';
+	const ENGINE = '';
 
 	/**
 	 * Connexion à la base de données

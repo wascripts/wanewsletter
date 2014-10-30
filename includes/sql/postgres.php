@@ -11,10 +11,8 @@ class Wadb_postgres extends Wadb
 {
 	/**
 	 * Type de base de données
-	 *
-	 * @var string
 	 */
-	public $engine = 'postgres';
+	const ENGINE = 'postgres';
 
 	/**
 	 * Version du serveur

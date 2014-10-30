@@ -11,10 +11,8 @@ class Wadb_mysqli extends Wadb
 {
 	/**
 	 * Type de base de données
-	 *
-	 * @var string
 	 */
-	public $engine = 'mysql';
+	const ENGINE = 'mysql';
 
 	/**
 	 * Version du serveur

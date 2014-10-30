@@ -88,7 +88,7 @@ if (check_db_version($nl_config['db_version'])) {
 }
 
 if (isset($_POST['start'])) {
-	$sql_create = WA_ROOTDIR . '/includes/sql/schemas/' . $db->engine . '_tables.sql';
+	$sql_create = WA_ROOTDIR . '/includes/sql/schemas/' . $db::ENGINE . '_tables.sql';
 	$sql_data   = WA_ROOTDIR . '/includes/sql/schemas/data.sql';
 
 	if (!is_readable($sql_create) || !is_readable($sql_data)) {
@@ -175,7 +175,7 @@ if (isset($_POST['start'])) {
 		$sql_update = array();
 
 		if ($nl_config['db_version'] < 2) {
-			if ($db->engine == 'postgres') {
+			if ($db::ENGINE == 'postgres') {
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
 					ADD COLUMN liste_alias VARCHAR(254) NOT NULL DEFAULT ''";
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
@@ -248,7 +248,7 @@ if (isset($_POST['start'])) {
 					WHERE abo_id IN(" . implode(', ', $diff_2) . ")";
 			}
 
-			if ($db->engine == 'postgres') {
+			if ($db::ENGINE == 'postgres') {
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
 					ADD COLUMN liste_numlogs SMALLINT NOT NULL DEFAULT 0";
 				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
@@ -295,7 +295,7 @@ if (isset($_POST['start'])) {
 		}
 
 		if ($nl_config['db_version'] < 4) {
-			if ($db->engine == 'postgres') {
+			if ($db::ENGINE == 'postgres') {
 				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 					ADD COLUMN abo_lang VARCHAR(30) NOT NULL DEFAULT ''";
 			}
@@ -326,7 +326,7 @@ if (isset($_POST['start'])) {
 		}
 
 		if ($nl_config['db_version'] < 5) {
-			if ($db->engine == 'mysql') {
+			if ($db::ENGINE == 'mysql') {
 				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 					CHANGE abo_id abo_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT";
 				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
@@ -338,7 +338,7 @@ if (isset($_POST['start'])) {
 			unset($nl_config['hebergeur']);
 			unset($nl_config['version']);
 
-			if ($db->engine == 'postgres') {
+			if ($db::ENGINE == 'postgres') {
 				$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index";
 				$sql_update[] = "DROP INDEX admin_id_wa_auth_admin_index";
 				$sql_update[] = "DROP INDEX liste_id_wa_log_index";
@@ -414,7 +414,7 @@ if (isset($_POST['start'])) {
 				DROP COLUMN abo_register_key,
 				DROP COLUMN abo_register_date";
 
-			if ($db->engine == 'postgres') {
+			if ($db::ENGINE == 'postgres') {
 				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
 					ADD CONSTRAINT register_key_idx UNIQUE (register_key)";
 				$sql_update[] = "CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)";
@@ -450,14 +450,14 @@ if (isset($_POST['start'])) {
 			// En cas de bug lors d'une importation d'emails, les clefs
 			// peuvent ne pas avoir été recréées si une erreur est survenue
 			//
-			if ($db->engine == 'postgres') {
+			if ($db::ENGINE == 'postgres') {
 				$db->query("ALTER TABLE " . ABONNES_TABLE . "
 					ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
 			}
-			else if ($db->engine == 'sqlite') {
+			else if ($db::ENGINE == 'sqlite') {
 				$db->query("CREATE UNIQUE INDEX abo_email_idx ON " . ABONNES_TABLE . "(abo_email)");
 			}
-			else if ($db->engine == 'mysql') {
+			else if ($db::ENGINE == 'mysql') {
 				$db->query("ALTER TABLE " . ABONNES_TABLE . "
 					ADD UNIQUE abo_email_idx (abo_email)");
 			}
@@ -470,7 +470,7 @@ if (isset($_POST['start'])) {
 		// - Nouveau format de table de configuration
 		//
 		if ($nl_config['db_version'] < 8) {
-			if ($db->engine == 'postgres') {
+			if ($db::ENGINE == 'postgres') {
 				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 					ALTER COLUMN abo_email TYPE VARCHAR(254)";
 				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
@@ -482,7 +482,7 @@ if (isset($_POST['start'])) {
 					ALTER COLUMN return_email TYPE VARCHAR(254),
 					ALTER COLUMN liste_alias TYPE VARCHAR(254)";
 			}
-			else if ($db->engine == 'sqlite') {
+			else if ($db::ENGINE == 'sqlite') {
 				foreach (array(ABONNES_TABLE, ADMIN_TABLE, BANLIST_TABLE, LISTE_TABLE) as $tablename) {
 					wa_sqlite_recreate_table($tablename);
 				}
@@ -529,13 +529,13 @@ if (isset($_POST['start'])) {
 		// stocker les hashages renvoyés par phpass
 		//
 		if ($nl_config['db_version'] < 9) {
-			if ($db->engine == 'postgres') {
+			if ($db::ENGINE == 'postgres') {
 				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 					ALTER COLUMN abo_pwd TYPE VARCHAR(255)";
 				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
 					ALTER COLUMN admin_pwd TYPE VARCHAR(255)";
 			}
-			else if ($db->engine == 'sqlite') {
+			else if ($db::ENGINE == 'sqlite') {
 				foreach (array(ABONNES_TABLE, ADMIN_TABLE) as $tablename) {
 					wa_sqlite_recreate_table($tablename);
 				}
@@ -555,7 +555,7 @@ if (isset($_POST['start'])) {
 		// On les passe en MEDIUMTEXT.
 		//
 		if ($nl_config['db_version'] < 10) {
-			if ($db->engine == 'mysql') {
+			if ($db::ENGINE == 'mysql') {
 				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
 					MODIFY COLUMN log_body_html MEDIUMTEXT,
 					MODIFY COLUMN log_body_text MEDIUMTEXT";
@@ -629,7 +629,7 @@ if (isset($_POST['start'])) {
 		// Corrections sur les séquences PostgreSQL créées manuellement et donc
 		// non liées à leur table
 		//
-		if ($nl_config['db_version'] < 16 && $db->engine == 'postgres') {
+		if ($nl_config['db_version'] < 16 && $db::ENGINE == 'postgres') {
 			// La séquence pour la table ban_list ne suit pas le nommage {tablename}_id_seq
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$sban_id_seq RENAME TO %2$s_id_seq', $prefixe, BANLIST_TABLE);
 

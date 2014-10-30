@@ -75,7 +75,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 }
 
 // Create table
-$sql_create = file_get_contents(sprintf('%s/%s_tables.sql', $schemas_dir, $db_to->engine));
+$sql_create = file_get_contents(sprintf('%s/%s_tables.sql', $schemas_dir, $db_to::ENGINE));
 $sql_create = parseSQL($sql_create, $prefixe_to);
 
 foreach ($sql_create as $query) {
@@ -83,7 +83,7 @@ foreach ($sql_create as $query) {
 }
 
 // On récupère les séquences PostgreSQL pour les initialiser correctement après les insertions
-if ($db_to->engine == 'postgres') {
+if ($db_to::ENGINE == 'postgres') {
 	$sequences = array();
 
 	$sql = "SELECT t.relname AS tablename, a.attname AS fieldname, s.relname AS seqname
@@ -110,7 +110,7 @@ if ($db_to->engine == 'postgres') {
 // Si la base de données de destination est SQLite, on travaille en mémoire et
 // on fait la copie sur disque à la fin, c'est beaucoup plus rapide.
 //
-if ($db_to->engine == 'sqlite') {
+if ($db_to::ENGINE == 'sqlite') {
 	$sqlite_db = $db_to->dbname;
 	$db_to->close();
 	$db_to = Wadatabase('sqlite::memory:');
@@ -140,14 +140,14 @@ function fields_list($tablename)
 
 	$fields = array();
 
-	if ($db_to->engine == 'mysql') {
+	if ($db_to::ENGINE == 'mysql') {
 		$result = $db_to->query(sprintf("SHOW COLUMNS FROM %s", $db_to->quote($tablename)));
 
 		while ($row = $result->fetch()) {
 			$fields[] = $row['Field'];
 		}
 	}
-	else if ($db_to->engine == 'postgres') {
+	else if ($db_to::ENGINE == 'postgres') {
 		$sql = "SELECT a.attname AS field
 			FROM pg_class c, pg_attribute a
 			WHERE c.relname = '$tablename'
@@ -159,7 +159,7 @@ function fields_list($tablename)
 			$fields[] = $row['field'];
 		}
 	}
-	else if ($db_to->engine == 'sqlite') {
+	else if ($db_to::ENGINE == 'sqlite') {
 		$result = $db_to->query(sprintf("PRAGMA table_info(%s)", $db_to->quote($tablename)));
 
 		while ($row = $result->fetch()) {
@@ -202,7 +202,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 				exit(1);
 			}
 
-			if ($db_to->engine == 'postgres' && isset($sequences[$tablename])) {
+			if ($db_to::ENGINE == 'postgres' && isset($sequences[$tablename])) {
 				$sequences[$tablename]['seqval'] = max(
 					$sequences[$tablename]['seqval'],
 					++$row[$sequences[$tablename]['field']]
@@ -211,7 +211,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 		}
 		while ($row = $result->fetch());
 
-		if ($db_to->engine == 'postgres' && isset($sequences[$tablename])) {
+		if ($db_to::ENGINE == 'postgres' && isset($sequences[$tablename])) {
 			$db_to->query(sprintf("SELECT setval('%s', %d, false)",
 				$sequences[$tablename]['seqname'],
 				$sequences[$tablename]['seqval']
@@ -223,7 +223,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 	flush();
 }
 
-if ($db_to->engine == 'sqlite') {
+if ($db_to::ENGINE == 'sqlite') {
 	$db_to->query(sprintf('ATTACH %s AS dest', $db_to->quote($sqlite_db)));
 
 	foreach ($sql_schemas as $tablename => $schema) {

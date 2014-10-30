@@ -239,7 +239,7 @@ function WaDatabase($dsn)
 	//
 	// Charset non précisé dans le DSN. On tente une auto-configuration.
 	//
-	if ($db->engine != 'sqlite' && ($encoding = $db->encoding()) &&
+	if ($db::ENGINE != 'sqlite' && ($encoding = $db->encoding()) &&
 		preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding)
 	) {
 		//
