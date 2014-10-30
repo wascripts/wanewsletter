@@ -17,7 +17,8 @@
 		"source": "https://github.com/wascripts/wanewsletter"
 	},
 	"require": {
-		"php": ">=5.3.7"
+		"php": ">=5.3.7",
+		"patchwork/utf8": "~1.2@dev"
 	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "~1.0"

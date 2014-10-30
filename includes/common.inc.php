@@ -69,6 +69,7 @@ require WA_ROOTDIR . '/includes/compat.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/wadb_init.php';
+require WA_ROOTDIR . '/vendor/autoload.php';
 
 //
 // Configuration des gestionnaires d'erreurs et d'exceptions
@@ -94,6 +95,11 @@ if (!defined('IN_INSTALL') && !defined('NL_INSTALLED')) {
 		exit(1);
 	}
 }
+
+//
+// Initialisation de patchwork/utf8
+//
+\Patchwork\Utf8\Bootup::initAll();
 
 //
 // Configuration par défaut
