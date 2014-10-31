@@ -542,25 +542,27 @@ switch ($mode) {
 					}
 				}
 				else if (extension_loaded('xml')) {
-					$depth = 0;
-					$tagName = '';
+					$depth   = 0;
+					$tagname = '';
 
 					$parser = xml_parser_create();
 					xml_set_element_handler($parser,
-						create_function('$parser,$name,$attrs',
-							'if (($GLOBALS["depth"] == 0 && strtolower($name) == "wanliste") || $GLOBALS["depth"] > 0) {
-								$GLOBALS["depth"]++;
+						function ($parser, $name, $attrs) use (&$depth, &$tagname) {
+							if (($depth == 0 && strtolower($name) == 'wanliste') || $depth > 0) {
+								$depth++;
 							}
 
-							$GLOBALS["tagName"] = strtolower($name);'
-						),
-						create_function('$parser,$name', '$GLOBALS["depth"]--;')
+							$tagname = strtolower($name);
+						},
+						function ($parser, $name) use (&$depth) { $depth--; }
 					);
-					xml_set_character_data_handler($parser, create_function('$parser, $data',
-						'if ($GLOBALS["tagName"] == "email" && $GLOBALS["depth"] == 2) {
-							$GLOBALS["emails"][] = $data;
-						}'
-					));
+					xml_set_character_data_handler($parser,
+						function ($parser, $data) use (&$depth, &$tagname, &$emails) {
+							if ($tagname == 'email' && $depth == 2) {
+								$emails[] = $data;
+							}
+						}
+					);
 
 					if (!xml_parse($parser, $list_tmp)) {
 						$output->displayMessage(sprintf(
@@ -604,17 +606,17 @@ switch ($mode) {
 			//
 			// Vérification syntaxique des emails
 			//
-			$emails = array_filter($emails, create_function('$email',
-				'global $lang, $report;
-
-				if (Mailer::validate_email($email)) {
-					return true;
+			$emails = array_filter($emails,
+				function ($email) use (&$lang, &$report) {
+					if (Mailer::validate_email($email)) {
+						return true;
+					}
+					else {
+						$report .= sprintf('%s : %s%s', $email, $lang['Message']['Invalid_email2'], WA_EOL);
+						return false;
+					}
 				}
-				else {
-					$report .= sprintf(\'%s : %s%s\', $email, $lang[\'Message\'][\'Invalid_email2\'], WA_EOL);
-					return false;
-				}'
-			));
+			);
 
 			if (count($emails) > 0) {
 				$current_time = time();
@@ -622,11 +624,8 @@ switch ($mode) {
 
 				fake_header(false);
 
-				$sql_emails = array_map(create_function('$email',
-					'return $GLOBALS["db"]->escape(strtolower($email));'
-					),
-					$emails
-				);
+				$sql_emails = array_map('strtolower', $emails);
+				$sql_emails = array_map(array($db, 'escape'), $sql_emails);
 
 				$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
 					FROM " . ABONNES_TABLE . " AS a

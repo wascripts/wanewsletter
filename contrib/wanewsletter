@@ -386,25 +386,23 @@ else if ($import_mail) {
 	//
 	// Vérification syntaxique des emails
 	//
-	$emails = array_filter($emails, create_function('$email',
-		'global $lang;
-
-		if( Mailer::validate_email($email) ) {
-			return true;
+	$emails = array_filter($emails,
+		function ($email) use (&$lang) {
+			if (Mailer::validate_email($email)) {
+				return true;
+			}
+			else {
+				printf("%s : %s\n", $email, $lang['Message']['Invalid_email2']);
+				return false;
+			}
 		}
-		else {
-			printf("%s : %s\n", $email, $lang[\'Message\'][\'Invalid_email2\']);
-			return false;
-		}'
-	));
+	);
 
 	if (count($emails) > 0) {
 		$counter = 0;
-		$sql_emails = array_map(create_function('$email',
-			'return $GLOBALS["db"]->escape(strtolower($email));'
-			),
-			$emails
-		);
+
+		$sql_emails = array_map('strtolower', $emails);
+		$sql_emails = array_map(array($db, 'escape'), $sql_emails);
 
 		$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
 			FROM " . ABONNES_TABLE . " AS a

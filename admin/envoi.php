@@ -538,12 +538,9 @@ switch ($mode) {
 			//
 			// Fonction de callback utilisée pour l'appel à preg_replace_callback() plus bas
 			//
-			function replace_include($match)
-			{
-				global $mode, $lang, $error, $msg_error;
-
+			$replace_include = function ($m) use ($mode, &$lang, &$error, &$msg_error) {
 				preg_match_all('/\\s+([a-z_:][a-z0-9_:.-]*)\\s?=\\s?(["\'])(.+?)(?<!\\\\)(?:\\\\\\\\)*\\2/i',
-					$match[1], $attrs, PREG_SET_ORDER);
+					$m[1], $attrs, PREG_SET_ORDER);
 
 				$resource = null;
 				$tds = false;
@@ -560,7 +557,7 @@ switch ($mode) {
 				}
 
 				if (is_null($resource) || (!$tds && $mode != 'send')) {
-					return $match[0];
+					return $m[0];
 				}
 
 				$result = wan_get_contents($resource, $errstr);
@@ -568,16 +565,17 @@ switch ($mode) {
 				if (!$result) {
 					$error = true;
 					$msg_error[] = $errstr;
-					return $match[0];
+					return $m[0];
 				}
 				else {
 					return convert_encoding($result['data'], $result['charset']);
 				}
-			}
+			};
 
 			$regexp = '/<\\?inclu[dr]e(\\s+[^>]+)\\?>/i';
-			$logdata['log_body_text'] = preg_replace_callback($regexp, 'replace_include', $logdata['log_body_text']);
-			$logdata['log_body_html'] = preg_replace_callback($regexp, 'replace_include', $logdata['log_body_html']);
+			foreach (array('log_body_text', 'log_body_html') as $key) {
+				$logdata[$key] = preg_replace_callback($regexp, $replace_include, $logdata[$key]);
+			}
 
 			if ($mode == 'test' || $mode == 'send') {
 				if (!DISABLE_CHECK_LINKS && $listdata['liste_format'] != FORMAT_HTML &&
@@ -861,9 +859,9 @@ if ($mode == 'test' && !empty($_POST['test_address'])) {
 	$supp_address = explode(',', $_POST['test_address']);
 	$supp_address = array_map('trim', $supp_address);
 	$supp_address = array_unique($supp_address);
-	$supp_address = array_filter($supp_address, create_function('$email',
-		'return Mailer::validate_email($email);'
-	));
+	$supp_address = array_filter($supp_address, function ($email) {
+		return Mailer::validate_email($email);
+	});
 }
 
 if (($mode == 'test' && count($supp_address) > 0) || $mode == 'progress') {
