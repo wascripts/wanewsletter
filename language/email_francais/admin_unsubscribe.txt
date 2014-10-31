@@ -1,10 +1,10 @@
 Bonjour %USER%,
 
-Une personne s'est désinscrite de la liste de diffusion "%LISTE%".
+Une personne s'est dÃ©sinscrite de la liste de diffusion "%LISTE%".
 
 Son adresse email est %EMAIL%
 
-A bientôt sur %URLSITE%
+A bientÃ´t sur %URLSITE%
 
 ~~~~~~~~~~
 %SIG%

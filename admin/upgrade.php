@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 AurÈlien Maille
+ * @copyright 2002-2014 Aur√©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -54,7 +54,7 @@ if (!wan_is_admin($admindata)) {
 }
 
 //
-// CompatibilitÈ avec Wanewsletter < 2.4-beta2
+// Compatibilit√© avec Wanewsletter < 2.4-beta2
 //
 if (!isset($nl_config['db_version'])) {
 	// Versions <= 2.2.13
@@ -72,8 +72,8 @@ if (!isset($nl_config['db_version'])) {
 	}
 
 	//
-	// On incrÈmente manuellement db_version en fonction de chaque version ayant
-	// apportÈ des changements dans les tables de donnÈes du script.
+	// On incr√©mente manuellement db_version en fonction de chaque version ayant
+	// apport√© des changements dans les tables de donn√©es du script.
 	//
 	$nl_config['db_version'] = 1;
 	$versions = array('2.2-beta2', '2.2-rc2', '2.2-rc2b', '2.2-rc3', '2.2.12', '2.3-beta3');
@@ -98,7 +98,7 @@ if (isset($_POST['start'])) {
 
 	if (!$error) {
 		//
-		// Lancement de la mise ‡ jour
+		// Lancement de la mise √† jour
 		// On allonge le temps maximum d'execution du script.
 		//
 		@set_time_limit(1200);
@@ -145,9 +145,9 @@ if (isset($_POST['start'])) {
 		$sql_data   = $sql_data_by_table;
 
 		//
-		// Nous vÈrifions tout d'abord si des doublons sont prÈsents dans
-		// la table des abonnÈs.
-		// Si des doublons sont prÈsents, la mise ‡ jour ne peut continuer.
+		// Nous v√©rifions tout d'abord si des doublons sont pr√©sents dans
+		// la table des abonn√©s.
+		// Si des doublons sont pr√©sents, la mise √† jour ne peut continuer.
 		//
 		$sql = "SELECT abo_email
 			FROM " . ABONNES_TABLE . "
@@ -163,10 +163,10 @@ if (isset($_POST['start'])) {
 			}
 			while ($row = $result->fetch());
 
-			$output->displayMessage(sprintf("Des adresses email sont prÈsentes en plusieurs
-				exemplaires dans la table %s, la mise ‡ jour ne peut continuer.
-				Supprimez les doublons en cause puis relancez la mise ‡ jour.
-				Adresses email prÈsentes en plusieurs exemplaires : %s",
+			$output->displayMessage(sprintf("Des adresses email sont pr√©sentes en plusieurs
+				exemplaires dans la table %s, la mise √† jour ne peut continuer.
+				Supprimez les doublons en cause puis relancez la mise √† jour.
+				Adresses email pr√©sentes en plusieurs exemplaires : %s",
 				ABONNES_TABLE,
 				implode(', ', $emails)
 			));
@@ -201,17 +201,17 @@ if (isset($_POST['start'])) {
 		}
 
 		//
-		// Un bug Ètait prÈsent dans la rc1, comme une seconde Èdition du package avait ÈtÈ mise
-		// ‡ disposition pour pallier ‡ un bug de derniËre minute assez important, le numÈro de version
-		// Ètait 2.2-rc2 pendant une dizaine de jours (alors qu'il me semblait avoir recorrigÈ
-		// le package aprËs coup).
-		// Nous effectuons donc la mise ‡ jour Ègalement pour les versions 2.2-rc2.
-		// Le nom de la vrai release candidate 2 est donc 2.2-rc2b pour Èviter des problËmes lors des mises
-		// ‡ jour par les gens qui ont tÈlÈchargÈ le package les dix premiers jours.
+		// Un bug √©tait pr√©sent dans la rc1, comme une seconde √©dition du package avait √©t√© mise
+		// √† disposition pour pallier √† un bug de derni√®re minute assez important, le num√©ro de version
+		// √©tait 2.2-rc2 pendant une dizaine de jours (alors qu'il me semblait avoir recorrig√©
+		// le package apr√®s coup).
+		// Nous effectuons donc la mise √† jour √©galement pour les versions 2.2-rc2.
+		// Le nom de la vrai release candidate 2 est donc 2.2-rc2b pour √©viter des probl√®mes lors des mises
+		// √† jour par les gens qui ont t√©l√©charg√© le package les dix premiers jours.
 		//
 		if ($nl_config['db_version'] < 3) {
 			//
-			// Suppression des Èventuelles entrÈes orphelines dans les tables abonnes et abo_liste
+			// Suppression des √©ventuelles entr√©es orphelines dans les tables abonnes et abo_liste
 			//
 			$sql = "SELECT abo_id
 				FROM " . ABONNES_TABLE;
@@ -305,8 +305,8 @@ if (isset($_POST['start'])) {
 			}
 
 			//
-			// Correction du bug de mise ‡ jour de la table abo_liste aprËs un envoi.
-			// Si tous les abonnÈs d'une liste ont send ‡ 1, on remet celui ci ‡ 0
+			// Correction du bug de mise √† jour de la table abo_liste apr√®s un envoi.
+			// Si tous les abonn√©s d'une liste ont send √† 1, on remet celui ci √† 0
 			//
 			$sql = "SELECT COUNT(al.abo_id) AS num_abo, SUM(al.send) AS num_send, al.liste_id
 				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
@@ -436,19 +436,19 @@ if (isset($_POST['start'])) {
 		}
 
 		//
-		// DÈbut du support de SQLite en plus de MySQL et PostgreSQL
+		// D√©but du support de SQLite en plus de MySQL et PostgreSQL
 		// (2.3-beta1 pour SQLite 2; 2.3-beta2 pour SQLite 3)
 		//
 
 		//
-		// La contrainte d'unicitÈ sur abo_email peut avoir ÈtÈ perdue en cas
-		// de bug lors de l'importation via l'outil proposÈ par Wanewsletter.
-		// On essaie de recrÈer cette contrainte d'unicitÈ.
+		// La contrainte d'unicit√© sur abo_email peut avoir √©t√© perdue en cas
+		// de bug lors de l'importation via l'outil propos√© par Wanewsletter.
+		// On essaie de recr√©er cette contrainte d'unicit√©.
 		//
 		if ($nl_config['db_version'] < 7) {
 			//
 			// En cas de bug lors d'une importation d'emails, les clefs
-			// peuvent ne pas avoir ÈtÈ recrÈÈes si une erreur est survenue
+			// peuvent ne pas avoir √©t√© recr√©√©es si une erreur est survenue
 			//
 			if ($db::ENGINE == 'postgres') {
 				$db->query("ALTER TABLE " . ABONNES_TABLE . "
@@ -465,8 +465,8 @@ if (isset($_POST['start'])) {
 
 		//
 		// Passage de toutes les colonnes stockant une adresse email en VARCHAR(254)
-		// - On uniformise les tailles de colonne pour ce type de donnÈes
-		// - le protocole SMTP nÈcessite une longueur max de 254 octets des adresses email
+		// - On uniformise les tailles de colonne pour ce type de donn√©es
+		// - le protocole SMTP n√©cessite une longueur max de 254 octets des adresses email
 		// - Nouveau format de table de configuration
 		//
 		if ($nl_config['db_version'] < 8) {
@@ -526,7 +526,7 @@ if (isset($_POST['start'])) {
 
 		//
 		// Passage des colonnes abo_pwd et admin_pwd en VARCHAR(255) pour pouvoir
-		// stocker les hashages renvoyÈs par phpass
+		// stocker les hashages renvoy√©s par phpass
 		//
 		if ($nl_config['db_version'] < 9) {
 			if ($db::ENGINE == 'postgres') {
@@ -550,8 +550,8 @@ if (isset($_POST['start'])) {
 
 		//
 		// Les champs TEXT sur MySQL ont un espace de stockage de 2^16 octets
-		// soit environ 64 Kio. «a pourrait Ítre un peu lÈger dans des cas
-		// d'utilisation extrËme.
+		// soit environ 64 Kio. √áa pourrait √™tre un peu l√©ger dans des cas
+		// d'utilisation extr√®me.
 		// On les passe en MEDIUMTEXT.
 		//
 		if ($nl_config['db_version'] < 10) {
@@ -564,10 +564,10 @@ if (isset($_POST['start'])) {
 
 		//
 		// Correction d'une horrible faute de conjuguaison sur le nom d'une
-		// entrÈe de la configuration.
+		// entr√©e de la configuration.
 		//
 		if ($nl_config['db_version'] < 11) {
-			if (isset($nl_config['sending_limit'])) {// Table de configuration recrÈÈe dans l'update 8
+			if (isset($nl_config['sending_limit'])) {// Table de configuration recr√©√©e dans l'update 8
 				$sql_update[] = "UPDATE " . CONFIG_TABLE . "
 					SET config_value = '$nl_config[emails_sended]'
 					WHERE config_name = 'sending_limit'";
@@ -582,8 +582,8 @@ if (isset($_POST['start'])) {
 		}
 
 		//
-		// Les noms de listes de diffusion sont stockÈs avec des entitÈs html
-		// SuprËme bÈtise (je sais pas ce qui m'a pris :S)
+		// Les noms de listes de diffusion sont stock√©s avec des entit√©s html
+		// Supr√®me b√©tise (je sais pas ce qui m'a pris :S)
 		//
 		if ($nl_config['db_version'] < 12) {
 			$result = $db->query("SELECT liste_id, liste_name FROM ".LISTE_TABLE);
@@ -597,20 +597,20 @@ if (isset($_POST['start'])) {
 		}
 
 		//
-		// Ajout du rÈpertoire data/ centralisant les donnÈes "volatiles".
-		// On ajoutera une note ‡ ce propos dans le message de rÈsultat de
-		// la mise ‡ jour.
+		// Ajout du r√©pertoire data/ centralisant les donn√©es "volatiles".
+		// On ajoutera une note √† ce propos dans le message de r√©sultat de
+		// la mise √† jour.
 		//
 		$moved_dirs = false;
 
 		if ($nl_config['db_version'] < 13) {
-			// fake. Permet simplement de savoir que les rÈpertoires stats, tmp, ...
-			// ont changÈ de place et le notifier ‡ l'administrateur
+			// fake. Permet simplement de savoir que les r√©pertoires stats, tmp, ...
+			// ont chang√© de place et le notifier √† l'administrateur
 			$moved_dirs = @!is_writable(WA_TMPDIR);
 		}
 
 		//
-		// EntrÈe de configuration 'gd_img_type' obsolËte. On la supprime.
+		// Entr√©e de configuration 'gd_img_type' obsol√®te. On la supprime.
 		//
 		if ($nl_config['db_version'] < 14) {
 			$sql_update[] = "DELETE FROM " . CONFIG_TABLE . "
@@ -618,7 +618,7 @@ if (isset($_POST['start'])) {
 		}
 
 		//
-		// Ajout de l'entrÈe de configuration 'debug_level'.
+		// Ajout de l'entr√©e de configuration 'debug_level'.
 		//
 		if ($nl_config['db_version'] < 15) {
 			$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
@@ -626,11 +626,11 @@ if (isset($_POST['start'])) {
 		}
 
 		//
-		// Corrections sur les sÈquences PostgreSQL crÈÈes manuellement et donc
-		// non liÈes ‡ leur table
+		// Corrections sur les s√©quences PostgreSQL cr√©√©es manuellement et donc
+		// non li√©es √† leur table
 		//
 		if ($nl_config['db_version'] < 16 && $db::ENGINE == 'postgres') {
-			// La sÈquence pour la table ban_list ne suit pas le nommage {tablename}_id_seq
+			// La s√©quence pour la table ban_list ne suit pas le nommage {tablename}_id_seq
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$sban_id_seq RENAME TO %2$s_id_seq', $prefixe, BANLIST_TABLE);
 
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.abo_id', ABONNES_TABLE);
@@ -646,19 +646,19 @@ if (isset($_POST['start'])) {
 		exec_queries($sql_update);
 
 		//
-		// On met ‡ jour le numÈro identifiant la version des tables du script
+		// On met √† jour le num√©ro identifiant la version des tables du script
 		//
 		wa_update_config('db_version', WANEWSLETTER_DB_VERSION);
 
 		//
-		// Affichage message de rÈsultat
+		// Affichage message de r√©sultat
 		//
 
 		if (defined('UPDATE_CONFIG_FILE') || $moved_dirs) {
 			$config_file  = '<' . "?php\n";
 			$config_file .= "\n";
 			$config_file .= "//\n";
-			$config_file .= "// ParamËtres d'accËs ‡ la base de donnÈes\n";
+			$config_file .= "// Param√®tres d'acc√®s √† la base de donn√©es\n";
 			$config_file .= "// Ne pas modifier ce fichier ! (Do not edit this file)\n";
 			$config_file .= "//\n";
 			$config_file .= "define('NL_INSTALLED', true);\n";

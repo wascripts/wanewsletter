@@ -1,10 +1,10 @@
 -- 
--- Données de base de WAnewsletter
+-- DonnÃ©es de base de WAnewsletter
 -- 
 
 
 -- 
--- Création d'un compte administrateur (mot de passe par défaut: admin)
+-- CrÃ©ation d'un compte administrateur (mot de passe par dÃ©faut: admin)
 -- 
 INSERT INTO wa_admin (admin_login, admin_pwd, admin_email, admin_lang, admin_dateformat, admin_level)
 	VALUES('admin', '$P$D6MbHmah9V/JY/9H3.dRGKpCVS65su0', 'admin@domaine.com', 'francais', 'd M Y H:i', 2);
@@ -48,7 +48,7 @@ INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '16')
 
 
 -- 
--- Extensions interdites par défaut
+-- Extensions interdites par dÃ©faut
 -- 
 INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'exe');
 INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'php');

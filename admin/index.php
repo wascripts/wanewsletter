@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -19,7 +19,7 @@ if (count($liste_ids) > 0) {
 	$sql_liste_ids = implode(', ', $liste_ids);
 
 	//
-	// Récupération des nombres d'inscrits
+	// RÃ©cupÃ©ration des nombres d'inscrits
 	//
 	$sql = "SELECT COUNT(abo_id) AS num_abo, abo_status
 		FROM " . ABONNES_TABLE . "
@@ -41,7 +41,7 @@ if (count($liste_ids) > 0) {
 	}
 
 	//
-	// Récupération du nombre d'archives
+	// RÃ©cupÃ©ration du nombre d'archives
 	//
 	$sql = "SELECT SUM(liste_numlogs) AS num_logs
 		FROM " . LISTE_TABLE . "
@@ -53,7 +53,7 @@ if (count($liste_ids) > 0) {
 	}
 
 	//
-	// Récupération de la date du dernier envoi
+	// RÃ©cupÃ©ration de la date du dernier envoi
 	//
 	$sql = "SELECT MAX(log_date) AS last_log
 		FROM " . LOG_TABLE . "
@@ -66,7 +66,7 @@ if (count($liste_ids) > 0) {
 	}
 
 	//
-	// Espace disque occupé
+	// Espace disque occupÃ©
 	//
 	$sql = "SELECT SUM(jf.file_size) AS totalsize
 		FROM " . JOINED_FILES_TABLE . " AS jf
@@ -95,7 +95,7 @@ if (count($liste_ids) > 0) {
 
 //
 // Poids des tables du script
-// (excepté la table des sessions)
+// (exceptÃ© la table des sessions)
 //
 list($infos) = parseDSN($dsn);
 

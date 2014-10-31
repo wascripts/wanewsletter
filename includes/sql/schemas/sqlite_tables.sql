@@ -1,5 +1,5 @@
 -- 
--- Schéma des tables de WAnewsletter pour SQLite
+-- SchÃ©ma des tables de WAnewsletter pour SQLite
 -- 
 
 -- 

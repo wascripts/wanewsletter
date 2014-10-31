@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -16,12 +16,12 @@ include WA_ROOTDIR . '/includes/tags.inc.php';
 /**
  * launch_sending()
  *
- * Cette fonction est appellée soit dans envoi.php lors de l'envoi, soit
- * dans le fichier appellé originellement cron.php
+ * Cette fonction est appellÃ©e soit dans envoi.php lors de l'envoi, soit
+ * dans le fichier appellÃ© originellement cron.php
  *
- * @param array $listdata      Tableau des données de la liste concernée
- * @param array $logdata       Tableau des données de la newsletter
- * @param array $supp_address  Adresses de destinataires supplémentaires
+ * @param array $listdata      Tableau des donnÃ©es de la liste concernÃ©e
+ * @param array $logdata       Tableau des donnÃ©es de la newsletter
+ * @param array $supp_address  Adresses de destinataires supplÃ©mentaires
  *
  * @return string
  */
@@ -31,15 +31,15 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 	//
 	// On commence par poser un verrou sur un fichier lock,
-	// il ne faut pas qu'il y ait simultanément plusieurs flôts d'envois
-	// pour une même liste de diffusion.
+	// il ne faut pas qu'il y ait simultanÃ©ment plusieurs flÃ´ts d'envois
+	// pour une mÃªme liste de diffusion.
 	//
 	$lockfile = sprintf(WA_LOCKFILE, $listdata['liste_id']);
 
 	if (file_exists($lockfile)) {
 		$isBeginning = false;
 		$fp = fopen($lockfile, 'r+');
-		$supp_address = array();// On en tient pas compte, ça l'a déjà été lors du premier flôt
+		$supp_address = array();// On en tient pas compte, Ã§a l'a dÃ©jÃ  Ã©tÃ© lors du premier flÃ´t
 	}
 	else {
 		$isBeginning = true;
@@ -54,8 +54,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 	if (filesize($lockfile) > 0) {
 		//
-		// L'envoi a planté au cours d'un "flôt" précédent. On récupère les éventuels
-		// identifiants d'abonnés stockés dans le fichier lock et on met à jour la table
+		// L'envoi a plantÃ© au cours d'un "flÃ´t" prÃ©cÃ©dent. On rÃ©cupÃ¨re les Ã©ventuels
+		// identifiants d'abonnÃ©s stockÃ©s dans le fichier lock et on met Ã  jour la table
 		//
 		$abo_ids = fread($fp, filesize($lockfile));
 		$abo_ids = array_map('trim', explode("\n", trim($abo_ids)));
@@ -97,7 +97,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 
 	//
-	// On traite les données de la newsletter à envoyer
+	// On traite les donnÃ©es de la newsletter Ã  envoyer
 	//
 	if (preg_match('/[\x80-\x9F]/', $logdata['log_subject']) ||
 		preg_match('/[\x80-\x9F]/', $logdata['log_body_text']) ||
@@ -126,7 +126,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	);
 
 	//
-	// Ajout du lien de désinscription, selon les méthodes d'envoi/format utilisés
+	// Ajout du lien de dÃ©sinscription, selon les mÃ©thodes d'envoi/format utilisÃ©s
 	//
 	$link = newsletter_links($listdata);
 
@@ -136,8 +136,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 
 	//
-	// On s'occupe maintenant des fichiers joints ou incorporés
-	// Si les fichiers sont stockés sur un serveur ftp, on les rapatrie le temps du flot d'envoi
+	// On s'occupe maintenant des fichiers joints ou incorporÃ©s
+	// Si les fichiers sont stockÃ©s sur un serveur ftp, on les rapatrie le temps du flot d'envoi
 	//
 	$total_files = count($logdata['joined_files']);
 	$tmp_files   = array();
@@ -180,7 +180,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 
 	//
-	// Récupération des champs des tags personnalisés
+	// RÃ©cupÃ©ration des champs des tags personnalisÃ©s
 	//
 	if (count($other_tags) > 0) {
 		$fields_str = '';
@@ -193,8 +193,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 
 	//
-	// Si on en est au premier flôt, on récupère également les adresses email
-	// des administrateurs ayant activés l'option de réception de copie
+	// Si on en est au premier flÃ´t, on rÃ©cupÃ¨re Ã©galement les adresses email
+	// des administrateurs ayant activÃ©s l'option de rÃ©ception de copie
 	//
 	if ($isBeginning) {
 		$sql = "SELECT a.admin_email
@@ -208,7 +208,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		}
 		$result->free();
 
-		$supp_address = array_unique($supp_address); // Au cas où...
+		$supp_address = array_unique($supp_address); // Au cas oÃ¹...
 	}
 
 	$abo_ids     = array();
@@ -218,7 +218,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 	if ($logdata['log_status'] == STATUS_STANDBY) {
 		//
-		// On récupère les infos sur les abonnés destinataires
+		// On rÃ©cupÃ¨re les infos sur les abonnÃ©s destinataires
 		//
 		$sql = "SELECT COUNT(a.abo_id) AS total
 			FROM " . ABONNES_TABLE . " AS a
@@ -273,7 +273,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 			//
 			// Tableau pour remplacer les tags par des chaines vides
-			// Non utilisation des tags avec le moteur d'envoi en copie cachée
+			// Non utilisation des tags avec le moteur d'envoi en copie cachÃ©e
 			//
 			$tags_replace = array('NAME' => '', 'PSEUDO' => '');
 			if (count($other_tags) > 0) {
@@ -396,7 +396,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				$mailer->set_address($address);
 
 				//
-				// Traitement des tags et tags personnalisés
+				// Traitement des tags et tags personnalisÃ©s
 				//
 				$tags_replace = array();
 
@@ -409,7 +409,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				else {
 					$tags_replace['NAME'] = '';
 				}
-				$tags_replace['PSEUDO'] = $tags_replace['NAME'];// Cohérence avec d'autres parties du script
+				$tags_replace['PSEUDO'] = $tags_replace['NAME'];// CohÃ©rence avec d'autres parties du script
 
 				if (count($other_tags) > 0) {
 					foreach ($other_tags as $tag) {
@@ -459,7 +459,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			}
 
 			//
-			// Aucun email envoyé, il y a manifestement un problème, on affiche le message d'erreur
+			// Aucun email envoyÃ©, il y a manifestement un problÃ¨me, on affiche le message d'erreur
 			//
 			if ($total_abo > 0 && $sendError == $total_abo) {
 				flock($fp, LOCK_UN);
@@ -477,14 +477,14 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 	else if ($isBeginning) {
 		//
-		// Aucun abonné dont le champ send soit positionné à 0 et nous sommes au
-		// début de l'envoi. Cette liste ne comporte donc pas encore d'abonné.
+		// Aucun abonnÃ© dont le champ send soit positionnÃ© Ã  0 et nous sommes au
+		// dÃ©but de l'envoi. Cette liste ne comporte donc pas encore d'abonnÃ©.
 		//
 		return $lang['Message']['No_subscribers'];
 	}
 
 	//
-	// Si l'option FTP est utilisée, suppression des fichiers temporaires
+	// Si l'option FTP est utilisÃ©e, suppression des fichiers temporaires
 	//
 	if ($nl_config['use_ftp']) {
 		foreach ($tmp_files as $filename) {
@@ -497,15 +497,15 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 	if (!$db->ping()) {
 		//
-		// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
+		// L'envoi a durÃ© trop longtemps et la connexion au serveur SQL a Ã©tÃ© perdue
 		//
 		if ($db::ENGINE == 'mysql') {
-			trigger_error("La connexion à la base de données a été perdue.<br />
-Vous devriez mettre l'option PHP mysqli.reconnect à On dans le php.ini,<br />
+			trigger_error("La connexion Ã  la base de donnÃ©es a Ã©tÃ© perdue.<br />
+Vous devriez mettre l'option PHP mysqli.reconnect Ã  On dans le php.ini,<br />
 pour permettre la reconnexion automatique au serveur.", E_USER_ERROR);
 		}
 		else {
-			trigger_error("La connexion à la base de données a été perdue", E_USER_ERROR);
+			trigger_error("La connexion Ã  la base de donnÃ©es a Ã©tÃ© perdue", E_USER_ERROR);
 		}
 	}
 
@@ -593,9 +593,9 @@ pour permettre la reconnexion automatique au serveur.", E_USER_ERROR);
 }
 
 /**
- * Fonction renvoyant les liens à placer dans les newsletters, selon les réglages
+ * Fonction renvoyant les liens Ã  placer dans les newsletters, selon les rÃ©glages
  *
- * @param array $listdata  Tableau des données de la liste concernée
+ * @param array $listdata  Tableau des donnÃ©es de la liste concernÃ©e
  *
  * @return array
  */

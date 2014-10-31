@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -44,7 +44,7 @@ class Attach
 
 	/**
 	 * Initialisation des variables de la classe
-	 * Initialisation de la connexion au serveur ftp le cas échéant
+	 * Initialisation de la connexion au serveur ftp le cas Ã©chÃ©ant
 	 */
 	public function __construct()
 	{
@@ -74,8 +74,8 @@ class Attach
 
 	/**
 	 * Fonction de connexion au serveur ftp
-	 * La fonction a été affranchi de façon à être utilisable sans créer
-	 * une instance de la classe. (pour tester la connexion dans la config. générale)
+	 * La fonction a Ã©tÃ© affranchi de faÃ§on Ã  Ãªtre utilisable sans crÃ©er
+	 * une instance de la classe. (pour tester la connexion dans la config. gÃ©nÃ©rale)
 	 *
 	 * @param string  $ftp_server Nom du serveur ftp
 	 * @param integer $ftp_port   Port de connexion
@@ -110,7 +110,7 @@ class Attach
 	}
 
 	/**
-	 * Verifie la présence du fichier demandé dans le dossier des fichier joints ou sur le ftp
+	 * Verifie la prÃ©sence du fichier demandÃ© dans le dossier des fichier joints ou sur le ftp
 	 *
 	 * @param string  $filename  Nom du fichier
 	 * @param boolean $error     True si une erreur s'est produite
@@ -130,7 +130,7 @@ class Attach
 
 			if (is_array($listing) && count($listing)) {
 				//
-				// On vérifie chaque entrée du listing pour retrouver le fichier spécifié
+				// On vÃ©rifie chaque entrÃ©e du listing pour retrouver le fichier spÃ©cifiÃ©
 				//
 				foreach ($listing as $line_info) {
 					if (preg_match('/^\s*([d-])[rwxst-]{9} .+ ([0-9]*) [a-zA-Z]+ [0-9:\s]+ (.+)$/i', $line_info, $m)) {
@@ -158,10 +158,10 @@ class Attach
 	}
 
 	/**
-	 * Génération d'un nom de fichier unique
-	 * Fonction récursive
+	 * GÃ©nÃ©ration d'un nom de fichier unique
+	 * Fonction rÃ©cursive
 	 *
-	 * @param string $prev_filename Nom du fichier temporaire précédemment généré et refusé
+	 * @param string $prev_filename Nom du fichier temporaire prÃ©cÃ©demment gÃ©nÃ©rÃ© et refusÃ©
 	 *
 	 * @return string
 	 */
@@ -187,19 +187,19 @@ class Attach
 	}
 
 	/**
-	 * Effectue les vérifications nécessaires et ajoute une entrée dans les tables de
+	 * Effectue les vÃ©rifications nÃ©cessaires et ajoute une entrÃ©e dans les tables de
 	 * gestion des fichiers joints
 	 *
-	 * Le fichier peut être uploadé via le formulaire adéquat, être sur un serveur distant,
-	 * ou avoir été uploadé manuellement sur le serveur
+	 * Le fichier peut Ãªtre uploadÃ© via le formulaire adÃ©quat, Ãªtre sur un serveur distant,
+	 * ou avoir Ã©tÃ© uploadÃ© manuellement sur le serveur
 	 *
-	 * @param string  $upload_mode  Mode d'upload du fichier (upload http, à distance, fichier local)
+	 * @param string  $upload_mode  Mode d'upload du fichier (upload http, Ã  distance, fichier local)
 	 * @param integer $log_id       Identifiant du log
 	 * @param string  $filename     Nom du fichier
 	 * @param string  $tmp_filename Nom temporaire du fichier/nom du fichier local/url du fichier distant
 	 * @param integer $filesize     Taille du fichier
 	 * @param string  $filetype     Type mime du fichier
-	 * @param string  $errno_code   Code erreur éventuel de l'upload http
+	 * @param string  $errno_code   Code erreur Ã©ventuel de l'upload http
 	 * @param boolean $error        True si une erreur survient
 	 * @param array   $msg_error    Tableau des messages d'erreur
 	 */
@@ -214,7 +214,7 @@ class Attach
 		}
 
 		//
-		// Vérification de l'accès en écriture au répertoire de stockage
+		// VÃ©rification de l'accÃ¨s en Ã©criture au rÃ©pertoire de stockage
 		//
 		if ($upload_mode != 'local' && !$this->use_ftp && !is_writable($this->upload_path)) {
 			$error = true;
@@ -223,7 +223,7 @@ class Attach
 		}
 
 		//
-		// Vérification de la validité du nom du fichier
+		// VÃ©rification de la validitÃ© du nom du fichier
 		//
 		if (!$this->check_filename($filename)) {
 			$error = true;
@@ -231,7 +231,7 @@ class Attach
 		}
 
 		//
-		// Vérification de l'extension du fichier
+		// VÃ©rification de l'extension du fichier
 		//
 		if (!$this->check_extension($extension)) {
 			$error = true;
@@ -240,7 +240,7 @@ class Attach
 
 		if (!$error) {
 			//
-			// Si l'upload a échoué, on récupère le message correspondant à l'erreur survenue
+			// Si l'upload a Ã©chouÃ©, on rÃ©cupÃ¨re le message correspondant Ã  l'erreur survenue
 			//
 			if ($upload_mode == 'upload' && $errno_code != UPLOAD_ERR_OK) {
 				$error = true;
@@ -256,7 +256,7 @@ class Attach
 			}
 
 			//
-			// Récupération d'un fichier distant
+			// RÃ©cupÃ©ration d'un fichier distant
 			//
 			else if ($upload_mode == 'remote') {
 				$URL  = $tmp_filename;
@@ -343,13 +343,13 @@ class Attach
 			}
 
 			//
-			// Fichier uploadé manuellement sur le serveur
+			// Fichier uploadÃ© manuellement sur le serveur
 			//
 			else if ($upload_mode == 'local') {
 				$filetype = Mailer::mime_type($extension);
 
 				//
-				// On verifie si le fichier est bien présent sur le serveur
+				// On verifie si le fichier est bien prÃ©sent sur le serveur
 				//
 				$filesize = $this->joined_file_exists($tmp_filename, $error, $msg_error);
 			}
@@ -359,7 +359,7 @@ class Attach
 		}
 
 		//
-		// Vérification de la taille du fichier par rapport à la taille maximale autorisée
+		// VÃ©rification de la taille du fichier par rapport Ã  la taille maximale autorisÃ©e
 		//
 		if (!$this->check_maxsize($log_id, $filesize, $total_size)) {
 			$error = true;
@@ -368,7 +368,7 @@ class Attach
 		}
 
 		//
-		// Si fichier uploadé ou fichier distant, on déplace le fichier à son emplacement final
+		// Si fichier uploadÃ© ou fichier distant, on dÃ©place le fichier Ã  son emplacement final
 		//
 		if (!$error && $upload_mode != 'local') {
 			$physical_filename = $this->make_filename();
@@ -403,14 +403,14 @@ class Attach
 			}
 
 			//
-			// Suppression du fichier temporaire créé par nos soins
+			// Suppression du fichier temporaire crÃ©Ã© par nos soins
 			//
 			$this->remove_file($tmp_filename);
 		}
 
 		if (!$error) {
 			//
-			// Tout s'est bien passé, on entre les nouvelles données dans la base de données
+			// Tout s'est bien passÃ©, on entre les nouvelles donnÃ©es dans la base de donnÃ©es
 			//
 			$db->beginTransaction();
 
@@ -436,7 +436,7 @@ class Attach
 	}
 
 	/**
-	 * Ajoute une entrée pour le log courant avec l'identifiant d'un fichier existant
+	 * Ajoute une entrÃ©e pour le log courant avec l'identifiant d'un fichier existant
 	 *
 	 * @param integer $file_id   Identifiant du fichier
 	 * @param integer $log_id    Identifiant du log
@@ -464,7 +464,7 @@ class Attach
 
 		if (!$error) {
 			//
-			// On verifie si le fichier est bien présent sur le serveur
+			// On verifie si le fichier est bien prÃ©sent sur le serveur
 			//
 			$filesize = $this->joined_file_exists($physical_name, $error, $msg_error);
 		}
@@ -476,7 +476,7 @@ class Attach
 		}
 
 		//
-		// Insertion des données
+		// Insertion des donnÃ©es
 		//
 		if (!$error) {
 			$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id)
@@ -488,7 +488,7 @@ class Attach
 	}
 
 	/**
-	 * Vérification de la validité du nom de fichier
+	 * VÃ©rification de la validitÃ© du nom de fichier
 	 *
 	 * @param string $filename
 	 *
@@ -500,7 +500,7 @@ class Attach
 	}
 
 	/**
-	 * Vérification de la validité de l'extension du fichier
+	 * VÃ©rification de la validitÃ© de l'extension du fichier
 	 *
 	 * @param string $extension
 	 *
@@ -520,7 +520,7 @@ class Attach
 	}
 
 	/**
-	 * Vérification de la taille du fichier par rapport à la taille du log et la taille maximale
+	 * VÃ©rification de la taille du fichier par rapport Ã  la taille du log et la taille maximale
 	 *
 	 * @param integer $log_id     Identifiant du log
 	 * @param integer $filesize   Taille du fichier
@@ -543,7 +543,7 @@ class Attach
 	}
 
 	/**
-	 * Récupère les infos sur le fichier joint à télécharger (envoyer au client)
+	 * RÃ©cupÃ¨re les infos sur le fichier joint Ã  tÃ©lÃ©charger (envoyer au client)
 	 *
 	 * @param integer $file_id Identifiant du fichier joint
 	 */
@@ -568,7 +568,7 @@ class Attach
 			}
 
 			if (!($fp = @fopen($tmp_filename, 'rb'))) {
-				trigger_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)', E_USER_ERROR);
+				trigger_error('Impossible de rÃ©cupÃ©rer le contenu du fichier (fichier non accessible en lecture)', E_USER_ERROR);
 			}
 
 			$data = fread($fp, filesize($tmp_filename));
@@ -586,10 +586,10 @@ class Attach
 	}
 
 	/**
-	 * Déplacement du fichier demandé du serveur ftp vers le dossier temporaire
+	 * DÃ©placement du fichier demandÃ© du serveur ftp vers le dossier temporaire
 	 * Retourne le nom du fichier temporaire
 	 *
-	 * @param array $data Données du fichier joint
+	 * @param array $data DonnÃ©es du fichier joint
 	 *
 	 * @return string
 	 */
@@ -608,9 +608,9 @@ class Attach
 	}
 
 	/**
-	 * Mode à utiliser pour le ftp, ascii ou binaire
+	 * Mode Ã  utiliser pour le ftp, ascii ou binaire
 	 *
-	 * @param string $mime_type Type mime du fichier concerné
+	 * @param string $mime_type Type mime du fichier concernÃ©
 	 *
 	 * @return integer
 	 */
@@ -621,11 +621,11 @@ class Attach
 
 	/**
 	 * Fonction de suppression de fichiers joints
-	 * Retourne le nombre des fichiers supprimés, en cas de succés
+	 * Retourne le nombre des fichiers supprimÃ©s, en cas de succÃ©s
 	 *
-	 * @param boolean $massive_delete Si true, suppression des fichiers joints du ou des logs concernés
-	 * @param mixed   $log_id_ary     id ou tableau des id des logs concernés
-	 * @param mixed   $file_id_ary    id ou tableau des id des fichiers joints concernés (si $massive_delete à false)
+	 * @param boolean $massive_delete Si true, suppression des fichiers joints du ou des logs concernÃ©s
+	 * @param mixed   $log_id_ary     id ou tableau des id des logs concernÃ©s
+	 * @param mixed   $file_id_ary    id ou tableau des id des fichiers joints concernÃ©s (si $massive_delete Ã  false)
 	 *
 	 * @return mixed
 	 */
@@ -717,22 +717,22 @@ class Attach
 	}
 
 	/**
-	 * Fonction d'envois des entêtes nécessaires au téléchargement et
-	 * des données du fichier à télécharger
+	 * Fonction d'envois des entÃªtes nÃ©cessaires au tÃ©lÃ©chargement et
+	 * des donnÃ©es du fichier Ã  tÃ©lÃ©charger
 	 *
-	 * @param string $filename  Nom réel du fichier
+	 * @param string $filename  Nom rÃ©el du fichier
 	 * @param string $mime_type Mime type du fichier
 	 * @param string $filedata  Contenu du fichier
 	 */
 	public static function send_file($filename, $mime_type, $data)
 	{
 		//
-		// Si aucun type de média n'est indiqué, on utilisera par défaut
+		// Si aucun type de mÃ©dia n'est indiquÃ©, on utilisera par dÃ©faut
 		// le type application/octet-stream (application/octetstream pour IE et Opera).
-		// Si le type application/octet-stream	ou application/octetstream est indiqué, on fait
-		// éventuellement le changement si le type n'est pas bon pour l'agent utilisateur.
-		// Si on a à faire à Opera, on utilise application/octetstream car toute autre type peut poser
-		// d'éventuels problèmes.
+		// Si le type application/octet-stream	ou application/octetstream est indiquÃ©, on fait
+		// Ã©ventuellement le changement si le type n'est pas bon pour l'agent utilisateur.
+		// Si on a Ã  faire Ã  Opera, on utilise application/octetstream car toute autre type peut poser
+		// d'Ã©ventuels problÃ¨mes.
 		//
 		if (empty($mime_type) ||
 			preg_match('#application/octet-?stream#i', $mime_type) ||
@@ -747,8 +747,8 @@ class Attach
 		}
 
 		//
-		// Désactivation de la compression de sortie de php au cas où
-		// et envoi des en-têtes appropriés au client.
+		// DÃ©sactivation de la compression de sortie de php au cas oÃ¹
+		// et envoi des en-tÃªtes appropriÃ©s au client.
 		//
 		@ini_set('zlib.output_compression', 'Off');
 		header('Content-Length: ' . strlen($data));

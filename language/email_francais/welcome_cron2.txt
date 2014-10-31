@@ -1,27 +1,27 @@
 Bonjour,
 
-Vous recevez cet email parce que vous (ou quelqu'un d'autre se faisant passer pour vous) vous êtes inscrits à 
+Vous recevez cet email parce que vous (ou quelqu'un d'autre se faisant passer pour vous) vous Ãªtes inscrits Ã  
 la liste de diffusion "%LISTE%" du site %SITENAME%. 
 
-Nous vous remercions de votre intérêt pour notre liste de diffusion. 
+Nous vous remercions de votre intÃ©rÃªt pour notre liste de diffusion. 
 
 <!-- start_block password -->
-Voici le code associé à votre compte, gardez-le précieusement : 
+Voici le code associÃ© Ã  votre compte, gardez-le prÃ©cieusement : 
 %password.CODE%
 
 <!-- end_block password -->
-Pour confirmer votre inscription, envoyez un email à %EMAIL_NEWSLETTER% avec comme sujet "confirmation" et 
+Pour confirmer votre inscription, envoyez un email Ã  %EMAIL_NEWSLETTER% avec comme sujet "confirmation" et 
 comme message, le code de votre compte.
 
 <!-- start_block enable_profil_cp -->
-Une fois votre inscription confirmée, vous pourez gérer votre compte en cliquant sur le lien ci dessous : 
+Une fois votre inscription confirmÃ©e, vous pourez gÃ©rer votre compte en cliquant sur le lien ci dessous : 
 %enable_profil_cp.LINK_PROFIL_CP%
 <!-- end_block enable_profil_cp -->
 
-Merci de vous être inscrit et à bientôt sur %URLSITE%
+Merci de vous Ãªtre inscrit et Ã  bientÃ´t sur %URLSITE%
 
 ~~~~~~~~~~
 %SIG%
 
 ~~~~~~~~~~~~~~~~~~~~
-Si vous ne vous êtes pas inscrit à cette liste de diffusion, ignorez simplement ce message.
+Si vous ne vous Ãªtes pas inscrit Ã  cette liste de diffusion, ignorez simplement ce message.

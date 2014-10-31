@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -61,14 +61,14 @@ class Wanewsletter
 		global $db, $nl_config, $lang;
 
 		//
-		// Vérification syntaxique de l'email
+		// VÃ©rification syntaxique de l'email
 		//
 		if (!Mailer::validate_email($email)) {
 			return array('error' => true, 'message' => $lang['Message']['Invalid_email']);
 		}
 
 		//
-		// Vérification de la liste des masques de bannissements
+		// VÃ©rification de la liste des masques de bannissements
 		//
 		if ($action == 'inscription') {
 			$sql = "SELECT ban_email
@@ -120,11 +120,11 @@ class Wanewsletter
 
 		if ($nl_config['check_email_mx'] && !$abodata) {
 			//
-			// Vérification de l'existence d'un Mail eXchanger sur le domaine de l'email,
-			// et vérification de l'existence du compte associé (La vérification de l'existence du
+			// VÃ©rification de l'existence d'un Mail eXchanger sur le domaine de l'email,
+			// et vÃ©rification de l'existence du compte associÃ© (La vÃ©rification de l'existence du
 			// compte n'est toutefois pas infaillible, les serveurs smtp refusant parfois le relaying,
-			// c'est à dire de traiter les demandes émanant d'un entité extérieure à leur réseau, et
-			// pour une adresse email extérieure à ce réseau)
+			// c'est Ã  dire de traiter les demandes Ã©manant d'un entitÃ© extÃ©rieure Ã  leur rÃ©seau, et
+			// pour une adresse email extÃ©rieure Ã  ce rÃ©seau)
 			//
 			if (!$this->mailer->validate_email_mx($email, $response)) {
 				return array('error' => true,
@@ -241,7 +241,7 @@ class Wanewsletter
 				}
 			}
 
-			$this->listdata = $abodata;// Récupération des données relatives à la liste
+			$this->listdata = $abodata;// RÃ©cupÃ©ration des donnÃ©es relatives Ã  la liste
 
 			if ($abodata['confirmed'] == SUBSCRIBE_NOT_CONFIRMED) {
 				$this->confirm($code, $time);
@@ -313,15 +313,15 @@ class Wanewsletter
 
 		if (!$this->hasAccount) {
 			//
-			// Une confirmation est envoyée si la liste le demande
+			// Une confirmation est envoyÃ©e si la liste le demande
 			//
 			$confirm = !($this->listdata['confirm_subscribe'] == CONFIRM_NONE);
 		}
 		else {
 			//
-			// Une confirmation est envoyée si la liste demande une confirmation même
-			// si l'email a été validé dans une précédente inscription à une autre liste,
-			// et également si l'inscription est faite mais n'a pas encore été confirmée.
+			// Une confirmation est envoyÃ©e si la liste demande une confirmation mÃªme
+			// si l'email a Ã©tÃ© validÃ© dans une prÃ©cÃ©dente inscription Ã  une autre liste,
+			// et Ã©galement si l'inscription est faite mais n'a pas encore Ã©tÃ© confirmÃ©e.
 			//
 			$confirm = ($this->isRegistered || $this->listdata['confirm_subscribe'] == CONFIRM_ALWAYS);
 		}

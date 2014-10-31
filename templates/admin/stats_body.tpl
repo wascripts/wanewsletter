@@ -3,7 +3,7 @@
 var Stats = {
 	/**
 	 * Lors de la manipulation des dates, ne pas oublier que Javascript traite
-	 * les valeurs numériques des mois sur un intervalle 0..11 alors que le
+	 * les valeurs numÃ©riques des mois sur un intervalle 0..11 alors que le
 	 * script stats.php, la selectbox 'month' et dans les liens #prev-period et
 	 * #next-period, les mois sont dans un intervalle 1..12
 	 */
@@ -87,7 +87,7 @@ var Stats = {
 
 		this.graphBox.addEventListener('webkitTransitionEnd', handleEvent, false);
 		this.graphBox.addEventListener('transitionend', handleEvent, false);
-		window.setTimeout(function() { Stats.preloadAndSync(); }, 700);/* Compatibilité avec IE9 */
+		window.setTimeout(function() { Stats.preloadAndSync(); }, 700);/* CompatibilitÃ© avec IE9 */
 	},
 
 	preloadAndSync: function() {
@@ -116,8 +116,8 @@ var Stats = {
 	getTitle: function(date) {
 		var title = String(date.getFullYear()) + '/' + String(date.getMonth()+1);
 
-		// On détecte l'usage avancé possible de toLocaleString() en passant
-		// un argument volontairement erroné et en testant le type d'erreur
+		// On dÃ©tecte l'usage avancÃ© possible de toLocaleString() en passant
+		// un argument volontairement erronÃ© et en testant le type d'erreur
 		try {
 			date.toLocaleDateString("i");
 		}
@@ -144,7 +144,7 @@ var Stats = {
 		this.graphBox.nextLink = document.getElementById('next-period');
 		this.form = document.forms['date-form'];
 
-		// Modèles pour les titres et URL des liens et des entrées dans l'historique
+		// ModÃ¨les pour les titres et URL des liens et des entrÃ©es dans l'historique
 		this.aTitle = this.graphBox.prevLink.getAttribute('title');
 		this.aTitle = this.aTitle.substring(0, this.aTitle.indexOf('\u2013')-1);
 		this.aURL   = this.graphBox.firstElementChild.getAttribute('src');
@@ -163,7 +163,7 @@ var Stats = {
 
 		this.preloadAndSync();
 
-		// Formulaire de choix de période
+		// Formulaire de choix de pÃ©riode
 		this.form.addEventListener('submit', function(evt){
 			var newDate = new Date(this.elements['year'].value, (this.elements['month'].value-1), 1);
 
@@ -178,7 +178,7 @@ var Stats = {
 			evt.preventDefault();
 		}, false);
 
-		// Liens précédent et suivant
+		// Liens prÃ©cÃ©dent et suivant
 		this.graphBox.prevLink.addEventListener('click', function(evt) {
 			Stats.getPrevPeriod(new Date(Stats.currentDate.getFullYear(), Stats.currentDate.getMonth()-1, 1));
 			Stats.pushHistory();

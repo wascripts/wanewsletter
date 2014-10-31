@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -12,11 +12,11 @@ if (!defined('SQLPARSER_INC')) {
 define('SQLPARSER_INC', true);
 
 /**
- * Parse un fichier contenant une liste de requète et
- * renvoie un tableau avec une requète par entrée
+ * Parse un fichier contenant une liste de requÃ¨te et
+ * renvoie un tableau avec une requÃ¨te par entrÃ©e
  *
  * @param string $input   Contenu du fichier .sql
- * @param string $prefixe Préfixe des tables à mettre à la place du prefixe par défaut
+ * @param string $prefixe PrÃ©fixe des tables Ã  mettre Ã  la place du prefixe par dÃ©faut
  *
  * @return array
  */
@@ -43,7 +43,7 @@ function parseSQL($input, $prefixe = '')
 		}
 
 		//
-		// Si on est pas dans des simples quotes, on vérifie si on entre ds des commentaires
+		// Si on est pas dans des simples quotes, on vÃ©rifie si on entre ds des commentaires
 		//
 		if (!$between_quotes && !$in_comments && preg_match('/^\/\*/', $lines[$i])) {
 			$in_comments = true;
@@ -57,7 +57,7 @@ function parseSQL($input, $prefixe = '')
 			)
 		) {
 			//
-			// Nombre de simple quotes non échappés
+			// Nombre de simple quotes non Ã©chappÃ©s
 			//
 			$unescaped_quotes = preg_match_all("/(?<!\\\\)(\\\\\\\\)*'/", $lines[$i], $matches);
 
@@ -87,7 +87,7 @@ function parseSQL($input, $prefixe = '')
 		}
 
 		//
-		// Pour tenter de ménager la mémoire
+		// Pour tenter de mÃ©nager la mÃ©moire
 		//
 		unset($lines[$i]);
 	}
@@ -97,7 +97,7 @@ function parseSQL($input, $prefixe = '')
 	}
 
 	//
-	// Pour tenter de ménager la mémoire
+	// Pour tenter de mÃ©nager la mÃ©moire
 	//
 	unset($input, $lines);
 

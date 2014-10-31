@@ -1,5 +1,5 @@
 -- 
--- Schéma des tables de WAnewsletter pour PostgreSQL
+-- SchÃ©ma des tables de WAnewsletter pour PostgreSQL
 -- 
 
 

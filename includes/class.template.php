@@ -109,7 +109,7 @@ class Template {
     {
         if (!$this->loadfile($handle))
         {
-            die("Template->pparse(): Impossible de charger le fichier template pour le modèle $handle");
+            die("Template->pparse(): Impossible de charger le fichier template pour le modÃ¨le $handle");
         }
 
         // actually compile the template now.
@@ -136,7 +136,7 @@ class Template {
     {
         if (!$this->loadfile($handle))
         {
-            die("Template->assign_var_from_handle(): Impossible de charger le fichier template pour le modèle $handle");
+            die("Template->assign_var_from_handle(): Impossible de charger le fichier template pour le modÃ¨le $handle");
         }
 
         // Compile it, with the "no echo statements" option on.
@@ -249,14 +249,14 @@ class Template {
         // If we don't have a file assigned to this handle, die.
         if (!isset($this->files[$handle]))
         {
-            die("Template->loadfile(): Aucun fichier spécifié pour le modèle $handle");
+            die("Template->loadfile(): Aucun fichier spÃ©cifiÃ© pour le modÃ¨le $handle");
         }
 
         $filename = $this->files[$handle];
 
         if (!($str = @file_get_contents($filename)))
         {
-            die("Template->loadfile(): Le fichier $filename pour le modèle $handle est vide");
+            die("Template->loadfile(): Le fichier $filename pour le modÃ¨le $handle est vide");
         }
         
         $this->uncompiled_code[$handle] = $str;

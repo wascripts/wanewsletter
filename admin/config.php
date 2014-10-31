@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -43,13 +43,13 @@ if (isset($_POST['submit'])) {
 
 	$new_config['date_format'] = ($new_config['date_format'] == '') ? 'd M Y H:i' : $new_config['date_format'];
 
-	// Restriction de caractères sur le nom du cookie
+	// Restriction de caractÃ¨res sur le nom du cookie
 	if (preg_match("/[=,;\s\v]/", $new_config['cookie_name'])) {
 		$error = true;
 		$msg_error[] = nl2br($lang['Message']['Invalid_cookie_name']);
 	}
 
-	// Restriction sur le chemin de validité du cookie
+	// Restriction sur le chemin de validitÃ© du cookie
 	if ($new_config['cookie_path'] == '') {
 		$new_config['cookie_path'] = '/';
 	}
@@ -189,15 +189,15 @@ if (isset($_POST['submit'])) {
 		wa_update_config(array_merge($old_config, $new_config));
 
 		//
-		// Si le préfixe des cookie a changé, on envoie de nouveaux cookies et
-		// on supprime ceux qui sont obsolètes.
+		// Si le prÃ©fixe des cookie a changÃ©, on envoie de nouveaux cookies et
+		// on supprime ceux qui sont obsolÃ¨tes.
 		//
 		if ($new_config['cookie_name'] !== $old_config['cookie_name']) {
 			$session->rename_cookies($new_config['cookie_name']);
 		}
 
 		//
-		// Déplacement des fichiers joints dans le nouveau dossier de stockage s'il est changé
+		// DÃ©placement des fichiers joints dans le nouveau dossier de stockage s'il est changÃ©
 		//
 		if ($move_files) {
 			if ($browse = dir($source_upload)) {

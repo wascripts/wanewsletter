@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -17,14 +17,14 @@ class Output extends Template
 	private $links         = array();
 
 	/**
-	 * Scripts clients liés au document
+	 * Scripts clients liÃ©s au document
 	 *
 	 * @var array
 	 */
 	private $scripts       = array();
 
 	/**
-	 * Champs cachés d'un formulaire du document
+	 * Champs cachÃ©s d'un formulaire du document
 	 *
 	 * @var array
 	 */
@@ -50,7 +50,7 @@ class Output extends Template
 	public function __construct($template_root)
 	{
 		//
-		// Réglage du dossier contenant les templates
+		// RÃ©glage du dossier contenant les templates
 		//
 		$this->set_rootdir($template_root);
 	}
@@ -60,13 +60,13 @@ class Output extends Template
 	 *
 	 * @param string $rel   Relation qui lie le document cible au document courant
 	 * @param string $href  URL du document cible
-	 * @param string $title Titre éventuel
+	 * @param string $title Titre Ã©ventuel
 	 * @param string $type  Type MIME du document cible
 	 */
 	public function addLink($rel, $href = null, $title = null, $type = null)
 	{
 		if (is_array($rel)) {
-			// Si le premier argument fourni est un tableau, c'est qu'on reçoit
+			// Si le premier argument fourni est un tableau, c'est qu'on reÃ§oit
 			// directement un tableau d'attributs
 			$attrs = $rel;
 		}
@@ -105,12 +105,12 @@ class Output extends Template
 	 * @param string $src    URL du script
 	 * @param string $type   Type MIME
 	 * @param boolean $async Chargement asynchrone
-	 * @param boolean $defer Chargement après le chargement de la page elle-même
+	 * @param boolean $defer Chargement aprÃ¨s le chargement de la page elle-mÃªme
 	 */
 	public function addScript($src, $type = null, $async = null, $defer = null)
 	{
 		if (is_array($src)) {
-			// Si le premier argument fourni est un tableau, c'est qu'on reçoit
+			// Si le premier argument fourni est un tableau, c'est qu'on reÃ§oit
 			// directement un tableau d'attributs
 			$attrs = $src;
 		}
@@ -127,7 +127,7 @@ class Output extends Template
 	}
 
 	/**
-	 * Retourne les scripts clients liés au document
+	 * Retourne les scripts clients liÃ©s au document
 	 *
 	 * @return string
 	 */
@@ -144,7 +144,7 @@ class Output extends Template
 	}
 
 	/**
-	 * Ajoute un champs caché pour un formulaire
+	 * Ajoute un champs cachÃ© pour un formulaire
 	 *
 	 * @param string $name
 	 * @param string $value
@@ -155,7 +155,7 @@ class Output extends Template
 	}
 
 	/**
-	 * Retourne l'ensemble des champs cachés ajoutés et réinitialise la propriété hidden_fields
+	 * Retourne l'ensemble des champs cachÃ©s ajoutÃ©s et rÃ©initialise la propriÃ©tÃ© hidden_fields
 	 *
 	 * @return string
 	 */
@@ -174,8 +174,8 @@ class Output extends Template
 	}
 
 	/**
-	 * Retourne un élément HTML formaté à partir de son nom, du tableau d'attributs,
-	 * et de son contenu éventuel.
+	 * Retourne un Ã©lÃ©ment HTML formatÃ© Ã  partir de son nom, du tableau d'attributs,
+	 * et de son contenu Ã©ventuel.
 	 *
 	 * @param string  $name
 	 * @param array   $attrs
@@ -226,12 +226,12 @@ class Output extends Template
 	}
 
 	/**
-	 * Retourne un attribut HTML booléen si $return vaut true.
+	 * Retourne un attribut HTML boolÃ©en si $return vaut true.
 	 * Appel typique : ... $o->getBoolAttr('checked', ($var1 == $var2))
 	 * L'attribut est dans le format court.
 	 *
-	 * @param string  $name   Nom de l'attribut booléen (checked, selected, ...)
-	 * @param boolean $return Résultat du test conditionnel
+	 * @param string  $name   Nom de l'attribut boolÃ©en (checked, selected, ...)
+	 * @param boolean $return RÃ©sultat du test conditionnel
 	 *
 	 * @return string
 	 */
@@ -241,7 +241,7 @@ class Output extends Template
 	}
 
 	/**
-	 * Envoie en sortie les en-têtes HTTP appropriés et l'en-tête du document
+	 * Envoie en sortie les en-tÃªtes HTTP appropriÃ©s et l'en-tÃªte du document
 	 *
 	 * @param string  $page_title
 	 */
@@ -349,7 +349,7 @@ class Output extends Template
 	}
 
 	/**
-	 * Envoi le pied de page et termine l'exécution du script
+	 * Envoi le pied de page et termine l'exÃ©cution du script
 	 */
 	public function page_footer()
 	{
@@ -416,7 +416,7 @@ class Output extends Template
 		echo purge_latin1($data);
 
 		//
-		// On ferme la connexion à la base de données, si elle existe
+		// On ferme la connexion Ã  la base de donnÃ©es, si elle existe
 		//
 		if ($db instanceof Wadb) {
 			$db->close();
@@ -426,7 +426,7 @@ class Output extends Template
 	}
 
 	/**
-	 * Envoie des en-têtes HTTP
+	 * Envoie des en-tÃªtes HTTP
 	 */
 	public function send_headers()
 	{
@@ -443,8 +443,8 @@ class Output extends Template
 	}
 
 	/**
-	 * Envoi des en-têtes appropriés et d'une page html simplifiée avec les données fournies
-	 * Termine également l'exécution du script
+	 * Envoi des en-tÃªtes appropriÃ©s et d'une page html simplifiÃ©e avec les donnÃ©es fournies
+	 * Termine Ã©galement l'exÃ©cution du script
 	 *
 	 * @param string $content
 	 * @param string $page_title
@@ -483,7 +483,7 @@ BASIC;
 
 	/**
 	 * Affiche de message d'information.
-	 * OBSOLÈTE. Voir méthode displayMessage() plus bas.
+	 * OBSOLÃˆTE. Voir mÃ©thode displayMessage() plus bas.
 	 *
 	 * @param string $str
 	 *
@@ -495,10 +495,10 @@ BASIC;
 	}
 
 	/**
-	 * Ajoute une entrée à la pile des messages
+	 * Ajoute une entrÃ©e Ã  la pile des messages
 	 *
 	 * @param string $str  le message
-	 * @param string $link le lien html à intégrer dans le message
+	 * @param string $link le lien html Ã  intÃ©grer dans le message
 	 */
 	public function addLine($str, $link = null)
 	{
@@ -511,7 +511,7 @@ BASIC;
 
 	/**
 	 * Affichage d'un message d'information
-	 * Si $str n'est pas fourni, la pile de messages $this->messageList est utilisée
+	 * Si $str n'est pas fourni, la pile de messages $this->messageList est utilisÃ©e
 	 *
 	 * @param string $str
 	 * @param string $title
@@ -566,7 +566,7 @@ BASIC;
 	}
 
 	/**
-	 * Génération et affichage de liste d'erreur
+	 * GÃ©nÃ©ration et affichage de liste d'erreur
 	 *
 	 * @param mixed $msg_errors
 	 */
@@ -589,8 +589,8 @@ BASIC;
 	/**
 	 * Affichage des fichiers joints
 	 *
-	 * @param array   $logdata Données du log concerné
-	 * @param integer $format  Format du log visualisé (si dans view.php)
+	 * @param array   $logdata DonnÃ©es du log concernÃ©
+	 * @param integer $format  Format du log visualisÃ© (si dans view.php)
 	 *
 	 * @return boolean
 	 */
@@ -600,7 +600,7 @@ BASIC;
 
 		$page_envoi  = (strpos(server_info('PHP_SELF'), 'envoi.php') !== false);
 		$body_size   = (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
-		$total_size  = 1024; // ~ 1024 correspond au poids de base d'un email (en-têtes)
+		$total_size  = 1024; // ~ 1024 correspond au poids de base d'un email (en-tÃªtes)
 		$total_size += ($body_size > 0) ? ($body_size / 2) : 0;
 		$num_files   = count($logdata['joined_files']);
 
@@ -664,7 +664,7 @@ BASIC;
 
 			if ($nl_config['use_ftp'] || file_exists($tmp_filename)) {
 				//
-				// On affiche pas dans la liste les fichiers incorporés dans
+				// On affiche pas dans la liste les fichiers incorporÃ©s dans
 				// une newsletter au format HTML.
 				//
 				if ($format == FORMAT_HTML && in_array($filename, $embed_files)) {
@@ -704,8 +704,8 @@ BASIC;
 	}
 
 	/**
-	 * Affichage de la page de sélection de liste ou insertion du select de choix de liste dans
-	 * le coin inférieur gauche de l'administration
+	 * Affichage de la page de sÃ©lection de liste ou insertion du select de choix de liste dans
+	 * le coin infÃ©rieur gauche de l'administration
 	 *
 	 * @param integer $auth_type
 	 * @param boolean $display

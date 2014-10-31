@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -26,28 +26,28 @@ if (!version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=')) {
 	exit;
 }
 
-// $default_error_reporting est utilisé ultérieurement dans le gestionnaire d'erreurs
+// $default_error_reporting est utilisÃ© ultÃ©rieurement dans le gestionnaire d'erreurs
 $default_error_reporting = (E_ALL & ~(E_STRICT|E_DEPRECATED));
 error_reporting($default_error_reporting);
 
 $starttime = array_sum(explode(' ', microtime()));
 
 //
-// Intialisation des variables pour éviter toute injection malveillante de code
+// Intialisation des variables pour Ã©viter toute injection malveillante de code
 //
 $simple_header = $error = false;
 $nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = array();
 $output = null;
 $dsn = $prefixe = '';
 $prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
-// Compatibilité avec wanewsletter < 2.3-beta2
+// CompatibilitÃ© avec wanewsletter < 2.3-beta2
 $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = '';
 
 //
-// Réglage des divers répertoires utilisés par le script.
-// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
+// RÃ©glage des divers rÃ©pertoires utilisÃ©s par le script.
+// Le tilde est remplacÃ© par WA_ROOTDIR, qui mÃ¨ne au rÃ©pertoire d'installation
 // de Wanewsletter.
-// Ces variables sont ensuite utilisées dans constantes.php pour définir les
+// Ces variables sont ensuite utilisÃ©es dans constantes.php pour dÃ©finir les
 // constantes WA_*DIR
 //
 $logs_dir  = '~/data/logs';
@@ -83,7 +83,7 @@ set_exception_handler('wan_exception_handler');
 spl_autoload_register('wan_autoloader');
 
 //
-// Pas installé ?
+// Pas installÃ© ?
 //
 if (!defined('IN_INSTALL') && !defined('NL_INSTALLED')) {
 	if (!defined('IN_COMMANDLINE')) {
@@ -102,13 +102,13 @@ if (!defined('IN_INSTALL') && !defined('NL_INSTALLED')) {
 \Patchwork\Utf8\Bootup::initAll();
 
 //
-// Configuration par défaut
+// Configuration par dÃ©faut
 //
 load_settings();
 
 if (defined('IN_COMMANDLINE')) {
 	//
-	// Compatibilité avec PHP en CGI
+	// CompatibilitÃ© avec PHP en CGI
 	//
 	if (PHP_SAPI != 'cli') {
 		define('STDIN',  fopen('php://stdin', 'r'));
@@ -125,8 +125,8 @@ else {
 }
 
 //
-// Désactivation de magic_quotes_runtime +
-// magic_quotes_gpc et retrait éventuel des backslashes
+// DÃ©sactivation de magic_quotes_runtime +
+// magic_quotes_gpc et retrait Ã©ventuel des backslashes
 //
 @ini_set('magic_quotes_runtime', 0);
 
@@ -136,7 +136,7 @@ strip_magic_quotes_gpc($_COOKIE);
 strip_magic_quotes_gpc($_FILES, true);
 strip_magic_quotes_gpc($_REQUEST);
 
-// Compatibilité avec wanewsletter < 2.3-beta2
+// CompatibilitÃ© avec wanewsletter < 2.3-beta2
 if (empty($dsn)) {
 	$infos['engine'] = (!empty($dbtype)) ? $dbtype : 'mysql';
 	$infos['host']   = $dbhost;

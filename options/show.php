@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -47,7 +47,7 @@ if ($filedata = $result->fetch()) {
 
 	if (!is_readable($tmp_filename)) {
 		http_response_code(500);
-		plain_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
+		plain_error('Impossible de rÃ©cupÃ©rer le contenu du fichier (fichier non accessible en lecture)');
 	}
 
 	$maxAge = 0;
@@ -95,7 +95,7 @@ if ($filedata = $result->fetch()) {
 	echo $data;
 
 	//
-	// Si l'option FTP est utilisée, suppression du fichier temporaire
+	// Si l'option FTP est utilisÃ©e, suppression du fichier temporaire
 	//
 	if ($nl_config['use_ftp']) {
 		$attach->remove_file($tmp_filename);

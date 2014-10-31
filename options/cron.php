@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -14,7 +14,7 @@ define('WA_ROOTDIR',    '..');
 require WA_ROOTDIR . '/includes/common.inc.php';
 
 //
-// Initialisation de la connexion à la base de données et récupération de la configuration
+// Initialisation de la connexion Ã  la base de donnÃ©es et rÃ©cupÃ©ration de la configuration
 //
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
@@ -33,23 +33,23 @@ $result = $db->query($sql);
 
 if ($listdata = $result->fetch()) {
 	//
-	// On règle le script pour ignorer une déconnexion du client et
-	// poursuivre l'envoi du flot d'emails jusqu'à son terme.
+	// On rÃ¨gle le script pour ignorer une dÃ©connexion du client et
+	// poursuivre l'envoi du flot d'emails jusqu'Ã  son terme.
 	//
 	@ignore_user_abort(true);
 
 	//
-	// On augmente également le temps d'exécution maximal du script.
+	// On augmente Ã©galement le temps d'exÃ©cution maximal du script.
 	//
-	// Certains hébergeurs désactivent pour des raisons évidentes cette fonction
-	// Si c'est votre cas, vous êtes mal barré
+	// Certains hÃ©bergeurs dÃ©sactivent pour des raisons Ã©videntes cette fonction
+	// Si c'est votre cas, vous Ãªtes mal barrÃ©
 	//
 	@set_time_limit(1200);
 
 	if ($mode == 'send') {
 		require WA_ROOTDIR . '/includes/engine_send.php';
 
-		 // on récupère le dernier log en statut d'envoi
+		 // on rÃ©cupÃ¨re le dernier log en statut d'envoi
 		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 			FROM " . LOG_TABLE . "
 			WHERE liste_id = $listdata[liste_id]
@@ -83,7 +83,7 @@ if ($listdata = $result->fetch()) {
 		require WA_ROOTDIR . '/includes/functions.validate.php';
 		require WA_ROOTDIR . '/includes/functions.stats.php';
 
-		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel
+		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper Ã  chaque appel
 
 		$wan = new Wanewsletter($listdata);
 		$pop = new Pop();
@@ -115,7 +115,7 @@ if ($listdata = $result->fetch()) {
 
 			switch ($action) {
 				case 'desinscription':
-				case 'désinscription':
+				case 'dÃ©sinscription':
 				case 'unsubscribe':
 					$action = 'desinscription';
 					break;
@@ -129,7 +129,7 @@ if ($listdata = $result->fetch()) {
 			}
 
 			$code = $pop->contents[$mail_id]['message'];
-			// Compatibilité avec versions < 2.3
+			// CompatibilitÃ© avec versions < 2.3
 			if (strlen($code) == 32) {
 				$code = substr($code, 0, 20);
 			}

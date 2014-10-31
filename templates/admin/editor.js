@@ -2,7 +2,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -62,7 +62,7 @@ function make_editor()
 }
 
 /*
- * Fenêtre de prévisualisation des newsletters
+ * FenÃªtre de prÃ©visualisation des newsletters
  */
 function preview()
 {
@@ -161,7 +161,7 @@ function addLinks()
 	}
 
 	if (typeof(texte.selectionStart) != 'undefined') {
-		var caretPos = (texte.selectionEnd + 7);// 7 = longueur de la chaîne {LINKS}
+		var caretPos = (texte.selectionEnd + 7);// 7 = longueur de la chaÃ®ne {LINKS}
 		var before   = (texte.value).substring(0, texte.selectionStart);
 		var after    = (texte.value).substring(texte.selectionStart, texte.textLength);
 		texte.value  = before + '{LINKS}' + after;

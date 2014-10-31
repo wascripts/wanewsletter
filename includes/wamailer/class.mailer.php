@@ -4,7 +4,7 @@
  * @version   2.5
  * @link      http://phpcodeur.net/wascripts/wamailer/
  * @author    Bobe <wascripts@phpcodeur.net>
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/licenses/lgpl.html  GNU Lesser General Public License
  */
 
@@ -21,16 +21,16 @@ if( !defined('DATE_RFC2822') )
 /**
  * Classe d'envois d'emails
  * 
- * Fonctionne également sur Online
- * Gère l'attachement de pièces jointes et l'envoi d'emails au format html, ainsi que les emails multi-formats.
- * Gére aussi les pièces jointes dites "embarquées"
- * (incorporées et utilisées dans l'email html, ex: images, sons ..)
+ * Fonctionne Ã©galement sur Online
+ * GÃ¨re l'attachement de piÃ¨ces jointes et l'envoi d'emails au format html, ainsi que les emails multi-formats.
+ * GÃ©re aussi les piÃ¨ces jointes dites "embarquÃ©es"
+ * (incorporÃ©es et utilisÃ©es dans l'email html, ex: images, sons ..)
  * 
- * Se référer aux RFC 822, 2045, 2046, 2047 et 2822
+ * Se rÃ©fÃ©rer aux RFC 822, 2045, 2046, 2047 et 2822
  * 
- * Les sources qui m'ont bien aidées :
+ * Les sources qui m'ont bien aidÃ©es :
  * 
- * @link http://abcdrfc.free.fr/ (français)
+ * @link http://abcdrfc.free.fr/ (franÃ§ais)
  * @link http://www.rfc-editor.org/ (anglais)
  * @link http://cvs.php.net/viewvc.cgi/php-src/ext/standard/mail.c
  * @link http://cvs.php.net/viewvc.cgi/php-src/win32/sendmail.c
@@ -52,11 +52,11 @@ class Mailer {
 	/**
 	 * Chemin vers la classe smtp
 	 * 
-	 * Si laissée vide, le script tentera de reconstituer le chemin vers la classe smtp
-	 * (la classe smtp doit alors être dans le même dossier que la présente classe)
+	 * Si laissÃ©e vide, le script tentera de reconstituer le chemin vers la classe smtp
+	 * (la classe smtp doit alors Ãªtre dans le mÃªme dossier que la prÃ©sente classe)
 	 * 
 	 * @deprecated le chargement de la classe smtp est pris en chargement par
-	 *             l'autoloader déclaré au niveau supérieur de l'application
+	 *             l'autoloader dÃ©clarÃ© au niveau supÃ©rieur de l'application
 	 * @var string
 	 * @access public
 	 */
@@ -71,10 +71,10 @@ class Mailer {
 	var $smtp                  = null;
 	
 	/**
-	 * Si placé à TRUE, la connexion au serveur SMTP ne sera pas fermée après l'envoi, et sera réutilisée 
-	 * pour un envoi ultérieur. 
-	 * Ce sera alors au programmeur de refermer lui même la connexion après la fin des envois en faisant 
-	 * appel à la méthode quit() de la classe smtp : $mailer->smtp->quit(); 
+	 * Si placÃ© Ã  TRUE, la connexion au serveur SMTP ne sera pas fermÃ©e aprÃ¨s l'envoi, et sera rÃ©utilisÃ©e 
+	 * pour un envoi ultÃ©rieur. 
+	 * Ce sera alors au programmeur de refermer lui mÃªme la connexion aprÃ¨s la fin des envois en faisant 
+	 * appel Ã  la mÃ©thode quit() de la classe smtp : $mailer->smtp->quit(); 
 	 * 
 	 * @var boolean
 	 * @access public
@@ -94,7 +94,7 @@ class Mailer {
 	var $sendmail_mode          = false;
 	
 	/**
-	 * Chemin d'accés à sendmail
+	 * Chemin d'accÃ©s Ã  sendmail
 	 * 
 	 * @var string
 	 * @access public
@@ -102,7 +102,7 @@ class Mailer {
 	var $sendmail_path          = '/usr/sbin/sendmail';
 	
 	/**
-	 * Paramètres de commandes complémentaires
+	 * ParamÃ¨tres de commandes complÃ©mentaires
 	 * 
 	 * @var string
 	 * @access public
@@ -112,7 +112,7 @@ class Mailer {
 	/***************************************************************/
 	
 	/**
-	 * Chemins par défaut pour les modèles d'emails 
+	 * Chemins par dÃ©faut pour les modÃ¨les d'emails 
 	 *
 	 * @var string
 	 * @access public
@@ -120,7 +120,7 @@ class Mailer {
 	var $root                   = './';
 	
 	/**
-	 * Extensions des modèles au format texte
+	 * Extensions des modÃ¨les au format texte
 	 *
 	 * @var string
 	 * @access public
@@ -128,7 +128,7 @@ class Mailer {
 	var $text_tpl_ext           = 'txt';
 	
 	/**
-	 * Extensions des modèles au format html
+	 * Extensions des modÃ¨les au format html
 	 *
 	 * @var string
 	 * @access public
@@ -136,7 +136,7 @@ class Mailer {
 	var $html_tpl_ext           = 'html';
 	
 	/**
-	 * OBSOLÈTE. NE PAS MODIFIER.
+	 * OBSOLÃˆTE. NE PAS MODIFIER.
 	 *
 	 * @var integer
 	 * @access public
@@ -148,7 +148,7 @@ class Mailer {
 	 * 
 	 * 1 - pour format texte brut
 	 * 2 - pour format html
-	 * 3 - Multi-format (html affiché, et texte si html pas supporté)
+	 * 3 - Multi-format (html affichÃ©, et texte si html pas supportÃ©)
 	 * 
 	 * @var integer
 	 * @access public
@@ -156,7 +156,7 @@ class Mailer {
 	var $format                 = 1;
 	
 	/**
-	 * Adresse de l'expéditeur 
+	 * Adresse de l'expÃ©diteur 
 	 * 
 	 * @var array
 	 * @access public
@@ -180,7 +180,7 @@ class Mailer {
 	var $subject                = '';
 	
 	/**
-	 * Messages non compilés, selon le format
+	 * Messages non compilÃ©s, selon le format
 	 * 
 	 * @var array
 	 * @access private
@@ -188,7 +188,7 @@ class Mailer {
 	var $uncompiled_message     = array();
 	
 	/**
-	 * Messages alternatifs non compilés, selon le format
+	 * Messages alternatifs non compilÃ©s, selon le format
 	 * 
 	 * @var array
 	 * @access private
@@ -196,7 +196,7 @@ class Mailer {
 	var $uncompiled_altmessage  = array();
 	
 	/**
-	 * Messages compilés, selon le format
+	 * Messages compilÃ©s, selon le format
 	 * 
 	 * @var array
 	 * @access private
@@ -204,7 +204,7 @@ class Mailer {
 	var $compiled_message       = array();
 	
 	/**
-	 * Tableau des tags à remplacer dans le message
+	 * Tableau des tags Ã  remplacer dans le message
 	 * 
 	 * @var array
 	 * @access private
@@ -212,7 +212,7 @@ class Mailer {
 	var $tags                   = array();
 	
 	/**
-	 * Tableau des blocks à remplacer dans le message, ainsi que les tags qui leur sont associés
+	 * Tableau des blocks Ã  remplacer dans le message, ainsi que les tags qui leur sont associÃ©s
 	 * 
 	 * @var array
 	 * @access private
@@ -220,7 +220,7 @@ class Mailer {
 	var $block_tags             = array();
 	
 	/**
-	 * "Frontières" utilisées pour séparer les différentes parties de l'email
+	 * "FrontiÃ¨res" utilisÃ©es pour sÃ©parer les diffÃ©rentes parties de l'email
 	 * 
 	 * @var array
 	 * @access private
@@ -228,7 +228,7 @@ class Mailer {
 	var $boundary               = array('part0' => array(), 'part1' => array(), 'part2' => array());
 	
 	/**
-	 * Tableau des fichiers attachés
+	 * Tableau des fichiers attachÃ©s
 	 * 
 	 * @var array
 	 * @access private
@@ -236,7 +236,7 @@ class Mailer {
 	var $attachfile             = array('path' => array(), 'name' => array(), 'mimetype' => array(), 'disposition' => array());
 	
 	/**
-	 * Tableau des fichiers incorporés (spécifique aux emails au format html)
+	 * Tableau des fichiers incorporÃ©s (spÃ©cifique aux emails au format html)
 	 * 
 	 * @var array
 	 * @access private
@@ -244,7 +244,7 @@ class Mailer {
 	var $embeddedfile           = array('path' => array(), 'name' => array(), 'mimetype' => array());
 	
 	/**
-	 * Extraction automatique des images et autres objets présents dans le
+	 * Extraction automatique des images et autres objets prÃ©sents dans le
 	 * corps html de l'email et ajout dans le table $embeddedfile
 	 * 
 	 * @see ligne 2178
@@ -254,7 +254,7 @@ class Mailer {
 	var $extract_auto           = false;
 	
 	/**
-	 * Tableau des en-têtes de l'email
+	 * Tableau des en-tÃªtes de l'email
 	 * 
 	 * @var array
 	 * @access private
@@ -262,7 +262,7 @@ class Mailer {
 	var $headers                = array();
 	
 	/**
-	 * Jeu de caractère utilisé dans l'email
+	 * Jeu de caractÃ¨re utilisÃ© dans l'email
 	 * 
 	 * @var string
 	 * @access public
@@ -270,7 +270,7 @@ class Mailer {
 	var $charset                = 'iso-8859-1';
 	
 	/**
-	 * Encodage à utiliser 
+	 * Encodage Ã  utiliser 
 	 * (7bit, 8bit, quoted-printable, base64 ou binary)
 	 * 
 	 * @var string
@@ -279,8 +279,8 @@ class Mailer {
 	var $encoding               = '8bit';
 	
 	/**
-	 * Utilisé dans la méthode Mailer::encode_mime_header() pour détecter
-	 * les octets de début de séquence dans une chaîne utf-8
+	 * UtilisÃ© dans la mÃ©thode Mailer::encode_mime_header() pour dÃ©tecter
+	 * les octets de dÃ©but de sÃ©quence dans une chaÃ®ne utf-8
 	 * 
 	 * @var array
 	 * @access private
@@ -290,7 +290,7 @@ class Mailer {
 	);
 	
 	/**
-	 * Longueur maximale des lignes dans l'email, telle que définie dans la rfc2822
+	 * Longueur maximale des lignes dans l'email, telle que dÃ©finie dans la rfc2822
 	 * 
 	 * @var integer
 	 * @access private
@@ -298,7 +298,7 @@ class Mailer {
 	var $maxlen                 = 78;
 	
 	/**
-	 * IP de l'expéditeur
+	 * IP de l'expÃ©diteur
 	 * 
 	 * @var string
 	 * @access public
@@ -306,7 +306,7 @@ class Mailer {
 	var $sender_ip              = '127.0.0.1';
 	
 	/**
-	 * Nom du serveur émetteur
+	 * Nom du serveur Ã©metteur
 	 * 
 	 * @var string
 	 * @access public
@@ -314,7 +314,7 @@ class Mailer {
 	var $server_from            = '';
 	
 	/**
-	 * Activer/désactiver le validateur d'adresse email
+	 * Activer/dÃ©sactiver le validateur d'adresse email
 	 * 
 	 * @var boolean
 	 * @access public
@@ -322,8 +322,8 @@ class Mailer {
 	var $valid_syntax           = false;
 	
 	/**
-	 * Activer/désactiver le mode de débogguage
-	 * S'il est activé, les messages d'erreur s'afficheront directement à l'écran et l'éxécution du script 
+	 * Activer/dÃ©sactiver le mode de dÃ©bogguage
+	 * S'il est activÃ©, les messages d'erreur s'afficheront directement Ã  l'Ã©cran et l'Ã©xÃ©cution du script 
 	 * sera interrompu
 	 * 
 	 * @var boolean
@@ -333,8 +333,8 @@ class Mailer {
 	
 	/**
 	 * Statut du traitement de l'envoi
-	 * Cette variable ne doit pas être modifiée, si elle est à false, 
-	 * l'email n'est tout simplement pas envoyé
+	 * Cette variable ne doit pas Ãªtre modifiÃ©e, si elle est Ã  false, 
+	 * l'email n'est tout simplement pas envoyÃ©
 	 * 
 	 * @var boolean
 	 * @access private
@@ -350,10 +350,10 @@ class Mailer {
 	var $msg_error              = '';
 	
 	/**
-	 * Pour comprendre l'utilité de cette variable, référez vous à la méthode recipients_list()
+	 * Pour comprendre l'utilitÃ© de cette variable, rÃ©fÃ©rez vous Ã  la mÃ©thode recipients_list()
 	 * 
-	 * Si votre serveur utilise sendmail, mettez à 1, s'il utilise un serveur smtp, mettez à -1.
-	 * Si vous ne savez pas, n'y touchez pas, le script tentera de trouver de lui même.
+	 * Si votre serveur utilise sendmail, mettez Ã  1, s'il utilise un serveur smtp, mettez Ã  -1.
+	 * Si vous ne savez pas, n'y touchez pas, le script tentera de trouver de lui mÃªme.
 	 * 
 	 * @var mixed
 	 * @access public
@@ -361,7 +361,7 @@ class Mailer {
 	var $fix_bug_mail           = null;
 	
 	/**
-	 * Texte placé dans l'entête X-Mailer
+	 * Texte placÃ© dans l'entÃªte X-Mailer
 	 * 
 	 * @var string
 	 * @access public
@@ -371,7 +371,7 @@ class Mailer {
 	/**
 	 * Constructeur de classe
 	 * 
-	 * @param string $template_path  Chemin vers les modèles d'emails 
+	 * @param string $template_path  Chemin vers les modÃ¨les d'emails 
 	 * 
 	 * @access public
 	 * @return void
@@ -384,8 +384,8 @@ class Mailer {
 		}
 		
 		//
-		// On récupère le domaine actuel dans le cas d'un dialogue SMTP
-		// et pour certains en-têtes de l'email
+		// On rÃ©cupÃ¨re le domaine actuel dans le cas d'un dialogue SMTP
+		// et pour certains en-tÃªtes de l'email
 		//
 		if( empty($this->server_from) ) {
 			if( isset($_SERVER['SERVER_NAME']) ) {
@@ -397,7 +397,7 @@ class Mailer {
 		}
 		
 		//
-		// On récupère l'adresse IP pour l'en-tête abuse
+		// On rÃ©cupÃ¨re l'adresse IP pour l'en-tÃªte abuse
 		//
 		if( $this->sender_ip == '127.0.0.1' && !empty($_SERVER['REMOTE_ADDR']) )
 		{
@@ -408,7 +408,7 @@ class Mailer {
 				$private_ip = $match[0];
 				
 				/**
-				 * Liens utiles sur les différentes plages d'ip :
+				 * Liens utiles sur les diffÃ©rentes plages d'ip :
 				 * 
 				 * @link http://www.commentcamarche.net/internet/ip.php3
 				 * @link http://www.usenet-fr.net/fur/comp/reseaux/masques.html
@@ -418,10 +418,10 @@ class Mailer {
 				// Liste d'ip non valides
 				// 
 				$pattern_ip   = array();
-				$pattern_ip[] = '/^0\..*/'; // Réseau 0 n'existe pas
+				$pattern_ip[] = '/^0\..*/'; // RÃ©seau 0 n'existe pas
 				$pattern_ip[] = '/^127\..*/'; // ip locale
 				
-				// Plages d'ip spécifiques à l'intranet
+				// Plages d'ip spÃ©cifiques Ã  l'intranet
 				$pattern_ip[] = '/^10\..*/';
 				$pattern_ip[] = '/^172\.1[6-9]\..*/';
 				$pattern_ip[] = '/^172\.2[0-9]\..*/';
@@ -429,7 +429,7 @@ class Mailer {
 				$pattern_ip[] = '/^172\.31\..*/';
 				$pattern_ip[] = '/^192\.168\..*/';
 				
-				// Plage d'adresse de classe D réservée pour les flux multicast et de classe E, non utilisée 
+				// Plage d'adresse de classe D rÃ©servÃ©e pour les flux multicast et de classe E, non utilisÃ©e 
 				$pattern_ip[] = '/^22[4-9]\..*/';
 				$pattern_ip[] = '/^2[3-5][0-9]\..*/';
 				
@@ -439,7 +439,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Indique si l'on est sur un serveur de l'hébergeur Online
+	 * Indique si l'on est sur un serveur de l'hÃ©bergeur Online
 	 * 
 	 * @access public
 	 * @return boolean
@@ -450,13 +450,13 @@ class Mailer {
 	}
 	
 	/**
-	 * Initialise un objet Smtp pour utilisation ultérieure
+	 * Initialise un objet Smtp pour utilisation ultÃ©rieure
 	 * 
 	 * @param string  $server  Nom du serveur SMTP
-	 * @param integer $port    Port de connexion (25 dans la grande majorité des cas)
-	 * @param string  $user    Login d'authentification (si AUTH est supporté par le serveur)
-	 * @param string  $pass    Password d'authentification (si AUTH est supporté par le serveur)
-	 * @param string  $server_from  Serveur émetteur
+	 * @param integer $port    Port de connexion (25 dans la grande majoritÃ© des cas)
+	 * @param string  $user    Login d'authentification (si AUTH est supportÃ© par le serveur)
+	 * @param string  $pass    Password d'authentification (si AUTH est supportÃ© par le serveur)
+	 * @param string  $server_from  Serveur Ã©metteur
 	 * 
 	 * @access public
 	 * @return void
@@ -485,7 +485,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Créé une nouvelle instance de la classe
+	 * CrÃ©Ã© une nouvelle instance de la classe
 	 * 
 	 * @param boolean $debug
 	 * 
@@ -501,7 +501,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Paramétrage des variables concernant sendmail
+	 * ParamÃ©trage des variables concernant sendmail
 	 * 
 	 * @param string $sendmail_cmd
 	 * @param string $sendmail_path
@@ -519,7 +519,7 @@ class Mailer {
 		
 		if( !@is_executable($this->sendmail_path) )
 		{
-			$this->error('use_sendmail() :: ' . $this->sendmail_path . ' n\'est pas exécutable');
+			$this->error('use_sendmail() :: ' . $this->sendmail_path . ' n\'est pas exÃ©cutable');
 			return false;
 		}
 		
@@ -527,9 +527,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Réglages du chemin vers les modèles
+	 * RÃ©glages du chemin vers les modÃ¨les
 	 * 
-	 * @param string $template_path  Chemin vers les modèles
+	 * @param string $template_path  Chemin vers les modÃ¨les
 	 * 
 	 * @access public
 	 * @return boolean
@@ -550,7 +550,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Vérifie qu'un répertoire ou fichier existe et est accessible en lecture
+	 * VÃ©rifie qu'un rÃ©pertoire ou fichier existe et est accessible en lecture
 	 * 
 	 * @param string $path  Chemin vers le fichier
 	 * 
@@ -572,7 +572,7 @@ class Mailer {
 	 * Retourne le contenu d'un fichier
 	 * 
 	 * @param string  $path         Chemin vers le fichier
-	 * @param boolean $binary_file  On spécifie si on charge un fichier binaire (pour windows)
+	 * @param boolean $binary_file  On spÃ©cifie si on charge un fichier binaire (pour windows)
 	 * 
 	 * @access public
 	 * @return mixed
@@ -641,7 +641,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Vérifie la validité syntaxique d'une adresse email
+	 * VÃ©rifie la validitÃ© syntaxique d'une adresse email
 	 * 
 	 * @param string $email
 	 * 
@@ -655,19 +655,19 @@ class Mailer {
 	}
 	
 	/**
-	 * Vérifie si une adresse email N'EST PAS valide (domaine et compte).
-	 * Ceci est différent d'une vérification de validité.
-	 * Le serveur SMTP peut très bien répondre par un 250 ok pour cet email,
-	 * les erreurs d'adressage étant traitées ultérieurement au niveau du
+	 * VÃ©rifie si une adresse email N'EST PAS valide (domaine et compte).
+	 * Ceci est diffÃ©rent d'une vÃ©rification de validitÃ©.
+	 * Le serveur SMTP peut trÃ¨s bien rÃ©pondre par un 250 ok pour cet email,
+	 * les erreurs d'adressage Ã©tant traitÃ©es ultÃ©rieurement au niveau du
 	 * serveur POP.
 	 * 
 	 * @link http://www.sitepoint.com/article/1051
 	 * @link http://www.zend.com/codex.php?id=449&single=1
-	 * @link http://fr.php.net/getmxrr (troisième User contributed note)
+	 * @link http://fr.php.net/getmxrr (troisiÃ¨me User contributed note)
 	 * 
-	 * @param string $email   Adresse email à vérifier
-	 * @param string $errstr  Passé par référence. Contiendra l'éventuel message
-	 *                        d'erreur retourné par le serveur SMTP
+	 * @param string $email   Adresse email Ã  vÃ©rifier
+	 * @param string $errstr  PassÃ© par rÃ©fÃ©rence. Contiendra l'Ã©ventuel message
+	 *                        d'erreur retournÃ© par le serveur SMTP
 	 * 
 	 * @access public
 	 * @return boolean
@@ -747,10 +747,10 @@ class Mailer {
 	}
 	
 	/**
-	 * Définition du champ expéditeur
+	 * DÃ©finition du champ expÃ©diteur
 	 * 
-	 * @param string $email  Email de l'expéditeur
-	 * @param string $name   Personnalisation du nom de l'expéditeur
+	 * @param string $email  Email de l'expÃ©diteur
+	 * @param string $name   Personnalisation du nom de l'expÃ©diteur
 	 * 
 	 * @access public
 	 * @return boolean
@@ -775,7 +775,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Définition des destinataires
+	 * DÃ©finition des destinataires
 	 * 
 	 * @param mixed  $email_mixed  Email du destinataire ou tableau contenant la liste des destinataires 
 	 * @param string $type         Type de destinataire : to, cc, ou bcc
@@ -847,7 +847,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Ancienne méthode d'ajout de destinataires, présent pour assurer la compatibilité 
+	 * Ancienne mÃ©thode d'ajout de destinataires, prÃ©sent pour assurer la compatibilitÃ© 
 	 * 
 	 * @see Mailer::set_address()
 	 * @access public
@@ -860,7 +860,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Définition du sujet de l'email
+	 * DÃ©finition du sujet de l'email
 	 * 
 	 * @param string $subject  Le sujet de l'email
 	 * 
@@ -875,8 +875,8 @@ class Mailer {
 	/**
 	 * Corps de l'email
 	 * 
-	 * @param string $message  Contient le message à envoyer
-	 * @param array  $tags     Variables à remplacer dans le texte
+	 * @param string $message  Contient le message Ã  envoyer
+	 * @param array  $tags     Variables Ã  remplacer dans le texte
 	 * 
 	 * @access public
 	 * @return void
@@ -890,11 +890,11 @@ class Mailer {
 	}
 	
 	/**
-	 * Alternative texte de l'email (on suppose que set_message() a été appellé
+	 * Alternative texte de l'email (on suppose que set_message() a Ã©tÃ© appellÃ©
 	 * avec un contenu html)
 	 * 
 	 * @param string $message  Contient le message alternatif
-	 * @param array  $tags     Variables à remplacer dans le texte
+	 * @param array  $tags     Variables Ã  remplacer dans le texte
 	 * 
 	 * @access public
 	 * @return void
@@ -907,8 +907,8 @@ class Mailer {
 	}
 	
 	/**
-	 * @param string $file  Nom du modèle (sans l'extension)
-	 * @param array  $tags  Variables à remplacer dans le texte
+	 * @param string $file  Nom du modÃ¨le (sans l'extension)
+	 * @param array  $tags  Variables Ã  remplacer dans le texte
 	 * 
 	 * @access public
 	 * @return boolean
@@ -941,7 +941,7 @@ class Mailer {
 	}
 	
 	/**
-	 * @param array $tags  Tableau des tags à remplacer dans le message
+	 * @param array $tags  Tableau des tags Ã  remplacer dans le message
 	 * 
 	 * @access public
 	 * @return void
@@ -961,8 +961,8 @@ class Mailer {
 	}
 	
 	/**
-	 * @param string $name  Nom du block et des éventuels sous blocks
-	 * @param array  $tags  Tableau des tags à remplacer dans le message
+	 * @param string $name  Nom du block et des Ã©ventuels sous blocks
+	 * @param array  $tags  Tableau des tags Ã  remplacer dans le message
 	 * 
 	 * @access public
 	 * @return void
@@ -992,8 +992,8 @@ class Mailer {
 	 * @param string  $path         Chemin vers le fichier
 	 * @param string  $filename     Nom du fichier
 	 * @param string  $disposition  Disposition
-	 * @param string  $mime_type    Type de média
-	 * @param boolean $embedded     true si fichier incorporé dans l'email html
+	 * @param string  $mime_type    Type de mÃ©dia
+	 * @param boolean $embedded     true si fichier incorporÃ© dans l'email html
 	 * 
 	 * @access public
 	 * @return boolean
@@ -1031,7 +1031,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Renvoie le type mime à partir de l'extension de fichier
+	 * Renvoie le type mime Ã  partir de l'extension de fichier
 	 * 
 	 * @param string $ext  Extension de fichier
 	 * 
@@ -1129,9 +1129,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Définition de l'adresse de réponse
+	 * DÃ©finition de l'adresse de rÃ©ponse
 	 * 
-	 * @param string $email  Email de réponse
+	 * @param string $email  Email de rÃ©ponse
 	 * @param string $name   Personnalisation
 	 * 
 	 * @access public
@@ -1167,7 +1167,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Définition de l'adresse de retour d'erreurs
+	 * DÃ©finition de l'adresse de retour d'erreurs
 	 * 
 	 * @param string $email  Email de retour d'erreur
 	 * 
@@ -1197,10 +1197,10 @@ class Mailer {
 	}
 	
 	/**
-	 * Définition de l'adresse cible pour les notifications de lecture
+	 * DÃ©finition de l'adresse cible pour les notifications de lecture
 	 * 
 	 * @param string $email  Email pour le retour de notification de lecture 
-	 *                       (par défaut, l'adresse d'envoi est utilisée)
+	 *                       (par dÃ©faut, l'adresse d'envoi est utilisÃ©e)
 	 * 
 	 * @access public
 	 * @return boolean
@@ -1239,9 +1239,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Priorité de l'email
+	 * PrioritÃ© de l'email
 	 * 
-	 * @param mixed $level  Niveau de priorité de l'email
+	 * @param mixed $level  Niveau de prioritÃ© de l'email
 	 * 
 	 * @access public
 	 * @return void
@@ -1269,10 +1269,10 @@ class Mailer {
 	}
 	
 	/**
-	 * Ajout d'en-têtes supplémentaires
+	 * Ajout d'en-tÃªtes supplÃ©mentaires
 	 * 
-	 * @param string $name   Nom de l'entête 
-	 * @param string $value  Contenu de l'entête
+	 * @param string $name   Nom de l'entÃªte 
+	 * @param string $value  Contenu de l'entÃªte
 	 * 
 	 * @access public
 	 * @return boolean
@@ -1280,8 +1280,8 @@ class Mailer {
 	function additionnal_header($name, $value)
 	{
 		//
-		// Le nom de l'en-tête ne doit contenir que des caractères us-ascii, 
-		// et ne doit pas contenir le caractère deux points (:)
+		// Le nom de l'en-tÃªte ne doit contenir que des caractÃ¨res us-ascii, 
+		// et ne doit pas contenir le caractÃ¨re deux points (:)
 		// - Section 2.2 de la rfc 2822
 		//
 		if( !preg_match('/^[\x21-\x39\x3B-\x7E]+$/', $name) )
@@ -1292,7 +1292,7 @@ class Mailer {
 		$name  = str_replace(' ', '-', ucwords(str_replace('-', ' ', $name)));
 		
 		//
-		// Le contenu de l'en-tête ne doit contenir aucun retour chariot ou 
+		// Le contenu de l'en-tÃªte ne doit contenir aucun retour chariot ou 
 		// saut de ligne
 		// - Section 2.2 de la rfc 2822
 		//
@@ -1304,8 +1304,8 @@ class Mailer {
 	}
 	
 	/**
-	 * @param string $encoding  Type d'encodage désiré
-	 * @param string $str       Chaîne à encoder
+	 * @param string $encoding  Type d'encodage dÃ©sirÃ©
+	 * @param string $str       ChaÃ®ne Ã  encoder
 	 * 
 	 * @access private
 	 * @return string
@@ -1340,7 +1340,7 @@ class Mailer {
 				break;
 			
 			default:
-				$this->error('make_encoding() :: Aucun encodage valide spécifié !');
+				$this->error('make_encoding() :: Aucun encodage valide spÃ©cifiÃ© !');
 				break;
 		}
 		
@@ -1348,9 +1348,9 @@ class Mailer {
 	}
 	
 	/**
-	 * Encode le texte en chaîne à guillemets
+	 * Encode le texte en chaÃ®ne Ã  guillemets
 	 * 
-	 * @param string $str  Texte à encoder
+	 * @param string $str  Texte Ã  encoder
 	 * 
 	 * @access private
 	 * @return string
@@ -1417,8 +1417,8 @@ class Mailer {
 	}
 	
 	/**
-	 * @param string $value  Contenu de l'entête
-	 * @param string $name   Nom de l'entête correspondant
+	 * @param string $value  Contenu de l'entÃªte
+	 * @param string $name   Nom de l'entÃªte correspondant
 	 * @param string $token  Type de jeton
 	 * 
 	 * @access public
@@ -1446,11 +1446,11 @@ class Mailer {
 			}
 			
 			/**
-			 * Si le nombre d'octets à encoder représente plus de 33% de la chaîne,
-			 * nous utiliserons l'encodage base64 qui garantit une chaîne encodée 33%
+			 * Si le nombre d'octets Ã  encoder reprÃ©sente plus de 33% de la chaÃ®ne,
+			 * nous utiliserons l'encodage base64 qui garantit une chaÃ®ne encodÃ©e 33%
 			 * plus longue que l'originale, sinon, on utilise l'encodage "Q".
 			 * La RFC 2047 recommande d'utiliser pour chaque cas l'encodage produisant
-			 * le résultat le plus court.
+			 * le rÃ©sultat le plus court.
 			 * 
 			 * @see RFC 2045#6.8
 			 * @see RFC 2047#4
@@ -1459,7 +1459,7 @@ class Mailer {
 			$strlen   = strlen($value);
 			$encoding = (($q / $strlen) < 0.33) ? 'Q' : 'B';
 			$template = sprintf('=?%s?%s?%%s?=%s', $this->charset, $encoding, $sep);
-			$maxlen   = ($maxlen - strlen($template) + strlen($sep) + 2);// + 2 pour le %s dans le modèle
+			$maxlen   = ($maxlen - strlen($template) + strlen($sep) + 2);// + 2 pour le %s dans le modÃ¨le
 			$is_utf8  = (strcasecmp($this->charset, 'UTF-8') == 0);
 			$newbody  = '';
 			$pos = 0;
@@ -1470,20 +1470,20 @@ class Mailer {
 				if( $newbody == '' )
 				{
 					$tmplen -= strlen($name . ': ');
-					if( $encoding == 'Q' ) $tmplen++;// TODO : à comprendre
+					if( $encoding == 'Q' ) $tmplen++;// TODO : Ã  comprendre
 				}
 				
 				if( $encoding == 'Q' )
 				{
 					$q = preg_match_all("/[$charlist]/", substr($value, $pos, $tmplen), $matches);
-					// chacun des octets trouvés prendra trois fois plus de place dans
-					// la chaîne encodée. On retranche cette valeur de la longueur du tronçon
+					// chacun des octets trouvÃ©s prendra trois fois plus de place dans
+					// la chaÃ®ne encodÃ©e. On retranche cette valeur de la longueur du tronÃ§on
 					$tmplen -= ($q * 2);
 				}
 				else
 				{
 					/**
-					 * La longueur de l'encoded-text' doit être un multiple de 4
+					 * La longueur de l'encoded-text' doit Ãªtre un multiple de 4
 					 * pour ne pas casser l'encodage base64
 					 * 
 					 * @see RFC 2047#5
@@ -1495,12 +1495,12 @@ class Mailer {
 				if( $is_utf8 )
 				{
 					/**
-					 * Il est interdit de sectionner un caractère multi-octet.
-					 * On teste chaque octet en partant de la fin du tronçon en cours
-					 * jusqu'à tomber sur un caractère ascii ou l'octet de début de
-					 * séquence d'un caractère multi-octets.
-					 * On vérifie alors qu'il y bien $m octets qui suivent (le cas échéant).
-					 * Si ce n'est pas le cas, on réduit la longueur du tronçon.
+					 * Il est interdit de sectionner un caractÃ¨re multi-octet.
+					 * On teste chaque octet en partant de la fin du tronÃ§on en cours
+					 * jusqu'Ã  tomber sur un caractÃ¨re ascii ou l'octet de dÃ©but de
+					 * sÃ©quence d'un caractÃ¨re multi-octets.
+					 * On vÃ©rifie alors qu'il y bien $m octets qui suivent (le cas Ã©chÃ©ant).
+					 * Si ce n'est pas le cas, on rÃ©duit la longueur du tronÃ§on.
 					 * 
 					 * @see RFC 2047#5
 					 */
@@ -1591,7 +1591,7 @@ class Mailer {
 	/**
 	 * Envoie de l'email
 	 * 
-	 * @param boolean $do_not_send  true pour retourner l'entête et le corps
+	 * @param boolean $do_not_send  true pour retourner l'entÃªte et le corps
 	 *                              du message au lieu d'envoyer l'email
 	 * 
 	 * @access public
@@ -1643,19 +1643,19 @@ class Mailer {
 				/**
 				 * FIX
 				 * 
-				 * La fonction mail() n'accepte les entêtes long que si on utilise
-				 * la séquence CRLFSP (\r\n ), or, sur certains systèmes, il semble
-				 * que les retours de ligne soient... doublés...
-				 * Résultat, le corps de l'email commence au saut de ligne en trop
-				 * (et donc contient une bonne partie des entêtes).
-				 * Pour cette raison, on ne 'plie' le sujet avec des séquences LFSP (\n )
-				 * que si l'on est sùr que la fonction mail() ouvre directement
+				 * La fonction mail() n'accepte les entÃªtes long que si on utilise
+				 * la sÃ©quence CRLFSP (\r\n ), or, sur certains systÃ¨mes, il semble
+				 * que les retours de ligne soient... doublÃ©s...
+				 * RÃ©sultat, le corps de l'email commence au saut de ligne en trop
+				 * (et donc contient une bonne partie des entÃªtes).
+				 * Pour cette raison, on ne 'plie' le sujet avec des sÃ©quences LFSP (\n )
+				 * que si l'on est sÃ¹r que la fonction mail() ouvre directement
 				 * un socket vers un serveur SMTP
 				 * 
 				 * @link http://bugs.php.net/bug.php?id=24805
 				 */
 				$subject = $this->subject;
-				if( $this->fix_bug_mail == -1 )// cette attribut est renseigné dans Mailer::recipients_list()
+				if( $this->fix_bug_mail == -1 )// cette attribut est renseignÃ© dans Mailer::recipients_list()
 				{
 					$subject = str_replace("\n ", "\r\n ", $this->word_wrap($subject));
 				}
@@ -1666,9 +1666,9 @@ class Mailer {
 		{
 			case WM_HOST_OTHER:
 				//
-				// Détection du safe_mode. S'il est activé, on ne pourra pas
-				// régler l'adresse email de retour (return-path) avec le
-				// cinquième argument.
+				// DÃ©tection du safe_mode. S'il est activÃ©, on ne pourra pas
+				// rÃ©gler l'adresse email de retour (return-path) avec le
+				// cinquiÃ¨me argument.
 				// En alternative, utilisation de ini_get() et ini_set() sur
 				// l'option sendmail_from de PHP ?
 				//
@@ -1721,7 +1721,7 @@ class Mailer {
 				break;
 			
 			default:
-				$this->error('send() :: Aucune fonction d\'envoi n\'est définie');
+				$this->error('send() :: Aucune fonction d\'envoi n\'est dÃ©finie');
 				$result = false;
 				break;
 		}
@@ -1739,8 +1739,8 @@ class Mailer {
 	 * 
 	 * @param string $address  Adresses des destinataires
 	 * @param string $message  Corps de l'email
-	 * @param string $headers  Entêtes de l'email
-	 * @param string $Rpath    Adresse d'envoi (définit le return-path)
+	 * @param string $headers  EntÃªtes de l'email
+	 * @param string $Rpath    Adresse d'envoi (dÃ©finit le return-path)
 	 * 
 	 * @access private
 	 * @return boolean
@@ -1778,9 +1778,9 @@ class Mailer {
 		}
 		
 		//
-		// Apparamment, les commandes ne sont réellement effectuées qu'après la fermeture proprement 
+		// Apparamment, les commandes ne sont rÃ©ellement effectuÃ©es qu'aprÃ¨s la fermeture proprement 
 		// de la connexion au serveur SMTP. On quitte donc la connexion courante si l'option de connexion 
-		// persistante n'est pas activée.
+		// persistante n'est pas activÃ©e.
 		//
 		if( !$this->persistent_connection )
 		{
@@ -1792,12 +1792,12 @@ class Mailer {
 	
 	/**
 	 * Envoi via sendmail
-	 * (Je me suis beaucoup inspiré ici de la classe de PEAR concernant l'envoi via sendmail)
+	 * (Je me suis beaucoup inspirÃ© ici de la classe de PEAR concernant l'envoi via sendmail)
 	 * 
 	 * @param string $address  Adresses des destinataires
 	 * @param string $message  Corps de l'email
-	 * @param string $headers  Entêtes de l'email
-	 * @param string $Rpath    Adresse d'envoi (définit le return-path)
+	 * @param string $headers  EntÃªtes de l'email
+	 * @param string $Rpath    Adresse d'envoi (dÃ©finit le return-path)
 	 * 
 	 * @access private
 	 * @return boolean
@@ -1826,12 +1826,12 @@ class Mailer {
 			
 			if( !($sm = popen($this->sendmail_path . $this->sendmail_cmd, 'w')) )
 			{
-				$this->error('sendmail() :: Impossible d\'exécuter sendmail');
+				$this->error('sendmail() :: Impossible d\'exÃ©cuter sendmail');
 				return false;
 			}
 			
 			//
-			// On envoie les entêtes 
+			// On envoie les entÃªtes 
 			//
 			fputs($sm, $headers . "\n\n");
 			
@@ -1844,13 +1844,13 @@ class Mailer {
 			
 			if( $code != 0 )
 			{
-				$this->error('sendmail() :: Sendmail a retourné le code d\'erreur suivant -> ' . $code);
+				$this->error('sendmail() :: Sendmail a retournÃ© le code d\'erreur suivant -> ' . $code);
 				return false;
 			}
 		}
 		else
 		{
-			$this->error('sendmail() :: ' . $this->sendmail_path . ' n\'est pas exécutable');
+			$this->error('sendmail() :: ' . $this->sendmail_path . ' n\'est pas exÃ©cutable');
 			return false;
 		}
 		
@@ -1858,12 +1858,12 @@ class Mailer {
 	}
 	
 	/**
-	 * Retourne l'adresse d'envoi à utiliser dans l'option -f de sendmail 
-	 * ou pour la commande MAIL FROM de SMTP car c'est celle ci qui est utilisée 
-	 * pour forger l'entête return-path
-	 * Nous utiliserons l'adresse email fournie pour le return-path, si cet entête n'est pas vide.
-	 * S'il est vide, nous utiliserons l'adresse d'expéditeur fournie. 
-	 * Enfin, si celle ci n'a pas été fournie non plus, on utilise la valeur de sendmail_from
+	 * Retourne l'adresse d'envoi Ã  utiliser dans l'option -f de sendmail 
+	 * ou pour la commande MAIL FROM de SMTP car c'est celle ci qui est utilisÃ©e 
+	 * pour forger l'entÃªte return-path
+	 * Nous utiliserons l'adresse email fournie pour le return-path, si cet entÃªte n'est pas vide.
+	 * S'il est vide, nous utiliserons l'adresse d'expÃ©diteur fournie. 
+	 * Enfin, si celle ci n'a pas Ã©tÃ© fournie non plus, on utilise la valeur de sendmail_from
 	 * 
 	 * @access private
 	 * @return string
@@ -1885,7 +1885,7 @@ class Mailer {
 			if( empty($Rpath) )
 			{
 				//
-				// Pas moyen d'obtenir une adresse à utiliser.
+				// Pas moyen d'obtenir une adresse Ã  utiliser.
 				// En dernier ressort, nous utilisons une adresse factice
 				//
 				$Rpath = 'postmaster@'.$this->server_from;
@@ -1909,7 +1909,7 @@ class Mailer {
 		}
 		
 		//
-		// Sendmail/qmail/[...] se charge déja de parser les entêtes To, Cc et Bcc éventuels
+		// Sendmail/qmail/[...] se charge dÃ©ja de parser les entÃªtes To, Cc et Bcc Ã©ventuels
 		// On renvoie un tableau vide
 		//
 		if( $this->sendmail_mode )
@@ -1919,7 +1919,7 @@ class Mailer {
 		
 		//
 		// Mode smtp, on renvoie les adresses de tous les destinataires et on supprime 
-		// l'entête Bcc
+		// l'entÃªte Bcc
 		//
 		else if( $this->smtp_mode )
 		{
@@ -1934,12 +1934,12 @@ class Mailer {
 			//
 			// FIX
 			// 
-			// Si la fonction mail() utilise sendmail, elle rajoute automatiquement un entête To, 
-			// or, nous avons déja rajouté un entête To (pour pouvoir personnaliser les adresses), 
-			// et sendmail va parser les deux entête To sans distinction. 
-			// Résultat, les emails vont être reçus en double ...
+			// Si la fonction mail() utilise sendmail, elle rajoute automatiquement un entÃªte To, 
+			// or, nous avons dÃ©ja rajoutÃ© un entÃªte To (pour pouvoir personnaliser les adresses), 
+			// et sendmail va parser les deux entÃªte To sans distinction. 
+			// RÃ©sultat, les emails vont Ãªtre reÃ§us en double ...
 			// 
-			// Si un serveur smtp est utilisé, la personnalisation des adresses Cc et Bcc ne fonctionne pas
+			// Si un serveur smtp est utilisÃ©, la personnalisation des adresses Cc et Bcc ne fonctionne pas
 			//
 			if( !isset($this->fix_bug_mail) )
 			{
@@ -1951,8 +1951,8 @@ class Mailer {
 				}
 				
 				//
-				// Certains hébergeurs désactivent la fonction ini_get() (sont cons quand même nan ?)
-				// Pas grave, on récupère le contenu du phpinfo et on le scan (Bwaahahaa ..)
+				// Certains hÃ©bergeurs dÃ©sactivent la fonction ini_get() (sont cons quand mÃªme nan ?)
+				// Pas grave, on rÃ©cupÃ¨re le contenu du phpinfo et on le scan (Bwaahahaa ..)
 				//
 				else
 				{
@@ -1971,8 +1971,8 @@ class Mailer {
 					else
 					{
 						//
-						// Bon, pas moyen de récupérer la valeur de sendmail_path :/
-						// Pour que l'envoi se passe tout de même sans problème, on supprime l'entête To
+						// Bon, pas moyen de rÃ©cupÃ©rer la valeur de sendmail_path :/
+						// Pour que l'envoi se passe tout de mÃªme sans problÃ¨me, on supprime l'entÃªte To
 						// Tant pis pour la personnalisation.
 						//
 						$this->fix_bug_mail = 0;
@@ -1981,7 +1981,7 @@ class Mailer {
 			}
 			
 			//
-			// Sendmail/qmail/[...] est utilisé, on renvoie le contenu de l'entête To et on le supprime
+			// Sendmail/qmail/[...] est utilisÃ©, on renvoie le contenu de l'entÃªte To et on le supprime
 			//
 			if( $this->fix_bug_mail == 1 )
 			{
@@ -2001,10 +2001,10 @@ class Mailer {
 				// FIX
 				// 
 				// La personnalisation telle que "name" <user@domaine.com> ne marche pas
-				// pour l'entêtes Cc si on utilise la fonction mail() et qu'un serveur
-				// smtp est utilisé. On supprime donc la personnalisation de l'entête Cc
+				// pour l'entÃªtes Cc si on utilise la fonction mail() et qu'un serveur
+				// smtp est utilisÃ©. On supprime donc la personnalisation de l'entÃªte Cc
 				// 
-				// Dans le doute, on supprime également l'entête To.
+				// Dans le doute, on supprime Ã©galement l'entÃªte To.
 				//
 				if( $this->fix_bug_mail == 0 )
 				{
@@ -2027,7 +2027,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Renvoie les entêtes correspondant au type demandé
+	 * Renvoie les entÃªtes correspondant au type demandÃ©
 	 * 
 	 * @param string $type
 	 * 
@@ -2076,7 +2076,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Génération du bloc d'en-têtes
+	 * GÃ©nÃ©ration du bloc d'en-tÃªtes
 	 * 
 	 * @access private
 	 * @return string
@@ -2109,7 +2109,7 @@ class Mailer {
 		$this->headers['Message-ID']   = '<' . md5(microtime() . rand()) . '@' . $this->server_from . '>';
 		
 		//
-		// La rfc2822 conseille de placer certains entêtes dans un certain ordre
+		// La rfc2822 conseille de placer certains entÃªtes dans un certain ordre
 		//
 		$header_rank = array('Return-Path', 'Date', 'From', 'Subject', 'X-Sender', 'To', 'Cc', 'Bcc', 'Reply-To');
 		
@@ -2176,8 +2176,8 @@ class Mailer {
 		$total_embedded = count($this->embeddedfile['path']);
 		
 		//
-		// Si des fichiers joints sont présents, ou si des fichiers incorporés sont 
-		// présents et que l'email est au format texte brut
+		// Si des fichiers joints sont prÃ©sents, ou si des fichiers incorporÃ©s sont 
+		// prÃ©sents et que l'email est au format texte brut
 		//
 		if( $total_attach > 0 || ( $total_embedded > 0 && $this->format == 1 ) )
 		{
@@ -2193,7 +2193,7 @@ class Mailer {
 		}
 		
 		//
-		// L'email est au format texte brut ou ne contient pas de fichiers joints ou incorporés
+		// L'email est au format texte brut ou ne contient pas de fichiers joints ou incorporÃ©s
 		//
 		else
 		{
@@ -2204,7 +2204,7 @@ class Mailer {
 	}
 	
 	/**
-	 * Génération du corps de l'email
+	 * GÃ©nÃ©ration du corps de l'email
 	 * 
 	 * @access private
 	 * @return string
@@ -2394,10 +2394,10 @@ class Mailer {
 	/**
 	 * @param string  $path         Chemin vers le fichier
 	 * @param string  $filename     Nom du fichier
-	 * @param string  $mime_type    Type de média du fichier
+	 * @param string  $mime_type    Type de mÃ©dia du fichier
 	 * @param string  $disposition  Disposition
-	 * @param string  $boundary     Frontière à utiliser
-	 * @param boolean $embedded     Si fichier incorporé, true
+	 * @param string  $boundary     FrontiÃ¨re Ã  utiliser
+	 * @param boolean $embedded     Si fichier incorporÃ©, true
 	 * 
 	 * @access private
 	 * @return string
@@ -2523,7 +2523,7 @@ class Mailer {
 	}
 	
 	/**
-	 * @param string $msg_error  Le message d'erreur à afficher si mode debug
+	 * @param string $msg_error  Le message d'erreur Ã  afficher si mode debug
 	 * 
 	 * @access private
 	 * @return void

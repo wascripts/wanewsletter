@@ -1,7 +1,7 @@
 <?php
 
 //
-// Utilisez ce fichier si vous souhaitez (re)créer un fichier de configuration
+// Utilisez ce fichier si vous souhaitez (re)crÃ©er un fichier de configuration
 // valide sans utiliser le script d'installation de Wanewsletter.
 //
 define('NL_INSTALLED', true);

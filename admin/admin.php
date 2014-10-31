@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -297,7 +297,7 @@ if (isset($_POST['submit'])) {
 			$result = $db->query($sql);
 
 			if (($pseudo = $result->column('admin_login')) === false) {
-				trigger_error('Impossible de récupérer le pseudo de cet utilisateur', E_USER_ERROR);
+				trigger_error('Impossible de rÃ©cupÃ©rer le pseudo de cet utilisateur', E_USER_ERROR);
 			}
 
 			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
@@ -349,7 +349,7 @@ if (wan_is_admin($admindata)) {
 		$result = $db->query($sql);
 
 		if (!($current_admin = $result->fetch())) {
-			trigger_error("Impossible de récupérer les données de l'utilisateur", E_USER_ERROR);
+			trigger_error("Impossible de rÃ©cupÃ©rer les donnÃ©es de l'utilisateur", E_USER_ERROR);
 		}
 	}
 

@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -38,7 +38,7 @@ class Auth
 	);
 
 	/**
-	 * Initialisation de la classe, et récupération des permissions de l'utilisateur courant
+	 * Initialisation de la classe, et rÃ©cupÃ©ration des permissions de l'utilisateur courant
 	 */
 	public function __construct()
 	{
@@ -48,9 +48,9 @@ class Auth
 	}
 
 	/**
-	 * Récupèration des permissions pour l'utilisateur demandé
+	 * RÃ©cupÃ¨ration des permissions pour l'utilisateur demandÃ©
 	 *
-	 * @param integer $admin_id Identifiant de l'utilisateur concerné
+	 * @param integer $admin_id Identifiant de l'utilisateur concernÃ©
 	 */
 	public function read_data($admin_id)
 	{
@@ -80,12 +80,12 @@ class Auth
 	}
 
 	/**
-	 * Fonction de vérification des permissions, selon la permission concernée et la liste concernée
-	 * Si vérification pour une liste particulière, retourne un booléen, sinon retourne un tableau d'identifiant
-	 * des listes pour lesquelles la permission est accordée
+	 * Fonction de vÃ©rification des permissions, selon la permission concernÃ©e et la liste concernÃ©e
+	 * Si vÃ©rification pour une liste particuliÃ¨re, retourne un boolÃ©en, sinon retourne un tableau d'identifiant
+	 * des listes pour lesquelles la permission est accordÃ©e
 	 *
-	 * @param integer $auth_type Code de la permission concernée
-	 * @param integer $liste_id  Identifiant de la liste concernée
+	 * @param integer $auth_type Code de la permission concernÃ©e
+	 * @param integer $liste_id  Identifiant de la liste concernÃ©e
 	 *
 	 * @return array|boolean
 	 */
@@ -117,7 +117,7 @@ class Auth
 	}
 
 	/**
-	 * Construction de la liste déroulante oui/non pour la permission concernée et la liste concernée
+	 * Construction de la liste dÃ©roulante oui/non pour la permission concernÃ©e et la liste concernÃ©e
 	 *
 	 * @param integer $auth_type Code de la permission
 	 * @param array   $listdata  Tableau des permissions pour la liste en cours

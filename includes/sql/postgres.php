@@ -3,14 +3,14 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 class Wadb_postgres extends Wadb
 {
 	/**
-	 * Type de base de données
+	 * Type de base de donnÃ©es
 	 */
 	const ENGINE = 'postgres';
 
@@ -29,14 +29,14 @@ class Wadb_postgres extends Wadb
 	public $clientVersion = '';
 
 	/**
-	 * Nombre de lignes affectées par la dernière requète DML
+	 * Nombre de lignes affectÃ©es par la derniÃ¨re requÃ¨te DML
 	 *
 	 * @var integer
 	 */
 	protected $_affectedRows = 0;
 
 	/**
-	 * Liste de séquences telle que ['dbname.tablename' => 'seqname']
+	 * Liste de sÃ©quences telle que ['dbname.tablename' => 'seqname']
 	 *
 	 * @var array
 	 */
@@ -195,7 +195,7 @@ class Wadb_postgres extends Wadb
 	public function lastInsertId()
 	{
 		if (preg_match('/^INSERT\s+INTO\s+([^\s]+)\s+/i', $this->lastQuery, $m)) {
-			$tablename = trim($m[1], '"');// Revert éventuel de l'appel à self::quote()
+			$tablename = trim($m[1], '"');// Revert Ã©ventuel de l'appel Ã  self::quote()
 			$key = $this->dbname . '.' . $tablename;
 
 			if (!isset(self::$seqlist[$key]) ) {
@@ -290,7 +290,7 @@ class WadbResult_postgres extends WadbResult
 }
 
 /**
- * Certaines parties sont basées sur phpPgAdmin 2.4.2
+ * Certaines parties sont basÃ©es sur phpPgAdmin 2.4.2
  */
 class WadbBackup_postgres extends WadbBackup
 {
@@ -368,7 +368,7 @@ class WadbBackup_postgres extends WadbBackup
 			$contents .= $this->eol;
 
 			foreach ($sequences[$tabledata['name']] as $seq) {
-				// Création de la séquence
+				// CrÃ©ation de la sÃ©quence
 				$contents .= sprintf("CREATE SEQUENCE %s start %d increment %d maxvalue %d minvalue %d cache %d;%s",
 					$this->db->quote($seq['sequence_name']),
 					$seq['start_value'],
@@ -379,7 +379,7 @@ class WadbBackup_postgres extends WadbBackup
 					$this->eol
 				);
 
-				// Initialisation à sa valeur courante
+				// Initialisation Ã  sa valeur courante
 				$last_value = $seq['last_value'];
 				if ($seq['is_called'] == 't') {
 					$last_value++;
@@ -559,7 +559,7 @@ class WadbBackup_postgres extends WadbBackup
 		}
 
 		if (isset($sequences[$tabledata['name']])) {
-			// Rattachement des séquences sur les champs liés
+			// Rattachement des sÃ©quences sur les champs liÃ©s
 			foreach ($sequences[$tabledata['name']] as $field => $seq) {
 				$contents .= sprintf("ALTER SEQUENCE %s OWNED BY %s.%s;%s",
 					$this->db->quote($seq['sequence_name']),

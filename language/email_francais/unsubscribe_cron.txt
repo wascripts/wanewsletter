@@ -1,15 +1,15 @@
 Bonjour, 
 
-Vous recevez cet email car vous (ou quelqu'un se faisant passer pour vous) désirez vous désinscrire de la 
+Vous recevez cet email car vous (ou quelqu'un se faisant passer pour vous) dÃ©sirez vous dÃ©sinscrire de la 
 liste de diffusion "%LISTE%" du site %SITENAME%.
 
-Pour vous désinscrire, vous devez envoyer un email à %EMAIL_NEWSLETTER% avec pour sujet "Desinscription" 
+Pour vous dÃ©sinscrire, vous devez envoyer un email Ã  %EMAIL_NEWSLETTER% avec pour sujet "Desinscription" 
 et dans le message, le code suivant : %CODE%
 
-A bientôt sur %URLSITE%.
+A bientÃ´t sur %URLSITE%.
 
 ~~~~~~~~~~
 %SIG%
 
 ~~~~~~~~~~~~~~~~~~~~
-Si vous ne souhaitez pas vous désinscrire, ignorez simplement cet email.
+Si vous ne souhaitez pas vous dÃ©sinscrire, ignorez simplement cet email.

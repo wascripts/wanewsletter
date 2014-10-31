@@ -3,54 +3,54 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 //
 // Version correspondant au code source en place sur le serveur.
-// Remplace la constante obsolète WA_VERSION, jadis définie dans le fichier de configuration.
+// Remplace la constante obsolÃ¨te WA_VERSION, jadis dÃ©finie dans le fichier de configuration.
 //
 define('WANEWSLETTER_VERSION', '2.4-beta3');
 
 //
 // identifiant de version des tables du script.
-// Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
-// le script invite l'utilisateur à lancer la procédure de mise à jour des tables
+// Doit correspondre Ã  l'entrÃ©e 'db_version' dans la configuration, sinon,
+// le script invite l'utilisateur Ã  lancer la procÃ©dure de mise Ã  jour des tables
 //
 define('WANEWSLETTER_DB_VERSION', 16);
 
 //
-// Modes de débogage du script
+// Modes de dÃ©bogage du script
 // Sauf en mode silencieux, le script affiche aussi des informations
-// complémentaires en bas de page (durée d'exécution, nbre de requètes SQL,
-// mémoire utilisée, ...)
+// complÃ©mentaires en bas de page (durÃ©e d'exÃ©cution, nbre de requÃ¨tes SQL,
+// mÃ©moire utilisÃ©e, ...)
 //
-// Le script annonce les erreurs critiques, sans donner de détails
+// Le script annonce les erreurs critiques, sans donner de dÃ©tails
 define('DEBUG_LEVEL_QUIET',  1);
-// Le script affiche les erreurs PHP et SQL en donnant des détails
+// Le script affiche les erreurs PHP et SQL en donnant des dÃ©tails
 define('DEBUG_LEVEL_NORMAL', 2);
 // Le script affiche aussi les erreurs non inclues dans le niveau d'erreurs PHP
-// configuré par error_reporting() ou masquées avec l'opérateur @
+// configurÃ© par error_reporting() ou masquÃ©es avec l'opÃ©rateur @
 define('DEBUG_LEVEL_ALL',    3);
 
 //
-// Configure le niveau de débogage souhaité
+// Configure le niveau de dÃ©bogage souhaitÃ©
 //
 define('DEBUG_MODE', DEBUG_LEVEL_NORMAL);
 
 //
-// Active/Désactive l'affichage des messages d'erreur en pied de page.
-// Si false, les erreurs sont affichées dès qu'elles sont traitées.
+// Active/DÃ©sactive l'affichage des messages d'erreur en pied de page.
+// Si false, les erreurs sont affichÃ©es dÃ¨s qu'elles sont traitÃ©es.
 //
 define('DISPLAY_ERRORS_IN_LOG', true);
 
 //
-// Active/Désactive le passage automatique à l'UTF-8 au moment de l'envoi en présence de
-// caractères invalides provenant de Windows-1252 dans les newsletters.
+// Active/DÃ©sactive le passage automatique Ã  l'UTF-8 au moment de l'envoi en prÃ©sence de
+// caractÃ¨res invalides provenant de Windows-1252 dans les newsletters.
 //
-// Si cette constante est placée à TRUE, les caractères en cause subiront une transformation
-// vers un caractère simple ou composé graphiquement proche (voir la fonction purge_latin1()
+// Si cette constante est placÃ©e Ã  TRUE, les caractÃ¨res en cause subiront une transformation
+// vers un caractÃ¨re simple ou composÃ© graphiquement proche (voir la fonction purge_latin1()
 // dans le fichier includes/functions.php).
 //
 define('TRANSLITE_INVALID_CHARS', false);
@@ -62,7 +62,7 @@ define('ENABLE_HTTP_AUTHENTICATION', true);
 
 
 //
-// Il est recommandé de ne rien modifier au-delà de cette ligne
+// Il est recommandÃ© de ne rien modifier au-delÃ  de cette ligne
 //
 
 //
@@ -81,7 +81,7 @@ define('STATUS_SENT',    2);
 define('STATUS_MODEL',   3);
 
 //
-// Statut des abonnés
+// Statut des abonnÃ©s
 //
 define('ABO_ACTIF',   1);
 define('ABO_INACTIF', 0);
@@ -113,7 +113,7 @@ define('CONFIRM_ONCE',   1);
 define('CONFIRM_NONE',   0);
 
 //
-// On vérifie si l'upload est autorisé sur le serveur
+// On vÃ©rifie si l'upload est autorisÃ© sur le serveur
 //
 if (config_status('file_uploads')) {
 	function get_integer_byte_value($size)
@@ -139,7 +139,7 @@ if (config_status('file_uploads')) {
 	}
 
 	if (!($filesize = config_value('upload_max_filesize'))) {
-        $filesize = '2M'; // 2 Méga-Octets
+        $filesize = '2M'; // 2 MÃ©ga-Octets
     }
 	$upload_max_size = get_integer_byte_value($filesize);
 
@@ -199,14 +199,14 @@ else {
 }
 
 //
-// Signature du script pour divers cas de figure (entête X-Mailer dans les emails
-// envoyés, entête User-Agent lors des requètes HTTP, etc)
+// Signature du script pour divers cas de figure (entÃªte X-Mailer dans les emails
+// envoyÃ©s, entÃªte User-Agent lors des requÃ¨tes HTTP, etc)
 //
 define('WA_SIGNATURE', sprintf('Wanewsletter/%s', WANEWSLETTER_VERSION));
 define('WA_X_MAILER', WA_SIGNATURE);
 
 //
-// Utilisées dans le cadre de la classe de vérification de mise à jour
+// UtilisÃ©es dans le cadre de la classe de vÃ©rification de mise Ã  jour
 //
 define('WA_DOWNLOAD_PAGE', 'http://phpcodeur.net/wascripts/wanewsletter/telecharger');
 define('WA_CHECK_UPDATE_URL', 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version');
@@ -214,7 +214,7 @@ define('WA_CHECK_UPDATE_CACHE', 'wa-check-update.cache');
 define('WA_CHECK_UPDATE_CACHE_TTL', 3600);
 
 //
-// Déclaration des dossiers et fichiers spéciaux utilisés par le script
+// DÃ©claration des dossiers et fichiers spÃ©ciaux utilisÃ©s par le script
 //
 define('WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
 define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));

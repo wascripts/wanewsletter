@@ -1,8 +1,8 @@
 Bonjour %PSEUDO%,
 
-Vous avez été ajouté comme administrateur de la newsletter de %SITENAME%
+Vous avez Ã©tÃ© ajoutÃ© comme administrateur de la newsletter de %SITENAME%
 
-Voici les données qui vous permettront de vous connecter :
+Voici les donnÃ©es qui vous permettront de vous connecter :
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Votre login : %PSEUDO%
@@ -10,7 +10,7 @@ Votre mot de passe : %PASSWORD%
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Vous pourrez changer votre password pour un autre à votre convenance une fois connecté à l'administration :
+Vous pourrez changer votre password pour un autre Ã  votre convenance une fois connectÃ© Ã  l'administration :
 
 %LINK_ADMIN%
 

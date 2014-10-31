@@ -2,7 +2,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -41,7 +41,7 @@ abbr[title] {
 	cursor: help;
 }
 
-.notice { font-size: .85em; }/* Doivent idéalement se trouver dans un contexte de font-size à 13px */
+.notice { font-size: .85em; }/* Doivent idÃ©alement se trouver dans un contexte de font-size Ã  13px */
 
 /* Structure des pages */
 
@@ -293,7 +293,7 @@ table.listing tr:nth-child(even) td {
 	background-color: #DBD8D5;
 }
 
-/* only-child nécessaire pour donner un poids suffisant à la règle CSS */
+/* only-child nÃ©cessaire pour donner un poids suffisant Ã  la rÃ¨gle CSS */
 table.dataset td[colspan]:only-child,
 table.listing td[colspan]:only-child {
 	background-color: #D6D8DA;
@@ -322,7 +322,7 @@ div#log-details { margin: 1px; padding: .2em .5em; line-height: 1.5; }
 div#log-details { background-color: #E7E5E3; }
 div#log-details span + span:last-child { float: right; margin-top: 2px; }
 
-/* Boîte de visualisation des images jointes */
+/* BoÃ®te de visualisation des images jointes */
 div.image-box {
 	overflow: auto;
 	position: fixed;
@@ -340,7 +340,7 @@ div.image-box {
 div.image-box img { display: block; max-width: 100%; max-height: 100%; }
 div.image-box img[data-type*="/svg"] { min-width: 50px; min-height: 50px; }
 
-/* Spécifique à la page des statistiques */
+/* SpÃ©cifique Ã  la page des statistiques */
 
 .stats {
 	background-color: #F0F0F0;
@@ -383,7 +383,7 @@ div#graph-box img.next {
 	left: 560px;
 }
 
-/* Transition vers l'image précédente */
+/* Transition vers l'image prÃ©cÃ©dente */
 div#graph-box.transitionToPrev img.prev {
 	opacity: 1;
 	-webkit-transform: scale(1);
@@ -419,15 +419,15 @@ form#smallbox {
 	text-align: right;
 }
 
-/* Boîte de sélection de liste */
+/* BoÃ®te de sÃ©lection de liste */
 #liste option[value="0"]:first-child,
 #admin_id option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
 
 input, select, button {
-	line-height: normal;/* Sur IE, les <button> héritent du line-height du parent */
+	line-height: normal;/* Sur IE, les <button> hÃ©ritent du line-height du parent */
 	font-family: inherit;
 }
-/* Chrome applique par défaut une marge de 2px sur ces éléments */
+/* Chrome applique par dÃ©faut une marge de 2px sur ces Ã©lÃ©ments */
 input, select, button, textarea {
 	margin: 0;
 }
@@ -455,7 +455,7 @@ button:hover {
 button:focus {
 	border-color: #003B78;
 	box-shadow: 0 0 2px #003B78;
-	outline: none;/* Chrome applique par défaut un outline sur les button:focus */
+	outline: none;/* Chrome applique par dÃ©faut un outline sur les button:focus */
 }
 button:active,
 button:disabled {
@@ -489,7 +489,7 @@ input[type="password"]:focus,
 textarea:focus { background-color: white; }
 
 input[type="text"].number { width: 40px; }
-select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil */
+select.logList { min-width: 200px; }/* logList utilisÃ© dans le panneau de profil */
 
 
 /* Barre de progression */

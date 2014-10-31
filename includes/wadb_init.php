@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -72,9 +72,9 @@ $GLOBALS['sql_schemas'] = array(
 );
 
 /**
- * Génère une chaîne DSN
+ * GÃ©nÃ¨re une chaÃ®ne DSN
  *
- * @param array $infos   Informations sur l'accès à la base de données
+ * @param array $infos   Informations sur l'accÃ¨s Ã  la base de donnÃ©es
  * @param array $options Options de connexion
  *
  * @return string
@@ -126,7 +126,7 @@ function createDSN($infos, $options = null)
 }
 
 /**
- * Décompose une chaîne DSN
+ * DÃ©compose une chaÃ®ne DSN
  *
  * @param string $dsn
  *
@@ -179,7 +179,7 @@ function parseDSN($dsn)
 
 			case 'query':
 				parse_str($value, $options);
-				// parse_str est affecté par l'option magic_quotes_gpc donc...
+				// parse_str est affectÃ© par l'option magic_quotes_gpc donc...
 				strip_magic_quotes_gpc($options);
 				break;
 		}
@@ -211,7 +211,7 @@ function parseDSN($dsn)
 }
 
 /**
- * Initialise la connexion à la base de données à partir d'une chaîne DSN
+ * Initialise la connexion Ã  la base de donnÃ©es Ã  partir d'une chaÃ®ne DSN
  *
  * @param string $dsn
  *
@@ -237,16 +237,16 @@ function WaDatabase($dsn)
 	}
 
 	//
-	// Charset non précisé dans le DSN. On tente une auto-configuration.
+	// Charset non prÃ©cisÃ© dans le DSN. On tente une auto-configuration.
 	//
 	if ($db::ENGINE != 'sqlite' && ($encoding = $db->encoding()) &&
 		preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding)
 	) {
 		//
-		// WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
-		// Si le jeu de caractères de la connexion est multi-octet, on le change
-		// arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur
-		// en cas d'échec.
+		// WorkAround : Wanewsletter ne gÃ¨re pas les codages de caractÃ¨res multi-octets.
+		// Si le jeu de caractÃ¨res de la connexion est multi-octet, on le change
+		// arbitrairement pour le latin1 et on affiche une alerte Ã  l'utilisateur
+		// en cas d'Ã©chec.
 		//
 		$newEncoding = 'latin1';
 		$db->encoding($newEncoding);
@@ -255,14 +255,14 @@ function WaDatabase($dsn)
 			global $output;
 
 			$message = <<<ERR
-Wanewsletter a détecté que le <strong>jeu de caractères</strong>
-de connexion à votre base de données est <q>$encoding</q>.
-Wanewsletter ne gère pas les codages de caractères multi-octets et a donc tenté
-de changer ce réglage en faveur du jeu de caractères <q>$newEncoding</q>, mais sans succès.<br />
-Consultez la documentation de votre base de données pour trouver le réglage adéquat
-et définir le paramètre charset dans la variable \$dsn du fichier de configuration
-(consultez le fichier config.sample.inc.php pour voir un exemple de DSN configuré
-de cette manière)."
+Wanewsletter a dÃ©tectÃ© que le <strong>jeu de caractÃ¨res</strong>
+de connexion Ã  votre base de donnÃ©es est <q>$encoding</q>.
+Wanewsletter ne gÃ¨re pas les codages de caractÃ¨res multi-octets et a donc tentÃ©
+de changer ce rÃ©glage en faveur du jeu de caractÃ¨res <q>$newEncoding</q>, mais sans succÃ¨s.<br />
+Consultez la documentation de votre base de donnÃ©es pour trouver le rÃ©glage adÃ©quat
+et dÃ©finir le paramÃ¨tre charset dans la variable \$dsn du fichier de configuration
+(consultez le fichier config.sample.inc.php pour voir un exemple de DSN configurÃ©
+de cette maniÃ¨re)."
 ERR;
 			$output->displayMessage(str_replace("\n", " ", $message));
 		}
@@ -272,9 +272,9 @@ ERR;
 }
 
 /**
- * Exécute une ou plusieurs requètes SQL sur la base de données
+ * ExÃ©cute une ou plusieurs requÃ¨tes SQL sur la base de donnÃ©es
  *
- * @param mixed $queries Une ou plusieurs requètes SQL à exécuter
+ * @param mixed $queries Une ou plusieurs requÃ¨tes SQL Ã  exÃ©cuter
  */
 function exec_queries(&$queries)
 {
@@ -294,11 +294,11 @@ function exec_queries(&$queries)
 }
 
 /**
- * SQLite a un support très limité de la commande ALTER TABLE
- * Impossible de modifier ou supprimer une colonne donnée
- * On réécrit les tables dont la structure a changé
+ * SQLite a un support trÃ¨s limitÃ© de la commande ALTER TABLE
+ * Impossible de modifier ou supprimer une colonne donnÃ©e
+ * On rÃ©Ã©crit les tables dont la structure a changÃ©
  *
- * @param string $tablename Nom de la table à recréer
+ * @param string $tablename Nom de la table Ã  recrÃ©er
  */
 function wa_sqlite_recreate_table($tablename)
 {

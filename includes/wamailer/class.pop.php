@@ -4,14 +4,14 @@
  * @version   2.5
  * @link      http://phpcodeur.net/wascripts/wamailer/
  * @author    Bobe <wascripts@phpcodeur.net>
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/licenses/lgpl.html  GNU Lesser General Public License
  */
 
 /**
  * Classe de connexion et consultation de serveur POP
  * 
- * Les sources qui m'ont bien aidées :
+ * Les sources qui m'ont bien aidÃ©es :
  * 
  * @link http://www.interpc.fr/mapage/billaud/telmail.htm
  * @link http://www.devshed.com/Server_Side/PHP/SocketProgramming/page8.html
@@ -19,9 +19,9 @@
  * @link http://abcdrfc.free.fr/
  * 
  * Toutes les commandes de connexion et de dialogue avec le serveur sont
- * détaillées dans la RFC 1939.
+ * dÃ©taillÃ©es dans la RFC 1939.
  * 
- * @link http://abcdrfc.free.fr/rfc-vf/rfc1939.html (français)
+ * @link http://abcdrfc.free.fr/rfc-vf/rfc1939.html (franÃ§ais)
  * @link http://www.rfc-editor.org/rfc/rfc1939.txt (anglais)
  * 
  * @access public
@@ -37,7 +37,7 @@ class Pop {
 	var $connect_id     = NULL; 
 	
 	/**
-	 * Nom ou IP du serveur pop à contacter
+	 * Nom ou IP du serveur pop Ã  contacter
 	 * 
 	 * @var string
 	 * @access public
@@ -45,7 +45,7 @@ class Pop {
 	var $pop_server     = ''; 
 	
 	/**
-	 * Port d'accés (en général, 110)
+	 * Port d'accÃ©s (en gÃ©nÃ©ral, 110)
 	 * 
 	 * @var integer
 	 * @access public
@@ -61,7 +61,7 @@ class Pop {
 	var $pop_user       = ''; 
 	
 	/**
-	 * Mot de passe d'accés au compte
+	 * Mot de passe d'accÃ©s au compte
 	 * 
 	 * @var string
 	 * @access public
@@ -69,7 +69,7 @@ class Pop {
 	var $pop_pass       = ''; 
 	
 	/**
-	 * Dernière réponse envoyée par le serveur
+	 * DerniÃ¨re rÃ©ponse envoyÃ©e par le serveur
 	 * 
 	 * @var string
 	 * @access private
@@ -77,7 +77,7 @@ class Pop {
 	var $reponse        = ''; 
 	
 	/**
-	 * Tableau contenant les données des emails lus
+	 * Tableau contenant les donnÃ©es des emails lus
 	 * 
 	 * @var string
 	 * @access private
@@ -85,7 +85,7 @@ class Pop {
 	var $contents       = array(); 
 	
 	/**
-	 * Durée maximale d'une tentative de connexion
+	 * DurÃ©e maximale d'une tentative de connexion
 	 * 
 	 * @var string
 	 * @access public
@@ -109,8 +109,8 @@ class Pop {
 	var $msg_error      = ''; 
 	
 	/**
-	 * Debug mode activé/désactivé. 
-	 * Si activé, le dialogue avec le serveur s'affiche à l'écran, une éventuelle erreur stoppe le script
+	 * Debug mode activÃ©/dÃ©sactivÃ©. 
+	 * Si activÃ©, le dialogue avec le serveur s'affiche Ã  l'Ã©cran, une Ã©ventuelle erreur stoppe le script
 	 * 
 	 * @var boolean
 	 * @access public
@@ -126,7 +126,7 @@ class Pop {
 	var $save_log       = FALSE;
 	
 	/**
-	 * Écraser les données présentes dans le fichier log si celui ci est présent
+	 * Ã‰craser les donnÃ©es prÃ©sentes dans le fichier log si celui ci est prÃ©sent
 	 *
 	 * @var boolean
 	 * @access public
@@ -142,10 +142,10 @@ class Pop {
 	var $filelog        = './log_pop.txt';
 	
 	/**
-	 * Si l'argument vaut TRUE, la connexion est établie automatiquement avec les paramètres par défaut 
-	 * de la classe. (On suppose qu'ils ont été préalablement remplacés par les bons paramètres)
+	 * Si l'argument vaut TRUE, la connexion est Ã©tablie automatiquement avec les paramÃ¨tres par dÃ©faut 
+	 * de la classe. (On suppose qu'ils ont Ã©tÃ© prÃ©alablement remplacÃ©s par les bons paramÃ¨tres)
 	 * 
-	 * @param boolean $auto_connect  TRUE pour établir la connexion à l'instanciation de la classe
+	 * @param boolean $auto_connect  TRUE pour Ã©tablir la connexion Ã  l'instanciation de la classe
 	 * 
 	 * @return void
 	 */
@@ -161,7 +161,7 @@ class Pop {
 	 * Etablit la connexion au serveur POP et effectue l'identification
 	 * 
 	 * @param string  $pop_server    Nom ou IP du serveur
-	 * @param integer $pop_port      Port d'accés au serveur POP
+	 * @param integer $pop_port      Port d'accÃ©s au serveur POP
 	 * @param string  $pop_user      Nom d'utilisateur du compte
 	 * @param string  $pop_pass      Mot de passe du compte
 	 * 
@@ -211,9 +211,9 @@ class Pop {
 	}
 	
 	/**
-	 * Envoit les données au serveur
+	 * Envoit les donnÃ©es au serveur
 	 * 
-	 * @param string $input  Données à envoyer
+	 * @param string $input  DonnÃ©es Ã  envoyer
 	 * 
 	 * @access private
 	 * @return void
@@ -232,7 +232,7 @@ class Pop {
 	}
 	
 	/**
-	 * Récupère la réponse du serveur
+	 * RÃ©cupÃ¨re la rÃ©ponse du serveur
 	 * 
 	 * @access private
 	 * @return boolean
@@ -262,7 +262,7 @@ class Pop {
 	
 	/**
 	 * Commande STAT
-	 * Renvoie le nombre de messages présent et la taille totale (en octets)
+	 * Renvoie le nombre de messages prÃ©sent et la taille totale (en octets)
 	 * 
 	 * @access public
 	 * @return array
@@ -282,10 +282,10 @@ class Pop {
 	
 	/**
 	 * Commande LIST
-	 * Renvoie un tableau avec leur numéro en index et leur taille pour valeur
-	 * Si un numéro de message est donné, sa taille sera renvoyée
+	 * Renvoie un tableau avec leur numÃ©ro en index et leur taille pour valeur
+	 * Si un numÃ©ro de message est donnÃ©, sa taille sera renvoyÃ©e
 	 * 
-	 * @param integer $num  Numéro du message
+	 * @param integer $num  NumÃ©ro du message
 	 * 
 	 * @access public
 	 * @return mixed
@@ -337,10 +337,10 @@ class Pop {
 	
 	/**
 	 * Commande RETR/TOP
-	 * Renvoie un tableau avec leur numéro en index et leur taille pour valeur
+	 * Renvoie un tableau avec leur numÃ©ro en index et leur taille pour valeur
 	 * 
-	 * @param integer $num       Numéro du message
-	 * @param integer $max_line  Nombre maximal de ligne à renvoyer (par défaut, tout le message)
+	 * @param integer $num       NumÃ©ro du message
+	 * @param integer $max_line  Nombre maximal de ligne Ã  renvoyer (par dÃ©faut, tout le message)
 	 * 
 	 * @access public
 	 * @return boolean
@@ -391,8 +391,8 @@ class Pop {
 	}
 	
 	/**
-	 * Récupère les entêtes de l'email spécifié par $num et renvoi un tableau avec le 
-	 * nom des entêtes et leur valeur
+	 * RÃ©cupÃ¨re les entÃªtes de l'email spÃ©cifiÃ© par $num et renvoi un tableau avec le 
+	 * nom des entÃªtes et leur valeur
 	 * 
 	 * @param string $str
 	 * 
@@ -448,7 +448,7 @@ class Pop {
 	}
 	
 	/**
-	 * Décode l'entête donné s'il est encodé
+	 * DÃ©code l'entÃªte donnÃ© s'il est encodÃ©
 	 * 
 	 * @param string $str
 	 * 
@@ -458,8 +458,8 @@ class Pop {
 	function decode_mime_header($str)
 	{
 		//
-		// On vérifie si l'entête est encodé en base64 ou en quoted-printable, et on
-		// le décode si besoin est.
+		// On vÃ©rifie si l'entÃªte est encodÃ© en base64 ou en quoted-printable, et on
+		// le dÃ©code si besoin est.
 		//
 		$total = preg_match_all('/=\?[^?]+\?(Q|q|B|b)\?([^?]+)\?\=/', $str, $matches);
 		
@@ -482,11 +482,11 @@ class Pop {
 	}
 	
 	/**
-	 * Parse l'email demandé et renvoie des informations sur les fichiers joints éventuels
-	 * Retourne un tableau contenant les données (nom, encodage, données du fichier ..) sur les fichiers joints
-	 * ou false si aucun fichier joint n'est trouvé ou que l'email correspondant à $num n'existe pas.
+	 * Parse l'email demandÃ© et renvoie des informations sur les fichiers joints Ã©ventuels
+	 * Retourne un tableau contenant les donnÃ©es (nom, encodage, donnÃ©es du fichier ..) sur les fichiers joints
+	 * ou false si aucun fichier joint n'est trouvÃ© ou que l'email correspondant Ã  $num n'existe pas.
 	 * 
-	 * @param integer $num  Numéro de l'email à parser
+	 * @param integer $num  NumÃ©ro de l'email Ã  parser
 	 * 
 	 * @access public
 	 * @status experimental
@@ -506,7 +506,7 @@ class Pop {
 		$message = $this->contents[$num]['message'];
 		
 		//
-		// On vérifie si le message comporte plusieurs parties
+		// On vÃ©rifie si le message comporte plusieurs parties
 		//
 		if( !isset($headers['content-type']) || !stristr($headers['content-type'], 'multipart') )
 		{
@@ -569,9 +569,9 @@ class Pop {
 	
 	/**
 	 * Commande DELE
-	 * Demande au serveur d'effacer le message correspondant au numéro donné
+	 * Demande au serveur d'effacer le message correspondant au numÃ©ro donnÃ©
 	 * 
-	 * @param integer $num  Numéro du message
+	 * @param integer $num  NumÃ©ro du message
 	 * 
 	 * @access public
 	 * @return boolean
@@ -585,7 +585,7 @@ class Pop {
 	
 	/**
 	 * Commande RSET
-	 * Annule les dernières commandes (effacement ..)
+	 * Annule les derniÃ¨res commandes (effacement ..)
 	 * 
 	 * @access public
 	 * @return boolean
@@ -631,7 +631,7 @@ class Pop {
 	}
 	
 	/**
-	 * @param string $msg_error  Le message d'erreur, à afficher si mode debug
+	 * @param string $msg_error  Le message d'erreur, Ã  afficher si mode debug
 	 * 
 	 * @access private
 	 * @return void

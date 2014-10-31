@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -15,7 +15,7 @@ require WA_ROOTDIR . '/includes/functions.validate.php';
 include WA_ROOTDIR . '/includes/tags.inc.php';
 
 //
-// Initialisation de la connexion à la base de données et récupération de la configuration
+// Initialisation de la connexion Ã  la base de donnÃ©es et rÃ©cupÃ©ration de la configuration
 //
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
@@ -35,7 +35,7 @@ function check_login($email, $regkey = null)
 	global $db, $nl_config, $other_tags;
 
 	//
-	// Récupération des champs des tags personnalisés
+	// RÃ©cupÃ©ration des champs des tags personnalisÃ©s
 	//
 	if (count($other_tags) > 0) {
 		$fields_str = '';
@@ -91,8 +91,8 @@ function check_login($email, $regkey = null)
 		}
 
 		if (!is_null($regkey) && strcmp($abodata['passwd'], $regkey) != 0 && !$regkey_matched) {
-			// Le mot de passe rentré ne correspond ni au mot de passe de l'abonné,
-			// ni à l'une de ses clés d'enregistrement
+			// Le mot de passe rentrÃ© ne correspond ni au mot de passe de l'abonnÃ©,
+			// ni Ã  l'une de ses clÃ©s d'enregistrement
 			return false;
 		}
 
@@ -107,7 +107,7 @@ $mode  = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
 $email = (!empty($_REQUEST['email'])) ? trim($_REQUEST['email']) : '';
 
 //
-// Vérification de l'authentification
+// VÃ©rification de l'authentification
 //
 if ($mode != 'login' && $mode != 'sendkey') {
 	if (!empty($_COOKIE[$nl_config['cookie_name'] . '_abo'])) {
@@ -135,7 +135,7 @@ if ($mode != 'login' && $mode != 'sendkey') {
 	}
 }
 //
-// Fin de la vérification
+// Fin de la vÃ©rification
 //
 
 $language = ($mode == 'login' || $mode == 'sendkey') ? $nl_config['language'] : $abodata['language'];
@@ -456,7 +456,7 @@ switch ($mode) {
 				$format   = $abodata['listes'][$row['liste_id']]['format'];
 
 				//
-				// On traite les données de la newsletter à envoyer
+				// On traite les donnÃ©es de la newsletter Ã  envoyer
 				//
 				if (preg_match('/[\x80-\x9F]/', $row['log_subject']) ||
 					preg_match('/[\x80-\x9F]/', $row['log_body_text']) ||
@@ -495,7 +495,7 @@ switch ($mode) {
 				}
 
 				//
-				// Ajout du lien de désinscription, selon le format utilisé
+				// Ajout du lien de dÃ©sinscription, selon le format utilisÃ©
 				//
 				if ($listdata['use_cron']) {
 					$liste_email = (!empty($listdata['liste_alias']))
@@ -523,8 +523,8 @@ switch ($mode) {
 				$mailer->set_message($body);
 
 				//
-				// On s'occupe maintenant des fichiers joints ou incorporés
-				// Si les fichiers sont stockés sur un serveur ftp, on les rapatrie le temps du flot d'envoi
+				// On s'occupe maintenant des fichiers joints ou incorporÃ©s
+				// Si les fichiers sont stockÃ©s sur un serveur ftp, on les rapatrie le temps du flot d'envoi
 				//
 				if (isset($files[$row['log_id']]) && count($files[$row['log_id']]) > 0) {
 					$total_files = count($files[$row['log_id']]);
@@ -569,7 +569,7 @@ switch ($mode) {
 				}
 
 				//
-				// Traitement des tags et tags personnalisés
+				// Traitement des tags et tags personnalisÃ©s
 				//
 				$tags_replace = array();
 

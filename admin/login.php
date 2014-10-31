@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -98,7 +98,7 @@ if ($mode == 'sendpass') {
 }
 
 //
-// Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
+// Si l'utilisateur n'est pas connectÃ©, on rÃ©cupÃ¨re les donnÃ©es et on dÃ©marre une nouvelle session
 //
 else if (isset($_POST['submit']) && !$session->is_logged_in) {
 	$login     = (!empty($_POST['login'])) ? trim($_POST['login']) : '';
@@ -114,7 +114,7 @@ else if (isset($_POST['submit']) && !$session->is_logged_in) {
 }
 
 //
-// Déconnexion de l'administration
+// DÃ©connexion de l'administration
 //
 else if ($mode == 'logout') {
 	if ($session->is_logged_in) {
@@ -126,8 +126,8 @@ else if ($mode == 'logout') {
 }
 
 //
-// L'utilisateur est connecté ?
-// Dans ce cas, on le redirige vers la page demandée, ou vers l'accueil de l'administration par défaut
+// L'utilisateur est connectÃ© ?
+// Dans ce cas, on le redirige vers la page demandÃ©e, ou vers l'accueil de l'administration par dÃ©faut
 //
 if ($session->is_logged_in) {
 	http_redirect($redirect);

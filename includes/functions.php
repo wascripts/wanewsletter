@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -13,7 +13,7 @@ define('FUNCTIONS_INC', true);
 
 /**
  * Fonction de chargement automatique de classes.
- * Implémentation à la barbare sans égard pour PSR-0. On verra plus tard pour
+ * ImplÃ©mentation Ã  la barbare sans Ã©gard pour PSR-0. On verra plus tard pour
  * faire quelque chose de plus propre...
  *
  * @param string $classname Nom de la classe
@@ -30,12 +30,12 @@ function wan_autoloader($classname)
 	$classname = strtolower($classname);
 
 	if (!isset($catalog[$classname])) {
-		// Couches d'abstraction pour les bases de données
+		// Couches d'abstraction pour les bases de donnÃ©es
 		// Wadb ou Wadb_{driver}
 		if (strncmp($classname, 'wadb', 4) === 0) {
 			$filename = sprintf('%s/includes/sql/%s.php',
 				$rootdir,
-				// Si on a une classe Wadb_{driver}, on retire le préfixe
+				// Si on a une classe Wadb_{driver}, on retire le prÃ©fixe
 				($classname == 'wadb') ? $classname : substr($classname, 5)
 			);
 		}
@@ -58,10 +58,10 @@ function wan_autoloader($classname)
 }
 
 /**
- * Vérifie que les numéros de version des tables dans le fichier constantes.php
+ * VÃ©rifie que les numÃ©ros de version des tables dans le fichier constantes.php
  * et dans la table de configuration du script sont synchro
  *
- * @param integer $version Version présente dans la base de données (clé 'db_version')
+ * @param integer $version Version prÃ©sente dans la base de donnÃ©es (clÃ© 'db_version')
  *
  * @return boolean
  */
@@ -71,9 +71,9 @@ function check_db_version($version)
 }
 
 /**
- * Vérifie la présence d'une mise à jour
+ * VÃ©rifie la prÃ©sence d'une mise Ã  jour
  *
- * @param boolean $complete true pour vérifier aussi l'URL distante
+ * @param boolean $complete true pour vÃ©rifier aussi l'URL distante
  *
  * @return boolean|integer
  */
@@ -105,7 +105,7 @@ function wa_check_update($complete = false)
 }
 
 /**
- * Retourne la configuration du script stockée dans la base de données
+ * Retourne la configuration du script stockÃ©e dans la base de donnÃ©es
  *
  * @return array
  */
@@ -128,7 +128,7 @@ function wa_get_config()
 	}
 	// Wanewsletter < 2.4-beta2
 	else {
-		trigger_error("La table de configuration du script est obsolète. Mise à jour requise", E_USER_WARNING);
+		trigger_error("La table de configuration du script est obsolÃ¨te. Mise Ã  jour requise", E_USER_WARNING);
 		$config = $row;
 	}
 
@@ -136,12 +136,12 @@ function wa_get_config()
 }
 
 /**
- * Sauvegarde les clés de configuration fournies dans la base de données
+ * Sauvegarde les clÃ©s de configuration fournies dans la base de donnÃ©es
  *
- * @param mixed $config  Soit le nom de l'option de configuration à mettre à jour,
+ * @param mixed $config  Soit le nom de l'option de configuration Ã  mettre Ã  jour,
  *                       soit un tableau d'options
- * @param string $value  Si le premier argument est une chaîne, utilisé comme
- *                       valeur pour l'option ciblée
+ * @param string $value  Si le premier argument est une chaÃ®ne, utilisÃ© comme
+ *                       valeur pour l'option ciblÃ©e
  */
 function wa_update_config($config, $value = null)
 {
@@ -162,10 +162,10 @@ function wa_update_config($config, $value = null)
 }
 
 /**
- * Génération d'une chaîne aléatoire
+ * GÃ©nÃ©ration d'une chaÃ®ne alÃ©atoire
  *
- * @param integer $length       Nombre de caractères
- * @param integer $specialChars Ajout de caractères spéciaux
+ * @param integer $length       Nombre de caractÃ¨res
+ * @param integer $specialChars Ajout de caractÃ¨res spÃ©ciaux
  *
  * @return string
  */
@@ -197,7 +197,7 @@ function generate_key($length = 32, $specialChars = false)
 }
 
 /**
- * Indique si on est sur une connexion sécurisée
+ * Indique si on est sur une connexion sÃ©curisÃ©e
  *
  * @return boolean
  */
@@ -209,8 +209,8 @@ function wan_ssl_connection()
 /**
  * Construction d'une url
  *
- * @param string  $url     Url à compléter
- * @param array   $params  Paramètres à ajouter en fin d'url
+ * @param string  $url     Url Ã  complÃ©ter
+ * @param array   $params  ParamÃ¨tres Ã  ajouter en fin d'url
  * @param boolean $session Ajout de l'ID de session PHP s'il y a lieu
  *
  * @return string
@@ -263,7 +263,7 @@ function wan_build_url($url, $params = array(), $session = false)
 	$cur_params = array();
 	if ($query != '') {
 		parse_str($query, $cur_params);
-		// parse_str est affecté par l'option magic_quotes_gpc donc...
+		// parse_str est affectÃ© par l'option magic_quotes_gpc donc...
 		strip_magic_quotes_gpc($cur_params);
 	}
 
@@ -281,10 +281,10 @@ function wan_build_url($url, $params = array(), $session = false)
 }
 
 /**
- * Version adaptée de la fonction http_redirect() de pecl_http
+ * Version adaptÃ©e de la fonction http_redirect() de pecl_http
  *
  * @param string  $url     Url de redirection
- * @param array   $params  Paramètres à ajouter en fin d'url
+ * @param array   $params  ParamÃ¨tres Ã  ajouter en fin d'url
  * @param boolean $session Ajout de l'ID de session PHP s'il y a lieu
  * @param integer $status  Code de redirection HTTP
  */
@@ -310,9 +310,9 @@ function http_redirect($url, $params = array(), $session = false, $status = 0)
 }
 
 /**
- * Initialisation des préférences et du moteur de templates
+ * Initialisation des prÃ©fÃ©rences et du moteur de templates
  *
- * @param array $admindata Données utilisateur
+ * @param array $admindata DonnÃ©es utilisateur
  */
 function load_settings($admindata = array())
 {
@@ -374,12 +374,12 @@ function load_settings($admindata = array())
 }
 
 /**
- * Gestionnaire d'erreur personnalisé du script
+ * Gestionnaire d'erreur personnalisÃ© du script
  *
  * @param integer $errno   Code de l'erreur
  * @param string  $errstr  Texte proprement dit de l'erreur
- * @param string  $errfile Fichier où s'est produit l'erreur
- * @param integer $errline Numéro de la ligne
+ * @param string  $errfile Fichier oÃ¹ s'est produit l'erreur
+ * @param integer $errline NumÃ©ro de la ligne
  *
  * @return boolean
  */
@@ -393,7 +393,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	$debug_level = wan_get_debug_level();
 
 	//
-	// On affiche pas les erreurs non prises en compte dans le réglage du
+	// On affiche pas les erreurs non prises en compte dans le rÃ©glage du
 	// error_reporting si error_reporting vaut 0, sauf si DEBUG_MODE est au max
 	//
 	if (!$fatal && ($debug_level == DEBUG_LEVEL_QUIET ||
@@ -403,11 +403,11 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	}
 
 	//
-	// On s'assure que si des erreurs surviennent au sein même du gestionnaire
-	// d'erreurs alors que l'opérateur @ a été utilisé en amont, elles seront
-	// bien traitées correctement, soit par le gestionnaire d'erreurs personnalisé,
+	// On s'assure que si des erreurs surviennent au sein mÃªme du gestionnaire
+	// d'erreurs alors que l'opÃ©rateur @ a Ã©tÃ© utilisÃ© en amont, elles seront
+	// bien traitÃ©es correctement, soit par le gestionnaire d'erreurs personnalisÃ©,
 	// soit par le gestionnaire d'erreurs natif de PHP
-	// (dans le cas d'erreurs fatales par exemple <= C'est du vécu :().
+	// (dans le cas d'erreurs fatales par exemple <= C'est du vÃ©cu :().
 	//
 	error_reporting($GLOBALS['default_error_reporting']);
 
@@ -437,9 +437,9 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 }
 
 /**
- * Gestionnaire d'erreur personnalisé du script
+ * Gestionnaire d'erreur personnalisÃ© du script
  *
- * @param Exception $e Exception "attrapée" par le gestionnaire
+ * @param Exception $e Exception "attrapÃ©e" par le gestionnaire
  */
 function wan_exception_handler($e)
 {
@@ -450,7 +450,7 @@ function wan_exception_handler($e)
 /**
  * Formatage du message d'erreurs
  *
- * @param Exception $error Exception décrivant l'erreur
+ * @param Exception $error Exception dÃ©crivant l'erreur
  *
  * @return string
  */
@@ -465,8 +465,8 @@ function wan_format_error($error)
 	$backtrace = $error->getTrace();
 
 	if ($error instanceof WanError) {
-		// Cas spécial. L'exception personnalisée a été créé dans wan_error_handler()
-		// et contient donc l'appel à wan_error_handler() elle-même. On corrige.
+		// Cas spÃ©cial. L'exception personnalisÃ©e a Ã©tÃ© crÃ©Ã© dans wan_error_handler()
+		// et contient donc l'appel Ã  wan_error_handler() elle-mÃªme. On corrige.
 		array_shift($backtrace);
 	}
 
@@ -488,7 +488,7 @@ function wan_format_error($error)
 	}
 
 	if (wan_get_debug_level() == DEBUG_LEVEL_QUIET) {
-		// Si on est en mode de non-débogage, on a forcément attrapé une erreur
+		// Si on est en mode de non-dÃ©bogage, on a forcÃ©ment attrapÃ© une erreur
 		// critique pour arriver ici.
 		$message  = $lang['Message']['Critical_error'];
 	}
@@ -542,7 +542,7 @@ function wan_format_error($error)
 /**
  * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
  *
- * @param Exception $error      Exception décrivant l'erreur
+ * @param Exception $error      Exception dÃ©crivant l'erreur
  * @param boolean   $simpleHTML Si true, affichage simple dans un paragraphe
  */
 function wan_display_error($error, $simpleHTML = false)
@@ -565,7 +565,7 @@ function wan_display_error($error, $simpleHTML = false)
 
 		$message = htmlspecialchars_decode($message);
 
-		// Au cas où le terminal utilise l'encodage utf-8
+		// Au cas oÃ¹ le terminal utilise l'encodage utf-8
 		if (preg_match('/\.UTF-?8/i', getenv('LANG'))) {
 			$message = wan_utf8_encode($message);
 		}
@@ -607,10 +607,10 @@ BASIC;
 }
 
 /**
- * Si elle est appelée avec un argument, ajoute l'entrée dans le journal,
+ * Si elle est appelÃ©e avec un argument, ajoute l'entrÃ©e dans le journal,
  * sinon, renvoie le journal.
  *
- * @param mixed $entry Peut être un objet Exception, ou une simple chaîne
+ * @param mixed $entry Peut Ãªtre un objet Exception, ou une simple chaÃ®ne
  *
  * @return array
  */
@@ -638,7 +638,7 @@ function wanlog($entry = null)
 }
 
 /**
- * Même fonctionnement que la fonction native error_get_last()
+ * MÃªme fonctionnement que la fonction native error_get_last()
  *
  * @return array
  */
@@ -663,9 +663,9 @@ function wan_error_get_last()
 }
 
 /**
- * @param mixed   $var     Variable à afficher
- * @param boolean $exit    True pour terminer l'exécution du script
- * @param boolean $verbose True pour utiliser var_dump() (détails sur le contenu de la variable)
+ * @param mixed   $var     Variable Ã  afficher
+ * @param boolean $exit    True pour terminer l'exÃ©cution du script
+ * @param boolean $verbose True pour utiliser var_dump() (dÃ©tails sur le contenu de la variable)
  */
 function plain_error($var, $exit = true, $verbose = false)
 {
@@ -694,8 +694,8 @@ function plain_error($var, $exit = true, $verbose = false)
  * Fonction d'affichage par page.
  *
  * @param string  $url           Adresse vers laquelle doivent pointer les liens de navigation
- * @param integer $total_item    Nombre total d'éléments
- * @param integer $item_per_page Nombre d'éléments par page
+ * @param integer $total_item    Nombre total d'Ã©lÃ©ments
+ * @param integer $item_per_page Nombre d'Ã©lÃ©ments par page
  * @param integer $page_id       Identifiant de la page en cours
  *
  * @return string
@@ -706,13 +706,13 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 
 	$total_pages = ceil($total_item / $item_per_page);
 
-	// premier caractère de l'url au moins en position 1
-	// on place un espace à la position 0 de la chaîne
+	// premier caractÃ¨re de l'url au moins en position 1
+	// on place un espace Ã  la position 0 de la chaÃ®ne
 	$url = ' ' . $url;
 
 	$url .= (strpos($url, '?')) ? '&amp;' : '?';
 
-	// suppression de l'espace précédemment ajouté
+	// suppression de l'espace prÃ©cÃ©demment ajoutÃ©
 	$url = substr($url, 1);
 
 	if ($total_pages == 1) {
@@ -779,8 +779,8 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 /**
  * Fonction de renvoi de date selon la langue
  *
- * @param string  $dateformat Format demandé
- * @param integer $timestamp  Timestamp unix à convertir
+ * @param string  $dateformat Format demandÃ©
+ * @param integer $timestamp  Timestamp unix Ã  convertir
  *
  * @return string
  */
@@ -803,13 +803,13 @@ function convert_time($dateformat, $timestamp)
 }
 
 /**
- * Fonction de purge de la table des abonnés
- * Retourne le nombre d'entrées supprimées
- * Fonction récursive
+ * Fonction de purge de la table des abonnÃ©s
+ * Retourne le nombre d'entrÃ©es supprimÃ©es
+ * Fonction rÃ©cursive
  *
- * @param integer $liste_id       Liste concernée
- * @param integer $limitevalidate Limite de validité pour confirmer une inscription
- * @param integer $purge_freq     Fréquence des purges
+ * @param integer $liste_id       Liste concernÃ©e
+ * @param integer $limitevalidate Limite de validitÃ© pour confirmer une inscription
+ * @param integer $purge_freq     FrÃ©quence des purges
  *
  * @return integer
  */
@@ -884,10 +884,10 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 }
 
 /**
- * Annule l'effet produit par l'option de configuration magic_quotes_gpc à On
- * Fonction récursive
+ * Annule l'effet produit par l'option de configuration magic_quotes_gpc Ã  On
+ * Fonction rÃ©cursive
  *
- * @param array $data Tableau des données
+ * @param array $data Tableau des donnÃ©es
  */
 function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 {
@@ -913,7 +913,7 @@ function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 }
 
 /**
- * @param string $relative_path Chemin relatif à résoudre
+ * @param string $relative_path Chemin relatif Ã  rÃ©soudre
  *
  * @return string
  */
@@ -927,7 +927,7 @@ function wa_realpath($relative_path)
 }
 
 /**
- * Pour limiter la longueur d'une chaine de caractère à afficher
+ * Pour limiter la longueur d'une chaine de caractÃ¨re Ã  afficher
  *
  * @param string  $str
  * @param integer $len
@@ -951,7 +951,7 @@ function cut_str($str, $len)
 
 /**
  * Convertit les liens dans un texte en lien html
- * Importé de WAgoldBook 2.0.x et précédemment importé de phpBB 2.0.x
+ * ImportÃ© de WAgoldBook 2.0.x et prÃ©cÃ©demment importÃ© de phpBB 2.0.x
  *
  * @param string $str
  *
@@ -985,7 +985,7 @@ function config_status($name)
  * Retourne la valeur d'une directive de configuration
  *
  * @param string  $name         Nom de la directive
- * @param boolean $need_boolean Nécessaire pour obtenir un booléen en retour (pour les directives on/off)
+ * @param boolean $need_boolean NÃ©cessaire pour obtenir un boolÃ©en en retour (pour les directives on/off)
  *
  * @return boolean|string
  */
@@ -1004,7 +1004,7 @@ function config_value($name, $need_boolean = false)
 }
 
 /**
- * Retourne l'information serveur demandée
+ * Retourne l'information serveur demandÃ©e
  *
  * @param string $name Nom de l'information
  *
@@ -1018,9 +1018,9 @@ function server_info($name)
 }
 
 /**
- * Fonctions à utiliser lors des longues boucles (backup, envois)
+ * Fonctions Ã  utiliser lors des longues boucles (backup, envois)
  * qui peuvent provoquer un time out du navigateur client
- * Inspiré d'un code équivalent dans phpMyAdmin 2.5.0 (libraries/build_dump.lib.php précisément)
+ * InspirÃ© d'un code Ã©quivalent dans phpMyAdmin 2.5.0 (libraries/build_dump.lib.php prÃ©cisÃ©ment)
  *
  * @param boolean $in_loop True si on est dans la boucle, false pour initialiser $time
  */
@@ -1042,11 +1042,11 @@ function fake_header($in_loop)
 }
 
 /**
- * Effectue une translitération sur les caractères interdits provenant de Windows-1252
- * ou les transforme en références d'entité numérique selon que la chaîne est du texte brut ou du HTML
+ * Effectue une translitÃ©ration sur les caractÃ¨res interdits provenant de Windows-1252
+ * ou les transforme en rÃ©fÃ©rences d'entitÃ© numÃ©rique selon que la chaÃ®ne est du texte brut ou du HTML
  *
- * @param string $data      Chaîne à modifier
- * @param string $translite Active ou non la translitération
+ * @param string $data      ChaÃ®ne Ã  modifier
+ * @param string $translite Active ou non la translitÃ©ration
  *
  * @return string
  */
@@ -1064,12 +1064,12 @@ function purge_latin1($data, $translite = false)
 }
 
 /**
- * Détecte si une chaîne est encodée ou non en UTF-8
+ * DÃ©tecte si une chaÃ®ne est encodÃ©e ou non en UTF-8
  *
- * @param string $string Chaîne à modifier
+ * @param string $string ChaÃ®ne Ã  modifier
  *
  * @link   http://w3.org/International/questions/qa-forms-utf-8.html
- * @see    http://bugs.php.net/bug.php?id=37793 (segfault qui oblige à tronçonner la chaîne)
+ * @see    http://bugs.php.net/bug.php?id=37793 (segfault qui oblige Ã  tronÃ§onner la chaÃ®ne)
  * @return boolean
  */
 function is_utf8($string)
@@ -1089,7 +1089,7 @@ function is_utf8($string)
 }
 
 /**
- * Encode une chaîne en UTF-8
+ * Encode une chaÃ®ne en UTF-8
  *
  * @param string $data
  *
@@ -1105,7 +1105,7 @@ function wan_utf8_encode($data)
 }
 
 /**
- * Décode une chaîne en UTF-8
+ * DÃ©code une chaÃ®ne en UTF-8
  *
  * @param string $data
  *
@@ -1121,7 +1121,7 @@ function wan_utf8_decode($data)
 }
 
 /**
- * Détection d'encodage et conversion vers $charset
+ * DÃ©tection d'encodage et conversion vers $charset
  *
  * @param string $data
  *
@@ -1155,11 +1155,11 @@ function convert_encoding($data, $charset, $check_bom = true)
 }
 
 /**
- * Récupère un contenu local ou via HTTP et le retourne, ainsi que le jeu de
- * caractère et le type de média de la chaîne, si disponible.
+ * RÃ©cupÃ¨re un contenu local ou via HTTP et le retourne, ainsi que le jeu de
+ * caractÃ¨re et le type de mÃ©dia de la chaÃ®ne, si disponible.
  *
- * @param string $URL    L'URL à appeller
- * @param string $errstr Conteneur pour un éventuel message d'erreur
+ * @param string $URL    L'URL Ã  appeller
+ * @param string $errstr Conteneur pour un Ã©ventuel message d'erreur
  *
  * @return boolean|array
  */
@@ -1194,11 +1194,11 @@ function wan_get_contents($URL, &$errstr)
 }
 
 /**
- * Récupère un contenu via HTTP et le retourne, ainsi que le jeu de
- * caractère et le type de média de la chaîne, si disponible.
+ * RÃ©cupÃ¨re un contenu via HTTP et le retourne, ainsi que le jeu de
+ * caractÃ¨re et le type de mÃ©dia de la chaÃ®ne, si disponible.
  *
- * @param string $URL    L'URL à appeller
- * @param string $errstr Conteneur pour un éventuel message d'erreur
+ * @param string $URL    L'URL Ã  appeller
+ * @param string $errstr Conteneur pour un Ã©ventuel message d'erreur
  *
  * @return boolean|array
  */
@@ -1246,7 +1246,7 @@ function http_get_contents($URL, &$errstr)
 		return false;
 	}
 
-	// Entêtes
+	// EntÃªtes
 	while (!feof($fs)) {
 		$tmp = fgets($fs, 1024);
 
@@ -1298,8 +1298,8 @@ function http_get_contents($URL, &$errstr)
 }
 
 /**
- * Formate un nombre en fonction de paramètres de langue (idem que number_format() mais on ne spécifie
- * que deux arguments max, les deux autres sont récupérés dans $lang)
+ * Formate un nombre en fonction de paramÃ¨tres de langue (idem que number_format() mais on ne spÃ©cifie
+ * que deux arguments max, les deux autres sont rÃ©cupÃ©rÃ©s dans $lang)
  *
  * @param float   $number
  * @param integer $decimals
@@ -1317,7 +1317,7 @@ function wa_number_format($number, $decimals = 2)
 }
 
 /**
- * Retourne le nombre de références 'cid' (appel d'objet dans un email)
+ * Retourne le nombre de rÃ©fÃ©rences 'cid' (appel d'objet dans un email)
  *
  * @param string $body
  * @param array  $refs
@@ -1333,7 +1333,7 @@ function hasCidReferences($body, &$refs)
 }
 
 /**
- * Retourne une taille en octet formatée pour être lisible par un humain
+ * Retourne une taille en octet formatÃ©e pour Ãªtre lisible par un humain
  *
  * @param string $size
  *
@@ -1456,7 +1456,7 @@ $CONVMAP = array(
 
 /**
  * Idem que la fonction htmlspecialchars() native, mais avec le jeu de
- * caractère ISO-8859-1 par défaut.
+ * caractÃ¨re ISO-8859-1 par dÃ©faut.
  *
  * @param string $string
  * @param int    $flags
@@ -1476,7 +1476,7 @@ function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', 
 
 /**
  * Idem que la fonction html_entity_decode() native, mais avec le jeu de
- * caractère ISO-8859-1 par défaut.
+ * caractÃ¨re ISO-8859-1 par dÃ©faut.
  *
  * @param string $string
  * @param int    $flags
@@ -1494,9 +1494,9 @@ function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1'
 }
 
 /**
- * Vérifie si l'utilisateur concerné est administrateur
+ * VÃ©rifie si l'utilisateur concernÃ© est administrateur
  *
- * @param array $admin Tableau des données de l'utilisateur
+ * @param array $admin Tableau des donnÃ©es de l'utilisateur
  *
  * @return boolean
  */
@@ -1506,8 +1506,8 @@ function wan_is_admin($admin)
 }
 
 /**
- * Retourne le niveau de débogage, dépendant de la valeur de la constante DEBUG_MODE
- * ainsi que de la clé de configuration 'debug_level'.
+ * Retourne le niveau de dÃ©bogage, dÃ©pendant de la valeur de la constante DEBUG_MODE
+ * ainsi que de la clÃ© de configuration 'debug_level'.
  *
  * @return integer
  */

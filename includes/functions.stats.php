@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -47,10 +47,10 @@ function convertToRGB($hexColor)
 }
 
 /**
- * Calcule les coordonnées du rayon
+ * Calcule les coordonnÃ©es du rayon
  *
- * @param float   $degre    Degré
- * @param integer $diametre Diamètre du cercle
+ * @param float   $degre    DegrÃ©
+ * @param integer $diametre DiamÃ¨tre du cercle
  *
  * @return array
  */
@@ -63,11 +63,11 @@ function xy_arc($degre, $diametre)
 }
 
 /**
- * Créé le fichier de statistiques pour le mois et l'année donnés
+ * CrÃ©Ã© le fichier de statistiques pour le mois et l'annÃ©e donnÃ©s
  *
- * @param array   $listdata Données de la liste concernée
+ * @param array   $listdata DonnÃ©es de la liste concernÃ©e
  * @param integer $month    Chiffre du mois
- * @param integer $year     Chiffre de l'année
+ * @param integer $year     Chiffre de l'annÃ©e
  *
  * @return boolean
  */
@@ -117,9 +117,9 @@ function create_stats($listdata, $month, $year)
 /**
  * update_stats()
  *
- * Mise à jour des données pour les statistiques
+ * Mise Ã  jour des donnÃ©es pour les statistiques
  *
- * @param array $listdata  Données de la liste concernée
+ * @param array $listdata  DonnÃ©es de la liste concernÃ©e
  *
  * @return boolean
  */
@@ -157,9 +157,9 @@ function update_stats($listdata)
 }
 
 /**
- * Suppression/déplacement de stats (lors de la suppression d'une liste)
+ * Suppression/dÃ©placement de stats (lors de la suppression d'une liste)
  *
- * @param integer $liste_from Id de la liste dont on supprime/déplace les stats
+ * @param integer $liste_from Id de la liste dont on supprime/dÃ©place les stats
  * @param mixed   $liste_to   Id de la liste de destination ou boolean (dans ce cas, on supprime)
  *
  * @return boolean
@@ -217,7 +217,7 @@ function remove_stats($liste_from, $liste_to = false)
 }
 
 /**
- * Effectue les traitements adéquats sur la chaine et retourne un tableau
+ * Effectue les traitements adÃ©quats sur la chaine et retourne un tableau
  *
  * @param string $contents Contenu du fichier des statistiques
  *
@@ -231,7 +231,7 @@ function clean_stats($contents)
 }
 
 /**
- * Fonction centrale dédiée au formatage des noms de fichiers de statistiques de Wanewsletter
+ * Fonction centrale dÃ©diÃ©e au formatage des noms de fichiers de statistiques de Wanewsletter
  *
  * @param string  $date     Sous forme year_month (eg: 2005_April)
  * @param integer $liste_id

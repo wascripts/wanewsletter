@@ -4,14 +4,14 @@
  * @version   2.5
  * @link      http://phpcodeur.net/wascripts/wamailer/
  * @author    Bobe <wascripts@phpcodeur.net>
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/licenses/lgpl.html  GNU Lesser General Public License
  */
 
 /**
  * Classe de connexion et d'envois d'emails via un serveur SMTP
  * 
- * Les sources qui m'ont bien aidées :
+ * Les sources qui m'ont bien aidÃ©es :
  * 
  * @link http://www.rfc-editor.org/
  * @link http://strasbourg.ort.asso.fr/examen2000/np.html#SMTP
@@ -20,11 +20,11 @@
  * @link http://www.interpc.fr/mapage/billaud/telmail.htm
  * 
  * Toutes les commandes de connexion et de dialogue avec le serveur sont
- * détaillées dans la RFC 821.
+ * dÃ©taillÃ©es dans la RFC 821.
  * 
- * Les commandes d'authentification au serveur sont détaillées dans la RFC 2554
+ * Les commandes d'authentification au serveur sont dÃ©taillÃ©es dans la RFC 2554
  * 
- * @link http://abcdrfc.free.fr/rfc-vf/rfc821.html (français)
+ * @link http://abcdrfc.free.fr/rfc-vf/rfc821.html (franÃ§ais)
  * @link http://www.rfc-editor.org/rfc/rfc821.txt (anglais)
  * @link http://www.rfc-editor.org/rfc/rfc2554.txt (anglais)
  * 
@@ -41,7 +41,7 @@ class Smtp {
 	var $connect_id      = NULL;
 	
 	/**
-	 * Nom ou IP du serveur smtp à contacter
+	 * Nom ou IP du serveur smtp Ã  contacter
 	 * 
 	 * @var string
 	 * @access public
@@ -49,7 +49,7 @@ class Smtp {
 	var $smtp_server     = '';
 	
 	/**
-	 * Port d'accés (en général, 25)
+	 * Port d'accÃ©s (en gÃ©nÃ©ral, 25)
 	 * 
 	 * @var integer
 	 * @access public
@@ -57,7 +57,7 @@ class Smtp {
 	var $smtp_port       = 25;
 	
 	/**
-	 * login pour la connexion (seulement si nécessaire)
+	 * login pour la connexion (seulement si nÃ©cessaire)
 	 * 
 	 * @var string
 	 * @access public
@@ -65,7 +65,7 @@ class Smtp {
 	var $smtp_user       = '';
 	
 	/**
-	 * password pour la connexion (seulement si nécessaire)
+	 * password pour la connexion (seulement si nÃ©cessaire)
 	 * 
 	 * @var string
 	 * @access public
@@ -73,7 +73,7 @@ class Smtp {
 	var $smtp_pass       = '';
 	
 	/**
-	 * Nom du serveur émetteur
+	 * Nom du serveur Ã©metteur
 	 * 
 	 * @var string
 	 * @access public
@@ -81,7 +81,7 @@ class Smtp {
 	var $server_from     = '';
 	
 	/**
-	 * Dernière réponse envoyée par le serveur
+	 * DerniÃ¨re rÃ©ponse envoyÃ©e par le serveur
 	 * 
 	 * @var string
 	 * @access private
@@ -89,7 +89,7 @@ class Smtp {
 	var $reponse         = '';
 	
 	/**
-	 * Code de la dernière réponse
+	 * Code de la derniÃ¨re rÃ©ponse
 	 * 
 	 * @var string
 	 * @access private
@@ -97,7 +97,7 @@ class Smtp {
 	var $code            = '';
 	
 	/**
-	 * Durée maximale d'une tentative de connexion
+	 * DurÃ©e maximale d'une tentative de connexion
 	 * 
 	 * @var string
 	 * @access public
@@ -121,8 +121,8 @@ class Smtp {
 	var $msg_error       = '';
 	
 	/**
-	 * Debug mode activé/désactivé. 
-	 * Si activé, le dialogue avec le serveur s'affiche à l'écran, une éventuelle erreur stoppe le script
+	 * Debug mode activÃ©/dÃ©sactivÃ©. 
+	 * Si activÃ©, le dialogue avec le serveur s'affiche Ã  l'Ã©cran, une Ã©ventuelle erreur stoppe le script
 	 * 
 	 * @var boolean
 	 * @access public
@@ -138,7 +138,7 @@ class Smtp {
 	var $save_log        = FALSE;
 	
 	/**
-	 * Ecraser les données présentes dans le fichier log si celui ci est présent
+	 * Ecraser les donnÃ©es prÃ©sentes dans le fichier log si celui ci est prÃ©sent
 	 * 
 	 * @var boolean
 	 * @access public
@@ -154,10 +154,10 @@ class Smtp {
 	var $filelog         = './log_smtp.txt';
 	
 	/**
-	 * Si l'argument vaut TRUE, la connexion est établie automatiquement avec les paramètres par défaut 
-	 * de la classe. (On suppose qu'ils ont été préalablement remplacés par les bons paramètres)
+	 * Si l'argument vaut TRUE, la connexion est Ã©tablie automatiquement avec les paramÃ¨tres par dÃ©faut 
+	 * de la classe. (On suppose qu'ils ont Ã©tÃ© prÃ©alablement remplacÃ©s par les bons paramÃ¨tres)
 	 * 
-	 * @param boolean $auto_connect  TRUE pour établir la connexion à l'instanciation de la classe
+	 * @param boolean $auto_connect  TRUE pour Ã©tablir la connexion Ã  l'instanciation de la classe
 	 * 
 	 * @return void
 	 */
@@ -179,13 +179,13 @@ class Smtp {
 	}
 	
 	/**
-	 * Établit la connexion au serveur SMTP et effectue l'identification
+	 * Ã‰tablit la connexion au serveur SMTP et effectue l'identification
 	 * 
 	 * @param string  $smtp_server  Nom ou IP du serveur
-	 * @param integer $smtp_port    Port d'accés au serveur SMTP
-	 * @param string  $smtp_user    login pour la connexion (seulement si nécessaire)
-	 * @param string  $smtp_pass    password pour la connexion (seulement si nécessaire)
-	 * @param string  $server_from  Serveur émetteur
+	 * @param integer $smtp_port    Port d'accÃ©s au serveur SMTP
+	 * @param string  $smtp_user    login pour la connexion (seulement si nÃ©cessaire)
+	 * @param string  $smtp_pass    password pour la connexion (seulement si nÃ©cessaire)
+	 * @param string  $server_from  Serveur Ã©metteur
 	 * 
 	 * @access public
 	 * @return boolean
@@ -219,7 +219,7 @@ class Smtp {
 		}
 		
 		//
-		// Comme on est poli, on dit bonjour, et on s'authentifie le cas échéant 
+		// Comme on est poli, on dit bonjour, et on s'authentifie le cas Ã©chÃ©ant 
 		// 
 		// Code success : 250
 		// Code error   : 500, 501, 504, 421
@@ -243,7 +243,7 @@ class Smtp {
 	}
 	
 	/**
-	 * Authentification auprès du serveur, s'il le supporte
+	 * Authentification auprÃ¨s du serveur, s'il le supporte
 	 * 
 	 * @access public
 	 * @return boolean
@@ -272,9 +272,9 @@ class Smtp {
 	}
 	
 	/**
-	 * Envoit les données au serveur
+	 * Envoit les donnÃ©es au serveur
 	 * 
-	 * @param string $input  Données à envoyer
+	 * @param string $input  DonnÃ©es Ã  envoyer
 	 * 
 	 * @access private
 	 * @return void
@@ -293,7 +293,7 @@ class Smtp {
 	}
 	
 	/**
-	 * Récupère la réponse du serveur et la parse pour obtenir le code réponse
+	 * RÃ©cupÃ¨re la rÃ©ponse du serveur et la parse pour obtenir le code rÃ©ponse
 	 * 
 	 * @access private
 	 * @return boolean
@@ -350,7 +350,7 @@ class Smtp {
 	
 	/**
 	 * Commande MAIL FROM
-	 * Envoi l'adresse email de l'expéditeur au serveur SMTP
+	 * Envoi l'adresse email de l'expÃ©diteur au serveur SMTP
 	 * 
 	 * @param string $email_from
 	 * 
@@ -360,7 +360,7 @@ class Smtp {
 	function mail_from($email_from)
 	{
 		//
-		// On spécifie l'adresse de l'expéditeur
+		// On spÃ©cifie l'adresse de l'expÃ©diteur
 		//
 		// Code success : 250
 		// Code failure : 552, 451, 452
@@ -384,7 +384,7 @@ class Smtp {
 	function rcpt_to($email_to, $strict = false)
 	{
 		//
-		// On spécifie les destinatires au serveur smtp
+		// On spÃ©cifie les destinatires au serveur smtp
 		// 
 		// Code success : 250, 251
 		// Code failure : 550, 551, 552, 553, 450, 451, 452
@@ -397,7 +397,7 @@ class Smtp {
 	
 	/**
 	 * Commande DATA
-	 * Envoie le message (entêtes et corps) au serveur et demande l'envoi
+	 * Envoie le message (entÃªtes et corps) au serveur et demande l'envoi
 	 * 
 	 * @param string $headers
 	 * @param string $message
@@ -412,14 +412,14 @@ class Smtp {
 		
 		//
 		// Si un point se trouve seul sur une ligne, on le remplace par deux points
-		// pour éviter que le serveur ne l'interprète comme la fin de l'envoi
+		// pour Ã©viter que le serveur ne l'interprÃ¨te comme la fin de l'envoi
 		//
 		$message = preg_replace("/\r\n\./", "\r\n..", $message);
 		
 		//
-		// On indique au serveur que l'on va lui livrer les données
+		// On indique au serveur que l'on va lui livrer les donnÃ©es
 		//
-		// Code intermédiaire : 354
+		// Code intermÃ©diaire : 354
 		//
 		$this->put_data('DATA');
 		if( !$this->get_reponse(354) )
@@ -428,7 +428,7 @@ class Smtp {
 		}
 		
 		//
-		// On envoie les entêtes
+		// On envoie les entÃªtes
 		//
 		$this->put_data($headers . "\r\n");
 		
@@ -438,7 +438,7 @@ class Smtp {
 		$this->put_data($message);
 		
 		//
-		// On indique la fin de l'envoi de données au serveur
+		// On indique la fin de l'envoi de donnÃ©es au serveur
 		//
 		// Code success : 250
 		// Code failure : 552, 554, 451, 452
@@ -499,7 +499,7 @@ class Smtp {
 	function quit()
 	{
 		//
-		// Comme on est poli, on dit aurevoir au serveur avec la commande adéquat QUIT 
+		// Comme on est poli, on dit aurevoir au serveur avec la commande adÃ©quat QUIT 
 		//
 		// Code success : 221
 		// Code failure : 500
@@ -529,7 +529,7 @@ class Smtp {
 	}
 	
 	/**
-	 * @param string $msg_error  Le message d'erreur, à afficher si mode debug
+	 * @param string $msg_error  Le message d'erreur, Ã  afficher si mode debug
 	 * 
 	 * @access private
 	 * @return void

@@ -1,16 +1,16 @@
 Bonjour, 
 
-Vous avez souhaité recevoir les identifiants de votre compte à une de nos listes de diffusion.
+Vous avez souhaitÃ© recevoir les identifiants de votre compte Ã  une de nos listes de diffusion.
 
 Voici vos identifiants :
 ~~~~~~~~~~~~~~~~~~~~
 
-L'email associé à votre compte : %EMAIL%
+L'email associÃ© Ã  votre compte : %EMAIL%
 Code de votre compte : %CODE%
 
 ~~~~~~~~~~~~~~~~~~~~
 
-Nous vous remercions de votre intérêt pour notre liste de diffusion et à bientôt sur %URLSITE%
+Nous vous remercions de votre intÃ©rÃªt pour notre liste de diffusion et Ã  bientÃ´t sur %URLSITE%
 
 ~~~~~~~~~~
 %SIG%

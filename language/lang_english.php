@@ -3,17 +3,17 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
- * Vous pouvez très facilement traduire Wanewsletter dans une autre langue.
+ * Vous pouvez trÃ¨s facilement traduire Wanewsletter dans une autre langue.
  * Il vous suffit pour cela de traduire ce qui se trouve entre
- * guillemets. Attention, ne touchez pas à la partie $lang['....']
+ * guillemets. Attention, ne touchez pas Ã  la partie $lang['....']
  *
  * des %1\$s, %s, %d ou autre signe de ce genre signifient qu'ils
- * vont être remplacés par un contenu variable. Placez les de façon
- * adéquat dans la phrase mais ne les enlevez pas.
- * Enfin, les \n représentent un retour à la ligne.
+ * vont Ãªtre remplacÃ©s par un contenu variable. Placez les de faÃ§on
+ * adÃ©quat dans la phrase mais ne les enlevez pas.
+ * Enfin, les \n reprÃ©sentent un retour Ã  la ligne.
  */
 
 
@@ -115,7 +115,7 @@ $lang['Button']['browse']           = "Browse";
 
 
 //
-// Différents messages d'information et d'erreur
+// DiffÃ©rents messages d'information et d'erreur
 //
 $lang['Message']['Subscribe_1']             = "Successful subscription!\nA confirmation email has been sent to your address.\nCaution, the confirmation link in the email will be valid for %d days!\nAfter this time, you will have to subscribe again.";
 $lang['Message']['Subscribe_2']             = "Successful subscription!";
@@ -332,7 +332,7 @@ $lang['Click_resend_auto']          = "Click %shere%s to continue with automatic
 $lang['Click_resend_manuel']        = "Click %shere%s to send another packet of emails";
 
 //
-// Sujets de divers emails envoyés
+// Sujets de divers emails envoyÃ©s
 //
 $lang['Subject_email']['Subscribe'] = "Subscription to the %s newsletter";
 $lang['Subject_email']['Unsubscribe_1'] = "Unsubscription confirmation";
@@ -518,7 +518,7 @@ $lang['Export_nl']                  = "Export this newsletter";
 
 
 //
-// Page : Gestion des abonnés
+// Page : Gestion des abonnÃ©s
 //
 $lang['Explain']['abo']             = "Here you can view, modify and delete the account of people who have subscribed to your mailing lists";
 $lang['Click_return_abo']           = "Click %shere%s to return to the subscribers' list";
@@ -741,7 +741,7 @@ $datetime['Dec']        = "Dec";
 
 
 //
-// Données diverses sur la langue
+// DonnÃ©es diverses sur la langue
 //
 $lang['CHARSET']        = 'ISO-8859-1';
 $lang['CONTENT_LANG']   = 'en';

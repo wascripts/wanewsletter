@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -13,7 +13,7 @@ define('WA_ROOTDIR',    '..');
 require WA_ROOTDIR . '/includes/common.inc.php';
 
 //
-// Initialisation de la connexion à la base de données et récupération de la configuration
+// Initialisation de la connexion Ã  la base de donnÃ©es et rÃ©cupÃ©ration de la configuration
 //
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();

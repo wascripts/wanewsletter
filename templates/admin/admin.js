@@ -2,14 +2,14 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 function make_admin()
 {
 	//
-	// Boite de sélection de liste
+	// Boite de sÃ©lection de liste
 	//
 	var smallbox = document.forms['smallbox'];
 
@@ -26,7 +26,7 @@ function make_admin()
 	}
 
 	//
-	// Lien "switch" pour cocher/décocher toutes les checkbox dans un listing
+	// Lien "switch" pour cocher/dÃ©cocher toutes les checkbox dans un listing
 	//
 	var deleteButton = document.querySelector('div#aside-bottom button[name="delete"]');
 
@@ -120,14 +120,14 @@ function showImage(evt)
 }
 
 /**
- * Utilisée pour masquer les champs file et afficher à la place un élément
- * <button> mieux intégré graphiquement.
+ * UtilisÃ©e pour masquer les champs file et afficher Ã  la place un Ã©lÃ©ment
+ * <button> mieux intÃ©grÃ© graphiquement.
  */
 function initUploadButton(inputFile)
 {
 	/*
 	 * L'attribut HTML5 hidden est le meilleur choix, car il retire aussi
-	 * l'élément de la navigation au clavier
+	 * l'Ã©lÃ©ment de la navigation au clavier
 	 */
 	if (typeof(inputFile.hidden) != 'undefined') {
 		inputFile.hidden = true;

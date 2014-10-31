@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -19,14 +19,14 @@ $secure = true;
 require WA_ROOTDIR . '/includes/common.inc.php';
 
 //
-// Initialisation de la connexion à la base de données et récupération de la configuration
+// Initialisation de la connexion Ã  la base de donnÃ©es et rÃ©cupÃ©ration de la configuration
 //
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
 
 //
-// Hors phase de développement ou beta, on affiche une alerte si
-// l'administrateur a activé le débogage.
+// Hors phase de dÃ©veloppement ou beta, on affiche une alerte si
+// l'administrateur a activÃ© le dÃ©bogage.
 //
 if (DEBUG_MODE == DEBUG_LEVEL_QUIET && wan_get_debug_level() > DEBUG_MODE) {
 	wanlog($lang['Message']['Warning_debug_active']);
@@ -55,7 +55,7 @@ if (!defined('IN_LOGIN')) {
 
 	if (!defined('IN_UPGRADE')) {
 		//
-		// On vérifie si les tables du script sont bien à jour
+		// On vÃ©rifie si les tables du script sont bien Ã  jour
 		//
 		if (!check_db_version(@$nl_config['db_version'])) {
 			$output->addLine($lang['Need_upgrade_db']);
@@ -73,7 +73,7 @@ if (!defined('IN_LOGIN')) {
 		$auth = new Auth();
 
 		//
-		// Si la liste en session n'existe pas, on met à jour la session
+		// Si la liste en session n'existe pas, on met Ã  jour la session
 		//
 		if (!isset($auth->listdata[$admindata['session_liste']])) {
 			$admindata['session_liste'] = 0;
@@ -96,7 +96,7 @@ if (!defined('IN_LOGIN')) {
 }
 
 //
-// Purge 'automatique' des listes (comptes non activés au-delà du temps limite)
+// Purge 'automatique' des listes (comptes non activÃ©s au-delÃ  du temps limite)
 //
 if (!(time() % 10)) {
 	purge_liste();

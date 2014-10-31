@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -43,7 +43,7 @@ else if ($admindata['session_liste']) {
 $output->build_listbox(Auth::VIEW, false, './view.php?mode=' . $mode);
 
 //
-// Mode download : téléchargement des fichiers joints à un log
+// Mode download : tÃ©lÃ©chargement des fichiers joints Ã  un log
 //
 if ($mode == 'download') {
 	if (!$auth->check_auth(Auth::VIEW, $listdata['liste_id'])) {
@@ -86,8 +86,8 @@ else if ($mode == 'export') {
 	$result = $db->query($sql);
 
 	//
-	// Copie des fichiers joints dans le répertoire temporaire WA_TMPDIR/newsletter
-	// et remplacement éventuel des références cid: dans la newsletter HTML.
+	// Copie des fichiers joints dans le rÃ©pertoire temporaire WA_TMPDIR/newsletter
+	// et remplacement Ã©ventuel des rÃ©fÃ©rences cid: dans la newsletter HTML.
 	//
 	while ($row = $result->fetch()) {
 		$zip->addFile(
@@ -103,10 +103,10 @@ else if ($mode == 'export') {
 	}
 
 	//
-	// Traitement des caractères invalides provenant de Windows-1252
-	// - Pour le format texte, passage à l'utf-8, pas d'alternative
-	// - Pour le format HTML, transformation des caractères en cause
-	//   dans leur équivalent en référence d'entité numérique.
+	// Traitement des caractÃ¨res invalides provenant de Windows-1252
+	// - Pour le format texte, passage Ã  l'utf-8, pas d'alternative
+	// - Pour le format HTML, transformation des caractÃ¨res en cause
+	//   dans leur Ã©quivalent en rÃ©fÃ©rence d'entitÃ© numÃ©rique.
 	//
 	if (preg_match('/[\x80-\x9F]/', $logdata['log_body_text'])) {
 		$logdata['log_body_text'] = wan_utf8_encode($logdata['log_body_text']);
@@ -192,7 +192,7 @@ else if ($mode == 'iframe') {
 }
 
 //
-// Mode gestion des abonnés
+// Mode gestion des abonnÃ©s
 //
 else if ($mode == 'abonnes') {
 	include WA_ROOTDIR . '/includes/tags.inc.php';
@@ -215,7 +215,7 @@ else if ($mode == 'abonnes') {
 	$get_string = '';
 
 	//
-	// Si la fonction de recherche est sollicitée
+	// Si la fonction de recherche est sollicitÃ©e
 	//
 	$abo_confirmed   = SUBSCRIBE_CONFIRMED;
 	$sql_search      = '';
@@ -271,13 +271,13 @@ else if ($mode == 'abonnes') {
 	}
 
 	//
-	// Visualisation du profil d'un abonné
+	// Visualisation du profil d'un abonnÃ©
 	//
 	if ($action == 'view') {
 		$liste_ids = $auth->check_auth(Auth::VIEW);
 
 		//
-		// Récupération des champs des tags personnalisés
+		// RÃ©cupÃ©ration des champs des tags personnalisÃ©s
 		//
 		if (count($other_tags) > 0) {
 			$fields_str = '';
@@ -321,7 +321,7 @@ else if ($mode == 'abonnes') {
 			));
 
 			//
-			// Affichage des valeurs des tags enregistrés
+			// Affichage des valeurs des tags enregistrÃ©s
 			//
 			if (count($other_tags) > 0) {
 				$output->assign_block_vars('tags', array(
@@ -341,7 +341,7 @@ else if ($mode == 'abonnes') {
 				}
 			}
 
-			// Affichage des listes de diffusion auxquelles l'abonné est inscrit
+			// Affichage des listes de diffusion auxquelles l'abonnÃ© est inscrit
 			$register_date = time();
 
 			do {
@@ -384,7 +384,7 @@ else if ($mode == 'abonnes') {
 	}
 
 	//
-	// Édition d'un profil d'abonné
+	// Ã‰dition d'un profil d'abonnÃ©
 	//
 	else if ($action == 'edit') {
 		$liste_ids = $auth->check_auth(Auth::EDIT);
@@ -411,7 +411,7 @@ else if ($mode == 'abonnes') {
 				$result_ids = array_intersect($liste_ids, $tmp_ids);
 
 				//
-				// Cet utiliteur n'a pas les droits nécessaires pour faire cette opération
+				// Cet utiliteur n'a pas les droits nÃ©cessaires pour faire cette opÃ©ration
 				//
 				if (count($result_ids) == 0) {
 					http_response_code(401);
@@ -424,7 +424,7 @@ else if ($mode == 'abonnes') {
 				);
 
 				//
-				// Récupération des champs des tags personnalisés
+				// RÃ©cupÃ©ration des champs des tags personnalisÃ©s
 				//
 				if (count($other_tags) > 0 && isset($_POST['tags'])) {
 					foreach ($other_tags as $tag) {
@@ -465,7 +465,7 @@ else if ($mode == 'abonnes') {
 		}
 
 		//
-		// Récupération des champs des tags personnalisés
+		// RÃ©cupÃ©ration des champs des tags personnalisÃ©s
 		//
 		if (count($other_tags) > 0) {
 			$fields_str = '';
@@ -517,7 +517,7 @@ else if ($mode == 'abonnes') {
 			));
 
 			//
-			// Affichage des valeurs des tags enregistrés
+			// Affichage des valeurs des tags enregistrÃ©s
 			//
 			if (count($other_tags) > 0) {
 				$output->assign_block_vars('tags', array(
@@ -561,7 +561,7 @@ else if ($mode == 'abonnes') {
 	}
 
 	//
-	// Suppression d'un ou plusieurs profils abonnés
+	// Suppression d'un ou plusieurs profils abonnÃ©s
 	//
 	else if ($action == 'delete') {
 		$email_list = (!empty($_POST['email_list'])) ? $_POST['email_list'] : '';
@@ -852,7 +852,7 @@ else if ($mode == 'liste') {
 	}
 
 	//
-	// Ajout ou édition d'une liste
+	// Ajout ou Ã©dition d'une liste
 	//
 	if ($action == 'add' || $action == 'edit') {
 		$vararray = array(
@@ -1067,7 +1067,7 @@ else if ($mode == 'liste') {
 	}
 
 	//
-	// Suppression d'une liste avec transvasement éventuel des abonnés
+	// Suppression d'une liste avec transvasement Ã©ventuel des abonnÃ©s
 	// et archives vers une autre liste
 	//
 	else if ($action == 'delete') {
@@ -1113,7 +1113,7 @@ else if ($mode == 'liste') {
 				$db->query($sql);
 
 				//
-				// Suppression des archives et éventuelles pièces jointes
+				// Suppression des archives et Ã©ventuelles piÃ¨ces jointes
 				//
 				$sql = "SELECT log_id
 					FROM " . LOG_TABLE . "
@@ -1169,7 +1169,7 @@ else if ($mode == 'liste') {
 				}
 
 				//
-				// Suppression des entrées des abonnés déjà inscrits à l'autre liste
+				// Suppression des entrÃ©es des abonnÃ©s dÃ©jÃ  inscrits Ã  l'autre liste
 				//
 				if (count($delete_abo_ids) > 0) {
 					$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
@@ -1179,7 +1179,7 @@ else if ($mode == 'liste') {
 				}
 
 				//
-				// Mise de l'entrée existante des abonnés pour pointer sur la liste choisie
+				// Mise de l'entrÃ©e existante des abonnÃ©s pour pointer sur la liste choisie
 				//
 				if (count($update_abo_ids) > 0) {
 					$sql = "UPDATE " . ABO_LISTE_TABLE . "
@@ -1190,7 +1190,7 @@ else if ($mode == 'liste') {
 				}
 
 				//
-				// Passage des archives à la liste choisie
+				// Passage des archives Ã  la liste choisie
 				//
 				$sql = "UPDATE " . LOG_TABLE . "
 					SET liste_id = $liste_id
@@ -1268,7 +1268,7 @@ else if ($mode == 'liste') {
 	}
 
 	//
-	// Purge (suppression des inscriptions non confirmées et dont la date de validité est dépassée)
+	// Purge (suppression des inscriptions non confirmÃ©es et dont la date de validitÃ© est dÃ©passÃ©e)
 	//
 	else if ($action == 'purge') {
 		$abo_deleted = purge_liste($listdata['liste_id'], $listdata['limitevalidate'], $listdata['purge_freq']);
@@ -1281,7 +1281,7 @@ else if ($mode == 'liste') {
 	}
 
 	//
-	// Récupération des nombres d'inscrits
+	// RÃ©cupÃ©ration des nombres d'inscrits
 	//
 	$num_inscrits = 0;
 	$num_temp     = 0;
@@ -1303,7 +1303,7 @@ else if ($mode == 'liste') {
 	}
 
 	//
-	// Récupération de la date du dernier envoi
+	// RÃ©cupÃ©ration de la date du dernier envoi
 	//
 	$sql = "SELECT MAX(log_date) AS last_log
 		FROM " . LOG_TABLE . "

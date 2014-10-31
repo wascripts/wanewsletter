@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -14,11 +14,11 @@ if (!defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE')) {
 define('IN_NEWSLETTER', true);
 
 //
-// Compatibilité avec les version < 2.3.x
+// CompatibilitÃ© avec les version < 2.3.x
 //
 if (!defined('WA_ROOTDIR')) {
 	if (!isset($waroot)) {
-		exit("Le répertoire de Wanewsletter n'est pas défini!");
+		exit("Le rÃ©pertoire de Wanewsletter n'est pas dÃ©fini!");
 	}
 
 	define('WA_ROOTDIR', rtrim($waroot, '/'));
@@ -30,7 +30,7 @@ require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 
 //
-// Initialisation de la connexion à la base de données et récupération de la configuration
+// Initialisation de la connexion Ã  la base de donnÃ©es et rÃ©cupÃ©ration de la configuration
 //
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
@@ -54,7 +54,7 @@ if (empty($action) && preg_match('/([a-z0-9]{20})(?:&|$)/i', $_SERVER['QUERY_STR
 }
 
 //
-// Compatibilité avec les version < 2.3.x
+// CompatibilitÃ© avec les version < 2.3.x
 //
 else if (!empty($action) && !empty($email) && strlen($code) == 32) {
 	$code = substr($code, 0, 20);
@@ -62,8 +62,8 @@ else if (!empty($action) && !empty($email) && strlen($code) == 32) {
 
 if (!empty($action) || !empty($code)) {
 	//
-	// Purge des éventuelles inscriptions dépassées
-	// pour parer au cas d'une réinscription
+	// Purge des Ã©ventuelles inscriptions dÃ©passÃ©es
+	// pour parer au cas d'une rÃ©inscription
 	//
 	purge_liste();
 
@@ -97,11 +97,11 @@ if (!empty($action) || !empty($code)) {
 
 if (defined('IN_WA_FORM')) {
 	//
-	// On réactive le gestionnaire d'erreur précédent
+	// On rÃ©active le gestionnaire d'erreur prÃ©cÃ©dent
 	//
 	@restore_error_handler();
 
-	// Si besoin, conversion du message vers le charset demandé
+	// Si besoin, conversion du message vers le charset demandÃ©
 	if (!empty($textCharset)) {
 		$message = iconv($lang['CHARSET'], $textCharset, $message);
 	}
@@ -110,6 +110,6 @@ if (defined('IN_WA_FORM')) {
 }
 
 //
-// remise des paramêtres par défaut
+// remise des paramÃªtres par dÃ©faut
 //
 error_reporting($default_error_reporting);

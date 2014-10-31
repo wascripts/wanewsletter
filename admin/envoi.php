@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -21,16 +21,16 @@ if (!$auth->check_auth(Auth::VIEW, $admindata['session_liste'])) {
 }
 
 //
-// Vous pouvez, grâce à cette constante, désactiver la vérification de
+// Vous pouvez, grÃ¢ce Ã  cette constante, dÃ©sactiver la vÃ©rification de
 // l'existence du tag {LINKS} dans les lettres au moment de l'envoi.
 //
-// N'oubliez pas que permettre aux abonnés à vos listes de se désinscrire
-// simplement et rapidement si tel est leur souhait est une obligation légale (1).
+// N'oubliez pas que permettre aux abonnÃ©s Ã  vos listes de se dÃ©sinscrire
+// simplement et rapidement si tel est leur souhait est une obligation lÃ©gale (1).
 // Aussi, et sauf cas particuliers, vous ne devriez pas retirer ces liens
 // des lettres que vous envoyez, et donc changer la valeur de cette constante.
 //
-// (1) Au moins en France, en application de l'article 22 de la loi n° 2004-575
-// du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN).
+// (1) Au moins en France, en application de l'article 22 de la loi nÂ° 2004-575
+// du 21 juin 2004 pour la confiance dans l'Ã©conomie numÃ©rique (LCEN).
 //
 define('DISABLE_CHECK_LINKS', false);
 
@@ -67,7 +67,7 @@ $output->build_listbox(Auth::VIEW, false);
 
 switch ($mode) {
 	//
-	// Téléchargement d'un fichier joint
+	// TÃ©lÃ©chargement d'un fichier joint
 	//
 	case 'download':
 		$file_id = (!empty($_GET['fid'])) ? intval($_GET['fid']) : 0;
@@ -274,7 +274,7 @@ switch ($mode) {
 		break;
 
 	//
-	// Chargement d'un log dont on veut reprendre l'écriture ou l'envoi
+	// Chargement d'un log dont on veut reprendre l'Ã©criture ou l'envoi
 	//
 	case 'load':
 		if (isset($_POST['submit']) || $logdata['log_id']) {
@@ -536,7 +536,7 @@ switch ($mode) {
 			}
 
 			//
-			// Fonction de callback utilisée pour l'appel à preg_replace_callback() plus bas
+			// Fonction de callback utilisÃ©e pour l'appel Ã  preg_replace_callback() plus bas
 			//
 			$replace_include = function ($m) use ($mode, &$lang, &$error, &$msg_error) {
 				preg_match_all('/\\s+([a-z_:][a-z0-9_:.-]*)\\s?=\\s?(["\'])(.+?)(?<!\\\\)(?:\\\\\\\\)*\\2/i',
@@ -621,8 +621,8 @@ switch ($mode) {
 				}
 
 				//
-				// Deux newsletters ne peuvent être simultanément en attente d'envoi
-				// pour une même liste.
+				// Deux newsletters ne peuvent Ãªtre simultanÃ©ment en attente d'envoi
+				// pour une mÃªme liste.
 				//
 				if ($mode == 'send') {
 					$sql = "SELECT COUNT(*) AS test
@@ -647,10 +647,10 @@ switch ($mode) {
 				unset($logdata['log_id']);
 
 				//
-				// Au cas où la newsletter a le status WRITING mais que son précédent statut était HANDLE,
-				// nous la dupliquons pour garder intact le modèle
+				// Au cas oÃ¹ la newsletter a le status WRITING mais que son prÃ©cÃ©dent statut Ã©tait HANDLE,
+				// nous la dupliquons pour garder intact le modÃ¨le
 				// Si la newsletter a un statut HANDLE et qu'on est en mode send, nous dupliquons newsletter
-				// et entrées pour les fichiers joints
+				// et entrÃ©es pour les fichiers joints
 				//
 				if ($logdata['log_status'] == STATUS_WRITING) {
 					if ($mode == 'send') {
@@ -693,7 +693,7 @@ switch ($mode) {
 				}
 
 				//
-				// Duplication des entrées pour les fichiers joints
+				// Duplication des entrÃ©es pour les fichiers joints
 				//
 				if ($duplicate_file) {
 					$sql = "SELECT file_id
@@ -753,14 +753,14 @@ switch ($mode) {
 
 			if (!empty($file_id)) {
 				//
-				// Attachement d'un fichier utilisé dans une autre newsletter de la liste
+				// Attachement d'un fichier utilisÃ© dans une autre newsletter de la liste
 				//
 				$attach->use_file_exists($file_id, $logdata['log_id'], $error, $msg_error);
 			}
 			else {
 				//
-				// On a affaire soit à un fichier présent localement, soit à un fichier
-				// distant, soit à un fichier uploadé
+				// On a affaire soit Ã  un fichier prÃ©sent localement, soit Ã  un fichier
+				// distant, soit Ã  un fichier uploadÃ©
 				//
 				if (!empty($local_file)) {
 					$tmp_filename = str_replace('\\', '/', $tmp_filename);
@@ -788,7 +788,7 @@ switch ($mode) {
 
 		if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id']) && count($file_ids) > 0) {
 			//
-			// Suppression du fichier joint spécifié
+			// Suppression du fichier joint spÃ©cifiÃ©
 			//
 			$attach = new Attach();
 			$attach->delete_joined_files(false, $logdata['log_id'], $file_ids);
@@ -805,11 +805,11 @@ $file_box = '';
 $logdata['joined_files'] = array();
 
 //
-// Récupération des fichiers joints de la liste
+// RÃ©cupÃ©ration des fichiers joints de la liste
 //
 if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 	//
-	// On récupère tous les fichiers joints de la liste pour avoir les fichiers joints de la newsletter
+	// On rÃ©cupÃ¨re tous les fichiers joints de la liste pour avoir les fichiers joints de la newsletter
 	// en cours, et construire le select box des fichiers existants
 	//
 	$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
@@ -823,7 +823,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 	$other_files = $joined_files_id = array();
 
 	//
-	// On dispatche les données selon que le fichier appartient à la newsletter en cours ou non.
+	// On dispatche les donnÃ©es selon que le fichier appartient Ã  la newsletter en cours ou non.
 	//
 	while ($row = $result->fetch()) {
 		if ($row['log_id'] == $logdata['log_id']) {
@@ -832,7 +832,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 		}
 		else {
 			//
-			// file_id sert d'index dans le tableau, pour éviter les doublons ramenés par la requête
+			// file_id sert d'index dans le tableau, pour Ã©viter les doublons ramenÃ©s par la requÃªte
 			//
 			$other_files[$row['file_id']] = $row;
 		}
@@ -873,16 +873,16 @@ if (($mode == 'test' && count($supp_address) > 0) || $mode == 'progress') {
 	require WA_ROOTDIR . '/includes/engine_send.php';
 
 	//
-	// On règle le script pour ignorer une déconnexion du client et
-	// poursuivre l'envoi du flot d'emails jusqu'à son terme.
+	// On rÃ¨gle le script pour ignorer une dÃ©connexion du client et
+	// poursuivre l'envoi du flot d'emails jusqu'Ã  son terme.
 	//
 	@ignore_user_abort(true);
 
 	//
-	// On augmente également le temps d'exécution maximal du script.
+	// On augmente Ã©galement le temps d'exÃ©cution maximal du script.
 	//
-	// Certains hébergeurs désactivent pour des raisons évidentes cette fonction
-	// Si c'est votre cas, vous êtes mal barré
+	// Certains hÃ©bergeurs dÃ©sactivent pour des raisons Ã©videntes cette fonction
+	// Si c'est votre cas, vous Ãªtes mal barrÃ©
 	//
 	@set_time_limit(1200);
 
@@ -1002,7 +1002,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 	));
 
 	//
-	// Si l'upload est autorisé, on affiche le champs type file
+	// Si l'upload est autorisÃ©, on affiche le champs type file
 	//
 	if (FILE_UPLOADS_ON) {
 		$output->assign_block_vars('joined_files.upload_input', array(
@@ -1013,7 +1013,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 	}
 
 	//
-	// Box de sélection de fichiers existants
+	// Box de sÃ©lection de fichiers existants
 	//
 	if ($file_box != '') {
 		$output->assign_block_vars('joined_files.select_box', array(

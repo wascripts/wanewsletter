@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -12,8 +12,8 @@ define('IN_NEWSLETTER', true);
 require './pagestart.php';
 
 //
-// Compression éventuelle des données et réglage du mime-type et du
-// nom de fichier en conséquence.
+// Compression Ã©ventuelle des donnÃ©es et rÃ©glage du mime-type et du
+// nom de fichier en consÃ©quence.
 //
 function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 {
@@ -45,7 +45,7 @@ function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 }
 
 //
-// Lecture et décompression éventuelle des données
+// Lecture et dÃ©compression Ã©ventuelle des donnÃ©es
 //
 function decompress_filedata($tmp_filename, $filename)
 {
@@ -139,7 +139,7 @@ else if ($admindata['session_liste']) {
 }
 
 //
-// Affichage de la boîte de sélection des modules
+// Affichage de la boÃ®te de sÃ©lection des modules
 //
 if (!isset($_POST['submit'])) {
 	if ($mode != 'backup' && $mode != 'restore') {
@@ -181,7 +181,7 @@ if (!isset($_POST['submit'])) {
 }
 
 //
-// On vérifie la présence des extensions nécessaires pour les différents formats de fichiers proposés
+// On vÃ©rifie la prÃ©sence des extensions nÃ©cessaires pour les diffÃ©rents formats de fichiers proposÃ©s
 //
 define('ZIPLIB_LOADED', extension_loaded('zip'));
 define('ZLIB_LOADED',   extension_loaded('zlib'));
@@ -200,9 +200,9 @@ else {
 define('WA_EOL', $eol);
 
 //
-// On augmente le temps d'exécution du script
-// Certains hébergeurs empèchent pour des raisons évidentes cette possibilité
-// Si c'est votre cas, vous êtes mal barré
+// On augmente le temps d'exÃ©cution du script
+// Certains hÃ©bergeurs empÃ¨chent pour des raisons Ã©videntes cette possibilitÃ©
+// Si c'est votre cas, vous Ãªtes mal barrÃ©
 //
 @set_time_limit(1200);
 
@@ -210,10 +210,10 @@ function wan_subdir_status($dir)
 {
 	if (file_exists($dir)) {
 		if (!is_readable($dir)) {
-			$str = "non [pas d'accès en lecture]";
+			$str = "non [pas d'accÃ¨s en lecture]";
 		}
 		else if (!is_writable($dir)) {
-			$str = "non [pas d'accès en écriture]";
+			$str = "non [pas d'accÃ¨s en Ã©criture]";
 		}
 		else {
 			$str = "ok";
@@ -272,7 +272,7 @@ switch ($mode) {
 		wan_print_row(' - Extension GD', $str);
 		wan_print_row(' - Extension Iconv',
 			extension_loaded('iconv') ?
-				sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
+				sprintf('oui - Version %s - ImplÃ©mentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
 		);
 		wan_print_row(' - Extension Mcrypt',  extension_loaded('mcrypt') ? 'oui' : 'non');
 		wan_print_row(' - Extension Mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
@@ -284,7 +284,7 @@ switch ($mode) {
 		wan_print_row(' - Extension Zip', extension_loaded('zip') ? 'oui' : 'non');
 		wan_print_row(' - Extension Zlib', extension_loaded('zlib') ? 'oui' : 'non');
 
-		// Le safe mode et les magic quotes ont été supprimés à partir de PHP 5.4
+		// Le safe mode et les magic quotes ont Ã©tÃ© supprimÃ©s Ã  partir de PHP 5.4
 		if (version_compare(PHP_VERSION, '5.4.0-dev', '<')) {
 			wan_print_row(' - safe_mode', config_status('safe_mode') ? 'on' : 'off');
 			wan_print_row(' - magic_quotes_gpc', config_status('magic_quotes_gpc') ? 'on' : 'off');
@@ -311,17 +311,17 @@ switch ($mode) {
 		list($infos) = parseDSN($dsn);
 
 		wan_print_row('Type de serveur', $_SERVER['SERVER_SOFTWARE'] . ' - ' . PHP_OS);
-		wan_print_row('Connexion sécurisée', wan_ssl_connection() ? 'oui' : 'non');
+		wan_print_row('Connexion sÃ©curisÃ©e', wan_ssl_connection() ? 'oui' : 'non');
 
 		if ($db::ENGINE == 'sqlite') {
-			wan_print_row('Base de données', sprintf('%s %s - Driver : %s',
+			wan_print_row('Base de donnÃ©es', sprintf('%s %s - Driver : %s',
 				$infos['label'],
 				$db->libVersion,
 				$infos['driver']
 			));
 		}
 		else {
-			wan_print_row('Base de données', sprintf('%s %s - Client : %s - Jeu de caractères : %s - Driver : %s',
+			wan_print_row('Base de donnÃ©es', sprintf('%s %s - Client : %s - Jeu de caractÃ¨res : %s - Driver : %s',
 				$infos['label'],
 				$db->serverVersion,
 				$db->clientVersion,
@@ -384,7 +384,7 @@ switch ($mode) {
 			$filename = sprintf('wa_export_%d.%s', $admindata['session_liste'], $ext);
 
 			//
-			// Préparation des données selon l'option demandée
+			// PrÃ©paration des donnÃ©es selon l'option demandÃ©e
 			//
 			$contents = compress_filedata($filename, $mime_type, $contents, $compress);
 
@@ -393,7 +393,7 @@ switch ($mode) {
 			}
 			else {
 				if (!($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
-					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
+					trigger_error('Impossible d\'Ã©crire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
 				fwrite($fw, $contents);
@@ -496,9 +496,9 @@ switch ($mode) {
 					}
 
 					//
-					// Si nous n'avons pas d'accès direct au fichier uploadé,
-					// il doit être déplacé vers le dossier des fichiers
-					// temporaires du script pour être accessible en lecture.
+					// Si nous n'avons pas d'accÃ¨s direct au fichier uploadÃ©,
+					// il doit Ãªtre dÃ©placÃ© vers le dossier des fichiers
+					// temporaires du script pour Ãªtre accessible en lecture.
 					//
 					if (!is_readable($tmp_filename)) {
 						$unlink = true;
@@ -588,7 +588,7 @@ switch ($mode) {
 			}
 
 			//
-			// Aucun fichier d'import valide reçu et textarea vide
+			// Aucun fichier d'import valide reÃ§u et textarea vide
 			//
 			if (count($emails) == 0) {
 				$output->redirect('./tools.php?mode=import', 4);
@@ -604,7 +604,7 @@ switch ($mode) {
 			$emails = array_unique($emails);
 
 			//
-			// Vérification syntaxique des emails
+			// VÃ©rification syntaxique des emails
 			//
 			$emails = array_filter($emails,
 				function ($email) use (&$lang, &$report) {
@@ -635,10 +635,10 @@ switch ($mode) {
 				$result = $db->query($sql);
 
 				//
-				// Traitement des adresses email déjà présentes dans la base de données
+				// Traitement des adresses email dÃ©jÃ  prÃ©sentes dans la base de donnÃ©es
 				//
 				while ($abodata = $result->fetch()) {
-					if (!isset($abodata['confirmed'])) { // N'est pas inscrit à cette liste
+					if (!isset($abodata['confirmed'])) { // N'est pas inscrit Ã  cette liste
 						$sql_data = array();
 						$sql_data['abo_id']        = $abodata['abo_id'];
 						$sql_data['liste_id']      = $listdata['liste_id'];
@@ -699,12 +699,12 @@ switch ($mode) {
 			}
 
 			//
-			// Selon que des emails ont été refusés ou pas, affichage du message correspondant
-			// et mise à disposition éventuelle du rapport d'erreurs
+			// Selon que des emails ont Ã©tÃ© refusÃ©s ou pas, affichage du message correspondant
+			// et mise Ã  disposition Ã©ventuelle du rapport d'erreurs
 			//
 			if ($report != '') {
 				$report_str  = '#' . WA_EOL;
-				$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
+				$report_str .= '# Rapport des adresses emails refusÃ©es / Bad address email report' . WA_EOL;
 				$report_str .= '#' . WA_EOL;
 				$report_str .= WA_EOL;
 				$report_str .= $report . WA_EOL;
@@ -953,7 +953,7 @@ switch ($mode) {
 
 		if (isset($_POST['submit'])) {
 			//
-			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql
+			// Lancement de la sauvegarde. Pour commencer, l'entÃªte du fichier sql
 			//
 			$contents  = $backup->header(WA_SIGNATURE);
 			$contents .= $backup->get_other_queries($drop_option);
@@ -961,11 +961,11 @@ switch ($mode) {
 			fake_header(false);
 
 			foreach ($tables as $tabledata) {
-				if ($backup_type != 2) {// save complète ou structure uniquement
+				if ($backup_type != 2) {// save complÃ¨te ou structure uniquement
 					$contents .= $backup->get_table_structure($tabledata, $drop_option);
 				}
 
-				if ($backup_type != 1) {// save complète ou données uniquement
+				if ($backup_type != 1) {// save complÃ¨te ou donnÃ©es uniquement
 					$contents .= $backup->get_table_data($tabledata['name']);
 				}
 
@@ -978,7 +978,7 @@ switch ($mode) {
 			$mime_type = 'text/plain';
 
 			//
-			// Préparation des données selon l'option demandée
+			// PrÃ©paration des donnÃ©es selon l'option demandÃ©e
 			//
 			$contents = compress_filedata($filename, $mime_type, $contents, $compress);
 
@@ -987,7 +987,7 @@ switch ($mode) {
 			}
 			else {
 				if (!($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
-					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
+					trigger_error('Impossible d\'Ã©crire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
 				fwrite($fw, $contents);
@@ -1066,8 +1066,8 @@ switch ($mode) {
 			require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
 			//
-			// On règle le script pour ignorer une déconnexion du client et mener
-			// la restauration à son terme
+			// On rÃ¨gle le script pour ignorer une dÃ©connexion du client et mener
+			// la restauration Ã  son terme
 			//
 			@ignore_user_abort(true);
 
@@ -1108,9 +1108,9 @@ switch ($mode) {
 					}
 
 					//
-					// Si nous n'avons pas d'accès direct au fichier uploadé,
-					// il doit être déplacé vers le dossier des fichiers
-					// temporaires du script pour être accessible en lecture.
+					// Si nous n'avons pas d'accÃ¨s direct au fichier uploadÃ©,
+					// il doit Ãªtre dÃ©placÃ© vers le dossier des fichiers
+					// temporaires du script pour Ãªtre accessible en lecture.
 					//
 					if (!is_readable($tmp_filename)) {
 						$unlink = true;
@@ -1130,7 +1130,7 @@ switch ($mode) {
 				}
 			}
 			//
-			// Aucun fichier de restauration reçu
+			// Aucun fichier de restauration reÃ§u
 			//
 			else {
 				$output->redirect('./tools.php?mode=restore', 4);

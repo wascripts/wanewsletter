@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -13,7 +13,7 @@ require './pagestart.php';
 require WA_ROOTDIR . '/includes/functions.stats.php';
 
 //
-// Si le module de statistiques est désactivé ou que la librairie GD n'est pas installé,
+// Si le module de statistiques est dÃ©sactivÃ© ou que la librairie GD n'est pas installÃ©,
 // on affiche le message d'information correspondant
 //
 if ($nl_config['disable_stats']) {
@@ -106,7 +106,7 @@ function display_img_error($str)
 	$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
 
 	//
-	// Création du contour noir
+	// CrÃ©ation du contour noir
 	//
 	imagefill($im, 0, 0, $black);
 	imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $gray1);
@@ -126,7 +126,7 @@ if ($img == 'graph') {
 	$ts = mktime(0, 0, 0, $month, 1, $year);
 
 	//
-	// Réglages de l'image
+	// RÃ©glages de l'image
 	//
 	$imageW = 560;
 	$imageH = 260;
@@ -134,7 +134,7 @@ if ($img == 'graph') {
 	$text_font  = 2;
 
 	//
-	// Récupération des statistiques
+	// RÃ©cupÃ©ration des statistiques
 	//
 	$filename = filename_stats($year . '_' . date('F', $ts), $listdata['liste_id']);
 
@@ -183,7 +183,7 @@ if ($img == 'graph') {
 	imagestring($im, $title_font, $start, 5, $title, $black);
 
 	//
-	// Échelle horizontale et lecture du fichier des stats
+	// Ã‰chelle horizontale et lecture du fichier des stats
 	//
 	$max_days    = date('t', $ts);
 	$num_per_day = array();
@@ -202,7 +202,7 @@ if ($img == 'graph') {
 	}
 
 	//
-	// Échelle verticale (nombre d'inscriptions)
+	// Ã‰chelle verticale (nombre d'inscriptions)
 	//
 	$top_value = $max_value;
 	while (($top_value % 10) != 0) {
@@ -242,7 +242,7 @@ if ($img == 'graph') {
 	$src = $fct_imagecreatefrom(WA_ROOTDIR . '/images/barre.' . $img_type);
 
 	//
-	// Affichage des résultats
+	// Affichage des rÃ©sultats
 	//
 	for ($day = 1, $int = 0; $day <= $max_days; $day++, $int += 16) {
 		if ($num_per_day[$day] > 0) {
@@ -317,7 +317,7 @@ if ($img == 'camembert') {
 	}
 
 	//
-	// Création du contour noir
+	// CrÃ©ation du contour noir
 	//
 	imagefill($im, 0, 0, $black);
 	imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $gray1);
@@ -330,7 +330,7 @@ if ($img == 'camembert') {
 	imagestring($im, $title_font, $start, 4, $title, $black);
 
 	//
-	// Positionnement de départ du camenbert
+	// Positionnement de dÃ©part du camenbert
 	//
 	$startX = 70;
 	$startY = 100;
@@ -346,9 +346,9 @@ if ($img == 'camembert') {
 
 	if ($img_type == 'png') {
 		$src = imagecreatefrompng(WA_ROOTDIR . '/images/shadow.png');
-		imagecopyresized($im, $src, $shadowX, $globalY, 0, 0, $outer, $outer, $outer, $outer); // Angle supérieur gauche
-		imagecopyresized($im, $src, $shadowX, ($globalY + $outer), 0, $outer, $outer, $rectH, $outer, 1); // Coté gauche
-		imagecopyresized($im, $src, $shadowX, ($globalY + $rectH + 1), 0, (imagesy($src) - $outer), 401, $outer, 401, $outer); // Coté gauche
+		imagecopyresized($im, $src, $shadowX, $globalY, 0, 0, $outer, $outer, $outer, $outer); // Angle supÃ©rieur gauche
+		imagecopyresized($im, $src, $shadowX, ($globalY + $outer), 0, $outer, $outer, $rectH, $outer, 1); // CotÃ© gauche
+		imagecopyresized($im, $src, $shadowX, ($globalY + $rectH + 1), 0, (imagesy($src) - $outer), 401, $outer, 401, $outer); // CotÃ© gauche
 	}
 	else {
 		imagefilledrectangle($im, $shadowX, ($globalY + $outer), ($imageW - 20 - $outer), ($globalY + $rectH + $outer), $gray2);
@@ -358,7 +358,7 @@ if ($img == 'camembert') {
 	imagefilledrectangle($im, ($rectX + 1), ($globalY + 1), ($imageW - 21), ($globalY + $rectH - 1), $gray1);
 
 	//
-	// Ok, on génère le camenbert
+	// Ok, on gÃ©nÃ¨re le camenbert
 	//
 	$degre = 0;
 
@@ -372,7 +372,7 @@ if ($img == 'camembert') {
 		}
 
 		//
-		// On vérifie si le nombre d'inscrits représente au moins un millième du total
+		// On vÃ©rifie si le nombre d'inscrits reprÃ©sente au moins un milliÃ¨me du total
 		// (Sans cela, il se produit un bug d'affichage)
 		//
 		$part = 0;
@@ -396,7 +396,7 @@ if ($img == 'camembert') {
 		}
 
 		//
-		// Insertion du carré de couleur pour la légende, suivi du nom de la liste et du nombre d'abonnés
+		// Insertion du carrÃ© de couleur pour la lÃ©gende, suivi du nom de la liste et du nombre d'abonnÃ©s
 		//
 		imagefilledrectangle($im, 165, ($globalY + $int + 2), 175, ($globalY + $int + 12), $gray2);
 		imagefilledrectangle($im, 166, ($globalY + $int + 1), 176, ($globalY + $int + 11), $color_arc);
@@ -482,8 +482,8 @@ $output->assign_vars(array(
 ));
 
 //
-// Affichons un message d'alerte au cas où le répertoire de statistiques n'est pas
-// accessible en écriture.
+// Affichons un message d'alerte au cas oÃ¹ le rÃ©pertoire de statistiques n'est pas
+// accessible en Ã©criture.
 //
 if (!is_writable(WA_STATSDIR)) {
 	$output->assign_block_vars('statsdir_error', array(

@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -12,9 +12,9 @@ if (!defined('FUNCTIONS_BOX_INC')) {
 define('FUNCTIONS_BOX_INC', true);
 
 /**
- * Construction de la liste déroulante des langues disponibles pour le script
+ * Construction de la liste dÃ©roulante des langues disponibles pour le script
  *
- * @param string $default_lang Langue actuellement utilisée
+ * @param string $default_lang Langue actuellement utilisÃ©e
  *
  * @return string
  */
@@ -51,13 +51,13 @@ function lang_box($default_lang = '')
 }
 
 /**
- * Construction de la liste déroulante des formats de newsletter
+ * Construction de la liste dÃ©roulante des formats de newsletter
  *
- * @param string  $select_name    Nom de la liste déroulante
- * @param integer $default_format Format par défaut
+ * @param string  $select_name    Nom de la liste dÃ©roulante
+ * @param integer $default_format Format par dÃ©faut
  * @param boolean $option_submit  True si submit lors du changement de valeur de la liste
- * @param boolean $multi_format   True si on doit affiche également multi-format comme valeur
- * @param boolean $no_id          True pour ne pas mettre d'attribut id à la balise <select>
+ * @param boolean $multi_format   True si on doit affiche Ã©galement multi-format comme valeur
+ * @param boolean $no_id          True pour ne pas mettre d'attribut id Ã  la balise <select>
  *
  * @return string
  */

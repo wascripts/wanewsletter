@@ -4,15 +4,15 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
  * @status experimental
  *
- * Ce module est marqué comme expérimental car son intégration dans Wanewsletter
- * n'est pas considérée comme étant satisfaisante, cependant, tous les tests
- * effectués ont été satisfaisant et la partie permettant les envois d'emails
- * notamment est considérée comme étant utilisable en "production".
+ * Ce module est marquÃ© comme expÃ©rimental car son intÃ©gration dans Wanewsletter
+ * n'est pas considÃ©rÃ©e comme Ã©tant satisfaisante, cependant, tous les tests
+ * effectuÃ©s ont Ã©tÃ© satisfaisant et la partie permettant les envois d'emails
+ * notamment est considÃ©rÃ©e comme Ã©tant utilisable en "production".
  */
 
 define('IN_NEWSLETTER',  true);
@@ -20,7 +20,7 @@ define('IN_COMMANDLINE', true);
 define('WA_ROOTDIR',     dirname(dirname(__FILE__)));
 
 //
-// PHP CLI ne change pas le répertoire courant pour celui du script
+// PHP CLI ne change pas le rÃ©pertoire courant pour celui du script
 //
 if (PHP_SAPI != 'cli') {
 	//
@@ -31,7 +31,7 @@ if (PHP_SAPI != 'cli') {
 	$argc = $_SERVER['argc'];
 }
 
- // Au cas où le terminal utilise l'encodage utf-8
+ // Au cas oÃ¹ le terminal utilise l'encodage utf-8
 if (preg_match('/\.UTF-?8/i', getenv('LANG'))) {
 	function convert_output($data)
 	{
@@ -44,7 +44,7 @@ if (preg_match('/\.UTF-?8/i', getenv('LANG'))) {
 require WA_ROOTDIR . '/includes/common.inc.php';
 
 //
-// Initialisation de la connexion à la base de données et récupération de la configuration
+// Initialisation de la connexion Ã  la base de donnÃ©es et rÃ©cupÃ©ration de la configuration
 //
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
@@ -64,13 +64,13 @@ $send_delay   = 10;
 
 if ($argc == 1) {
 	echo "Usage: $argv[0] [OPTION]...\n";
-	echo "Pour en savoir davantage, faites: « $argv[0] --help ».\n";
+	echo "Pour en savoir davantage, faites: Â« $argv[0] --help Â».\n";
 	exit(0);
 }
 
 //
-// En mode un email par abonné, on envoit tous les emails par défaut (avec une pause
-// à intervalle régulier (voir plus haut)).
+// En mode un email par abonnÃ©, on envoit tous les emails par dÃ©faut (avec une pause
+// Ã  intervalle rÃ©gulier (voir plus haut)).
 //
 if ($nl_config['engine_send'] == ENGINE_UNIQ) {
 	$nl_config['sending_limit'] = 0;
@@ -78,7 +78,7 @@ if ($nl_config['engine_send'] == ENGINE_UNIQ) {
 
 for ($i = 1; $i < $argc; $i++) {
 	//
-	// Version du script et de PHP et SAPI utilisé
+	// Version du script et de PHP et SAPI utilisÃ©
 	//
 	if ($argv[$i] == '--version' || $argv[$i] == '-v') {
 		echo "Wanewsletter $version with PHP " . PHP_VERSION . " (" . PHP_SAPI . ")\n";
@@ -90,23 +90,23 @@ for ($i = 1; $i < $argc; $i++) {
 	//
 	else if ($argv[$i] == '--license') {
 		echo "Wanewsletter $version\n";
-		echo "Copyright (c) 2002-2014 Aurélien Maille\n";
+		echo "Copyright (c) 2002-2014 AurÃ©lien Maille\n";
 		echo "\n";
 
 		if (preg_match('/^fr[_-]/', getenv('LANG'))) {
 			echo <<<WANSHELL
 Wanewsletter est un logiciel libre; vous pouvez le redistribuer ou le
-modifier selon les termes de la License Publique Générale de GNU, publiée
+modifier selon les termes de la License Publique GÃ©nÃ©rale de GNU, publiÃ©e
 par la Free Software Foundation; soit la version 2 de la Licence ou,
-soit (selon vos préférences) toute version ultérieure.
+soit (selon vos prÃ©fÃ©rences) toute version ultÃ©rieure.
 
-Wanewsletter est distribué dans l'espoir qu'il soit utile,
-mais AUCUNE garantie n'est donnée tant pour des raisons COMMERCIALES que
-pour RÉPONDRE À UN BESOIN PARTICULIER.  Consultez la Licence
-Publique Générale de GNU pour plus de détails.
+Wanewsletter est distribuÃ© dans l'espoir qu'il soit utile,
+mais AUCUNE garantie n'est donnÃ©e tant pour des raisons COMMERCIALES que
+pour RÃ‰PONDRE Ã€ UN BESOIN PARTICULIER.  Consultez la Licence
+Publique GÃ©nÃ©rale de GNU pour plus de dÃ©tails.
 
-Vous devriez avoir reçu copie de la Licence Publique Générale de GNU
-avec Wanewsletter; sinon, écrivez à la Free Software Foundation, Inc.,
+Vous devriez avoir reÃ§u copie de la Licence Publique GÃ©nÃ©rale de GNU
+avec Wanewsletter; sinon, Ã©crivez Ã  la Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
@@ -144,28 +144,28 @@ Usage: $argv[0] [options]
 
 Envois:
   -pNUM, --process-send=NUM  Lance un envoi avec NUM un id de liste
-  -lNUM, --limit=NUM   Limite à NUM le nombre d'emails envoyés
-  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par défaut, 400)
-  -dNUM, --delay=NUM   Durée en secondes entre les flots d'envois
-                       (par défaut, 10).
+  -lNUM, --limit=NUM   Limite Ã  NUM le nombre d'emails envoyÃ©s
+  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par dÃ©faut, 400)
+  -dNUM, --delay=NUM   DurÃ©e en secondes entre les flots d'envois
+                       (par dÃ©faut, 10).
 
 Divers:
   --process-subscribe=NUM  Validation des inscriptions par email
   --import-mail=NUM        Importation d'emails avec NUM un id de liste
   --format=FORMAT          FORMAT peut prendre la valeur 'plain' ou 'html'
-                           'text' et 'texte' sont acceptés comme
-                           alternative à 'plain'.
+                           'text' et 'texte' sont acceptÃ©s comme
+                           alternative Ã  'plain'.
 
 Informations:
-  -h, --help     Affiche la présente aide
+  -h, --help     Affiche la prÃ©sente aide
   -v, --version  Affiche les informations de version
       --license  Affiche les informations de licence
 
 Exemple d'importation d'emails :
   $argv[0] --import-mail=1 -- address1@domain.tld address2@domain.tld
 
-La liste d'adresses peut également être fournie en entrée, les adresses
-dans le fichier étant séparées par des caractères blancs (espace, tabulation
+La liste d'adresses peut Ã©galement Ãªtre fournie en entrÃ©e, les adresses
+dans le fichier Ã©tant sÃ©parÃ©es par des caractÃ¨res blancs (espace, tabulation
 ou saut de ligne) :
   $argv[0] --import-mail=1 < /path/to/address_list
 
@@ -175,7 +175,7 @@ WANSHELL;
 	}
 
 	//
-	// Lancement d'un flôt d'envoi
+	// Lancement d'un flÃ´t d'envoi
 	//
 	else if (preg_match('/^-(?:-process-send=|p)(\d+)$/', $argv[$i], $match)) {
 		$process_send = true;
@@ -198,14 +198,14 @@ WANSHELL;
 	}
 
 	//
-	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
+	// Nombre d'envois maximum Ã  effectuer lors d'un flot d'envois
 	//
 	else if (preg_match('/^-(?:-packet=|k)(\d+)$/', $argv[$i], $match)) {
 		$send_packet = $match[1];
 	}
 
 	//
-	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
+	// Nombre d'envois maximum Ã  effectuer lors d'un flot d'envois
 	//
 	else if (preg_match('/^-(?:-delay=|d)(\d+)$/', $argv[$i], $match)) {
 		$send_delay = $match[1];
@@ -217,7 +217,7 @@ WANSHELL;
 	}
 
 	//
-	// Format choisi pour les comptes des adresses emails importées
+	// Format choisi pour les comptes des adresses emails importÃ©es
 	//
 	else if (preg_match('/^--format=/', $argv[$i], $match)) {
 		$format = substr($argv[$i], 9);
@@ -234,7 +234,7 @@ WANSHELL;
 	}
 
 	//
-	// Récupération des adresses email passées dans la ligne de commande
+	// RÃ©cupÃ©ration des adresses email passÃ©es dans la ligne de commande
 	//
 	else if ($argv[$i] == '--') {
 		if (isset($argv[++$i])) {
@@ -267,7 +267,7 @@ if ($process_send) {
 		WHERE liste_id = $listdata[liste_id]
 			AND log_status = " . STATUS_STANDBY . "
 		LIMIT 1 OFFSET 0";
-	$result = $db->query($sql);// on récupère le dernier log en statut d'envoi
+	$result = $db->query($sql);// on rÃ©cupÃ¨re le dernier log en statut d'envoi
 
 	if (!($logdata = $result->fetch())) {
 		echo $lang['Message']['No_log_to_send'] . "\n";
@@ -325,7 +325,7 @@ else if ($process_subscribe) {
 
 		switch ($action) {
 			case 'desinscription':
-			case 'désinscription':
+			case 'dÃ©sinscription':
 			case 'unsubscribe':
 				$action = 'desinscription';
 				break;
@@ -339,7 +339,7 @@ else if ($process_subscribe) {
 		}
 
 		$code = $pop->contents[$mail_id]['message'];
-		// Compatibilité avec versions < 2.3
+		// CompatibilitÃ© avec versions < 2.3
 		if (strlen($code) == 32) {
 			$code = substr($code, 0, 20);
 		}
@@ -384,7 +384,7 @@ else if ($import_mail) {
 	}
 
 	//
-	// Vérification syntaxique des emails
+	// VÃ©rification syntaxique des emails
 	//
 	$emails = array_filter($emails,
 		function ($email) use (&$lang) {
@@ -412,7 +412,7 @@ else if ($import_mail) {
 		$result = $db->query($sql);
 
 		//
-		// Traitement des adresses email déjà présentes dans la base de données
+		// Traitement des adresses email dÃ©jÃ  prÃ©sentes dans la base de donnÃ©es
 		//
 		while ($abodata = $result->fetch()) {
 			if (!isset($abodata['confirmed'])) {

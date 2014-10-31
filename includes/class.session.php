@@ -3,12 +3,12 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 /**
- * Gestion des connexions à l'administration
+ * Gestion des connexions Ã  l'administration
  */
 class Session
 {
@@ -27,7 +27,7 @@ class Session
 	private $session_id   = '';
 
 	/**
-	 * Données de la session
+	 * DonnÃ©es de la session
 	 *
 	 * @var array
 	 */
@@ -41,35 +41,35 @@ class Session
 	private $cfg_cookie   = array();
 
 	/**
-	 * La session vient elle d'être créée ?
+	 * La session vient elle d'Ãªtre crÃ©Ã©e ?
 	 *
 	 * @var boolean
 	 */
 	public $new_session  = false;
 
 	/**
-	 * Statut utilisateur connecté/non connecté
+	 * Statut utilisateur connectÃ©/non connectÃ©
 	 *
 	 * @var boolean
 	 */
 	public $is_logged_in = false;
 
 	/**
-	 * Mise à jour du hash de mot de passe à chaque identification réussie
+	 * Mise Ã  jour du hash de mot de passe Ã  chaque identification rÃ©ussie
 
 	 * @var boolean
 	 */
 	public $update_hash  = true;
 
 	/**
-	 * Intialisation de la classe, récupération de l'ip ..
+	 * Intialisation de la classe, rÃ©cupÃ©ration de l'ip ..
 	 */
 	public function __construct()
 	{
 		global $nl_config;
 
 		//
-		// Récupération de l'IP
+		// RÃ©cupÃ©ration de l'IP
 		//
 		$client_ip = server_info('REMOTE_ADDR');
 		$proxy_ip  = server_info('HTTP_X_FORWARDED_FOR');
@@ -82,7 +82,7 @@ class Session
 			$private_ip = $match[0];
 
 			/*
-			 * Liens utiles sur les différentes plages d'ip :
+			 * Liens utiles sur les diffÃ©rentes plages d'ip :
 			 *
 			 * @link http://www.commentcamarche.net/internet/ip.php3
 			 * @link http://www.usenet-fr.net/fur/comp/reseaux/masques.html
@@ -92,17 +92,17 @@ class Session
 			// Liste d'ip non valides
 			//
 			$pattern_ip = array();
-			$pattern_ip[] = '/^0\..*/'; // Réseau 0 n'existe pas
+			$pattern_ip[] = '/^0\..*/'; // RÃ©seau 0 n'existe pas
 			$pattern_ip[] = '/^127\..*/'; // ip locale
 
-			// Plages d'ip spécifiques à l'intranet
+			// Plages d'ip spÃ©cifiques Ã  l'intranet
 			$pattern_ip[] = '/^10\..*/';
 			$pattern_ip[] = '/^172\.1[6-9]\..*/';
 			$pattern_ip[] = '/^172\.2[0-9]\..*/';
 			$pattern_ip[] = '/^172\.3[0-1]\..*/';
 			$pattern_ip[] = '/^192\.168\..*/';
 
-			// Plage d'adresse de classe D réservée pour les flux multicast et de classe E, non utilisée
+			// Plage d'adresse de classe D rÃ©servÃ©e pour les flux multicast et de classe E, non utilisÃ©e
 			$pattern_ip[] = '/^22[4-9]\..*/';
 			$pattern_ip[] = '/^2[3-5][0-9]\..*/';
 
@@ -131,7 +131,7 @@ class Session
 	/**
 	 * Ouverture d'une nouvelle session
 	 *
-	 * @param array   $admindata Données utilisateur
+	 * @param array   $admindata DonnÃ©es utilisateur
 	 * @param boolean $autologin True si activer l'autoconnexion
 	 *
 	 * @return array
@@ -186,9 +186,9 @@ class Session
 	}
 
 	/**
-	 * Vérification de la session et de l'utilisateur
+	 * VÃ©rification de la session et de l'utilisateur
 	 *
-	 * @param integer $liste Id de la liste actuellement gérée
+	 * @param integer $liste Id de la liste actuellement gÃ©rÃ©e
 	 *
 	 * @return mixed
 	 */
@@ -213,7 +213,7 @@ class Session
 		$this->sessiondata = (is_array($sessiondata)) ? $sessiondata : array();
 
 		//
-		// Suppression des sessions périmées
+		// Suppression des sessions pÃ©rimÃ©es
 		//
 		if (!($current_time % 5)) {
 			$sql = "DELETE FROM " . SESSIONS_TABLE . "
@@ -224,7 +224,7 @@ class Session
 
 		if ($this->session_id != '') {
 			//
-			// Récupération des infos sur la session et l'utilisateur
+			// RÃ©cupÃ©ration des infos sur la session et l'utilisateur
 			//
 			$sql = "SELECT s.*, a.*
 				FROM " . SESSIONS_TABLE . " AS s
@@ -235,8 +235,8 @@ class Session
 
 			if ($row = $result->fetch()) {
 				//
-				// Comparaison des ip pour éviter la substitution des sessions
-				// Peut poser problème avec certains proxy
+				// Comparaison des ip pour Ã©viter la substitution des sessions
+				// Peut poser problÃ¨me avec certains proxy
 				//
 				$len_check_ip = 4;
 
@@ -319,9 +319,9 @@ class Session
 	}
 
 	/**
-	 * Déconnexion de l'administration
+	 * DÃ©connexion de l'administration
 	 *
-	 * @param integer $admin_id Id de l'utilisateur concerné
+	 * @param integer $admin_id Id de l'utilisateur concernÃ©
 	 */
 	public function logout($admin_id)
 	{
@@ -344,11 +344,11 @@ class Session
 	}
 
 	/**
-	 * Connexion à l'administration
+	 * Connexion Ã  l'administration
 	 *
-	 * @param mixed   $admin_mixed Id ou pseudo de l'utilisateur concerné
+	 * @param mixed   $admin_mixed Id ou pseudo de l'utilisateur concernÃ©
 	 * @param string  $admin_pwd   Mot de passe de l'utilisateur
-	 * @param boolean $autologin   True si autoconnexion demandée
+	 * @param boolean $autologin   True si autoconnexion demandÃ©e
 	 *
 	 * @return mixed
 	 */
@@ -402,8 +402,8 @@ class Session
 	 * Envoi des cookies
 	 *
 	 * @param string  $name        Nom du cookie
-	 * @param string  $cookie_data Données à insérer dans le cookie
-	 * @param integer $cookie_time Durée de validité du cookie
+	 * @param string  $cookie_data DonnÃ©es Ã  insÃ©rer dans le cookie
+	 * @param integer $cookie_time DurÃ©e de validitÃ© du cookie
 	 *
 	 * @return boolean
 	 */
@@ -421,9 +421,9 @@ class Session
 	}
 
 	/**
-	 * Renomme les cookies précédemment envoyés par la classe Session
+	 * Renomme les cookies prÃ©cÃ©demment envoyÃ©s par la classe Session
 	 *
-	 * @param string $new_prefix Nouveau préfixe pour les cookies envoyés
+	 * @param string $new_prefix Nouveau prÃ©fixe pour les cookies envoyÃ©s
 	 */
 	public function rename_cookies($new_prefix)
 	{
@@ -449,7 +449,7 @@ class Session
 
 	/**
 	 * Encodage des IP pour stockage et comparaisons plus simples
-	 * Importé de phpBB et modifié
+	 * ImportÃ© de phpBB et modifiÃ©
 	 *
 	 * @param string $dotquat_ip
 	 *
@@ -462,10 +462,10 @@ class Session
 	}
 
 	/**
-	 * Décodage des IP
-	 * Importé de phpBB et modifié
+	 * DÃ©codage des IP
+	 * ImportÃ© de phpBB et modifiÃ©
 	 *
-	 * @param string $hex_ip Ip en hexadécimal
+	 * @param string $hex_ip Ip en hexadÃ©cimal
 	 *
 	 * @return string
 	 */

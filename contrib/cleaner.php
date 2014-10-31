@@ -3,19 +3,19 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 AurÈlien Maille
+ * @copyright 2002-2014 Aur√©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
- * - Recherche les entrÈes orphelines dans les tables abonnes et abo_liste
- * et les efface, si demandÈ.
- * - Peut Ègalement effacer les fichiers prÈsents dans le rÈpertoire d'upload
- * sans correspondance dans les tables de fichiers joints ainsi que les entrÈes
- * dans les tables de fichiers pour lesquelles le fichier n'est plus prÈsent
+ * - Recherche les entr√©es orphelines dans les tables abonnes et abo_liste
+ * et les efface, si demand√©.
+ * - Peut √©galement effacer les fichiers pr√©sents dans le r√©pertoire d'upload
+ * sans correspondance dans les tables de fichiers joints ainsi que les entr√©es
+ * dans les tables de fichiers pour lesquelles le fichier n'est plus pr√©sent
  */
 
 //
-// Ceci est un fichier de test ou d'aide lors du dÈveloppement.
-// Commentez les lignes suivantes uniquement si vous Ítes s˘r de ce que vous faites !
+// Ceci est un fichier de test ou d'aide lors du d√©veloppement.
+// Commentez les lignes suivantes uniquement si vous √™tes s√πr de ce que vous faites !
 //
 echo "This script has been disabled for security reasons\n";
 exit(0);
@@ -38,17 +38,17 @@ if ($type != 'files' && $type != 'files2' && $type != 'subscribers') {
 
 <dl>
 	<dt><a href="cleaner.php?type=files">Fichiers joints</a></dt>
-	<dd>Supprime les entrÈes de la table wa_joined_files qui n\'ont pas de correspondance
+	<dd>Supprime les entr√©es de la table wa_joined_files qui n\'ont pas de correspondance
 	dans la table wa_log_files, et vice versa.</dd>
 	<dt><a href="cleaner.php?type=files2">Fichiers joints (2)</a></dt>
-	<dd>Supprime les entrÈes des tables wa_joined_files et wa_log_files si le fichier concernÈ
-	n\'est plus prÈsent dans le rÈpertoire des fichiers joints, et vice versa</dd>
-	<dt><a href="cleaner.php?type=subscribers">AbonnÈs</a></dt>
-	<dd>Supprime les entrÈes de la table wa_abonnes qui n\'ont pas de correspondance
+	<dd>Supprime les entr√©es des tables wa_joined_files et wa_log_files si le fichier concern√©
+	n\'est plus pr√©sent dans le r√©pertoire des fichiers joints, et vice versa</dd>
+	<dt><a href="cleaner.php?type=subscribers">Abonn√©s</a></dt>
+	<dd>Supprime les entr√©es de la table wa_abonnes qui n\'ont pas de correspondance
 	dans la table wa_abo_liste, et vice versa.</dd>
 </dl>
 
-<p>Le script affiche le nombre d\'entrÈes concernÈes et demande confirmation avant de les supprimer.</p>');
+<p>Le script affiche le nombre d\'entr√©es concern√©es et demande confirmation avant de les supprimer.</p>');
 }
 
 if ($type == 'subscribers') {
@@ -90,16 +90,16 @@ if ($type == 'subscribers') {
             $db->query($sql);
         }
 
-        $output->basic('OpÈration effectuÈe');
+        $output->basic('Op√©ration effectu√©e');
     }
 
     $data  = '<ul>';
-    $data .= '<li>' . $total_diff_1 . ' entrÈes orphelines dans la table ' . ABONNES_TABLE . ' (' . implode(', ', $diff_1) . ')</li>';
-    $data .= '<li>' . $total_diff_2 . ' entrÈes orphelines dans la table ' . ABO_LISTE_TABLE . ' (' . implode(', ', $diff_2) . ')</li>';
+    $data .= '<li>' . $total_diff_1 . ' entr√©es orphelines dans la table ' . ABONNES_TABLE . ' (' . implode(', ', $diff_1) . ')</li>';
+    $data .= '<li>' . $total_diff_2 . ' entr√©es orphelines dans la table ' . ABO_LISTE_TABLE . ' (' . implode(', ', $diff_2) . ')</li>';
     $data .= '</ul>';
 
     if ($total_diff_1 > 0 || $total_diff_2 > 0) {
-        $data .= '<p><a href="cleaner.php?type=subscribers&amp;delete=true">Effacer les entrÈes orphelines</a></p>';
+        $data .= '<p><a href="cleaner.php?type=subscribers&amp;delete=true">Effacer les entr√©es orphelines</a></p>';
     }
 
     $output->basic($data);
@@ -143,16 +143,16 @@ else if ($type == 'files') {
             $db->query($sql);
         }
 
-        $output->basic('OpÈration effectuÈe');
+        $output->basic('Op√©ration effectu√©e');
     }
 
     $data  = '<ul>';
-    $data .= '<li>' . $total_diff_1 . ' entrÈes orphelines dans la table ' . JOINED_FILES_TABLE . ' (ids: ' . implode(', ', $diff_1) . ')</li>';
-    $data .= '<li>' . $total_diff_2 . ' entrÈes orphelines dans la table ' . LOG_FILES_TABLE . ' (ids: ' . implode(', ', $diff_2) . ')</li>';
+    $data .= '<li>' . $total_diff_1 . ' entr√©es orphelines dans la table ' . JOINED_FILES_TABLE . ' (ids: ' . implode(', ', $diff_1) . ')</li>';
+    $data .= '<li>' . $total_diff_2 . ' entr√©es orphelines dans la table ' . LOG_FILES_TABLE . ' (ids: ' . implode(', ', $diff_2) . ')</li>';
     $data .= '</ul>';
 
     if ($total_diff_1 > 0 || $total_diff_2 > 0) {
-        $data .= '<p><a href="cleaner.php?type=files&amp;delete=true">Effacer les entrÈes orphelines</p>';
+        $data .= '<p><a href="cleaner.php?type=files&amp;delete=true">Effacer les entr√©es orphelines</p>';
     }
 
     $output->basic($data);
@@ -200,16 +200,16 @@ else if ($type == 'files2') {
 			$db->commit();
 		}
 
-        $output->basic('OpÈration effectuÈe');
+        $output->basic('Op√©ration effectu√©e');
     }
 
     $data  = '<ul>';
     $data .= '<li>' . count($sql_delete_ids) . ' fichiers manquants (ids: ' . implode(', ', $sql_delete_ids) . ')</li>';
-    $data .= '<li>' . count($delete_files) . ' fichiers dans "' . $nl_config['upload_path'] . '" sans entrÈe correspondante dans la base de donnÈes (fichiers: ' . implode(', ', $delete_files) . ')</li>';
+    $data .= '<li>' . count($delete_files) . ' fichiers dans "' . $nl_config['upload_path'] . '" sans entr√©e correspondante dans la base de donn√©es (fichiers: ' . implode(', ', $delete_files) . ')</li>';
     $data .= '</ul>';
 
     if (count($sql_delete_ids) > 0 || count($delete_files) > 0) {
-        $data .= '<p><a href="cleaner.php?type=files2&amp;delete=true">Effacer les entrÈes orphelines</p>';
+        $data .= '<p><a href="cleaner.php?type=files2&amp;delete=true">Effacer les entr√©es orphelines</p>';
     }
 
     $output->basic($data);

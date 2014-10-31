@@ -3,14 +3,14 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 class Wadb_sqlite3 extends Wadb
 {
 	/**
-	 * Type de base de données
+	 * Type de base de donnÃ©es
 	 */
 	const ENGINE = 'sqlite';
 
@@ -130,10 +130,10 @@ class Wadb_sqlite3 extends Wadb
 		}
 
 		//
-		// SQLite ne supporte les insertions multiples qu'à partir de la version 3.7.11
+		// SQLite ne supporte les insertions multiples qu'Ã  partir de la version 3.7.11
 		//
 		if (!version_compare($this->libVersion, '3.7.11', '>=')) {
-			// On veut renvoyer false si au moins un appel à parent::insert() renvoie false
+			// On veut renvoyer false si au moins un appel Ã  parent::insert() renvoie false
 			$result = false;
 			foreach ($dataset as $data) {
 				$result |= !parent::insert($tablename, $data);

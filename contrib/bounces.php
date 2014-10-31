@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
  * @link http://www.cru.fr/listes/atelier/bounce.html
@@ -12,18 +12,18 @@
  * @see RFC 1893 - Enhanced Mail System Status Codes
  * @see RFC 3462 - The Multipart/Report Content Type for the Reporting of Mail System Administrative Messages
  *
- * Ce script se charge de scanner le compte mail indiqué pour récupérer les mail-daemon renvoyés
- * en cas de compte inexistant ou de boite pleine et supprime les emails indiqués de la base des
+ * Ce script se charge de scanner le compte mail indiquÃ© pour rÃ©cupÃ©rer les mail-daemon renvoyÃ©s
+ * en cas de compte inexistant ou de boite pleine et supprime les emails indiquÃ©s de la base des
  * inscrits (si boite inexistante).
  *
- * Si vous utilisez ce script pour scanner le compte sur lequel vous avez demandé que soient renvoyés
- * les emails de retours d'erreur, faites attention de décommenter ensuite la ligne plus haut pour éviter
- * d'éventuels actes malveillants.
+ * Si vous utilisez ce script pour scanner le compte sur lequel vous avez demandÃ© que soient renvoyÃ©s
+ * les emails de retours d'erreur, faites attention de dÃ©commenter ensuite la ligne plus haut pour Ã©viter
+ * d'Ã©ventuels actes malveillants.
  */
 
 //
-// Ceci est un fichier de test ou d'aide lors du développement.
-// Commentez les lignes suivantes uniquement si vous êtes sùr de ce que vous faites !
+// Ceci est un fichier de test ou d'aide lors du dÃ©veloppement.
+// Commentez les lignes suivantes uniquement si vous Ãªtes sÃ¹r de ce que vous faites !
 //
 echo "This script has been disabled for security reasons\n";
 exit(0);
@@ -32,7 +32,7 @@ exit(0);
 // Configuration du script
 //
 $pop_server = '';
-$pop_port   = 110; // port du serveur. La valeur par défaut (110) est la plus répandue.
+$pop_port   = 110; // port du serveur. La valeur par dÃ©faut (110) est la plus rÃ©pandue.
 $pop_user   = '';
 $pop_passwd = '';
 
@@ -161,8 +161,8 @@ if ($process) {
 		$pop->quit();
 	}
 
-	$output  = "Opération effectuée avec succés\n";
-	$output .= count($deleted_mails) . " compte(s) supprimé(s) pour cause d'adresse non valide.\n\n";
+	$output  = "OpÃ©ration effectuÃ©e avec succÃ©s\n";
+	$output .= count($deleted_mails) . " compte(s) supprimÃ©(s) pour cause d'adresse non valide.\n\n";
 
 	foreach ($deleted_mails as $mail) {
 		$output .= ' - ' . $mail . "\n";

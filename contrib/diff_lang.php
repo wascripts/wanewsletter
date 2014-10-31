@@ -3,16 +3,16 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 AurÈlien Maille
+ * @copyright 2002-2014 Aur√©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
- * Affiche les entrÈes prÈsentes dans le premier fichier de language
- * qui ne sont pas prÈsentes dans le deuxiËme fichier de language.
+ * Affiche les entr√©es pr√©sentes dans le premier fichier de language
+ * qui ne sont pas pr√©sentes dans le deuxi√®me fichier de language.
  */
 
 //
-// Ceci est un fichier de test ou d'aide lors du dÈveloppement.
-// Commentez les lignes suivantes uniquement si vous Ítes s˘r de ce que vous faites !
+// Ceci est un fichier de test ou d'aide lors du d√©veloppement.
+// Commentez les lignes suivantes uniquement si vous √™tes s√πr de ce que vous faites !
 //
 echo "This script has been disabled for security reasons\n";
 exit(0);
@@ -33,14 +33,14 @@ function diff_lang($tab_1, $tab_2, $namespace = '')
             diff_lang($tab_1[$varname], $tab_2[$varname], $namespace.'.'.$varname);
         }
         else if (!isset($tab_2[$varname])) {
-        	printf("%s => index non prÈsent\n", $namespace.'.'.$varname);
+        	printf("%s => index non pr√©sent\n", $namespace.'.'.$varname);
         }
         else {
 			$a = preg_match_all('#%(?!%)#', $tab_1[$varname], $m);
 			$b = preg_match_all('#%(?!%)#', $tab_2[$varname], $m);
 
 			if ($a != $b) {
-				printf("%s => Nombre de paramËtres de formatage diffÈrent\n", $namespace.'.'.$varname);
+				printf("%s => Nombre de param√®tres de formatage diff√©rent\n", $namespace.'.'.$varname);
 				printf("%s : \"%s\"\n", $FICHIER_REFERENCE, addcslashes($tab_1[$varname], "\x0A\x0D\x22\x24"));
 				printf("%s : \"%s\"\n", $FICHIER_A_TESTER, addcslashes($tab_2[$varname], "\x0A\x0D\x22\x24"));
 			}

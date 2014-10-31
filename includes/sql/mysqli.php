@@ -3,14 +3,14 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2014 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 class Wadb_mysqli extends Wadb
 {
 	/**
-	 * Type de base de données
+	 * Type de base de donnÃ©es
 	 */
 	const ENGINE = 'mysql';
 
@@ -100,7 +100,7 @@ class Wadb_mysqli extends Wadb
 			$this->error = '';
 			$this->lastQuery = '';
 
-			if (!is_bool($result)) {// on a réceptionné une ressource ou un objet
+			if (!is_bool($result)) {// on a rÃ©ceptionnÃ© une ressource ou un objet
 				$result = new WadbResult_mysqli($result);
 			}
 		}
