@@ -303,7 +303,7 @@ switch ($mode) {
 		wan_print_row(' - post_max_size', config_value('post_max_size'));
 		wan_print_row(' - max_input_time', config_value('max_input_time'));
 		wan_print_row(' - memory_limit', config_value('memory_limit'));
-		wan_print_row(' - mail.add_x_header', config_value('mail.add_x_header'));
+		wan_print_row(' - mail.add_x_header', config_status('mail.add_x_header') ? 'on' : 'off');
 		wan_print_row(' - mail.force_extra_parameters', config_value('mail.force_extra_parameters'));
 		wan_print_row(' - open_basedir',  config_value('open_basedir'));
 		wan_print_row(' - sendmail_from', config_value('sendmail_from'));
