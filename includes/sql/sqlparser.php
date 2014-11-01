@@ -53,7 +53,7 @@ function parseSQL($input, $prefixe = '')
 				!$in_comments &&
 				strlen($lines[$i]) > 0 &&
 				$lines[$i][0] != '#' &&
-				!preg_match('/^--\x20/', $lines[$i])
+				!preg_match('/^--(\s|$)/', $lines[$i])
 			)
 		) {
 			//
