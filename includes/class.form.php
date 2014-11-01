@@ -38,7 +38,7 @@ class Wanewsletter
 			);
 		}
 
-		$mailer->set_charset($lang['CHARSET']);
+		$mailer->set_charset('UTF-8');
 		$mailer->set_format(FORMAT_TEXTE);
 		$this->mailer = $mailer;
 

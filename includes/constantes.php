@@ -18,7 +18,7 @@ define('WANEWSLETTER_VERSION', '2.4-beta3');
 // Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
 // le script invite l'utilisateur à lancer la procédure de mise à jour des tables
 //
-define('WANEWSLETTER_DB_VERSION', 16);
+define('WANEWSLETTER_DB_VERSION', 17);
 
 //
 // Modes de débogage du script
@@ -44,16 +44,6 @@ define('DEBUG_MODE', DEBUG_LEVEL_NORMAL);
 // Si false, les erreurs sont affichées dès qu'elles sont traitées.
 //
 define('DISPLAY_ERRORS_IN_LOG', true);
-
-//
-// Active/Désactive le passage automatique à l'UTF-8 au moment de l'envoi en présence de
-// caractères invalides provenant de Windows-1252 dans les newsletters.
-//
-// Si cette constante est placée à TRUE, les caractères en cause subiront une transformation
-// vers un caractère simple ou composé graphiquement proche (voir la fonction purge_latin1()
-// dans le fichier includes/functions.php).
-//
-define('TRANSLITE_INVALID_CHARS', false);
 
 //
 // Prise en compte de l'authentification HTTP pour la connexion automatique

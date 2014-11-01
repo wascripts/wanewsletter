@@ -205,7 +205,7 @@ switch ($mode) {
 					);
 				}
 
-				$mailer->set_charset($lang['CHARSET']);
+				$mailer->set_charset('UTF-8');
 				$mailer->set_format(FORMAT_TEXTE);
 
 				if ($abodata['pseudo'] != '') {
@@ -439,7 +439,7 @@ switch ($mode) {
 				);
 			}
 
-			$mailer->set_charset($lang['CHARSET']);
+			$mailer->set_charset('UTF-8');
 
 			if ($abodata['pseudo'] != '') {
 				$address = array($abodata['pseudo'] => $abodata['email']);
@@ -448,34 +448,9 @@ switch ($mode) {
 				$address = $abodata['email'];
 			}
 
-			$lang['CHARSET'] = strtoupper($lang['CHARSET']);
-			$lang['Label_link::utf8'] = wan_utf8_encode($lang['Label_link']);
-
 			while ($row = $result->fetch()) {
 				$listdata = $abodata['listes'][$row['liste_id']];
 				$format   = $abodata['listes'][$row['liste_id']]['format'];
-
-				//
-				// On traite les données de la newsletter à envoyer
-				//
-				if (preg_match('/[\x80-\x9F]/', $row['log_subject']) ||
-					preg_match('/[\x80-\x9F]/', $row['log_body_text']) ||
-					preg_match('/[\x80-\x9F]/', $row['log_body_html'])
-				) {
-					if (!TRANSLITE_INVALID_CHARS) {
-						$row['log_subject']   = wan_utf8_encode($row['log_subject']);
-						$row['log_body_text'] = wan_utf8_encode($row['log_body_text']);
-						$row['log_body_html'] = wan_utf8_encode($row['log_body_html']);
-						$lang['Label_link']   = $lang['Label_link::utf8'];
-
-						$mailer->set_charset('UTF-8');
-					}
-					else {
-						$row['log_subject']   = purge_latin1($row['log_subject'], true);
-						$row['log_body_text'] = purge_latin1($row['log_body_text'], true);
-						$row['log_body_html'] = purge_latin1($row['log_body_html']);
-					}
-				}
 
 				$mailer->clear_all();
 				$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);

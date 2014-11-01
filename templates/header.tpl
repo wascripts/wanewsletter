@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="{CONTENT_LANG}" dir="{CONTENT_DIR}">
 <head>
-	<meta charset="{CHARSET}" />
+	<meta charset="UTF-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="Robots" content="noindex, nofollow, none" />
 	{META}

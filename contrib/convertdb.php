@@ -30,7 +30,7 @@ define('WA_ROOTDIR', dirname(dirname(__FILE__)));
 $schemas_dir  = WA_ROOTDIR . '/includes/sql/schemas';
 
 //$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
-$dsn_from     = 'mysql://username:password@localhost/dbname?charset=latin1';
+$dsn_from     = 'mysql://username:password@localhost/dbname?charset=utf8';
 $dsn_to       = 'sqlite:/path/to/db/wanewsletter.sqlite';
 
 $prefixe_from = 'wa_';
@@ -43,7 +43,7 @@ define('IN_NEWSLETTER', true);
 
 if (PHP_SAPI != 'cli') {
 	set_time_limit(0);
-	header('Content-Type: text/plain; charset=ISO-8859-1');
+	header('Content-Type: text/plain; charset=UTF-8');
 }
 else {
 	define('IN_COMMANDLINE', true);

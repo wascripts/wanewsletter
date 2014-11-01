@@ -27,7 +27,7 @@ if ($mode == 'sendpass') {
 	if (isset($_POST['submit'])) {
 		$sql = "SELECT admin_id
 			FROM " . ADMIN_TABLE . "
-			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($login)) . "'
+			WHERE admin_login = '" . $db->escape($login) . "'
 				AND admin_email = '" . $db->escape($email) . "'";
 		$result = $db->query($sql);
 
@@ -51,7 +51,7 @@ if ($mode == 'sendpass') {
 				);
 			}
 
-			$mailer->set_charset($lang['CHARSET']);
+			$mailer->set_charset('UTF-8');
 			$mailer->set_format(FORMAT_TEXTE);
 			$mailer->set_from($email);
 			$mailer->set_address($email);

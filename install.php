@@ -42,8 +42,7 @@ $output->set_filenames( array(
 $output->assign_vars( array(
 	'PAGE_TITLE'   => (defined('NL_INSTALLED')) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
-	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-	'CHARSET'      => $lang['CHARSET']
+	'CONTENT_DIR'  => $lang['CONTENT_DIR']
 ));
 
 $prefixe = (!empty($_POST['prefixe'])) ? trim($_POST['prefixe']) : 'wa_';
@@ -159,8 +158,7 @@ load_settings();
 $output->assign_vars( array(
 	'PAGE_TITLE'   => (defined('NL_INSTALLED')) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
-	'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-	'CHARSET'      => $lang['CHARSET']
+	'CONTENT_DIR'  => $lang['CONTENT_DIR']
 ));
 
 if ($start) {
@@ -171,7 +169,7 @@ if ($start) {
 
 		$sql = "SELECT admin_email, admin_pwd, admin_level
 			FROM " . ADMIN_TABLE . "
-			WHERE LOWER(admin_login) = '" . $db->escape(strtolower($admin_login)) . "'
+			WHERE admin_login = '" . $db->escape($admin_login) . "'
 				AND admin_level = " . ADMIN_LEVEL;
 		$result = $db->query($sql);
 

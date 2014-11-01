@@ -103,19 +103,20 @@ else if ($mode == 'export') {
 	}
 
 	//
-	// Traitement des caractères invalides provenant de Windows-1252
-	// - Pour le format texte, passage à l'utf-8, pas d'alternative
-	// - Pour le format HTML, transformation des caractères en cause
-	//   dans leur équivalent en référence d'entité numérique.
+	// Ajout du BOM utf-8 pour l'archive en texte plat
 	//
 	if (preg_match('/[\x80-\x9F]/', $logdata['log_body_text'])) {
-		$logdata['log_body_text'] = wan_utf8_encode($logdata['log_body_text']);
-		$logdata['log_body_text'] = "\xEF\xBB\xBF" . $logdata['log_body_text']; // Ajout du BOM
+		$logdata['log_body_text'] = "\xEF\xBB\xBF" . $logdata['log_body_text'];
 	}
 
-	if (preg_match('/[\x80-\x9F]/', $logdata['log_body_html'])) {
-		$logdata['log_body_html'] = purge_latin1($logdata['log_body_html']);
-	}
+	//
+	// Ajout d'un meta charset dans l'archive html
+	//
+	$logdata['log_body_html'] = str_ireplace(
+		'<head>',
+		'<head><meta charset="UTF-8">',
+		$logdata['log_body_html']
+	);
 
 	$zip->addFromString('newsletter/newsletter.txt', $logdata['log_body_text']);
 	$zip->addFromString('newsletter/newsletter.html', $logdata['log_body_html']);
@@ -166,8 +167,8 @@ else if ($mode == 'iframe') {
 
 				echo str_replace(
 					'{LINKS}',
-					'<a href="#" onclick="return false;">' . $lang['Label_link'] . ' (lien fictif)</a>',
-					purge_latin1($body)
+					sprintf('<a href="#" onclick="return false;">%s (lien fictif)</a>', $lang['Label_link']),
+					$body
 				);
 			}
 			else {
@@ -890,7 +891,7 @@ else if ($mode == 'liste') {
 			$liste_name = strip_tags($liste_name);
 			$liste_sig  = strip_tags($liste_sig);
 
-			if (strlen($liste_name) < 3 || strlen($liste_name) > 30) {
+			if (mb_strlen($liste_name) < 3 || mb_strlen($liste_name) > 30) {
 				$error = true;
 				$msg_error[] = $lang['Invalid_liste_name'];
 			}

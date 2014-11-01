@@ -34,8 +34,8 @@ if (($mode == 'adduser' || $mode == 'deluser') && !wan_is_admin($admindata)) {
 }
 
 if ($mode == 'adduser') {
-	$new_login = (!empty($_POST['new_login'])) ? trim(strip_tags($_POST['new_login'])) : '';
-	$new_email = (!empty($_POST['new_email'])) ? trim(strip_tags($_POST['new_email'])) : '';
+	$new_login = (!empty($_POST['new_login'])) ? trim($_POST['new_login']) : '';
+	$new_email = (!empty($_POST['new_email'])) ? trim($_POST['new_email']) : '';
 
 	if (isset($_POST['submit'])) {
 		require WA_ROOTDIR . '/includes/functions.validate.php';
@@ -47,7 +47,7 @@ if ($mode == 'adduser') {
 		else {
 			$sql = "SELECT COUNT(*) AS login_test
 				FROM " . ADMIN_TABLE . "
-				WHERE LOWER(admin_login) = '" . $db->escape(strtolower($new_login)) . "'";
+				WHERE admin_login = '" . $db->escape($new_login) . "'";
 			$result = $db->query($sql);
 
 			if ($result->column('login_test') > 0) {
@@ -87,7 +87,7 @@ if ($mode == 'adduser') {
 				);
 			}
 
-			$mailer->set_charset($lang['CHARSET']);
+			$mailer->set_charset('UTF-8');
 			$mailer->set_format(FORMAT_TEXTE);
 			$mailer->set_from($admindata['admin_email'], $admindata['admin_login']);
 			$mailer->set_address($new_email);
@@ -312,7 +312,7 @@ if (isset($_POST['submit'])) {
 				);
 			}
 
-			$mailer->set_charset($lang['CHARSET']);
+			$mailer->set_charset('UTF-8');
 			$mailer->set_format(FORMAT_TEXTE);
 			$mailer->set_from($admindata['admin_email'], $admindata['admin_login']);
 			$mailer->set_address($email);

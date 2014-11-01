@@ -111,15 +111,13 @@ if ($listdata = $result->fetch()) {
 				continue;
 			}
 
-			$action = strtolower(trim($headers['subject']));
+			$action = mb_strtolower(trim($headers['subject']));
 
 			switch ($action) {
-				case 'desinscription':
 				case 'désinscription':
 				case 'unsubscribe':
 					$action = 'desinscription';
 					break;
-				case 'inscription':
 				case 'subscribe':
 					$action = 'inscription';
 					break;

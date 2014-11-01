@@ -7,6 +7,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+use \Patchwork\Utf8 as u;
+
 if (!defined('FUNCTIONS_INC')) {
 
 define('FUNCTIONS_INC', true);
@@ -565,11 +567,6 @@ function wan_display_error($error, $simpleHTML = false)
 
 		$message = htmlspecialchars_decode($message);
 
-		// Au cas où le terminal utilise l'encodage utf-8
-		if (preg_match('/\.UTF-?8/i', getenv('LANG'))) {
-			$message = wan_utf8_encode($message);
-		}
-
 		fputs(STDERR, $message);
 	}
 	else if ($simpleHTML) {
@@ -670,7 +667,7 @@ function wan_error_get_last()
 function plain_error($var, $exit = true, $verbose = false)
 {
 	if (!headers_sent()) {
-		header('Content-Type: text/plain; charset=ISO-8859-15');
+		header('Content-Type: text/plain; charset=UTF-8');
 	}
 
 	if ($verbose) {
@@ -936,14 +933,14 @@ function wa_realpath($relative_path)
  */
 function cut_str($str, $len)
 {
-	if (strlen($str) > $len) {
-		$str = substr($str, 0, ($len - 3));
+	if (mb_strlen($str) > $len) {
+		$str = mb_substr($str, 0, $len);
 
-		if ($space = strrpos($str, ' ')) {
-			$str = substr($str, 0, $space);
+		if ($space = mb_strrpos($str, ' ')) {
+			$str = mb_substr($str, 0, $space);
 		}
 
-		$str .= '...';
+		$str .= "\xe2\x80\xa6";// (U+2026) Horizontal ellipsis char
 	}
 
 	return $str;
@@ -1042,113 +1039,33 @@ function fake_header($in_loop)
 }
 
 /**
- * Effectue une translitération sur les caractères interdits provenant de Windows-1252
- * ou les transforme en références d'entité numérique selon que la chaîne est du texte brut ou du HTML
+ * Détection d'encodage et conversion de $charset
  *
- * @param string $data      Chaîne à modifier
- * @param string $translite Active ou non la translitération
- *
- * @return string
- */
-function purge_latin1($data, $translite = false)
-{
-	global $lang;
-
-	if ($lang['CHARSET'] == 'ISO-8859-1') {
-		$convmap_name = ($translite) ? 'translite_cp1252' : 'cp1252_to_entity';
-
-		return strtr($data, $GLOBALS['CONVMAP'][$convmap_name]);
-	}
-
-	return $data;
-}
-
-/**
- * Détecte si une chaîne est encodée ou non en UTF-8
- *
- * @param string $string Chaîne à modifier
- *
- * @link   http://w3.org/International/questions/qa-forms-utf-8.html
- * @see    http://bugs.php.net/bug.php?id=37793 (segfault qui oblige à tronçonner la chaîne)
- * @return boolean
- */
-function is_utf8($string)
-{
-	return !strlen(
-		preg_replace(
-		'/[\x09\x0A\x0D\x20-\x7E]'              # ASCII
-		. '|[\xC2-\xDF][\x80-\xBF]'             # non-overlong 2-byte
-		. '|\xE0[\xA0-\xBF][\x80-\xBF]'         # excluding overlongs
-		. '|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}'  # straight 3-byte
-		. '|\xED[\x80-\x9F][\x80-\xBF]'         # excluding surrogates
-		. '|\xF0[\x90-\xBF][\x80-\xBF]{2}'      # planes 1-3
-		. '|[\xF1-\xF3][\x80-\xBF]{3}'          # planes 4-15
-		. '|\xF4[\x80-\x8F][\x80-\xBF]{2}'      # plane 16
-		. '/sS', '', $string)
-	);
-}
-
-/**
- * Encode une chaîne en UTF-8
- *
- * @param string $data
+ * @param string  $data
+ * @param string  $charset   Jeu de caractères des données fournies
+ * @param boolean $check_bom Détection du BOM en tête des données
  *
  * @return string
  */
-function wan_utf8_encode($data)
-{
-	$data = strtr($data, $GLOBALS['CONVMAP']['cp1252_to_entity']);
-	$data = utf8_encode($data);
-	$data = strtr($data, array_flip($GLOBALS['CONVMAP']['utf8_to_entity']));
-
-	return $data;
-}
-
-/**
- * Décode une chaîne en UTF-8
- *
- * @param string $data
- *
- * @return string
- */
-function wan_utf8_decode($data)
-{
-	$data = strtr($data, $GLOBALS['CONVMAP']['utf8_to_entity']);
-	$data = utf8_decode($data);
-	$data = strtr($data, array_flip($GLOBALS['CONVMAP']['cp1252_to_entity']));
-
-	return $data;
-}
-
-/**
- * Détection d'encodage et conversion vers $charset
- *
- * @param string $data
- *
- * @return string
- */
-function convert_encoding($data, $charset, $check_bom = true)
+function convert_encoding($data, $charset = null, $check_bom = true)
 {
 	if (empty($charset)) {
 		if ($check_bom && strncmp($data, "\xEF\xBB\xBF", 3) == 0) {
 			$charset = 'UTF-8';
 			$data = substr($data, 3);
 		}
-		else if (is_utf8($data)) {
+		else if (u::isUtf8($data)) {
 			$charset = 'UTF-8';
 		}
 	}
 
-	if (strtoupper($charset) == 'UTF-8') {
-		if ($GLOBALS['lang']['CHARSET'] == 'ISO-8859-1') {
-			$data = wan_utf8_decode($data);
-		}
-		else if (extension_loaded('iconv')) {
-			$data = iconv($charset, $GLOBALS['lang']['CHARSET'] . '//TRANSLIT', $data);
-		}
-		else if (extension_loaded('mbstring')) {
-			$data = mb_convert_encoding($data, $GLOBALS['lang']['CHARSET'], $charset);
-		}
+	if (empty($charset)) {
+		$charset = 'windows-1252';
+		trigger_error("Cannot found valid charset. Using windows-1252 as fallback", E_USER_NOTICE);
+	}
+
+	if (strtoupper($charset) != 'UTF-8') {
+		$data = iconv($charset, 'UTF-8', $data);
 	}
 
 	return $data;
@@ -1308,9 +1225,12 @@ function http_get_contents($URL, &$errstr)
  */
 function wa_number_format($number, $decimals = 2)
 {
-	$number = number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
-	if (substr($number, -2) == '00') {
-		$number = substr($number, 0, -3);
+	$number = u::number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
+	$number = rtrim($number, '0');
+	$dec_point_len = strlen($GLOBALS['lang']['DEC_POINT']);
+
+	if (substr($number, -$dec_point_len) === $GLOBALS['lang']['DEC_POINT']) {
+		$number = substr($number, 0, -$dec_point_len);
 	}
 
 	return $number;
@@ -1361,102 +1281,12 @@ function formateSize($size)
 		$unit = $GLOBALS['lang']['Octets'];
 	}
 
-	return sprintf("%s\xA0%s", wa_number_format($size), $unit);
+	return sprintf("%s\xC2\xA0%s", wa_number_format($size), $unit);
 }
 
-$CONVMAP = array(
-	'cp1252_to_entity' => array(
-		"\x80" => "&#8364;",    # EURO SIGN
-		"\x82" => "&#8218;",    # SINGLE LOW-9 QUOTATION MARK
-		"\x83" => "&#402;",     # LATIN SMALL LETTER F WITH HOOK
-		"\x84" => "&#8222;",    # DOUBLE LOW-9 QUOTATION MARK
-		"\x85" => "&#8230;",    # HORIZONTAL ELLIPSIS
-		"\x86" => "&#8224;",    # DAGGER
-		"\x87" => "&#8225;",    # DOUBLE DAGGER
-		"\x88" => "&#710;",     # MODIFIER LETTER CIRCUMFLEX ACCENT
-		"\x89" => "&#8240;",    # PER MILLE SIGN */
-		"\x8a" => "&#352;",     # LATIN CAPITAL LETTER S WITH CARON
-		"\x8b" => "&#8249;",    # SINGLE LEFT-POINTING ANGLE QUOTATION
-		"\x8c" => "&#338;",     # LATIN CAPITAL LIGATURE OE
-		"\x8e" => "&#381;",     # LATIN CAPITAL LETTER Z WITH CARON
-		"\x91" => "&#8216;",    # LEFT SINGLE QUOTATION MARK
-		"\x92" => "&#8217;",    # RIGHT SINGLE QUOTATION MARK
-		"\x93" => "&#8220;",    # LEFT DOUBLE QUOTATION MARK
-		"\x94" => "&#8221;",    # RIGHT DOUBLE QUOTATION MARK
-		"\x95" => "&#8226;",    # BULLET
-		"\x96" => "&#8211;",    # EN DASH
-		"\x97" => "&#8212;",    # EM DASH
-		"\x98" => "&#732;",     # SMALL TILDE
-		"\x99" => "&#8482;",    # TRADE MARK SIGN
-		"\x9a" => "&#353;",     # LATIN SMALL LETTER S WITH CARON
-		"\x9b" => "&#8250;",    # SINGLE RIGHT-POINTING ANGLE QUOTATION
-		"\x9c" => "&#339;",     # LATIN SMALL LIGATURE OE
-		"\x9e" => "&#382;",     # LATIN SMALL LETTER Z WITH CARON
-		"\x9f" => "&#376;"      # LATIN CAPITAL LETTER Y WITH DIAERESIS
-	),
-	'utf8_to_entity' => array(
-		"\xe2\x82\xac" => "&#8364;",
-		"\xe2\x80\x9a" => "&#8218;",
-		"\xc6\x92"     => "&#402;",
-		"\xe2\x80\x9e" => "&#8222;",
-		"\xe2\x80\xa6" => "&#8230;",
-		"\xe2\x80\xa0" => "&#8224;",
-		"\xe2\x80\xa1" => "&#8225;",
-		"\xcb\x86"     => "&#710;",
-		"\xe2\x80\xb0" => "&#8240;",
-		"\xc5\xa0"     => "&#352;",
-		"\xe2\x80\xb9" => "&#8249;",
-		"\xc5\x92"     => "&#338;",
-		"\xc5\xbd"     => "&#381;",
-		"\xe2\x80\x98" => "&#8216;",
-		"\xe2\x80\x99" => "&#8217;",
-		"\xe2\x80\x9c" => "&#8220;",
-		"\xe2\x80\x9d" => "&#8221;",
-		"\xe2\x80\xa2" => "&#8226;",
-		"\xe2\x80\x93" => "&#8211;",
-		"\xe2\x80\x94" => "&#8212;",
-		"\xcb\x9c"     => "&#732;",
-		"\xe2\x84\xa2" => "&#8482;",
-		"\xc5\xa1"     => "&#353;",
-		"\xe2\x80\xba" => "&#8250;",
-		"\xc5\x93"     => "&#339;",
-		"\xc5\xbe"     => "&#382;",
-		"\xc5\xb8"     => "&#376;"
-	),
-	'translite_cp1252' => array(
-		"\x80" => "euro",
-		"\x82" => ",",
-		"\x83" => "f",
-		"\x84" => ",,",
-		"\x85" => "...",
-		"\x86" => "?",
-		"\x87" => "?",
-		"\x88" => "^",
-		"\x89" => "?",
-		"\x8a" => "S",
-		"\x8b" => "?",
-		"\x8c" => "OE",
-		"\x8e" => "Z",
-		"\x91" => "'",
-		"\x92" => "'",
-		"\x93" => "\"",
-		"\x94" => "\"",
-		"\x95" => "?",
-		"\x96" => "-",
-		"\x97" => "--",
-		"\x98" => "~",
-		"\x99" => "tm",
-		"\x9a" => "s",
-		"\x9b" => ">",
-		"\x9c" => "oe",
-		"\x9e" => "z",
-		"\x9f" => "Y"
-	)
-);
-
 /**
- * Idem que la fonction htmlspecialchars() native, mais avec le jeu de
- * caractère ISO-8859-1 par défaut.
+ * Idem que la fonction htmlspecialchars() native, avec le paramètre $encoding
+ * par défaut à UTF-8. Ce n'est le cas en natif qu'à partir de PHP 5.4.
  *
  * @param string $string
  * @param int    $flags
@@ -1465,7 +1295,7 @@ $CONVMAP = array(
  *
  * @return string
  */
-function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', $double_encode = true)
+function wan_htmlspecialchars($string, $flags = null, $encoding = 'UTF-8', $double_encode = true)
 {
 	if ($flags == null) {
 		$flags = ENT_COMPAT | ENT_HTML401;
@@ -1475,8 +1305,8 @@ function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', 
 }
 
 /**
- * Idem que la fonction html_entity_decode() native, mais avec le jeu de
- * caractère ISO-8859-1 par défaut.
+ * Idem que la fonction html_entity_decode() native, avec le paramètre $encoding
+ * par défaut à UTF-8. Ce n'est le cas en natif qu'à partir de PHP 5.4.
  *
  * @param string $string
  * @param int    $flags
@@ -1484,7 +1314,7 @@ function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', 
  *
  * @return string
  */
-function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1')
+function wan_html_entity_decode($string, $flags = null, $encoding = 'UTF-8')
 {
 	if ($flags == null) {
 		$flags = ENT_COMPAT | ENT_HTML401;

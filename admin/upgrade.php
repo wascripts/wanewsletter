@@ -643,6 +643,37 @@ if (isset($_POST['start'])) {
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.log_id', LOG_TABLE);
 		}
 
+		//
+		// MySQL : Définition du jeu de caractères des tables et colonnes en
+		// UTF-8 avec conversion automatique des données. Merci MySQL :D
+		// SQLite : Conversion manuelle des données :(
+		//
+		if ($nl_config['db_version'] < 17) {
+			if ($db::ENGINE == 'mysql') {
+				foreach ($sql_schemas as $tablename => $schema) {
+					$sql_update[] = sprintf("ALTER TABLE %s CONVERT TO CHARACTER SET utf8", $tablename);
+				}
+			}
+			else if ($db::ENGINE == 'sqlite') {
+				$db->createFunction('utf8_encode', array('\Patchwork\Utf8', 'utf8_encode'));
+
+				$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_pseudo = utf8_encode(abo_pseudo)";
+				$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_login = utf8_encode(admin_login)";
+				$sql_update[] = "UPDATE " . CONFIG_TABLE . "
+					SET config_name = utf8_encode(config_name),
+					config_value = utf8_encode(config_value)";
+				$sql_update[] = "UPDATE " . JOINED_FILES_TABLE . " SET file_real_name = utf8_encode(file_real_name)";
+				$sql_update[] = "UPDATE " . LISTE_TABLE . "
+					SET liste_name = utf8_encode(liste_name),
+						form_url = utf8_encode(form_url),
+						liste_sig = utf8_encode(liste_sig)";
+				$sql_update[] = "UPDATE " . LOG_TABLE . "
+					SET log_subject = utf8_encode(log_subject),
+						log_body_text = utf8_encode(log_body_text),
+						log_body_html = utf8_encode(log_body_html)";
+			}
+		}
+
 		exec_queries($sql_update);
 
 		//

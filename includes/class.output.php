@@ -312,7 +312,6 @@ class Output extends Template
 			'META'         => $this->meta_redirect,
 			'CONTENT_LANG' => $lang['CONTENT_LANG'],
 			'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-			'CHARSET'      => $lang['CHARSET'],
 			'L_LOG'        => $lang['Module']['log'],
 
 			'L_LOGOUT'     => $l_logout,
@@ -413,7 +412,7 @@ class Output extends Template
 		$data = ob_get_contents();
 		ob_end_clean();
 
-		echo purge_latin1($data);
+		echo $data;
 
 		//
 		// On ferme la connexion à la base de données, si elle existe
@@ -436,7 +435,7 @@ class Output extends Template
 		header('Pragma: no-cache');// HTTP/1.0
 		header('Cache-Control: no-cache, must-revalidate, max-age=0');
 		header('Content-Language: ' . $lang['CONTENT_LANG']);
-		header('Content-Type: text/html; charset=' . $lang['CHARSET']);
+		header('Content-Type: text/html; charset=UTF-8');
 
 		ob_start();
 		ob_implicit_flush(0);
@@ -453,18 +452,16 @@ class Output extends Template
 	{
 		global $lang;
 
-		$lg      = (!empty($lang['CONTENT_LANG'])) ? $lang['CONTENT_LANG'] : 'fr';
-		$dir     = (!empty($lang['CONTENT_DIR'])) ? $lang['CONTENT_DIR'] : 'ltr';
-		$charset = (!empty($lang['CHARSET'])) ? $lang['CHARSET'] : 'ISO-8859-1';
-		$content = purge_latin1($content);
+		$lang = (!empty($lang['CONTENT_LANG'])) ? $lang['CONTENT_LANG'] : 'fr';
+		$dir  = (!empty($lang['CONTENT_DIR'])) ? $lang['CONTENT_DIR'] : 'ltr';
 
 		$this->send_headers();
 
 		echo <<<BASIC
 <!DOCTYPE html>
-<html lang="$lg" dir="$dir">
+<html lang="$lang" dir="$dir">
 <head>
-	<meta charset="$charset" />
+	<meta charset="UTF-8" />
 	$this->meta_redirect
 	<title>$page_title</title>
 

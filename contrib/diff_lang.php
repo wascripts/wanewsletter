@@ -22,7 +22,7 @@ define('WA_LANGUAGE_DIR', '../language');
 $FICHIER_REFERENCE = 'lang_francais.php';
 $FICHIER_A_TESTER  = 'lang_english.php';
 
-ini_set('default_mimetype', 'text/plain');
+header('Content-Type: text/plain; charset=UTF-8');
 
 function diff_lang($tab_1, $tab_2, $namespace = '')
 {

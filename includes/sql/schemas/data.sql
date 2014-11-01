@@ -1,20 +1,20 @@
--- 
+--
 -- Données de base de WAnewsletter
--- 
+--
 
 
--- 
+--
 -- Création d'un compte administrateur (mot de passe par défaut: admin)
--- 
+--
 INSERT INTO wa_admin (admin_login, admin_pwd, admin_email, admin_lang, admin_dateformat, admin_level)
 	VALUES('admin', '$P$D6MbHmah9V/JY/9H3.dRGKpCVS65su0', 'admin@domaine.com', 'francais', 'd M Y H:i', 2);
 INSERT INTO wa_auth_admin (admin_id, liste_id, auth_view, auth_edit, auth_del, auth_send, auth_import, auth_export, auth_ban, auth_attach)
 	VALUES (1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
 
--- 
+--
 -- Configuration de base
--- 
+--
 INSERT INTO wa_config (config_name, config_value) VALUES('sitename',       'Yourdomaine');
 INSERT INTO wa_config (config_name, config_value) VALUES('urlsite',        'http://www.yourdomaine.com');
 INSERT INTO wa_config (config_name, config_value) VALUES('path',           '/');
@@ -44,12 +44,12 @@ INSERT INTO wa_config (config_name, config_value) VALUES('check_email_mx', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('enable_profil_cp', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('mailing_startdate', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('debug_level',    '1');
-INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '16');
+INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '17');
 
 
--- 
+--
 -- Extensions interdites par défaut
--- 
+--
 INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'exe');
 INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'php');
 INSERT INTO wa_forbidden_ext (liste_id, fe_ext) VALUES(1, 'php3');

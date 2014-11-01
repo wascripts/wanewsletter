@@ -31,16 +31,6 @@ if (PHP_SAPI != 'cli') {
 	$argc = $_SERVER['argc'];
 }
 
- // Au cas où le terminal utilise l'encodage utf-8
-if (preg_match('/\.UTF-?8/i', getenv('LANG'))) {
-	function convert_output($data)
-	{
-		return wan_utf8_encode($data);
-	}
-
-	ob_start('convert_output', 1);
-}
-
 require WA_ROOTDIR . '/includes/common.inc.php';
 
 //
@@ -321,15 +311,13 @@ else if ($process_subscribe) {
 			continue;
 		}
 
-		$action = strtolower(trim($headers['subject']));
+		$action = mb_strtolower(trim($headers['subject']));
 
 		switch ($action) {
-			case 'desinscription':
 			case 'désinscription':
 			case 'unsubscribe':
 				$action = 'desinscription';
 				break;
-			case 'inscription':
 			case 'subscribe':
 				$action = 'inscription';
 				break;

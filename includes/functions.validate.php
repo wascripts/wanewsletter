@@ -18,7 +18,7 @@ define('FUNCTIONS_VALIDATE_INC', true);
  */
 function validate_pseudo($pseudo)
 {
-	return (strlen($pseudo) >= 2 && strlen($pseudo) <= 30);
+	return (mb_strlen($pseudo) >= 2 && mb_strlen($pseudo) <= 30);
 }
 
 /**

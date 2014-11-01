@@ -267,7 +267,7 @@ class Mailer {
 	 * @var string
 	 * @access public
 	 */
-	var $charset                = 'iso-8859-1';
+	var $charset                = 'UTF-8';
 	
 	/**
 	 * Encodage à utiliser 

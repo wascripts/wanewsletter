@@ -7,6 +7,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+use \Patchwork\Utf8 as u;
+
 define('IN_NEWSLETTER', true);
 
 require './pagestart.php';
@@ -228,7 +230,7 @@ function wan_subdir_status($dir)
 
 function wan_print_row($name, $value)
 {
-	echo str_pad($name, 30);
+	echo u::str_pad($name, 30);
 	echo ' : ';
 	echo wan_htmlspecialchars($value);
 	echo "\r\n";

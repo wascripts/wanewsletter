@@ -240,15 +240,15 @@ function WaDatabase($dsn)
 	// Charset non précisé dans le DSN. On tente une auto-configuration.
 	//
 	if ($db::ENGINE != 'sqlite' && ($encoding = $db->encoding()) &&
-		preg_match('#^UTF-?(8|16)|UCS-?2|UNICODE$#i', $encoding)
+		!preg_match('#^utf-?8$#i', $encoding)
 	) {
 		//
-		// WorkAround : Wanewsletter ne gère pas les codages de caractères multi-octets.
-		// Si le jeu de caractères de la connexion est multi-octet, on le change
-		// arbitrairement pour le latin1 et on affiche une alerte à l'utilisateur
+		// Wanewsletter utilise l'UTF-8 comme codage de caractères.
+		// Si le jeu de caractères de la connexion est différent, on le change
+		// arbitrairement pour l'UTF-8 et on affiche une alerte à l'utilisateur
 		// en cas d'échec.
 		//
-		$newEncoding = 'latin1';
+		$newEncoding = 'utf8';
 		$db->encoding($newEncoding);
 
 		if (strcasecmp($encoding, $db->encoding()) === 0) {
@@ -256,13 +256,13 @@ function WaDatabase($dsn)
 
 			$message = <<<ERR
 Wanewsletter a détecté que le <strong>jeu de caractères</strong>
-de connexion à votre base de données est <q>$encoding</q>.
-Wanewsletter ne gère pas les codages de caractères multi-octets et a donc tenté
-de changer ce réglage en faveur du jeu de caractères <q>$newEncoding</q>, mais sans succès.<br />
+de la connexion à votre base de données est <q>$encoding</q>.
+Wanewsletter utilise l'UTF-8 comme codage de caractères et a donc tenté
+de changer ce réglage, mais sans succès.<br />
 Consultez la documentation de votre base de données pour trouver le réglage adéquat
 et définir le paramètre charset dans la variable \$dsn du fichier de configuration
 (consultez le fichier config.sample.inc.php pour voir un exemple de DSN configuré
-de cette manière)."
+de cette manière).
 ERR;
 			$output->displayMessage(str_replace("\n", " ", $message));
 		}
