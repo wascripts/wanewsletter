@@ -674,6 +674,41 @@ if (isset($_POST['start'])) {
 			}
 		}
 
+		//
+		// Avant le support UTF-8 dans Wanewsletter, PostgreSQL a considéré
+		// toutes les chaînes qui lui étaient transmises comme du latin1, non
+		// comme du windows-1252 comme le fait MySQL.
+		// Les caractères spécifiques à windows-1252 sont donc incorrectement
+		// codés en UTF-8 dans les tables, ce qui est devenu problématique
+		// maintenant que Wanewsletter travaille directement en UTF-8
+		//
+		if ($nl_config['db_version'] < 18 && $db::ENGINE == 'postgres') {
+			$res = $db->query(sprintf("SELECT pg_encoding_to_char(encoding) as db_encoding
+				FROM pg_database WHERE datname = '%s'",
+				$db->dbname
+			));
+
+			if ($res->column('db_encoding') == 'UTF8') {
+				$sql_update[] = "UPDATE " . ABONNES_TABLE . "
+					SET abo_pseudo = convert_from(convert(abo_pseudo::bytea, 'utf8', 'latin1'),'win1252')";
+				$sql_update[] = "UPDATE " . ADMIN_TABLE . "
+					SET admin_login = convert_from(convert(admin_login::bytea, 'utf8', 'latin1'),'win1252')";
+				$sql_update[] = "UPDATE " . CONFIG_TABLE . "
+					SET config_name = convert_from(convert(config_name::bytea, 'utf8', 'latin1'),'win1252'),
+					config_value = convert_from(convert(config_value::bytea, 'utf8', 'latin1'),'win1252')";
+				$sql_update[] = "UPDATE " . JOINED_FILES_TABLE . "
+					SET file_real_name = convert_from(convert(file_real_name::bytea, 'utf8', 'latin1'),'win1252')";
+				$sql_update[] = "UPDATE " . LISTE_TABLE . "
+					SET liste_name = convert_from(convert(liste_name::bytea, 'utf8', 'latin1'),'win1252'),
+						form_url = convert_from(convert(form_url::bytea, 'utf8', 'latin1'),'win1252'),
+						liste_sig = convert_from(convert(liste_sig::bytea, 'utf8', 'latin1'),'win1252')";
+				$sql_update[] = "UPDATE " . LOG_TABLE . "
+					SET log_subject = convert_from(convert(log_subject::bytea, 'utf8', 'latin1'),'win1252'),
+						log_body_text = convert_from(convert(log_body_text::bytea, 'utf8', 'latin1'),'win1252'),
+						log_body_html = convert_from(convert(log_body_html::bytea, 'utf8', 'latin1'),'win1252')";
+			}
+		}
+
 		exec_queries($sql_update);
 
 		//
