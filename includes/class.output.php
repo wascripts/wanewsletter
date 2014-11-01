@@ -409,11 +409,6 @@ class Output extends Template
 
 		$this->pparse('footer');
 
-		$data = ob_get_contents();
-		ob_end_clean();
-
-		echo $data;
-
 		//
 		// On ferme la connexion à la base de données, si elle existe
 		//
@@ -436,9 +431,6 @@ class Output extends Template
 		header('Cache-Control: no-cache, must-revalidate, max-age=0');
 		header('Content-Language: ' . $lang['CONTENT_LANG']);
 		header('Content-Type: text/html; charset=UTF-8');
-
-		ob_start();
-		ob_implicit_flush(0);
 	}
 
 	/**
