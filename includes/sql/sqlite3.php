@@ -224,6 +224,23 @@ class Wadb_sqlite3 extends Wadb
 	{
 		return new WadbBackup_sqlite3($this);
 	}
+
+	/**
+	 * Enregistre une fonction PHP ou une fonction utilisateur à utiliser comme
+	 * fonction scalaire SQL, pour utilisation dans les requête SQL.
+	 *
+	 * @link http://www.php.net/sqlite3.createfunction
+	 *
+	 * @param string   $name
+	 * @param callable $callback
+	 * @param integer  $num_args
+	 *
+	 * @return boolean
+	 */
+	public function createFunction($name, $callback, $num_args = -1)
+	{
+		return $this->link->createFunction($name, $callback, $num_args);
+	}
 }
 
 class WadbResult_sqlite3 extends WadbResult
