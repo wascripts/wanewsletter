@@ -65,6 +65,17 @@ if (file_exists($config_file)) {
 	unset($config_file);
 }
 
+//
+// On vérifie proprement la présence des dépendances.
+// Évite que l'utilisateur prenne un méchant et énigmatique fatal error sur le require() suivant.
+//
+if (!file_exists(WA_ROOTDIR . '/vendor/autoload.php')) {
+	echo "Please first install the dependencies using the command: ";
+	echo "<samp>composer install</samp><br>";
+	echo "See the <a href='https://getcomposer.org/'>official website of Composer</a>.";
+	exit;
+}
+
 require WA_ROOTDIR . '/includes/compat.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
