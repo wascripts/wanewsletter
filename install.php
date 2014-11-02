@@ -425,7 +425,7 @@ if (!defined('NL_INSTALLED')) {
 		'DB_BOX'    => $db_box,
 		'DBPATH'    => wan_htmlspecialchars($infos['path']),
 		'DBHOST'    => wan_htmlspecialchars($infos['host']),
-		'DBNAME'    => wan_htmlspecialchars($infos['dbname']),
+		'DBNAME'    => ($infos['engine'] != 'sqlite') ? wan_htmlspecialchars($infos['dbname']) : '',
 		'DBUSER'    => wan_htmlspecialchars($infos['user']),
 		'PREFIXE'   => wan_htmlspecialchars($prefixe),
 		'LOGIN'     => wan_htmlspecialchars($admin_login),
