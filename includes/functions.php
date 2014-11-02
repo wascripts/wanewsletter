@@ -1353,4 +1353,22 @@ function wan_get_debug_level()
 	return $debug_level;
 }
 
+/**
+ * Forge l'url vers une entrée de la FAQ
+ *
+ * @param integer $entry_id
+ *
+ * @return string
+ */
+function wan_get_faq_url($entry_id)
+{
+	global $nl_config, $lang;
+
+	return sprintf('%s/docs/faq.%s.html#p%d',
+		rtrim($nl_config['path'], '/'),
+		$lang['CONTENT_LANG'],
+		$entry_id
+	);
+}
+
 }

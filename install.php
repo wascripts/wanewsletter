@@ -348,7 +348,7 @@ if ($start) {
 
 		$db->close();
 
-		$login_page = WA_ROOTDIR . '/admin/login.php';
+		$login_page = wan_build_url('admin/login.php');
 
 		if (!defined('NL_INSTALLED')) {
 			if (!($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w'))) {
@@ -394,8 +394,8 @@ if (!defined('NL_INSTALLED')) {
 
 	$l_explain = nl2br(sprintf(
 		$lang['Welcome_in_install'],
-		'<a href="' . WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
-		'<a href="' . WA_ROOTDIR . '/COPYING">', '</a>',
+		'<a href="docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
+		'<a href="COPYING">', '</a>',
 		'<a href="http://phpcodeur.net/wascripts/GPL">', '</a>'
 	));
 

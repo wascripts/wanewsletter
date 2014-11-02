@@ -159,7 +159,7 @@ else if ($mode == 'iframe') {
 			if ($format == FORMAT_HTML) {
 				$body = preg_replace(
 					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/si',
-					'<\\1"' . WA_ROOTDIR . '/options/show.php?file=\\2"\\3>',
+					'<\\1"' . $nl_config['path'] . 'options/show.php?file=\\2"\\3>',
 					$body
 				);
 
@@ -1005,7 +1005,10 @@ else if ($mode == 'liste') {
 			'L_TITLE_CRON'         => $lang['Title']['cron'],
 			'L_EXPLAIN'            => nl2br($lang['Explain']['liste']),
 			'L_EXPLAIN_PURGE'      => nl2br($lang['Explain']['purge']),
-			'L_EXPLAIN_CRON'       => nl2br(sprintf($lang['Explain']['cron'], '<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p5">', '</a>')),
+			'L_EXPLAIN_CRON'       => nl2br(sprintf($lang['Explain']['cron'],
+				sprintf('<a href="%s">', wan_get_faq_url(5)),
+				'</a>'
+			)),
 			'L_LISTE_NAME'         => $lang['Liste_name'],
 			'L_LISTE_PUBLIC'       => $lang['Liste_public'],
 			'L_AUTH_FORMAT'        => $lang['Auth_format'],

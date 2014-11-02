@@ -98,7 +98,8 @@ spl_autoload_register('wan_autoloader');
 //
 if (!defined('IN_INSTALL') && !defined('NL_INSTALLED')) {
 	if (!defined('IN_COMMANDLINE')) {
-		http_redirect(sprintf('%s/install.php', WA_ROOTDIR));
+		$install_path = (file_exists('install.php')) ? 'install.php' : '../install.php';
+		http_redirect($install_path);
 	}
 	else {
 		echo "Wanewsletter seems not to be installed!\n";

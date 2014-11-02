@@ -278,8 +278,8 @@ class Output extends Template
 
 			$this->addLink('section',   './admin.php', $lang['Module']['users']);
 			$this->addLink('section',   './stats.php', $lang['Title']['stats']);
-			$this->addLink('help',      WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
-			$this->addLink('author',    WA_ROOTDIR . '/docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
+			$this->addLink('help',      '../docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
+			$this->addLink('author',    '../docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
 			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
 
 			if ($page_title == '') {

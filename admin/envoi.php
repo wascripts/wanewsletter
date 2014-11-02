@@ -904,7 +904,7 @@ $body_html = wan_htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
 
 $output->addLink('subsection', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('subsection', './envoi.php?mode=progress', $lang['List_send']);
-$output->addScript(WA_ROOTDIR . '/templates/admin/editor.js');
+$output->addScript($nl_config['path'] . 'templates/admin/editor.js');
 
 $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $prev_status);
@@ -917,7 +917,10 @@ $output->set_filenames(array(
 ));
 
 $output->assign_vars(array(
-	'L_EXPLAIN'               => nl2br(sprintf($lang['Explain']['send'],'<a href="' . WA_ROOTDIR . '/docs/faq.' . $lang['CONTENT_LANG'] . '.html#p26">', '</a>')),
+	'L_EXPLAIN'               => nl2br(sprintf($lang['Explain']['send'],
+		sprintf('<a href="%s">', wan_get_faq_url(26)),
+		'</a>'
+	)),
 	'L_LOAD_LOG'              => $lang['Load_log'],
 	'L_LIST_SEND'             => $lang['List_send'],
 	'L_DEST'                  => $lang['Dest'],
