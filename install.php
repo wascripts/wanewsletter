@@ -200,16 +200,15 @@ if ($start) {
 	}
 	else {
 		try {
-			if (empty($dsn)) {
-				throw new Exception(sprintf($lang['Connect_db_error'], 'Invalid DB name'));
-			}
-
 			if ($infos['engine'] == 'sqlite') {
 				$sqlite_dir = dirname($infos['path']);
 
 				if (!is_writable($sqlite_dir)) {
 					throw new Exception(sprintf($lang['sqldir_perms_problem'], $sqlite_dir));
 				}
+			}
+			else if ($infos['dbname'] == '') {
+				throw new Exception(sprintf($lang['Connect_db_error'], 'Invalid DB name'));
 			}
 
 			$db = WaDatabase($dsn);
