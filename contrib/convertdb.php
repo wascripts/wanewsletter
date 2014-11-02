@@ -120,20 +120,6 @@ if ($db_to::ENGINE == 'sqlite') {
 	}
 }
 
-function escape_data($value)
-{
-	global $db_to;
-
-	if (is_null($value)) {
-		$value = 'NULL';
-	}
-	else {
-		$value = "'" . $db_to->escape($value) . "'";
-	}
-
-	return $value;
-}
-
 function fields_list($tablename)
 {
 	global $db_to;
@@ -189,7 +175,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 		$fields = implode(', ', array_keys($row));
 
 		do {
-			$values = implode(", ", array_map('escape_data', $row));
+			$values = implode(', ', $db_to->prepareData($row));
 			$res = $db_to->query(sprintf("INSERT INTO %s (%s) VALUES(%s)",
 				$db_to->quote(str_replace('wa_', $prefixe_to, $tablename)),
 				$fields,
