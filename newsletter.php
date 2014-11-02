@@ -24,7 +24,7 @@ if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', rtrim($waroot, '/'));
 }
 
-$default_error_reporting = error_reporting();
+define('WA_INITIAL_ERROR_REPORTING', error_reporting());
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
@@ -112,4 +112,4 @@ if (defined('IN_WA_FORM')) {
 //
 // remise des paramêtres par défaut
 //
-error_reporting($default_error_reporting);
+error_reporting(WA_INITIAL_ERROR_REPORTING);
