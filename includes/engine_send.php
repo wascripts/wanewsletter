@@ -474,10 +474,22 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	$no_sent = $sent = 0;
 
 	if (!$db->ping()) {
-		//
-		// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
-		//
-		trigger_error('DB_connection_lost', E_USER_ERROR);
+		/**
+		 * mysql(i)_ping() ne fonctionne pas avec mysqlnd
+		 *
+		 * @link https://bugs.php.net/bug.php?id=52561
+		 */
+		global $dsn;
+
+		try {
+			$db = WaDatabase($dsn);
+		}
+		catch (Exception $e) {
+			//
+			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
+			//
+			trigger_error('DB_connection_lost', E_USER_ERROR);
+		}
 	}
 
 	if (count($abo_ids) > 0) {
