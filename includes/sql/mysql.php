@@ -30,6 +30,9 @@ class Wadb_mysql extends Wadb
 
 	public function connect($infos = null, $options = null)
 	{
+		$infos   = (is_null($infos)) ? $this->infos : $infos;
+		$options = (is_null($options)) ? $this->options : $options;
+
 		if (is_array($infos)) {
 			foreach (array('host', 'username', 'passwd', 'port', 'dbname') as $info) {
 				$$info = (isset($infos[$info])) ? $infos[$info] : null;

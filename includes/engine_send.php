@@ -479,10 +479,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		 *
 		 * @link https://bugs.php.net/bug.php?id=52561
 		 */
-		global $dsn;
-
 		try {
-			$db = WaDatabase($dsn);
+			$db->connect();
 		}
 		catch (Exception $e) {
 			//

@@ -23,6 +23,9 @@ class Wadb_sqlite3 extends Wadb
 
 	public function connect($infos = null, $options = null)
 	{
+		$infos   = (is_null($infos)) ? $this->infos : $infos;
+		$options = (is_null($options)) ? $this->options : $options;
+
 		$sqlite_db = ($infos['path'] != '') ? $infos['path'] : null;
 
 		if ($sqlite_db != ':memory:') {

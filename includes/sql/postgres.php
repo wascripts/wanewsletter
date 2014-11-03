@@ -44,6 +44,9 @@ class Wadb_postgres extends Wadb
 
 	public function connect($infos = null, $options = null)
 	{
+		$infos   = (is_null($infos)) ? $this->infos : $infos;
+		$options = (is_null($options)) ? $this->options : $options;
+
 		$connectString = '';
 
 		if (is_array($infos)) {
