@@ -35,11 +35,8 @@ class Wadb_mysqli extends Wadb
 				$$info = (isset($infos[$info])) ? $infos[$info] : null;
 			}
 
-			$this->host   = $host . (!is_null($port) ? ':'.$port : '');
-			$this->dbname = $dbname;
+			$this->infos = $infos;
 		}
-
-		$connect = 'mysqli_connect';
 
 		if (is_array($options)) {
 			$this->options = array_merge($this->options, $options);
@@ -49,7 +46,7 @@ class Wadb_mysqli extends Wadb
 			$host = "p:$host";
 		}
 
-		if (!($this->link = $connect($host, $username, $passwd, $dbname, $port))) {
+		if (!($this->link = mysqli_connect($host, $username, $passwd, $dbname, $port))) {
 			$this->errno = mysqli_connect_errno();
 			$this->error = mysqli_connect_error();
 			$this->link  = null;

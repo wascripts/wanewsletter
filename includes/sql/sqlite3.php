@@ -37,11 +37,11 @@ class Wadb_sqlite3 extends Wadb
 			}
 		}
 
+		$this->infos = $infos;
+
 		if (is_array($options)) {
 			$this->options = array_merge($this->options, $options);
 		}
-
-		$this->dbname = $sqlite_db;
 
 		try {
 			$this->link = new SQLite3($sqlite_db,

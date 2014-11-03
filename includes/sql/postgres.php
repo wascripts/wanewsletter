@@ -61,16 +61,14 @@ class Wadb_postgres extends Wadb
 				}
 			}
 
-			$this->host   = $infos['host'] . (!empty($infos['port']) ? ':'.$infos['port'] : '');
-			$this->dbname = $infos['dbname'];
+			$this->infos = $infos;
 		}
-
-		$connect = 'pg_connect';
 
 		if (is_array($options)) {
 			$this->options = array_merge($this->options, $options);
 		}
 
+		$connect = 'pg_connect';
 		if (!empty($this->options['persistent'])) {
 			$connect = 'pg_pconnect';
 		}

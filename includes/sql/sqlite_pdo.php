@@ -54,6 +54,8 @@ class Wadb_sqlite_pdo extends Wadb
 			}
 		}
 
+		$this->infos = $infos;
+
 		if (is_array($options)) {
 			$this->options = array_merge($this->options, $options);
 		}
@@ -62,8 +64,6 @@ class Wadb_sqlite_pdo extends Wadb
 		if (!empty($options['persistent'])) {
 			$opt[PDO::ATTR_PERSISTENT] = true;
 		}
-
-		$this->dbname = $sqlite_db;
 
 		try {
 			$this->pdo = new PDO('sqlite:' . $sqlite_db, null, null, $opt);

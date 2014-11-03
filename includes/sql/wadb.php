@@ -16,8 +16,10 @@ abstract class Wadb
 {
 	/**
 	 * Type de base de données
+	 * @todo Une classe fille peut surcharger une constante déclarée sur sa parente.
+	 * Normal ou faille dans l'implémentation PHP ?
 	 */
-	const ENGINE = '';
+//	const ENGINE = '';
 
 	/**
 	 * Connexion à la base de données
@@ -27,19 +29,11 @@ abstract class Wadb
 	protected $link;
 
 	/**
-	 * Hôte de la base de données
+	 * Informations de connexion
 	 *
-	 * @var string
+	 * @var array
 	 */
-	public $host = '';
-
-	/**
-	 * Nom de la base de données
-	 *
-	 * @var string
-	 */
-	public $dbname = '';
-
+	protected $infos = array();
 	/**
 	 * Options de connexion
 	 *
@@ -52,42 +46,42 @@ abstract class Wadb
 	 *
 	 * @var string
 	 */
-	public $sqlstate = '';
+	protected $sqlstate = '';
 
 	/**
 	 * Code d'erreur
 	 *
 	 * @var integer
 	 */
-	public $errno = 0;
+	protected $errno = 0;
 
 	/**
 	 * Message d'erreur
 	 *
 	 * @var string
 	 */
-	public $error = '';
+	protected $error = '';
 
 	/**
 	 * Dernière requète SQL exécutée (en cas d'erreur seulement)
 	 *
 	 * @var string
 	 */
-	public $lastQuery = '';
+	protected $lastQuery = '';
 
 	/**
 	 * Nombre de requètes SQL exécutées depuis le début de la connexion
 	 *
 	 * @var integer
 	 */
-	public $queries = 0;
+	protected $queries = 0;
 
 	/**
 	 * Durée totale d'exécution des requètes SQL
 	 *
 	 * @var integer
 	 */
-	public $sqltime = 0;
+	protected $sqltime = 0;
 
 	/**
 	 * Constructeur de classe
@@ -99,6 +93,42 @@ abstract class Wadb
 		if (is_array($options)) {
 			$this->options = array_merge($this->options, $options);
 		}
+	}
+
+	/**
+	 * Accès en lecture seule de certaines propriétés
+	 *
+	 * @param string $name
+	 *
+	 * @return mixed
+	 */
+	public function __get($name)
+	{
+		switch ($name) {
+			case 'infos':
+				$retval = $this->infos;
+				break;
+			case 'sqlstate':
+			case 'errno':
+			case 'error':
+			case 'lastQuery':
+			case 'queries':
+			case 'sqltime':
+				$retval = $this->{$name};
+				break;
+			// Compatibilité avec d'anciennes versions
+			case 'host':
+				$retval = $this->infos['host'];
+				break;
+			case 'dbname':
+				$retval = $this->infos['dbname'];
+				break;
+			default:
+				trigger_error(sprintf("Cannot access unknown property %s::\$%s", __CLASS__, $name), E_USER_WARNING);
+				break;
+		}
+
+		return $retval;
 	}
 
 	/**

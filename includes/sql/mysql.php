@@ -35,16 +35,14 @@ class Wadb_mysql extends Wadb
 				$$info = (isset($infos[$info])) ? $infos[$info] : null;
 			}
 
-			$this->host   = $host . (!is_null($port) ? ':'.$port : '');
-			$this->dbname = $dbname;
+			$this->infos = $infos;
 		}
-
-		$connect = 'mysql_connect';
 
 		if (is_array($options)) {
 			$this->options = array_merge($this->options, $options);
 		}
 
+		$connect = 'mysql_connect';
 		if (!empty($this->options['persistent'])) {
 			$connect = 'mysql_pconnect';
 		}
