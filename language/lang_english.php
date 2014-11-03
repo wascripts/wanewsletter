@@ -19,11 +19,11 @@
 
 $lang['General_title']              = "Mailing List Administration";
 
-$lang['Title']['accueil']           = "General information about the newsletter";
+$lang['Title']['accueil']           = "General informations";
 $lang['Title']['install']           = "Wanewsletter Install";
 $lang['Title']['upgrade']           = "Wanewsletter Upgrade";
 $lang['Title']['reinstall']         = "Wanewsletter re-install";
-$lang['Title']['database']          = "Database access";
+$lang['Title']['database']          = "Database access informations";
 $lang['Title']['admin']             = "Administration";
 $lang['Title']['error']             = "Error!";
 $lang['Title']['info']              = "Information!";
@@ -45,7 +45,7 @@ $lang['Title']['info_liste']        = "Information about the mailing list";
 $lang['Title']['add_liste']         = "Create a mailing list";
 $lang['Title']['edit_liste']        = "Edit a mailing list";
 $lang['Title']['purge_sys']         = "Purge system";
-$lang['Title']['cron']              = "Cron option";
+$lang['Title']['cron']              = "Manage subscribing by mail";
 $lang['Title']['logs']              = "Newsletters sent to mailing list <q>%s</q>";
 $lang['Title']['abo']               = "List of subscribers to mailing list <q>%s</q>";
 $lang['Title']['stats']             = "Mailing lists statistics";
@@ -54,8 +54,8 @@ $lang['Title']['export']            = "Export email adresses";
 $lang['Title']['import']            = "Import email adresses";
 $lang['Title']['ban']               = "Banned emails management";
 $lang['Title']['attach']            = "Files extensions management";
-$lang['Title']['backup']            = "Backup system";
-$lang['Title']['restore']           = "Restore system";
+$lang['Title']['backup']            = "Data backup";
+$lang['Title']['restore']           = "Restoring data";
 $lang['Title']['generator']         = "Subscription form generator";
 $lang['Title']['debug']             = "Debug informations";
 $lang['Title']['send']              = "Sending form";
@@ -258,6 +258,7 @@ $lang['Message']['Critical_error']          = "A critical error has occured. Ena
 $lang['Message']['No_gd_img_support']       = "No image format are available";
 $lang['Message']['Warning_debug_active']    = "<strong>Notice&nbsp;:</strong> The debugging is active&nbsp;!";
 $lang['Message']['Invalid_prefix']          = "The table prefix must start with a letter , optionally followed by other alphanumeric characters, and ends with an underscore.";
+$lang['Message']['DB_connection_lost']      = "The database connection has been lost";
 
 //
 // Divers
@@ -551,7 +552,7 @@ $lang['TagsEdit']                   = "Edit tags";
 $lang['Explain']['tools']           = "There are many tools available for you to manage your mailing lists";
 $lang['Explain']['export']          = "Here you can export a list's email addresses, in a specified format (not taken into account if the list is not multi-format).\nIf you do not specify any separation character, the file will contain one email address per line.";
 $lang['Explain']['import']          = "If you want to add multiple email addresses, put one address per line, or separate each address by a character (like ;) and enter it in the proper field.\nIf authorized by your server, you can also upload a file containing the emails' list, and specify a separation character here as well (unless the file contains one email per line). Alternatively, you can also specify the path to a file previously uploaded via FTP (relative path from the script's root).\nIf the file is compressed in a format supported by the server, it will automatically be de compressed.\n(a limit of %s emails has been set; See the %sscript FAQ%s for more details)";
-$lang['Explain']['ban']             = "You can ban a complete email address, type user@domain.com, or a part of the address using * as a wildcard\n\n <u>Examples</u> :\n <ul><li> toto@titi.com, the user having toto@titi.com as an email address cannot subscribe</li><li> *.fr.st; All emails with .fr.st as extension cannot subscribe</li><li> *@domaine.net, all emails with @domain.net as extension cannot subscribe</li><li> saddam@*, all emails with saddam@ as prefix cannot subscribe</li></ul>";
+$lang['Explain']['ban']             = "You can ban a complete email address, type user@domain.com, or a part of the address using * as a wildcard\n\n <u>Examples</u> :\n <ul><li> toto@titi.com, the user having toto@titi.com as an email address cannot subscribe</li><li> *.fr.st; All emails with .fr.st as extension cannot subscribe</li><li> *@domaine.net, all emails with @domain.net as extension cannot subscribe</li><li> eviluser@*, all emails with eviluser@ as prefix cannot subscribe</li></ul>";
 $lang['Explain']['unban']           = "To un-ban an email address, or part of an address, use the proper keyboard/mouse combination on your computer and browser";
 $lang['Explain']['forbid_ext']      = "To prohibit multiple file extensions at the same time, separate them with a comma";
 $lang['Explain']['reallow_ext']     = "To reauthorize one or more extensions, use the proper keyboard/mouse combination on your computer and browser";
