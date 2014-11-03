@@ -207,7 +207,7 @@ class Attach
 	{
 		global $db, $lang, $nl_config;
 
-		$extension = substr($filename, (strrpos($filename, '.') + 1));
+		$extension = pathinfo($filename, PATHINFO_EXTENSION);
 
 		if ($extension == '') {
 			$extension = 'x-wa';
@@ -336,7 +336,7 @@ class Attach
 					}
 					ftp_close($cid);
 
-					$filetype = Mailer::mime_type(substr($filename, (strrpos($filename, '.') + 1)));
+					$filetype = Mailer::mime_type($extension);
 				}
 
 				fclose($fw);
