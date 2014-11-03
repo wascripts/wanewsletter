@@ -96,7 +96,7 @@ if (defined('IN_WA_FORM')) {
 
 	// Si besoin, conversion du message vers le charset demandé
 	if (!empty($textCharset)) {
-		$message = iconv('UTF-8', $textCharset, $message);
+		$message = iconv('UTF-8', $textCharset.'//TRANSLIT', $message);
 	}
 
 	echo nl2br($message);
