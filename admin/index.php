@@ -95,12 +95,10 @@ if (count($liste_ids) > 0) {
 
 //
 // Poids des tables du script
-// (excepté la table des sessions)
+// (excepté la table des sessions, sauf dans le cas de sqlite)
 //
-list($infos) = parseDSN($dsn);
-
 if ($db::ENGINE == 'mysql') {
-	$sql = sprintf("SHOW TABLE STATUS FROM %s", $db->quote($infos['dbname']));
+	$sql = sprintf("SHOW TABLE STATUS FROM %s", $db->quote($db->infos['dbname']));
 
 	try {
 		$result = $db->query($sql);
@@ -144,7 +142,7 @@ else if ($db::ENGINE == 'postgres') {
 	}
 }
 else if ($db::ENGINE == 'sqlite') {
-	$dbsize = filesize($infos['path']);
+	$dbsize = filesize($db->infos['path']);
 }
 else {
 	$dbsize = $lang['Not_available'];

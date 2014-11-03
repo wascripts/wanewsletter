@@ -310,25 +310,23 @@ switch ($mode) {
 		wan_print_row(' - sendmail_path', config_value('sendmail_path'));
 		wan_print_row(' - SMTP',          config_value('SMTP'));
 
-		list($infos) = parseDSN($dsn);
-
 		wan_print_row('Type de serveur', $_SERVER['SERVER_SOFTWARE'] . ' - ' . PHP_OS);
 		wan_print_row('Connexion sécurisée', wan_ssl_connection() ? 'oui' : 'non');
 
 		if ($db::ENGINE == 'sqlite') {
 			wan_print_row('Base de données', sprintf('%s %s - Driver : %s',
-				$infos['label'],
+				$db->infos['label'],
 				$db->libVersion,
-				$infos['driver']
+				$db->infos['driver']
 			));
 		}
 		else {
 			wan_print_row('Base de données', sprintf('%s %s - Client : %s - Jeu de caractères : %s - Driver : %s',
-				$infos['label'],
+				$db->infos['label'],
 				$db->serverVersion,
 				$db->clientVersion,
 				$db->encoding(),
-				$infos['driver']
+				$db->infos['driver']
 			));
 		}
 
