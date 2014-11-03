@@ -321,13 +321,13 @@ switch ($mode) {
 			));
 		}
 		else {
-			wan_print_row('Base de données', sprintf('%s %s - Client : %s - Jeu de caractères : %s - Driver : %s',
+			wan_print_row('Base de données', sprintf('%s %s',
 				$db->infos['label'],
-				$db->serverVersion,
-				$db->clientVersion,
-				$db->encoding(),
-				$db->infos['driver']
+				$db->serverVersion
 			));
+			wan_print_row(' - Librairie cliente', $db->clientVersion);
+			wan_print_row(' - Driver', $db->infos['driver']);
+			wan_print_row(' - Jeu de caractères', $db->encoding());
 		}
 
 		wan_print_row('Agent utilisateur',
