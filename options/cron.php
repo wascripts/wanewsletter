@@ -9,9 +9,8 @@
 
 define('IN_NEWSLETTER', true);
 define('IN_CRON',       true);
-define('WA_ROOTDIR',    '..');
 
-require WA_ROOTDIR . '/includes/common.inc.php';
+require '../includes/common.inc.php';
 
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration

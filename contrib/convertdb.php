@@ -25,7 +25,7 @@ exit(0);
 //
 // Configuration
 //
-define('WA_ROOTDIR', dirname(dirname(__FILE__)));
+define('WA_ROOTDIR', dirname(__DIR__));
 
 $schemas_dir  = WA_ROOTDIR . '/includes/sql/schemas';
 

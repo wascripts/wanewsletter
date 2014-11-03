@@ -8,10 +8,9 @@
  */
 
 define('IN_NEWSLETTER', true);
-define('IN_INSTALL', true);
-define('WA_ROOTDIR', '.');
+define('IN_INSTALL',    true);
 
-require WA_ROOTDIR . '/includes/common.inc.php';
+require './includes/common.inc.php';
 
 function message($message)
 {

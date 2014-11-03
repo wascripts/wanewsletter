@@ -11,6 +11,10 @@ if (!defined('IN_NEWSLETTER')) {
 	exit('<b>No hacking</b>');
 }
 
+if (!defined('WA_ROOTDIR')) {
+	define('WA_ROOTDIR', str_replace('\\', '/', dirname(__DIR__)));
+}
+
 // @link http://bugs.php.net/bug.php?id=31440
 if (isset($_REQUEST['GLOBALS']) || isset($_FILES['GLOBALS'])) {
 	exit('GLOBALS overwrite attempt detected');

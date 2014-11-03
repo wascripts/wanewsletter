@@ -83,7 +83,7 @@ function process_bounce($deliveryReport)
 }
 
 define('IN_NEWSLETTER', true);
-define('WA_ROOTDIR',    '..');
+define('WA_ROOTDIR',    dirname(__DIR__));
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 

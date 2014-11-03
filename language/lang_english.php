@@ -559,7 +559,7 @@ $lang['Explain']['backup']          = "This module will allow you to back up the
 $lang['Explain']['restore']         = "This module will allow you to restore the script's tables previously backed up by Wanewsletter, or with any database manager.\nIf file upload is not authorized on your server, you can specify a file previously uploaded with ftp by indicating its path (relative to the script's root)";
 $lang['Explain']['generator']       = "Here you must enter the absolute address where the form's data will be transmitted (usually the address where the form itself is located)";
 $lang['Explain']['code_html']       = "Put this code at the address that you have/will indicate in the mailing list configuration";
-$lang['Explain']['code_php']        = "You must put this code at the form's destination address (proviously input). The file must have the .php extension!\nThe script sets the absolute path in the WA_ROOTDIR constant. However, if the value is wrong, you have to set the right path yourself.";
+$lang['Explain']['code_php']        = "You must put this code at the form's destination address (proviously input). The file must have the .php extension!";
 
 $lang['Select_tool']                = "Please select the tool you want to use";
 $lang['Export_format']              = "Export format";

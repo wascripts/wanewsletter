@@ -84,14 +84,14 @@ if (isset($_POST['submit'])) {
 				if (!mkdir($dest_upload, 0755)) {
 					$error = true;
 					$msg_error[] = sprintf($lang['Message']['Cannot_create_dir'],
-						wan_htmlspecialchars(wa_realpath($dest_upload))
+						wan_htmlspecialchars($dest_upload)
 					);
 				}
 			}
 			else if (!is_writable($dest_upload)) {
 				$error = true;
 				$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-					wan_htmlspecialchars(wa_realpath($dest_upload))
+					wan_htmlspecialchars($dest_upload)
 				);
 			}
 		}
@@ -177,7 +177,7 @@ if (isset($_POST['submit'])) {
 		if (!is_writable(WA_STATSDIR)) {
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-				wan_htmlspecialchars(wa_realpath(WA_STATSDIR))
+				wan_htmlspecialchars(WA_STATSDIR)
 			);
 		}
 	}

@@ -468,7 +468,7 @@ switch ($mode) {
 				$unlink = false;
 
 				if (!empty($file_local)) {
-					$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local));
+					$tmp_filename = WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local);
 					$filename     = $file_local;
 
 					if (!file_exists($tmp_filename)) {
@@ -1084,7 +1084,7 @@ switch ($mode) {
 				$unlink = false;
 
 				if (!empty($file_local)) {
-					$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local));
+					$tmp_filename = WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local);
 					$filename     = $file_local;
 
 					if (!file_exists($tmp_filename)) {
@@ -1217,14 +1217,10 @@ switch ($mode) {
 			$code_html .= "<input type=\"submit\" name=\"wanewsletter\" value=\"" . $lang['Button']['valid'] . "\" />\n";
 			$code_html .= "</form>";
 
-			$path = wa_realpath(WA_ROOTDIR . '/newsletter.php');
-
 			$code_php  = '<' . "?php\n";
 			$code_php .= "define('IN_WA_FORM', true);\n";
-			$code_php .= "define('WA_ROOTDIR', '" . substr($path, 0, strrpos($path, '/')) . "');\n";
-			$code_php .= "\n";
-			$code_php .= "include WA_ROOTDIR . '/newsletter.php';\n";
-			$code_php .= '?' . '>';
+			$code_php .= sprintf("require '%s/newsletter.php';\n", WA_ROOTDIR);
+			$code_php .= '?' . ">\n";
 
 			$output->set_filenames(array(
 				'tool_body' => 'result_generator_body.tpl'

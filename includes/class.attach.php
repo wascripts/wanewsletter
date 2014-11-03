@@ -144,9 +144,9 @@ class Attach
 				}
 			}
 		}
-		else if (file_exists(wa_realpath($this->upload_path . $filename))) {
+		else if (file_exists($this->upload_path . $filename)) {
 			$file_exists = true;
-			$filesize    = filesize(wa_realpath($this->upload_path . $filename));
+			$filesize    = filesize($this->upload_path . $filename);
 		}
 
 		if (!$file_exists) {
@@ -564,7 +564,7 @@ class Attach
 				$tmp_filename = $this->ftp_to_tmp($row);
 			}
 			else {
-				$tmp_filename = wa_realpath($this->upload_path . $row['file_physical_name']);
+				$tmp_filename = $this->upload_path . $row['file_physical_name'];
 			}
 
 			if (!($fp = @fopen($tmp_filename, 'rb'))) {
@@ -693,7 +693,7 @@ class Attach
 						}
 					}
 					else {
-						$this->remove_file(wa_realpath($this->upload_path . $filename));
+						$this->remove_file($this->upload_path . $filename);
 					}
 				}
 

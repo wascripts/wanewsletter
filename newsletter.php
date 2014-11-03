@@ -13,15 +13,8 @@ if (!defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE')) {
 
 define('IN_NEWSLETTER', true);
 
-//
-// Compatibilité avec les version < 2.3.x
-//
 if (!defined('WA_ROOTDIR')) {
-	if (!isset($waroot)) {
-		exit("Le répertoire de Wanewsletter n'est pas défini!");
-	}
-
-	define('WA_ROOTDIR', rtrim($waroot, '/'));
+	define('WA_ROOTDIR', __DIR__);
 }
 
 define('WA_INITIAL_ERROR_REPORTING', error_reporting());

@@ -17,7 +17,7 @@
 
 define('IN_NEWSLETTER',  true);
 define('IN_COMMANDLINE', true);
-define('WA_ROOTDIR',     dirname(dirname(__FILE__)));
+define('WA_ROOTDIR',     dirname(__DIR__));
 
 //
 // PHP CLI ne change pas le répertoire courant pour celui du script

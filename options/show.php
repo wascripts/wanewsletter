@@ -42,7 +42,7 @@ if ($filedata = $result->fetch()) {
 		$tmp_filename = $attach->ftp_to_tmp($filedata);
 	}
 	else {
-		$tmp_filename = wa_realpath(WA_ROOTDIR . '/' . $nl_config['upload_path'] . $filedata['file_physical_name']);
+		$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $filedata['file_physical_name'];
 	}
 
 	if (!is_readable($tmp_filename)) {

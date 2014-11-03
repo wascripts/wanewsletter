@@ -8,9 +8,8 @@
  */
 
 define('IN_SUBSCRIBE', true);
-define('WA_ROOTDIR',   '.');
 
-require WA_ROOTDIR . '/newsletter.php';
+require './newsletter.php';
 
 $list_box = '';
 

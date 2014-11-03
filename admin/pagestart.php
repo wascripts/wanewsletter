@@ -11,12 +11,11 @@ if (!defined('IN_NEWSLETTER')) {
 	exit('<b>No hacking</b>');
 }
 
-define('IN_ADMIN',   true);
-define('WA_ROOTDIR', '..');
+define('IN_ADMIN', true);
 
 $secure = true;
 
-require WA_ROOTDIR . '/includes/common.inc.php';
+require '../includes/common.inc.php';
 
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration
@@ -66,7 +65,7 @@ if (!defined('IN_LOGIN')) {
 		if (!is_writable(WA_TMPDIR)) {
 			$output->displayMessage(sprintf(
 				$lang['Message']['Dir_not_writable'],
-				wan_htmlspecialchars(wa_realpath(WA_TMPDIR))
+				wan_htmlspecialchars(WA_TMPDIR)
 			));
 		}
 
