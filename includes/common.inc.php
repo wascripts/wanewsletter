@@ -20,16 +20,6 @@ if (isset($_REQUEST['GLOBALS']) || isset($_FILES['GLOBALS'])) {
 	exit('GLOBALS overwrite attempt detected');
 }
 
-// Check PHP version
-define('WA_PHP_VERSION_REQUIRED', '5.3.7');
-if (!version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=')) {
-	printf("Your server is running PHP %s, but Wanewsletter requires PHP %s or higher",
-		PHP_VERSION,
-		WA_PHP_VERSION_REQUIRED
-	);
-	exit;
-}
-
 // $default_error_reporting est utilisé ultérieurement dans le gestionnaire d'erreurs
 $default_error_reporting = (E_ALL & ~(E_STRICT|E_DEPRECATED));
 error_reporting($default_error_reporting);
