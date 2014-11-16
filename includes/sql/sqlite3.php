@@ -266,7 +266,7 @@ class WadbResult_sqlite3 extends WadbResult
 
 	public function column($column)
 	{
-		$row = $this->result->fetchArray(SQLITE3_ASSOC);
+		$row = $this->result->fetchArray();
 
 		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
