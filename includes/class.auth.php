@@ -38,13 +38,90 @@ class Auth
 	);
 
 	/**
-	 * Initialisation de la classe, et récupération des permissions de l'utilisateur courant
+	 * Vérifie si l'utilisateur s'est authentifié
 	 */
-	public function __construct()
+	public function isLoggedIn()
 	{
-		global $admindata;
+		return !empty($_SESSION['is_logged_in']);
+	}
 
-		$this->read_data($admindata['admin_id']);
+	/**
+	 * Vérification des identifiants de connexion
+	 *
+	 * @param mixed  $username Nom d'utilisateur
+	 * @param string $passwd   Mot de passe de l'utilisateur
+	 *
+	 * @return boolean|array
+	 */
+	public function checkCredentials($username, $passwd)
+	{
+		global $db, $nl_config;
+
+		$login  = false;
+		$hasher = new PasswordHash();
+
+		$sql = sprintf("SELECT *
+			FROM %s
+			WHERE admin_login = '%s'",
+			ADMIN_TABLE,
+			$db->escape($username)
+		);
+		$result = $db->query($sql);
+
+		if ($row = $result->fetch()) {
+			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
+			if ($row['admin_pwd'][0] != '$') {
+				if ($row['admin_pwd'] === md5($passwd)) {
+					$login = true;
+				}
+			}
+			// New password hash using phpass
+			else if ($hasher->check($passwd, $row['admin_pwd'])) {
+				$login = true;
+			}
+		}
+
+		if ($login) {
+			// Avant la version 9 des tables, le champ admin_pwd était limité à 32 caractères
+			if (isset($nl_config['db_version']) && $nl_config['db_version'] > 8) {
+				$row['admin_pwd'] = $hasher->hash($passwd);
+
+				$data = array('admin_pwd' => $row['admin_pwd']);
+				$cond = array('admin_id'  => $row['admin_id']);
+				$db->update(ADMIN_TABLE, $data, $cond);
+			}
+
+			$_SESSION['is_logged_in'] = true;
+			$_SESSION['uid'] = intval($row['admin_id']);
+
+			return $row;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Récupération des données utilisateur selon son ID
+	 *
+	 * @param integer $uid Identifiant de l'utilisateur
+	 *
+	 * @return boolean|array
+	 */
+	public function getUserData($uid)
+	{
+		global $db;
+
+		$sql = "SELECT *
+			FROM " . ADMIN_TABLE . "
+			WHERE admin_id = " . intval($uid);
+		$result = $db->query($sql);
+
+		if ($row = $result->fetch()) {
+			$this->read_data($uid);
+			return $row;
+		}
+
+		return false;
 	}
 
 	/**
@@ -72,7 +149,7 @@ class Auth
 			$tmp_ary[$row['liste_id']] = $row;
 		}
 
-		if ($admindata['admin_id'] != $admin_id) {
+		if (!empty($admindata) && $admindata['admin_id'] != $admin_id) {
 			return $tmp_ary;
 		}
 

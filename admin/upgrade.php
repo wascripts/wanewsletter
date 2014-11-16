@@ -8,11 +8,26 @@
  */
 
 define('IN_NEWSLETTER', true);
+define('IN_ADMIN', true);
 define('IN_UPGRADE', true);
 
-require './pagestart.php';
+require '../includes/common.inc.php';
+
+//
+// Initialisation de la connexion à la base de données et récupération de la configuration
+//
+$db = WaDatabase($dsn);
+$nl_config = wa_get_config();
+
+$auth = new Auth();
 
 if (filter_input(INPUT_GET, 'mode') == 'check') {
+	$session = new Session($nl_config);
+
+	if (!$auth->isLoggedIn()) {
+		exit;
+	}
+
 	$result = wa_check_update(true);
 
 	if (filter_input(INPUT_GET, 'output') == 'json') {
@@ -43,14 +58,6 @@ if (filter_input(INPUT_GET, 'mode') == 'check') {
 	}
 
 	exit;
-}
-
-if (!wan_is_admin($admindata)) {
-	http_response_code(401);
-	$output->redirect('./index.php', 6);
-	$output->addLine($lang['Message']['Not_authorized']);
-	$output->addLine($lang['Click_return_index'], './index.php');
-	$output->displayMessage();
 }
 
 //
@@ -94,6 +101,21 @@ if (isset($_POST['start'])) {
 	if (!is_readable($sql_create) || !is_readable($sql_data)) {
 		$error = true;
 		$msg_error[] = $lang['Message']['sql_file_not_readable'];
+	}
+
+	$login  = trim(filter_input(INPUT_POST, 'login'));
+	$passwd = trim(filter_input(INPUT_POST, 'passwd'));
+
+	if (!($admindata = $auth->checkCredentials($login, $passwd))) {
+		$error = true;
+		$msg_error[] = $lang['Message']['Error_login'];
+	}
+	else if (!wan_is_admin($admindata)) {
+		http_response_code(401);
+		$output->redirect('./index.php', 6);
+		$output->addLine($lang['Message']['Not_authorized']);
+		$output->addLine($lang['Click_return_index'], './index.php');
+		$output->displayMessage();
 	}
 
 	if (!$error) {
@@ -709,6 +731,47 @@ if (isset($_POST['start'])) {
 			}
 		}
 
+		//
+		// Réorganisation de la table des sessions
+		//
+		if ($nl_config['db_version'] < 19) {
+			if ($db::ENGINE != 'sqlite') {
+				if ($db::ENGINE == 'mysql') {
+					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+						ENGINE = MyISAM";
+					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+						MODIFY COLUMN session_id VARCHAR(100)";
+					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+						CHANGE COLUMN session_time session_expire INTEGER";
+					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+						ADD COLUMN session_data MEDIUMTEXT";
+				}
+				else {
+					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+						ALTER COLUMN session_id TYPE VARCHAR(100)";
+					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+						RENAME COLUMN session_time TO session_expire";
+					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+						ADD COLUMN session_data TEXT";
+				}
+
+				$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					DROP COLUMN admin_id";
+				$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					DROP COLUMN session_ip";
+				$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					DROP COLUMN session_liste";
+			}
+			else {
+				wa_sqlite_recreate_table(SESSIONS_TABLE, false);
+			}
+
+			$sql_update[] = "DELETE FROM " . SESSIONS_TABLE;
+
+			exec_queries($sql_update);
+			$db->vacuum(SESSIONS_TABLE);
+		}
+
 		exec_queries($sql_update);
 
 		//
@@ -779,6 +842,8 @@ $output->set_filenames( array(
 $output->assign_vars( array(
 	'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
 	'L_EXPLAIN'       => nl2br(sprintf($lang['Welcome_in_upgrade'], WANEWSLETTER_VERSION)),
+	'L_LOGIN'         => $lang['Login'],
+	'L_PASSWD'        => $lang['Password'],
 	'L_START_BUTTON'  => $lang['Start_upgrade']
 ));
 

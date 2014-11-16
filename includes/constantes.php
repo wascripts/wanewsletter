@@ -18,7 +18,7 @@ define('WANEWSLETTER_VERSION', '2.4-beta3');
 // Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
 // le script invite l'utilisateur à lancer la procédure de mise à jour des tables
 //
-define('WANEWSLETTER_DB_VERSION', 18);
+define('WANEWSLETTER_DB_VERSION', 19);
 
 //
 // Modes de débogage du script

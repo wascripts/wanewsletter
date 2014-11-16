@@ -1,10 +1,10 @@
--- 
+--
 -- Schéma des tables de WAnewsletter pour SQLite
--- 
+--
 
--- 
+--
 -- Structure de la table "wa_abo_liste"
--- 
+--
 CREATE TABLE wa_abo_liste (
 	abo_id        INTEGER  NOT NULL DEFAULT 0,
 	liste_id      INTEGER  NOT NULL DEFAULT 0,
@@ -18,9 +18,9 @@ CREATE TABLE wa_abo_liste (
 );
 
 
--- 
+--
 -- Structure de la table "wa_abonnes"
--- 
+--
 CREATE TABLE wa_abonnes (
 	abo_id     INTEGER      NOT NULL,
 	abo_pseudo VARCHAR(30)  NOT NULL DEFAULT '',
@@ -34,9 +34,9 @@ CREATE TABLE wa_abonnes (
 CREATE INDEX abo_status_idx ON wa_abonnes (abo_status);
 
 
--- 
+--
 -- Structure de la table "wa_admin"
--- 
+--
 CREATE TABLE wa_admin (
 	admin_id            INTEGER      NOT NULL,
 	admin_login         VARCHAR(30)  NOT NULL DEFAULT '',
@@ -51,9 +51,9 @@ CREATE TABLE wa_admin (
 );
 
 
--- 
+--
 -- Structure de la table "wa_auth_admin"
--- 
+--
 CREATE TABLE wa_auth_admin (
 	admin_id    INTEGER NOT NULL DEFAULT 0,
 	liste_id    INTEGER NOT NULL DEFAULT 0,
@@ -70,9 +70,9 @@ CREATE TABLE wa_auth_admin (
 CREATE INDEX admin_id_idx ON wa_auth_admin (admin_id);
 
 
--- 
+--
 -- Structure de la table "wa_ban_list"
--- 
+--
 CREATE TABLE wa_ban_list (
 	ban_id    INTEGER      NOT NULL,
 	liste_id  INTEGER      NOT NULL DEFAULT 0,
@@ -81,9 +81,9 @@ CREATE TABLE wa_ban_list (
 );
 
 
--- 
+--
 -- Structure de la table "wa_config"
--- 
+--
 CREATE TABLE wa_config (
 	config_id     INTEGER      NOT NULL,
 	config_name   VARCHAR(255),
@@ -93,9 +93,9 @@ CREATE TABLE wa_config (
 );
 
 
--- 
+--
 -- Structure de la table "wa_forbidden_ext"
--- 
+--
 CREATE TABLE wa_forbidden_ext (
 	fe_id    INTEGER     NOT NULL,
 	liste_id INTEGER     NOT NULL DEFAULT 0,
@@ -104,9 +104,9 @@ CREATE TABLE wa_forbidden_ext (
 );
 
 
--- 
+--
 -- Structure de la table "wa_joined_files"
--- 
+--
 CREATE TABLE wa_joined_files (
 	file_id            INTEGER      NOT NULL,
 	file_real_name     VARCHAR(200) NOT NULL DEFAULT '',
@@ -117,9 +117,9 @@ CREATE TABLE wa_joined_files (
 );
 
 
--- 
+--
 -- Structure de la table "wa_liste"
--- 
+--
 CREATE TABLE wa_liste (
 	liste_id          INTEGER      NOT NULL,
 	liste_name        VARCHAR(100) NOT NULL DEFAULT '',
@@ -146,9 +146,9 @@ CREATE TABLE wa_liste (
 );
 
 
--- 
+--
 -- Structure de la table "wa_log"
--- 
+--
 CREATE TABLE wa_log (
 	log_id        INTEGER      NOT NULL,
 	liste_id      INTEGER      NOT NULL DEFAULT 0,
@@ -164,9 +164,9 @@ CREATE INDEX liste_id_idx ON wa_log (liste_id);
 CREATE INDEX log_status_idx ON wa_log (log_status);
 
 
--- 
+--
 -- Structure de la table "wa_log_files"
--- 
+--
 CREATE TABLE wa_log_files (
 	log_id  INTEGER NOT NULL DEFAULT 0,
 	file_id INTEGER NOT NULL DEFAULT 0,
@@ -174,16 +174,14 @@ CREATE TABLE wa_log_files (
 );
 
 
--- 
+--
 -- Structure de la table "wa_session"
--- 
+--
 CREATE TABLE wa_session (
-	session_id    CHAR(32) NOT NULL DEFAULT '',
-	admin_id      INTEGER  NOT NULL DEFAULT 0,
-	session_start INTEGER  NOT NULL DEFAULT 0,
-	session_time  INTEGER  NOT NULL DEFAULT 0,
-	session_ip    CHAR(8)  NOT NULL DEFAULT '',
-	session_liste INTEGER  NOT NULL DEFAULT 0,
+	session_id     VARCHAR(100) NOT NULL DEFAULT '',
+	session_start  INTEGER  NOT NULL DEFAULT 0,
+	session_expire INTEGER  NOT NULL DEFAULT 0,
+	session_data   TEXT,
 	CONSTRAINT wa_session_pk PRIMARY KEY (session_id)
 );
 

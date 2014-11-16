@@ -129,15 +129,15 @@ switch ($mode) {
 $url_page  = './tools.php';
 $url_page .= ($mode != '') ? '?mode=' . $mode : '';
 
-if (!in_array($mode, array('backup','restore','debug')) && !$admindata['session_liste']) {
+if (!in_array($mode, array('backup','restore','debug')) && !$_SESSION['liste']) {
 	$output->build_listbox($auth_type, true, $url_page);
 }
-else if ($admindata['session_liste']) {
-	if (!$auth->check_auth($auth_type, $admindata['session_liste'])) {
+else if ($_SESSION['liste']) {
+	if (!$auth->check_auth($auth_type, $_SESSION['liste'])) {
 		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
 	}
 
-	$listdata = $auth->listdata[$admindata['session_liste']];
+	$listdata = $auth->listdata[$_SESSION['liste']];
 }
 
 //
@@ -381,7 +381,7 @@ switch ($mode) {
 			}
 			$result->free();
 
-			$filename = sprintf('wa_export_%d.%s', $admindata['session_liste'], $ext);
+			$filename = sprintf('wa_export_%d.%s', $_SESSION['liste'], $ext);
 
 			//
 			// Préparation des données selon l'option demandée

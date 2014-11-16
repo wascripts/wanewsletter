@@ -250,6 +250,10 @@ class Output extends Template
 		global $nl_config, $lang, $template, $admindata, $auth;
 		global $simple_header, $error, $msg_error;
 
+		if (defined('IN_ADMIN') && (!($auth instanceof Auth) || !$auth->isLoggedIn())) {
+			$simple_header = true;
+		}
+
 		define('HEADER_INC', true);
 
 		$this->send_headers();
@@ -408,13 +412,6 @@ class Output extends Template
 		}
 
 		$this->pparse('footer');
-
-		//
-		// On ferme la connexion à la base de données, si elle existe
-		//
-		if ($db instanceof Wadb) {
-			$db->close();
-		}
 
 		exit;
 	}
@@ -708,7 +705,7 @@ BASIC;
 		$liste_id_ary = $auth->check_auth($auth_type);
 
 		if (empty($jump_to)) {
-			$jump_to = './' . wan_htmlspecialchars(basename(server_info('PHP_SELF')));
+			$jump_to = './' . wan_htmlspecialchars(basename(server_info('SCRIPT_NAME')));
 			$query_string = server_info('QUERY_STRING');
 
 			if ($query_string != '') {
@@ -721,7 +718,7 @@ BASIC;
 				$tmp_box .= sprintf(
 					"<option value=\"%d\"%s>%s</option>\n\t",
 					$liste_id,
-					$output->getBoolAttr('selected', ($admindata['session_liste'] == $liste_id)),
+					$output->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id)),
 					wan_htmlspecialchars(cut_str($data['liste_name'], 30))
 				);
 			}

@@ -297,10 +297,13 @@ function exec_queries(&$queries)
  * SQLite a un support très limité de la commande ALTER TABLE
  * Impossible de modifier ou supprimer une colonne donnée
  * On réécrit les tables dont la structure a changé
+ * /!\ Ne permet que d'altérer le type des colonnes.
+ * Ajouter/Renommer/Supprimer des colonnes ne fonctionnera pas avec $restore_data à true
  *
- * @param string $tablename Nom de la table à recréer
+ * @param string $tablename   Nom de la table à recréer
+ * @param string $ignore_data true pour laisser la nouvelle table vide (perte des données)
  */
-function wa_sqlite_recreate_table($tablename)
+function wa_sqlite_recreate_table($tablename, $restore_data = true)
 {
 	global $db, $prefixe, $sql_create, $sql_schemas;
 
@@ -330,10 +333,14 @@ function wa_sqlite_recreate_table($tablename)
 
 	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
 	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
-	$sql_update[] = sprintf('INSERT INTO %1$s (%2$s) SELECT %2$s FROM %1$s_tmp;',
-		$tablename,
-		implode(',', $columns)
-	);
+
+	if ($restore_data) {
+		$sql_update[] = sprintf('INSERT INTO %1$s (%2$s) SELECT %2$s FROM %1$s_tmp;',
+			$tablename,
+			implode(',', $columns)
+		);
+	}
+
 	$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
 
 	exec_queries($sql_update);

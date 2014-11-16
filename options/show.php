@@ -11,12 +11,12 @@ define('IN_NEWSLETTER', true);
 
 require '../admin/pagestart.php';
 
-if (!$auth->check_auth(Auth::VIEW, $admindata['session_liste'])) {
+if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
 	plain_error($lang['Message']['Not_auth_view']);
 }
 
-$listdata = $auth->listdata[$admindata['session_liste']];
+$listdata = $auth->listdata[$_SESSION['liste']];
 
 $file_id  = (!empty($_GET['fid'])) ? intval($_GET['fid']) : 0;
 $filename = (!empty($_GET['file'])) ? trim($_GET['file']) : '';

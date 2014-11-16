@@ -25,16 +25,16 @@ else if (!extension_loaded('gd')) {
 
 $liste_ids = $auth->check_auth(Auth::VIEW);
 
-if (!$admindata['session_liste']) {
+if (!$_SESSION['liste']) {
 	$output->build_listbox(Auth::VIEW);
 }
 
-if (!$auth->check_auth(Auth::VIEW, $admindata['session_liste'])) {
+if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
 	$output->displayMessage('Not_auth_view');
 }
 
-$listdata = $auth->listdata[$admindata['session_liste']];
+$listdata = $auth->listdata[$_SESSION['liste']];
 
 $img   = (!empty($_GET['img'])) ? trim($_GET['img']) : '';
 $year  = (!empty($_GET['year'])) ? intval($_GET['year']) : date('Y');

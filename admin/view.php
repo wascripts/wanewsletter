@@ -33,11 +33,11 @@ foreach ($vararray as $varname) {
 	}
 }
 
-if (($mode != 'liste' || ($mode == 'liste' && $action != 'add')) && !$admindata['session_liste']) {
+if (($mode != 'liste' || ($mode == 'liste' && $action != 'add')) && !$_SESSION['liste']) {
 	$output->build_listbox(Auth::VIEW);
 }
-else if ($admindata['session_liste']) {
-	$listdata = $auth->listdata[$admindata['session_liste']];
+else if ($_SESSION['liste']) {
+	$listdata = $auth->listdata[$_SESSION['liste']];
 }
 
 $output->build_listbox(Auth::VIEW, false, './view.php?mode=' . $mode);
@@ -848,7 +848,7 @@ else if ($mode == 'liste') {
 			break;
 	}
 
-	if ($auth_type && !$auth->check_auth($auth_type, $admindata['session_liste'])) {
+	if ($auth_type && !$auth->check_auth($auth_type, $_SESSION['liste'])) {
 		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
 	}
 
@@ -955,17 +955,7 @@ else if ($mode == 'liste') {
 
 					$db->insert(LISTE_TABLE, $sql_data);
 
-					$new_liste_id = $db->lastInsertId();
-
-					$sql = sprintf("UPDATE %s
-						SET session_liste = %d
-						WHERE session_id = '%s' AND admin_id = %d",
-						SESSIONS_TABLE,
-						$new_liste_id,
-						$session->getId(),
-						$admindata['admin_id']
-					);
-					$db->query($sql);
+					$_SESSION['liste'] = $new_liste_id = $db->lastInsertId();
 				}
 				else {
 					$sql_where['liste_id'] = $listdata['liste_id'];
@@ -1230,7 +1220,7 @@ else if ($mode == 'liste') {
 
 			foreach ($auth->listdata as $liste_id => $data) {
 				if (in_array($liste_id, $liste_ids) && $liste_id != $listdata['liste_id']) {
-					$selected  = $output->getBoolAttr('selected', ($admindata['session_liste'] == $liste_id));
+					$selected  = $output->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id));
 					$list_box .= '<option value="' . $liste_id . '"' . $selected . '> - '
 						. wan_htmlspecialchars(cut_str($data['liste_name'], 30)) . ' - </option>';
 				}

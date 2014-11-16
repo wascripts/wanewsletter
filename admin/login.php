@@ -100,14 +100,14 @@ if ($mode == 'sendpass') {
 //
 // Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
 //
-else if (isset($_POST['submit']) && !$session->is_logged_in) {
-	$login     = (!empty($_POST['login'])) ? trim($_POST['login']) : '';
-	$passwd    = (!empty($_POST['passwd'])) ? trim($_POST['passwd']) : '';
-	$autologin = false;// (!empty($_POST['autologin'])) ? true : false;
+else if (isset($_POST['submit']) && !$auth->isLoggedIn()) {
+	$login  = trim(filter_input(INPUT_POST, 'login'));
+	$passwd = trim(filter_input(INPUT_POST, 'passwd'));
 
-	$session->login($login, $passwd, $autologin);
-
-	if (!$session->is_logged_in) {
+	if ($data = $auth->checkCredentials($login, $passwd)) {
+		session_regenerate_id();
+	}
+	else {
 		$error = true;
 		$msg_error[] = $lang['Message']['Error_login'];
 	}
@@ -117,8 +117,8 @@ else if (isset($_POST['submit']) && !$session->is_logged_in) {
 // Déconnexion de l'administration
 //
 else if ($mode == 'logout') {
-	if ($session->is_logged_in) {
-		$session->logout($admindata['admin_id']);
+	if ($auth->isLoggedIn()) {
+		session_destroy();
 	}
 
 	$error = true;
@@ -129,7 +129,7 @@ else if ($mode == 'logout') {
 // L'utilisateur est connecté ?
 // Dans ce cas, on le redirige vers la page demandée, ou vers l'accueil de l'administration par défaut
 //
-if ($session->is_logged_in) {
+if ($auth->isLoggedIn()) {
 	http_redirect($redirect);
 }
 
@@ -154,7 +154,7 @@ $output->assign_vars(array(
 	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 ));
 
-if (!isset($_COOKIE[$nl_config['cookie_name'] . '_data'])) {
+if (!isset($_COOKIE[session_name()])) {
 	$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
 }
 

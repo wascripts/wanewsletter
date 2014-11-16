@@ -200,14 +200,12 @@ CREATE TABLE wa_log_files (
 -- Structure de la table "wa_session"
 --
 CREATE TABLE wa_session (
-	session_id    CHAR(32) NOT NULL DEFAULT '',
-	admin_id      SMALLINT NOT NULL DEFAULT 0,
-	session_start INTEGER  NOT NULL DEFAULT 0,
-	session_time  INTEGER  NOT NULL DEFAULT 0,
-	session_ip    CHAR(8)  NOT NULL DEFAULT '',
-	session_liste SMALLINT NOT NULL DEFAULT 0,
+	session_id     VARCHAR(100) NOT NULL DEFAULT '',
+	session_start  INTEGER  NOT NULL DEFAULT 0,
+	session_expire INTEGER  NOT NULL DEFAULT 0,
+	session_data   MEDIUMTEXT,
 	CONSTRAINT wa_session_pk PRIMARY KEY (session_id)
 )
-	ENGINE = MEMORY
+	ENGINE = MyISAM
 	DEFAULT CHARACTER SET = utf8;
 

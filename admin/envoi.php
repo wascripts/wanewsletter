@@ -11,11 +11,11 @@ define('IN_NEWSLETTER', true);
 
 require './pagestart.php';
 
-if (!$admindata['session_liste']) {
+if (!$_SESSION['liste']) {
 	$output->build_listbox(Auth::VIEW);
 }
 
-if (!$auth->check_auth(Auth::VIEW, $admindata['session_liste'])) {
+if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
 	$output->displayMessage('Not_auth_view');
 }
@@ -38,7 +38,7 @@ define('DISABLE_CHECK_LINKS', false);
 // End of Configuration
 //
 
-$listdata = $auth->listdata[$admindata['session_liste']];
+$listdata = $auth->listdata[$_SESSION['liste']];
 
 $logdata = array();
 $logdata['log_id']        = (!empty($_REQUEST['id'])) ? intval($_REQUEST['id']) : 0;
