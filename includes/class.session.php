@@ -89,6 +89,7 @@ class Session
 	 */
 	public function reset()
 	{
+		$_SESSION['is_admin_session'] = defined('IN_ADMIN');
 		$_SESSION['is_logged_in'] = false;
 		$_SESSION['uid']   = null;
 		$this->new_session = true;

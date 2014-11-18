@@ -1,6 +1,6 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./profil_cp.php">
+<form method="post" action="./profil_cp.php?mode=archives">
 <div class="block">
 	<h2>{TITLE}</h2>
 

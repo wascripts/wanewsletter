@@ -28,9 +28,12 @@ if (!$nl_config['enable_profil_cp']) {
 //
 // Instanciation d'une session
 //
-$session = new Session();
+$session = new Session($nl_config);
+//
+// End
+//
 
-function check_login($email, $regkey = null)
+function getAboData($abo_id)
 {
 	global $db, $nl_config, $other_tags;
 
@@ -40,129 +43,119 @@ function check_login($email, $regkey = null)
 	if (count($other_tags) > 0) {
 		$fields_str = '';
 		foreach ($other_tags as $data) {
-			$fields_str .= ', a.' . $data['column_name'];
+			$fields_str .= ', ' . $db->quote($data['column_name']);
 		}
 	}
 	else {
 		$fields_str = '';
 	}
 
-	$sql = "SELECT a.abo_id, a.abo_pseudo, a.abo_pwd, a.abo_email, a.abo_lang, a.abo_status,
-			al.format, al.register_key, al.register_date, l.liste_id, l.liste_name, l.sender_email,
-			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url $fields_str
-		FROM " . ABONNES_TABLE . " AS a
-			INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
-			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
-		WHERE LOWER(a.abo_email) = '" . $db->escape(strtolower($email)) . "'";
-	$result = $db->query($sql);
-
-	if ($row = $result->fetch()) {
-		$abodata = array();
-		$abodata['id']       = $row['abo_id'];
-		$abodata['pseudo']   = $row['abo_pseudo'];
-		$abodata['passwd']   = $row['abo_pwd'];
-		$abodata['email']    = $row['abo_email'];
-		$abodata['language'] = $row['abo_lang'];
-		$abodata['regdate']  = $row['register_date'];
-		$abodata['regkey']   = $row['register_key'];
-		$abodata['status']   = $row['abo_status'];
-		$abodata['tags']     = array();
-
-		foreach ($other_tags as $tag) {
-			if (isset($row[$tag['column_name']])) {
-				$abodata['tags'][$tag['column_name']] = $row[$tag['column_name']];
-			}
-		}
-
-		$abodata['listes'] = array();
-		$regkey_matched = false;
-
-		do {
-			$abodata['listes'][$row['liste_id']] = $row;
-
-			if (!is_null($regkey) && strcmp($regkey, md5($row['register_key'])) == 0) {
-				$regkey_matched = true;
-			}
-		}
-		while ($row = $result->fetch());
-
-		if (empty($abodata['language'])) {
-			$abodata['language'] = $nl_config['language'];
-		}
-
-		if (!is_null($regkey) && strcmp($abodata['passwd'], $regkey) != 0 && !$regkey_matched) {
-			// Le mot de passe rentré ne correspond ni au mot de passe de l'abonné,
-			// ni à l'une de ses clés d'enregistrement
-			return false;
-		}
-
-		return $abodata;
+	if (!is_int($abo_id)) {
+		$sql_where = "abo_email = '" . $db->escape($abo_id) . "'";
 	}
 	else {
+		$sql_where = 'abo_id = ' . intval($abo_id);
+	}
+
+	$sql = "SELECT abo_id, abo_pseudo, abo_pwd, abo_email, abo_lang, abo_status $fields_str
+		FROM " . ABONNES_TABLE . "
+		WHERE " . $sql_where;
+	$result = $db->query($sql);
+
+	if (!($row = $result->fetch())) {
 		return false;
 	}
+
+	$abodata = array();
+	$abodata['id']       = $row['abo_id'];
+	$abodata['pseudo']   = $row['abo_pseudo'];
+	$abodata['passwd']   = $row['abo_pwd'];
+	$abodata['email']    = $row['abo_email'];
+	$abodata['language'] = $row['abo_lang'];
+	$abodata['status']   = $row['abo_status'];
+	$abodata['tags']     = array();
+	$abodata['listes']   = array();
+
+	if (empty($abodata['language'])) {
+		$abodata['language'] = $nl_config['language'];
+	}
+
+	foreach ($other_tags as $tag) {
+		if (isset($row[$tag['column_name']])) {
+			$abodata['tags'][$tag['column_name']] = $row[$tag['column_name']];
+		}
+	}
+
+	$sql = "SELECT al.format, al.register_key, al.register_date, l.liste_id, l.liste_name, l.sender_email,
+			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url
+		FROM " . ABO_LISTE_TABLE . " AS al
+			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
+		WHERE al.abo_id = " . $row['abo_id'];
+	$result = $db->query($sql);
+
+	while ($row = $result->fetch()) {
+		$abodata['listes'][$row['liste_id']] = $row;
+	}
+
+	return $abodata;
 }
 
-$mode  = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
-$email = (!empty($_REQUEST['email'])) ? trim($_REQUEST['email']) : '';
+$mode = (!empty($_GET['mode'])) ? $_GET['mode'] : '';
 
 //
 // Vérification de l'authentification
 //
 if ($mode != 'login' && $mode != 'sendkey') {
-	if (!empty($_COOKIE[$nl_config['cookie_name'] . '_abo'])) {
-		$data = (array) unserialize($_COOKIE[$nl_config['cookie_name'] . '_abo']);
-	}
-	else {
-		$data = array();
+	if (!$_SESSION['is_logged_in'] || $_SESSION['is_admin_session']) {
+		$session->reset();
+		http_redirect('profil_cp.php?mode=login');
 	}
 
-	if (isset($data['email']) && isset($data['key']) && validate_pass($data['key'])) {
-		if ($mode == 'logout') {
-			$session->send_cookie('abo', '', (time() - 3600));
-
-			$mode = 'login';
-		}
-		else {
-			$abodata = check_login($data['email'], $data['key']);
-			if (!is_array($abodata)) {
-				$mode = 'login';
-			}
-		}
-	}
-	else {
-		$mode = 'login';
-	}
+	$abodata = getAboData($_SESSION['uid']);
+	load_settings(array('admin_lang' => $abodata['language']));
 }
-//
-// Fin de la vérification
-//
-
-$language = ($mode == 'login' || $mode == 'sendkey') ? $nl_config['language'] : $abodata['language'];
-load_settings(array('admin_lang' => $language));
 
 switch ($mode) {
+	case 'logout':
+		session_destroy();
+		$error = true;
+		$msg_error[] = $lang['Message']['Success_logout'];
 	case 'login':
-		if (isset($_POST['submit'])) {
-			$regkey = (!empty($_POST['passwd'])) ? trim($_POST['passwd']) : '';
-			$regkey_md5 = md5($regkey);
+		$email  = (!empty($_POST['email'])) ? trim($_POST['email']) : '';
+		$regkey = (!empty($_POST['passwd'])) ? trim($_POST['passwd']) : '';
 
-			if (!empty($regkey) && validate_pass($regkey) && ($abodata = check_login($email, $regkey_md5))) {
-				if ($abodata['status'] == ABO_ACTIF) {
-					$session->send_cookie('abo', serialize(array(
-						'email' => $abodata['email'],
-						'key'   => $regkey_md5
-					)), (time() + 3600));
+		if (isset($_POST['submit'])) {
+			if ($abodata = getAboData($email)) {
+				$auth_ok = false;
+
+				if (strcmp($abodata['passwd'], md5($regkey)) != 0) {
+					foreach ($abodata['listes'] as $listdata) {
+						if (strcmp($regkey, $listdata['register_key']) == 0) {
+							$auth_ok = true;
+							break;
+						}
+					}
+				}
+				else {
+					$auth_ok = true;
+				}
+
+				if ($auth_ok) {
+					if ($abodata['status'] != ABO_ACTIF) {
+						$output->displayMessage('Inactive_account');
+					}
+
+					session_regenerate_id();
+					$_SESSION['is_logged_in'] = true;
+					$_SESSION['is_admin_session'] = false;
+					$_SESSION['uid'] = intval($abodata['id']);
 
 					http_redirect('profil_cp.php');
 				}
+			}
 
-				$output->displayMessage('Inactive_account');
-			}
-			else {
-				$error = true;
-				$msg_error[] = $lang['Message']['Error_login'];
-			}
+			$error = true;
+			$msg_error[] = $lang['Message']['Error_login'];
 		}
 
 		$output->page_header();
@@ -181,7 +174,7 @@ switch ($mode) {
 			'S_LOGIN' => wan_htmlspecialchars($email)
 		));
 
-		if (!isset($_COOKIE[$nl_config['cookie_name'] . '_abo'])) {
+		if (!isset($_COOKIE[session_name()])) {
 			$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
 		}
 
@@ -189,8 +182,10 @@ switch ($mode) {
 		break;
 
 	case 'sendkey':
+		$email = (!empty($_POST['email'])) ? trim($_POST['email']) : '';
+
 		if (isset($_POST['submit'])) {
-			if ($abodata = check_login($email)) {
+			if ($abodata = getAboData($email)) {
 				list($liste_id, $listdata) = each($abodata['listes']);
 
 				$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
@@ -222,7 +217,7 @@ switch ($mode) {
 
 				$mailer->use_template('account_info', array(
 					'EMAIL'   => $abodata['email'],
-					'CODE'    => $abodata['regkey'],
+					'CODE'    => $listdata['register_key'],
 					'URLSITE' => $nl_config['urlsite'],
 					'SIG'     => $listdata['liste_sig'],
 					'PSEUDO'  => $abodata['pseudo']
@@ -243,10 +238,9 @@ switch ($mode) {
 
 				$output->displayMessage('IDs_sended');
 			}
-			else {
-				$error = true;
-				$msg_error[] = $lang['Message']['Unknown_email'];
-			}
+
+			$error = true;
+			$msg_error[] = $lang['Message']['Unknown_email'];
 		}
 
 		$output->page_header();
@@ -577,7 +571,7 @@ switch ($mode) {
 
 				if (!$listdata['use_cron']) {
 					$tags_replace = array_merge($tags_replace, array(
-						'CODE'  => $abodata['regkey'],
+						'CODE'  => $listdata['register_key'],
 						'EMAIL' => rawurlencode($abodata['email'])
 					));
 				}
@@ -608,8 +602,6 @@ switch ($mode) {
 		while ($row = $result->fetch()) {
 			$abodata['listes'][$row['liste_id']]['archives'][] = $row;
 		}
-
-		$output->addHiddenfield('mode', 'archives');
 
 		$output->page_header();
 

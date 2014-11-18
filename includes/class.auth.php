@@ -42,7 +42,7 @@ class Auth
 	 */
 	public function isLoggedIn()
 	{
-		return !empty($_SESSION['is_logged_in']);
+		return (!empty($_SESSION['is_logged_in']) && $_SESSION['is_admin_session']);
 	}
 
 	/**
@@ -92,6 +92,7 @@ class Auth
 			}
 
 			$_SESSION['is_logged_in'] = true;
+			$_SESSION['is_admin_session'] = true;
 			$_SESSION['uid'] = intval($row['admin_id']);
 
 			return $row;

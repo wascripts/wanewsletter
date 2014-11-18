@@ -1,6 +1,6 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./profil_cp.php">
+<form method="post" action="./profil_cp.php?mode=editprofile">
 <div class="block">
 	<h2>{TITLE}</h2>
 
@@ -43,7 +43,7 @@
 		</tr>
 	</table>
 
-	<div class="bottom"> <input type="hidden" name="mode" value="editprofile" />
+	<div class="bottom">
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>

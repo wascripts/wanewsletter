@@ -1,4 +1,4 @@
-<form class="compact" method="post" action="./profil_cp.php">
+<form class="compact" method="post" action="./profil_cp.php?mode=login">
 <ul class="links">
 	<li><a href="profil_cp.php?mode=sendkey">{L_SENDKEY}</a></li>
 </ul>
@@ -18,7 +18,6 @@
 	</table>
 
 	<div class="bottom">
-		<input type="hidden" name="mode" value="login" />
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>

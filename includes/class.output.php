@@ -250,7 +250,7 @@ class Output extends Template
 		global $nl_config, $lang, $template, $admindata, $auth;
 		global $simple_header, $error, $msg_error;
 
-		if (defined('IN_ADMIN') && (!($auth instanceof Auth) || !$auth->isLoggedIn())) {
+		if (empty($_SESSION) || !$_SESSION['is_logged_in']) {
 			$simple_header = true;
 		}
 
@@ -301,46 +301,49 @@ class Output extends Template
 			}
 		}
 
-		if (!defined('IN_ADMIN') || empty($admindata['admin_login'])) {
-			$l_logout = $lang['Module']['logout'];
-		}
-		else {
-			$l_logout = sprintf(
-				$lang['Module']['logout_2'],
-				wan_htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
-			);
-		}
+		$sitename = (!empty($nl_config['sitename'])) ? $nl_config['sitename'] : 'Wanewsletter';
 
 		$this->assign_vars( array(
 			'PAGE_TITLE'   => $page_title,
 			'META'         => $this->meta_redirect,
 			'CONTENT_LANG' => $lang['CONTENT_LANG'],
 			'CONTENT_DIR'  => $lang['CONTENT_DIR'],
-			'L_LOG'        => $lang['Module']['log'],
 
-			'L_LOGOUT'     => $l_logout,
 			'S_NAV_LINKS'  => $this->getLinks(),
-			'S_SCRIPTS'    => $this->getScripts()
+			'S_SCRIPTS'    => $this->getScripts(),
+			'SITENAME'     => wan_htmlspecialchars($sitename, ENT_NOQUOTES)
 		));
 
-		if (defined('IN_ADMIN')) {
-			$sitename = (isset($nl_config['sitename'])) ? $nl_config['sitename'] : 'Wanewsletter';
-			$this->assign_vars(array(
-				'L_INDEX'       => $lang['Module']['accueil'],
-				'L_CONFIG'      => $lang['Module']['config'],
-				'L_SEND'        => $lang['Module']['send'],
-				'L_SUBSCRIBERS' => $lang['Module']['subscribers'],
-				'L_LIST'        => $lang['Module']['list'],
-				'L_TOOLS'       => $lang['Module']['tools'],
-				'L_USERS'       => $lang['Module']['users'],
-				'L_STATS'       => $lang['Module']['stats'],
+		// Si l'utilisateur est connecté, affichage du menu
+		if (!$simple_header) {
+			if (defined('IN_ADMIN')) {
+				$l_logout = sprintf(
+					$lang['Module']['logout_2'],
+					wan_htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
+				);
 
-				'SITENAME'      => wan_htmlspecialchars($sitename, ENT_NOQUOTES),
-			));
-		}
-		else {
+				$this->assign_vars(array(
+					'L_INDEX'       => $lang['Module']['accueil'],
+					'L_CONFIG'      => $lang['Module']['config'],
+					'L_SEND'        => $lang['Module']['send'],
+					'L_SUBSCRIBERS' => $lang['Module']['subscribers'],
+					'L_LIST'        => $lang['Module']['list'],
+					'L_TOOLS'       => $lang['Module']['tools'],
+					'L_USERS'       => $lang['Module']['users'],
+					'L_STATS'       => $lang['Module']['stats'],
+				));
+			}
+			else {
+				$l_logout = $lang['Module']['logout'];
+
+				$this->assign_vars(array(
+					'L_EDITPROFILE' => $lang['Module']['editprofile']
+				));
+			}
+
 			$this->assign_vars(array(
-				'L_EDITPROFILE' => $lang['Module']['editprofile']
+				'L_LOG'    => $lang['Module']['log'],
+				'L_LOGOUT' => $l_logout,
 			));
 		}
 
