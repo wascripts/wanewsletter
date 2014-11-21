@@ -185,8 +185,8 @@ switch ($mode) {
 			'L_CONFIRM_PASSWD'=> $lang['Confirm_passwd'],
 			'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
-			'EMAIL'    => $abodata['email'],
-			'PSEUDO'   => $abodata['username'],
+			'EMAIL'    => wan_htmlspecialchars($abodata['email']),
+			'PSEUDO'   => wan_htmlspecialchars($abodata['username']),
 			'LANG_BOX' => lang_box($abodata['abo_lang'])
 		));
 

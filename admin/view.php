@@ -306,7 +306,7 @@ else if ($mode == 'abonnes') {
 
 			$output->assign_vars(array(
 				'L_TITLE'             => sprintf($lang['Title']['profile'],
-					(!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email']
+					wan_htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
 				),
 				'L_EXPLAIN'           => nl2br($lang['Explain']['abo']),
 				'L_PSEUDO'            => $lang['Abo_pseudo'],
@@ -319,8 +319,9 @@ else if ($mode == 'abonnes') {
 				'L_DELETE_ACCOUNT'    => $lang['Button']['del_account'],
 
 				'U_GOTO_LIST'         => 'view.php?mode=abonnes' . $get_string . $get_page,
-				'S_ABO_PSEUDO'        => (!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : '<b>' . $lang['No_data'] . '</b>',
-				'S_ABO_EMAIL'         => $row['abo_email'],
+				'S_ABO_PSEUDO'        => (!empty($row['abo_pseudo']))
+					? wan_htmlspecialchars($row['abo_pseudo']) : '<b>' . $lang['No_data'] . '</b>',
+				'S_ABO_EMAIL'         => wan_htmlspecialchars($row['abo_email']),
 				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIF) ? $lang['Active'] : $lang['Inactive'],
 				'S_ABO_ID'            => $row['abo_id']
 			));
@@ -503,7 +504,9 @@ else if ($mode == 'abonnes') {
 			));
 
 			$output->assign_vars(array(
-				'L_TITLE'              => sprintf($lang['Title']['mod_profile'], ( !empty($row['abo_pseudo']) ) ? $row['abo_pseudo'] : $row['abo_email']),
+				'L_TITLE'              => sprintf($lang['Title']['mod_profile'],
+					wan_htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
+				),
 				'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
 				'L_PSEUDO'             => $lang['Abo_pseudo'],
 				'L_EMAIL'              => $lang['Email_address'],
@@ -804,7 +807,7 @@ else if ($mode == 'abonnes') {
 
 		for ($i = 0; $i < $num_abo; $i++) {
 			$output->assign_block_vars('aborow', array(
-				'ABO_EMAIL'         => $aborow[$i]['abo_email'],
+				'ABO_EMAIL'         => wan_htmlspecialchars($aborow[$i]['abo_email']),
 				'ABO_REGISTER_DATE' => convert_time($nl_config['date_format'], $aborow[$i]['register_date']),
 				'U_VIEW'            => sprintf('view.php?mode=abonnes&amp;action=view&amp;id=%d%s%s', $aborow[$i]['abo_id'], $get_string, $get_page)
 			));
