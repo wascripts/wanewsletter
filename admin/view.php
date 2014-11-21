@@ -290,7 +290,7 @@ else if ($mode == 'abonnes') {
 			$fields_str = '';
 		}
 
-		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_email, al.register_date, al.liste_id, al.format
+		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_email, a.abo_status, al.register_date, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
@@ -305,10 +305,13 @@ else if ($mode == 'abonnes') {
 			));
 
 			$output->assign_vars(array(
-				'L_TITLE'             => sprintf($lang['Title']['profile'], (!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email']),
+				'L_TITLE'             => sprintf($lang['Title']['profile'],
+					(!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email']
+				),
 				'L_EXPLAIN'           => nl2br($lang['Explain']['abo']),
 				'L_PSEUDO'            => $lang['Abo_pseudo'],
 				'L_EMAIL'             => $lang['Email_address'],
+				'L_STATUS'            => $lang['Account_status'],
 				'L_REGISTER_DATE'     => $lang['Susbcribed_date'],
 				'L_LISTE_TO_REGISTER' => $lang['Liste_to_register'],
 				'L_GOTO_LIST'         => $lang['Goto_list'],
@@ -318,6 +321,7 @@ else if ($mode == 'abonnes') {
 				'U_GOTO_LIST'         => 'view.php?mode=abonnes' . $get_string . $get_page,
 				'S_ABO_PSEUDO'        => (!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : '<b>' . $lang['No_data'] . '</b>',
 				'S_ABO_EMAIL'         => $row['abo_email'],
+				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIF) ? $lang['Active'] : $lang['Inactive'],
 				'S_ABO_ID'            => $row['abo_id']
 			));
 
@@ -421,7 +425,8 @@ else if ($mode == 'abonnes') {
 
 				$sql_data = array(
 					'abo_email'  => $email,
-					'abo_pseudo' => (!empty($_POST['pseudo'])) ? strip_tags(trim($_POST['pseudo'])) : ''
+					'abo_pseudo' => (!empty($_POST['pseudo'])) ? strip_tags(trim($_POST['pseudo'])) : '',
+					'abo_status' => (filter_input(INPUT_POST, 'status') == ABO_ACTIF) ? ABO_ACTIF : ABO_INACTIF
 				);
 
 				//
@@ -478,7 +483,7 @@ else if ($mode == 'abonnes') {
 			$fields_str = '';
 		}
 
-		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_email, al.liste_id, al.format
+		$sql = "SELECT $fields_str a.abo_id, a.abo_pseudo, a.abo_email, a.abo_status, al.liste_id, al.format
 			FROM " . ABONNES_TABLE . " AS a
 				INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id IN(" . implode(', ', $liste_ids) . ")
@@ -502,17 +507,22 @@ else if ($mode == 'abonnes') {
 				'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
 				'L_PSEUDO'             => $lang['Abo_pseudo'],
 				'L_EMAIL'              => $lang['Email_address'],
+				'L_STATUS'             => $lang['Account_status'],
 				'L_LISTE_TO_REGISTER'  => $lang['Liste_to_register'],
 				'L_GOTO_LIST'          => $lang['Goto_list'],
 				'L_VIEW_ACCOUNT'       => $lang['View_account'],
 				'L_DELETE_ACCOUNT'     => $lang['Button']['del_account'],
 				'L_VALID_BUTTON'       => $lang['Button']['valid'],
 				'L_WARNING_EMAIL_DIFF' => str_replace("\n", '\n', addslashes($lang['Warning_email_diff'])),
+				'L_ACTIVE'             => $lang['Active'],
+				'L_INACTIVE'           => $lang['Inactive'],
 
 				'U_GOTO_LIST'          => 'view.php?mode=abonnes' . $get_string . $get_page,
 				'S_ABO_PSEUDO'         => wan_htmlspecialchars($row['abo_pseudo']),
 				'S_ABO_EMAIL'          => wan_htmlspecialchars($row['abo_email']),
 				'S_ABO_ID'             => $row['abo_id'],
+				'S_STATUS_ACTIVE'      => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_ACTIF)),
+				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIF)),
 
 				'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
 			));

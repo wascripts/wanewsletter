@@ -36,6 +36,15 @@ function checkForm_editAboProfil()
 			<td><label for="email">{L_EMAIL}&nbsp;:</label></td>
 			<td><input type="text" id="email" name="email" value="{S_ABO_EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
+		<tr>
+			<td><label>{L_STATUS}&nbsp;:</label></td>
+			<td>
+				<input type="radio" id="status_active" name="status" value="1" {S_STATUS_ACTIVE}/>
+				<label for="status_active" class="notice">{L_ACTIVE}</label>
+				<input type="radio" id="status_inactive" name="status" value="0" {S_STATUS_INACTIVE}/>
+				<label for="status_inactive" class="notice">{L_INACTIVE}</label>
+			</td>
+		</tr>
 	</table>
 
 	<div class="explain">{L_LISTE_TO_REGISTER}</div>

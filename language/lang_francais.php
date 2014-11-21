@@ -329,6 +329,9 @@ $lang['Reset_passwd']               = "Réinitialiser mon mot de passe";
 $lang['Name']                       = "Nom";
 $lang['Value']                      = "Valeur";
 $lang['Cookie_notice']              = "Vous devez activer les cookies pour pouvoir vous connecter";
+$lang['Account_status']             = "Statut de ce compte";
+$lang['Active']                     = "Actif";
+$lang['Inactive']                   = "Inactif";
 
 $lang['Click_return_index']         = "Cliquez %sici%s pour retourner sur l’accueil";
 $lang['Click_return_back']          = "Cliquez %sici%s pour retourner sur la page précédente";

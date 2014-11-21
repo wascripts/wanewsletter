@@ -23,6 +23,10 @@
 			<td>{L_REGISTER_DATE}&nbsp;:</td>
 			<td>{S_REGISTER_DATE}</td>
 		</tr>
+		<tr>
+			<td>{L_STATUS}&nbsp;:</td>
+			<td>{S_STATUS}</td>
+		</tr>
 	</table>
 
 	<div class="explain">{L_LISTE_TO_REGISTER}&nbsp;:</div>
