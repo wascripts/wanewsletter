@@ -367,12 +367,6 @@ class Wanewsletter
 			));
 		}
 
-		if (!$this->hasAccount || $this->isRegistered) {
-			$this->mailer->assign_block_tags('password', array(
-				'CODE' => $this->account['code']
-			));
-		}
-
 		if (count($this->other_tags) > 0) {
 			$tags = array();
 			foreach ($this->other_tags as $tag) {

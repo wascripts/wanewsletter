@@ -1,23 +1,28 @@
-<form class="compact" id="login-form" method="post" action="login.php">
+<form class="compact" id="login-form" method="post" action="{S_SCRIPT_NAME}?mode=login">
+<ul class="links">
+	<li><a href="{S_SCRIPT_NAME}?mode=reset_passwd">{L_RESET_PASSWD}</a></li>
+</ul>
+
 <div class="block">
 	<h2>{TITLE}</h2>
+
+	<div class="explain">{L_EXPLAIN}</div>
 
 	<table class="dataset">
 		<tr>
 			<td><label for="login">{L_LOGIN}&nbsp;:</label></td>
-			<td><input type="text" id="login" name="login" maxlength="30" size="25" autofocus /></td>
+			<td><input type="text" id="login" name="login" maxlength="254" size="25" autofocus /></td>
 		</tr>
 		<tr>
-			<td><label for="passwd">{L_PASS}&nbsp;:</label></td>
+			<td><label for="passwd">{L_PASSWD}&nbsp;:</label></td>
 			<td><input type="password" id="passwd" name="passwd" size="25" /></td>
 		</tr>
-		<tr>
+		<!-- tr>
 			<td colspan="2">
-				<!-- input type="checkbox" id="autologin" name="autologin" value="1" />
-				<label for="autologin">{L_AUTOLOGIN}</label><br /  -->
-				<span class="notice"><a href="login.php?mode=sendpass">{L_LOST_PASSWORD}</a></span>
+				<input type="checkbox" id="autologin" name="autologin" value="1" />
+				<label for="autologin">{L_AUTOLOGIN}</label>
 			</td>
-		</tr>
+		</tr -->
 	</table>
 
 	<div class="bottom">{S_HIDDEN_FIELDS}

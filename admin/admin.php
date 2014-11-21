@@ -62,12 +62,8 @@ if ($mode == 'adduser') {
 		}
 
 		if (!$error) {
-			$new_pass = generate_key(10);
-			$hasher = new PasswordHash();
-
 			$sql_data = array();
 			$sql_data['admin_login']      = $new_login;
-			$sql_data['admin_pwd']        = $hasher->hash($new_pass);
 			$sql_data['admin_email']      = $new_email;
 			$sql_data['admin_lang']       = $nl_config['language'];
 			$sql_data['admin_dateformat'] = $nl_config['date_format'];
@@ -94,10 +90,9 @@ if ($mode == 'adduser') {
 			$mailer->set_subject(sprintf($lang['Subject_email']['New_admin'], $nl_config['sitename']));
 
 			$mailer->use_template('new_admin', array(
-				'PSEUDO'     => $new_login,
-				'SITENAME'   => $nl_config['sitename'],
-				'PASSWORD'   => $new_pass,
-				'LINK_ADMIN' => wan_build_url('index.php')
+				'PSEUDO'        => $new_login,
+				'SITENAME'      => $nl_config['sitename'],
+				'INIT_PASS_URL' => wan_build_url('login.php?mode=cp')
 			));
 
 			if (!$mailer->send()) {
@@ -123,9 +118,8 @@ if ($mode == 'adduser') {
 	$output->assign_vars(array(
 		'L_TITLE'         => $lang['Add_user'],
 		'L_EXPLAIN'       => nl2br($lang['Explain']['admin']),
-		'L_LOGIN'         => $lang['Login_new_user'],
-		'L_EMAIL'         => $lang['Email_new_user'],
-		'L_EMAIL_NOTE'    => nl2br($lang['Email_note']),
+		'L_LOGIN'         => $lang['Login'],
+		'L_EMAIL'         => $lang['Email_address'],
 		'L_VALID_BUTTON'  => $lang['Button']['valid'],
 		'L_CANCEL_BUTTON' => $lang['Button']['cancel'],
 
@@ -197,7 +191,7 @@ if (isset($_POST['submit'])) {
 		$output->displayMessage();
 	}
 
-	$vararray = array('current_pass', 'new_pass', 'confirm_pass', 'email', 'dateformat', 'language');
+	$vararray = array('current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'dateformat', 'language');
 	foreach ($vararray as $varname) {
 		${$varname} = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : '';
 	}
@@ -215,27 +209,23 @@ if (isset($_POST['submit'])) {
 	$email_new_subscribe = (!empty($_POST['email_new_subscribe'])) ? intval($_POST['email_new_subscribe']) : SUBSCRIBE_NOTIFY_NO;
 	$email_unsubscribe   = (!empty($_POST['email_unsubscribe'])) ? intval($_POST['email_unsubscribe']) : UNSUBSCRIBE_NOTIFY_NO;
 
-	$hasher = new PasswordHash();
-
-	if ($admin_id == $admindata['admin_id'] && $current_pass != '' &&
-		!$hasher->check($current_pass, $admindata['admin_pwd'])
-	) {
-		$error = true;
-		$msg_error[] = $lang['Message']['Error_login'];
-	}
-
 	$set_password = false;
-	if (($admin_id != $admindata['admin_id'] && $new_pass != '') || $current_pass != '') {
-		if (!validate_pass($new_pass)) {
+	if ($new_passwd != '') {
+		$hasher = new PasswordHash();
+		$set_password = true;
+
+		if ($admin_id == $admindata['admin_id'] && !$hasher->check($current_passwd, $admindata['admin_pwd'])) {
+			$error = true;
+			$msg_error[] = $lang['Message']['Error_login'];
+		}
+		else if (!validate_pass($new_passwd)) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Alphanum_pass'];
 		}
-		else if ($new_pass !== $confirm_pass) {
+		else if ($new_passwd !== $confirm_passwd) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Bad_confirm_pass'];
 		}
-
-		$set_password = true;
 	}
 
 	if (!Mailer::validate_email($email)) {
@@ -253,7 +243,7 @@ if (isset($_POST['submit'])) {
 		);
 
 		if ($set_password) {
-			$sql_data['admin_pwd'] = $hasher->hash($new_pass);
+			$sql_data['admin_pwd'] = $hasher->hash($new_passwd);
 		}
 
 		if (wan_is_admin($admindata) && $admin_id != $admindata['admin_id'] && !empty($_POST['admin_level'])) {
@@ -287,44 +277,6 @@ if (isset($_POST['submit'])) {
 					$sql_where = array('admin_id' => $admin_id, 'liste_id' => $liste_ids[$i]);
 					$db->update(AUTH_ADMIN_TABLE, $sql_data, $sql_where);
 				}
-			}
-		}
-
-		if ($set_password) {
-			$sql = "SELECT admin_login
-				FROM " . ADMIN_TABLE . "
-				WHERE admin_id = " . $admin_id;
-			$result = $db->query($sql);
-
-			if (($pseudo = $result->column('admin_login')) === false) {
-				trigger_error('Impossible de récupérer le pseudo de cet utilisateur', E_USER_ERROR);
-			}
-
-			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-			$mailer->signature = WA_X_MAILER;
-
-			if ($nl_config['use_smtp']) {
-				$mailer->use_smtp(
-					$nl_config['smtp_host'],
-					$nl_config['smtp_port'],
-					$nl_config['smtp_user'],
-					$nl_config['smtp_pass']
-				);
-			}
-
-			$mailer->set_charset('UTF-8');
-			$mailer->set_format(FORMAT_TEXTE);
-			$mailer->set_from($admindata['admin_email'], $admindata['admin_login']);
-			$mailer->set_address($email);
-			$mailer->set_subject($lang['Subject_email']['New_pass']);
-
-			$mailer->use_template('new_admin_pass', array(
-				'PSEUDO'   => $pseudo,
-				'PASSWORD' => $new_pass
-			));
-
-			if (!$mailer->send()) {
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
 			}
 		}
 
@@ -409,10 +361,10 @@ $output->assign_vars(array(
 	'L_NOTE_DATE'           => sprintf($lang['Fct_date'], '<a href="http://www.php.net/date">', '</a>'),
 	'L_EMAIL_NEW_SUBSCRIBE' => $lang['Email_new_subscribe'],
 	'L_EMAIL_UNSUBSCRIBE'   => $lang['Email_unsubscribe'],
-	'L_PASS'                => $lang['Password'],
-	'L_NEW_PASS'            => $lang['New_pass'],
-	'L_CONFIRM_PASS'        => $lang['Conf_pass'],
-	'L_NOTE_PASS'           => nl2br($lang['Note_pass']),
+	'L_PASSWD'              => $lang['Password'],
+	'L_NEW_PASSWD'          => $lang['New_passwd'],
+	'L_CONFIRM_PASSWD'      => $lang['Confirm_passwd'],
+	'L_NOTE_PASSWD'         => nl2br($lang['Note_passwd']),
 	'L_YES'                 => $lang['Yes'],
 	'L_NO'                  => $lang['No'],
 	'L_VALID_BUTTON'        => $lang['Button']['valid'],

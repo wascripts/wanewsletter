@@ -8,11 +8,11 @@
 
 	<title>{PAGE_TITLE}</title>
 
-	<link rel="stylesheet" href="../templates/wanewsletter.css" />
+	<link rel="stylesheet" href="{BASEDIR}/templates/wanewsletter.css" />
 
 	{S_NAV_LINKS}
 
-	<script src="../templates/admin/admin.js"></script>
+	<script src="{BASEDIR}/templates/admin/admin.js"></script>
 	{S_SCRIPTS}
 </head>
 <body id="top">
@@ -20,7 +20,7 @@
 <div id="header">
 	<div id="logo">
 		<a href="./index.php">
-			<img src="../images/logo-wa.png" width="160" height="60" alt="{L_INDEX}" title="{L_INDEX}" />
+			<img src="{BASEDIR}/images/logo-wa.png" width="160" height="60" alt="{L_INDEX}" title="{L_INDEX}" />
 		</a>
 	</div>
 

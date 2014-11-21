@@ -29,68 +29,20 @@ if (!$nl_config['enable_profil_cp']) {
 // Instanciation d'une session
 //
 $session = new Session($nl_config);
+$auth = new Auth();
 //
 // End
 //
 
-function getAboData($abo_id)
+function getAboDataList($abodata)
 {
-	global $db, $nl_config, $other_tags;
-
-	//
-	// Récupération des champs des tags personnalisés
-	//
-	if (count($other_tags) > 0) {
-		$fields_str = '';
-		foreach ($other_tags as $data) {
-			$fields_str .= ', ' . $db->quote($data['column_name']);
-		}
-	}
-	else {
-		$fields_str = '';
-	}
-
-	if (!is_int($abo_id)) {
-		$sql_where = "abo_email = '" . $db->escape($abo_id) . "'";
-	}
-	else {
-		$sql_where = 'abo_id = ' . intval($abo_id);
-	}
-
-	$sql = "SELECT abo_id, abo_pseudo, abo_pwd, abo_email, abo_lang, abo_status $fields_str
-		FROM " . ABONNES_TABLE . "
-		WHERE " . $sql_where;
-	$result = $db->query($sql);
-
-	if (!($row = $result->fetch())) {
-		return false;
-	}
-
-	$abodata = array();
-	$abodata['id']       = $row['abo_id'];
-	$abodata['pseudo']   = $row['abo_pseudo'];
-	$abodata['passwd']   = $row['abo_pwd'];
-	$abodata['email']    = $row['abo_email'];
-	$abodata['language'] = $row['abo_lang'];
-	$abodata['status']   = $row['abo_status'];
-	$abodata['tags']     = array();
-	$abodata['listes']   = array();
-
-	if (empty($abodata['language'])) {
-		$abodata['language'] = $nl_config['language'];
-	}
-
-	foreach ($other_tags as $tag) {
-		if (isset($row[$tag['column_name']])) {
-			$abodata['tags'][$tag['column_name']] = $row[$tag['column_name']];
-		}
-	}
+	global $db;
 
 	$sql = "SELECT al.format, al.register_key, al.register_date, l.liste_id, l.liste_name, l.sender_email,
 			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url
 		FROM " . ABO_LISTE_TABLE . " AS al
 			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
-		WHERE al.abo_id = " . $row['abo_id'];
+		WHERE al.abo_id = " . $abodata['abo_id'];
 	$result = $db->query($sql);
 
 	while ($row = $result->fetch()) {
@@ -100,168 +52,36 @@ function getAboData($abo_id)
 	return $abodata;
 }
 
-$mode = (!empty($_GET['mode'])) ? $_GET['mode'] : '';
+$mode = filter_input(INPUT_GET, 'mode');
+// Spécial. la présence du paramètre 'k' signifie qu'on est dans le mode reset_passwd
+$reset_key = filter_input(INPUT_GET, 'k');
 
-//
-// Vérification de l'authentification
-//
-if ($mode != 'login' && $mode != 'sendkey') {
-	if (!$_SESSION['is_logged_in'] || $_SESSION['is_admin_session']) {
-		$session->reset();
-		http_redirect('profil_cp.php?mode=login');
-	}
-
-	$abodata = getAboData($_SESSION['uid']);
-	load_settings(array('admin_lang' => $abodata['language']));
+if ($reset_key && !$mode) {
+	$mode = 'reset_passwd';
 }
 
+if ($mode == 'login' || $mode == 'logout' || $mode == 'reset_passwd' || $mode == 'cp') {
+	require './includes/login.inc.php';
+}
+
+if (!$auth->isLoggedIn()) {
+	$session->reset();
+	http_redirect('profil_cp.php?mode=login');
+}
+
+$abodata = $auth->getUserData($_SESSION['uid']);
+$abodata = getAboDataList($abodata);
+
+if (empty($abodata['abo_lang'])) {
+	$abodata['abo_lang'] = $nl_config['language'];
+}
+
+load_settings(array('admin_lang' => $abodata['abo_lang']));
+
 switch ($mode) {
-	case 'logout':
-		session_destroy();
-		$error = true;
-		$msg_error[] = $lang['Message']['Success_logout'];
-	case 'login':
-		$email  = (!empty($_POST['email'])) ? trim($_POST['email']) : '';
-		$regkey = (!empty($_POST['passwd'])) ? trim($_POST['passwd']) : '';
-
-		if (isset($_POST['submit'])) {
-			if ($abodata = getAboData($email)) {
-				$auth_ok = false;
-
-				if (strcmp($abodata['passwd'], md5($regkey)) != 0) {
-					foreach ($abodata['listes'] as $listdata) {
-						if (strcmp($regkey, $listdata['register_key']) == 0) {
-							$auth_ok = true;
-							break;
-						}
-					}
-				}
-				else {
-					$auth_ok = true;
-				}
-
-				if ($auth_ok) {
-					if ($abodata['status'] != ABO_ACTIF) {
-						$output->displayMessage('Inactive_account');
-					}
-
-					session_regenerate_id();
-					$_SESSION['is_logged_in'] = true;
-					$_SESSION['is_admin_session'] = false;
-					$_SESSION['uid'] = intval($abodata['id']);
-
-					http_redirect('profil_cp.php');
-				}
-			}
-
-			$error = true;
-			$msg_error[] = $lang['Message']['Error_login'];
-		}
-
-		$output->page_header();
-
-		$output->set_filenames(array(
-			'body' => 'login_body.tpl'
-		));
-
-		$output->assign_vars(array(
-			'TITLE'          => $lang['Module']['login'],
-			'L_LOGIN'        => $lang['Account_login'],
-			'L_PASS'         => $lang['Account_pass'],
-			'L_SENDKEY'      => $lang['Lost_password'],
-			'L_VALID_BUTTON' => $lang['Button']['valid'],
-
-			'S_LOGIN' => wan_htmlspecialchars($email)
-		));
-
-		if (!isset($_COOKIE[session_name()])) {
-			$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
-		}
-
-		$output->pparse('body');
-		break;
-
-	case 'sendkey':
-		$email = (!empty($_POST['email'])) ? trim($_POST['email']) : '';
-
-		if (isset($_POST['submit'])) {
-			if ($abodata = getAboData($email)) {
-				list($liste_id, $listdata) = each($abodata['listes']);
-
-				$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-				$mailer->signature = WA_X_MAILER;
-
-				if ($nl_config['use_smtp']) {
-					$mailer->use_smtp(
-						$nl_config['smtp_host'],
-						$nl_config['smtp_port'],
-						$nl_config['smtp_user'],
-						$nl_config['smtp_pass']
-					);
-				}
-
-				$mailer->set_charset('UTF-8');
-				$mailer->set_format(FORMAT_TEXTE);
-
-				if ($abodata['pseudo'] != '') {
-					$address = array($abodata['pseudo'] => $abodata['email']);
-				}
-				else {
-					$address = $abodata['email'];
-				}
-
-				$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
-				$mailer->set_address($address);
-				$mailer->set_subject($lang['Subject_email']['Sendkey']);
-				$mailer->set_return_path($listdata['return_email']);
-
-				$mailer->use_template('account_info', array(
-					'EMAIL'   => $abodata['email'],
-					'CODE'    => $listdata['register_key'],
-					'URLSITE' => $nl_config['urlsite'],
-					'SIG'     => $listdata['liste_sig'],
-					'PSEUDO'  => $abodata['pseudo']
-				));
-
-				if (count($other_tags) > 0) {
-					$tags = array();
-					foreach ($other_tags as $tag) {
-						$tags[$tag['tag_name']] = $abodata['tags'][$tag['column_name']];
-					}
-
-					$mailer->assign_tags($tags);
-				}
-
-				if (!$mailer->send()) {
-					trigger_error('Failed_sending', E_USER_ERROR);
-				}
-
-				$output->displayMessage('IDs_sended');
-			}
-
-			$error = true;
-			$msg_error[] = $lang['Message']['Unknown_email'];
-		}
-
-		$output->page_header();
-
-		$output->set_filenames(array(
-			'body' => 'sendkey_body.tpl'
-		));
-
-		$output->assign_vars(array(
-			'TITLE'          => $lang['Title']['sendkey'],
-			'L_EXPLAIN'      => nl2br($lang['Explain']['sendkey']),
-			'L_LOGIN'        => $lang['Account_login'],
-			'L_VALID_BUTTON' => $lang['Button']['valid']
-		));
-
-		$output->pparse('body');
-		break;
-
 	case 'editprofile':
 		if (isset($_POST['submit'])) {
-			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language', 'current_pass', 'new_pass', 'confirm_pass');
+			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language', 'current_passwd', 'new_passwd', 'confirm_passwd');
 			foreach ($vararray as $varname) {
 				${$varname} = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : '';
 			}
@@ -282,7 +102,7 @@ switch ($mode) {
 				else {
 					$sql = "SELECT COUNT(*) AS test
 						FROM " . ABONNES_TABLE . "
-						WHERE LOWER(abo_email) = '" . $db->escape(strtolower($new_email)) . "'";
+						WHERE abo_email = '" . $db->escape($new_email) . "'";
 					$result = $db->query($sql);
 
 					if ($result->column('test') != 0) {
@@ -292,23 +112,23 @@ switch ($mode) {
 				}
 			}
 
-			if ($current_pass != '' && md5($current_pass) != $abodata['passwd']) {
-				$error = true;
-				$msg_error[] = $lang['Message']['Error_login'];
-			}
-
 			$set_password = false;
-			if ($new_pass != '' && $confirm_pass != '') {
-				if (!validate_pass($new_pass)) {
+			if ($new_passwd != '') {
+				$hasher = new PasswordHash();
+				$set_password = true;
+
+				if (!$hasher->check($current_passwd, $abodata['passwd'])) {
+					$error = true;
+					$msg_error[] = $lang['Message']['Error_login'];
+				}
+				else if (!validate_pass($new_passwd)) {
 					$error = true;
 					$msg_error[] = $lang['Message']['Alphanum_pass'];
 				}
-				else if ($new_pass != $confirm_pass) {
+				else if ($new_passwd !== $confirm_passwd) {
 					$error = true;
 					$msg_error[] = $lang['Message']['Bad_confirm_pass'];
 				}
-
-				$set_password = true;
 			}
 
 			if (!$error) {
@@ -318,7 +138,7 @@ switch ($mode) {
 				);
 
 				if ($set_password) {
-					$sql_data['abo_pwd'] = md5($new_pass);
+					$sql_data['abo_pwd'] = $hasher->hash($new_passwd);
 				}
 
 				if ($new_email != '') {
@@ -334,7 +154,7 @@ switch ($mode) {
 					}
 				}
 
-				$db->update(ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['id']));
+				$db->update(ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['uid']));
 
 				$output->redirect('profil_cp.php', 4);
 				$output->displayMessage('Profile_updated');
@@ -358,27 +178,22 @@ switch ($mode) {
 			'L_CONFIRM_EMAIL' => $lang['Confirm_Email'],
 			'L_PSEUDO'        => $lang['Abo_pseudo'],
 			'L_LANG'          => $lang['Default_lang'],
-			'L_NEW_PASS'      => $lang['New_pass'],
-			'L_CONFIRM_PASS'  => $lang['Conf_pass'],
+			'L_PASSWD'        => $lang['Password'],
+			'L_NEW_PASSWD'    => $lang['New_passwd'],
+			'L_CONFIRM_PASSWD'=> $lang['Confirm_passwd'],
 			'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
 			'EMAIL'    => $abodata['email'],
-			'PSEUDO'   => $abodata['pseudo'],
-			'LANG_BOX' => lang_box($abodata['language'])
+			'PSEUDO'   => $abodata['username'],
+			'LANG_BOX' => lang_box($abodata['abo_lang'])
 		));
 
 		foreach ($other_tags as $tag) {
-			if (isset($abodata['tags'][$tag['column_name']])) {
+			if (isset($abodata[$tag['column_name']])) {
 				$output->assign_var($tag['tag_name'],
-					wan_htmlspecialchars($abodata['tags'][$tag['column_name']])
+					wan_htmlspecialchars($abodata[$tag['column_name']])
 				);
 			}
-		}
-
-		if ($abodata['passwd'] != '') {
-			$output->assign_block_vars('password', array(
-				'L_PASS' => $lang['Password']
-			));
 		}
 
 		$output->pparse('body');
@@ -435,8 +250,8 @@ switch ($mode) {
 
 			$mailer->set_charset('UTF-8');
 
-			if ($abodata['pseudo'] != '') {
-				$address = array($abodata['pseudo'] => $abodata['email']);
+			if ($abodata['username'] != '') {
+				$address = array($abodata['username'] => $abodata['email']);
 			}
 			else {
 				$address = $abodata['email'];
@@ -542,10 +357,10 @@ switch ($mode) {
 				//
 				$tags_replace = array();
 
-				if ($abodata['pseudo'] != '') {
-					$tags_replace['NAME'] = $abodata['pseudo'];
+				if ($abodata['username'] != '') {
+					$tags_replace['NAME'] = $abodata['username'];
 					if ($format == FORMAT_HTML) {
-						$tags_replace['NAME'] = wan_htmlspecialchars($abodata['pseudo']);
+						$tags_replace['NAME'] = wan_htmlspecialchars($abodata['username']);
 					}
 				}
 				else {
@@ -554,12 +369,12 @@ switch ($mode) {
 
 				if (count($other_tags) > 0) {
 					foreach ($other_tags as $tag) {
-						if ($abodata['tags'][$tag['column_name']] != '') {
-							if (!is_numeric($abodata['tags'][$tag['column_name']]) && $format == FORMAT_HTML) {
-								$tags_replace[$tag['tag_name']] = wan_htmlspecialchars($abodata['tags'][$tag['column_name']]);
+						if ($abodata[$tag['column_name']] != '') {
+							if (!is_numeric($abodata[$tag['column_name']]) && $format == FORMAT_HTML) {
+								$tags_replace[$tag['tag_name']] = wan_htmlspecialchars($abodata[$tag['column_name']]);
 							}
 							else {
-								$tags_replace[$tag['tag_name']] = $abodata['tags'][$tag['column_name']];
+								$tags_replace[$tag['tag_name']] = $abodata[$tag['column_name']];
 							}
 
 							continue;

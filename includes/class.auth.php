@@ -42,58 +42,102 @@ class Auth
 	 */
 	public function isLoggedIn()
 	{
-		return (!empty($_SESSION['is_logged_in']) && $_SESSION['is_admin_session']);
+		return (!empty($_SESSION['is_logged_in']) && defined('IN_ADMIN') == $_SESSION['is_admin_session']);
 	}
 
 	/**
 	 * Vérification des identifiants de connexion
 	 *
-	 * @param mixed  $username Nom d'utilisateur
-	 * @param string $passwd   Mot de passe de l'utilisateur
+	 * @param mixed  $id     Identifiant (peut être un nom d'utilisateur ou une adresse email)
+	 * @param string $passwd Mot de passe de l'utilisateur
 	 *
 	 * @return boolean|array
 	 */
-	public function checkCredentials($username, $passwd)
+	public function checkCredentials($id, $passwd)
 	{
 		global $db, $nl_config;
 
 		$login  = false;
 		$hasher = new PasswordHash();
 
-		$sql = sprintf("SELECT *
-			FROM %s
-			WHERE admin_login = '%s'",
-			ADMIN_TABLE,
-			$db->escape($username)
-		);
-		$result = $db->query($sql);
+		$userdata = $this->getUserData($id);
 
-		if ($row = $result->fetch()) {
+		if ($userdata && $userdata['passwd'] != null) {
 			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
-			if ($row['admin_pwd'][0] != '$') {
-				if ($row['admin_pwd'] === md5($passwd)) {
+			if ($userdata['passwd'][0] != '$') {
+				if ($userdata['passwd'] === md5($passwd)) {
 					$login = true;
 				}
 			}
 			// New password hash using phpass
-			else if ($hasher->check($passwd, $row['admin_pwd'])) {
+			else if ($hasher->check($passwd, $userdata['passwd'])) {
 				$login = true;
 			}
 		}
 
 		if ($login) {
-			// Avant la version 9 des tables, le champ admin_pwd était limité à 32 caractères
+			// Avant la version 9 des tables, les colonnes stockant les mots
+			// de passe étaient limitées à 32 caractères.
 			if (isset($nl_config['db_version']) && $nl_config['db_version'] > 8) {
-				$row['admin_pwd'] = $hasher->hash($passwd);
-
-				$data = array('admin_pwd' => $row['admin_pwd']);
-				$cond = array('admin_id'  => $row['admin_id']);
-				$db->update(ADMIN_TABLE, $data, $cond);
+				$this->updatePassword($userdata['uid'], $passwd);
 			}
 
-			$_SESSION['is_logged_in'] = true;
-			$_SESSION['is_admin_session'] = true;
-			$_SESSION['uid'] = intval($row['admin_id']);
+			return $userdata;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param integer $uid    Identifiant de l'utilisateur
+	 * @param string  $passwd Nouveau mot de passe à hasher et stocker
+	 */
+	public function updatePassword($uid, $passwd)
+	{
+		global $db;
+
+		list($tablename, $columns) = $this->getUserTableInfos();
+
+		$hasher = new PasswordHash();
+
+		$data = array($columns['passwd'] => $hasher->hash($passwd));
+		$cond = array($columns['uid'] => $uid);
+		$db->update($tablename, $data, $cond);
+	}
+
+	/**
+	 * Récupération des données utilisateur
+	 *
+	 * @param mixed $id Identifiant de l'utilisateur (username, email ou ID numérique)
+	 *
+	 * @return boolean|array
+	 */
+	public function getUserData($id)
+	{
+		global $db;
+
+		list($tablename, $columns) = $this->getUserTableInfos();
+
+		if (!is_int($id) && $id != '') {
+			$sql_where = sprintf("%s = '%s'",
+				(strpos($id, '@') ? $columns['email'] : $columns['username']),
+				$db->escape($id)
+			);
+		}
+		else {
+			$sql_where = sprintf("%s = %d", $columns['uid'], $id);
+		}
+
+		$sql = "SELECT *
+			FROM $tablename
+			WHERE " . $sql_where;
+		$result = $db->query($sql);
+
+		if ($row = $result->fetch()) {
+			$row['uid']      = intval($row[$columns['uid']]);
+			$row['username'] = $row[$columns['username']];
+			$row['email']    = $row[$columns['email']];
+			$row['passwd']   = $row[$columns['passwd']];
 
 			return $row;
 		}
@@ -102,27 +146,32 @@ class Auth
 	}
 
 	/**
-	 * Récupération des données utilisateur selon son ID
+	 * Renvoie les noms de table et de colonnes de la table utilisateur active
 	 *
-	 * @param integer $uid Identifiant de l'utilisateur
-	 *
-	 * @return boolean|array
+	 * @return array [string $tablename, array $columns]
 	 */
-	public function getUserData($uid)
+	public function getUserTableInfos()
 	{
-		global $db;
+		if (defined('IN_ADMIN')) {
+			$tablename = ADMIN_TABLE;
+			$columns   = array();
 
-		$sql = "SELECT *
-			FROM " . ADMIN_TABLE . "
-			WHERE admin_id = " . intval($uid);
-		$result = $db->query($sql);
+			$columns['uid']      = 'admin_id';
+			$columns['passwd']   = 'admin_pwd';
+			$columns['username'] = 'admin_login';
+			$columns['email']    = 'admin_email';
+		}
+		else {
+			$tablename = ABONNES_TABLE;
+			$columns   = array();
 
-		if ($row = $result->fetch()) {
-			$this->read_data($uid);
-			return $row;
+			$columns['uid']      = 'abo_id';
+			$columns['passwd']   = 'abo_pwd';
+			$columns['username'] = 'abo_pseudo';
+			$columns['email']    = 'abo_email';
 		}
 
-		return false;
+		return array($tablename, $columns);
 	}
 
 	/**

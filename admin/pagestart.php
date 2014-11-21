@@ -47,9 +47,6 @@ $auth = new Auth();
 // End
 //
 
-//
-// On vérifie si les tables du script sont bien à jour
-//
 if (!defined('IN_LOGIN')) {
 	if (!$auth->isLoggedIn() || !($admindata = $auth->getUserData($_SESSION['uid']))) {
 		$session->reset();
@@ -60,6 +57,7 @@ if (!defined('IN_LOGIN')) {
 	}
 
 	load_settings($admindata);
+	$auth->read_data($_SESSION['uid']);// TODO : fix
 
 	if (!is_writable(WA_TMPDIR)) {
 		$output->displayMessage(sprintf(
@@ -69,21 +67,22 @@ if (!defined('IN_LOGIN')) {
 	}
 
 	//
-	// Si la liste en session n'existe pas, on met à jour la session
+	// Si la liste en session n'existe pas, on met à jour la session.
+	// On teste aussi un éventuel identifiant de liste donné en paramètre.
 	//
-	$liste = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
-
-	if (!isset($_SESSION['liste'])) {
+	if (!isset($_SESSION['liste']) || !isset($auth->listdata[$_SESSION['liste']])) {
 		$_SESSION['liste'] = 0;
 	}
+
+	$liste = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
 
 	if (isset($auth->listdata[$liste])) {
 		$_SESSION['liste'] = $liste;
 	}
-}
 
-if (!defined('IN_LOGIN') && strtoupper(server_info('REQUEST_METHOD')) == 'POST' && $session->new_session) {
-	$output->displayMessage('Invalid_session');
+	if (strtoupper(server_info('REQUEST_METHOD')) == 'POST' && $session->new_session) {
+		$output->displayMessage('Invalid_session');
+	}
 }
 
 //

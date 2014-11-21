@@ -8,7 +8,7 @@
 
 	<title>{PAGE_TITLE}</title>
 
-	<link rel="stylesheet" href="./templates/wanewsletter.css" />
+	<link rel="stylesheet" href="{BASEDIR}/templates/wanewsletter.css" />
 
 	{S_NAV_LINKS}
 
@@ -18,7 +18,7 @@
 <div id="header">
 	<div id="logo">
 		<a href="./profil_cp.php">
-			<img src="./images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" />
+			<img src="{BASEDIR}/images/logo-wa.png" width="160" height="60" alt="{PAGE_TITLE}" title="{PAGE_TITLE}" />
 		</a>
 	</div>
 

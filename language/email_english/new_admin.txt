@@ -2,17 +2,6 @@ Hi %PSEUDO%,
 
 You have been added as a %SITENAME% newsletter administrator.
 
-Here is your login information :
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Your login name : %PSEUDO%
-Your password : %PASSWORD%
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can change your password at your convenience, once you are connected to the administration page :
-
-%LINK_ADMIN%
-
-%SIG%
+In order to create your password and activate your account, please follow this link:
+%INIT_PASS_URL%
 

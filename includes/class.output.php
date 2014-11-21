@@ -309,6 +309,7 @@ class Output extends Template
 			'CONTENT_LANG' => $lang['CONTENT_LANG'],
 			'CONTENT_DIR'  => $lang['CONTENT_DIR'],
 
+			'BASEDIR'      => (!empty($nl_config['path'])) ? rtrim($nl_config['path'], '/') : '.',
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts(),
 			'SITENAME'     => wan_htmlspecialchars($sitename, ENT_NOQUOTES)

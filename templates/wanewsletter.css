@@ -45,7 +45,7 @@ abbr[title] {
 
 /* Structure des pages */
 
-body#simple { width: 60%; min-width: 500px; margin: 0 auto; }
+body#simple { width: 60%; min-width: 690px; margin: 0 auto; }
 
 div#header {
 	min-height: 70px;

@@ -1,0 +1,8 @@
+Hi %PSEUDO%,
+
+It seems you asked to reset your password.
+To do so, please follow this link:
+%RESET_URL%
+
+If you have not made a reset request, simply ignore this message.
+

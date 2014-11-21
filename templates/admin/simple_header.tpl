@@ -8,7 +8,7 @@
 
 	<title>{PAGE_TITLE}</title>
 
-	<link rel="stylesheet" href="../templates/wanewsletter.css" />
+	<link rel="stylesheet" href="{BASEDIR}/templates/wanewsletter.css" />
 
 	{S_NAV_LINKS}
 

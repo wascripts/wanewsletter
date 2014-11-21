@@ -62,9 +62,9 @@ $lang['Title']['send']              = "Sending form";
 $lang['Title']['join']              = "Attach a file to the newsletter";
 $lang['Title']['joined_files']      = "Newsletter attached files";
 $lang['Title']['profil_cp']         = "Panel of management of account";
-$lang['Title']['sendkey']           = "Receive your identifiers";
 $lang['Title']['archives']          = "logs of the mailing lists";
-$lang['Title']['sendpass']          = "Generate a new password";
+$lang['Title']['Create_passwd']     = "Create your password";
+$lang['Title']['Reset_passwd']      = "Reset your password";
 $lang['Title']['form']              = "Subscribe to newsletter";
 $lang['Title']['check_update']      = "Check for updates";
 
@@ -155,7 +155,7 @@ $lang['Message']['Success_send_finish']     = "Sending successfully finished.\nT
 $lang['Message']['Success_operation']       = "The operation has been successfully carried out";
 
 $lang['Message']['Profile_updated']         = "The profils has been successfully updated";
-$lang['Message']['Admin_added']             = "The user has been successfully added.  He will receive his login information by email.";
+$lang['Message']['Admin_added']             = "The user has been successfully added. He is about to receive a welcome email.";
 $lang['Message']['Admin_deleted']           = "The user has been successfully deleted";
 $lang['Message']['liste_created']           = "The new mailing list has been successfully created";
 $lang['Message']['liste_edited']            = "The mailing list has been successfully modified";
@@ -179,8 +179,7 @@ $lang['Message']['Not_auth_export']         = "You are not authorized to export 
 $lang['Message']['Not_auth_ban']            = "You are not authorized to make modifications to this mailing list's bannishing list";
 $lang['Message']['Not_auth_attach']         = "You are not authorized to attach files or view attached files in this mailing list";
 
-$lang['Message']['Error_login']             = "Incorrect login or password!";
-$lang['Message']['Error_sendpass']          = "incorrect login or email!";
+$lang['Message']['Error_login']             = "Login incorrect. Authentication failure";
 $lang['Message']['Bad_confirm_pass']        = "The new password and confirmed password are not the same";
 $lang['Message']['Bad_confirm_email']       = "The confirmation of your new email address is incorrect";
 $lang['Message']['bad_ftp_param']           = "The connexion to the ftp server could not be established, please check your settings \n(%s)";
@@ -248,7 +247,6 @@ $lang['Message']['Database_unsupported']    = "This database is not supported by
 
 $lang['Message']['Profil_cp_disabled']      = "The panel of management of account is actually disabled";
 $lang['Message']['Inactive_account']        = "Your account is actually inactive, you had to receive an email to activate it.";
-$lang['Message']['IDs_sended']              = "Your identifiers were sent to you by email";
 $lang['Message']['Logs_sent']               = "The selected newsletters were sent at your address: %s";
 $lang['Message']['Twice_sending']           = "A newsletter is already in the course of sending for this list. Finish or cancel this sending before beginning another of them.";
 
@@ -259,6 +257,12 @@ $lang['Message']['No_gd_img_support']       = "No image format are available";
 $lang['Message']['Warning_debug_active']    = "<strong>Notice&nbsp;:</strong> The debugging is active&nbsp;!";
 $lang['Message']['Invalid_prefix']          = "The table prefix must start with a letter , optionally followed by other alphanumeric characters, and ends with an underscore.";
 $lang['Message']['DB_connection_lost']      = "The database connection has been lost";
+$lang['Message']['Reset_using_username_ok'] = "if an account matchs the username that you have submitted, an email reset password will be sent to the corresponding email address.";
+$lang['Message']['Reset_using_email_ok']    = "if an account matchs the email address that you have submitted, an email reset password will be sent to this email address.";
+$lang['Message']['Invalid_token']           = "This token is not valid !";
+$lang['Message']['Expired_token']           = "This token is no more valid ! \nRetry the process to receive a new valid token.";
+$lang['Message']['Password_created']        = "Your password has been successfully created.\n You can now %slog in%s.";
+$lang['Message']['Password_modified']       = "Your password has been successfully modified.\n You can now %slog in%s.";
 
 //
 // Divers
@@ -279,8 +283,9 @@ $lang['Next_page']                  = "Next page";
 $lang['Last_page']                  = "Last page";
 $lang['Yes']                        = "yes";
 $lang['No']                         = "no";
-$lang['Login']                      = "Access login";
-$lang['Password']                   = "Access password";
+$lang['Login']                      = "User name";
+$lang['Login_or_email']             = "User name ou email address";
+$lang['Password']                   = "Password";
 $lang['Not_available']              = "Not available";
 $lang['Seconds']                    = "seconds";
 $lang['Days']                       = "days";
@@ -312,15 +317,14 @@ $lang['Import']                     = "Import";
 $lang['Export']                     = "Export";
 $lang['Ban']                        = "Ban";
 $lang['Attach']                     = "Attach";
+$lang['Log_in']                     = "Log in";
 $lang['Autologin']                  = "Connect automatically";
 $lang['Faq']                        = "Script's FAQ";
 $lang['Author_note']                = "Author's notes";
 $lang['Page_loading']               = "Please wait while the page is loading";
 $lang['Label_link']                 = "To unsubscribe";
-$lang['Account_login']              = "Enter the email address of your account";
-$lang['Account_pass']               = "Password or code of your account";
 $lang['Maximum_size']               = "Maximum size: %s";
-$lang['Lost_password']              = "Lost password?";
+$lang['Reset_passwd']               = "Reset my password";
 $lang['Name']                       = "Name";
 $lang['Value']                      = "Value";
 $lang['Cookie_notice']              = "You must enable cookies to log in";
@@ -332,16 +336,16 @@ $lang['Click_start_send']           = "Click %shere%s if you wish to start the s
 $lang['Click_resend_auto']          = "Click %shere%s to continue with automatic sendings";
 $lang['Click_resend_manuel']        = "Click %shere%s to send another packet of emails";
 
+$lang['Explain']['Reset_passwd']    = "Enter your username or your email address to receive a mail with instructions on how to create a new password.";
+
 //
 // Sujets de divers emails envoyés
 //
-$lang['Subject_email']['Subscribe'] = "Subscription to the %s newsletter";
+$lang['Subject_email']['Subscribe']     = "Subscription to the %s newsletter";
 $lang['Subject_email']['Unsubscribe_1'] = "Unsubscription confirmation";
 $lang['Subject_email']['New_subscribe'] = "New newsletter subscriber";
 $lang['Subject_email']['Unsubscribe_2'] = "New newsletter unsubscriber";
-$lang['Subject_email']['New_admin'] = "Administration of %s newsletter";
-$lang['Subject_email']['New_pass']  = "Your new password";
-$lang['Subject_email']['Sendkey']   = "The identifiers of your account";
+$lang['Subject_email']['New_admin']     = "Administration of %s newsletter";
 
 
 //
@@ -349,10 +353,8 @@ $lang['Subject_email']['Sendkey']   = "The identifiers of your account";
 //
 $lang['Welcome_profil_cp']          = "Welcome on the manage panel of your account.\nYou can here modify your subscriber profile and view the archives.";
 $lang['Explain']['editprofile']     = "Here, you have the possibility to modify the data of your account.\nYou can inform your first name or pseudo to personalize the newsletters which you will receive (according to the settings of the administrator). You can also put a password to your account, what will be simpler to type than the code of your account.";
-$lang['Explain']['sendkey']         = "If you lost the identifiers of your account, you can ask them to be sent back to you by email";
 $lang['Explain']['archives']        = "You can ask to receive the previous newsletters sent to the mailing lists to which you are registered.\nBe careful, for each newsletter selected, you will receive an email.";
 $lang['Explain']['change_email']    = "The next two fields let you change the email address of your account. Remember that your email address is used to connect to this interface.";
-$lang['Explain']['config_debug']    = "The debugger displays the non-fatal error occuring during the run-time of the script.  It can help to find the source of a bug.\n The debug informations are shown only to administrators.";
 
 $lang['New_Email']                  = "Enter your new email address";
 $lang['Confirm_Email']              = "Confirme your email address";
@@ -384,6 +386,7 @@ $lang['Explain']['config_cookies']  = "These parameters allow you to set the coo
 $lang['Explain']['config_files']    = "You can attach files to your outgoing newsletters. \nTo accomplish this, the script has two options. The easiest option is to have files stored on the server, in the folder defined as a storage directory (the folder must have writing permissions). \nIf, for any reason, this option is not possible on your server, the script offers you the possibility to store the files on a <abbr title=\"File Transfert Protocol\" lang=\"en\">FTP</abbr> server.\n For this option, you must enter acces parameters for the ftp server.";
 $lang['Explain']['config_email']    = "These settings allow you to configure sending emails.\nBy default, the script send a personalized email to each subscriber, but you can configure it to send one or more emails with a list of recipients in a BCC field.\nIf you want to use a specific <abbr title=\"Simple Mail Transfert Protocol\">SMTP</abbr> server, turn on the option and fill in the login informations. By default, the script uses the <abbr title=\"PHP: Hypertext Preprocessor\">PHP</abbr> <code>mail()</code> function. See %sFAQ%s about limitations in the context of using <abbr>SMTP</abbr> server.";
 $lang['Explain']['config_stats']    = "The script has a small statistics module. The module requires that the GD libraty is installed on your server to make it work. \nIf you don't wish to use this functionnality, it is recommended that you deactivate the statistics module to avoid unnecessary data processing by the script.";
+$lang['Explain']['config_debug']    = "The debugger displays the non-fatal error occuring during the run-time of the script.  It can help to find the source of a bug.\n The debug informations are shown only to administrators.";
 
 $lang['Default_lang']               = "Select the default language";
 $lang['Sitename']                   = "Your site's name";
@@ -444,15 +447,12 @@ $lang['Del_user']                   = "Delete this user";
 $lang['Del_note']                   = "Caution, this operation is irreversible";
 $lang['Email_new_subscribe']        = "Be notified of new subscriptions by email";
 $lang['Email_unsubscribe']          = "Be notified of unsubscriptions by email";
-$lang['New_pass']                   = "New password";
-$lang['Conf_pass']                  = "Confirm the new password";
-$lang['Note_pass']                  = "only if you change your password";
+$lang['New_passwd']                 = "New password";
+$lang['Confirm_passwd']             = "Confirm the new password";
+$lang['Note_passwd']                = "only if you change your password";
 $lang['Choice_user']                = "Select a user";
 $lang['View_profile']               = "View profile of";
 $lang['Confirm_del_user']           = "Do you confirm the removal of the selected user?";
-$lang['Login_new_user']             = "His login";
-$lang['Email_new_user']             = "His email";
-$lang['Email_note']                 = "(Where he will receive his password)";
 $lang['User_level']                 = "This user's level";
 $lang['Liste_name2']                = "List name";
 

@@ -10,7 +10,7 @@
 			<td><input type="text" id="new_login" name="new_login" value="{LOGIN}" size="30" maxlength="30" /></td>
 		</tr>
 		<tr>
-			<td><label for="new_email">{L_EMAIL}&nbsp;:</label> <span class="notice">{L_EMAIL_NOTE}</span></td>
+			<td><label for="new_email">{L_EMAIL}&nbsp;:</label></td>
 			<td><input type="text" id="new_email" name="new_email" value="{EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 	</table>

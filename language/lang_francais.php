@@ -62,9 +62,9 @@ $lang['Title']['send']              = "Formulaire d’envoi";
 $lang['Title']['join']              = "Joindre un fichier à la newsletter";
 $lang['Title']['joined_files']      = "Fichiers joints à cette newsletter";
 $lang['Title']['profil_cp']         = "Panneau de gestion de compte";
-$lang['Title']['sendkey']           = "Recevoir vos identifiants";
 $lang['Title']['archives']          = "Archives des listes de diffusion";
-$lang['Title']['sendpass']          = "Générer un nouveau mot de passe";
+$lang['Title']['Create_passwd']     = "Création de votre mot de passe";
+$lang['Title']['Reset_passwd']      = "Réinitialisation de votre mot de passe";
 $lang['Title']['form']              = "Inscription à la liste de diffusion";
 $lang['Title']['check_update']      = "Vérification des mises à jour";
 
@@ -155,7 +155,7 @@ $lang['Message']['Success_send_finish']     = "Envoi terminé avec succès.\nCet
 $lang['Message']['Success_operation']       = "L’opération a été effectuée avec succès";
 
 $lang['Message']['Profile_updated']         = "Le profil a été mis à jour avec succès";
-$lang['Message']['Admin_added']             = "L’utilisateur a été ajouté avec succès, il va recevoir par email ses identifiants de connexion";
+$lang['Message']['Admin_added']             = "L’utilisateur a été ajouté avec succès, il va recevoir un email de bienvenue";
 $lang['Message']['Admin_deleted']           = "L’utilisateur a été supprimé avec succès";
 $lang['Message']['liste_created']           = "La nouvelle liste de diffusion a été créée avec succès";
 $lang['Message']['liste_edited']            = "La liste de diffusion a été modifiée avec succès";
@@ -179,8 +179,7 @@ $lang['Message']['Not_auth_export']         = "Vous n’êtes pas autorisé à e
 $lang['Message']['Not_auth_ban']            = "Vous n’êtes pas autorisé à effectuer des modifications sur la liste de bannissement de cette liste de diffusion";
 $lang['Message']['Not_auth_attach']         = "Vous n’êtes pas autorisé à joindre des fichiers ou à voir les fichiers joints de cette liste de diffusion";
 
-$lang['Message']['Error_login']             = "Login ou mot de passe incorrect !";
-$lang['Message']['Error_sendpass']          = "Login ou email incorrect !";
+$lang['Message']['Error_login']             = "Ces identifiants sont incorrects. Échec de l’authentification";
 $lang['Message']['Bad_confirm_pass']        = "La confirmation du mot de passe ne correspond pas au mot de passe entré";
 $lang['Message']['Bad_confirm_email']       = "La confirmation de votre nouvelle adresse email est erronée";
 $lang['Message']['bad_ftp_param']           = "La connexion au serveur ftp n’a pu être établie, vérifiez vos paramètres \n(%s)";
@@ -248,7 +247,6 @@ $lang['Message']['Database_unsupported']    = "Cette base de données n’est pa
 
 $lang['Message']['Profil_cp_disabled']      = "Le panneau de gestion de compte est actuellement désactivé";
 $lang['Message']['Inactive_account']        = "Votre compte est actuellement inactif, vous avez dû recevoir un email pour l’activer.";
-$lang['Message']['IDs_sended']              = "Vos identifiants vous ont été envoyés par email";
 $lang['Message']['Logs_sent']               = "Les newsletters sélectionnées ont été envoyées à votre adresse: %s";
 $lang['Message']['Twice_sending']           = "Une newsletter est déjà en cours d’envoi pour cette liste. Terminez ou annulez cet envoi avant d’en commencer un autre.";
 
@@ -259,6 +257,13 @@ $lang['Message']['No_gd_img_support']       = "Aucun format d’image valable n�
 $lang['Message']['Warning_debug_active']    = "<strong>Note&nbsp;:</strong> Le débogage est activé&nbsp;!";
 $lang['Message']['Invalid_prefix']          = "Le préfixe de table doit commencer par une lettre, éventuellement suivie d’autres caractères alphanumériques, et se terminer par un tiret bas ou underscore.";
 $lang['Message']['DB_connection_lost']      = "La connexion à la base de données a été perdue";
+
+$lang['Message']['Reset_using_username_ok'] = "Si un compte correspond au nom d’utilisateur que vous avez fourni, un email de réinitialisation du mot de passe sera envoyé à l’adresse email correspondante.";
+$lang['Message']['Reset_using_email_ok']    = "Si un compte correspond à l’adresse email que vous avez fournie, un email de réinitialisation du mot de passe sera envoyé à cette adresse email.";
+$lang['Message']['Invalid_token']           = "Ce jeton n’est pas valide !";
+$lang['Message']['Expired_token']           = "Ce jeton n’est plus valide ! \nRépetez l’opération pour obtenir un nouveau jeton valide.";
+$lang['Message']['Password_created']        = "Votre mot de passe a été créé avec succès.\n Vous pouvez désormais %svous connecter%s.";
+$lang['Message']['Password_modified']       = "Votre mot de passe a été modifié avec succès.\n Vous pouvez désormais %svous connecter%s.";
 
 //
 // Divers
@@ -279,8 +284,9 @@ $lang['Next_page']                  = "Page suivante";
 $lang['Last_page']                  = "Dernière page";
 $lang['Yes']                        = "oui";
 $lang['No']                         = "non";
-$lang['Login']                      = "Login d’accès";
-$lang['Password']                   = "Mot de passe d’accès";
+$lang['Login']                      = "Nom d’utilisateur";
+$lang['Login_or_email']             = "Nom d’utilisateur ou adresse email";
+$lang['Password']                   = "Mot de passe";
 $lang['Not_available']              = "Non disponible";
 $lang['Seconds']                    = "secondes";
 $lang['Days']                       = "jours";
@@ -312,15 +318,14 @@ $lang['Import']                     = "Importer";
 $lang['Export']                     = "Exporter";
 $lang['Ban']                        = "Bannir";
 $lang['Attach']                     = "Attacher";
+$lang['Log_in']                     = "Se connecter";
 $lang['Autologin']                  = "Se connecter automatiquement";
 $lang['Faq']                        = "FAQ du script";
 $lang['Author_note']                = "Notes de l’auteur";
 $lang['Page_loading']               = "Veuillez patienter pendant le chargement de la page";
 $lang['Label_link']                 = "Se désinscrire";
-$lang['Account_login']              = "Entrez l’adresse email de votre compte";
-$lang['Account_pass']               = "Mot de passe ou code de votre compte";
 $lang['Maximum_size']               = "Taille maximum: %s";
-$lang['Lost_password']              = "Mot de passe perdu ?";
+$lang['Reset_passwd']               = "Réinitialiser mon mot de passe";
 $lang['Name']                       = "Nom";
 $lang['Value']                      = "Valeur";
 $lang['Cookie_notice']              = "Vous devez activer les cookies pour pouvoir vous connecter";
@@ -332,16 +337,17 @@ $lang['Click_start_send']           = "Cliquez %sici%s si vous souhaitez démarr
 $lang['Click_resend_auto']          = "Cliquez %sici%s pour continuer l’envoi de façon automatique";
 $lang['Click_resend_manuel']        = "Cliquez %sici%s pour envoyer un autre flot d’emails";
 
+$lang['Explain']['login']           = "Si votre compte ne possède pas encore de mot de passe, vous pouvez en créer un en suivant ce lien&nbsp;: %sCréer mon mot de passe%s.";
+$lang['Explain']['Reset_passwd']    = "Entrez votre nom d’utilisateur ou votre adresse email pour recevoir un email contenant les instructions à suivre pour créer un nouveau mot de passe.";
+
 //
 // Sujets de divers emails envoyés
 //
-$lang['Subject_email']['Subscribe'] = "Inscription à la newsletter de %s";
+$lang['Subject_email']['Subscribe']     = "Inscription à la newsletter de %s";
 $lang['Subject_email']['Unsubscribe_1'] = "Confirmation de désinscription";
 $lang['Subject_email']['New_subscribe'] = "Nouvel inscrit à la newsletter";
 $lang['Subject_email']['Unsubscribe_2'] = "Désinscription de la newsletter";
-$lang['Subject_email']['New_admin'] = "Administration de la newsletter de %s";
-$lang['Subject_email']['New_pass']  = "Votre nouveau mot de passe";
-$lang['Subject_email']['Sendkey']   = "Les identifiants de votre compte";
+$lang['Subject_email']['New_admin']     = "Administration de la newsletter de %s";
 
 
 //
@@ -349,7 +355,6 @@ $lang['Subject_email']['Sendkey']   = "Les identifiants de votre compte";
 //
 $lang['Welcome_profil_cp']          = "Bienvenue sur le panneau de gestion de votre compte.\nVous pouvez ici modifier votre profil abonné et consulter les archives.";
 $lang['Explain']['editprofile']     = "Ici, vous avez la possibilité de modifier les données de votre compte.\nVous pouvez renseigner votre prénom ou pseudo pour personnaliser les newsletters que vous recevrez (selon les réglages de l’administrateur). Vous pouvez également mettre un mot de passe à votre compte, ce qui sera plus simple à taper que le code de votre compte.";
-$lang['Explain']['sendkey']         = "Si vous avez perdu les identifiants de votre compte, vous pouvez demander à ce qu’ils vous soient renvoyés par email";
 $lang['Explain']['archives']        = "Vous pouvez, à partir de cette page, demander à recevoir les précédentes newsletters envoyées aux listes de diffusion auxquelles vous êtes inscrit.\nAttention, pour chaque newsletter sélectionnée, vous recevrez un email.";
 $lang['Explain']['change_email']    = "Les deux champs suivant vous permettent de changer l’adresse email de votre compte. N’oubliez pas que votre adresse email vous sert à vous connecter à la présente interface.";
 
@@ -443,15 +448,12 @@ $lang['Del_user']                   = "Supprimer cet utilisateur";
 $lang['Del_note']                   = "Attention, cette opération est irréversible";
 $lang['Email_new_subscribe']        = "Être prévenu par email des nouvelles inscriptions";
 $lang['Email_unsubscribe']          = "Être prévenu par email des désinscriptions";
-$lang['New_pass']                   = "Nouveau mot de passe";
-$lang['Conf_pass']                  = "Confirmez le mot de passe";
-$lang['Note_pass']                  = "seulement si vous changez votre mot de passe";
+$lang['New_passwd']                 = "Nouveau mot de passe";
+$lang['Confirm_passwd']             = "Confirmez le mot de passe";
+$lang['Note_passwd']                = "seulement si vous changez votre mot de passe";
 $lang['Choice_user']                = "Sélectionnez un utilisateur";
 $lang['View_profile']               = "Voir le profil de";
 $lang['Confirm_del_user']           = "Vous confirmez la suppression de l’utilisateur sélectionné ?";
-$lang['Login_new_user']             = "Son login";
-$lang['Email_new_user']             = "Son email";
-$lang['Email_note']                 = "(Où il recevra son mot de passe)";
 $lang['User_level']                 = "Niveau de cet utilisateur";
 $lang['Liste_name2']                = "Nom de la liste";
 
