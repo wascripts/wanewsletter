@@ -211,10 +211,9 @@ if (isset($_POST['submit'])) {
 
 	$set_password = false;
 	if ($new_passwd != '') {
-		$hasher = new PasswordHash();
 		$set_password = true;
 
-		if ($admin_id == $admindata['admin_id'] && !$hasher->check($current_passwd, $admindata['admin_pwd'])) {
+		if ($admin_id == $admindata['admin_id'] && !password_verify($current_passwd, $admindata['admin_pwd'])) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Error_login'];
 		}
@@ -243,7 +242,10 @@ if (isset($_POST['submit'])) {
 		);
 
 		if ($set_password) {
-			$sql_data['admin_pwd'] = $hasher->hash($new_passwd);
+			if (!($passwd_hash = password_hash($new_passwd, PASSWORD_DEFAULT))) {
+				trigger_error("Unexpected error returned by password API", E_USER_ERROR);
+			}
+			$sql_data['admin_pwd'] = $passwd_hash;
 		}
 
 		if (wan_is_admin($admindata) && $admin_id != $admindata['admin_id'] && !empty($_POST['admin_level'])) {

@@ -114,10 +114,9 @@ switch ($mode) {
 
 			$set_password = false;
 			if ($new_passwd != '') {
-				$hasher = new PasswordHash();
 				$set_password = true;
 
-				if (!$hasher->check($current_passwd, $abodata['passwd'])) {
+				if (!password_verify($current_passwd, $abodata['passwd'])) {
 					$error = true;
 					$msg_error[] = $lang['Message']['Error_login'];
 				}
@@ -138,7 +137,10 @@ switch ($mode) {
 				);
 
 				if ($set_password) {
-					$sql_data['abo_pwd'] = $hasher->hash($new_passwd);
+					if (!($passwd_hash = password_hash($new_passwd, PASSWORD_DEFAULT))) {
+						trigger_error("Unexpected error returned by password API", E_USER_ERROR);
+					}
+					$sql_data['abo_pwd'] = $passwd_hash;
 				}
 
 				if ($new_email != '') {

@@ -57,8 +57,7 @@ class Auth
 	{
 		global $db, $nl_config;
 
-		$login  = false;
-		$hasher = new PasswordHash();
+		$login = false;
 
 		$userdata = $this->getUserData($id);
 
@@ -69,8 +68,8 @@ class Auth
 					$login = true;
 				}
 			}
-			// New password hash using phpass
-			else if ($hasher->check($passwd, $userdata['passwd'])) {
+			// New password hash using password API
+			else if (password_verify($passwd, $userdata['passwd'])) {
 				$login = true;
 			}
 		}
@@ -98,9 +97,11 @@ class Auth
 
 		list($tablename, $columns) = $this->getUserTableInfos();
 
-		$hasher = new PasswordHash();
+		if (!($passwd_hash = password_hash($passwd, PASSWORD_DEFAULT))) {
+			trigger_error("Unexpected error returned by password API", E_USER_ERROR);
+		}
 
-		$data = array($columns['passwd'] => $hasher->hash($passwd));
+		$data = array($columns['passwd'] => $passwd_hash);
 		$cond = array($columns['uid'] => $uid);
 		$db->update($tablename, $data, $cond);
 	}

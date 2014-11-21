@@ -18,7 +18,8 @@
 	},
 	"require": {
 		"php": ">=5.3.7",
-		"patchwork/utf8": "~1.2@dev"
+		"patchwork/utf8": "~1.2@dev",
+		"ircmaxell/password-compat": "1.0.4"
 	},
 	"require-dev": {
 		"squizlabs/php_codesniffer": "~1.0"

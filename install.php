@@ -176,35 +176,20 @@ if ($start) {
 	require WA_ROOTDIR . '/includes/functions.validate.php';
 
 	if (defined('NL_INSTALLED')) {
-		$login = false;
+		$auth = new Auth();
 
-		$sql = "SELECT admin_email, admin_pwd, admin_level
-			FROM " . ADMIN_TABLE . "
-			WHERE admin_login = '" . $db->escape($admin_login) . "'
-				AND admin_level = " . ADMIN_LEVEL;
-		$result = $db->query($sql);
-
-		if ($row = $result->fetch()) {
-			$hasher = new PasswordHash();
-
-			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
-			if ($row['admin_pwd'][0] != '$') {
-				if ($row['admin_pwd'] === md5($admin_pass)) {
-					$login = true;
-				}
-			}
-			// New password hash using phpass
-			else if ($hasher->check($admin_pass, $row['admin_pwd'])) {
-				$login = true;
+		if ($admindata = $auth->checkCredentials($admin_login, $admin_pass)) {
+			if (!wan_is_admin($admindata)) {
+				http_response_code(401);
+				$output->addLine($lang['Message']['Not_authorized']);
+				$output->addLine($lang['Click_return_index'], './index.php');
+				$output->displayMessage();
 			}
 
-			if ($login) {
-				$admin_email  = $row['admin_email'];
-				$confirm_pass = $admin_pass;
-			}
+			$admin_email  = $admindata['email'];
+			$confirm_pass = $admin_pass;
 		}
-
-		if (!$login) {
+		else {
 			$error = true;
 			$msg_error[] = $lang['Message']['Error_login'];
 		}
@@ -279,6 +264,10 @@ if ($start) {
 		//
 		@set_time_limit(300);
 
+		if (!($passwd_hash = password_hash($admin_pass, PASSWORD_DEFAULT))) {
+			trigger_error("Unexpected error returned by password API", E_USER_ERROR);
+		}
+
 		if (defined('NL_INSTALLED')) {
 			$sql_drop = array();
 
@@ -315,11 +304,9 @@ if ($start) {
 
 		$urlscript = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
 
-		$hasher = new PasswordHash();
-
 		$sql_data[] = "UPDATE " . ADMIN_TABLE . "
 			SET admin_login = '" . $db->escape($admin_login) . "',
-				admin_pwd   = '" . $db->escape($hasher->hash($admin_pass)) . "',
+				admin_pwd   = '" . $db->escape($passwd_hash) . "',
 				admin_email = '" . $db->escape($admin_email) . "',
 				admin_lang  = '$language'
 			WHERE admin_id = 1";
