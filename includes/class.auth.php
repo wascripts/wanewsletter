@@ -61,10 +61,10 @@ class Auth
 
 		$userdata = $this->getUserData($id);
 
-		if ($userdata && $userdata['passwd'] != null) {
+		if ($userdata && $userdata['passwd'] != '') {
 			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
 			if ($userdata['passwd'][0] != '$') {
-				if ($userdata['passwd'] === md5($passwd)) {
+				if (hash_equals($userdata['passwd'], md5($passwd))) {
 					$login = true;
 				}
 			}
