@@ -336,6 +336,7 @@ $lang['Click_start_send']           = "Click %shere%s if you wish to start the s
 $lang['Click_resend_auto']          = "Click %shere%s to continue with automatic sendings";
 $lang['Click_resend_manuel']        = "Click %shere%s to send another packet of emails";
 
+$lang['Explain']['login']           = "If your account doesn't have a password, you can create one by following this link: %sCreate password%s.";
 $lang['Explain']['Reset_passwd']    = "Enter your username or your email address to receive a mail with instructions on how to create a new password.";
 
 //
