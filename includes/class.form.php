@@ -9,7 +9,6 @@
 
 class Wanewsletter
 {
-	private $code        = '';
 	private $format      = FORMAT_TEXTE;
 	private $listdata    = array();
 	public $liste_email  = '';
@@ -24,7 +23,7 @@ class Wanewsletter
 
 	public function __construct($listdata = null)
 	{
-		global $nl_config, $lang;
+		global $nl_config;
 
 		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 		$mailer->signature = WA_X_MAILER;
@@ -395,7 +394,7 @@ class Wanewsletter
 
 	private function confirm($code, $time = null)
 	{
-		global $db, $nl_config, $lang;
+		global $db, $lang;
 
 		$time = (is_null($time)) ? time() : $time;
 		$time_limit = ($time - ($this->listdata['limitevalidate'] * 86400));

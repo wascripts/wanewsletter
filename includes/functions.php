@@ -165,7 +165,7 @@ function wa_update_config($config, $value = null)
  * Génération d'une chaîne aléatoire
  *
  * @param integer $length       Nombre de caractères
- * @param integer $specialChars Ajout de caractères spéciaux
+ * @param boolean $specialChars Ajout de caractères spéciaux
  *
  * @return string
  */
@@ -316,7 +316,7 @@ function http_redirect($url, $params = array(), $session = false, $status = 0)
  */
 function load_settings($admindata = array())
 {
-	global $nl_config, $lang, $datetime;
+	global $nl_config, $lang;
 
 	$check_list = array();
 	$supported_lang = array(
@@ -385,8 +385,6 @@ function load_settings($admindata = array())
  */
 function wan_error_handler($errno, $errstr, $errfile, $errline)
 {
-	global $nl_config;
-
 	$simple = (defined('IN_COMMANDLINE') || defined('IN_SUBSCRIBE') || defined('IN_WA_FORM') || defined('IN_CRON'));
 	$fatal  = ($errno == E_USER_ERROR || $errno == E_RECOVERABLE_ERROR);
 
@@ -456,7 +454,7 @@ function wan_exception_handler($e)
  */
 function wan_format_error($error)
 {
-	global $db, $lang, $nl_config;
+	global $db, $lang;
 
 	$errno   = $error->getCode();
 	$errstr  = $error->getMessage();
@@ -810,7 +808,7 @@ function convert_time($dateformat, $timestamp)
  */
 function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 {
-	global $db, $nl_config;
+	global $db;
 
 	if (!$liste_id) {
 		$total_entries_deleted = 0;
@@ -882,7 +880,8 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  * Annule l'effet produit par l'option de configuration magic_quotes_gpc à On
  * Fonction récursive
  *
- * @param array $data Tableau des données
+ * @param array   $data         Tableau des données
+ * @param boolean $isFilesArray Exception pour $_FILES
  */
 function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 {

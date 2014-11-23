@@ -624,8 +624,8 @@ class Attach
 	 * Retourne le nombre des fichiers supprimés, en cas de succés
 	 *
 	 * @param boolean $massive_delete Si true, suppression des fichiers joints du ou des logs concernés
-	 * @param mixed   $log_id_ary     id ou tableau des id des logs concernés
-	 * @param mixed   $file_id_ary    id ou tableau des id des fichiers joints concernés (si $massive_delete à false)
+	 * @param mixed   $log_ids        id ou tableau des id des logs concernés
+	 * @param mixed   $file_ids       id ou tableau des id des fichiers joints concernés (si $massive_delete à false)
 	 *
 	 * @return mixed
 	 */
@@ -722,7 +722,7 @@ class Attach
 	 *
 	 * @param string $filename  Nom réel du fichier
 	 * @param string $mime_type Mime type du fichier
-	 * @param string $filedata  Contenu du fichier
+	 * @param string $data      Contenu du fichier
 	 */
 	public static function send_file($filename, $mime_type, $data)
 	{

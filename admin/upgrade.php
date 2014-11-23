@@ -181,7 +181,7 @@ if (isset($_POST['start'])) {
 			$emails = array();
 
 			do {
-				$emails[] = $row[$fieldname];
+				$emails[] = $row['abo_email'];
 			}
 			while ($row = $result->fetch());
 

@@ -247,10 +247,10 @@ class Output extends Template
 	 */
 	public function page_header($page_title = '')
 	{
-		global $nl_config, $lang, $template, $admindata, $auth;
+		global $nl_config, $lang, $admindata, $auth;
 		global $simple_header, $error, $msg_error;
 
-		if (empty($_SESSION) || !$_SESSION['is_logged_in']) {
+		if (!($auth instanceof Auth) || !$auth->isLoggedIn()) {
 			$simple_header = true;
 		}
 
@@ -598,7 +598,7 @@ BASIC;
 			return false;
 		}
 
-		$test_ary = array();
+		$test_files = array();
 		for ($i = 0; $i < $num_files; $i++) {
 			$total_size  += $logdata['joined_files'][$i]['file_size'];
 			$test_files[] = $logdata['joined_files'][$i]['file_real_name'];

@@ -13,16 +13,15 @@ if (!defined('IN_NEWSLETTER')) {
 
 $output->set_rootdir(sprintf('%s/templates/', WA_ROOTDIR));
 
-$mode     = filter_input(INPUT_GET, 'mode');
-$redirect = (defined('IN_ADMIN')) ? 'index.php' : 'profil_cp.php';
-$redirect = (!empty($_REQUEST['redirect'])) ? trim($_REQUEST['redirect']) : $redirect;
-
-//
-// Réinitialisation du mot passe
-//
+$mode      = filter_input(INPUT_GET, 'mode');
 $reset_key = filter_input(INPUT_GET, 'k');
+$redirect  = (defined('IN_ADMIN')) ? 'index.php' : 'profil_cp.php';
+$redirect  = (!empty($_REQUEST['redirect'])) ? trim($_REQUEST['redirect']) : $redirect;
 
-if ($reset_key && !$mode) {
+//
+// Si la clé est fournie, on est forcément dans le mode 'reset_passwd'
+//
+if ($reset_key) {
 	$mode = 'reset_passwd';
 }
 
@@ -209,7 +208,7 @@ else if ($mode == 'logout') {
 
 //
 // L'utilisateur est connecté ?
-// Dans ce cas, on le redirige vers la page demandée, ou vers l'accueil de l'administration par défaut
+// Dans ce cas, on le redirige vers la page demandée
 //
 if ($auth->isLoggedIn()) {
 	http_redirect($redirect);

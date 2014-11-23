@@ -93,8 +93,6 @@ function send_image($name, $img, $lastModified = null)
 
 function display_img_error($str)
 {
-	global $img_type;
-
 	$imageW = 560;
 	$imageH = 80;
 	$text_font = 3;

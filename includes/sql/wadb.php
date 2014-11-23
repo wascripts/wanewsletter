@@ -250,7 +250,7 @@ abstract class Wadb
 	 * Prépare les données du tableau $data en prévision de leur utilisation
 	 * dans une requète.
 	 *
-	 * @param string $name
+	 * @param array $data
 	 *
 	 * @return array
 	 */
@@ -349,9 +349,9 @@ abstract class Wadb
 	abstract public function close();
 
 	/**
-	 * Initialise un objet WadbBackup_{driver}
+	 * Initialise un objet WadbBackup
 	 *
-	 * @return WadbBackup_{driver}
+	 * @return WadbBackup
 	 */
 	abstract public function initBackup();
 

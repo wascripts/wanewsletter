@@ -24,7 +24,6 @@ class Auth
 	const ATTACH = 8;
 
 	public $listdata = array();
-	private $rowset  = array();
 
 	public $auth_ary = array(
 		self::VIEW   => 'auth_view',
@@ -55,7 +54,7 @@ class Auth
 	 */
 	public function checkCredentials($id, $passwd)
 	{
-		global $db, $nl_config;
+		global $nl_config;
 
 		$login = false;
 
@@ -179,6 +178,8 @@ class Auth
 	 * Récupèration des permissions pour l'utilisateur demandé
 	 *
 	 * @param integer $admin_id Identifiant de l'utilisateur concerné
+	 *
+	 * @return array
 	 */
 	public function read_data($admin_id)
 	{
@@ -200,11 +201,11 @@ class Auth
 			$tmp_ary[$row['liste_id']] = $row;
 		}
 
-		if (!empty($admindata) && $admindata['admin_id'] != $admin_id) {
-			return $tmp_ary;
+		if ($admindata['admin_id'] == $admin_id) {
+			$this->listdata = $tmp_ary;
 		}
 
-		$this->listdata = $tmp_ary;
+		return $tmp_ary;
 	}
 
 	/**

@@ -578,8 +578,6 @@ function newsletter_links($listdata)
 {
 	global $nl_config, $lang;
 
-	$link = array(FORMAT_TEXTE => '', FORMAT_HTML => '');
-
 	$link_template = sprintf('<a href="%%s">%s</a>', str_replace('%', '%%', $lang['Label_link']));
 
 	if ($listdata['use_cron']) {

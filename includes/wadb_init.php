@@ -300,8 +300,8 @@ function exec_queries(&$queries)
  * /!\ Ne permet que d'altérer le type des colonnes.
  * Ajouter/Renommer/Supprimer des colonnes ne fonctionnera pas avec $restore_data à true
  *
- * @param string $tablename   Nom de la table à recréer
- * @param string $ignore_data true pour laisser la nouvelle table vide (perte des données)
+ * @param string  $tablename    Nom de la table à recréer
+ * @param boolean $restore_data true pour restaurer les données
  */
 function wa_sqlite_recreate_table($tablename, $restore_data = true)
 {
