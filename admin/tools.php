@@ -129,7 +129,7 @@ switch ($mode) {
 $url_page  = './tools.php';
 $url_page .= ($mode != '') ? '?mode=' . $mode : '';
 
-if (!in_array($mode, array('backup','restore','debug')) && !$_SESSION['liste']) {
+if (!in_array($mode, array('backup','restore','debug', '')) && !$_SESSION['liste']) {
 	$output->build_listbox($auth_type, true, $url_page);
 }
 else if ($_SESSION['liste']) {
