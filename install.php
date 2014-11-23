@@ -415,7 +415,7 @@ if (!defined('NL_INSTALLED')) {
 		'L_DEFAULT_LANG'    => $lang['Default_lang'],
 		'L_LOGIN'           => $lang['Login'],
 		'L_PASS'            => $lang['Password'],
-		'L_PASS_CONF'       => $lang['Conf_pass'],
+		'L_PASS_CONF'       => $lang['Confirm_passwd'],
 		'L_EMAIL'           => $lang['Email_address'],
 		'L_START_BUTTON'    => $lang['Start_install'],
 
