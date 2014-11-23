@@ -299,14 +299,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				//
 				// Initialisation de la barre de progression des envois
 				//
-				$bar = new Console_ProgressBar(
-					'Sending emails %percent% [%bar%] %current% of %max%', // One of several predefined formatstrings
-					'=>',       // What are we filling the bar with
-					' ',        // What are we PRE-filing the bar with
-					80,         // How wide is the  bar
-					$total_abo + count($supp_address), // How many steps are we looping through
-					array('ansi_terminal' => ANSI_TERMINAL)
-				);
+				$progressbar = new \ProgressBar\Manager(0, ($total_abo + count($supp_address)), 80, '=', ' ');
+				$progressbar->setFormat('Sending emails %percent%% [%bar%] %current%/%max%');
 			}
 			else {
 				fake_header(false);
@@ -425,7 +419,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				}
 
 				if (defined('IN_COMMANDLINE')) {
-					$bar->update($counter);
+					$progressbar->update($counter);
 
 					if (SEND_DELAY > 0 && ($counter % SEND_PACKET) == 0) {
 						sleep(SEND_DELAY);

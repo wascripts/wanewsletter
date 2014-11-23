@@ -25,7 +25,6 @@ function wan_autoloader($classname)
 	$catalog = array();
 	$catalog['wanerror']     = '%s/includes/class.error.php';
 	$catalog['wanewsletter'] = '%s/includes/class.form.php';
-	$catalog['console_progressbar'] = '%s/contrib/Console/ProgressBar.php';
 
 	$rootdir   = dirname(__DIR__);
 	$classname = strtolower($classname);
