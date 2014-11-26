@@ -189,18 +189,6 @@ define('ZIPLIB_LOADED', extension_loaded('zip'));
 define('ZLIB_LOADED',   extension_loaded('zlib'));
 define('BZIP2_LOADED',  extension_loaded('bz2'));
 
-if (WA_USER_OS == 'win') {
-	$eol = "\r\n";
-}
-else if (WA_USER_OS == 'mac') {
-	$eol = "\r";
-}
-else {
-	$eol = "\n";
-}
-
-define('WA_EOL', $eol);
-
 //
 // On augmente le temps d'exécution du script
 // Certains hébergeurs empèchent pour des raisons évidentes cette possibilité
@@ -939,7 +927,7 @@ switch ($mode) {
 			$output->displayMessage('Database_unsupported');
 		}
 
-		$backup->eol = WA_EOL;
+		$backup->eol = (WA_USER_OS == 'win') ? "\r\n" : "\n";
 		$tables_ary  = $backup->get_tables();
 
 		foreach ($tables_ary as $tablename => $tabletype) {
