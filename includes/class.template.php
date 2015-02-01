@@ -105,23 +105,24 @@ class Template {
      * and run the compiled code. This will print out
      * the results of executing the template.
      */
-    function pparse($handle)
+    function pparse($handle, $return = false)
     {
         if (!$this->loadfile($handle))
         {
             die("Template->pparse(): Impossible de charger le fichier template pour le modèle $handle");
         }
 
+        $_str = '';
         // actually compile the template now.
         if (!isset($this->compiled_code[$handle]) || empty($this->compiled_code[$handle]))
         {
             // Actually compile the code now.
-            $this->compiled_code[$handle] = $this->compile($this->uncompiled_code[$handle]);
+            $this->compiled_code[$handle] = $this->compile($this->uncompiled_code[$handle], $return, '_str');
         }
 
         // Run the compiled code.
         eval($this->compiled_code[$handle]);
-        return true;
+        return $_str;
     }
 
     /**
@@ -163,13 +164,13 @@ class Template {
             // Nested block.
             $blocks = explode('.', $blockname);
             $blockcount = count($blocks) - 1;
-            
+
             $str = &$this->_tpldata;
             for( $i = 0; $i < $blockcount; $i++ ) {
-                $str = &$str[$blocks[$i].'.']; 
-                $str = &$str[count($str) - 1]; 
+                $str = &$str[$blocks[$i].'.'];
+                $str = &$str[count($str) - 1];
             }
-            
+
             // Now we add the block that we're actually assigning to.
             // We're adding a new iteration to this block with the given
             // variable assignments.
@@ -258,13 +259,16 @@ class Template {
         {
             die("Template->loadfile(): Le fichier $filename pour le modèle $handle est vide");
         }
-        
+
         $this->uncompiled_code[$handle] = $str;
 
         return true;
     }
 
-
+    function loadFromString($handle, $str)
+    {
+        $this->uncompiled_code[$handle] = $str;
+    }
 
     /**
      * Compiles the given string of code, and returns
@@ -391,7 +395,7 @@ class Template {
                 }
                 else
                 {
-                    $code_lines[$i] = '$' . $retvar . '.= \'' . $code_lines[$i] . '\' . "\\n";'; 
+                    $code_lines[$i] = '$' . $retvar . '.= \'' . $code_lines[$i] . '\' . "\\n";';
                 }
             }
         }
