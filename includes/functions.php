@@ -603,7 +603,7 @@ BASIC;
  * Si elle est appelée avec un argument, ajoute l'entrée dans le journal,
  * sinon, renvoie le journal.
  *
- * @param mixed $entry Peut être un objet Exception, ou une simple chaîne
+ * @param mixed $entry Peut être un objet Exception, ou n'importe quelle autre valeur
  *
  * @return array
  */
@@ -611,7 +611,7 @@ function wanlog($entry = null)
 {
 	static $entries = array();
 
-	if ($entry === null) {
+	if (func_num_args() == 0) {
 		return $entries;
 	}
 
