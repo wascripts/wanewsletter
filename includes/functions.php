@@ -39,10 +39,6 @@ function wan_autoloader($classname)
 				($classname == 'wadb') ? $classname : substr($classname, 5)
 			);
 		}
-		// Wamailer
-		else if (in_array($classname, array('mailer','smtp'))) {
-			$filename = sprintf('%s/includes/wamailer/class.%s.php', $rootdir, $classname);
-		}
 		// Default
 		else {
 			$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
