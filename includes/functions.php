@@ -40,7 +40,7 @@ function wan_autoloader($classname)
 			);
 		}
 		// Wamailer
-		else if (in_array($classname, array('mailer','pop','smtp'))) {
+		else if (in_array($classname, array('mailer','smtp'))) {
 			$filename = sprintf('%s/includes/wamailer/class.%s.php', $rootdir, $classname);
 		}
 		// Default
