@@ -81,7 +81,7 @@ class Session
 			$this->reset();
 		}
 
-		register_shutdown_function('session_write_close');
+		session_register_shutdown();
 	}
 
 	/**

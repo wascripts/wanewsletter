@@ -16,6 +16,18 @@ if (!defined('ENT_HTML401')) {
 	define('ENT_HTML401', 0);
 }
 
+if (!function_exists('session_register_shutdown')) {
+	/**
+	 * Enregistre session_write_close() comme fonction de fermeture de session.
+	 *
+	 * @link http://www.php.net/session_register_shutdown
+	 */
+	function session_register_shutdown()
+	{
+		register_shutdown_function('session_write_close');
+	}
+}
+
 if (!function_exists('http_response_code')) {
 	/**
 	 * Récupère ou change le code de la réponse HTTP
