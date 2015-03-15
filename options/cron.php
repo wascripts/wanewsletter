@@ -25,7 +25,7 @@ $liste_id = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
 
 $sql = 'SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
 		liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe,
-		pop_host, pop_port, pop_user, pop_pass
+		pop_host, pop_port, pop_user, pop_pass, pop_tls
 	FROM ' . LISTE_TABLE . '
 	WHERE liste_id = ' . $liste_id;
 $result = $db->query($sql);
@@ -86,10 +86,13 @@ if ($listdata = $result->fetch()) {
 
 		$wan = new Wanewsletter($listdata);
 		$pop = new Pop();
+		$pop->options(array(
+			'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
+		));
 
 		try {
 			if (!$pop->connect(
-				$listdata['pop_host'],
+				($listdata['pop_tls'] == WA_SECURITY_FULL_TLS ? 'tls://' : '') . $listdata['pop_host'],
 				$listdata['pop_port'],
 				$listdata['pop_user'],
 				$listdata['pop_pass']

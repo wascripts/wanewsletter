@@ -143,6 +143,7 @@ CREATE TABLE wa_liste (
 	pop_port          SMALLINT     NOT NULL DEFAULT 110,
 	pop_user          VARCHAR(100) NOT NULL DEFAULT '',
 	pop_pass          VARCHAR(100) NOT NULL DEFAULT '',
+	pop_tls           SMALLINT     NOT NULL DEFAULT 0,
 	CONSTRAINT wa_liste_pk PRIMARY KEY (liste_id)
 );
 

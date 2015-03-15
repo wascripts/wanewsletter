@@ -145,12 +145,19 @@ if (isset($_POST['submit'])) {
 		$new_config['smtp_pass'] = $old_config['smtp_pass'];
 	}
 
+	if (!WA_SSL_SUPPORT) {
+		$new_config['smtp_tls'] = WA_SECURITY_NONE;
+	}
+
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
 		$smtp = new Mailer_SMTP();
+		$smtp->options(array(
+			'starttls' => ($new_config['smtp_tls'] == WA_SECURITY_STARTTLS)
+		));
 
 		try {
 			if (!$smtp->connect(
-				$new_config['smtp_host'],
+				($new_config['smtp_tls'] == WA_SECURITY_FULL_TLS ? 'tls://' : '') . $new_config['smtp_host'],
 				$new_config['smtp_port'],
 				$new_config['smtp_user'],
 				$new_config['smtp_pass']
@@ -348,6 +355,15 @@ $output->assign_block_vars('choice_engine_send', array(
 	'CHECKED_ENGINE_BCC'  => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_BCC)),
 	'CHECKED_ENGINE_UNIQ' => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_UNIQ))
 ));
+
+if (WA_SSL_SUPPORT) {
+	$output->assign_block_vars('ssl_support', array(
+		'L_SECURITY'        => $lang['Connection_security'],
+		'L_NONE'            => $lang['None'],
+		'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $new_config['smtp_tls'] == WA_SECURITY_STARTTLS),
+		'SSL_TLS_SELECTED'  => $output->getBoolAttr('selected', $new_config['smtp_tls'] == WA_SECURITY_FULL_TLS)
+	));
+}
 
 if (extension_loaded('gd')) {
 	$output->assign_block_vars('extension_gd', array(

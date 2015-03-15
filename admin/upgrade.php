@@ -772,6 +772,29 @@ if (isset($_POST['start'])) {
 			$db->vacuum(SESSIONS_TABLE);
 		}
 
+		//
+		// Support SSL/TLS pour les connexions aux serveurs SMTP et POP
+		//
+		if ($nl_config['db_version'] < 20) {
+			$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
+				VALUES('smtp_tls', '0')";
+
+			switch ($db::ENGINE) {
+				case 'mysql':
+					$type = 'TINYINT(1)';
+					break;
+				case 'postgres':
+					$type = 'SMALLINT';
+					break;
+				case 'sqlite':
+					$type = 'INTEGER';
+					break;
+			}
+
+			$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
+				ADD COLUMN pop_tls $type NOT NULL DEFAULT 0";
+		}
+
 		exec_queries($sql_update);
 
 		//

@@ -883,13 +883,14 @@ else if ($mode == 'liste') {
 			'auto_purge'        => true,
 			'purge_freq'        => 7,
 			'pop_port'          => 110,
+			'pop_tls'           => WA_SECURITY_NONE,
 			'liste_public'      => true,
 			'confirm_subscribe' => CONFIRM_ALWAYS,
 		);
 
 		$vararray2 = array(
-			'liste_format', 'confirm_subscribe', 'liste_public',
-			'limitevalidate', 'auto_purge', 'purge_freq', 'use_cron', 'pop_port'
+			'liste_format', 'confirm_subscribe', 'liste_public', 'limitevalidate',
+			'auto_purge', 'purge_freq', 'use_cron', 'pop_port', 'pop_tls'
 		);
 		foreach ($vararray2 as $varname) {
 			if (isset($_POST[$varname])) {
@@ -898,6 +899,10 @@ else if ($mode == 'liste') {
 			else {
 				${$varname} = (isset($default_values[$varname])) ? $default_values[$varname] : 0;
 			}
+		}
+
+		if (!WA_SSL_SUPPORT) {
+			$pop_tls = WA_SECURITY_NONE;
 		}
 
 		if (isset($_POST['submit'])) {
@@ -935,10 +940,13 @@ else if ($mode == 'liste') {
 
 			if ($use_cron && function_exists('stream_socket_client')) {
 				$pop = new Pop();
+				$pop->options(array(
+					'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
+				));
 
 				try {
 					if (!$pop->connect(
-						$pop_host,
+						($pop_tls == WA_SECURITY_FULL_TLS ? 'tls://' : '') . $pop_host,
 						$pop_port,
 						$pop_user,
 						$pop_pass
@@ -1071,6 +1079,15 @@ else if ($mode == 'liste') {
 
 			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
 		));
+
+		if (WA_SSL_SUPPORT) {
+			$output->assign_block_vars('ssl_support', array(
+				'L_SECURITY'        => $lang['Connection_security'],
+				'L_NONE'            => $lang['None'],
+				'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $pop_tls == WA_SECURITY_STARTTLS),
+				'SSL_TLS_SELECTED'  => $output->getBoolAttr('selected', $pop_tls == WA_SECURITY_FULL_TLS)
+			));
+		}
 
 		$output->pparse('body');
 

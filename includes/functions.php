@@ -1384,10 +1384,12 @@ function wan_sendmail(Email $email)
 	Mailer::$signature = WA_X_MAILER;
 
 	if ($nl_config['use_smtp']) {
+		$server = ($nl_config['smtp_tls'] == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 		Mailer::useSMTP(true, array(
-			'server'   => sprintf('%s:%d', $nl_config['smtp_host'], $nl_config['smtp_port']),
+			'server'   => sprintf($server, $nl_config['smtp_host'], $nl_config['smtp_port']),
 			'username' => $nl_config['smtp_user'],
-			'passwd'   => $nl_config['smtp_pass']
+			'passwd'   => $nl_config['smtp_pass'],
+			'starttls' => ($nl_config['smtp_tls'] == WA_SECURITY_STARTTLS)
 		));
 	}
 

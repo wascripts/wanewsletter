@@ -332,6 +332,8 @@ $lang['Cookie_notice']              = "Vous devez activer les cookies pour pouvo
 $lang['Account_status']             = "Statut de ce compte";
 $lang['Active']                     = "Actif";
 $lang['Inactive']                   = "Inactif";
+$lang['None']                       = "Aucune";
+$lang['Connection_security']        = "Sécurité de la connexion";
 
 $lang['Click_return_index']         = "Cliquez %sici%s pour retourner sur l’accueil";
 $lang['Click_return_back']          = "Cliquez %sici%s pour retourner sur la page précédente";

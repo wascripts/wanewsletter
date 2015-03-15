@@ -238,7 +238,7 @@ for ($i = 1; $i < $argc; $i++) {
 if (!is_null($liste_id)) {
 	$sql = 'SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
 			liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe,
-			pop_host, pop_port, pop_user, pop_pass
+			pop_host, pop_port, pop_user, pop_pass, pop_tls
 		FROM ' . LISTE_TABLE . '
 		WHERE liste_id = ' . $liste_id;
 	$result = $db->query($sql);
@@ -290,10 +290,13 @@ else if ($process_subscribe) {
 
 	$wan = new Wanewsletter($listdata);
 	$pop = new Pop();
+	$pop->options(array(
+		'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
+	));
 
 	try {
 		if (!$pop->connect(
-			$listdata['pop_host'],
+			($listdata['pop_tls'] == WA_SECURITY_FULL_TLS ? 'tls://' : '') . $listdata['pop_host'],
 			$listdata['pop_port'],
 			$listdata['pop_user'],
 			$listdata['pop_pass']

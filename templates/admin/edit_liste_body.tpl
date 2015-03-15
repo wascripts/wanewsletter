@@ -105,6 +105,16 @@
 			<td><label for="pop_pass">{L_POP_PASS}&nbsp;:</label></td>
 			<td><input type="password" id="pop_pass" name="pop_pass" size="30" maxlength="100"{DISABLED_CRON} autocomplete="off" /></td>
 		</tr>
+		<!-- BEGIN ssl_support -->
+		<tr>
+			<td><label for="pop_tls">{ssl_support.L_SECURITY}&nbsp;:</label></td>
+			<td><select name="pop_tls">
+				<option value="0">{ssl_support.L_NONE}</option>
+				<option value="1"{ssl_support.STARTTLS_SELECTED}>STARTTLS</option>
+				<option value="2"{ssl_support.SSL_TLS_SELECTED}>SSL/TLS</option>
+			</select></td>
+		</tr>
+		<!-- END ssl_support -->
 		<tr>
 			<td><label for="liste_alias">{L_LISTE_ALIAS}&nbsp;:</label></td>
 			<td><input type="text" id="liste_alias" name="liste_alias" value="{LISTE_ALIAS}" size="30" maxlength="254"{DISABLED_CRON} /></td>

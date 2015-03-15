@@ -18,7 +18,7 @@ define('WANEWSLETTER_VERSION', '2.4-beta3');
 // Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
 // le script invite l'utilisateur à lancer la procédure de mise à jour des tables
 //
-define('WANEWSLETTER_DB_VERSION', 19);
+define('WANEWSLETTER_DB_VERSION', 20);
 
 //
 // Modes de débogage du script
@@ -211,4 +211,15 @@ define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
 define('WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
 
 define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
+
+//
+// Sécurité des connexions (SMTP, POP, ...)
+//
+$transports = (function_exists('stream_get_transports')) ? stream_get_transports() : array();
+define('WA_SSL_SUPPORT', (in_array('ssl', $transports) || in_array('tls', $transports)));
+unset($transports);
+
+define('WA_SECURITY_NONE',     0);
+define('WA_SECURITY_STARTTLS', 1);
+define('WA_SECURITY_FULL_TLS', 2);
 

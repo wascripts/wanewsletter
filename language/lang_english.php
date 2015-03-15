@@ -331,6 +331,8 @@ $lang['Cookie_notice']              = "You must enable cookies to log in";
 $lang['Account_status']             = "Account status";
 $lang['Active']                     = "Active";
 $lang['Inactive']                   = "Inactive";
+$lang['None']                       = "None";
+$lang['Connection_security']        = "Connection security";
 
 $lang['Click_return_index']         = "Click %shere%s to return to the home page";
 $lang['Click_return_back']          = "Click %shere%s to go back to the previous page";

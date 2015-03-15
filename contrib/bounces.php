@@ -31,10 +31,13 @@ exit(0);
 //
 // Configuration du script
 //
-$pop_server = '';
+$pop_server = '';// Préfixez avec ssl:// ou tls:// si besoin
 $pop_port   = 110; // port du serveur. La valeur par défaut (110) est la plus répandue.
 $pop_user   = '';
 $pop_passwd = '';
+$pop_opts   = array(
+	'starttls' => false // true pour activer le STARTTLS; ignoré si le host est préfixé avec ssl:// ou tls://
+);
 
 //
 // Fin de la configuration
@@ -98,7 +101,15 @@ foreach ($_SERVER['argv'] as $arg) {
 
 if ($process) {
 	if (extension_loaded('imap')) {
-		$cid = imap_open("\{$pop_server:$pop_port/service=pop3}INBOX", $pop_user, $pop_passwd);
+		$secure = '';
+		if (preg_match('#^(ssl|tls)(v[.0-9]+)?://#', $pop_server, $m)) {
+			$pop_server = str_replace($m[0], '', $pop_server);
+			$secure = '/ssl';
+		}
+		else if (!empty($pop_opts['starttls'])) {
+			$secure = '/tls';
+		}
+		$cid = imap_open("\{$pop_server:$pop_port{$secure}/service=pop3\}INBOX", $pop_user, $pop_passwd);
 
 		$mail_box = imap_sort($cid, SORTDATE, 1);
 
@@ -130,6 +141,7 @@ if ($process) {
 		require 'Mail/mimeDecode.php';
 
 		$pop = new Pop();
+		$pop->options($pop_opts);
 		$pop->connect($pop_server, $pop_port, $pop_user, $pop_passwd);
 
 		$total    = $pop->stat_box();

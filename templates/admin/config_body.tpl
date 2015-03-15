@@ -196,6 +196,16 @@ document.addEventListener('DOMContentLoaded', function() {
 			<td><label for="smtp_pass">{L_SMTP_PASS}&nbsp;:</label><br /><span class="notice">{L_AUTH_SMTP_NOTE}</span></td>
 			<td><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="100"{DISABLED_SMTP} autocomplete="off" /></td>
 		</tr>
+		<!-- BEGIN ssl_support -->
+		<tr>
+			<td><label for="smtp_tls">{ssl_support.L_SECURITY}&nbsp;:</label></td>
+			<td><select name="smtp_tls">
+				<option value="0">{ssl_support.L_NONE}</option>
+				<option value="1"{ssl_support.STARTTLS_SELECTED}>STARTTLS</option>
+				<option value="2"{ssl_support.SSL_TLS_SELECTED}>SSL/TLS</option>
+			</select></td>
+		</tr>
+		<!-- END ssl_support -->
 	</table>
 
 	<!-- BEGIN extension_gd -->
