@@ -172,7 +172,7 @@ else if ($mode == 'iframe') {
 				);
 			}
 			else {
-				$body = Mailer::word_wrap(trim($body), false);
+				$body = Mime::wordwrap(trim($body));
 				$body = active_urls(wan_htmlspecialchars($body, ENT_NOQUOTES));
 				$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
 				$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
@@ -398,7 +398,7 @@ else if ($mode == 'abonnes') {
 		if (isset($_POST['submit'])) {
 			$email = (!empty($_POST['email'])) ? trim($_POST['email']) : '';
 
-			if (!Mailer::validate_email($email)) {
+			if (!Mailer::checkMailSyntax($email)) {
 				$error = true;
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
@@ -914,17 +914,17 @@ else if ($mode == 'liste') {
 				$msg_error[] = $lang['Unknown_format'];
 			}
 
-			if (!Mailer::validate_email($sender_email)) {
+			if (!Mailer::checkMailSyntax($sender_email)) {
 				$error = true;
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 
-			if (!empty($return_email) && !Mailer::validate_email($return_email)) {
+			if (!empty($return_email) && !Mailer::checkMailSyntax($return_email)) {
 				$error = true;
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 
-			if (!empty($liste_alias) && !Mailer::validate_email($liste_alias)) {
+			if (!empty($liste_alias) && !Mailer::checkMailSyntax($liste_alias)) {
 				$error = true;
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}

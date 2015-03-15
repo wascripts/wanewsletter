@@ -145,27 +145,27 @@ if (isset($_POST['submit'])) {
 		$new_config['smtp_pass'] = $old_config['smtp_pass'];
 	}
 
-	if ($new_config['use_smtp'] && function_exists('fsockopen')) {
-		preg_match('/^http(s)?:\/\/(.*?)\/?$/i', $new_config['urlsite'], $match);
+	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
+		$smtp = new Mailer_SMTP();
 
-		$smtp = new Smtp();
-
-		$result = $smtp->connect(
-			$new_config['smtp_host'],
-			$new_config['smtp_port'],
-			$new_config['smtp_user'],
-			$new_config['smtp_pass'],
-			$match[2]
-		);
-
-		if (!$result) {
+		try {
+			if (!$smtp->connect(
+				$new_config['smtp_host'],
+				$new_config['smtp_port'],
+				$new_config['smtp_user'],
+				$new_config['smtp_pass']
+			)) {
+				throw new Exception(sprintf("SMTP server response: '%s'", $smtp->responseData));
+			}
+		}
+		catch (Exception $e) {
 			$error = true;
 			$msg_error[] = sprintf(nl2br($lang['Message']['bad_smtp_param']),
-				wan_htmlspecialchars($smtp->msg_error));
+				wan_htmlspecialchars($e->getMessage())
+			);
 		}
-		else {
-			$smtp->quit();
-		}
+
+		$smtp->quit();
 	}
 	else {
 		$new_config['use_smtp'] = 0;
@@ -307,8 +307,8 @@ $output->assign_vars( array(
 	'SMTP_ROW_CLASS'            => ($new_config['use_smtp']) ? '' : 'inactive',
 	'CHECKED_USE_SMTP_ON'       => $output->getBoolAttr('checked', $new_config['use_smtp']),
 	'CHECKED_USE_SMTP_OFF'      => $output->getBoolAttr('checked', !$new_config['use_smtp']),
-	'DISABLED_SMTP'             => $output->getBoolAttr('disabled', !function_exists('fsockopen')),
-	'WARNING_SMTP'              => (!function_exists('fsockopen')) ? ' <span style="color: red;">[not available]</span>' : '',
+	'DISABLED_SMTP'             => $output->getBoolAttr('disabled', !function_exists('stream_socket_client')),
+	'WARNING_SMTP'              => (!function_exists('stream_socket_client')) ? ' <span style="color: red;">[not available]</span>' : '',
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
 	'SMTP_USER'                 => $new_config['smtp_user'],

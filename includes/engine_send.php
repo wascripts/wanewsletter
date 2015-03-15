@@ -75,28 +75,15 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 
 	//
-	// Initialisation de la classe mailer
+	// Initialisation de l'objet Email
 	//
-	$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-	$mailer->signature = WA_X_MAILER;
-
-	if ($nl_config['use_smtp']) {
-		$mailer->use_smtp(
-			$nl_config['smtp_host'],
-			$nl_config['smtp_port'],
-			$nl_config['smtp_user'],
-			$nl_config['smtp_pass']
-		);
-	}
-
-	$mailer->set_charset('UTF-8');
-	$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
+	$email = new Email('UTF-8');
+	$email->setFrom($listdata['sender_email'], $listdata['liste_name']);
+	$email->setSubject($logdata['log_subject']);
 
 	if ($listdata['return_email'] != '') {
-		$mailer->set_return_path($listdata['return_email']);
+		$email->setReturnPath($listdata['return_email']);
 	}
-
-	$mailer->set_subject($logdata['log_subject']);
 
 	$body = array(
 		FORMAT_TEXTE => $logdata['log_body_text'],
@@ -122,8 +109,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 	$attach = new Attach();
 
-	hasCidReferences($body[FORMAT_HTML], $refs);
-
 	for ($i = 0; $i < $total_files; $i++) {
 		$real_name     = $logdata['joined_files'][$i]['file_real_name'];
 		$physical_name = $logdata['joined_files'][$i]['file_physical_name'];
@@ -147,14 +132,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 		}
 
-		if (is_array($refs) && in_array($real_name, $refs)) {
-			$embedded = true;
-		}
-		else {
-			$embedded = false;
-		}
-
-		$mailer->attachment($file_path, $real_name, 'attachment', $mime_type, $embedded);
+		$email->attach($file_path, $real_name, $mime_type);
 	}
 
 	//
@@ -181,8 +159,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					AND aa.cc_admin = " . true;
 		$result = $db->query($sql);
 
-		while ($email = $result->column('admin_email')) {
-			$supp_address[] = $email;
+		while ($admin_email = $result->column('admin_email')) {
+			$supp_address[] = $admin_email;
 		}
 		$result->free();
 
@@ -192,7 +170,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	$abo_ids     = array();
 	$total_abo   = 0;
 	$abo_address = array();
-	$format      = ($listdata['liste_format'] != FORMAT_MULTIPLE) ? $listdata['liste_format'] : false;
 
 	if ($logdata['log_status'] == STATUS_STANDBY) {
 		//
@@ -231,12 +208,17 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 
 	if (count($abo_address) > 0 || ($logdata['log_status'] != STATUS_STANDBY && count($supp_address) > 0)) {
+		$tpl = new Template();
+		$tpl->loadFromString('textbody', $body[FORMAT_TEXTE]);
+		$tpl->loadFromString('htmlbody', $body[FORMAT_HTML]);
+
 		if ($nl_config['engine_send'] == ENGINE_BCC) {
 			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 			$abo_ids = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 
 			foreach ($abo_address as $row) {
-				$abo_format = (!$format) ? $row['format'] : $format;
+				$abo_format = ($listdata['liste_format'] != FORMAT_MULTIPLE)
+					? $listdata['liste_format'] : $row['format'];
 				$abo_ids[$abo_format][] = $row['abo_id'];
 				$abonnes[$abo_format][] = $row['abo_email'];
 			}
@@ -260,36 +242,40 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				}
 			}
 
-			if (count($abonnes[FORMAT_TEXTE]) > 0) {
-				$mailer->set_address($abonnes[FORMAT_TEXTE], 'Bcc');
-				$mailer->set_format(FORMAT_TEXTE);
-				$mailer->set_message($body[FORMAT_TEXTE]);
-				$mailer->assign_tags($tags_replace);
+			$tpl->assign_vars($tags_replace);
 
-				if (!$mailer->send()) {
-					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
+			$body[FORMAT_TEXTE] = $tpl->pparse('textbody', true);
+			$body[FORMAT_HTML]  = $tpl->pparse('htmlbody', true);
+
+			foreach (array(FORMAT_TEXTE, FORMAT_HTML) as $format) {
+				if (count($abonnes[$format]) > 0) {
+
+					$email->clearRecipients();
+					foreach ($abonnes[$format] as $abo_address) {
+						$email->addBCCRecipient($abo_address);
+					}
+
+					if ($listdata['liste_format'] != FORMAT_HTML) {
+						$email->setTextBody($body[FORMAT_TEXTE]);
+					}
+
+					if ($listdata['liste_format'] == FORMAT_HTML || (
+						$listdata['liste_format'] == FORMAT_MULTIPLE && $format == FORMAT_HTML
+					)) {
+						$email->setHTMLBody($body[FORMAT_HTML]);
+					}
+
+					try {
+						wan_sendmail($email);
+					}
+					catch (Exception $e) {
+						trigger_error(sprintf($lang['Message']['Failed_sending2'],
+							wan_htmlspecialchars($e->getMessage())
+						), E_USER_ERROR);
+					}
+
+					fwrite($fp, implode("\n", $abo_ids[$format])."\n");
 				}
-
-				fwrite($fp, implode("\n", $abo_ids[FORMAT_TEXTE])."\n");
-			}
-
-			$mailer->clear_address();
-
-			if (count($abonnes[FORMAT_HTML]) > 0) {
-				$mailer->set_address($abonnes[FORMAT_HTML], 'Bcc');
-				$mailer->set_format($listdata['liste_format']);
-				$mailer->assign_tags($tags_replace);
-				$mailer->set_message($body[FORMAT_HTML]);
-
-				if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-					$mailer->set_altmessage($body[FORMAT_TEXTE]);
-				}
-
-				if (!$mailer->send()) {
-					trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
-				}
-
-				fwrite($fp, implode("\n", $abo_ids[FORMAT_HTML])."\n");
 			}
 
 			$abo_ids = array_merge($abo_ids[FORMAT_TEXTE], $abo_ids[FORMAT_HTML]);
@@ -306,23 +292,10 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				fake_header(false);
 			}
 
-			$mailerText = clone $mailer;
-			$mailerHTML = clone $mailer;
-
 			if (!$listdata['use_cron']) {
 				$body[FORMAT_TEXTE] = str_replace('{LINKS}', $link[FORMAT_TEXTE], $body[FORMAT_TEXTE]);
 				$body[FORMAT_HTML]  = str_replace('{LINKS}', $link[FORMAT_HTML], $body[FORMAT_HTML]);
 			}
-
-			$mailerText->set_format(FORMAT_TEXTE);
-			$mailerText->set_message($body[FORMAT_TEXTE]);
-
-			$mailerHTML->set_format(FORMAT_HTML);
-			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-				$mailerHTML->set_format(FORMAT_MULTIPLE);
-				$mailerHTML->set_altmessage($body[FORMAT_TEXTE]);
-			}
-			$mailerHTML->set_message($body[FORMAT_HTML]);
 
 			$supp_address_ok = array();
 			foreach ($supp_address as $address) {
@@ -349,23 +322,17 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 			$counter   = 0;
 			$sendError = 0;
+			$lastError = '';
 
 			while (($row = array_pop($abo_address)) != null || ($row = array_pop($supp_address_ok)) != null) {
 				$counter++;
-				$abo_format = (!$format) ? $row['format'] : $format;
+				$abo_format = ($listdata['liste_format'] != FORMAT_MULTIPLE)
+					? $listdata['liste_format'] : $row['format'];
 
-				// Choix de l'instance de Wamailer en fonction du format voulu
-				$mailer = ($abo_format == FORMAT_TEXTE) ? $mailerText : $mailerHTML;
-
-				if ($row['abo_pseudo'] != '') {
-					$address = array($row['abo_pseudo'] => $row['abo_email']);
-				}
-				else {
-					$address = $row['abo_email'];
-				}
-
-				$mailer->clear_address();
-				$mailer->set_address($address);
+				$email->removeTextBody();
+				$email->removeHTMLBody();
+				$email->clearRecipients();
+				$email->addRecipient($row['abo_email'], $row['abo_pseudo']);
 
 				//
 				// Traitement des tags et tags personnalisés
@@ -406,11 +373,28 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					));
 				}
 
-				$mailer->assign_tags($tags_replace);
+				$tpl->assign_vars($tags_replace);
 
-				// envoi
-				if (!$mailer->send()) {
+				$textBody = $tpl->pparse('textbody', true);
+				$htmlBody = $tpl->pparse('htmlbody', true);
+
+				if ($abo_format == FORMAT_TEXTE) {
+					$email->setTextBody($textBody);
+				}
+				else {
+					$email->setHTMLBody($htmlBody);
+
+					if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
+						$email->setTextBody($textBody);
+					}
+				}
+
+				try {
+					wan_sendmail($email);
+				}
+				catch (Exception $e) {
 					$sendError++;
+					$lastError = $e->getMessage();
 				}
 
 				if ($row['abo_id'] != -1) {
@@ -438,7 +422,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				fclose($fp);
 				unlink($lockfile);
 
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
+				trigger_error(sprintf($lang['Message']['Failed_sending2'],
+					wan_htmlspecialchars($lastError)
+				), E_USER_ERROR);
 			}
 		}
 		else {

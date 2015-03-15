@@ -1,7 +1,7 @@
-Hi %PSEUDO%,
+Hi {PSEUDO},
 
-You have been added as a %SITENAME% newsletter administrator.
+You have been added as a {SITENAME} newsletter administrator.
 
 In order to create your password and activate your account, please follow this link:
-%INIT_PASS_URL%
+{INIT_PASS_URL}
 

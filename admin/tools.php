@@ -596,7 +596,7 @@ switch ($mode) {
 			//
 			$emails = array_filter($emails,
 				function ($email) use (&$lang, &$report) {
-					if (Mailer::validate_email($email)) {
+					if (Mailer::checkMailSyntax($email)) {
 						return true;
 					}
 					else {

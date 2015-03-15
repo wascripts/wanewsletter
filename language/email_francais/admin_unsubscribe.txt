@@ -1,10 +1,10 @@
-Bonjour %USER%,
+Bonjour {USER},
 
-Une personne s'est désinscrite de la liste de diffusion "%LISTE%".
+Une personne s'est désinscrite de la liste de diffusion "{LISTE}".
 
-Son adresse email est %EMAIL%
+Son adresse email est {EMAIL}
 
-A bientôt sur %URLSITE%
+A bientôt sur {URLSITE}
 
 ~~~~~~~~~~
-%SIG%
+{SIG}

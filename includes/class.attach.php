@@ -290,12 +290,14 @@ class Attach
 					if (!$result) {
 						$error = true;
 						$msg_error[] = $errstr;
+						fclose($fw);
 						$this->remove_file($tmp_filename);
 
 						return;
 					}
 
 					fwrite($fw, $result['data']);
+					fclose($fw);
 					$filesize = strlen($result['data']);
 					$filetype = $result['type'];
 				}
@@ -317,6 +319,7 @@ class Attach
 							$lang['Message']['Unaccess_host'],
 							wan_htmlspecialchars($part['host'])
 						);
+						fclose($fw);
 						$this->remove_file($tmp_filename);
 
 						return;
@@ -330,28 +333,30 @@ class Attach
 					if (!ftp_fget($cid, $fw, $path, FTP_BINARY)) {
 						$error = true;
 						$msg_error[] = $lang['Message']['Not_found_at_url'];
+						fclose($fw);
 						$this->remove_file($tmp_filename);
 
 						return;
 					}
 					ftp_close($cid);
+					fclose($fw);
 
-					$filetype = Mailer::mime_type($extension);
+					$filetype = Mime::getType($tmp_filename);
 				}
-
-				fclose($fw);
 			}
 
 			//
 			// Fichier uploadé manuellement sur le serveur
 			//
 			else if ($upload_mode == 'local') {
-				$filetype = Mailer::mime_type($extension);
-
 				//
 				// On verifie si le fichier est bien présent sur le serveur
 				//
 				$filesize = $this->joined_file_exists($tmp_filename, $error, $msg_error);
+
+				if (!$error) {
+					$filetype = Mime::getType($this->upload_path . $tmp_filename);
+				}
 			}
 		}
 		else {

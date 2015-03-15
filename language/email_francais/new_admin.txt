@@ -1,6 +1,6 @@
-Bonjour %PSEUDO%,
+Bonjour {PSEUDO},
 
-Vous avez été ajouté comme administrateur de la newsletter de %SITENAME%
+Vous avez été ajouté comme administrateur de la newsletter de {SITENAME}
 
 Pour créer votre mot de passe et ainsi activer votre compte, suivez le lien suivant :
-%INIT_PASS_URL%
+{INIT_PASS_URL}

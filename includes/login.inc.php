@@ -118,34 +118,32 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 				$_SESSION['reset_key'] = $reset_key = generate_key(12);
 				$_SESSION['reset_key_expire'] = strtotime('+15 min');
 
-				$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-				$mailer->signature = WA_X_MAILER;
-
-				if ($nl_config['use_smtp']) {
-					$mailer->use_smtp(
-						$nl_config['smtp_host'],
-						$nl_config['smtp_port'],
-						$nl_config['smtp_user'],
-						$nl_config['smtp_pass']
-					);
-				}
-
-				$hostname = parse_url($nl_config['urlsite'], PHP_URL_HOST);
-
-				$mailer->set_charset('UTF-8');
-				$mailer->set_format(FORMAT_TEXTE);
-				$mailer->set_from('do.not.reply@'.$hostname);
-				$mailer->set_address($userdata['email']);
-				$mailer->set_subject(($userdata['passwd'] == '')
-					? $lang['Title']['Create_passwd'] : $lang['Title']['Reset_passwd']
-				);
-
-				$mailer->use_template('reset_passwd', array(
+				$tpl = new Template(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+				$tpl->set_filenames(array('mail' => 'reset_passwd.txt'));
+				$tpl->assign_vars(array(
 					'PSEUDO'    => $userdata['username'],
 					'RESET_URL' => wan_build_url($_SERVER['SCRIPT_NAME'].'?k='.$reset_key)
 				));
+				$message = $tpl->pparse('mail', true);
 
-				$mailer->send();
+				$hostname = parse_url($nl_config['urlsite'], PHP_URL_HOST);
+
+				$email = new Email('UTF-8');
+				$email->setFrom('postmaster@'.$hostname);
+				$email->addRecipient($userdata['email']);
+				$email->setSubject(($userdata['passwd'] == '')
+					? $lang['Title']['Create_passwd'] : $lang['Title']['Reset_passwd']
+				);
+				$email->setTextBody($message);
+
+				try {
+					wan_sendmail($email);
+				}
+				catch (Exception $e) {
+					trigger_error(sprintf($lang['Message']['Failed_sending2'],
+						wan_htmlspecialchars($e->getMessage())
+					), E_USER_ERROR);
+				}
 			}
 
 			$message_id = (strpos($login_or_email, '@'))

@@ -56,7 +56,7 @@ if ($mode == 'adduser') {
 			}
 		}
 
-		if (!Mailer::validate_email($new_email)) {
+		if (!Mailer::checkMailSyntax($new_email)) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Invalid_email'];
 		}
@@ -71,32 +71,28 @@ if ($mode == 'adduser') {
 
 			$db->insert(ADMIN_TABLE, $sql_data);
 
-			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-			$mailer->signature = WA_X_MAILER;
-
-			if ($nl_config['use_smtp']) {
-				$mailer->use_smtp(
-					$nl_config['smtp_host'],
-					$nl_config['smtp_port'],
-					$nl_config['smtp_user'],
-					$nl_config['smtp_pass']
-				);
-			}
-
-			$mailer->set_charset('UTF-8');
-			$mailer->set_format(FORMAT_TEXTE);
-			$mailer->set_from($admindata['admin_email'], $admindata['admin_login']);
-			$mailer->set_address($new_email);
-			$mailer->set_subject(sprintf($lang['Subject_email']['New_admin'], $nl_config['sitename']));
-
-			$mailer->use_template('new_admin', array(
+			$tpl = new Template(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$tpl->set_filenames(array('mail' => 'new_admin.txt'));
+			$tpl->assign_vars(array(
 				'PSEUDO'        => $new_login,
 				'SITENAME'      => $nl_config['sitename'],
 				'INIT_PASS_URL' => wan_build_url('login.php?mode=cp')
 			));
+			$message = $tpl->pparse('mail', true);
 
-			if (!$mailer->send()) {
-				trigger_error(sprintf($lang['Message']['Failed_sending2'], $mailer->msg_error), E_USER_ERROR);
+			$email = new Email('UTF-8');
+			$email->setFrom($admindata['admin_email'], $admindata['admin_login']);
+			$email->addRecipient($new_email);
+			$email->setSubject(sprintf($lang['Subject_email']['New_admin'], $nl_config['sitename']));
+			$email->setTextBody($message);
+
+			try {
+				wan_sendmail($email);
+			}
+			catch (Exception $e) {
+				trigger_error(sprintf($lang['Message']['Failed_sending2'],
+					wan_htmlspecialchars($e->getMessage())
+				), E_USER_ERROR);
 			}
 
 			$output->redirect('./admin.php', 6);
@@ -227,7 +223,7 @@ if (isset($_POST['submit'])) {
 		}
 	}
 
-	if (!Mailer::validate_email($email)) {
+	if (!Mailer::checkMailSyntax($email)) {
 		$error = true;
 		$msg_error[] = $lang['Message']['Invalid_email'];
 	}

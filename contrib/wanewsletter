@@ -383,7 +383,7 @@ else if ($import_mail) {
 	//
 	$emails = array_filter($emails,
 		function ($email) use (&$lang) {
-			if (Mailer::validate_email($email)) {
+			if (Mailer::checkMailSyntax($email)) {
 				return true;
 			}
 			else {

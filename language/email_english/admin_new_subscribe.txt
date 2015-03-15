@@ -1,10 +1,10 @@
-Hi %USER%,
+Hi {USER},
 
-A new person has subscribed to the "%LISTE%" list.
+A new person has subscribed to the "{LISTE}" list.
 
-His or her email address is %EMAIL%.
+His or her email address is {EMAIL}.
 
-See you soon on %URLSITE%
+See you soon on {URLSITE}
 
 ~~~~~~~~~~
-%SIG%
+{SIG}

@@ -18,28 +18,14 @@ class Wanewsletter
 	private $isRegistered = false;
 	public $message       = '';
 
-	private $mailer;
+	private $tpl_dir;
 	private $other_tags;
 
 	public function __construct($listdata = null)
 	{
 		global $nl_config;
 
-		$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-		$mailer->signature = WA_X_MAILER;
-
-		if ($nl_config['use_smtp']) {
-			$mailer->use_smtp(
-				$nl_config['smtp_host'],
-				$nl_config['smtp_port'],
-				$nl_config['smtp_user'],
-				$nl_config['smtp_pass']
-			);
-		}
-
-		$mailer->set_charset('UTF-8');
-		$mailer->set_format(FORMAT_TEXTE);
-		$this->mailer = $mailer;
+		$this->tpl_dir = WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/';
 
 		if (isset($listdata)) {
 			$this->listdata    = $listdata;
@@ -62,7 +48,7 @@ class Wanewsletter
 		//
 		// Vérification syntaxique de l'email
 		//
-		if (!Mailer::validate_email($email)) {
+		if (!Mailer::checkMailSyntax($email)) {
 			return array('error' => true, 'message' => $lang['Message']['Invalid_email']);
 		}
 
@@ -125,9 +111,9 @@ class Wanewsletter
 			// c'est à dire de traiter les demandes émanant d'un entité extérieure à leur réseau, et
 			// pour une adresse email extérieure à ce réseau)
 			//
-			if (!$this->mailer->validate_email_mx($email, $response)) {
+			if (!validateMailbox($email, $response)) {
 				return array('error' => true,
-					'message' => sprintf($lang['Message']['Unrecognized_email'], $response));
+					'message' => sprintf($lang['Message']['Unrecognized_email'], $response[$email]));
 			}
 		}
 
@@ -337,17 +323,9 @@ class Wanewsletter
 			$email_tpl = ($this->listdata['use_cron']) ? 'welcome_cron2' : 'welcome_form2';
 		}
 
-		$this->mailer->clear_all();
-		$this->mailer->set_from($this->listdata['sender_email'], $this->listdata['liste_name']);
-		$this->mailer->set_address($this->account['email']);
-		$this->mailer->set_subject(sprintf($lang['Subject_email']['Subscribe'], $nl_config['sitename']));
-		$this->mailer->set_priority(1);
-
-		if ($this->listdata['return_email'] != '') {
-			$this->mailer->set_return_path($this->listdata['return_email']);
-		}
-
-		$this->mailer->use_template($email_tpl, array(
+		$tpl = new Template($this->tpl_dir);
+		$tpl->set_filenames(array('mail' => $email_tpl.'.txt'));
+		$tpl->assign_vars(array(
 			'LISTE'    => $this->listdata['liste_name'],
 			'SITENAME' => $nl_config['sitename'],
 			'URLSITE'  => $nl_config['urlsite'],
@@ -356,12 +334,12 @@ class Wanewsletter
 		));
 
 		if ($this->listdata['use_cron']) {
-			$this->mailer->assign_tags(array(
+			$tpl->assign_vars(array(
 				'EMAIL_NEWSLETTER' => $this->liste_email
 			));
 		}
 		else {
-			$this->mailer->assign_tags(array(
+			$tpl->assign_vars(array(
 				'LINK' => $this->make_link()
 			));
 		}
@@ -374,18 +352,35 @@ class Wanewsletter
 				}
 			}
 
-			$this->mailer->assign_tags($tags);
+			$tpl->assign_vars($tags);
 		}
 
 		if ($nl_config['enable_profil_cp']) {
 			$link_profil_cp = $nl_config['urlsite'] . $nl_config['path'] . 'profil_cp.php';
-			$this->mailer->assign_block_tags('enable_profil_cp', array(
+			$tpl->assign_block_vars('enable_profil_cp', array(
 				'LINK_PROFIL_CP' => $link_profil_cp
 			));
 		}
 
-		if (!$this->mailer->send()) {
-			$this->message = $lang['Message']['Failed_sending'];
+		$body = $tpl->pparse('mail', true);
+
+		$email = new Email('UTF-8');
+		$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
+		$email->addRecipient($this->account['email']);
+		$email->setSubject(sprintf($lang['Subject_email']['Subscribe'], $nl_config['sitename']));
+		$email->setTextBody($body);
+
+		if ($this->listdata['return_email'] != '') {
+			$email->setReturnPath($this->listdata['return_email']);
+		}
+
+		try {
+			wan_sendmail($email);
+		}
+		catch (Exception $e) {
+			$this->message = sprintf($lang['Message']['Failed_sending2'],
+				wan_htmlspecialchars($e->getMessage())
+			);
 			return false;
 		}
 
@@ -476,18 +471,11 @@ class Wanewsletter
 					AND liste_id = " . $this->listdata['liste_id'];
 			$db->query($sql);
 
-			$this->mailer->set_from($this->listdata['sender_email'], $this->listdata['liste_name']);
-			$this->mailer->set_address($this->account['email']);
-			$this->mailer->set_subject($lang['Subject_email']['Unsubscribe_1']);
-			$this->mailer->set_priority(3);
-
-			if ($this->listdata['return_email'] != '') {
-				$this->mailer->set_return_path($this->listdata['return_email']);
-			}
-
 			$email_tpl = ($this->listdata['use_cron']) ? 'unsubscribe_cron' : 'unsubscribe_form';
 
-			$this->mailer->use_template($email_tpl, array(
+			$tpl = new Template($this->tpl_dir);
+			$tpl->set_filenames(array('mail' => $email_tpl.'.txt'));
+			$tpl->assign_vars(array(
 				'LISTE'    => $this->listdata['liste_name'],
 				'SITENAME' => $nl_config['sitename'],
 				'URLSITE'  => $nl_config['urlsite'],
@@ -496,13 +484,13 @@ class Wanewsletter
 			));
 
 			if ($this->listdata['use_cron']) {
-				$this->mailer->assign_tags(array(
+				$tpl->assign_vars(array(
 					'EMAIL_NEWSLETTER' => $this->liste_email,
 					'CODE'             => $this->account['code']
 				));
 			}
 			else {
-				$this->mailer->assign_tags(array(
+				$tpl->assign_vars(array(
 					'LINK' => $this->make_link()
 				));
 			}
@@ -515,12 +503,28 @@ class Wanewsletter
 					}
 				}
 
-				$this->mailer->assign_tags($tags);
+				$tpl->assign_vars($tags);
 			}
 
-			if (!$this->mailer->send()) {
-				$this->message = $lang['Message']['Failed_sending'];
+			$body = $tpl->pparse('mail', true);
 
+			$email = new Email('UTF-8');
+			$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
+			$email->addRecipient($this->account['email']);
+			$email->setSubject($lang['Subject_email']['Unsubscribe_1']);
+			$email->setTextBody($body);
+
+			if ($this->listdata['return_email'] != '') {
+				$email->setReturnPath($this->listdata['return_email']);
+			}
+
+			try {
+				wan_sendmail($email);
+			}
+			catch (Exception $e) {
+				$this->message = sprintf($lang['Message']['Failed_sending2'],
+					wan_htmlspecialchars($e->getMessage())
+				);
 				return false;
 			}
 
@@ -593,17 +597,23 @@ class Wanewsletter
 			WHERE a.$fieldname = " . $fieldvalue;
 		if ($result = $db->query($sql)) {
 			if ($row = $result->fetch()) {
-				$this->mailer->clear_all();
-				$this->mailer->set_from($this->listdata['sender_email'], $this->listdata['liste_name']);
-				$this->mailer->set_subject($subject);
-
-				$this->mailer->use_template($template, array(
+				$tpl = new Template($this->tpl_dir);
+				$tpl->set_filenames(array('mail' => $template.'.txt'));
+				$tpl->assign_vars(array(
 					'EMAIL'   => $this->account['email'],
 					'LISTE'   => $this->listdata['liste_name'],
 					'URLSITE' => $nl_config['urlsite'],
 					'SIG'     => $this->listdata['liste_sig'],
 					'PSEUDO'  => $this->account['pseudo']
 				));
+
+				$email = new Email('UTF-8');
+				$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
+				$email->setSubject($subject);
+
+				if ($this->listdata['return_email'] != '') {
+					$email->setReturnPath($this->listdata['return_email']);
+				}
 
 				if (count($this->other_tags) > 0) {
 					$tags = array();
@@ -613,7 +623,7 @@ class Wanewsletter
 						}
 					}
 
-					$this->mailer->assign_tags($tags);
+					$tpl->assign_vars($tags);
 				}
 
 				do {
@@ -621,14 +631,17 @@ class Wanewsletter
 						continue;
 					}
 
-					$this->mailer->clear_address();
-					$this->mailer->set_address($row['admin_email'], $row['admin_login']);
+					$tpl->assign_var('USER', $row['admin_login']);
+					$body = $tpl->pparse('mail', true);
 
-					$this->mailer->assign_tags(array(
-						'USER' => $row['admin_login']
-					));
+					$email->clearRecipients();
+					$email->addRecipient($row['admin_email'], $row['admin_login']);
+					$email->setTextBody($body);
 
-					$this->mailer->send(); // envoi
+					try {
+						wan_sendmail($email);
+					}
+					catch (Exception $e) { }
 				}
 				while ($row = $result->fetch());
 			}

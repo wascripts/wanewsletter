@@ -1364,4 +1364,28 @@ function wan_get_faq_url($entry_id)
 	);
 }
 
+/**
+ * Envoi d'email
+ *
+ * @param Email $email
+ *
+ * @return boolean
+ */
+function wan_sendmail(Email $email)
+{
+	global $nl_config;
+
+	Mailer::$signature = WA_X_MAILER;
+
+	if ($nl_config['use_smtp']) {
+		Mailer::useSMTP(true, array(
+			'server'   => sprintf('%s:%d', $nl_config['smtp_host'], $nl_config['smtp_port']),
+			'username' => $nl_config['smtp_user'],
+			'passwd'   => $nl_config['smtp_pass']
+		));
+	}
+
+	Mailer::send($email);
+}
+
 }

@@ -95,7 +95,7 @@ switch ($mode) {
 					$error = true;
 					$msg_error[] = $lang['Message']['Bad_confirm_email'];
 				}
-				else if (!Mailer::validate_email($new_email)) {
+				else if (!Mailer::checkMailSyntax($new_email)) {
 					$error = true;
 					$msg_error[] = $lang['Message']['Invalid_email'];
 				}
@@ -235,42 +235,27 @@ switch ($mode) {
 					AND log_status = " . STATUS_SENT;
 			$result = $db->query($sql);
 
-			//
-			// Initialisation de la classe mailer
-			//
-			$mailer = new Mailer(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
-			$mailer->signature = WA_X_MAILER;
-
-			if ($nl_config['use_smtp']) {
-				$mailer->use_smtp(
-					$nl_config['smtp_host'],
-					$nl_config['smtp_port'],
-					$nl_config['smtp_user'],
-					$nl_config['smtp_pass']
-				);
-			}
-
-			$mailer->set_charset('UTF-8');
-
-			if ($abodata['username'] != '') {
-				$address = array($abodata['username'] => $abodata['email']);
-			}
-			else {
-				$address = $abodata['email'];
-			}
-
 			while ($row = $result->fetch()) {
 				$listdata = $abodata['listes'][$row['liste_id']];
-				$format   = $abodata['listes'][$row['liste_id']]['format'];
+				$format   = $abodata['listes'][$row['liste_id']]['format'];// = format choisi par l'abonné
 
-				$mailer->clear_all();
-				$mailer->set_from($listdata['sender_email'], $listdata['liste_name']);
-				$mailer->set_address($address);
-				$mailer->set_format($format);
-				$mailer->set_subject($row['log_subject']);
+				if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
+					$format = $listdata['liste_format'];
+				}
+
+				$email = new Email('UTF-8');
+				$email->setFrom($listdata['sender_email'], $listdata['liste_name']);
+				$email->setSubject($row['log_subject']);
+
+				if ($abodata['username'] != '') {
+					$email->addRecipient($abodata['email'], $abodata['username']);
+				}
+				else {
+					$email->addRecipient($abodata['email']);
+				}
 
 				if ($listdata['return_email'] != '') {
-					$mailer->set_return_path($listdata['return_email']);
+					$email->setReturnPath($listdata['return_email']);
 				}
 
 				if ($format == FORMAT_TEXTE) {
@@ -306,7 +291,6 @@ switch ($mode) {
 				}
 
 				$body = str_replace('{LINKS}', $link, $body);
-				$mailer->set_message($body);
 
 				//
 				// On s'occupe maintenant des fichiers joints ou incorporés
@@ -317,8 +301,6 @@ switch ($mode) {
 					$tmp_files	 = array();
 
 					$attach = new Attach();
-
-					hasCidReferences($body, $refs);
 
 					for ($i = 0; $i < $total_files; $i++) {
 						$real_name     = $files[$row['log_id']][$i]['file_real_name'];
@@ -343,14 +325,7 @@ switch ($mode) {
 							$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 						}
 
-						if (is_array($refs) && in_array($real_name, $refs)) {
-							$embedded = true;
-						}
-						else {
-							$embedded = false;
-						}
-
-						$mailer->attachment($file_path, $real_name, 'attachment', $mime_type, $embedded);
+						$email->attach($file_path, $real_name, $mime_type);
 					}
 				}
 
@@ -393,11 +368,25 @@ switch ($mode) {
 					));
 				}
 
-				$mailer->assign_tags($tags_replace);
+				$tpl = new Template();
+				$tpl->loadFromString('mail', $body);
+				$tpl->assign_vars($tags_replace);
+				$body = $tpl->pparse('mail', true);
 
-				// envoi
-				if (!$mailer->send()) {
-					trigger_error('Failed_sending', E_USER_ERROR);
+				if ($format == FORMAT_TEXTE) {
+					$email->setTextBody($body);
+				}
+				else {
+					$email->setHTMLBody($body);
+				}
+
+				try {
+					wan_sendmail($email);
+				}
+				catch (Exception $e) {
+					trigger_error(sprintf($lang['Message']['Failed_sending2'],
+						wan_htmlspecialchars($e->getMessage())
+					), E_USER_ERROR);
 				}
 			}
 

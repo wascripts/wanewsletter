@@ -1,13 +1,13 @@
 Hi,
 
-You are receiving this email because you (or someone using your email address) have made a request to unsubscribe from the "%LISTE%" distribution list of the %SITENAME% site.
+You are receiving this email because you (or someone using your email address) have made a request to unsubscribe from the "{LISTE}" distribution list of the {SITENAME} site.
 
-To unsubscribe, please send an email to %EMAIL_NEWSLETTER% with "Unsubscribe" in the subject line and the following code %CODE% in the body of the message.
+To unsubscribe, please send an email to {EMAIL_NEWSLETTER} with "Unsubscribe" in the subject line and the following code {CODE} in the body of the message.
 
-See you soon on %URLSITE%.
+See you soon on {URLSITE}.
 
 ~~~~~~~~~~
-%SIG%
+{SIG}
 
 ~~~~~~~~~~~~~~~~~~~~
 Please ignore this message if you do not wish to unsubscribe.
