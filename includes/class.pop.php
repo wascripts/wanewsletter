@@ -84,13 +84,21 @@ class Pop {
 	public $debug       = false;
 
 	/**
-	 * Utilisation de la commande STLS pour sécuriser la connexion.
-	 * Ignoré si la connexion est sécurisée en utilisant un des préfixes de
-	 * transport ssl ou tls supportés par PHP.
+	 * Options diverses.
+	 * Voir méthode Pop::options()
 	 *
-	 * @var boolean
+	 * @var array
 	 */
-	public $startTLS    = false;
+	private $opts       = array(
+		/**
+		 * Utilisation de la commande STARTTLS pour sécuriser la connexion.
+		 * Ignoré si la connexion est sécurisée en utilisant un des préfixes de
+		 * transport ssl ou tls supportés par PHP.
+		 *
+		 * @var boolean
+		 */
+		'starttls' => false
+	);
 
 	private $_responseData;
 
@@ -104,6 +112,23 @@ class Pop {
 	{
 		if ($auto_connect) {
 			$this->connect($this->host, $this->port, $this->username, $this->passwd);
+		}
+	}
+
+	/**
+	 * Définition des options d'utilisation
+	 *
+	 * @param array $opts
+	 */
+	public function options($opts)
+	{
+		if (is_array($opts)) {
+			// Alternative pour l'activation du débogage
+			if (!empty($opts['debug'])) {
+				$this->debug = $opts['debug'];
+			}
+
+			$this->opts = array_merge($this->opts, $opts);
 		}
 	}
 
@@ -130,7 +155,7 @@ class Pop {
 
 		$startTLS = false;
 		if (!preg_match('#^(ssl|tls)(v[.0-9]+)?://#', $host)) {
-			$startTLS = $this->startTLS;
+			$startTLS = $this->opts['starttls'];
 		}
 
 		//
