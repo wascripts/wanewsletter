@@ -86,7 +86,20 @@ if ($listdata = $result->fetch()) {
 
 		$wan = new Wanewsletter($listdata);
 		$pop = new Pop();
-		$pop->connect($listdata['pop_host'], $listdata['pop_port'], $listdata['pop_user'], $listdata['pop_pass']);
+
+		try {
+			if (!$pop->connect(
+				$listdata['pop_host'],
+				$listdata['pop_port'],
+				$listdata['pop_user'],
+				$listdata['pop_pass']
+			)) {
+				throw new Exception(sprintf("POP server response: '%s'", $pop->responseData));
+			}
+		}
+		catch (Exception $e) {
+			trigger_error(sprintf($lang['Message']['bad_pop_param'], $e->getMessage()), E_USER_ERROR);
+		}
 
 		$cpt = 0;
 		$total    = $pop->stat_box();

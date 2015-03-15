@@ -933,23 +933,27 @@ else if ($mode == 'liste') {
 				$pop_pass = $listdata['pop_pass'];
 			}
 
-			if ($use_cron && function_exists('fsockopen')) {
+			if ($use_cron && function_exists('stream_socket_client')) {
 				$pop = new Pop();
 
-				$result = $pop->connect(
-					$pop_host,
-					$pop_port,
-					$pop_user,
-					$pop_pass
-				);
-
-				if (!$result) {
+				try {
+					if (!$pop->connect(
+						$pop_host,
+						$pop_port,
+						$pop_user,
+						$pop_pass
+					)) {
+						throw new Exception(sprintf("POP server response: '%s'", $pop->responseData));
+					}
+				}
+				catch (Exception $e) {
 					$error = true;
-					$msg_error[] = sprintf(nl2br($lang['Message']['bad_pop_param']), wan_htmlspecialchars($pop->msg_error));
+					$msg_error[] = sprintf(nl2br($lang['Message']['bad_pop_param']),
+						wan_htmlspecialchars($e->getMessage())
+					);
 				}
-				else {
-					$pop->quit();
-				}
+
+				$pop->quit();
 			}
 			else {
 				$use_cron = 0;
@@ -1058,8 +1062,8 @@ else if ($mode == 'liste') {
 			'CHECKED_PURGE_OFF'    => $output->getBoolAttr('checked', !$auto_purge),
 			'CHECKED_USE_CRON_ON'  => $output->getBoolAttr('checked', $use_cron),
 			'CHECKED_USE_CRON_OFF' => $output->getBoolAttr('checked', !$use_cron),
-			'DISABLED_CRON'        => $output->getBoolAttr('disabled', !function_exists('fsockopen')),
-			'WARNING_CRON'         => (!function_exists('fsockopen')) ? ' <span style="color: red;">[not available]</span>' : '',
+			'DISABLED_CRON'        => $output->getBoolAttr('disabled', !function_exists('stream_socket_client')),
+			'WARNING_CRON'         => (!function_exists('stream_socket_client')) ? ' <span style="color: red;">[not available]</span>' : '',
 			'POP_HOST'             => wan_htmlspecialchars($pop_host),
 			'POP_PORT'             => intval($pop_port),
 			'POP_USER'             => wan_htmlspecialchars($pop_user),

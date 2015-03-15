@@ -30,99 +30,69 @@ class Pop {
 	 *
 	 * @var resource
 	 */
-	protected $connect_id     = null;
+	protected $socket;
 
 	/**
 	 * Nom ou IP du serveur pop à contacter
 	 *
 	 * @var string
 	 */
-	protected $pop_server     = '';
+	protected $host     = '';
 
 	/**
 	 * Port d'accés (en général, 110)
 	 *
 	 * @var integer
 	 */
-	protected $pop_port       = 110;
+	protected $port     = 110;
 
 	/**
 	 * Nom d'utilisateur du compte
 	 *
 	 * @var string
 	 */
-	protected $pop_user       = '';
+	protected $username = '';
 
 	/**
 	 * Mot de passe d'accés au compte
 	 *
 	 * @var string
 	 */
-	protected $pop_pass       = '';
-
-	/**
-	 * Dernière réponse envoyée par le serveur
-	 *
-	 * @var string
-	 */
-	protected $reponse        = '';
+	protected $passwd   = '';
 
 	/**
 	 * Tableau contenant les données des emails lus
 	 *
 	 * @var array
 	 */
-	public $contents          = array();
+	public $contents    = array();
 
 	/**
 	 * Durée maximale d'une tentative de connexion
 	 *
 	 * @var integer
 	 */
-	public $timeout           = 5;
+	public $timeout     = 30;
 
 	/**
-	 * Log contenant le dialogue avec le serveur POP
+	 * Débogage.
+	 * true pour afficher sur la sortie standard ou bien toute valeur utilisable
+	 * avec call_user_func()
 	 *
-	 * @var string
+	 * @var boolean|callable
 	 */
-	public $log               = '';
+	public $debug       = false;
 
 	/**
-	 * Variable contenant le dernier message d'erreur
-	 *
-	 * @var string
-	 */
-	public $msg_error         = '';
-
-	/**
-	 * Debug mode activé/désactivé.
-	 * Si activé, le dialogue avec le serveur s'affiche à l'écran, une éventuelle erreur stoppe le script
+	 * Utilisation de la commande STLS pour sécuriser la connexion.
+	 * Ignoré si la connexion est sécurisée en utilisant un des préfixes de
+	 * transport ssl ou tls supportés par PHP.
 	 *
 	 * @var boolean
 	 */
-	public $debug             = false;
+	public $startTLS    = false;
 
-	/**
-	 * Sauvegarde du log du dialogue avec le serveur pop dans un fichier texte.
-	 *
-	 * @var boolean
-	 */
-	public $save_log          = false;
-
-	/**
-	 * Écraser les données présentes dans le fichier log si celui ci est présent
-	 *
-	 * @var boolean
-	 */
-	public $erase_log         = false;
-
-	/**
-	 * Chemin de stockage du fichier log
-	 *
-	 * @var string
-	 */
-	public $filelog           = './log_pop.txt';
+	private $_responseData;
 
 	/**
 	 * Si l'argument vaut true, la connexion est établie automatiquement avec les paramètres par défaut
@@ -133,52 +103,87 @@ class Pop {
 	public function __construct($auto_connect = false)
 	{
 		if ($auto_connect) {
-			$this->connect($this->pop_server, $this->pop_port, $this->pop_user, $this->pop_pass);
+			$this->connect($this->host, $this->port, $this->username, $this->passwd);
 		}
 	}
 
 	/**
 	 * Etablit la connexion au serveur POP et effectue l'identification
 	 *
-	 * @param string  $pop_server Nom ou IP du serveur
-	 * @param integer $pop_port   Port d'accés au serveur POP
-	 * @param string  $pop_user   Nom d'utilisateur du compte
-	 * @param string  $pop_pass   Mot de passe du compte
+	 * @param string  $host     Nom ou IP du serveur
+	 * @param integer $port     Port d'accés au serveur POP
+	 * @param string  $username Nom d'utilisateur du compte
+	 * @param string  $passwd   Mot de passe du compte
 	 *
 	 * @return boolean
 	 */
-	public function connect($pop_server = '', $pop_port = 110, $pop_user = '', $pop_pass = '')
+	public function connect($host = null, $port = null, $username = null, $passwd = null)
 	{
-		$this->pop_server = ($pop_server != '') ? $pop_server : $this->pop_server;
-		$this->pop_port   = ($pop_port > 0) ? $pop_port : $this->pop_port;
-		$this->pop_user   = ($pop_user != '') ? $pop_user : $this->pop_user;
-		$this->pop_pass   = ($pop_pass != '') ? $pop_pass : $this->pop_pass;
+		foreach (array('host', 'port', 'username', 'passwd') as $varname) {
+			if (empty($$varname)) {
+				$$varname = $this->{$varname};
+			}
+		}
 
-		$this->reponse  = $this->log = $this->msg_error = '';
+		$this->_responseData = '';
 		$this->contents = array();
+
+		$startTLS = false;
+		if (!preg_match('#^(ssl|tls)(v[.0-9]+)?://#', $host)) {
+			$startTLS = $this->startTLS;
+		}
 
 		//
 		// Ouverture de la connexion au serveur POP
 		//
-		if (!($this->connect_id = fsockopen($this->pop_server, $this->pop_port, $errno, $errstr, $this->timeout))) {
-			$this->error("Pop::connect() :: Echec lors de la connexion au serveur pop : $errno $errstr");
+		$context = stream_context_create();
+		$this->socket = stream_socket_client(
+			sprintf('%s:%d', $host, $port),
+			$errno,
+			$errstr,
+			$this->timeout,
+			STREAM_CLIENT_CONNECT,
+			$context
+		);
+
+		if (!$this->socket) {
+			throw new Exception("Pop::connect(): Failed to connect to POP server ($errno - $errstr)");
+		}
+
+		stream_set_timeout($this->socket, $this->timeout);
+
+		if (!$this->checkResponse()) {
 			return false;
 		}
 
-		if (!$this->get_reponse()) {
-			return false;
+		//
+		// Le cas échéant, on utilise le protocole sécurisé TLS
+		//
+		if ($startTLS) {
+			$this->put('STLS');
+			if (!$this->checkResponse()) {
+				return false;
+			}
+
+			if (!stream_socket_enable_crypto(
+				$this->socket,
+				true,
+				STREAM_CRYPTO_METHOD_TLS_CLIENT
+			)) {
+				return false;
+			}
 		}
 
 		//
 		// Identification
 		//
-		$this->put_data('USER ' . $this->pop_user);
-		if (!$this->get_reponse()) {
+		$this->put(sprintf('USER %s', $username));
+		if (!$this->checkResponse()) {
 			return false;
 		}
 
-		$this->put_data('PASS ' . $this->pop_pass);
-		if (!$this->get_reponse()) {
+		$this->put(sprintf('PASS %s', $passwd));
+		if (!$this->checkResponse()) {
 			return false;
 		}
 
@@ -188,18 +193,14 @@ class Pop {
 	/**
 	 * Envoit les données au serveur
 	 *
-	 * @param string $input  Données à envoyer
+	 * @param string $data Données à envoyer
 	 */
-	protected function put_data($input)
+	protected function put($data)
 	{
-		if ($this->debug) {
-			echo $input;
-			flush();
-		}
+		$data .= "\r\n";
+		$this->log($data);
 
-		$this->log .= $input . "\r\n";
-
-		fputs($this->connect_id, $input . "\r\n");
+		fputs($this->socket, $data);
 	}
 
 	/**
@@ -207,24 +208,17 @@ class Pop {
 	 *
 	 * @return boolean
 	 */
-	protected function get_reponse()
+	protected function checkResponse()
 	{
-		$this->reponse = fgets($this->connect_id, 150);
+		$data = fgets($this->socket);
+		$this->log($data);
+		$this->_responseData = rtrim($data);
 
-		if ($this->debug) {
-			echo $this->reponse;
-			flush();
-		}
-
-		$this->log .= $this->reponse;
-
-		if (!(substr($this->reponse, 0, 3) == '+OK')) {
-			$this->error('send_data() :: ' . $this->reponse);
+		if (!(substr($this->_responseData, 0, 3) == '+OK')) {
 			return false;
 		}
-		else {
-			return true;
-		}
+
+		return true;
 	}
 
 	/**
@@ -235,12 +229,12 @@ class Pop {
 	 */
 	public function stat_box()
 	{
-		$this->put_data('STAT');
-		if (!$this->get_reponse()) {
+		$this->put('STAT');
+		if (!$this->checkResponse()) {
 			return false;
 		}
 
-		list(, $total_msg, $total_size) = explode(' ', $this->reponse);
+		list(, $total_msg, $total_size) = explode(' ', $this->_responseData);
 
 		return array('total_msg' => $total_msg, 'total_size' => $total_size);
 	}
@@ -261,8 +255,8 @@ class Pop {
 			$msg_send .= ' ' . $num;
 		}
 
-		$this->put_data($msg_send);
-		if (!$this->get_reponse()) {
+		$this->put($msg_send);
+		if (!$this->checkResponse()) {
 			return false;
 		}
 
@@ -270,23 +264,21 @@ class Pop {
 			$list = array();
 
 			do {
-				$Tmp = fgets($this->connect_id, 150);
+				$tmp = fgets($this->socket, 150);
 
-				if ($this->debug) {
-					echo $Tmp;
-				}
+				$this->log($tmp);
 
-				if (substr($Tmp, 0, 1) != '.') {
-					list($mail_id, $mail_size) = explode(' ', $Tmp);
+				if (substr($tmp, 0, 1) != '.') {
+					list($mail_id, $mail_size) = explode(' ', $tmp);
 					$list[$mail_id] = $mail_size;
 				}
 			}
-			while (substr($Tmp, 0, 1) != '.');
+			while (substr($tmp, 0, 1) != '.');
 
 			return $list;
 		}
 		else {
-			list(,, $mail_size) = explode(' ', $this->reponse);
+			list(,, $mail_size) = explode(' ', $this->_responseData);
 
 			return $mail_size;
 		}
@@ -310,25 +302,23 @@ class Pop {
 			$msg_send = 'TOP ' . $num . ' ' . $max_line;
 		}
 
-		$this->put_data($msg_send);
-		if (!$this->get_reponse()) {
+		$this->put($msg_send);
+		if (!$this->checkResponse()) {
 			return false;
 		}
 
 		$output = '';
 
 		do {
-			$Tmp = fgets($this->connect_id, 150);
+			$tmp = fgets($this->socket, 150);
 
-			if ($this->debug) {
-				echo $Tmp;
-			}
+			$this->log($tmp);
 
-			if (substr($Tmp, 0, 1) != '.') {
-				$output .= $Tmp;
+			if (substr($tmp, 0, 1) != '.') {
+				$output .= $tmp;
 			}
 		}
-		while (substr($Tmp, 0, 1) != '.');
+		while (substr($tmp, 0, 1) != '.');
 
 		$output = preg_replace("/\r\n?/", "\n", $output);
 
@@ -506,9 +496,9 @@ class Pop {
 	 */
 	public function delete_mail($num)
 	{
-		$this->put_data('DELE ' . $num);
+		$this->put('DELE ' . $num);
 
-		return $this->get_reponse();
+		return $this->checkResponse();
 	}
 
 	/**
@@ -519,9 +509,9 @@ class Pop {
 	 */
 	public function reset()
 	{
-		$this->put_data('STAT');
+		$this->put('STAT');
 
-		return $this->get_reponse();
+		return $this->checkResponse();
 	}
 
 	/**
@@ -530,40 +520,36 @@ class Pop {
 	 */
 	public function quit()
 	{
-		if (is_resource($this->connect_id)) {
-			$this->put_data('QUIT');
-			fclose($this->connect_id);
+		if (is_resource($this->socket)) {
+			$this->put('QUIT');
+			fclose($this->socket);
 
-			$this->connect_id = null;
-		}
-
-		if ($this->save_log) {
-			$mode = ($this->erase_log) ? 'w' : 'a';
-
-			if ($fw = fopen($this->filelog, $mode)) {
-				$log  = 'Connexion au serveur ' . $this->pop_server . ' :: ' . date('d/M/Y H:i:s');
-				$log .= "\r\n~~~~~~~~~~~~~~~~~~~~\r\n";
-				$log .= $this->log . "\r\n\r\n";
-
-				fwrite($fw, $log);
-				fclose($fw);
-			}
+			$this->socket = null;
 		}
 	}
 
 	/**
-	 * @param string $msg_error Le message d'erreur, à afficher si mode debug
+	 * Débogage
 	 */
-	protected function error($msg_error)
+	private function log($str)
 	{
 		if ($this->debug) {
-			$this->quit();
-			echo $msg_error;
-			exit;
+			if (is_callable($this->debug)) {
+				call_user_func($this->debug, $str);
+			}
+			else {
+				echo $str;
+				flush();
+			}
 		}
+	}
 
-		if ($this->msg_error == '') {
-			$this->msg_error = $msg_error;
+	public function __get($name)
+	{
+		switch ($name) {
+			case 'responseData':
+				return $this->{'_'.$name};
+				break;
 		}
 	}
 }
