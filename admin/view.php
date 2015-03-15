@@ -62,7 +62,7 @@ if ($mode == 'download') {
 else if ($mode == 'export') {
 	$log_id = (!empty($_GET['id'])) ? intval($_GET['id']) : 0;
 
-	$sql = "SELECT log_subject, log_body_text, log_body_html
+	$sql = "SELECT log_subject, log_body_text, log_body_html, log_date
 		FROM " . LOG_TABLE . "
 		WHERE log_id = " . $log_id;
 	$result = $db->query($sql);
@@ -71,7 +71,7 @@ else if ($mode == 'export') {
 		trigger_error('log_not_exists', E_USER_ERROR);
 	}
 
-	$filename = sprintf('newsletter-%d.zip', $log_id);
+	$filename = sprintf('newsletter-%s-%d.zip', date('Y.m.d', $logdata['log_date']), $log_id);
 	$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
 
 	$zip = new ZipArchive();
