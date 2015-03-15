@@ -312,7 +312,7 @@ function http_redirect($url, $params = array(), $session = false, $status = 0)
  */
 function load_settings($admindata = array())
 {
-	global $nl_config, $lang;
+	global $nl_config;
 
 	$check_list = array();
 	$supported_lang = array(
@@ -354,6 +354,8 @@ function load_settings($admindata = array())
 
 	$check_list = array_unique(array_reverse($check_list));
 
+	$lang = $datetime = array();
+
 	foreach ($check_list as $language) {
 		if (@is_readable(sprintf($file_pattern, $language))) {
 			if (empty($lang) || $supported_lang[$lang['CONTENT_LANG']] != $language) {
@@ -366,6 +368,10 @@ function load_settings($admindata = array())
 
 	if (empty($lang)) {
 		trigger_error('<b>Les fichiers de localisation sont introuvables !</b>', E_USER_ERROR);
+	}
+	else {
+		$GLOBALS['lang'] =& $lang;
+		$GLOBALS['datetime'] =& $datetime;
 	}
 }
 
