@@ -565,7 +565,7 @@ function wan_display_error($error, $simpleHTML = false)
 
 		$message = htmlspecialchars_decode($message);
 
-		fputs(STDERR, $message);
+		fwrite(STDERR, $message);
 	}
 	else if ($simpleHTML) {
 		echo '<p>' . nl2br($message) . '</p>';
@@ -1140,16 +1140,16 @@ function http_get_contents($URL, &$errstr)
 	$path .= (!isset($part['query'])) ? '' : '?'.$part['query'];
 
 	// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
-	fputs($fs, sprintf("GET %s HTTP/1.0\r\n", $path));
-	fputs($fs, sprintf("Host: %s\r\n", $part['host']));
-	fputs($fs, sprintf("User-Agent: %s\r\n", WA_SIGNATURE));
-	fputs($fs, "Accept: */*\r\n");
+	fwrite($fs, sprintf("GET %s HTTP/1.0\r\n", $path));
+	fwrite($fs, sprintf("Host: %s\r\n", $part['host']));
+	fwrite($fs, sprintf("User-Agent: %s\r\n", WA_SIGNATURE));
+	fwrite($fs, "Accept: */*\r\n");
 
 	if (extension_loaded('zlib')) {
-		fputs($fs, "Accept-Encoding: gzip\r\n");
+		fwrite($fs, "Accept-Encoding: gzip\r\n");
 	}
 
-	fputs($fs, "Connection: close\r\n\r\n");
+	fwrite($fs, "Connection: close\r\n\r\n");
 
 	$isGzipped = false;
 	$datatype  = $charset = null;

@@ -464,7 +464,7 @@ else if ($import_mail) {
 				$db->insert(ABONNES_TABLE, $sql_data);
 			}
 			catch (SQLException $e) {
-				fputs(STDERR, sprintf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error));
+				fwrite(STDERR, sprintf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error));
 				$db->rollBack();
 				continue;
 			}
