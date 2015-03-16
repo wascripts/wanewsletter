@@ -10,9 +10,7 @@
 define('IN_NEWSLETTER', true);
 
 require './includes/common.inc.php';
-
 require WA_ROOTDIR . '/includes/functions.validate.php';
-include WA_ROOTDIR . '/includes/tags.inc.php';
 
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration
@@ -77,6 +75,8 @@ if (empty($abodata['abo_lang'])) {
 }
 
 load_settings(array('admin_lang' => $abodata['abo_lang']));
+
+$other_tags = wan_get_tags();
 
 switch ($mode) {
 	case 'editprofile':

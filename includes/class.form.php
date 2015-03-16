@@ -37,8 +37,7 @@ class Wanewsletter
 			}
 		}
 
-		@include WA_ROOTDIR . '/includes/tags.inc.php';
-		$this->other_tags = $other_tags;
+		$this->other_tags = wan_get_tags();
 	}
 
 	private function check($action, $email)

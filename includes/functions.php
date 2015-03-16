@@ -1396,4 +1396,21 @@ function wan_sendmail(Email $email)
 	Mailer::send($email);
 }
 
+/**
+ * Retourne la liste des tags personnalisés (voir tags.sample.inc.php)
+ *
+ * @return array
+ */
+function wan_get_tags()
+{
+	$tags_file  = WA_ROOTDIR . '/includes/tags.inc.php';
+	$other_tags = array();
+
+	if (is_readable($tags_file)) {
+		include $tags_file;
+	}
+
+	return $other_tags;
+}
+
 }

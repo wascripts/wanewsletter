@@ -30,7 +30,7 @@ $starttime = array_sum(explode(' ', microtime()));
 // Intialisation des variables pour éviter toute injection malveillante de code
 //
 $simple_header = $error = false;
-$nl_config     = $lang = $datetime = $admindata = $msg_error = $other_tags = array();
+$nl_config     = $lang = $datetime = $admindata = $msg_error = array();
 $output = null;
 $dsn = $prefixe = '';
 $prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';

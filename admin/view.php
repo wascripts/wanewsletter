@@ -196,7 +196,7 @@ else if ($mode == 'iframe') {
 // Mode gestion des abonnés
 //
 else if ($mode == 'abonnes') {
-	include WA_ROOTDIR . '/includes/tags.inc.php';
+	$other_tags = wan_get_tags();
 
 	switch ($action) {
 		case 'delete':

@@ -11,8 +11,6 @@ if (!defined('ENGINE_SEND_INC')) {
 
 define('ENGINE_SEND_INC', true);
 
-include WA_ROOTDIR . '/includes/tags.inc.php';
-
 /**
  * launch_sending()
  *
@@ -27,7 +25,7 @@ include WA_ROOTDIR . '/includes/tags.inc.php';
  */
 function launch_sending($listdata, $logdata, $supp_address = array())
 {
-	global $nl_config, $db, $lang, $other_tags;
+	global $nl_config, $db, $lang;
 
 	//
 	// On commence par poser un verrou sur un fichier lock,
@@ -138,6 +136,8 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	// Récupération des champs des tags personnalisés
 	//
+	$other_tags = wan_get_tags();
+
 	if (count($other_tags) > 0) {
 		$fields_str = '';
 		foreach ($other_tags as $tag) {
