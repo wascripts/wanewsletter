@@ -302,6 +302,12 @@ class Output extends Template
 		}
 
 		$sitename = (!empty($nl_config['sitename'])) ? $nl_config['sitename'] : 'Wanewsletter';
+		$base_dir = (!empty($nl_config['path'])) ? rtrim($nl_config['path'], '/') : '.';
+
+		// Intégration d'une éventuelle feuille de style personnalisée
+		if (is_readable(WA_ROOTDIR . '/templates/wanewsletter.custom.css')) {
+			$this->addLink('stylesheet', sprintf('%s/templates/wanewsletter.custom.css', $base_dir));
+		}
 
 		$this->assign_vars( array(
 			'PAGE_TITLE'   => $page_title,
@@ -309,7 +315,7 @@ class Output extends Template
 			'CONTENT_LANG' => $lang['CONTENT_LANG'],
 			'CONTENT_DIR'  => $lang['CONTENT_DIR'],
 
-			'BASEDIR'      => (!empty($nl_config['path'])) ? rtrim($nl_config['path'], '/') : '.',
+			'BASEDIR'      => $base_dir,
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts(),
 			'SITENAME'     => wan_htmlspecialchars($sitename, ENT_NOQUOTES)
