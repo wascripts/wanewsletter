@@ -5,24 +5,17 @@
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
  * @copyright 2002-2015 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- */
-
-/**
- * Classe de connexion et consultation de serveur POP
+ *
+ * @see RFC 1939 - Post Office Protocol - Version 3
+ * @see RFC 2449 - POP3 Extension Mechanism
  *
  * Les sources qui m'ont bien aidées :
  *
- * @link http://www.interpc.fr/mapage/billaud/telmail.htm
- * @link http://www.devshed.com/Server_Side/PHP/SocketProgramming/page8.html
  * @link http://www.commentcamarche.net/internet/smtp.php3
- * @link http://abcdrfc.free.fr/
- *
- * Toutes les commandes de connexion et de dialogue avec le serveur sont
- * détaillées dans la RFC 1939.
- *
- * @link http://abcdrfc.free.fr/rfc-vf/rfc1939.html (français)
- * @link http://www.rfc-editor.org/rfc/rfc1939.txt (anglais)
+ * @link http://abcdrfc.free.fr/ (français)
+ * @link http://www.faqs.org/rfcs/ (anglais)
  */
+
 class Pop {
 
 	/**
@@ -89,7 +82,7 @@ class Pop {
 	 *
 	 * @var array
 	 */
-	private $opts       = array(
+	protected $opts     = array(
 		/**
 		 * Utilisation de la commande STLS pour sécuriser la connexion.
 		 * Ignoré si la connexion est sécurisée en utilisant un des préfixes de
@@ -110,7 +103,22 @@ class Pop {
 		'stream_context_params'  => null
 	);
 
-	private $_responseData;
+	/**
+	 * Liste des extensions POP supportées.
+	 *
+	 * @see self::getExtensions() self::connect()
+	 *
+	 * @var array
+	 */
+	protected $extensions = array();
+
+	/**
+	 * Dernier message de réponse retourné par le serveur.
+	 * Accessible en lecture sous la forme $obj->responseData
+	 *
+	 * @var string
+	 */
+	protected $_responseData;
 
 	/**
 	 * Si l'argument vaut true, la connexion est établie automatiquement avec les paramètres par défaut
@@ -201,10 +209,39 @@ class Pop {
 			return false;
 		}
 
+		// Support pour la commande APOP ?
+		$apop_timestamp = '';
+		if (preg_match('#<[^>]+>#', $this->_responseData, $m)) {
+			$apop_timestamp = $m[0];
+		}
+
+		// Récupération des extensions supportées par le serveur
+		$this->put('CAPA');
+
+		if ($this->checkResponse(true)) {
+			// On récupère la liste des extensions supportées par ce serveur
+			$this->extensions = array();
+			$lines = explode("\r\n", trim($this->_responseData));
+			array_shift($lines);// On zappe la réponse serveur +OK...
+
+			foreach ($lines as $line) {
+				// La RFC 2449 ne précise pas la casse des noms d'extension,
+				// on normalise en haut de casse
+				$name  = strtoupper(strtok($line, ' '));
+				$space = strpos($line, ' ');
+				$this->extensions[$name] = ($space !== false)
+					? strtoupper(substr($line, $space+1)) : true;
+			}
+		}
+
 		//
 		// Le cas échéant, on utilise le protocole sécurisé TLS
 		//
 		if ($startTLS) {
+			if (!$this->hasSupport('STLS')) {
+				throw new Exception("Pop::connect(): POP server doesn't support STLS command");
+			}
+
 			$this->put('STLS');
 			if (!$this->checkResponse()) {
 				return false;
@@ -215,24 +252,42 @@ class Pop {
 				true,
 				STREAM_CRYPTO_METHOD_TLS_CLIENT
 			)) {
-				return false;
+				throw new Exception("Pop::connect(): Cannot enable TLS encryption");
 			}
 		}
 
 		//
 		// Identification
 		//
-		$this->put(sprintf('USER %s', $username));
-		if (!$this->checkResponse()) {
-			return false;
+		if ($apop_timestamp) {
+			$this->put(sprintf('APOP %s %s', $username, md5($apop_timestamp.$passwd)));
+			if (!$this->checkResponse()) {
+				return false;
+			}
 		}
+		else {
+			$this->put(sprintf('USER %s', $username));
+			if (!$this->checkResponse()) {
+				return false;
+			}
 
-		$this->put(sprintf('PASS %s', $passwd));
-		if (!$this->checkResponse()) {
-			return false;
+			$this->put(sprintf('PASS %s', $passwd));
+			if (!$this->checkResponse()) {
+				return false;
+			}
 		}
 
 		return true;
+	}
+
+	/**
+	 * Vérifie l'état de la connexion
+	 *
+	 * @return boolean
+	 */
+	public function isConnected()
+	{
+		return is_resource($this->socket);
 	}
 
 	/**
@@ -242,28 +297,107 @@ class Pop {
 	 */
 	protected function put($data)
 	{
+		if (!$this->isConnected()) {
+			throw new Exception("Pop::put(): Connection was closed!");
+		}
+
 		$data .= "\r\n";
+		$total = strlen($data);
 		$this->log($data);
 
-		fwrite($this->socket, $data);
+		while ($data) {
+			$bw = fwrite($this->socket, $data);
+
+			if (!$bw) {
+				$md = stream_get_meta_data($this->socket);
+
+				if ($md['timed_out']) {
+					throw new Exception("Pop::put(): Connection timed out!");
+				}
+
+				break;
+			}
+
+			$data = substr($data, $bw);
+		}
 	}
 
 	/**
 	 * Récupère la réponse du serveur
 	 *
+	 * @param boolean $multiline Précise si on attend une réponse multi-lignes
+	 *
 	 * @return boolean
 	 */
-	protected function checkResponse()
+	protected function checkResponse($multiline = false)
 	{
-		$data = fgets($this->socket);
-		$this->log($data);
-		$this->_responseData = rtrim($data);
-
-		if (!(substr($this->_responseData, 0, 3) == '+OK')) {
-			return false;
+		if (!$this->isConnected()) {
+			throw new Exception("Pop::checkResponse(): Connection was closed!");
 		}
 
+		$this->_responseData = '';
+		$error = false;
+
+		do {
+			$data = fgets($this->socket);
+
+			if (!$data) {
+				$md = stream_get_meta_data($this->socket);
+
+				if ($md['timed_out']) {
+					throw new Exception("Pop::checkResponse(): Connection timed out!");
+				}
+
+				break;
+			}
+
+			$this->log($data);
+			$this->_responseData .= $data;
+
+			if ($this->_responseData == '' && substr($data, 0, 3) !== '+OK') {
+				return false;
+			}
+		}
+		while (!feof($this->socket) && ($multiline && rtrim($data) != '.'));
+
 		return true;
+	}
+
+	/**
+	 * Retourne la liste des extensions supportées par le serveur POP.
+	 * Les noms des extensions, ainsi que les éventuels paramètres, sont
+	 * normalisés en haut de casse. Exemple :
+	 * [
+	 *     'STLS' => true,
+	 *     'TOP'  => true,
+	 *     'LOGIN-DELAY' => 900
+	 * ]
+	 *
+	 * @return array
+	 */
+	public function getExtensions()
+	{
+		return $this->extensions;
+	}
+
+	/**
+	 * Indique si l'extension ciblée est supportée par le serveur POP.
+	 * Si l'extension possède des paramètres (par exemple, SASL donne aussi la
+	 * liste des méthodes supportées), ceux-ci sont retournés au lieu de true
+	 *
+	 * @param string $name Nom de l'extension (insensible à la casse)
+	 *
+	 * @return mixed
+	 */
+	public function hasSupport($name)
+	{
+		$name = strtoupper($name);
+
+		if (isset($this->extensions[$name])) {
+			return $this->extensions[$name];
+		}
+
+		return false;
 	}
 
 	/**
@@ -279,7 +413,7 @@ class Pop {
 			return false;
 		}
 
-		list(, $total_msg, $total_size) = explode(' ', $this->_responseData);
+		sscanf($this->_responseData, '+OK %d %d', $total_msg, $total_size);
 
 		return array('total_msg' => $total_msg, 'total_size' => $total_size);
 	}
@@ -295,35 +429,27 @@ class Pop {
 	 */
 	public function list_mail($num = 0)
 	{
-		$msg_send = 'LIST';
-		if ($num > 0) {
-			$msg_send .= ' ' . $num;
-		}
-
-		$this->put($msg_send);
-		if (!$this->checkResponse()) {
+		$this->put('LIST' . ($num > 0 ? ' ' . $num : ''));
+		if (!$this->checkResponse($num == 0)) {
 			return false;
 		}
 
 		if ($num == 0) {
-			$list = array();
+			$list  = array();
+			$lines = explode("\r\n", trim($this->_responseData));
+			array_shift($lines);// On zappe la réponse serveur +OK...
 
-			do {
-				$tmp = fgets($this->socket, 150);
-
-				$this->log($tmp);
-
-				if (substr($tmp, 0, 1) != '.') {
-					list($mail_id, $mail_size) = explode(' ', $tmp);
+			foreach ($lines as $line) {
+				if ($line != '.') {// fin d'une réponse multi-ligne
+					sscanf($line, '%d %d', $mail_id, $mail_size);
 					$list[$mail_id] = $mail_size;
 				}
 			}
-			while (substr($tmp, 0, 1) != '.');
 
 			return $list;
 		}
 		else {
-			list(,, $mail_size) = explode(' ', $this->_responseData);
+			sscanf($this->_responseData, '+OK %d %d', $num, $mail_size);
 
 			return $mail_size;
 		}
@@ -341,35 +467,24 @@ class Pop {
 	public function read_mail($num, $max_line = 0)
 	{
 		if (!$max_line) {
-			$msg_send = 'RETR ' . $num;
+			$cmd = sprintf('RETR %d', $num);
 		}
 		else {
-			$msg_send = 'TOP ' . $num . ' ' . $max_line;
+			$cmd = sprintf('TOP %d %d', $num, $max_line);
 		}
 
-		$this->put($msg_send);
-		if (!$this->checkResponse()) {
+		$this->put($cmd);
+		if (!$this->checkResponse(true)) {
 			return false;
 		}
 
-		$output = '';
+		$lines = explode("\r\n", $this->_responseData);
+		array_shift($lines);// On zappe la réponse serveur +OK...
+		$output = implode("\r\n", $lines);
 
-		do {
-			$tmp = fgets($this->socket, 150);
+		list($headers, $message) = explode("\r\n\r\n", $output, 2);
 
-			$this->log($tmp);
-
-			if (substr($tmp, 0, 1) != '.') {
-				$output .= $tmp;
-			}
-		}
-		while (substr($tmp, 0, 1) != '.');
-
-		$output = preg_replace("/\r\n?/", "\n", $output);
-
-		list($headers, $message) = explode("\n\n", $output, 2);
-
-		$this->contents[$num]['headers'] = trim(preg_replace("/\n( |\t)+/", ' ', $headers));
+		$this->contents[$num]['headers'] = trim(preg_replace("/\r\n( |\t)+/", ' ', $headers));
 		$this->contents[$num]['message'] = trim($message);
 
 		return true;
@@ -397,7 +512,7 @@ class Pop {
 
 		$headers = array();
 
-		$lines = explode("\n", $str);
+		$lines = explode("\r\n", $str);
 		for ($i = 0; $i < count($lines); $i++) {
 			list($name, $value) = explode(':', $lines[$i], 2);
 
@@ -438,21 +553,24 @@ class Pop {
 		// On vérifie si l'entête est encodé en base64 ou en quoted-printable, et on
 		// le décode si besoin est.
 		//
-		$total = preg_match_all('/=\?[^?]+\?(Q|q|B|b)\?([^?]+)\?\=/', $str, $matches);
+		$total = preg_match_all('/=\?([^?]+)\?(Q|q|B|b)\?([^?]+)\?\=/', $str, $matches);
 
 		for ($i = 0; $i < $total; $i++) {
-			if ($matches[1][$i] == 'Q' || $matches[1][$i] == 'q') {
-				$tmp = preg_replace('/=([a-zA-Z0-9]{2})/e', 'chr(ord("\\x\\1"));', $matches[2][$i]);
+			if ($matches[2][$i] == 'Q' || $matches[2][$i] == 'q') {
+				$tmp = preg_replace_callback('/=([a-zA-Z0-9]{2})/',
+					function ($m) { return chr(hexdec($m[1])); },
+					$matches[3][$i]
+				);
 				$tmp = str_replace('_', ' ', $tmp);
 			}
 			else {
-				$tmp = base64_decode($matches[2][$i]);
+				$tmp = base64_decode($matches[3][$i]);
 			}
 
 			$str = str_replace($matches[0][$i], $tmp, $str);
 		}
 
-		return trim($str);
+		return $str;
 	}
 
 	/**
@@ -488,7 +606,7 @@ class Pop {
 		$boundary = $infos['boundary'];
 		$parts    = array();
 		$files    = array();
-		$lines    = explode("\n", $message);
+		$lines    = explode("\r\n", $message);
 		$offset   = 0;
 
 		for ($i = 0; $i < count($lines); $i++) {
@@ -497,9 +615,9 @@ class Pop {
 				$parts[$offset] = '';
 
 				if (isset($parts[$offset - 1])) {
-					preg_match("/^(.+?)\n\n(.*?)$/s", trim($parts[$offset - 1]), $match);
+					preg_match("/^(.+?)\r\n\r\n(.*?)$/s", trim($parts[$offset - 1]), $match);
 
-					$local_headers = trim(preg_replace("/\n( |\t)+/", ' ', $match[1]));
+					$local_headers = trim(preg_replace("/\r\n( |\t)+/", ' ', $match[1]));
 					$local_message = trim($match[2]);
 
 					$local_headers = $this->parse_headers($local_headers);
@@ -524,7 +642,7 @@ class Pop {
 			}
 
 			if (isset($parts[$offset])) {
-				$parts[$offset] .= $lines[$i] . "\n";
+				$parts[$offset] .= $lines[$i] . "\r\n";
 			}
 		}
 
@@ -541,7 +659,19 @@ class Pop {
 	 */
 	public function delete_mail($num)
 	{
-		$this->put('DELE ' . $num);
+		$this->put(sprintf('DELE %d', $num));
+
+		return $this->checkResponse();
+	}
+
+	/**
+	 * Envoi la commande NOOP
+	 *
+	 * @return boolean
+	 */
+	public function noop()
+	{
+		$this->put('NOOP');
 
 		return $this->checkResponse();
 	}
@@ -554,7 +684,7 @@ class Pop {
 	 */
 	public function reset()
 	{
-		$this->put('STAT');
+		$this->put('RSET');
 
 		return $this->checkResponse();
 	}
@@ -576,7 +706,7 @@ class Pop {
 	/**
 	 * Débogage
 	 */
-	private function log($str)
+	protected function log($str)
 	{
 		if ($this->debug) {
 			if (is_callable($this->debug)) {
