@@ -295,7 +295,7 @@ class Pop {
 	 *
 	 * @param string $data Données à envoyer
 	 */
-	protected function put($data)
+	public function put($data)
 	{
 		if (!$this->isConnected()) {
 			throw new Exception("Pop::put(): Connection was closed!");
@@ -329,7 +329,7 @@ class Pop {
 	 *
 	 * @return boolean
 	 */
-	protected function checkResponse($multiline = false)
+	public function checkResponse($multiline = false)
 	{
 		if (!$this->isConnected()) {
 			throw new Exception("Pop::checkResponse(): Connection was closed!");
