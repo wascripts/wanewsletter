@@ -320,15 +320,14 @@ class WadbBackup_sqlite_pdo extends WadbBackup
 {
 	public function header($toolname = '')
 	{
-		$host = (function_exists('php_uname')) ? php_uname('n') : null;
-		if (empty($host)) {
-			$host = (isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : 'Unknown Host';
+		if (!($hostname = gethostname())) {
+			$hostname = (!empty($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : 'Unknown Host';
 		}
 
 		$contents  = '-- ' . $this->eol;
 		$contents .= "-- $toolname SQLite Dump" . $this->eol;
 		$contents .= '-- ' . $this->eol;
-		$contents .= "-- Host       : " . $host . $this->eol;
+		$contents .= "-- Host       : " . $hostname . $this->eol;
 		$contents .= "-- SQLite lib : " . $this->db->libVersion . $this->eol;
 		$contents .= "-- Database   : " . basename($this->db->dbname) . $this->eol;
 		$contents .= '-- Date       : ' . date(DATE_RFC2822) . $this->eol;
