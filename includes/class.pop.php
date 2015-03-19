@@ -336,7 +336,7 @@ class Pop {
 		}
 
 		$this->_responseData = '';
-		$error = false;
+		$isok = false;
 
 		do {
 			$data = fgets($this->socket);
@@ -354,9 +354,11 @@ class Pop {
 			$this->log($data);
 			$this->_responseData .= $data;
 
-			if ($this->_responseData == '' && substr($data, 0, 3) !== '+OK') {
+			if (!$isok && substr($data, 0, 3) !== '+OK') {
 				return false;
 			}
+
+			$isok = true;
 		}
 		while (!feof($this->socket) && ($multiline && rtrim($data) != '.'));
 
