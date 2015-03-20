@@ -99,8 +99,12 @@ class Pop {
 		 *
 		 * @var array
 		 */
-		'stream_context_options' => null,
-		'stream_context_params'  => null
+		'stream_context_opts'   => array(
+			'ssl' => array(
+				'disable_compression' => true, // default value in PHP ≥ 5.6
+			)
+		),
+		'stream_context_params' => null
 	);
 
 	/**
@@ -141,12 +145,15 @@ class Pop {
 	public function options($opts)
 	{
 		if (is_array($opts)) {
-			// Alternative pour l'activation du débogage
-			if (!empty($opts['debug'])) {
-				$this->debug = $opts['debug'];
+			// Configuration alternative
+			foreach (array('debug','timeout') as $name) {
+				if (!empty($opts[$name])) {
+					$this->{$name} = $opts[$name];
+					unset($opts[$name]);
+				}
 			}
 
-			$this->opts = array_merge($this->opts, $opts);
+			$this->opts = array_replace_recursive($this->opts, $opts);
 		}
 	}
 
@@ -179,16 +186,9 @@ class Pop {
 		//
 		// Ouverture de la connexion au serveur POP
 		//
-		$params = array();
-		if (is_array($this->opts['stream_context_options'])) {
-			$params[] = $this->opts['stream_context_options'];
-
-			if (is_array($this->opts['stream_context_params'])) {
-				$params[] = $this->opts['stream_context_params'];
-			}
-		}
-
-		$context = call_user_func_array('stream_context_create', $params);
+		$context_opts   = $this->opts['stream_context_opts'];
+		$context_params = $this->opts['stream_context_params'];
+		$context = stream_context_create($context_opts, $context_params);
 
 		$this->socket = stream_socket_client(
 			sprintf('%s:%d', $host, $port),
@@ -247,11 +247,13 @@ class Pop {
 				return false;
 			}
 
-			if (!stream_socket_enable_crypto(
-				$this->socket,
-				true,
-				STREAM_CRYPTO_METHOD_TLS_CLIENT
-			)) {
+			$crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
+			if (isset($context_opts['ssl']['crypto_method'])) {
+				$crypto_method = $context_opts['ssl']['crypto_method'];
+			}
+
+			if (!stream_socket_enable_crypto($this->socket, true, $crypto_method)) {
+				fclose($this->socket);
 				throw new Exception("Pop::connect(): Cannot enable TLS encryption");
 			}
 		}
