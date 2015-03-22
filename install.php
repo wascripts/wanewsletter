@@ -250,7 +250,7 @@ if ($start) {
 			$msg_error[] = $lang['Message']['Bad_confirm_pass'];
 		}
 
-		if (!Mailer::checkMailSyntax($admin_email)) {
+		if (!\Wamailer\Mailer::checkMailSyntax($admin_email)) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Invalid_email'];
 		}

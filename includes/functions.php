@@ -7,7 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-use \Patchwork\Utf8 as u;
+use Patchwork\Utf8 as u;
+use Wamailer\Mailer;
+use Wamailer\Email;
 
 if (!defined('FUNCTIONS_INC')) {
 

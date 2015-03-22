@@ -341,7 +341,7 @@ class Attach
 					ftp_close($cid);
 					fclose($fw);
 
-					$filetype = Mime::getType($tmp_filename);
+					$filetype = \Wamailer\Mime::getType($tmp_filename);
 				}
 			}
 
@@ -355,7 +355,7 @@ class Attach
 				$filesize = $this->joined_file_exists($tmp_filename, $error, $msg_error);
 
 				if (!$error) {
-					$filetype = Mime::getType($this->upload_path . $tmp_filename);
+					$filetype = \Wamailer\Mime::getType($this->upload_path . $tmp_filename);
 				}
 			}
 		}

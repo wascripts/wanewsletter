@@ -9,6 +9,9 @@
 
 define('IN_NEWSLETTER', true);
 
+use Wamailer\Mailer;
+use Wamailer\Email;
+
 require './pagestart.php';
 
 $mode     = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';

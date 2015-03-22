@@ -128,7 +128,7 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 
 				$hostname = parse_url($nl_config['urlsite'], PHP_URL_HOST);
 
-				$email = new Email('UTF-8');
+				$email = new \Wamailer\Email('UTF-8');
 				$email->setFrom('postmaster@'.$hostname);
 				$email->addRecipient($userdata['email']);
 				$email->setSubject(($userdata['passwd'] == '')

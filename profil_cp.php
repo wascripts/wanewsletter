@@ -9,6 +9,9 @@
 
 define('IN_NEWSLETTER', true);
 
+use Wamailer\Mailer;
+use Wamailer\Email;
+
 require './includes/common.inc.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 

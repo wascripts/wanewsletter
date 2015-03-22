@@ -860,7 +860,7 @@ if ($mode == 'test' && !empty($_POST['test_address'])) {
 	$supp_address = array_map('trim', $supp_address);
 	$supp_address = array_unique($supp_address);
 	$supp_address = array_filter($supp_address, function ($email) {
-		return Mailer::checkMailSyntax($email);
+		return \Wamailer\Mailer::checkMailSyntax($email);
 	});
 }
 

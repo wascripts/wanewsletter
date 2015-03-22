@@ -150,7 +150,7 @@ if (isset($_POST['submit'])) {
 	}
 
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
-		$smtp = new Mailer_SMTP();
+		$smtp = new \Wamailer\SmtpClient();
 		$smtp->options(array(
 			'starttls' => ($new_config['smtp_tls'] == WA_SECURITY_STARTTLS)
 		));

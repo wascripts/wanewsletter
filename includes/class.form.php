@@ -7,6 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+use Wamailer\Mailer;
+use Wamailer\Email;
+
 class Wanewsletter
 {
 	private $format      = FORMAT_TEXTE;

@@ -7,7 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-use \Patchwork\Utf8 as u;
+use Patchwork\Utf8 as u;
 
 define('IN_NEWSLETTER', true);
 
@@ -595,7 +595,7 @@ switch ($mode) {
 			//
 			$emails = array_filter($emails,
 				function ($email) use (&$lang, &$report) {
-					if (Mailer::checkMailSyntax($email)) {
+					if (\Wamailer\Mailer::checkMailSyntax($email)) {
 						return true;
 					}
 					else {
