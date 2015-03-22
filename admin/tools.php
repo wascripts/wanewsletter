@@ -244,7 +244,6 @@ switch ($mode) {
 		wan_print_row(' - engine_send',    $nl_config['engine_send']);
 		wan_print_row(' - sending_limit',  $nl_config['sending_limit']);
 		wan_print_row(' - use_smtp',       $nl_config['use_smtp'] ? 'oui' : 'non');
-		wan_print_row(' - check_email_mx', $nl_config['check_email_mx'] ? 'oui' : 'non');
 
 		wan_print_row('Version de PHP', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
 		wan_print_row(' - Extension Bz2', extension_loaded('zlib') ? 'oui' : 'non');

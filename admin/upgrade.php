@@ -795,6 +795,14 @@ if (isset($_POST['start'])) {
 				ADD COLUMN pop_tls $type NOT NULL DEFAULT 0";
 		}
 
+		//
+		// Entrée de configuration 'check_email_mx' obsolète. On la supprime.
+		//
+		if ($nl_config['db_version'] < 21) {
+			$sql_update[] = "DELETE FROM " . CONFIG_TABLE . "
+				WHERE config_name = 'check_email_mx'";
+		}
+
 		exec_queries($sql_update);
 
 		//

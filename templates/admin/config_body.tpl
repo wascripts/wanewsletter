@@ -148,25 +148,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	<table class="dataset">
 		<tr>
-			<td><label>{L_CHECK_EMAIL}&nbsp;:</label><br /><span class="notice">{L_CHECK_EMAIL_NOTE}</span></td>
+			<td><label>{L_ENGINE_SEND}&nbsp;:</label></td>
 			<td>
-				<input type="radio" id="check_email_mx_on" name="check_email_mx" value="1"{CHECKED_CHECK_EMAIL_ON} />
-				<label for="check_email_mx_on" class="notice">{L_YES}</label>
-				<input type="radio" id="check_email_mx_off" name="check_email_mx" value="0"{CHECKED_CHECK_EMAIL_OFF} />
-				<label for="check_email_mx_off" class="notice">{L_NO}</label>
+				<input type="radio" id="engine_send_uniq" name="engine_send" value="2"{CHECKED_ENGINE_UNIQ} />
+				<label for="engine_send_uniq" class="notice">{L_ENGINE_UNIQ}</label><br />
+				<input type="radio" id="engine_send_bcc" name="engine_send" value="1"{CHECKED_ENGINE_BCC} />
+				<label for="engine_send_bcc" class="notice">{L_ENGINE_BCC}</label>
 			</td>
 		</tr>
-		<!-- BEGIN choice_engine_send -->
-		<tr>
-			<td><label>{choice_engine_send.L_ENGINE_SEND}&nbsp;:</label></td>
-			<td>
-				<input type="radio" id="engine_send_uniq" name="engine_send" value="2"{choice_engine_send.CHECKED_ENGINE_UNIQ} />
-				<label for="engine_send_uniq" class="notice">{choice_engine_send.L_ENGINE_UNIQ}</label><br />
-				<input type="radio" id="engine_send_bcc" name="engine_send" value="1"{choice_engine_send.CHECKED_ENGINE_BCC} />
-				<label for="engine_send_bcc" class="notice">{choice_engine_send.L_ENGINE_BCC}</label>
-			</td>
-		</tr>
-		<!-- END choice_engine_send -->
 		<tr>
 			<td><label for="sending_limit">{L_SENDING_LIMIT}&nbsp;:</label><br /><span class="notice">{L_SENDING_LIMIT_NOTE}</span></td>
 			<td><input type="text" id="sending_limit" name="sending_limit" value="{SENDING_LIMIT}" size="5" maxlength="5" class="number" /></td>

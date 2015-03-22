@@ -41,11 +41,10 @@ INSERT INTO wa_config (config_name, config_value) VALUES('smtp_user',      '');
 INSERT INTO wa_config (config_name, config_value) VALUES('smtp_pass',      '');
 INSERT INTO wa_config (config_name, config_value) VALUES('smtp_tls',       '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('disable_stats',  '0');
-INSERT INTO wa_config (config_name, config_value) VALUES('check_email_mx', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('enable_profil_cp', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('mailing_startdate', '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('debug_level',    '1');
-INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '20');
+INSERT INTO wa_config (config_name, config_value) VALUES('db_version',     '21');
 
 
 --

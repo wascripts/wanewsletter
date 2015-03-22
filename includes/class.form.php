@@ -102,20 +102,6 @@ class Wanewsletter
 			return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
 		}
 
-		if ($nl_config['check_email_mx'] && !$abodata) {
-			//
-			// Vérification de l'existence d'un Mail eXchanger sur le domaine de l'email,
-			// et vérification de l'existence du compte associé (La vérification de l'existence du
-			// compte n'est toutefois pas infaillible, les serveurs smtp refusant parfois le relaying,
-			// c'est à dire de traiter les demandes émanant d'un entité extérieure à leur réseau, et
-			// pour une adresse email extérieure à ce réseau)
-			//
-			if (!validateMailbox($email, $response)) {
-				return array('error' => true,
-					'message' => sprintf($lang['Message']['Unrecognized_email'], $response[$email]));
-			}
-		}
-
 		$this->account['tags'] = array();
 
 		if (is_array($abodata)) {

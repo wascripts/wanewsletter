@@ -275,11 +275,9 @@ $output->assign_vars( array(
 	'L_MAX_FILESIZE'            => $lang['Max_filesize'],
 	'L_MAX_FILESIZE_NOTE'       => nl2br($lang['Max_filesize_note']),
 	'L_OCTETS'                  => $lang['Octets'],
-	'L_CHECK_EMAIL'             => $lang['Check_email'],
-	'L_CHECK_EMAIL_NOTE'        => nl2br(sprintf($lang['Check_email_note'],
-		sprintf('<a href="%s">', wan_get_faq_url(11)),
-		'</a>'
-	)),
+	'L_ENGINE_SEND'             => $lang['Choice_engine_send'],
+	'L_ENGINE_BCC'              => $lang['With_engine_bcc'],
+	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],
 	'L_SENDING_LIMIT'           => $lang['Sending_limit'],
 	'L_SENDING_LIMIT_NOTE'      => nl2br($lang['Sending_limit_note']),
 	'L_USE_SMTP'                => $lang['Use_smtp'],
@@ -308,8 +306,8 @@ $output->assign_vars( array(
 	'LENGTH_SESSION'            => $new_config['session_length'],
 	'UPLOAD_PATH'               => $new_config['upload_path'],
 	'MAX_FILESIZE'              => $new_config['max_filesize'],
-	'CHECKED_CHECK_EMAIL_ON'    => $output->getBoolAttr('checked', $new_config['check_email_mx']),
-	'CHECKED_CHECK_EMAIL_OFF'   => $output->getBoolAttr('checked', !$new_config['check_email_mx']),
+	'CHECKED_ENGINE_BCC'        => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_BCC)),
+	'CHECKED_ENGINE_UNIQ'       => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_UNIQ)),
 	'SENDING_LIMIT'             => $new_config['sending_limit'],
 	'SMTP_ROW_CLASS'            => ($new_config['use_smtp']) ? '' : 'inactive',
 	'CHECKED_USE_SMTP_ON'       => $output->getBoolAttr('checked', $new_config['use_smtp']),
@@ -346,15 +344,6 @@ if (extension_loaded('ftp')) {
 		'FTP_USER'             => $new_config['ftp_user'],
 	));
 }
-
-$output->assign_block_vars('choice_engine_send', array(
-	'L_ENGINE_SEND'       => $lang['Choice_engine_send'],
-	'L_ENGINE_BCC'        => $lang['With_engine_bcc'],
-	'L_ENGINE_UNIQ'       => $lang['With_engine_uniq'],
-
-	'CHECKED_ENGINE_BCC'  => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_BCC)),
-	'CHECKED_ENGINE_UNIQ' => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_UNIQ))
-));
 
 if (WA_SSL_SUPPORT) {
 	$output->assign_block_vars('ssl_support', array(
