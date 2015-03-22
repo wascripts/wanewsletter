@@ -357,7 +357,7 @@ function load_settings($admindata = array())
 	$lang = $datetime = array();
 
 	foreach ($check_list as $language) {
-		if (@is_readable(sprintf($file_pattern, $language))) {
+		if (is_readable(sprintf($file_pattern, $language))) {
 			if (empty($lang) || $supported_lang[$lang['CONTENT_LANG']] != $language) {
 				require sprintf($file_pattern, $language);
 			}
@@ -475,7 +475,7 @@ function wan_format_error($error)
 			$t['file'] = 'unknown';
 			$t['line'] = 0;
 		}
-		$file = wan_htmlspecialchars(str_replace(dirname(dirname(__FILE__)), '~', $t['file']));
+		$file = wan_htmlspecialchars(str_replace(dirname(__DIR__), '~', $t['file']));
 		$call = (isset($t['class']) ? $t['class'].$t['type'] : '') . $t['function'];
 		$t = sprintf('#%d  %s() called at [%s:%d]', $i, $call, $file, $t['line']);
 	}
@@ -520,7 +520,7 @@ function wan_format_error($error)
 		);
 
 		$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
-		$errfile = str_replace(dirname(dirname(__FILE__)), '~', $errfile);
+		$errfile = str_replace(dirname(__DIR__), '~', $errfile);
 
 		if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
 			$errstr = $lang['Message'][$errstr];
@@ -837,7 +837,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 			FROM " . ABO_LISTE_TABLE . "
 			WHERE liste_id = $liste_id
 				AND confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
-				AND register_date < " . (time() - ($limitevalidate * 86400));
+				AND register_date < " . strtotime(sprintf('-%d days', $limitevalidate));
 		$result = $db->query($sql);
 
 		$abo_ids = array();
@@ -870,7 +870,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 		}
 
 		$sql = "UPDATE " . LISTE_TABLE . "
-			SET purge_next = " . (time() + ($purge_freq * 86400)) . "
+			SET purge_next = " . strtotime(sprintf('+%d days', $purge_freq)) . "
 			WHERE liste_id = " . $liste_id;
 		$db->query($sql);
 
@@ -891,7 +891,7 @@ function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 
 	if (is_null($doStrip)) {
 		$doStrip = false;
-		if (version_compare(PHP_VERSION, '5.4.0-dev', '<') && get_magic_quotes_gpc()) {
+		if (PHP_VERSION_ID < 50400 && get_magic_quotes_gpc()) {
 			$doStrip = true;
 		}
 	}
@@ -915,7 +915,7 @@ function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
  */
 function wa_realpath($relative_path)
 {
-	if (!function_exists('realpath') || !($absolute_path = @realpath($relative_path))) {
+	if (!function_exists('realpath') || !($absolute_path = realpath($relative_path))) {
 		return $relative_path;
 	}
 

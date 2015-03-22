@@ -628,7 +628,7 @@ if (isset($_POST['start'])) {
 		if ($nl_config['db_version'] < 13) {
 			// fake. Permet simplement de savoir que les répertoires stats, tmp, ...
 			// ont changé de place et le notifier à l'administrateur
-			$moved_dirs = @!is_writable(WA_TMPDIR);
+			$moved_dirs = !is_writable(WA_TMPDIR);
 		}
 
 		//

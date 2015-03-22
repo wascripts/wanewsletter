@@ -275,7 +275,7 @@ switch ($mode) {
 		wan_print_row(' - Extension Zlib', extension_loaded('zlib') ? 'oui' : 'non');
 
 		// Le safe mode et les magic quotes ont été supprimés à partir de PHP 5.4
-		if (version_compare(PHP_VERSION, '5.4.0-dev', '<')) {
+		if (PHP_VERSION_ID < 50400) {
 			wan_print_row(' - safe_mode', config_status('safe_mode') ? 'on' : 'off');
 			wan_print_row(' - magic_quotes_gpc', config_status('magic_quotes_gpc') ? 'on' : 'off');
 			wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
@@ -380,7 +380,7 @@ switch ($mode) {
 				Attach::send_file($filename, $mime_type, $contents);
 			}
 			else {
-				if (!($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
+				if (!($fw = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
@@ -978,7 +978,7 @@ switch ($mode) {
 				Attach::send_file($filename, $mime_type, $contents);
 			}
 			else {
-				if (!($fw = @fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
+				if (!($fw = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 

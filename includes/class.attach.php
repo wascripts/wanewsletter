@@ -260,7 +260,7 @@ class Attach
 			//
 			else if ($upload_mode == 'remote') {
 				$URL  = $tmp_filename;
-				$part = @parse_url($URL);
+				$part = parse_url($URL);
 
 				if (!is_array($part) || !isset($part['scheme']) || (
 					$part['scheme'] != 'http' && (
@@ -276,7 +276,7 @@ class Attach
 				$tmp_path = (config_value('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
 				$tmp_filename = tempnam($tmp_path, 'wa0');
 
-				if (!($fw = @fopen($tmp_filename, 'wb'))) {
+				if (!($fw = fopen($tmp_filename, 'wb'))) {
 					$error = true;
 					$msg_error[] = $lang['Message']['Upload_error_5'];
 					$this->remove_file($tmp_filename);
@@ -391,19 +391,15 @@ class Attach
 			}
 			else {
 				if ($upload_mode == 'remote') {
-					$result_upload = @copy($tmp_filename, $this->upload_path . $physical_filename);
+					$result_upload = copy($tmp_filename, $this->upload_path . $physical_filename);
 				}
 				else {
-					$result_upload = @move_uploaded_file($tmp_filename, $this->upload_path . $physical_filename);
+					$result_upload = move_uploaded_file($tmp_filename, $this->upload_path . $physical_filename);
 				}
 
 				if (!$result_upload) {
 					$error = true;
 					$msg_error[] = $lang['Message']['Upload_error_5'];
-				}
-
-				if (!$error) {
-					@chmod($this->upload_path . $physical_filename, 0644);
 				}
 			}
 
@@ -572,12 +568,10 @@ class Attach
 				$tmp_filename = $this->upload_path . $row['file_physical_name'];
 			}
 
-			if (!($fp = @fopen($tmp_filename, 'rb'))) {
-				trigger_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)', E_USER_ERROR);
+			$data = file_get_contents($tmp_filename);
+			if ($data === false) {
+				trigger_error('Impossible de lire le fichier spécifié', E_USER_ERROR);
 			}
-
-			$data = fread($fp, filesize($tmp_filename));
-			fclose($fp);
 
 			if ($this->use_ftp) {
 				$this->remove_file($tmp_filename);

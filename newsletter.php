@@ -92,7 +92,7 @@ if (defined('IN_WA_FORM')) {
 	//
 	// On réactive le gestionnaire d'erreur précédent
 	//
-	@restore_error_handler();
+	restore_error_handler();
 
 	// Si besoin, conversion du message vers le charset demandé
 	if (!empty($textCharset)) {

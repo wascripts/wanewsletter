@@ -203,7 +203,7 @@ class Pop {
 		);
 
 		if (!$this->socket) {
-			throw new Exception("Pop::connect(): Failed to connect to POP server ($errno - $errstr)");
+			throw new Exception("Failed to connect to POP server ($errno - $errstr)");
 		}
 
 		stream_set_timeout($this->socket, $this->timeout);
@@ -242,7 +242,7 @@ class Pop {
 		//
 		if ($startTLS) {
 			if (!$this->hasSupport('STLS')) {
-				throw new Exception("Pop::connect(): POP server doesn't support STLS command");
+				throw new Exception("POP server doesn't support STLS command");
 			}
 
 			$this->put('STLS');
@@ -257,7 +257,7 @@ class Pop {
 
 			if (!stream_socket_enable_crypto($this->socket, true, $crypto_method)) {
 				fclose($this->socket);
-				throw new Exception("Pop::connect(): Cannot enable TLS encryption");
+				throw new Exception("Cannot enable TLS encryption");
 			}
 		}
 
@@ -303,7 +303,7 @@ class Pop {
 	public function put($data)
 	{
 		if (!$this->isConnected()) {
-			throw new Exception("Pop::put(): Connection was closed!");
+			throw new Exception("Connection was closed!");
 		}
 
 		$data .= "\r\n";
@@ -317,7 +317,7 @@ class Pop {
 				$md = stream_get_meta_data($this->socket);
 
 				if ($md['timed_out']) {
-					throw new Exception("Pop::put(): Connection timed out!");
+					throw new Exception("Connection timed out!");
 				}
 
 				break;
@@ -337,7 +337,7 @@ class Pop {
 	public function checkResponse($multiline = false)
 	{
 		if (!$this->isConnected()) {
-			throw new Exception("Pop::checkResponse(): Connection was closed!");
+			throw new Exception("Connection was closed!");
 		}
 
 		$this->_responseData = '';
@@ -350,7 +350,7 @@ class Pop {
 				$md = stream_get_meta_data($this->socket);
 
 				if ($md['timed_out']) {
-					throw new Exception("Pop::checkResponse(): Connection timed out!");
+					throw new Exception("Connection timed out!");
 				}
 
 				break;

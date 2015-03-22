@@ -57,7 +57,7 @@ function send_image($name, $img, $lastModified = null)
 	}
 
 	$canUseCache = true;
-	$cachetime   = (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
+	$cachetime   = (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
 
 	if (!empty($_SERVER['HTTP_CACHE_CONTROL'])) {
 		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_CACHE_CONTROL']);
@@ -141,7 +141,7 @@ if ($img == 'graph') {
 	}
 
 	if (($filesize = filesize(WA_STATSDIR . '/' . $filename)) > 0 &&
-		$fp = @fopen(WA_STATSDIR . '/' . $filename, 'r')
+		($fp = fopen(WA_STATSDIR . '/' . $filename, 'r'))
 	) {
 		$contents = fread($fp, $filesize);
 		$stats    = clean_stats($contents);

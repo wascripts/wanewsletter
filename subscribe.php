@@ -73,4 +73,4 @@ $output->pparse('body');
 //
 // On réactive le gestionnaire d'erreur précédent
 //
-@restore_error_handler();
+restore_error_handler();

@@ -348,7 +348,7 @@ if ($start) {
 		$login_page = wan_build_url('admin/login.php');
 
 		if (!defined('NL_INSTALLED')) {
-			if (!($fw = @fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w'))) {
+			if (!($fw = fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w'))) {
 				$output->addHiddenField('engine',  $infos['engine']);
 				$output->addHiddenField('host',    $infos['host']);
 				$output->addHiddenField('user',    $infos['user']);

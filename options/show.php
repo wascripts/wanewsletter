@@ -53,7 +53,7 @@ if ($filedata = $result->fetch()) {
 	$maxAge = 0;
 	$lastModified = filemtime($tmp_filename);
 	$canUseCache  = true;
-	$cachetime    = (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
+	$cachetime    = (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
 
 	if (!empty($_SERVER['HTTP_CACHE_CONTROL'])) {
 		$canUseCache = !preg_match('/no-cache/i', $_SERVER['HTTP_CACHE_CONTROL']);

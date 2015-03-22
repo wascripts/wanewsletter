@@ -391,7 +391,7 @@ class Wanewsletter
 		global $db, $lang;
 
 		$time = (is_null($time)) ? time() : $time;
-		$time_limit = ($time - ($this->listdata['limitevalidate'] * 86400));
+		$time_limit = strtotime(sprintf('-%d days', $this->listdata['limitevalidate']));
 
 		if ($this->account['date'] > $time_limit) {
 			$db->beginTransaction();
@@ -649,10 +649,8 @@ class Wanewsletter
 
 	private function update_stats()
 	{
-		@include WA_ROOTDIR . '/includes/functions.stats.php';
+		require WA_ROOTDIR . '/includes/functions.stats.php';
 
-		if (function_exists('update_stats')) {
-			update_stats($this->listdata);
-		}
+		update_stats($this->listdata);
 	}
 }

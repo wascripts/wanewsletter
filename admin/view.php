@@ -227,8 +227,9 @@ else if ($mode == 'abonnes') {
 	if ($search_keyword != '' || $search_date) {
 		if (strlen($search_keyword) > 1) {
 			$get_string .= '&amp;keyword=' . wan_htmlspecialchars(urlencode($search_keyword));
-			$sql_search  = 'WHERE a.abo_email LIKE \''
-				. str_replace('*', '%', addcslashes($db->escape($search_keyword), '%_')) . '\' ';
+			$sql_search  = sprintf("WHERE a.abo_email LIKE '%s' ",
+				str_replace('*', '%', addcslashes($db->escape($search_keyword), '%_'))
+			);
 		}
 
 		if ($search_date != 0) {
@@ -238,7 +239,9 @@ else if ($mode == 'abonnes') {
 				$abo_confirmed = SUBSCRIBE_NOT_CONFIRMED;
 			}
 			else {
-				$sql_search_date = ' AND al.register_date >= ' . (time() - ($search_date * 86400)) . ' ';
+				$sql_search_date = sprintf(' AND al.register_date >= %d ',
+					strtotime(sprintf('-%d days', $search_date))
+				);
 			}
 		}
 
@@ -355,13 +358,13 @@ else if ($mode == 'abonnes') {
 				$liste_format = $auth->listdata[$row['liste_id']]['liste_format'];
 
 				if ($liste_format == FORMAT_MULTIPLE) {
-					$format = sprintf(' (%s&#160;: %s)',
+					$format = sprintf(' (%s&nbsp;: %s)',
 						$lang['Choice_Format'],
 						($row['format'] == FORMAT_HTML ? 'html' : 'texte')
 					);
 				}
 				else {
-					$format = sprintf(' (%s&#160;: %s)',
+					$format = sprintf(' (%s&nbsp;: %s)',
 						$lang['Format'],
 						($liste_format == FORMAT_HTML ? 'html' : 'texte')
 					);
@@ -1686,7 +1689,7 @@ else if ($mode == 'log') {
 				$s_clip = '<img src="../templates/images/icon_clip.png" width="10" height="13" alt="@" title="' . $s_title_clip . '" />';
 			}
 			else {
-				$s_clip = '&#160;&#160;';
+				$s_clip = '&nbsp;&nbsp;';
 			}
 
 			$output->assign_block_vars('logrow', array(
