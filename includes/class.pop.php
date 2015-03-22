@@ -178,9 +178,12 @@ class Pop {
 		$this->_responseData = '';
 		$this->contents = array();
 
-		$startTLS = false;
-		if (!preg_match('#^(ssl|tls)(v[.0-9]+)?://#', $host)) {
-			$startTLS = $this->opts['starttls'];
+		$useSSL   = preg_match('#^(ssl|tls)(v[.0-9]+)?://#', $host);
+		$startTLS = (!$useSSL && $this->opts['starttls']);
+
+		// check de l'extension openssl si besoin
+		if (($useSSL || $startTLS) && !extension_loaded('openssl')) {
+			throw new Exception("Cannot use SSL/TLS because the openssl extension isn't loaded!");
 		}
 
 		//
