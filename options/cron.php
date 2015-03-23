@@ -85,7 +85,7 @@ if ($listdata = $result->fetch()) {
 		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel
 
 		$wan = new Wanewsletter($listdata);
-		$pop = new Pop();
+		$pop = new PopClient();
 		$pop->options(array(
 			'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
 		));

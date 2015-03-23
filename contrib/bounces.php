@@ -140,7 +140,7 @@ if ($process) {
 	else {
 		require 'Mail/mimeDecode.php';
 
-		$pop = new Pop();
+		$pop = new PopClient();
 		$pop->options($pop_opts);
 		$pop->connect($pop_server, $pop_port, $pop_user, $pop_passwd);
 

@@ -289,7 +289,7 @@ else if ($process_subscribe) {
 	require WA_ROOTDIR . '/includes/functions.stats.php';
 
 	$wan = new Wanewsletter($listdata);
-	$pop = new Pop();
+	$pop = new PopClient();
 	$pop->options(array(
 		'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
 	));

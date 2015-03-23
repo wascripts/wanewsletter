@@ -25,6 +25,7 @@ define('FUNCTIONS_INC', true);
 function wan_autoloader($classname)
 {
 	$catalog = array();
+	$catalog['popclient']    = '%s/includes/class.pop.php';
 	$catalog['wanerror']     = '%s/includes/class.error.php';
 	$catalog['wanewsletter'] = '%s/includes/class.form.php';
 

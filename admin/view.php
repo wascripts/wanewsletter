@@ -945,7 +945,7 @@ else if ($mode == 'liste') {
 			}
 
 			if ($use_cron && function_exists('stream_socket_client')) {
-				$pop = new Pop();
+				$pop = new PopClient();
 				$pop->options(array(
 					'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
 				));

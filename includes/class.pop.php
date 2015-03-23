@@ -16,7 +16,7 @@
  * @link http://www.faqs.org/rfcs/ (anglais)
  */
 
-class Pop {
+class PopClient {
 
 	/**
 	 * Identifiant de connexion
@@ -99,12 +99,12 @@ class Pop {
 		 *
 		 * @var array
 		 */
-		'stream_context_opts'   => array(
+		'stream_opts'   => array(
 			'ssl' => array(
 				'disable_compression' => true, // default value in PHP ≥ 5.6
 			)
 		),
-		'stream_context_params' => null
+		'stream_params' => null
 	);
 
 	/**
@@ -189,8 +189,8 @@ class Pop {
 		//
 		// Ouverture de la connexion au serveur POP
 		//
-		$context_opts   = $this->opts['stream_context_opts'];
-		$context_params = $this->opts['stream_context_params'];
+		$context_opts   = $this->opts['stream_opts'];
+		$context_params = $this->opts['stream_params'];
 		$context = stream_context_create($context_opts, $context_params);
 
 		$this->socket = stream_socket_client(
@@ -308,7 +308,7 @@ class Pop {
 
 		$data .= "\r\n";
 		$total = strlen($data);
-		$this->log($data);
+		$this->log(sprintf('C: %s', $data));
 
 		while ($data) {
 			$bw = fwrite($this->socket, $data);
@@ -356,7 +356,7 @@ class Pop {
 				break;
 			}
 
-			$this->log($data);
+			$this->log(sprintf('S: %s', $data));
 			$this->_responseData .= $data;
 
 			if (!$isok && substr($data, 0, 3) !== '+OK') {
