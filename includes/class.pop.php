@@ -8,6 +8,7 @@
  *
  * @see RFC 1939 - Post Office Protocol - Version 3
  * @see RFC 2449 - POP3 Extension Mechanism
+ * @see RFC 2595 - Using TLS with IMAP, POP3 and ACAP
  *
  * Les sources qui m'ont bien aidées :
  *
