@@ -175,7 +175,10 @@ else if ($mode == 'iframe') {
 				);
 			}
 			else {
-				$body = Mime::wordwrap(trim($body));
+				// on normalise les fins de ligne pour s'assurer du bon
+				// fonctionnement de wordwrap()
+				$body = preg_replace("/\r\n?|\n/", "\r\n", $body);
+				$body = wordwrap(trim($body), 78, "\r\n");
 				$body = active_urls(wan_htmlspecialchars($body, ENT_NOQUOTES));
 				$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
 				$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
