@@ -150,19 +150,20 @@ if (isset($_POST['submit'])) {
 	}
 
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
-		$smtp = new \Wamailer\SmtpClient();
+		$smtp = new \Wamailer\Transport\SmtpClient();
 		$smtp->options(array(
 			'starttls' => ($new_config['smtp_tls'] == WA_SECURITY_STARTTLS)
 		));
 
+		$server = ($new_config['smtp_tls'] == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+		$server = sprintf($server, $new_config['smtp_host'], $new_config['smtp_port']);
+
 		try {
-			if (!$smtp->connect(
-				($new_config['smtp_tls'] == WA_SECURITY_FULL_TLS ? 'tls://' : '') . $new_config['smtp_host'],
-				$new_config['smtp_port'],
-				$new_config['smtp_user'],
-				$new_config['smtp_pass']
-			)) {
-				throw new Exception(sprintf("SMTP server response: '%s'", $smtp->responseData));
+			if (!$smtp->connect($server, $new_config['smtp_user'], $new_config['smtp_pass'])) {
+				throw new Exception(sprintf(
+					"Failed to connect to SMTP server (%s)",
+					$smtp->responseData
+				));
 			}
 		}
 		catch (Exception $e) {
