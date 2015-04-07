@@ -19,8 +19,8 @@
 	"require": {
 		"php": ">=5.3.7",
 		"patchwork/utf8": "~1.2",
-		"ircmaxell/password-compat": "1.0.4",
-		"wascripts/wamailer": "dev-master",
+		"ircmaxell/password-compat": "1.0.*",
+		"wascripts/wamailer": "~4.0@dev",
 		"guiguiboy/PHP-CLI-Progress-Bar": "dev-master#7d3eb61c1f0c164b9c3139af694b2d38171e4d04"
 	},
 	"require-dev": {
