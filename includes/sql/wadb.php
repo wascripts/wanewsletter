@@ -16,10 +16,8 @@ abstract class Wadb
 {
 	/**
 	 * Type de base de données
-	 * @todo Une classe fille peut surcharger une constante déclarée sur sa parente.
-	 * Normal ou faille dans l'implémentation PHP ?
 	 */
-//	const ENGINE = '';
+	const ENGINE = '';
 
 	/**
 	 * Connexion à la base de données
