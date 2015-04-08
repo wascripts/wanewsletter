@@ -280,6 +280,7 @@ switch ($mode) {
 			wan_print_row(' - magic_quotes_runtime', config_status('magic_quotes_runtime') ? 'on' : 'off');
 		}
 
+		wan_print_row(' - open_basedir',  config_value('open_basedir'));
 		wan_print_row(' - sys_temp_dir', sys_get_temp_dir());
 		wan_print_row(' - filter.default', config_value('filter.default'));
 		wan_print_row(' - allow_url_fopen', config_status('allow_url_fopen') ? 'on' : 'off');
@@ -292,10 +293,12 @@ switch ($mode) {
 		wan_print_row(' - memory_limit', config_value('memory_limit'));
 		wan_print_row(' - mail.add_x_header', config_status('mail.add_x_header') ? 'on' : 'off');
 		wan_print_row(' - mail.force_extra_parameters', config_value('mail.force_extra_parameters'));
-		wan_print_row(' - open_basedir',  config_value('open_basedir'));
 		wan_print_row(' - sendmail_from', config_value('sendmail_from'));
 		wan_print_row(' - sendmail_path', config_value('sendmail_path'));
-		wan_print_row(' - SMTP',          config_value('SMTP'));
+
+		if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
+			wan_print_row(' - SMTP Server', config_value('SMTP').':'.config_value('smtp_port'));
+		}
 
 		wan_print_row('Type de serveur', $_SERVER['SERVER_SOFTWARE'] . ' - ' . PHP_OS);
 		wan_print_row('Connexion sécurisée', wan_ssl_connection() ? 'oui' : 'non');
