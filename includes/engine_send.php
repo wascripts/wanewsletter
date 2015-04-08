@@ -75,7 +75,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	//
 	// Initialisation de l'objet Email
 	//
-	$email = new \Wamailer\Email('UTF-8');
+	$email = new \Wamailer\Email();
 	$email->setFrom($listdata['sender_email'], $listdata['liste_name']);
 	$email->setSubject($logdata['log_subject']);
 

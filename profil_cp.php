@@ -246,7 +246,7 @@ switch ($mode) {
 					$format = $listdata['liste_format'];
 				}
 
-				$email = new Email('UTF-8');
+				$email = new Email();
 				$email->setFrom($listdata['sender_email'], $listdata['liste_name']);
 				$email->setSubject($row['log_subject']);
 

@@ -83,7 +83,7 @@ if ($mode == 'adduser') {
 			));
 			$message = $tpl->pparse('mail', true);
 
-			$email = new Email('UTF-8');
+			$email = new Email();
 			$email->setFrom($admindata['admin_email'], $admindata['admin_login']);
 			$email->addRecipient($new_email);
 			$email->setSubject(sprintf($lang['Subject_email']['New_admin'], $nl_config['sitename']));

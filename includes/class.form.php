@@ -352,7 +352,7 @@ class Wanewsletter
 
 		$body = $tpl->pparse('mail', true);
 
-		$email = new Email('UTF-8');
+		$email = new Email();
 		$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
 		$email->addRecipient($this->account['email']);
 		$email->setSubject(sprintf($lang['Subject_email']['Subscribe'], $nl_config['sitename']));
@@ -496,7 +496,7 @@ class Wanewsletter
 
 			$body = $tpl->pparse('mail', true);
 
-			$email = new Email('UTF-8');
+			$email = new Email();
 			$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
 			$email->addRecipient($this->account['email']);
 			$email->setSubject($lang['Subject_email']['Unsubscribe_1']);
@@ -595,7 +595,7 @@ class Wanewsletter
 					'PSEUDO'  => $this->account['pseudo']
 				));
 
-				$email = new Email('UTF-8');
+				$email = new Email();
 				$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
 				$email->setSubject($subject);
 
