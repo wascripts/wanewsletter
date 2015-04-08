@@ -87,17 +87,18 @@ if ($listdata = $result->fetch()) {
 		$wan = new Wanewsletter($listdata);
 		$pop = new PopClient();
 		$pop->options(array(
-			'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
+			'starttls' => ($listdata['pop_tls'] == WA_SECURITY_STARTTLS)
 		));
 
 		try {
-			if (!$pop->connect(
-				($listdata['pop_tls'] == WA_SECURITY_FULL_TLS ? 'tls://' : '') . $listdata['pop_host'],
-				$listdata['pop_port'],
-				$listdata['pop_user'],
-				$listdata['pop_pass']
-			)) {
-				throw new Exception(sprintf("POP server response: '%s'", $pop->responseData));
+			$server = ($listdata['pop_tls'] == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+			$server = sprintf($server, $listdata['pop_host'], $listdata['pop_port']);
+
+			if (!$pop->connect($server, $listdata['pop_user'], $listdata['pop_pass'])) {
+				throw new Exception(sprintf(
+					"Failed to connect to POP server (%s)",
+					$pop->responseData
+				));
 			}
 		}
 		catch (Exception $e) {

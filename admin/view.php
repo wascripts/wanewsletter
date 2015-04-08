@@ -954,13 +954,14 @@ else if ($mode == 'liste') {
 				));
 
 				try {
-					if (!$pop->connect(
-						($pop_tls == WA_SECURITY_FULL_TLS ? 'tls://' : '') . $pop_host,
-						$pop_port,
-						$pop_user,
-						$pop_pass
-					)) {
-						throw new Exception(sprintf("POP server response: '%s'", $pop->responseData));
+					$server = ($pop_tls == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+					$server = sprintf($server, $pop_host, $pop_port);
+
+					if (!$pop->connect($server, $pop_user, $pop_pass)) {
+						throw new Exception(sprintf(
+							"Failed to connect to POP server (%s)",
+							$pop->responseData
+						));
 					}
 				}
 				catch (Exception $e) {

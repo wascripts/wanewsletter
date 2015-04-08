@@ -31,8 +31,7 @@ exit(0);
 //
 // Configuration du script
 //
-$pop_server = '';// Préfixez avec ssl:// ou tls:// si besoin
-$pop_port   = 110; // port du serveur. La valeur par défaut (110) est la plus répandue.
+$pop_server = '';// Préfixez avec ssl:// ou tls:// si besoin (ex: tls://pop.mydomain.tld:995)
 $pop_user   = '';
 $pop_passwd = '';
 $pop_opts   = array(
@@ -109,7 +108,7 @@ if ($process) {
 		else if (!empty($pop_opts['starttls'])) {
 			$secure = '/tls';
 		}
-		$cid = imap_open("\{$pop_server:$pop_port{$secure}/service=pop3\}INBOX", $pop_user, $pop_passwd);
+		$cid = imap_open("\{$pop_server{$secure}/service=pop3\}INBOX", $pop_user, $pop_passwd);
 
 		$mail_box = imap_sort($cid, SORTDATE, 1);
 
@@ -142,7 +141,7 @@ if ($process) {
 
 		$pop = new PopClient();
 		$pop->options($pop_opts);
-		$pop->connect($pop_server, $pop_port, $pop_user, $pop_passwd);
+		$pop->connect($pop_server, $pop_user, $pop_passwd);
 
 		$total    = $pop->stat_box();
 		$mail_box = $pop->list_mail();

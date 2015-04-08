@@ -10,11 +10,9 @@
  * @see RFC 2449 - POP3 Extension Mechanism
  * @see RFC 2595 - Using TLS with IMAP, POP3 and ACAP
  *
- * Les sources qui m'ont bien aidées :
+ * D’autres sources qui m’ont bien aidées :
  *
  * @link http://www.commentcamarche.net/internet/smtp.php3
- * @link http://abcdrfc.free.fr/ (français)
- * @link http://www.faqs.org/rfcs/ (anglais)
  */
 
 class PopClient {
@@ -27,32 +25,11 @@ class PopClient {
 	protected $socket;
 
 	/**
-	 * Nom ou IP du serveur pop à contacter
+	 * Nom ou IP du serveur pop à contacter, ainsi que le port.
 	 *
 	 * @var string
 	 */
-	protected $host     = '';
-
-	/**
-	 * Port d'accés (en général, 110)
-	 *
-	 * @var integer
-	 */
-	protected $port     = 110;
-
-	/**
-	 * Nom d'utilisateur du compte
-	 *
-	 * @var string
-	 */
-	protected $username = '';
-
-	/**
-	 * Mot de passe d'accés au compte
-	 *
-	 * @var string
-	 */
-	protected $passwd   = '';
+	protected $server   = 'localhost:110';
 
 	/**
 	 * Tableau contenant les données des emails lus
@@ -62,7 +39,7 @@ class PopClient {
 	public $contents    = array();
 
 	/**
-	 * Durée maximale d'une tentative de connexion
+	 * Durée maximale d’une tentative de connexion
 	 *
 	 * @var integer
 	 */
@@ -79,7 +56,8 @@ class PopClient {
 
 	/**
 	 * Options diverses.
-	 * Voir méthode Pop::options()
+	 * Les propriétés 'timeout' et 'debug' peuvent être configurées également
+	 * au travers de la méthode PopClient::options()
 	 *
 	 * @var array
 	 */
@@ -119,83 +97,96 @@ class PopClient {
 
 	/**
 	 * Dernier message de réponse retourné par le serveur.
-	 * Accessible en lecture sous la forme $obj->responseData
+	 * Accessible en lecture.
 	 *
 	 * @var string
 	 */
-	protected $_responseData;
+	protected $responseData;
 
 	/**
-	 * Si l'argument vaut true, la connexion est établie automatiquement avec les paramètres par défaut
-	 * de la classe. (On suppose qu'ils ont été préalablement remplacés par les bons paramètres)
-	 *
-	 * @param boolean $auto_connect true pour établir la connexion à l'instanciation de la classe
+	 * @param array $opts
 	 */
-	public function __construct($auto_connect = false)
+	public function __construct(array $opts = array())
 	{
-		if ($auto_connect) {
-			$this->connect($this->host, $this->port, $this->username, $this->passwd);
+		if (!strpos($this->server, '://')) {
+			$this->server = 'tcp://'.$this->server;
 		}
+
+		$this->options($opts);
 	}
 
 	/**
-	 * Définition des options d'utilisation
+	 * Définition des options d’utilisation.
+	 * Les options 'debug' et 'timeout' renvoient aux propriétés de classe
+	 * de même nom.
 	 *
 	 * @param array $opts
+	 *
+	 * @return array
 	 */
-	public function options($opts)
+	public function options(array $opts = array())
 	{
-		if (is_array($opts)) {
-			// Configuration alternative
-			foreach (array('debug','timeout') as $name) {
-				if (!empty($opts[$name])) {
-					$this->{$name} = $opts[$name];
-					unset($opts[$name]);
-				}
+		// Configuration alternative
+		foreach (array('debug','timeout') as $name) {
+			if (!empty($opts[$name])) {
+				$this->{$name} = $opts[$name];
+				unset($opts[$name]);
 			}
-
-			$this->opts = array_replace_recursive($this->opts, $opts);
 		}
+
+		$this->opts = array_replace_recursive($this->opts, $opts);
+
+		return $this->opts;
 	}
 
 	/**
 	 * Etablit la connexion au serveur POP et effectue l'identification
 	 *
-	 * @param string  $host     Nom ou IP du serveur
-	 * @param integer $port     Port d'accés au serveur POP
+	 * @param string  $server   Nom ou IP du serveur (hostname, proto://hostname, proto://hostname:port)
 	 * @param string  $username Nom d'utilisateur du compte
-	 * @param string  $passwd   Mot de passe du compte
+	 * @param string  $password Mot de passe du compte
 	 *
+	 * @throws Exception
 	 * @return boolean
 	 */
-	public function connect($host = null, $port = null, $username = null, $passwd = null)
+	public function connect($server = null, $username = null, $password = null)
 	{
-		foreach (array('host', 'port', 'username', 'passwd') as $varname) {
-			if (empty($$varname)) {
-				$$varname = $this->{$varname};
-			}
-		}
-
-		$this->_responseData = '';
+		// Reset des données relatives à l’éventuelle connexion précédente
+		$this->responseData = '';
 		$this->contents = array();
 
-		$useSSL   = preg_match('#^(ssl|tls)(v[.0-9]+)?://#', $host);
+		if (!$server) {
+			$server = $this->server;
+		}
+
+		if (!strpos($server, '://')) {
+			$server = 'tcp://'.$server;
+		}
+
+		$port = parse_url($server, PHP_URL_PORT);
+		if (!$port) {
+			$server .= ':'.parse_url($this->server, PHP_URL_PORT);
+		}
+
+		$proto = substr(parse_url($server, PHP_URL_SCHEME), 0, 3);
+		$useSSL   = ($proto == 'ssl' || $proto == 'tls');
 		$startTLS = (!$useSSL && $this->opts['starttls']);
 
-		// check de l'extension openssl si besoin
-		if (($useSSL || $startTLS) && !extension_loaded('openssl')) {
-			throw new Exception("Cannot use SSL/TLS because the openssl extension isn't loaded!");
+		// check de l’extension openssl si besoin
+		if (($useSSL || $startTLS) && !in_array('tls', stream_get_transports())) {
+			throw new Exception("Cannot use SSL/TLS because the openssl extension is not available!");
 		}
 
 		//
 		// Ouverture de la connexion au serveur POP
 		//
-		$context_opts   = $this->opts['stream_opts'];
-		$context_params = $this->opts['stream_params'];
-		$context = stream_context_create($context_opts, $context_params);
+		$context = stream_context_create(
+			$this->opts['stream_opts'],
+			$this->opts['stream_params']
+		);
 
 		$this->socket = stream_socket_client(
-			sprintf('%s:%d', $host, $port),
+			$server,
 			$errno,
 			$errstr,
 			$this->timeout,
@@ -215,7 +206,7 @@ class PopClient {
 
 		// Support pour la commande APOP ?
 		$apop_timestamp = '';
-		if (preg_match('#<[^>]+>#', $this->_responseData, $m)) {
+		if (preg_match('#<[^>]+>#', $this->responseData, $m)) {
 			$apop_timestamp = $m[0];
 		}
 
@@ -225,7 +216,7 @@ class PopClient {
 		if ($this->checkResponse(true)) {
 			// On récupère la liste des extensions supportées par ce serveur
 			$this->extensions = array();
-			$lines = explode("\r\n", trim($this->_responseData));
+			$lines = explode("\r\n", trim($this->responseData));
 			array_shift($lines);// On zappe la réponse serveur +OK...
 
 			foreach ($lines as $line) {
@@ -242,31 +233,14 @@ class PopClient {
 		// Le cas échéant, on utilise le protocole sécurisé TLS
 		//
 		if ($startTLS) {
-			if (!$this->hasSupport('STLS')) {
-				throw new Exception("POP server doesn't support STLS command");
-			}
-
-			$this->put('STLS');
-			if (!$this->checkResponse()) {
-				return false;
-			}
-
-			$crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
-			if (isset($context_opts['ssl']['crypto_method'])) {
-				$crypto_method = $context_opts['ssl']['crypto_method'];
-			}
-
-			if (!stream_socket_enable_crypto($this->socket, true, $crypto_method)) {
-				fclose($this->socket);
-				throw new Exception("Cannot enable TLS encryption");
-			}
+			$this->startTLS();
 		}
 
 		//
 		// Identification
 		//
 		if ($apop_timestamp) {
-			$this->put(sprintf('APOP %s %s', $username, md5($apop_timestamp.$passwd)));
+			$this->put(sprintf('APOP %s %s', $username, md5($apop_timestamp.$password)));
 			if (!$this->checkResponse()) {
 				return false;
 			}
@@ -277,13 +251,45 @@ class PopClient {
 				return false;
 			}
 
-			$this->put(sprintf('PASS %s', $passwd));
+			$this->put(sprintf('PASS %s', $password));
 			if (!$this->checkResponse()) {
 				return false;
 			}
 		}
 
 		return true;
+	}
+
+	/**
+	 * Utilisation de la commande STLS pour sécuriser la connexion.
+	 *
+	 * @throws Exception
+	 */
+	public function startTLS()
+	{
+		if (!$this->hasSupport('STLS')) {
+			throw new Exception("POP server doesn't support STLS command");
+		}
+
+		$this->put('STLS');
+		if (!$this->checkResponse()) {
+			throw new Exception(sprintf(
+				"STLS command returned an error (%s)",
+				$this->responseData
+			));
+		}
+
+		$ssl_options   = $this->opts['stream_opts']['ssl'];
+		$crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
+
+		if (isset($ssl_options['crypto_method'])) {
+			$crypto_method = $ssl_options['crypto_method'];
+		}
+
+		if (!stream_socket_enable_crypto($this->socket, true, $crypto_method)) {
+			fclose($this->socket);
+			throw new Exception("Cannot enable TLS encryption");
+		}
 	}
 
 	/**
@@ -297,9 +303,11 @@ class PopClient {
 	}
 
 	/**
-	 * Envoit les données au serveur
+	 * Envoie les données au serveur
 	 *
-	 * @param string $data Données à envoyer
+	 * @param string $data
+	 *
+	 * @throws Exception
 	 */
 	public function put($data)
 	{
@@ -333,6 +341,7 @@ class PopClient {
 	 *
 	 * @param boolean $multiline Précise si on attend une réponse multi-lignes
 	 *
+	 * @throws Exception
 	 * @return boolean
 	 */
 	public function checkResponse($multiline = false)
@@ -341,7 +350,7 @@ class PopClient {
 			throw new Exception("Connection was closed!");
 		}
 
-		$this->_responseData = '';
+		$this->responseData = '';
 		$isok = false;
 
 		do {
@@ -358,7 +367,7 @@ class PopClient {
 			}
 
 			$this->log(sprintf('S: %s', $data));
-			$this->_responseData .= $data;
+			$this->responseData .= $data;
 
 			if (!$isok && substr($data, 0, 3) !== '+OK') {
 				return false;
@@ -389,11 +398,11 @@ class PopClient {
 	}
 
 	/**
-	 * Indique si l'extension ciblée est supportée par le serveur POP.
-	 * Si l'extension possède des paramètres (par exemple, SASL donne aussi la
+	 * Indique si l’extension ciblée est supportée par le serveur POP.
+	 * Si l’extension possède des paramètres (par exemple, SASL donne aussi la
 	 * liste des méthodes supportées), ceux-ci sont retournés au lieu de true
 	 *
-	 * @param string $name Nom de l'extension (insensible à la casse)
+	 * @param string $name Nom de l’extension (insensible à la casse)
 	 *
 	 * @return mixed
 	 */
@@ -409,7 +418,7 @@ class PopClient {
 	}
 
 	/**
-	 * Commande STAT
+	 * Envoie la commande STAT.
 	 * Renvoie le nombre de messages présent et la taille totale (en octets)
 	 *
 	 * @return array
@@ -421,14 +430,14 @@ class PopClient {
 			return false;
 		}
 
-		sscanf($this->_responseData, '+OK %d %d', $total_msg, $total_size);
+		sscanf($this->responseData, '+OK %d %d', $total_msg, $total_size);
 
 		return array('total_msg' => $total_msg, 'total_size' => $total_size);
 	}
 
 	/**
-	 * Commande LIST
-	 * Renvoie un tableau avec leur numéro en index et leur taille pour valeur
+	 * Envoie la commande LIST.
+	 * Renvoie un tableau avec leur numéro en index et leur taille pour valeur.
 	 * Si un numéro de message est donné, sa taille sera renvoyée
 	 *
 	 * @param integer $num Numéro du message
@@ -444,7 +453,7 @@ class PopClient {
 
 		if ($num == 0) {
 			$list  = array();
-			$lines = explode("\r\n", trim($this->_responseData));
+			$lines = explode("\r\n", trim($this->responseData));
 			array_shift($lines);// On zappe la réponse serveur +OK...
 
 			foreach ($lines as $line) {
@@ -457,7 +466,7 @@ class PopClient {
 			return $list;
 		}
 		else {
-			sscanf($this->_responseData, '+OK %d %d', $num, $mail_size);
+			sscanf($this->responseData, '+OK %d %d', $num, $mail_size);
 
 			return $mail_size;
 		}
@@ -486,7 +495,7 @@ class PopClient {
 			return false;
 		}
 
-		$lines = explode("\r\n", $this->_responseData);
+		$lines = explode("\r\n", $this->responseData);
 		array_shift($lines);// On zappe la réponse serveur +OK...
 		$output = implode("\r\n", $lines);
 
@@ -499,8 +508,8 @@ class PopClient {
 	}
 
 	/**
-	 * Récupère les entêtes de l'email spécifié par $num et renvoi un tableau avec le
-	 * nom des entêtes et leur valeur
+	 * Récupère les entêtes de l’email spécifié par $num et renvoi un tableau
+	 * avec le nom des entêtes et leur valeur
 	 *
 	 * @param string $str
 	 *
@@ -549,7 +558,7 @@ class PopClient {
 	}
 
 	/**
-	 * Décode l'entête donné s'il est encodé
+	 * Décode l’entête donné s’il est encodé
 	 *
 	 * @param string $str
 	 *
@@ -582,11 +591,13 @@ class PopClient {
 	}
 
 	/**
-	 * Parse l'email demandé et renvoie des informations sur les fichiers joints éventuels
-	 * Retourne un tableau contenant les données (nom, encodage, données du fichier ..) sur les fichiers joints
-	 * ou false si aucun fichier joint n'est trouvé ou que l'email correspondant à $num n'existe pas.
+	 * Parse l’email demandé et renvoie des informations sur les fichiers
+	 * joints éventuels.
+	 * Retourne un tableau contenant les données (nom, encodage, données du
+	 * fichier ..) sur les fichiers joints ou false si aucun fichier joint
+	 * n’est trouvé ou que l’email correspondant à $num n’existe pas.
 	 *
-	 * @param integer $num Numéro de l'email à parser
+	 * @param integer $num Numéro de l’email à parser
 	 *
 	 * @status experimental
 	 * @return mixed
@@ -658,8 +669,8 @@ class PopClient {
 	}
 
 	/**
-	 * Commande DELE
-	 * Demande au serveur d'effacer le message correspondant au numéro donné
+	 * Envoie la commande DELE.
+	 * Demande au serveur d’effacer le message correspondant au numéro donné
 	 *
 	 * @param integer $num Numéro du message
 	 *
@@ -673,7 +684,7 @@ class PopClient {
 	}
 
 	/**
-	 * Envoi la commande NOOP
+	 * Envoie la commande NOOP
 	 *
 	 * @return boolean
 	 */
@@ -685,7 +696,7 @@ class PopClient {
 	}
 
 	/**
-	 * Commande RSET
+	 * Envoie la commande RSET.
 	 * Annule les dernières commandes (effacement ..)
 	 *
 	 * @return boolean
@@ -698,8 +709,7 @@ class PopClient {
 	}
 
 	/**
-	 * Commande QUIT
-	 * Ferme la connexion au serveur
+	 * Envoie la commande QUIT et ferme la connexion au serveur
 	 */
 	public function quit()
 	{
@@ -727,12 +737,32 @@ class PopClient {
 		}
 	}
 
+	/**
+	 * Lecture des propriétés non publiques autorisées.
+	 *
+	 * @param string $name Nom de la propriété
+	 *
+	 * @throws Exception
+	 * @return mixed
+	 */
 	public function __get($name)
 	{
 		switch ($name) {
 			case 'responseData':
-				return $this->{'_'.$name};
+				return $this->{$name};
+				break;
+			default:
+				throw new Exception("Error while trying to get property '$name'");
 				break;
 		}
+	}
+
+	/**
+	 * Destructeur de classe.
+	 * On s’assure de fermer proprement la connexion s’il y a lieu.
+	 */
+	public function __destruct()
+	{
+		$this->quit();
 	}
 }
