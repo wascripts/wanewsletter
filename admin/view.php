@@ -933,17 +933,17 @@ else if ($mode == 'liste') {
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 
-			if (!empty($return_email) && !Mailer::checkMailSyntax($return_email)) {
+			if ($return_email != '' && !Mailer::checkMailSyntax($return_email)) {
 				$error = true;
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 
-			if (!empty($liste_alias) && !Mailer::checkMailSyntax($liste_alias)) {
+			if ($liste_alias != '' && !Mailer::checkMailSyntax($liste_alias)) {
 				$error = true;
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
 
-			if (empty($pop_pass) && $action == 'edit') {
+			if ($pop_pass == '' && $pop_user != '' && $action == 'edit') {
 				$pop_pass = $listdata['pop_pass'];
 			}
 
