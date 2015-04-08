@@ -141,7 +141,7 @@ if (isset($_POST['submit'])) {
 		$new_config['use_ftp'] = 0;
 	}
 
-	if (empty($new_config['smtp_pass'])) {
+	if ($new_config['smtp_pass'] == '' && $new_config['smtp_user'] != '') {
 		$new_config['smtp_pass'] = $old_config['smtp_pass'];
 	}
 
