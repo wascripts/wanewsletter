@@ -7,9 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('ENGINE_SEND_INC')) {
-
-define('ENGINE_SEND_INC', true);
+namespace Wanewsletter;
 
 /**
  * launch_sending()
@@ -268,7 +266,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					try {
 						wan_sendmail($email);
 					}
-					catch (Exception $e) {
+					catch (\Exception $e) {
 						trigger_error(sprintf($lang['Message']['Failed_sending2'],
 							wan_htmlspecialchars($e->getMessage())
 						), E_USER_ERROR);
@@ -281,7 +279,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			$abo_ids = array_merge($abo_ids[FORMAT_TEXTE], $abo_ids[FORMAT_HTML]);
 		}
 		else if ($nl_config['engine_send'] == ENGINE_UNIQ) {
-			if (defined('IN_COMMANDLINE')) {
+			if (check_cli()) {
 				//
 				// Initialisation de la barre de progression des envois
 				//
@@ -392,7 +390,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				try {
 					wan_sendmail($email);
 				}
-				catch (Exception $e) {
+				catch (\Exception $e) {
 					$sendError++;
 					$lastError = $e->getMessage();
 				}
@@ -402,7 +400,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					fwrite($fp, "$row[abo_id]\n");
 				}
 
-				if (defined('IN_COMMANDLINE')) {
+				if (check_cli()) {
 					$progressbar->update($counter);
 
 					if (SEND_DELAY > 0 && ($counter % SEND_PACKET) == 0) {
@@ -462,7 +460,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		try {
 			$db->connect();
 		}
-		catch (Exception $e) {
+		catch (Dblayer\Exception $e) {
 			//
 			// L'envoi a duré trop longtemps et la connexion au serveur SQL a été perdue
 			//
@@ -509,7 +507,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			($sent + $no_sent)
 		);
 
-		if (!defined('IN_COMMANDLINE')) {
+		if (!check_cli()) {
 			if (!empty($_GET['step']) && $_GET['step'] == 'auto') {
 				http_redirect("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
 			}
@@ -594,6 +592,4 @@ function newsletter_links($listdata)
 	}
 
 	return $link;
-}
-
 }

@@ -7,11 +7,13 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('IN_NEWSLETTER')) {
+namespace Wanewsletter;
+
+const IN_ADMIN = true;
+
+if (__FILE__ == $_SERVER['SCRIPT_FILENAME']) {
 	exit('<b>No hacking</b>');
 }
-
-define('IN_ADMIN', true);
 
 require '../includes/common.inc.php';
 
@@ -47,7 +49,7 @@ $auth = new Auth();
 // End
 //
 
-if (!defined('IN_LOGIN')) {
+if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 	if (!$auth->isLoggedIn() || !($admindata = $auth->getUserData($_SESSION['uid']))) {
 		$session->reset();
 		$redirect  = '?redirect=' . basename(server_info('SCRIPT_NAME'));

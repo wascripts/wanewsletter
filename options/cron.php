@@ -7,8 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-define('IN_NEWSLETTER', true);
-define('IN_CRON',       true);
+namespace Wanewsletter;
 
 require '../includes/common.inc.php';
 
@@ -87,11 +86,11 @@ if ($listdata = $result->fetch()) {
 		$wan = new Wanewsletter($listdata);
 		$pop = new PopClient();
 		$pop->options(array(
-			'starttls' => ($listdata['pop_tls'] == WA_SECURITY_STARTTLS)
+			'starttls' => ($listdata['pop_tls'] == SECURITY_STARTTLS)
 		));
 
 		try {
-			$server = ($listdata['pop_tls'] == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+			$server = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 			$server = sprintf($server, $listdata['pop_host'], $listdata['pop_port']);
 
 			if (!$pop->connect($server, $listdata['pop_user'], $listdata['pop_pass'])) {

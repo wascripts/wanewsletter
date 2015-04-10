@@ -7,7 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-class Wadb_mysql extends Wadb
+namespace Wanewsletter\Dblayer;
+
+class Mysql extends Wadb
 {
 	/**
 	 * Type de base de données
@@ -59,7 +61,7 @@ class Wadb_mysql extends Wadb
 			$this->error = mysql_error();
 			$this->link  = null;
 
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 		else if (!mysql_select_db($dbname)) {
 			$this->errno = mysql_errno($this->link);
@@ -67,7 +69,7 @@ class Wadb_mysql extends Wadb
 			mysql_close($this->link);
 			$this->link  = null;
 
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 		else {
 			$this->serverVersion = mysql_get_server_info($this->link);
@@ -105,7 +107,7 @@ class Wadb_mysql extends Wadb
 			$this->lastQuery = $query;
 			$this->rollBack();
 
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;
@@ -113,7 +115,7 @@ class Wadb_mysql extends Wadb
 			$this->lastQuery = '';
 
 			if (!is_bool($result)) {// on a réceptionné une ressource ou un objet
-				$result = new WadbResult_mysql($result);
+				$result = new MysqlResult($result);
 			}
 		}
 
@@ -196,11 +198,11 @@ class Wadb_mysql extends Wadb
 
 	public function initBackup()
 	{
-		return new WadbBackup_mysql($this);
+		return new MysqlBackup($this);
 	}
 }
 
-class WadbResult_mysql extends WadbResult
+class MysqlResult extends WadbResult
 {
 	public function fetch($mode = null)
 	{
@@ -234,7 +236,7 @@ class WadbResult_mysql extends WadbResult
 	}
 }
 
-class WadbBackup_mysql extends WadbBackup
+class MysqlBackup extends WadbBackup
 {
 	public function header($toolname = '')
 	{

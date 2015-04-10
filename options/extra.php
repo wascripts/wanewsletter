@@ -7,7 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-define('IN_NEWSLETTER', true);
+namespace Wanewsletter;
 
 require '../includes/common.inc.php';
 

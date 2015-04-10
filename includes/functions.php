@@ -7,17 +7,17 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter;
+
 use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wamailer\Email;
-
-if (!defined('FUNCTIONS_INC')) {
-
-define('FUNCTIONS_INC', true);
+use Wanewsletter\Dblayer\Wadb;
+use Wanewsletter\Dblayer\WadbResult;
 
 /**
  * Fonction de chargement automatique de classes.
- * Implémentation à la barbare sans égard pour PSR-0. On verra plus tard pour
+ * Implémentation à la barbare. On verra plus tard pour
  * faire quelque chose de plus propre...
  *
  * @param string $classname Nom de la classe
@@ -26,24 +26,30 @@ function wan_autoloader($classname)
 {
 	$catalog = array();
 	$catalog['popclient']    = '%s/includes/class.pop.php';
-	$catalog['wanerror']     = '%s/includes/class.error.php';
 	$catalog['wanewsletter'] = '%s/includes/class.form.php';
 
-	$rootdir   = dirname(__DIR__);
+	$rootdir = dirname(__DIR__);
+	$prefix  = '';
+
+	if (strpos($classname, '\\')) {
+		list($prefix, $classname) = explode('\\', $classname, 2);
+	}
+
+	if ($prefix != 'Wanewsletter') {
+		return null;
+	}
+
 	$classname = strtolower($classname);
 
 	if (!isset($catalog[$classname])) {
-		// Couches d'abstraction pour les bases de données
-		// Wadb ou Wadb_{driver}
-		if (strncmp($classname, 'wadb', 4) === 0) {
-			$filename = sprintf('%s/includes/sql/%s.php',
-				$rootdir,
-				// Si on a une classe Wadb_{driver}, on retire le préfixe
-				($classname == 'wadb') ? $classname : substr($classname, 5)
-			);
+		if (strpos($classname, '\\')) {
+			// cas spécial pour dblayer qui est localisé dans sql/
+			$classname = str_replace('dblayer\\', 'sql/', $classname);
+			// Chemin includes/<namespace>/<classname>.php
+			$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
 		}
-		// Default
 		else {
+			// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
 			$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
 		}
 	}
@@ -390,7 +396,7 @@ function load_settings($admindata = array())
  */
 function wan_error_handler($errno, $errstr, $errfile, $errline)
 {
-	$simple = (defined('IN_COMMANDLINE') || defined('IN_SUBSCRIBE') || defined('IN_WA_FORM') || defined('IN_CRON'));
+	$simple = (check_cli() || !check_in_admin());
 	$fatal  = ($errno == E_USER_ERROR || $errno == E_RECOVERABLE_ERROR);
 
 	$debug_level = wan_get_debug_level();
@@ -414,7 +420,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	//
 	error_reporting($GLOBALS['default_error_reporting']);
 
-	$error = new WanError(array(
+	$error = new Error(array(
 		'type'    => $errno,
 		'message' => $errstr,
 		'file'    => $errfile,
@@ -467,7 +473,7 @@ function wan_format_error($error)
 	$errline = $error->getLine();
 	$backtrace = $error->getTrace();
 
-	if ($error instanceof WanError) {
+	if ($error instanceof Error) {
 		// Cas spécial. L'exception personnalisée a été créé dans wan_error_handler()
 		// et contient donc l'appel à wan_error_handler() elle-même. On corrige.
 		array_shift($backtrace);
@@ -495,7 +501,7 @@ function wan_format_error($error)
 		// critique pour arriver ici.
 		$message  = $lang['Message']['Critical_error'];
 	}
-	else if ($error instanceof SQLException) {
+	else if ($error instanceof Dblayer\Exception) {
 		if ($db instanceof Wadb && $db->sqlstate != '') {
 			$errno = $db->sqlstate;
 		}
@@ -531,7 +537,7 @@ function wan_format_error($error)
 
 		$message = sprintf(
 			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
-			($error instanceof WanError) ? $label : get_class($error),
+			($error instanceof Error) ? $label : get_class($error),
 			$errstr,
 			$errfile,
 			$errline
@@ -554,8 +560,8 @@ function wan_display_error($error, $simpleHTML = false)
 
 	$message = wan_format_error($error);
 
-	if (defined('IN_COMMANDLINE')) {
-		if (ANSI_TERMINAL) {
+	if (check_cli()) {
+		if (function_exists('posix_isatty') && posix_isatty(STDOUT)) {
 			$message = preg_replace("#<b>#",  "\033[1;31m", $message, 1);
 			$message = preg_replace("#</b>#", "\033[0m", $message, 1);
 
@@ -1145,7 +1151,7 @@ function http_get_contents($URL, &$errstr)
 	// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
 	fwrite($fs, sprintf("GET %s HTTP/1.0\r\n", $path));
 	fwrite($fs, sprintf("Host: %s\r\n", $part['host']));
-	fwrite($fs, sprintf("User-Agent: %s\r\n", WA_SIGNATURE));
+	fwrite($fs, sprintf("User-Agent: %s\r\n", sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION)));
 	fwrite($fs, "Accept: */*\r\n");
 
 	if (extension_loaded('zlib')) {
@@ -1384,13 +1390,13 @@ function wan_sendmail(Email $email)
 {
 	global $nl_config;
 
-	Mailer::$signature = WA_X_MAILER;
+	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
 
 	if ($nl_config['use_smtp']) {
-		$server = ($nl_config['smtp_tls'] == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+		$server = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 		$options = array(
 			'server'   => sprintf($server, $nl_config['smtp_host'], $nl_config['smtp_port']),
-			'starttls' => ($nl_config['smtp_tls'] == WA_SECURITY_STARTTLS),
+			'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
 			'auth' => array(
 				'username'  => $nl_config['smtp_user'],
 				'secretkey' => $nl_config['smtp_pass']
@@ -1419,4 +1425,98 @@ function wan_get_tags()
 	return $other_tags;
 }
 
+/**
+ * Retourne la taille maximale possible des fichiers uploadés par un formulaire
+ * HTML multipart/form-data, ou 0 si l’upload est désactivé sur le serveur.
+ * La fonction tient compte des options PHP 'upload_max_filesize' et
+ * 'post_max_size' pour le calcul de la taille de fichier autorisée.
+ *
+ * @return integer
+ */
+function get_max_filesize()
+{
+	if (!config_status('file_uploads')) {
+		return 0;
+	}
+
+	$literal2integer = function ($size) {
+		if (preg_match('/^([0-9]+)([KMG])$/i', $size, $m)) {
+			switch (strtoupper($m[2])) {
+				case 'K':
+					$size = ($m[1] * 1024);
+					break;
+				case 'M':
+					$size = ($m[1] * 1024 * 1024);
+					break;
+				case 'G': // Since php 5.1.0
+					$size = ($m[1] * 1024 * 1024 * 1024);
+					break;
+			}
+		}
+		else {
+			$size = intval($size);
+		}
+
+		return $size;
+	};
+
+	if (!($filesize = config_value('upload_max_filesize'))) {
+        $filesize = '2M'; // 2 Méga-Octets
+    }
+
+	$upload_max_size = $literal2integer($filesize);
+
+    if ($postsize = config_value('post_max_size')) {
+        $postsize = $literal2integer($postsize);
+        if ($postsize < $upload_max_size) {
+            $upload_max_size = $postsize;
+        }
+    }
+
+    return $upload_max_size;
+}
+
+/**
+ * Indique si PHP supporte les connexion SSL/TLS.
+ *
+ * @return boolean
+ */
+function check_ssl_support()
+{
+	$transports = array();
+	if (function_exists('stream_get_transports')) {
+		$transports = stream_get_transports();
+	}
+
+	return (in_array('ssl', $transports) || in_array('tls', $transports));
+}
+
+/**
+ * Vérifie si on est en ligne de commande.
+ *
+ * @return boolean
+ */
+function check_cli()
+{
+	if (PHP_SAPI != 'cli' && PHP_SAPI != 'cgi-fcgi') {
+		return false;
+	}
+
+	if (PHP_SAPI == 'cgi-fcgi' && !defined('STDIN')) {
+		define('STDIN',  fopen('php://stdin',  'r'));
+		define('STDOUT', fopen('php://stdout', 'w'));
+		define('STDERR', fopen('php://stderr', 'w'));
+	}
+
+	return true;
+}
+
+/**
+ * Indique si on se trouve dans l’administration.
+ *
+ * @return boolean
+ */
+function check_in_admin()
+{
+	return defined(__NAMESPACE__.'\\IN_ADMIN');
 }

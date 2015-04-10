@@ -9,10 +9,6 @@
  * Copiez ou renommez ce fichier en tags.inc.php avant utilisation !
  */
 
-if (!defined('IN_NEWSLETTER')) {
-    exit('<b>No hacking</b>');
-}
-
 $other_tags = array();
 $t = 0;
 

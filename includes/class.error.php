@@ -7,11 +7,13 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter;
+
 /**
  * Wrapper pour les erreurs générées par PHP
  * Utilisé comme simple contenant pour les informations sur une erreur donnée
  */
-class WanError extends Exception
+class Error extends Exception
 {
 	public function __construct($error)
 	{

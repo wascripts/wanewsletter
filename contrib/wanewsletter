@@ -15,23 +15,21 @@
  * notamment est considérée comme étant utilisable en "production".
  */
 
-define('IN_NEWSLETTER',  true);
-define('IN_COMMANDLINE', true);
-define('WA_ROOTDIR',     dirname(__DIR__));
+namespace Wanewsletter;
 
-//
-// PHP CLI ne change pas le répertoire courant pour celui du script
-//
-if (PHP_SAPI != 'cli') {
-	//
-	// PHP en mode CGI ne rend pas disponible directement les variables
-	// $argv et $argc si register_globals est sur Off
-	//
-	$argv = $_SERVER['argv'];
-	$argc = $_SERVER['argc'];
-}
+define('WA_ROOTDIR', dirname(__DIR__));
 
 require WA_ROOTDIR . '/includes/common.inc.php';
+
+// Le script n’est utilisable qu’en ligne de commande.
+if (!check_cli()) {
+	echo "This script must be called only in commande ligne.";
+	exit;
+}
+else if (!isset($argc)) {
+	echo "Please enable PHP option register_argc_argv.";
+	exit(1);
+}
 
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration
@@ -291,11 +289,11 @@ else if ($process_subscribe) {
 	$wan = new Wanewsletter($listdata);
 	$pop = new PopClient();
 	$pop->options(array(
-		'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
+		'starttls' => ($pop_tls == SECURITY_STARTTLS)
 	));
 
 	try {
-		$server = ($listdata['pop_tls'] == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+		$server = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 		$server = sprintf($server, $listdata['pop_host'], $listdata['pop_port']);
 
 		if (!$pop->connect($server, $listdata['pop_user'], $listdata['pop_pass'])) {
@@ -464,7 +462,7 @@ else if ($import_mail) {
 			try {
 				$db->insert(ABONNES_TABLE, $sql_data);
 			}
-			catch (SQLException $e) {
+			catch (Dblayer\Exception $e) {
 				fwrite(STDERR, sprintf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error));
 				$db->rollBack();
 				continue;

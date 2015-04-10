@@ -7,9 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('FUNCTIONS_VALIDATE_INC') ) {
-
-define('FUNCTIONS_VALIDATE_INC', true);
+namespace Wanewsletter;
 
 /**
  * @param string $pseudo
@@ -38,9 +36,7 @@ function validate_pass($passwd)
  */
 function validate_lang($language)
 {
-	return (bool) (preg_match('/^[\w_-]+$/', $language) &&
+	return (preg_match('/^[\w_-]+$/', $language) &&
 		file_exists(WA_ROOTDIR . '/language/lang_' . $language . '.php')
 	);
-}
-
 }

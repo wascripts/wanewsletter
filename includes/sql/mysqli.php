@@ -7,7 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-class Wadb_mysqli extends Wadb
+namespace Wanewsletter\Dblayer;
+
+class Mysqli extends Wadb
 {
 	/**
 	 * Type de base de données
@@ -54,7 +56,7 @@ class Wadb_mysqli extends Wadb
 			$this->error = mysqli_connect_error();
 			$this->link  = null;
 
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 		else {
 			$this->serverVersion = mysqli_get_server_info($this->link);
@@ -93,7 +95,7 @@ class Wadb_mysqli extends Wadb
 			$this->lastQuery = $query;
 			$this->rollBack();
 
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;
@@ -101,7 +103,7 @@ class Wadb_mysqli extends Wadb
 			$this->lastQuery = '';
 
 			if (!is_bool($result)) {// on a réceptionné une ressource ou un objet
-				$result = new WadbResult_mysqli($result);
+				$result = new MysqliResult($result);
 			}
 		}
 
@@ -182,11 +184,11 @@ class Wadb_mysqli extends Wadb
 
 	public function initBackup()
 	{
-		return new WadbBackup_mysqli($this);
+		return new MysqliBackup($this);
 	}
 }
 
-class WadbResult_mysqli extends WadbResult
+class MysqliResult extends WadbResult
 {
 	public function fetch($mode = null)
 	{
@@ -220,7 +222,7 @@ class WadbResult_mysqli extends WadbResult
 	}
 }
 
-class WadbBackup_mysqli extends WadbBackup
+class MysqliBackup extends WadbBackup
 {
 	public function header($toolname = '')
 	{

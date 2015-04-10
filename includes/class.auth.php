@@ -7,6 +7,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter;
+
 /**
  * Class Auth
  *
@@ -41,7 +43,8 @@ class Auth
 	 */
 	public function isLoggedIn()
 	{
-		return (!empty($_SESSION['is_logged_in']) && defined('IN_ADMIN') == $_SESSION['is_admin_session']);
+		return (!empty($_SESSION['is_logged_in']) &&
+			check_in_admin() == $_SESSION['is_admin_session']);
 	}
 
 	/**
@@ -152,7 +155,7 @@ class Auth
 	 */
 	public function getUserTableInfos()
 	{
-		if (defined('IN_ADMIN')) {
+		if (check_in_admin()) {
 			$tablename = ADMIN_TABLE;
 			$columns   = array();
 

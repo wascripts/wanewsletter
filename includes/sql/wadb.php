@@ -7,10 +7,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter\Dblayer;
+
 /**
  * Exceptions émises par les classes d'accès aux bases de données
  */
-class SQLException extends Exception { }
+class Exception extends \Wanewsletter\Exception { }
 
 abstract class Wadb
 {
@@ -135,7 +137,7 @@ abstract class Wadb
 	 * @param array $infos   Informations de connexion
 	 * @param array $options Options de connexion/utilisation
 	 *
-	 * @throws SQLException En cas d'échec de la connexion
+	 * @throws Exception En cas d'échec de la connexion
 	 */
 	abstract public function connect($infos = null, $options = null);
 
@@ -163,8 +165,7 @@ abstract class Wadb
 	 *
 	 * @param string $query
 	 *
-	 * @throws SQLException En cas d'erreur retournée par la base de données
-	 *
+	 * @throws Exception En cas d'erreur retournée par la base de données
 	 * @return boolean|WadbResult
 	 */
 	abstract public function query($query);

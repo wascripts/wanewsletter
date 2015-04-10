@@ -7,7 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-define('IN_SUBSCRIBE', true);
+namespace Wanewsletter;
+
+$return_message = true;
 
 require './newsletter.php';
 

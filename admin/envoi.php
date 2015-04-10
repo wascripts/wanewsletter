@@ -7,18 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-define('IN_NEWSLETTER', true);
-
-require './pagestart.php';
-
-if (!$_SESSION['liste']) {
-	$output->build_listbox(Auth::VIEW);
-}
-
-if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
-	http_response_code(401);
-	$output->displayMessage('Not_auth_view');
-}
+namespace Wanewsletter;
 
 //
 // Vous pouvez, grâce à cette constante, désactiver la vérification de
@@ -32,7 +21,18 @@ if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 // (1) Au moins en France, en application de l'article 22 de la loi n° 2004-575
 // du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN).
 //
-define('DISABLE_CHECK_LINKS', false);
+const DISABLE_CHECK_LINKS = false;
+
+require './pagestart.php';
+
+if (!$_SESSION['liste']) {
+	$output->build_listbox(Auth::VIEW);
+}
+
+if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
+	http_response_code(401);
+	$output->displayMessage('Not_auth_view');
+}
 
 //
 // End of Configuration
@@ -902,6 +902,8 @@ $subject   = wan_htmlspecialchars($logdata['log_subject']);
 $body_text = wan_htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
 $body_html = wan_htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
 
+$max_filesize = get_max_filesize();
+
 $output->addLink('subsection', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('subsection', './envoi.php?mode=progress', $lang['List_send']);
 $output->addScript($nl_config['path'] . 'templates/admin/editor.js');
@@ -946,7 +948,7 @@ $output->assign_vars(array(
 	'CHECKED_CC_ADMIN_ON'     => $output->getBoolAttr('checked', $listdata['cc_admin']),
 	'CHECKED_CC_ADMIN_OFF'    => $output->getBoolAttr('checked', !$listdata['cc_admin']),
 
-	'S_ENCTYPE'               => (FILE_UPLOADS_ON) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
+	'S_ENCTYPE'               => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
 	'S_DELETE_BUTTON_DISABLED' => $output->getBoolAttr('disabled', ($logdata['log_id'] == 0)),
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
 ));
@@ -987,7 +989,7 @@ if ($auth->check_auth(Auth::SEND, $listdata['liste_id'])) {
 
 if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 	$rowspan = 2;
-	if (FILE_UPLOADS_ON) {
+	if ($max_filesize) {
 		$rowspan++;
 	}
 
@@ -1007,11 +1009,11 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 	//
 	// Si l'upload est autorisé, on affiche le champs type file
 	//
-	if (FILE_UPLOADS_ON) {
+	if ($max_filesize) {
 		$output->assign_block_vars('joined_files.upload_input', array(
 			'L_BROWSE_BUTTON' => $lang['Button']['browse'],
-			'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
-			'MAX_FILE_SIZE'   => MAX_FILE_SIZE
+			'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
+			'MAX_FILE_SIZE'   => $max_filesize
 		));
 	}
 

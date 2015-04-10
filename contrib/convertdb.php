@@ -15,6 +15,8 @@
  * le fichier de schéma des tables correspondant dans ~/includes/sql/schemas
  */
 
+namespace Wanewsletter;
+
 //
 // Ceci est un fichier de test ou d'aide lors du développement.
 // Commentez les lignes suivantes uniquement si vous êtes sûr de ce que vous faites !
@@ -39,18 +41,13 @@ $prefixe_to   = 'wa_';
 // End Of Config
 //
 
-define('IN_NEWSLETTER', true);
+require WA_ROOTDIR . '/includes/common.inc.php';
+require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
-if (PHP_SAPI != 'cli') {
+if (!check_cli()) {
 	set_time_limit(0);
 	header('Content-Type: text/plain; charset=UTF-8');
 }
-else {
-	define('IN_COMMANDLINE', true);
-}
-
-require WA_ROOTDIR . '/includes/common.inc.php';
-require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
 //
 // Connect to DB
@@ -76,7 +73,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 
 // Create table
 $sql_create = file_get_contents(sprintf('%s/%s_tables.sql', $schemas_dir, $db_to::ENGINE));
-$sql_create = parseSQL($sql_create, $prefixe_to);
+$sql_create = Dblayer\parseSQL($sql_create, $prefixe_to);
 
 foreach ($sql_create as $query) {
 	$db_to->query($query);

@@ -7,6 +7,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter;
+
 class Output extends Template
 {
 	/**
@@ -43,6 +45,13 @@ class Output extends Template
 	 * @var array
 	 */
 	private $messageList   = array();
+
+	/**
+	 * Indique si la méthode page_header() a déjà été appelée.
+	 *
+	 * @var boolean
+	 */
+	private $header_displayed = false;
 
 	/**
 	 * @param string $template_root
@@ -254,7 +263,7 @@ class Output extends Template
 			$simple_header = true;
 		}
 
-		define('HEADER_INC', true);
+		$this->header_displayed = true;
 
 		$this->send_headers();
 
@@ -262,7 +271,7 @@ class Output extends Template
 			'header' => ($simple_header) ? 'simple_header.tpl' :'header.tpl'
 		));
 
-		if (defined('IN_ADMIN')) {
+		if (check_in_admin()) {
 			$this->addLink('home', './',              				$lang['Title']['accueil']);
 			$this->addLink('section', './config.php',               $lang['Module']['config']);
 			$this->addLink('section', './envoi.php',                $lang['Title']['send']);
@@ -323,7 +332,7 @@ class Output extends Template
 
 		// Si l'utilisateur est connecté, affichage du menu
 		if (!$simple_header) {
-			if (defined('IN_ADMIN')) {
+			if (check_in_admin()) {
 				$l_logout = sprintf(
 					$lang['Module']['logout_2'],
 					wan_htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
@@ -392,8 +401,8 @@ class Output extends Template
 
 		$version = WANEWSLETTER_VERSION;
 
-		if (wan_get_debug_level() > DEBUG_LEVEL_QUIET && $db instanceof Wadb) {
-			$version  .= sprintf(' (%s)', substr(get_class($db), 5));
+		if (wan_get_debug_level() > DEBUG_LEVEL_QUIET && $db instanceof Dblayer\Wadb) {
+			$version  .= sprintf(' (%s)', $db::ENGINE);
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);
 
@@ -542,7 +551,7 @@ BASIC;
 			}
 		}
 
-		if (!defined('HEADER_INC')) {
+		if (!$this->header_displayed) {
 			$this->page_header();
 		}
 

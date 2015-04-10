@@ -7,9 +7,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-use Patchwork\Utf8 as u;
+namespace Wanewsletter;
 
-define('IN_NEWSLETTER', true);
+use Patchwork\Utf8 as u;
+use ZipArchive;
 
 require './pagestart.php';
 
@@ -666,7 +667,7 @@ switch ($mode) {
 					try {
 						$db->insert(ABONNES_TABLE, $sql_data);
 					}
-					catch (SQLException $e) {
+					catch (Dblayer\Exception $e) {
 						$report .= sprintf('%s : SQL error (#%d: %s)%s', $email, $db->errno, $db->error, WA_EOL);
 						$db->rollBack();
 						continue;
@@ -712,6 +713,8 @@ switch ($mode) {
 			$output->displayMessage();
 		}
 
+		$max_filesize = get_max_filesize();
+
 		$output->set_filenames(array(
 			'tool_body' => 'import_body.tpl'
 		));
@@ -729,7 +732,7 @@ switch ($mode) {
 			'L_RESET_BUTTON'   => $lang['Button']['reset'],
 
 			'S_HIDDEN_FIELDS'  => $output->getHiddenFields(),
-			'S_ENCTYPE'        => (FILE_UPLOADS_ON) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
+			'S_ENCTYPE'        => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
 		));
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
@@ -741,7 +744,7 @@ switch ($mode) {
 			));
 		}
 
-		if (FILE_UPLOADS_ON) {
+		if ($max_filesize) {
 			//
 			// L'upload est disponible sur le serveur
 			// Affichage du champ file pour importation
@@ -749,8 +752,8 @@ switch ($mode) {
 			$output->assign_block_vars('upload_file', array(
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 				'L_FILE_UPLOAD'   => $lang['File_upload'],
-				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
-				'MAX_FILE_SIZE'   => MAX_FILE_SIZE
+				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
+				'MAX_FILE_SIZE'   => $max_filesize
 			));
 		}
 
@@ -929,8 +932,7 @@ switch ($mode) {
 			$output->displayMessage('Database_unsupported');
 		}
 
-		$backup->eol = (WA_USER_OS == 'win') ? "\r\n" : "\n";
-		$tables_ary  = $backup->get_tables();
+		$tables_ary = $backup->get_tables();
 
 		foreach ($tables_ary as $tablename => $tabletype) {
 			if (!isset($_POST['submit'])) {
@@ -949,7 +951,7 @@ switch ($mode) {
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql
 			//
-			$contents  = $backup->header(WA_SIGNATURE);
+			$contents  = $backup->header(sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION));
 			$contents .= $backup->get_other_queries($drop_option);
 
 			fake_header(false);
@@ -1133,7 +1135,7 @@ switch ($mode) {
 				$output->displayMessage();
 			}
 
-			$queries = parseSQL($data);
+			$queries = Dblayer\parseSQL($data);
 
 			$db->beginTransaction();
 
@@ -1149,6 +1151,8 @@ switch ($mode) {
 			$output->displayMessage('Success_restore');
 		}
 
+		$max_filesize = get_max_filesize();
+
 		$output->set_filenames(array(
 			'tool_body' => 'restore_body.tpl'
 		));
@@ -1161,10 +1165,10 @@ switch ($mode) {
 			'L_RESET_BUTTON'    => $lang['Button']['reset'],
 
 			'S_HIDDEN_FIELDS'   => $output->getHiddenFields(),
-			'S_ENCTYPE'         => (FILE_UPLOADS_ON) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
+			'S_ENCTYPE'         => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
 		));
 
-		if (FILE_UPLOADS_ON) {
+		if ($max_filesize) {
 			//
 			// L'upload est disponible sur le serveur
 			// Affichage du champ file pour importation
@@ -1172,8 +1176,8 @@ switch ($mode) {
 			$output->assign_block_vars('upload_file', array(
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 				'L_FILE_UPLOAD'   => $lang['File_upload_restore'],
-				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize(MAX_FILE_SIZE)),
-				'MAX_FILE_SIZE'   => MAX_FILE_SIZE
+				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
+				'MAX_FILE_SIZE'   => $max_filesize
 			));
 		}
 
@@ -1206,7 +1210,6 @@ switch ($mode) {
 			$code_html .= "</form>";
 
 			$code_php  = '<' . "?php\n";
-			$code_php .= "define('IN_WA_FORM', true);\n";
 			$code_php .= sprintf("require '%s/newsletter.php';\n", WA_ROOTDIR);
 			$code_php .= '?' . ">\n";
 

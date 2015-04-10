@@ -7,7 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-define('IN_NEWSLETTER', true);
+namespace Wanewsletter;
 
 require './pagestart.php';
 
@@ -145,17 +145,17 @@ if (isset($_POST['submit'])) {
 		$new_config['smtp_pass'] = $old_config['smtp_pass'];
 	}
 
-	if (!WA_SSL_SUPPORT) {
-		$new_config['smtp_tls'] = WA_SECURITY_NONE;
+	if (!check_ssl_support()) {
+		$new_config['smtp_tls'] = SECURITY_NONE;
 	}
 
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
 		$smtp = new \Wamailer\Transport\SmtpClient();
 		$smtp->options(array(
-			'starttls' => ($new_config['smtp_tls'] == WA_SECURITY_STARTTLS)
+			'starttls' => ($new_config['smtp_tls'] == SECURITY_STARTTLS)
 		));
 
-		$server = ($new_config['smtp_tls'] == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+		$server = ($new_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 		$server = sprintf($server, $new_config['smtp_host'], $new_config['smtp_port']);
 
 		try {
@@ -166,7 +166,7 @@ if (isset($_POST['submit'])) {
 				));
 			}
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			$error = true;
 			$msg_error[] = sprintf(nl2br($lang['Message']['bad_smtp_param']),
 				wan_htmlspecialchars($e->getMessage())
@@ -346,12 +346,12 @@ if (extension_loaded('ftp')) {
 	));
 }
 
-if (WA_SSL_SUPPORT) {
+if (check_ssl_support()) {
 	$output->assign_block_vars('ssl_support', array(
 		'L_SECURITY'        => $lang['Connection_security'],
 		'L_NONE'            => $lang['None'],
-		'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $new_config['smtp_tls'] == WA_SECURITY_STARTTLS),
-		'SSL_TLS_SELECTED'  => $output->getBoolAttr('selected', $new_config['smtp_tls'] == WA_SECURITY_FULL_TLS)
+		'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $new_config['smtp_tls'] == SECURITY_STARTTLS),
+		'SSL_TLS_SELECTED'  => $output->getBoolAttr('selected', $new_config['smtp_tls'] == SECURITY_FULL_TLS)
 	));
 }
 

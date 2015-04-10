@@ -7,10 +7,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('COMPAT_PHP_INC')) {
-
-define('COMPAT_PHP_INC', true);
-
 // PHP 5.4.0
 if (!defined('ENT_HTML401')) {
 	define('ENT_HTML401', 0);
@@ -185,5 +181,3 @@ if (!function_exists('hash_equals')) {
 		return (0 === $result);
 	}
 }
-
-}// end if !defined

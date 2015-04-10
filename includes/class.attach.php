@@ -7,6 +7,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter;
+
 /**
  * Class Attach
  *
@@ -733,11 +735,24 @@ class Attach
 		// Si on a à faire à Opera, on utilise application/octetstream car toute autre type peut poser
 		// d'éventuels problèmes.
 		//
+
+		// TODO : Obsolète ?
+		$user_agent = server_info('HTTP_USER_AGENT');
+		if (stristr($user_agent, 'opera')) {
+			$user_agent = 'opera';
+		}
+		else if (stristr($user_agent, 'msie')) {
+			$user_agent = 'msie';
+		}
+		else {
+			$user_agent = null;
+		}
+
 		if (empty($mime_type) ||
 			preg_match('#application/octet-?stream#i', $mime_type) ||
-			WA_USER_BROWSER == 'opera'
+			$user_agent == 'opera'
 		) {
-			if (WA_USER_BROWSER == 'msie' || WA_USER_BROWSER == 'opera') {
+			if ($user_agent == 'msie' || $user_agent == 'opera') {
 				$mime_type = 'application/octetstream';
 			}
 			else {

@@ -7,9 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('_INC_WADB_INIT')) {
-
-define('_INC_WADB_INIT', true);
+namespace Wanewsletter;
 
 //
 // Tables du script
@@ -193,7 +191,7 @@ function parseDSN($dsn)
 			if (!extension_loaded('pdo') || !extension_loaded('pdo_sqlite')) {
 				trigger_error("No SQLite3 or PDO/SQLite extension loaded !", E_USER_ERROR);
 			}
-			$infos['driver'] = 'sqlite_pdo';
+			$infos['driver'] = 'sqlitepdo';
 		}
 
 		if (is_readable($infos['path']) && filesize($infos['path']) > 0) {
@@ -215,7 +213,7 @@ function parseDSN($dsn)
  *
  * @param string $dsn
  *
- * @return boolean|Wadb
+ * @return boolean|Dblayer\Wadb
  */
 function WaDatabase($dsn)
 {
@@ -224,7 +222,7 @@ function WaDatabase($dsn)
 	}
 
 	list($infos, $options) = $tmp;
-	$dbclass = 'Wadb_' . $infos['driver'];
+	$dbclass = __NAMESPACE__ . '\\Dblayer\\' . ucfirst($infos['driver']);
 
 	$infos['username'] = (isset($infos['user'])) ? $infos['user'] : null;
 	$infos['passwd']   = (isset($infos['pass'])) ? $infos['pass'] : null;
@@ -344,6 +342,4 @@ function wa_sqlite_recreate_table($tablename, $restore_data = true)
 	$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
 
 	exec_queries($sql_update);
-}
-
 }

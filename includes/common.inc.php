@@ -7,7 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('IN_NEWSLETTER')) {
+namespace Wanewsletter;
+
+if (__FILE__ == $_SERVER['SCRIPT_FILENAME']) {
 	exit('<b>No hacking</b>');
 }
 
@@ -79,19 +81,21 @@ require WA_ROOTDIR . '/vendor/autoload.php';
 //
 // Configuration des gestionnaires d'erreurs et d'exceptions
 //
-set_error_handler('wan_error_handler');
-set_exception_handler('wan_exception_handler');
+set_error_handler(__NAMESPACE__.'\\wan_error_handler');
+set_exception_handler(__NAMESPACE__.'\\wan_exception_handler');
 
 //
 // Chargement automatique des classes
 //
-spl_autoload_register('wan_autoloader');
+spl_autoload_register(__NAMESPACE__.'\\wan_autoloader');
 
 //
 // Pas installé ?
 //
-if (!defined('IN_INSTALL') && !defined('NL_INSTALLED')) {
-	if (!defined('IN_COMMANDLINE')) {
+$current_script = str_replace(dirname(__DIR__).'/', '', $_SERVER['SCRIPT_FILENAME']);
+
+if ($current_script != 'install.php' && !defined('NL_INSTALLED')) {
+	if (!check_cli()) {
 		$install_path = (file_exists('install.php')) ? 'install.php' : '../install.php';
 		http_redirect($install_path);
 	}
@@ -112,21 +116,10 @@ if (!defined('IN_INSTALL') && !defined('NL_INSTALLED')) {
 //
 load_settings();
 
-if (defined('IN_COMMANDLINE')) {
-	//
-	// Compatibilité avec PHP en CGI
-	//
-	if (PHP_SAPI != 'cli') {
-		define('STDIN',  fopen('php://stdin', 'r'));
-		define('STDOUT', fopen('php://stdout', 'w'));
-		define('STDERR', fopen('php://stderr', 'w'));
-	}
-
-	define('ANSI_TERMINAL', function_exists('posix_isatty') && posix_isatty(STDOUT));
-}
-else {
-	$output = new Output(sprintf(
-		'%s/templates/%s', WA_ROOTDIR, (defined('IN_ADMIN') ? 'admin/' : '')
+if (!check_cli()) {
+	$output = new Output(sprintf('%s/templates/%s',
+		WA_ROOTDIR,
+		(check_in_admin() ? 'admin/' : '')
 	));
 }
 
@@ -144,6 +137,7 @@ strip_magic_quotes_gpc($_REQUEST);
 
 // Compatibilité avec wanewsletter < 2.3-beta2
 if (empty($dsn)) {
+	$infos = array();
 	$infos['engine'] = (!empty($dbtype)) ? $dbtype : 'mysql';
 	$infos['host']   = $dbhost;
 	$infos['user']   = $dbuser;
@@ -161,9 +155,10 @@ if (empty($dsn)) {
 	}
 
 	$dsn = createDSN($infos);
+	unset($infos);
 
 	define('UPDATE_CONFIG_FILE', true);
-
-	// Pas la peine de polluer le scope global
-	unset($infos, $dbtype, $dbhost, $dbuser, $dbpassword, $dbname);
 }
+
+// Pas la peine de polluer le scope global
+unset($current_script, $dbtype, $dbhost, $dbuser, $dbpassword, $dbname);

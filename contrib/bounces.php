@@ -21,6 +21,8 @@
  * d'éventuels actes malveillants.
  */
 
+namespace Wanewsletter;
+
 //
 // Ceci est un fichier de test ou d'aide lors du développement.
 // Commentez les lignes suivantes uniquement si vous êtes sùr de ce que vous faites !
@@ -41,6 +43,10 @@ $pop_opts   = array(
 //
 // Fin de la configuration
 //
+if (!isset($argc)) {
+	echo "Please enable PHP option register_argc_argv.";
+	exit(1);
+}
 
 function process_bounce($deliveryReport)
 {
@@ -84,15 +90,14 @@ function process_bounce($deliveryReport)
 	}
 }
 
-define('IN_NEWSLETTER', true);
-define('WA_ROOTDIR',    dirname(__DIR__));
+define('WA_ROOTDIR', dirname(__DIR__));
 
 require WA_ROOTDIR . '/includes/common.inc.php';
 
 $db = WaDatabase($dsn);
 
 $process = false;
-foreach ($_SERVER['argv'] as $arg) {
+foreach ($argv as $arg) {
 	if ($arg == '--process' || $arg == 'process=true') {
 		$process = true;
 	}
@@ -151,7 +156,7 @@ if ($process) {
 			$headers = $pop->contents[$mail_id]['headers'];
 			$message = $pop->contents[$mail_id]['message'];
 
-			$decode = new Mail_mimeDecode($headers . "\r\n\r\n" . $message, "\r\n");
+			$decode = new \Mail_mimeDecode($headers . "\r\n\r\n" . $message, "\r\n");
 			$email  = $decode->decode(array('include_bodies' => true, 'decode_bodies' => true));
 
 			if ($email->ctype_primary == 'multipart' &&

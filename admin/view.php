@@ -7,10 +7,11 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-define('IN_NEWSLETTER', true);
+namespace Wanewsletter;
 
 use Wamailer\Mailer;
 use Wamailer\Mime;
+use ZipArchive;
 
 require './pagestart.php';
 
@@ -892,7 +893,7 @@ else if ($mode == 'liste') {
 			'auto_purge'        => true,
 			'purge_freq'        => 7,
 			'pop_port'          => 110,
-			'pop_tls'           => WA_SECURITY_NONE,
+			'pop_tls'           => SECURITY_NONE,
 			'liste_public'      => true,
 			'confirm_subscribe' => CONFIRM_ALWAYS,
 		);
@@ -910,8 +911,8 @@ else if ($mode == 'liste') {
 			}
 		}
 
-		if (!WA_SSL_SUPPORT) {
-			$pop_tls = WA_SECURITY_NONE;
+		if (!check_ssl_support()) {
+			$pop_tls = SECURITY_NONE;
 		}
 
 		if (isset($_POST['submit'])) {
@@ -950,11 +951,11 @@ else if ($mode == 'liste') {
 			if ($use_cron && function_exists('stream_socket_client')) {
 				$pop = new PopClient();
 				$pop->options(array(
-					'starttls' => ($pop_tls == WA_SECURITY_STARTTLS)
+					'starttls' => ($pop_tls == SECURITY_STARTTLS)
 				));
 
 				try {
-					$server = ($pop_tls == WA_SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+					$server = ($pop_tls == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 					$server = sprintf($server, $pop_host, $pop_port);
 
 					if (!$pop->connect($server, $pop_user, $pop_pass)) {
@@ -1090,12 +1091,12 @@ else if ($mode == 'liste') {
 			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
 		));
 
-		if (WA_SSL_SUPPORT) {
+		if (check_ssl_support()) {
 			$output->assign_block_vars('ssl_support', array(
 				'L_SECURITY'        => $lang['Connection_security'],
 				'L_NONE'            => $lang['None'],
-				'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $pop_tls == WA_SECURITY_STARTTLS),
-				'SSL_TLS_SELECTED'  => $output->getBoolAttr('selected', $pop_tls == WA_SECURITY_FULL_TLS)
+				'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $pop_tls == SECURITY_STARTTLS),
+				'SSL_TLS_SELECTED'  => $output->getBoolAttr('selected', $pop_tls == SECURITY_FULL_TLS)
 			));
 		}
 

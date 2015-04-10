@@ -9,7 +9,7 @@
 
 namespace Wanewsletter;
 
-const IN_LOGIN = true;
+class Exception extends \Exception
+{
 
-require './pagestart.php';
-require '../includes/login.inc.php';
+}

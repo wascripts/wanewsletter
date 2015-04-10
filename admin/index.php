@@ -7,7 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-define('IN_NEWSLETTER', true);
+namespace Wanewsletter;
 
 require './pagestart.php';
 
@@ -121,7 +121,7 @@ if ($db::ENGINE == 'mysql') {
 			}
 		}
 	}
-	catch (SQLException $e) {
+	catch (Dblayer\Exception $e) {
 		wanlog($e);
 		$dbsize = $lang['Not_available'];
 	}
@@ -136,7 +136,7 @@ else if ($db::ENGINE == 'postgres') {
 		$row    = $result->fetch();
 		$dbsize = $row[0];
 	}
-	catch (SQLException $e) {
+	catch (Dblayer\Exception $e) {
 		wanlog($e);
 		$dbsize = $lang['Not_available'];
 	}

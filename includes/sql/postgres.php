@@ -7,7 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-class Wadb_postgres extends Wadb
+namespace Wanewsletter\Dblayer;
+
+class Postgres extends Wadb
 {
 	/**
 	 * Type de base de données
@@ -82,7 +84,7 @@ class Wadb_postgres extends Wadb
 			$this->error = $tmp['message'];
 			$this->link  = null;
 
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 		else {
 			$tmp = pg_version($this->link);
@@ -128,7 +130,7 @@ class Wadb_postgres extends Wadb
 					$result = true;
 				}
 				else {
-					$result = new WadbResult_postgres($result);
+					$result = new PostgresResult($result);
 				}
 
 				return $result;
@@ -143,7 +145,7 @@ class Wadb_postgres extends Wadb
 			$this->error = 'Unknown error with database';
 		}
 
-		throw new SQLException($this->error, $this->errno);
+		throw new Exception($this->error, $this->errno);
 	}
 
 	public function quote($name)
@@ -252,11 +254,11 @@ class Wadb_postgres extends Wadb
 
 	public function initBackup()
 	{
-		return new WadbBackup_postgres($this);
+		return new PostgresBackup($this);
 	}
 }
 
-class WadbResult_postgres extends WadbResult
+class PostgresResult extends WadbResult
 {
 	public function fetch($mode = null)
 	{
@@ -293,7 +295,7 @@ class WadbResult_postgres extends WadbResult
 /**
  * Certaines parties sont basées sur phpPgAdmin 2.4.2
  */
-class WadbBackup_postgres extends WadbBackup
+class PostgresBackup extends WadbBackup
 {
 	public function header($toolname = '')
 	{

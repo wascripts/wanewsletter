@@ -15,6 +15,8 @@
  * @link http://www.commentcamarche.net/internet/smtp.php3
  */
 
+namespace Wanewsletter;
+
 class PopClient {
 
 	/**

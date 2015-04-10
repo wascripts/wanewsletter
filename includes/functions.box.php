@@ -7,9 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('FUNCTIONS_BOX_INC')) {
-
-define('FUNCTIONS_BOX_INC', true);
+namespace Wanewsletter;
 
 /**
  * Construction de la liste déroulante des langues disponibles pour le script
@@ -84,6 +82,4 @@ function format_box($select_name, $default_format = 0, $option_submit = false, $
 	$format_box .= '</select>';
 
 	return $format_box;
-}
-
 }

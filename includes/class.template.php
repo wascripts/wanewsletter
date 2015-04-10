@@ -18,6 +18,8 @@
  *
  ***************************************************************************/
 
+namespace Wanewsletter;
+
 /**
  * Template class. By Nathan Codding of the phpBB group.
  * The interface was originally inspired by PHPLib templates,
@@ -52,7 +54,7 @@ class Template {
      * Constructor. Simply sets the root dir.
      *
      */
-    function Template($root = "templates/")
+    function __construct($root = "templates/")
     {
         $this->set_rootdir($root);
     }

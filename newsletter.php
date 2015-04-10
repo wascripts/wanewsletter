@@ -7,11 +7,11 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('IN_WA_FORM') && !defined('IN_SUBSCRIBE')) {
+namespace Wanewsletter;
+
+if (__FILE__ == $_SERVER['SCRIPT_FILENAME']) {
 	exit('<b>No hacking</b>');
 }
-
-define('IN_NEWSLETTER', true);
 
 if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', __DIR__);
@@ -88,7 +88,7 @@ if (!empty($action) || !empty($code)) {
 	}
 }
 
-if (defined('IN_WA_FORM')) {
+if (empty($return_message)) {
 	//
 	// On réactive le gestionnaire d'erreur précédent
 	//

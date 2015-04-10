@@ -7,7 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-class Wadb_sqlite3 extends Wadb
+namespace Wanewsletter\Dblayer;
+
+class Sqlite3 extends Wadb
 {
 	/**
 	 * Type de base de données
@@ -47,7 +49,7 @@ class Wadb_sqlite3 extends Wadb
 		}
 
 		try {
-			$this->link = new SQLite3($sqlite_db,
+			$this->link = new \SQLite3($sqlite_db,
 				SQLITE3_OPEN_READWRITE|SQLITE3_OPEN_CREATE,
 				(!empty($options['encryption_key'])) ? $options['encryption_key'] : null
 			);
@@ -57,13 +59,13 @@ class Wadb_sqlite3 extends Wadb
 			$this->link->exec('PRAGMA short_column_names = 1');
 			$this->link->exec('PRAGMA case_sensitive_like = 0');
 
-			$tmp = SQLite3::version();
+			$tmp = \SQLite3::version();
 			$this->libVersion = $tmp['versionString'];
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			$this->errno = $e->getCode();
 			$this->error = $e->getMessage();
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 	}
 
@@ -101,7 +103,7 @@ class Wadb_sqlite3 extends Wadb
 			$this->result = null;
 			$this->rollBack();
 
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;
@@ -113,7 +115,7 @@ class Wadb_sqlite3 extends Wadb
 				$result = true;
 			}
 			else {
-				$result = new WadbResult_sqlite3($result);
+				$result = new Sqlite3Result($result);
 			}
 		}
 
@@ -211,7 +213,7 @@ class Wadb_sqlite3 extends Wadb
 			try {
 				$this->rollBack();
 			}
-			catch (Exception $e) {}
+			catch (\Exception $e) {}
 
 			$result = $this->link->close();
 			$this->link = null;
@@ -225,7 +227,7 @@ class Wadb_sqlite3 extends Wadb
 
 	public function initBackup()
 	{
-		return new WadbBackup_sqlite3($this);
+		return new Sqlite3Backup($this);
 	}
 
 	/**
@@ -246,7 +248,7 @@ class Wadb_sqlite3 extends Wadb
 	}
 }
 
-class WadbResult_sqlite3 extends WadbResult
+class Sqlite3Result extends WadbResult
 {
 	public function fetch($mode = null)
 	{
@@ -279,7 +281,7 @@ class WadbResult_sqlite3 extends WadbResult
 	}
 }
 
-class WadbBackup_sqlite3 extends WadbBackup
+class Sqlite3Backup extends WadbBackup
 {
 	public function header($toolname = '')
 	{

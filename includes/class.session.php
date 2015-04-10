@@ -7,6 +7,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter;
+
 /**
  * Gestion des connexions à l'administration
  */
@@ -34,19 +36,20 @@ class Session
 	protected $maxlifetime = 3600;
 
 	/**
-	 * Configuration du système de sessions PHP et démarrage d'une session
+	 * Configuration du système de sessions PHP et démarrage d’une session
 	 *
 	 * @param array $config Configuration de la session
 	 */
 	public function __construct($config)
 	{
+		$this->maxlifetime = $config['session_length'];
+
 		$this->cfg_cookie['name']     = 'wanewsletter';
 		$this->cfg_cookie['path']     = str_replace('//', '/', dirname($_SERVER['REQUEST_URI']).'/');
 		$this->cfg_cookie['lifetime'] = 0;
 		$this->cfg_cookie['domain']   = null;
 		$this->cfg_cookie['secure']   = wan_ssl_connection();
 		$this->cfg_cookie['httponly'] = true;
-		$this->maxlifetime = $config['session_length'];
 
 		foreach ($this->cfg_cookie as $key => $value) {
 			if (isset($config['cookie_'.$key])) {
@@ -89,7 +92,7 @@ class Session
 	 */
 	public function reset()
 	{
-		$_SESSION['is_admin_session'] = defined('IN_ADMIN');
+		$_SESSION['is_admin_session'] = check_in_admin();
 		$_SESSION['is_logged_in'] = false;
 		$_SESSION['uid']   = null;
 		$this->new_session = true;

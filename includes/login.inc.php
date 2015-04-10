@@ -7,7 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('IN_NEWSLETTER')) {
+namespace Wanewsletter;
+
+if (__FILE__ == $_SERVER['SCRIPT_FILENAME']) {
 	exit('<b>No hacking</b>');
 }
 
@@ -15,7 +17,7 @@ $output->set_rootdir(sprintf('%s/templates/', WA_ROOTDIR));
 
 $mode      = filter_input(INPUT_GET, 'mode');
 $reset_key = filter_input(INPUT_GET, 'k');
-$redirect  = (defined('IN_ADMIN')) ? 'index.php' : 'profil_cp.php';
+$redirect  = (check_in_admin()) ? 'index.php' : 'profil_cp.php';
 $redirect  = (!empty($_REQUEST['redirect'])) ? trim($_REQUEST['redirect']) : $redirect;
 
 //
@@ -139,7 +141,7 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 				try {
 					wan_sendmail($email);
 				}
-				catch (Exception $e) {
+				catch (\Exception $e) {
 					trigger_error(sprintf($lang['Message']['Failed_sending2'],
 						wan_htmlspecialchars($e->getMessage())
 					), E_USER_ERROR);
@@ -184,7 +186,7 @@ else if (isset($_POST['submit']) && !$auth->isLoggedIn()) {
 	if ($userdata = $auth->checkCredentials($login, $passwd)) {
 		session_regenerate_id();
 		$_SESSION['is_logged_in'] = true;
-		$_SESSION['is_admin_session'] = defined('IN_ADMIN');
+		$_SESSION['is_admin_session'] = check_in_admin();
 		$_SESSION['uid'] = intval($userdata['uid']);
 	}
 	else {

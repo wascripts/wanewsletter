@@ -7,9 +7,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-define('IN_NEWSLETTER', true);
-define('IN_ADMIN', true);
-define('IN_UPGRADE', true);
+namespace Wanewsletter;
+
+const IN_ADMIN = true;
 
 require '../includes/common.inc.php';
 
@@ -127,8 +127,8 @@ if (isset($_POST['start'])) {
 
 		require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
-		$sql_create = parseSQL(file_get_contents($sql_create), $prefixe);
-		$sql_data   = parseSQL(file_get_contents($sql_data), $prefixe);
+		$sql_create = Dblayer\parseSQL(file_get_contents($sql_create), $prefixe);
+		$sql_data   = Dblayer\parseSQL(file_get_contents($sql_data), $prefixe);
 
 		$sql_create_by_table = $sql_data_by_table = array();
 

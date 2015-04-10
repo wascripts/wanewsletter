@@ -7,9 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('FUNCTIONS_STATS_INC')) {
-
-define('FUNCTIONS_STATS_INC', true);
+namespace Wanewsletter;
 
 /**
  * @param string $hexColor
@@ -235,6 +233,4 @@ function clean_stats($contents)
 function filename_stats($date, $liste_id)
 {
 	return sprintf('%s_list%d.txt', $date, $liste_id);
-}
-
 }

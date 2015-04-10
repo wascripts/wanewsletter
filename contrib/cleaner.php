@@ -13,6 +13,8 @@
  * dans les tables de fichiers pour lesquelles le fichier n'est plus présent
  */
 
+namespace Wanewsletter;
+
 //
 // Ceci est un fichier de test ou d'aide lors du développement.
 // Commentez les lignes suivantes uniquement si vous êtes sùr de ce que vous faites !
@@ -21,7 +23,6 @@ echo "This script has been disabled for security reasons\n";
 exit(0);
 
 
-define('IN_NEWSLETTER', true);
 define('WA_ROOTDIR', dirname(__DIR__));
 
 require WA_ROOTDIR . '/includes/common.inc.php';

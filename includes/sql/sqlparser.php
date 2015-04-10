@@ -7,9 +7,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if (!defined('SQLPARSER_INC')) {
-
-define('SQLPARSER_INC', true);
+namespace Wanewsletter\Dblayer;
 
 /**
  * Parse un fichier contenant une liste de requète et
@@ -102,6 +100,4 @@ function parseSQL($input, $prefixe = '')
 	unset($input, $lines);
 
 	return $output;
-}
-
 }

@@ -7,6 +7,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter;
+
 use Wamailer\Mailer;
 use Wamailer\Email;
 
@@ -365,7 +367,7 @@ class Wanewsletter
 		try {
 			wan_sendmail($email);
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			$this->message = sprintf($lang['Message']['Failed_sending2'],
 				wan_htmlspecialchars($e->getMessage())
 			);
@@ -509,7 +511,7 @@ class Wanewsletter
 			try {
 				wan_sendmail($email);
 			}
-			catch (Exception $e) {
+			catch (\Exception $e) {
 				$this->message = sprintf($lang['Message']['Failed_sending2'],
 					wan_htmlspecialchars($e->getMessage())
 				);
@@ -629,7 +631,7 @@ class Wanewsletter
 					try {
 						wan_sendmail($email);
 					}
-					catch (Exception $e) { }
+					catch (\Exception $e) { }
 				}
 				while ($row = $result->fetch());
 			}

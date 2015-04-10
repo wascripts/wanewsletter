@@ -7,7 +7,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-class Wadb_sqlite_pdo extends Wadb
+namespace Wanewsletter\Dblayer;
+
+use PDO;
+use PDOException;
+
+class Sqlitepdo extends Wadb
 {
 	/**
 	 * Type de base de données
@@ -87,7 +92,7 @@ class Wadb_sqlite_pdo extends Wadb
 		catch (PDOException $e) {
 			$this->errno = $e->getCode();
 			$this->error = $e->getMessage();
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 	}
 
@@ -134,7 +139,7 @@ class Wadb_sqlite_pdo extends Wadb
 			}
 			catch (PDOException $e) {}
 
-			throw new SQLException($this->error, $this->errno);
+			throw new Exception($this->error, $this->errno);
 		}
 		else {
 			$this->errno = 0;
@@ -147,7 +152,7 @@ class Wadb_sqlite_pdo extends Wadb
 				$result = true;
 			}
 			else {
-				$result = new WadbResult_sqlite_pdo($result);
+				$result = new SqlitepdoResult($result);
 			}
 		}
 
@@ -251,7 +256,7 @@ class Wadb_sqlite_pdo extends Wadb
 
 	public function initBackup()
 	{
-		return new WadbBackup_sqlite_pdo($this);
+		return new SqlitepdoBackup($this);
 	}
 
 	/**
@@ -272,7 +277,7 @@ class Wadb_sqlite_pdo extends Wadb
 	}
 }
 
-class WadbResult_sqlite_pdo extends WadbResult
+class SqlitepdoResult extends WadbResult
 {
 	public function fetch($mode = null)
 	{
@@ -316,7 +321,7 @@ class WadbResult_sqlite_pdo extends WadbResult
 	}
 }
 
-class WadbBackup_sqlite_pdo extends WadbBackup
+class SqlitepdoBackup extends WadbBackup
 {
 	public function header($toolname = '')
 	{
