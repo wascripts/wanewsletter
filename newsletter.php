@@ -69,9 +69,9 @@ if (!empty($action) || !empty($code)) {
 			$result = $db->query($sql);
 
 			if ($listdata = $result->fetch()) {
-				$wanewsletter = new Wanewsletter($listdata);
-				$wanewsletter->message =& $message;
-				$wanewsletter->do_action($action, $email, $format);
+				$sub = new Subscription($listdata);
+				$sub->message =& $message;
+				$sub->do_action($action, $email, $format);
 			}
 			else {
 				$message = $lang['Message']['Unknown_list'];
@@ -82,9 +82,9 @@ if (!empty($action) || !empty($code)) {
 		}
 	}
 	else {
-		$wanewsletter = new Wanewsletter();
-		$wanewsletter->message =& $message;
-		$wanewsletter->check_code($code);
+		$sub = new Subscription();
+		$sub->message =& $message;
+		$sub->check_code($code);
 	}
 }
 

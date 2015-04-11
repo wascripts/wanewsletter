@@ -12,16 +12,16 @@ namespace Wanewsletter;
 use Wamailer\Mailer;
 use Wamailer\Email;
 
-class Wanewsletter
+class Subscription
 {
 	private $format      = FORMAT_TEXTE;
 	private $listdata    = array();
-	public $liste_email  = '';
+	public  $liste_email = '';
 
 	private $account      = array();
 	private $hasAccount   = false;
 	private $isRegistered = false;
-	public $message       = '';
+	public  $message      = '';
 
 	private $tpl_dir;
 	private $other_tags;

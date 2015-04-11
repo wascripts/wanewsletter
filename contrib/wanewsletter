@@ -286,7 +286,7 @@ else if ($process_subscribe) {
 	require WA_ROOTDIR . '/includes/functions.validate.php';
 	require WA_ROOTDIR . '/includes/functions.stats.php';
 
-	$wan = new Wanewsletter($listdata);
+	$sub = new Subscription($listdata);
 	$pop = new PopClient();
 	$pop->options(array(
 		'starttls' => ($pop_tls == SECURITY_STARTTLS)
@@ -320,7 +320,7 @@ else if ($process_subscribe) {
 		$pseudo = (isset($match[1])) ? strip_tags(trim($match[1])) : '';
 		$email  = trim($match[2]);
 
-		if (!isset($headers['to']) || !stristr($headers['to'], $wan->liste_email)) {
+		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
 			continue;
 		}
 
@@ -354,10 +354,10 @@ else if ($process_subscribe) {
 				$time = time();
 			}
 
-			$wan->check_code($code, $time);
+			$sub->check_code($code, $time);
 		}
 		else if (in_array($action, array('inscription','setformat','desinscription'))) {
-			$wan->do_action($action, $email);
+			$sub->do_action($action, $email);
 		}
 
 		//

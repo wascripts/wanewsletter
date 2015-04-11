@@ -83,7 +83,7 @@ if ($listdata = $result->fetch()) {
 
 		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel
 
-		$wan = new Wanewsletter($listdata);
+		$sub = new Subscription($listdata);
 		$pop = new PopClient();
 		$pop->options(array(
 			'starttls' => ($listdata['pop_tls'] == SECURITY_STARTTLS)
@@ -118,7 +118,7 @@ if ($listdata = $result->fetch()) {
 			$pseudo = (isset($m[1])) ? strip_tags(trim($m[1])) : '';
 			$email  = trim($m[2]);
 
-			if (!isset($headers['to']) || !stristr($headers['to'], $wan->liste_email)) {
+			if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
 				continue;
 			}
 
@@ -152,10 +152,10 @@ if ($listdata = $result->fetch()) {
 					$time = time();
 				}
 
-				$wan->check_code($code, $time);
+				$sub->check_code($code, $time);
 			}
 			else if (in_array($action, array('inscription','setformat','desinscription'))) {
-				$wan->do_action($action, $email);
+				$sub->do_action($action, $email);
 			}
 
 			//

@@ -24,9 +24,6 @@ use Wanewsletter\Dblayer\WadbResult;
  */
 function wan_autoloader($classname)
 {
-	$catalog = array();
-	$catalog['wanewsletter'] = '%s/includes/class.form.php';
-
 	$rootdir = dirname(__DIR__);
 	$prefix  = '';
 
@@ -40,20 +37,15 @@ function wan_autoloader($classname)
 
 	$classname = strtolower($classname);
 
-	if (!isset($catalog[$classname])) {
-		if (strpos($classname, '\\')) {
-			// cas spécial pour dblayer qui est localisé dans sql/
-			$classname = str_replace('dblayer\\', 'sql/', $classname);
-			// Chemin includes/<namespace>/<classname>.php
-			$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
-		}
-		else {
-			// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
-			$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
-		}
+	if (strpos($classname, '\\')) {
+		// cas spécial pour dblayer qui est localisé dans sql/
+		$classname = str_replace('dblayer\\', 'sql/', $classname);
+		// Chemin includes/<namespace>/<classname>.php
+		$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
 	}
 	else {
-		$filename = sprintf($catalog[$classname], $rootdir);
+		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
+		$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
 	}
 
 	if (is_readable($filename)) {
