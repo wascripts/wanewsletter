@@ -106,6 +106,22 @@ class PopClient {
 	protected $responseData;
 
 	/**
+	 * Tableau compilant quelques informations sur la connexion en cours (accès en lecture).
+	 *
+	 * @var array
+	 */
+	protected $serverInfos = array(
+		'host'      => '',
+		'port'      => 0,
+		// true si la connexion est chiffrée avec SSL/TLS
+		'encrypted' => false,
+		// true si le certificat a été vérifié
+		'trusted'   => false,
+		// Ressource de contexte de flux manipulable avec les fonctions stream_context_*
+		'context'   => null
+	);
+
+	/**
 	 * @param array $opts
 	 */
 	public function __construct(array $opts = array())
@@ -165,14 +181,24 @@ class PopClient {
 			$server = 'tcp://'.$server;
 		}
 
-		$port = parse_url($server, PHP_URL_PORT);
-		if (!$port) {
-			$server .= ':'.parse_url($this->server, PHP_URL_PORT);
+		$url = parse_url($server);
+		if (!$url) {
+			throw new Exception("Invalid server argument given.");
 		}
 
-		$proto = substr(parse_url($server, PHP_URL_SCHEME), 0, 3);
+		$proto = substr($url['scheme'], 0, 3);
 		$useSSL   = ($proto == 'ssl' || $proto == 'tls');
 		$startTLS = (!$useSSL && $this->opts['starttls']);
+
+		// Attribution du port par défaut si besoin
+		if (empty($url['port'])) {
+			$url['port'] = 110;
+			if ($useSSL) {
+				$url['port'] = 995;// POP3S
+			}
+
+			$server .= ':'.$url['port'];
+		}
 
 		// check de l’extension openssl si besoin
 		if (($useSSL || $startTLS) && !in_array('tls', stream_get_transports())) {
@@ -197,7 +223,10 @@ class PopClient {
 		);
 
 		if (!$this->socket) {
-			throw new Exception("Failed to connect to POP server ($errno - $errstr)");
+			if ($errno == 0) {
+				$errstr = 'Unknown error. Check PHP errors log to get more information.';
+			}
+			throw new Exception("Failed to connect to POP server ($errstr)");
 		}
 
 		stream_set_timeout($this->socket, $this->timeout);
@@ -237,6 +266,20 @@ class PopClient {
 		if ($startTLS) {
 			$this->startTLS();
 		}
+
+		// On compile les informations sur la connexion
+		$infos = array();
+		$infos['host']      = $url['host'];
+		$infos['port']      = $url['port'];
+		$infos['encrypted'] = ($useSSL || $startTLS);
+		$infos['trusted']   = ($infos['encrypted'] && PHP_VERSION_ID >= 50600);
+		$infos['context']   = $context;
+
+		if (isset($this->opts['stream_opts']['ssl']['verify_peer'])) {
+			$infos['trusted'] = $this->opts['stream_opts']['ssl']['verify_peer'];
+		}
+
+		$this->serverInfos = $infos;
 
 		//
 		// Identification
@@ -721,6 +764,15 @@ class PopClient {
 
 			$this->socket = null;
 		}
+
+		$infos = array();
+		$infos['host']      = '';
+		$infos['port']      = 0;
+		$infos['encrypted'] = false;
+		$infos['trusted']   = false;
+		$infos['context']   = null;
+
+		$this->serverInfos = $infos;
 	}
 
 	/**
@@ -750,6 +802,7 @@ class PopClient {
 	public function __get($name)
 	{
 		switch ($name) {
+			case 'serverInfos':
 			case 'responseData':
 				return $this->{$name};
 				break;
