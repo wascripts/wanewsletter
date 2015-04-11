@@ -264,7 +264,6 @@ switch ($mode) {
 			extension_loaded('iconv') ?
 				sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
 		);
-		wan_print_row(' - Extension Mcrypt',  extension_loaded('mcrypt') ? 'oui' : 'non');
 		wan_print_row(' - Extension Mbstring', extension_loaded('mbstring') ? 'oui' : 'non');
 		wan_print_row(' - Extension OpenSSL',
 			extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
@@ -322,7 +321,7 @@ switch ($mode) {
 		}
 
 		wan_print_row('Agent utilisateur',
-			(isset($_SERVER['HTTP_USER_AGENT'])) ? $_SERVER['HTTP_USER_AGENT'] : 'Inconnu'
+			filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS)
 		);
 
 		echo "</pre>";
