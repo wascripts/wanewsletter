@@ -1505,7 +1505,7 @@ function check_ssl_support()
  */
 function check_cli()
 {
-	if (PHP_SAPI != 'cli' && PHP_SAPI != 'cgi-fcgi') {
+	if (PHP_SAPI != 'cli' && (PHP_SAPI != 'cgi-fcgi' || !empty($_SERVER['SERVER_ADDR']))) {
 		return false;
 	}
 
