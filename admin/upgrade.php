@@ -74,19 +74,26 @@ if (!isset($nl_config['db_version'])) {
 	}
 
 	// Les versions des branches 2.0 et 2.1 ne sont plus prises en charge
-	if (!version_compare($currentVersion, '2.2-beta', '>=' )) {
+	if (!version_compare($currentVersion, '2.2.0', '>=' )) {
 		$output->displayMessage($lang['Unsupported_version']);
 	}
 
 	//
-	// On incrémente manuellement db_version en fonction de chaque version ayant
-	// apporté des changements dans les tables de données du script.
+	// On sélectionne manuellement db_version en fonction de chaque
+	// version ayant apporté des changements dans les tables de données
+	// du script.
+	// Le numérotage de db_version prenait en compte des versions
+	// antérieures à 2.2.0 qui apportaient des modifications, d'où
+	// le db_version commençant à 5.
 	//
-	$nl_config['db_version'] = 1;
-	$versions = array('2.2-beta2', '2.2-rc2', '2.2-rc2b', '2.2-rc3', '2.2.12', '2.3-beta3');
+	$nl_config['db_version'] = 5;
 
-	foreach ($versions as $version) {
-		$nl_config['db_version'] += (int)version_compare($currentVersion, $version, '>');
+	if (version_compare($currentVersion, '2.2.8', '>')) {
+		$nl_config['db_version']++;
+	}
+
+	if (version_compare($currentVersion, '2.2.13', '>')) {
+		$nl_config['db_version']++;
 	}
 }
 
@@ -167,194 +174,41 @@ if (isset($_POST['start'])) {
 		$sql_data   = $sql_data_by_table;
 
 		//
-		// Nous vérifions tout d'abord si des doublons sont présents dans
-		// la table des abonnés.
+		// Vérification préalable de la présence de doublons dans la table
+		// des abonnés.
+		// La contrainte d'unicité sur abo_email a été ajoutée dans la
+		// version 2.3-beta1 (équivalent db_version = 7).
 		// Si des doublons sont présents, la mise à jour ne peut continuer.
 		//
-		$sql = "SELECT abo_email
-			FROM " . ABONNES_TABLE . "
-			GROUP BY abo_email
-			HAVING COUNT(abo_email) > 1";
-		$result = $db->query($sql);
-
-		if ($row = $result->fetch()) {
-			$emails = array();
-
-			do {
-				$emails[] = $row['abo_email'];
-			}
-			while ($row = $result->fetch());
-
-			$output->displayMessage(sprintf("Des adresses email sont présentes en plusieurs
-				exemplaires dans la table %s, la mise à jour ne peut continuer.
-				Supprimez les doublons en cause puis relancez la mise à jour.
-				Adresses email présentes en plusieurs exemplaires : %s",
-				ABONNES_TABLE,
-				implode(', ', $emails)
-			));
-		}
-
-		$sql_update = array();
-
-		if ($nl_config['db_version'] < 2) {
-			if ($db::ENGINE == 'postgres') {
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN liste_alias VARCHAR(254) NOT NULL DEFAULT ''";
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN use_cron SMALLINT NOT NULL DEFAULT 0";
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN pop_host VARCHAR(100) NOT NULL DEFAULT ''";
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN pop_port SMALLINT NOT NULL DEFAULT 110";
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN pop_user VARCHAR(100) NOT NULL DEFAULT ''";
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN pop_pass VARCHAR(100) NOT NULL DEFAULT ''";
-			}
-			else {
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN liste_alias VARCHAR(254) NOT NULL DEFAULT '',
-					ADD COLUMN use_cron TINYINT(1) NOT NULL DEFAULT 0,
-					ADD COLUMN pop_host VARCHAR(100) NOT NULL DEFAULT '',
-					ADD COLUMN pop_port SMALLINT NOT NULL DEFAULT 110,
-					ADD COLUMN pop_user VARCHAR(100) NOT NULL DEFAULT '',
-					ADD COLUMN pop_pass VARCHAR(100) NOT NULL DEFAULT ''";
-			}
-		}
-
-		//
-		// Un bug était présent dans la rc1, comme une seconde édition du package avait été mise
-		// à disposition pour pallier à un bug de dernière minute assez important, le numéro de version
-		// était 2.2-rc2 pendant une dizaine de jours (alors qu'il me semblait avoir recorrigé
-		// le package après coup).
-		// Nous effectuons donc la mise à jour également pour les versions 2.2-rc2.
-		// Le nom de la vrai release candidate 2 est donc 2.2-rc2b pour éviter des problèmes lors des mises
-		// à jour par les gens qui ont téléchargé le package les dix premiers jours.
-		//
-		if ($nl_config['db_version'] < 3) {
-			//
-			// Suppression des éventuelles entrées orphelines dans les tables abonnes et abo_liste
-			//
-			$sql = "SELECT abo_id
-				FROM " . ABONNES_TABLE;
+		if ($nl_config['db_version'] < 7) {
+			$sql = "SELECT abo_email
+				FROM " . ABONNES_TABLE . "
+				GROUP BY abo_email
+				HAVING COUNT(abo_email) > 1";
 			$result = $db->query($sql);
 
-			$abonnes_id = array();
-			while ($abo_id = $result->column('abo_id')) {
-				$abonnes_id[] = $abo_id;
-			}
+			if ($row = $result->fetch()) {
+				$emails = array();
 
-			$sql = "SELECT abo_id
-				FROM " . ABO_LISTE_TABLE . "
-				GROUP BY abo_id";
-			$result = $db->query($sql);
-
-			$abo_liste_id = array();
-			while ($abo_id = $result->column('abo_id')) {
-				$abo_liste_id[] = $abo_id;
-			}
-
-			$diff_1 = array_diff($abonnes_id, $abo_liste_id);
-			$diff_2 = array_diff($abo_liste_id, $abonnes_id);
-
-			$total_diff_1 = count($diff_1);
-			$total_diff_2 = count($diff_2);
-
-			if ($total_diff_1 > 0) {
-				$sql_update[] = "DELETE FROM " . ABONNES_TABLE . "
-					WHERE abo_id IN(" . implode(', ', $diff_1) . ")";
-			}
-
-			if ($total_diff_2 > 0) {
-				$sql_update[] = "DELETE FROM " . ABO_LISTE_TABLE . "
-					WHERE abo_id IN(" . implode(', ', $diff_2) . ")";
-			}
-
-			if ($db::ENGINE == 'postgres') {
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN liste_numlogs SMALLINT NOT NULL DEFAULT 0";
-				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
-					ADD COLUMN log_numdest SMALLINT NOT NULL DEFAULT 0";
-			}
-			else {
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN liste_numlogs SMALLINT NOT NULL DEFAULT 0 AFTER liste_alias";
-				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
-					ADD COLUMN log_numdest SMALLINT NOT NULL DEFAULT 0 AFTER log_date";
-				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . " DROP INDEX abo_id";
-				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . " DROP INDEX liste_id";
-				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
-					ADD PRIMARY KEY (abo_id , liste_id)";
-				$sql_update[] = "ALTER TABLE " . LOG_FILES_TABLE . " DROP INDEX log_id";
-				$sql_update[] = "ALTER TABLE " . LOG_FILES_TABLE . " DROP INDEX file_id";
-				$sql_update[] = "ALTER TABLE " . LOG_FILES_TABLE . "
-					ADD PRIMARY KEY (log_id , file_id)";
-			}
-
-			$sql = "SELECT COUNT(*) AS numlogs, liste_id
-				FROM " . LOG_TABLE . "
-				WHERE log_status = " . STATUS_SENT . "
-				GROUP BY liste_id";
-			$result = $db->query($sql);
-
-			while ($row = $result->fetch()) {
-				$sql_update[] = "UPDATE " . LISTE_TABLE . "
-					SET liste_numlogs = " . $row['numlogs'] . "
-					WHERE liste_id = " . $row['liste_id'];
-			}
-
-			$sql = "SELECT COUNT(DISTINCT(a.abo_id)) AS num_dest, al.liste_id
-				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
-				WHERE a.abo_id = al.abo_id AND a.abo_status = " . ABO_ACTIF . "
-				GROUP BY al.liste_id";
-			$result = $db->query($sql);
-
-			while ($row = $result->fetch()) {
-				$sql_update[] = "UPDATE " . LOG_TABLE . "
-					SET log_numdest = " . $row['num_dest'] . "
-					WHERE liste_id = " . $row['liste_id'];
-			}
-		}
-
-		if ($nl_config['db_version'] < 4) {
-			if ($db::ENGINE == 'postgres') {
-				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
-					ADD COLUMN abo_lang VARCHAR(30) NOT NULL DEFAULT ''";
-			}
-			else {
-				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
-					ADD COLUMN abo_lang VARCHAR(30) NOT NULL DEFAULT '' AFTER abo_email";
-			}
-
-			//
-			// Correction du bug de mise à jour de la table abo_liste après un envoi.
-			// Si tous les abonnés d'une liste ont send à 1, on remet celui ci à 0
-			//
-			$sql = "SELECT COUNT(al.abo_id) AS num_abo, SUM(al.send) AS num_send, al.liste_id
-				FROM " . ABONNES_TABLE . " AS a, " . ABO_LISTE_TABLE . " AS al
-				WHERE a.abo_id = al.abo_id AND a.abo_status = " . ABO_ACTIF . "
-				GROUP BY al.liste_id";
-			$result = $db->query($sql);
-
-			while ($row = $result->fetch()) {
-				if ($row['num_abo'] == $row['num_send']) {
-					$sql_update[] = "UPDATE " . ABO_LISTE_TABLE . "
-						SET send = 0
-						WHERE liste_id = " . $row['liste_id'];
+				do {
+					$emails[] = $row['abo_email'];
 				}
-			}
+				while ($row = $result->fetch());
 
-			$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_lang = '$nl_config[language]'";
-		}
-
-		if ($nl_config['db_version'] < 5) {
-			if ($db::ENGINE == 'mysql') {
-				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
-					CHANGE abo_id abo_id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT";
-				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
-					CHANGE abo_id abo_id INTEGER UNSIGNED NOT NULL DEFAULT 0";
+				$output->displayMessage(sprintf("Des adresses email sont présentes en plusieurs
+					exemplaires dans la table %s, la mise à jour ne peut donc continuer.
+					Supprimez les doublons en cause puis relancez la mise à jour.
+					Adresses email présentes en plusieurs exemplaires : %s",
+					ABONNES_TABLE,
+					implode(', ', $emails)
+				));
 			}
 		}
+
+		//
+		// Début de la mise à jour
+		//
+		$sql_update = array();
 
 		if ($nl_config['db_version'] < 6) {
 			unset($nl_config['hebergeur']);
