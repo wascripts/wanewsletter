@@ -311,7 +311,13 @@ class Output extends Template
 		}
 
 		$sitename = (!empty($nl_config['sitename'])) ? $nl_config['sitename'] : 'Wanewsletter';
-		$base_dir = (!empty($nl_config['path'])) ? rtrim($nl_config['path'], '/') : '.';
+
+		if (!empty($nl_config['path'])) {
+			$base_dir = rtrim($nl_config['path'], '/');
+		}
+		else {
+			$base_dir = (strpos($_SERVER['PHP_SELF'], 'admin/')) ? '..' : '.';
+		}
 
 		// Intégration d'une éventuelle feuille de style personnalisée
 		if (is_readable(WA_ROOTDIR . '/templates/wanewsletter.custom.css')) {
