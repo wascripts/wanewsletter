@@ -1409,17 +1409,25 @@ function wan_sendmail(Email $email)
 }
 
 /**
- * Retourne la liste des tags personnalisés (voir tags.sample.inc.php)
+ * Retourne la liste des tags personnalisés (voir modèle tags.sample.inc.php)
  *
  * @return array
  */
 function wan_get_tags()
 {
-	$tags_file  = WA_ROOTDIR . '/includes/tags.inc.php';
+	$tags_file  = WA_ROOTDIR . '/data/tags.inc.php';
 	$other_tags = array();
 
 	if (is_readable($tags_file)) {
 		include $tags_file;
+	}
+	else {
+		// compatibilité Wanewsletter < 2.4-beta3
+		$tags_file  = WA_ROOTDIR . '/includes/tags.inc.php';
+		if (is_readable($tags_file)) {
+			include $tags_file;
+			wanlog("Using ~/includes/tags.inc.php. You should move this file into data/ directory.");
+		}
 	}
 
 	return $other_tags;

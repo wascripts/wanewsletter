@@ -6,7 +6,7 @@
  * @copyright 2002-2015 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
- * Copiez ou renommez ce fichier en tags.inc.php avant utilisation !
+ * Copiez ce fichier dans data/ en le renommant 'tags.inc.php' pour utilisation.
  */
 
 $other_tags = array();
