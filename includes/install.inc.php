@@ -412,13 +412,13 @@ if (!defined('NL_INSTALLED')) {
 
 		'IS_SQLITE' => ($infos['engine'] == 'sqlite') ? 'is-sqlite' : '',
 		'DB_BOX'    => $db_box,
-		'DBPATH'    => wan_htmlspecialchars($infos['path']),
-		'DBHOST'    => wan_htmlspecialchars($infos['host']),
-		'DBNAME'    => ($infos['engine'] != 'sqlite') ? wan_htmlspecialchars($infos['dbname']) : '',
-		'DBUSER'    => wan_htmlspecialchars($infos['user']),
-		'PREFIXE'   => wan_htmlspecialchars($prefixe),
-		'LOGIN'     => wan_htmlspecialchars($admin_login),
-		'EMAIL'     => wan_htmlspecialchars($admin_email),
+		'DBPATH'    => htmlspecialchars($infos['path']),
+		'DBHOST'    => htmlspecialchars($infos['host']),
+		'DBNAME'    => ($infos['engine'] != 'sqlite') ? htmlspecialchars($infos['dbname']) : '',
+		'DBUSER'    => htmlspecialchars($infos['user']),
+		'PREFIXE'   => htmlspecialchars($prefixe),
+		'LOGIN'     => htmlspecialchars($admin_login),
+		'EMAIL'     => htmlspecialchars($admin_email),
 		'LANG_BOX'  => lang_box($language)
 	));
 }
@@ -429,7 +429,7 @@ else {
 		'L_PASS'         => $lang['Password'],
 		'L_START_BUTTON' => $lang['Start_install'],
 
-		'LOGIN' => wan_htmlspecialchars($admin_login)
+		'LOGIN' => htmlspecialchars($admin_login)
 	));
 }
 

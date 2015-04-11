@@ -180,7 +180,7 @@ else if ($mode == 'iframe') {
 				// fonctionnement de wordwrap()
 				$body = preg_replace("/\r\n?|\n/", "\r\n", $body);
 				$body = wordwrap(trim($body), 78, "\r\n");
-				$body = active_urls(wan_htmlspecialchars($body, ENT_NOQUOTES));
+				$body = active_urls(htmlspecialchars($body, ENT_NOQUOTES));
 				$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
 				$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
 				$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
@@ -233,7 +233,7 @@ else if ($mode == 'abonnes') {
 
 	if ($search_keyword != '' || $search_date) {
 		if (strlen($search_keyword) > 1) {
-			$get_string .= '&amp;keyword=' . wan_htmlspecialchars(urlencode($search_keyword));
+			$get_string .= '&amp;keyword=' . htmlspecialchars(urlencode($search_keyword));
 			$sql_search  = sprintf("WHERE a.abo_email LIKE '%s' ",
 				str_replace('*', '%', addcslashes($db->escape($search_keyword), '%_'))
 			);
@@ -316,7 +316,7 @@ else if ($mode == 'abonnes') {
 
 			$output->assign_vars(array(
 				'L_TITLE'             => sprintf($lang['Title']['profile'],
-					wan_htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
+					htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
 				),
 				'L_EXPLAIN'           => nl2br($lang['Explain']['abo']),
 				'L_PSEUDO'            => $lang['Abo_pseudo'],
@@ -330,8 +330,8 @@ else if ($mode == 'abonnes') {
 
 				'U_GOTO_LIST'         => 'view.php?mode=abonnes' . $get_string . $get_page,
 				'S_ABO_PSEUDO'        => (!empty($row['abo_pseudo']))
-					? wan_htmlspecialchars($row['abo_pseudo']) : '<b>' . $lang['No_data'] . '</b>',
-				'S_ABO_EMAIL'         => wan_htmlspecialchars($row['abo_email']),
+					? htmlspecialchars($row['abo_pseudo']) : '<b>' . $lang['No_data'] . '</b>',
+				'S_ABO_EMAIL'         => htmlspecialchars($row['abo_email']),
 				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIF) ? $lang['Active'] : $lang['Inactive'],
 				'S_ABO_ID'            => $row['abo_id']
 			));
@@ -348,7 +348,7 @@ else if ($mode == 'abonnes') {
 
 				foreach ($other_tags as $tag) {
 					$value = $row[$tag['column_name']];
-					$value = (!is_null($value)) ? nl2br(wan_htmlspecialchars($value)) : '<i>NULL</i>';
+					$value = (!is_null($value)) ? nl2br(htmlspecialchars($value)) : '<i>NULL</i>';
 
 					$output->assign_block_vars('tags.row', array(
 						'NAME'  => $tag['tag_name'],
@@ -378,7 +378,7 @@ else if ($mode == 'abonnes') {
 				}
 
 				$output->assign_block_vars('listerow', array(
-					'LISTE_NAME'    => wan_htmlspecialchars($liste_name),
+					'LISTE_NAME'    => htmlspecialchars($liste_name),
 					'CHOICE_FORMAT' => $format,
 					'LISTE_ID'      => $row['liste_id']
 				));
@@ -515,7 +515,7 @@ else if ($mode == 'abonnes') {
 
 			$output->assign_vars(array(
 				'L_TITLE'              => sprintf($lang['Title']['mod_profile'],
-					wan_htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
+					htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
 				),
 				'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
 				'L_PSEUDO'             => $lang['Abo_pseudo'],
@@ -531,8 +531,8 @@ else if ($mode == 'abonnes') {
 				'L_INACTIVE'           => $lang['Inactive'],
 
 				'U_GOTO_LIST'          => 'view.php?mode=abonnes' . $get_string . $get_page,
-				'S_ABO_PSEUDO'         => wan_htmlspecialchars($row['abo_pseudo']),
-				'S_ABO_EMAIL'          => wan_htmlspecialchars($row['abo_email']),
+				'S_ABO_PSEUDO'         => htmlspecialchars($row['abo_pseudo']),
+				'S_ABO_EMAIL'          => htmlspecialchars($row['abo_email']),
 				'S_ABO_ID'             => $row['abo_id'],
 				'S_STATUS_ACTIVE'      => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_ACTIF)),
 				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIF)),
@@ -552,7 +552,7 @@ else if ($mode == 'abonnes') {
 					$output->assign_block_vars('tags.row', array(
 						'NAME'      => $tag['tag_name'],
 						'FIELDNAME' => $tag['column_name'],
-						'VALUE'     => wan_htmlspecialchars($row[$tag['column_name']])
+						'VALUE'     => htmlspecialchars($row[$tag['column_name']])
 					));
 				}
 			}
@@ -569,7 +569,7 @@ else if ($mode == 'abonnes') {
 				}
 
 				$output->assign_block_vars('listerow', array(
-					'LISTE_NAME' => wan_htmlspecialchars($auth->listdata[$row['liste_id']]['liste_name']),
+					'LISTE_NAME' => htmlspecialchars($auth->listdata[$row['liste_id']]['liste_name']),
 					'FORMAT_BOX' => $format_box,
 					'LISTE_ID'   => $row['liste_id']
 				));
@@ -766,7 +766,7 @@ else if ($mode == 'abonnes') {
 
 	$output->assign_vars(array(
 		'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
-		'L_TITLE'              => sprintf($lang['Title']['abo'], wan_htmlspecialchars($listdata['liste_name'])),
+		'L_TITLE'              => sprintf($lang['Title']['abo'], htmlspecialchars($listdata['liste_name'])),
 		'L_SEARCH'             => $lang['Search_abo'],
 		'L_SEARCH_NOTE'        => $lang['Search_abo_note'],
 		'L_SEARCH_BUTTON'      => $lang['Button']['search'],
@@ -780,7 +780,7 @@ else if ($mode == 'abonnes') {
 		'L_EMAIL'              => $lang['Email_address'],
 		'L_DATE'               => $lang['Susbcribed_date'],
 
-		'KEYWORD'              => wan_htmlspecialchars($search_keyword),
+		'KEYWORD'              => htmlspecialchars($search_keyword),
 		'SEARCH_DAYS_BOX'      => $search_days_box,
 		'SELECTED_TYPE_EMAIL'  => $output->getBoolAttr('selected', ($sql_type == 'abo_email')),
 		'SELECTED_TYPE_DATE'   => $output->getBoolAttr('selected', ($sql_type == 'register_date')),
@@ -817,7 +817,7 @@ else if ($mode == 'abonnes') {
 
 		for ($i = 0; $i < $num_abo; $i++) {
 			$output->assign_block_vars('aborow', array(
-				'ABO_EMAIL'         => wan_htmlspecialchars($aborow[$i]['abo_email']),
+				'ABO_EMAIL'         => htmlspecialchars($aborow[$i]['abo_email']),
 				'ABO_REGISTER_DATE' => convert_time($nl_config['date_format'], $aborow[$i]['register_date']),
 				'U_VIEW'            => sprintf('view.php?mode=abonnes&amp;action=view&amp;id=%d%s%s', $aborow[$i]['abo_id'], $get_string, $get_page)
 			));
@@ -968,7 +968,7 @@ else if ($mode == 'liste') {
 				catch (Exception $e) {
 					$error = true;
 					$msg_error[] = sprintf(nl2br($lang['Message']['bad_pop_param']),
-						wan_htmlspecialchars($e->getMessage())
+						htmlspecialchars($e->getMessage())
 					);
 				}
 
@@ -1064,12 +1064,12 @@ else if ($mode == 'liste') {
 			'L_RESET_BUTTON'       => $lang['Button']['reset'],
 			'L_CANCEL_BUTTON'      => $lang['Button']['cancel'],
 
-			'LISTE_NAME'           => wan_htmlspecialchars($liste_name),
+			'LISTE_NAME'           => htmlspecialchars($liste_name),
 			'FORMAT_BOX'           => format_box('liste_format', $liste_format, false, true),
-			'SENDER_EMAIL'         => wan_htmlspecialchars($sender_email),
-			'RETURN_EMAIL'         => wan_htmlspecialchars($return_email),
-			'FORM_URL'             => wan_htmlspecialchars($form_url),
-			'SIG_EMAIL'            => wan_htmlspecialchars($liste_sig),
+			'SENDER_EMAIL'         => htmlspecialchars($sender_email),
+			'RETURN_EMAIL'         => htmlspecialchars($return_email),
+			'FORM_URL'             => htmlspecialchars($form_url),
+			'SIG_EMAIL'            => htmlspecialchars($liste_sig),
 			'LIMITEVALIDATE'       => intval($limitevalidate),
 			'PURGE_FREQ'           => intval($purge_freq),
 			'CHECK_CONFIRM_ALWAYS' => $output->getBoolAttr('checked', ($confirm_subscribe == CONFIRM_ALWAYS)),
@@ -1083,10 +1083,10 @@ else if ($mode == 'liste') {
 			'CHECKED_USE_CRON_OFF' => $output->getBoolAttr('checked', !$use_cron),
 			'DISABLED_CRON'        => $output->getBoolAttr('disabled', !function_exists('stream_socket_client')),
 			'WARNING_CRON'         => (!function_exists('stream_socket_client')) ? ' <span style="color: red;">[not available]</span>' : '',
-			'POP_HOST'             => wan_htmlspecialchars($pop_host),
+			'POP_HOST'             => htmlspecialchars($pop_host),
 			'POP_PORT'             => intval($pop_port),
-			'POP_USER'             => wan_htmlspecialchars($pop_user),
-			'LISTE_ALIAS'          => wan_htmlspecialchars($liste_alias),
+			'POP_USER'             => htmlspecialchars($pop_user),
+			'LISTE_ALIAS'          => htmlspecialchars($liste_alias),
 
 			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
 		));
@@ -1267,7 +1267,7 @@ else if ($mode == 'liste') {
 				if (in_array($liste_id, $liste_ids) && $liste_id != $listdata['liste_id']) {
 					$selected  = $output->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id));
 					$list_box .= '<option value="' . $liste_id . '"' . $selected . '> - '
-						. wan_htmlspecialchars(cut_str($data['liste_name'], 30)) . ' - </option>';
+						. htmlspecialchars(cut_str($data['liste_name'], 30)) . ' - </option>';
 				}
 			}
 
@@ -1404,7 +1404,7 @@ else if ($mode == 'liste') {
 		'L_STARTDATE'         => $lang['Liste_startdate'],
 
 		'LISTE_ID'            => $listdata['liste_id'],
-		'LISTE_NAME'          => wan_htmlspecialchars($listdata['liste_name']),
+		'LISTE_NAME'          => htmlspecialchars($listdata['liste_name']),
 		'LISTE_PUBLIC'        => ($listdata['liste_public']) ? $lang['Yes'] : $lang['No'],
 		'AUTH_FORMAT'         => $l_format,
 		'SENDER_EMAIL'        => $listdata['sender_email'],
@@ -1412,7 +1412,7 @@ else if ($mode == 'liste') {
 		'CONFIRM_SUBSCRIBE'   => $l_confirm,
 		'NUM_SUBSCRIBERS'     => $num_inscrits,
 		'NUM_LOGS'            => $listdata['liste_numlogs'],
-		'FORM_URL'            => wan_htmlspecialchars($listdata['form_url']),
+		'FORM_URL'            => htmlspecialchars($listdata['form_url']),
 		'STARTDATE'           => convert_time($nl_config['date_format'], $listdata['liste_startdate'])
 	));
 
@@ -1652,7 +1652,7 @@ else if ($mode == 'log') {
 
 	$output->assign_vars(array(
 		'L_EXPLAIN'             => nl2br($lang['Explain']['logs']),
-		'L_TITLE'               => sprintf($lang['Title']['logs'], wan_htmlspecialchars($listdata['liste_name'])),
+		'L_TITLE'               => sprintf($lang['Title']['logs'], htmlspecialchars($listdata['liste_name'])),
 		'L_CLASSEMENT'          => $lang['Classement'],
 		'L_BY_SUBJECT'          => $lang['By_subject'],
 		'L_BY_DATE'             => $lang['By_date'],
@@ -1702,7 +1702,7 @@ else if ($mode == 'log') {
 
 			$output->assign_block_vars('logrow', array(
 				'ITEM_CLIP'   => $s_clip,
-				'LOG_SUBJECT' => wan_htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
+				'LOG_SUBJECT' => htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
 				'LOG_DATE'    => convert_time($nl_config['date_format'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sprintf('view.php?mode=log&amp;action=view&amp;id=%d%s', $logrow[$i]['log_id'], $get_string)
 			));
@@ -1725,7 +1725,7 @@ else if ($mode == 'log') {
 				'L_SUBJECT'  => $lang['Log_subject'],
 				'L_NUMDEST'  => $lang['Log_numdest'],
 
-				'SUBJECT'    => wan_htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
+				'SUBJECT'    => htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
 				'NUMDEST'    => $logdata['log_numdest'],
 				'FORMAT'     => $format,
 				'LOG_ID'     => $log_id

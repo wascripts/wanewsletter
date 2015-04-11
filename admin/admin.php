@@ -94,7 +94,7 @@ if ($mode == 'adduser') {
 			}
 			catch (\Exception $e) {
 				trigger_error(sprintf($lang['Message']['Failed_sending2'],
-					wan_htmlspecialchars($e->getMessage())
+					htmlspecialchars($e->getMessage())
 				), E_USER_ERROR);
 			}
 
@@ -122,8 +122,8 @@ if ($mode == 'adduser') {
 		'L_VALID_BUTTON'  => $lang['Button']['valid'],
 		'L_CANCEL_BUTTON' => $lang['Button']['cancel'],
 
-		'LOGIN' => wan_htmlspecialchars($new_login),
-		'EMAIL' => wan_htmlspecialchars($new_email),
+		'LOGIN' => htmlspecialchars($new_login),
+		'EMAIL' => htmlspecialchars($new_email),
 
 		'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 	));
@@ -321,7 +321,7 @@ if (wan_is_admin($admindata)) {
 		$admin_box .= '<option value="0">' . $lang['Choice_user'] . '</option>';
 
 		do {
-			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], wan_htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
+			$admin_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['admin_id'], htmlspecialchars($row['admin_login'], ENT_NOQUOTES));
 		}
 		while ($row = $result->fetch());
 
@@ -354,7 +354,7 @@ $output->set_filenames( array(
 ));
 
 $output->assign_vars(array(
-	'L_TITLE'               => sprintf($lang['Title']['profile'], wan_htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
+	'L_TITLE'               => sprintf($lang['Title']['profile'], htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
 	'L_EXPLAIN'             => nl2br($lang['Explain']['admin']),
 	'L_DEFAULT_LANG'        => $lang['Default_lang'],
 	'L_EMAIL'               => $lang['Email_address'],
@@ -410,7 +410,7 @@ if (wan_is_admin($admindata)) {
 
 	foreach ($listdata as $listrow) {
 		$output->assign_block_vars('admin_options.auth', array(
-			'LISTE_NAME'      => wan_htmlspecialchars($listrow['liste_name']),
+			'LISTE_NAME'      => htmlspecialchars($listrow['liste_name']),
 			'LISTE_ID'        => $listrow['liste_id'],
 
 			'BOX_AUTH_VIEW'   => $auth->box_auth(Auth::VIEW,   $listrow),

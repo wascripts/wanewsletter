@@ -143,7 +143,7 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 				}
 				catch (\Exception $e) {
 					trigger_error(sprintf($lang['Message']['Failed_sending2'],
-						wan_htmlspecialchars($e->getMessage())
+						htmlspecialchars($e->getMessage())
 					), E_USER_ERROR);
 				}
 			}
@@ -214,7 +214,7 @@ if ($auth->isLoggedIn()) {
 	http_redirect($redirect);
 }
 
-$output->addHiddenField('redirect', wan_htmlspecialchars($redirect));
+$output->addHiddenField('redirect', htmlspecialchars($redirect));
 
 $output->page_header();
 

@@ -221,7 +221,7 @@ function wan_print_row($name, $value)
 {
 	echo u::str_pad($name, 30);
 	echo ' : ';
-	echo wan_htmlspecialchars($value);
+	echo htmlspecialchars($value);
 	echo "\r\n";
 }
 
@@ -462,7 +462,7 @@ switch ($mode) {
 
 					if (!file_exists($tmp_filename)) {
 						$output->redirect('./tools.php?mode=import', 4);
-						$output->addLine(sprintf($lang['Message']['Error_local'], wan_htmlspecialchars($filename)));
+						$output->addLine(sprintf($lang['Message']['Error_local'], htmlspecialchars($filename)));
 						$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
 						$output->displayMessage();
 					}
@@ -558,7 +558,7 @@ switch ($mode) {
 					if (!xml_parse($parser, $list_tmp)) {
 						$output->displayMessage(sprintf(
 							$lang['Message']['Invalid_xml_data'],
-							wan_htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
+							htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
 							xml_get_current_line_number($parser)
 						));
 					}
@@ -1079,7 +1079,7 @@ switch ($mode) {
 
 					if (!file_exists($tmp_filename)) {
 						$output->redirect('./tools.php?mode=restore', 4);
-						$output->addLine(sprintf($lang['Message']['Error_local'], wan_htmlspecialchars($filename)));
+						$output->addLine(sprintf($lang['Message']['Error_local'], htmlspecialchars($filename)));
 						$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
 						$output->displayMessage();
 					}
@@ -1188,7 +1188,7 @@ switch ($mode) {
 		if (isset($_POST['generate'])) {
 			$url_form = (!empty($_POST['url_form'])) ? trim($_POST['url_form']) : '';
 
-			$code_html  = "<form method=\"post\" action=\"" . wan_htmlspecialchars($url_form) . "\">\n";
+			$code_html  = "<form method=\"post\" action=\"" . htmlspecialchars($url_form) . "\">\n";
 			$code_html .= $lang['Email_address'] . " : <input type=\"text\" name=\"email\" maxlength=\"100\" /> &nbsp; \n";
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
@@ -1222,8 +1222,8 @@ switch ($mode) {
 				'L_EXPLAIN_CODE_HTML' => nl2br($lang['Explain']['code_html']),
 				'L_EXPLAIN_CODE_PHP'  => nl2br($lang['Explain']['code_php']),
 
-				'CODE_HTML' => wan_htmlspecialchars($code_html, ENT_NOQUOTES),
-				'CODE_PHP'  => wan_htmlspecialchars($code_php, ENT_NOQUOTES)
+				'CODE_HTML' => htmlspecialchars($code_html, ENT_NOQUOTES),
+				'CODE_PHP'  => htmlspecialchars($code_php, ENT_NOQUOTES)
 			));
 		}
 		else {

@@ -206,14 +206,14 @@ class Output extends Template
 				$attr = $attrname;
 			}
 			else {
-				$attr = sprintf('%s="%s"', $attrname, wan_htmlspecialchars($value));
+				$attr = sprintf('%s="%s"', $attrname, htmlspecialchars($value));
 			}
 
 			$html .= $attr;
 		}
 
 		if (!is_null($data)) {
-			$data = wan_htmlspecialchars($data);
+			$data = htmlspecialchars($data);
 		}
 
 		$html .= ($closetag || $data) ? '>'.$data.'</'.$name.'>' : ' />';
@@ -327,7 +327,7 @@ class Output extends Template
 			'BASEDIR'      => $base_dir,
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts(),
-			'SITENAME'     => wan_htmlspecialchars($sitename, ENT_NOQUOTES)
+			'SITENAME'     => htmlspecialchars($sitename, ENT_NOQUOTES)
 		));
 
 		// Si l'utilisateur est connecté, affichage du menu
@@ -335,7 +335,7 @@ class Output extends Template
 			if (check_in_admin()) {
 				$l_logout = sprintf(
 					$lang['Module']['logout_2'],
-					wan_htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
+					htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
 				);
 
 				$this->assign_vars(array(
@@ -508,7 +508,7 @@ BASIC;
 	public function addLine($str, $link = null)
 	{
 		if (!is_null($link)) {
-			$str = sprintf($str, sprintf('<a href="%s">', wan_htmlspecialchars($link)), '</a>');
+			$str = sprintf($str, sprintf('<a href="%s">', htmlspecialchars($link)), '</a>');
 		}
 
 		$this->messageList[] = $str;
@@ -676,7 +676,7 @@ BASIC;
 					continue;
 				}
 
-				$filename = sprintf('<a href="%s">%s</a>', sprintf($u_download, $file_id), wan_htmlspecialchars($filename));
+				$filename = sprintf('<a href="%s">%s</a>', sprintf($u_download, $file_id), htmlspecialchars($filename));
 
 				if (preg_match('#^image/#', $mime_type)) {
 					$s_show  = sprintf('<a class="show" href="%s" type="%s">', sprintf($u_show, $file_id), $mime_type);
@@ -686,7 +686,7 @@ BASIC;
 			}
 			else {
 				$filename = sprintf('<del title="%s">%s</del>',
-					$lang['Message']['File_not_found'], wan_htmlspecialchars($filename));
+					$lang['Message']['File_not_found'], htmlspecialchars($filename));
 			}
 
 			$this->assign_block_vars('file_info', array(
@@ -724,11 +724,11 @@ BASIC;
 		$liste_id_ary = $auth->check_auth($auth_type);
 
 		if (empty($jump_to)) {
-			$jump_to = './' . wan_htmlspecialchars(basename(server_info('SCRIPT_NAME')));
+			$jump_to = './' . htmlspecialchars(basename(server_info('SCRIPT_NAME')));
 			$query_string = server_info('QUERY_STRING');
 
 			if ($query_string != '') {
-				$jump_to .= '?' . wan_htmlspecialchars($query_string);
+				$jump_to .= '?' . htmlspecialchars($query_string);
 			}
 		}
 
@@ -738,7 +738,7 @@ BASIC;
 					"<option value=\"%d\"%s>%s</option>\n\t",
 					$liste_id,
 					$output->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id)),
-					wan_htmlspecialchars(cut_str($data['liste_name'], 30))
+					htmlspecialchars(cut_str($data['liste_name'], 30))
 				);
 			}
 		}

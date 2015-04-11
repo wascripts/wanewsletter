@@ -64,7 +64,7 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 	if (!is_writable(WA_TMPDIR)) {
 		$output->displayMessage(sprintf(
 			$lang['Message']['Dir_not_writable'],
-			wan_htmlspecialchars(WA_TMPDIR)
+			htmlspecialchars(WA_TMPDIR)
 		));
 	}
 

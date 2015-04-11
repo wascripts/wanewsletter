@@ -36,7 +36,7 @@ if ($row = $result->fetch()) {
 
 		$list_box .= sprintf('<option value="%d"> %s (%s) </option>',
 			$row['liste_id'],
-			wan_htmlspecialchars($row['liste_name']),
+			htmlspecialchars($row['liste_name']),
 			$format
 		);
 	}

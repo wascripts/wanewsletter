@@ -369,7 +369,7 @@ class Wanewsletter
 		}
 		catch (\Exception $e) {
 			$this->message = sprintf($lang['Message']['Failed_sending2'],
-				wan_htmlspecialchars($e->getMessage())
+				htmlspecialchars($e->getMessage())
 			);
 			return false;
 		}
@@ -513,7 +513,7 @@ class Wanewsletter
 			}
 			catch (\Exception $e) {
 				$this->message = sprintf($lang['Message']['Failed_sending2'],
-					wan_htmlspecialchars($e->getMessage())
+					htmlspecialchars($e->getMessage())
 				);
 				return false;
 			}

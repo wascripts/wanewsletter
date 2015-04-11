@@ -319,7 +319,7 @@ class Attach
 						$error = true;
 						$msg_error[] = sprintf(
 							$lang['Message']['Unaccess_host'],
-							wan_htmlspecialchars($part['host'])
+							htmlspecialchars($part['host'])
 						);
 						fclose($fw);
 						$this->remove_file($tmp_filename);

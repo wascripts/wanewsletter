@@ -309,7 +309,7 @@ function http_redirect($url, $params = array(), $session = false, $status = 0)
 	// Si la fonction header() ne donne rien, on affiche une page de redirection
 	//
 	printf('<p>If your browser doesn\'t support meta redirect, click
-		<a href="%s">here</a> to go on next page.</p>', wan_htmlspecialchars($url));
+		<a href="%s">here</a> to go on next page.</p>', htmlspecialchars($url));
 	exit;
 }
 }
@@ -484,7 +484,7 @@ function wan_format_error($error)
 			$t['file'] = 'unknown';
 			$t['line'] = 0;
 		}
-		$file = wan_htmlspecialchars(str_replace(dirname(__DIR__), '~', $t['file']));
+		$file = htmlspecialchars(str_replace(dirname(__DIR__), '~', $t['file']));
 		$call = (isset($t['class']) ? $t['class'].$t['type'] : '') . $t['function'];
 		$t = sprintf('#%d  %s() called at [%s:%d]', $i, $call, $file, $t['line']);
 	}
@@ -507,10 +507,10 @@ function wan_format_error($error)
 		}
 
 		$message  = sprintf("<b>SQL errno:</b> %s\n", $errno);
-		$message .= sprintf("<b>SQL error:</b> %s\n", wan_htmlspecialchars($errstr));
+		$message .= sprintf("<b>SQL error:</b> %s\n", htmlspecialchars($errstr));
 
 		if ($db instanceof Wadb && $db->lastQuery != '') {
-			$message .= sprintf("<b>SQL query:</b> %s\n", wan_htmlspecialchars($db->lastQuery));
+			$message .= sprintf("<b>SQL query:</b> %s\n", htmlspecialchars($db->lastQuery));
 		}
 
 		$message .= $backtrace;
@@ -1095,7 +1095,7 @@ function wan_get_contents($URL, &$errstr)
 	if (strncmp($URL, 'http://', 7) == 0) {
 		$result = http_get_contents($URL, $errstr);
 		if (!$result) {
-			$errstr = sprintf($lang['Message']['Error_load_url'], wan_htmlspecialchars($URL), $errstr);
+			$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($URL), $errstr);
 		}
 	}
 	else {
@@ -1111,7 +1111,7 @@ function wan_get_contents($URL, &$errstr)
 		}
 		else {
 			$result = false;
-			$errstr = sprintf($lang['Message']['File_not_exists'], wan_htmlspecialchars($URL));
+			$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($URL));
 		}
 	}
 
@@ -1139,7 +1139,7 @@ function http_get_contents($URL, &$errstr)
 	$port = (!isset($part['port'])) ? 80 : $part['port'];
 
 	if (!($fs = fsockopen($part['host'], $port, $null, $null, 5))) {
-		$errstr = sprintf($lang['Message']['Unaccess_host'], wan_htmlspecialchars($part['host']));
+		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
 		return false;
 	}
 
@@ -1303,13 +1303,17 @@ function formateSize($size)
  *
  * @return string
  */
-function wan_htmlspecialchars($string, $flags = null, $encoding = 'UTF-8', $double_encode = true)
+function htmlspecialchars($string, $flags = null, $encoding = null, $double_encode = true)
 {
 	if ($flags == null) {
 		$flags = ENT_COMPAT | ENT_HTML401;
 	}
 
-	return htmlspecialchars($string, $flags, $encoding, $double_encode);
+	if ($encoding == null) {
+		$encoding = 'UTF-8';
+	}
+
+	return \htmlspecialchars($string, $flags, $encoding, $double_encode);
 }
 
 /**
@@ -1322,13 +1326,17 @@ function wan_htmlspecialchars($string, $flags = null, $encoding = 'UTF-8', $doub
  *
  * @return string
  */
-function wan_html_entity_decode($string, $flags = null, $encoding = 'UTF-8')
+function html_entity_decode($string, $flags = null, $encoding = null)
 {
 	if ($flags == null) {
 		$flags = ENT_COMPAT | ENT_HTML401;
 	}
 
-	return html_entity_decode($string, $flags, $encoding);
+	if ($encoding == null) {
+		$encoding = 'UTF-8';
+	}
+
+	return \html_entity_decode($string, $flags, $encoding);
 }
 
 /**

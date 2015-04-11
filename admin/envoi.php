@@ -261,7 +261,7 @@ switch ($mode) {
 
 				$output->assign_block_vars('logrow', array(
 					'LOG_ID'       => $row['log_id'],
-					'LOG_SUBJECT'  => wan_htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
+					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
 					'SEND_PERCENT' => $percent
 				));
 			}
@@ -319,13 +319,13 @@ switch ($mode) {
 
 						if (preg_match('/<title[^>]*>(.+?)<\/title>/is', $match_head[1], $match)) {
 							$logdata['log_subject'] = convert_encoding(trim($match[1]), $result['charset']);
-							$logdata['log_subject'] = wan_html_entity_decode($logdata['log_subject']);
+							$logdata['log_subject'] = html_entity_decode($logdata['log_subject']);
 						}
 
 						if (strncmp($_POST['body_html_url'], 'http://', 7) == 0) {
 							$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
 							$result['data'] = preg_replace('/<(head[^>]*)>/si',
-								"<\\1>\n<base href=\"" . wan_htmlspecialchars($URL) . "/\">", $result['data']);
+								"<\\1>\n<base href=\"" . htmlspecialchars($URL) . "/\">", $result['data']);
 						}
 					}
 
@@ -383,7 +383,7 @@ switch ($mode) {
 						"<option style=\"%s\" value=\"%d\">%s - %s %s</option>\n",
 						$style,
 						$row['log_id'],
-						wan_htmlspecialchars(cut_str($row['log_subject'], 40)),
+						htmlspecialchars(cut_str($row['log_subject'], 40)),
 						convert_time('d F Y', $row['log_date']),
 						$status
 					);
@@ -429,9 +429,9 @@ switch ($mode) {
 				'L_FORMAT_HTML' => $lang['Format_html'],
 
 				'BODY_TEXT_URL' => (!empty($_POST['body_text_url']))
-					? wan_htmlspecialchars(trim($_POST['body_text_url'])) : '',
+					? htmlspecialchars(trim($_POST['body_text_url'])) : '',
 				'BODY_HTML_URL' => (!empty($_POST['body_html_url']))
-					? wan_htmlspecialchars(trim($_POST['body_html_url'])) : ''
+					? htmlspecialchars(trim($_POST['body_html_url'])) : ''
 			));
 
 			$output->pparse('body');
@@ -610,7 +610,7 @@ switch ($mode) {
 
 					for ($i = 0; $i < $total_cid; $i++) {
 						if (!in_array($refs[$i], $files)) {
-							$files_error[] = wan_htmlspecialchars($refs[$i]);
+							$files_error[] = htmlspecialchars($refs[$i]);
 						}
 					}
 
@@ -840,7 +840,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 
 	foreach ($other_files as $tmp_id => $row) {
 		if (!in_array($tmp_id, $joined_files_id)) {
-			$file_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $tmp_id, wan_htmlspecialchars($row['file_real_name']));
+			$file_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $tmp_id, htmlspecialchars($row['file_real_name']));
 		}
 	}
 
@@ -898,9 +898,9 @@ if (($mode == 'test' && count($supp_address) > 0) || $mode == 'progress') {
 	$output->displayMessage($message);
 }
 
-$subject   = wan_htmlspecialchars($logdata['log_subject']);
-$body_text = wan_htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
-$body_html = wan_htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
+$subject   = htmlspecialchars($logdata['log_subject']);
+$body_text = htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
+$body_html = htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
 
 $max_filesize = get_max_filesize();
 
@@ -931,7 +931,7 @@ $output->assign_vars(array(
 	'L_STATUS_WRITING'        => $lang['Status_writing'],
 	'L_STATUS_MODEL'          => $lang['Status_model'],
 	'L_CC_ADMIN'              => $lang['Receive_copy'],
-	'L_CC_ADMIN_TITLE'        => wan_htmlspecialchars($lang['Receive_copy_title']),
+	'L_CC_ADMIN_TITLE'        => htmlspecialchars($lang['Receive_copy_title']),
 
 	'L_SEND_BUTTON'           => $lang['Button']['send'],
 	'L_SAVE_BUTTON'           => $lang['Button']['save'],
@@ -941,7 +941,7 @@ $output->assign_vars(array(
 	'L_YES'                   => $lang['Yes'],
 	'L_NO'                    => $lang['No'],
 
-	'S_DEST'                  => wan_htmlspecialchars($listdata['liste_name']),
+	'S_DEST'                  => htmlspecialchars($listdata['liste_name']),
 	'S_SUBJECT'               => $subject,
 	'SELECTED_STATUS_WRITING' => $output->getBoolAttr('selected', ($logdata['log_status'] == STATUS_WRITING)),
 	'SELECTED_STATUS_MODEL'   => $output->getBoolAttr('selected', ($logdata['log_status'] == STATUS_MODEL)),

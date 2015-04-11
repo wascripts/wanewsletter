@@ -188,15 +188,15 @@ switch ($mode) {
 			'L_CONFIRM_PASSWD'=> $lang['Confirm_passwd'],
 			'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
-			'EMAIL'    => wan_htmlspecialchars($abodata['email']),
-			'PSEUDO'   => wan_htmlspecialchars($abodata['username']),
+			'EMAIL'    => htmlspecialchars($abodata['email']),
+			'PSEUDO'   => htmlspecialchars($abodata['username']),
 			'LANG_BOX' => lang_box($abodata['abo_lang'])
 		));
 
 		foreach ($other_tags as $tag) {
 			if (isset($abodata[$tag['column_name']])) {
 				$output->assign_var($tag['tag_name'],
-					wan_htmlspecialchars($abodata[$tag['column_name']])
+					htmlspecialchars($abodata[$tag['column_name']])
 				);
 			}
 		}
@@ -289,7 +289,7 @@ switch ($mode) {
 						$link = $tmp_link;
 					}
 					else {
-						$link = '<a href="' . wan_htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>';
+						$link = '<a href="' . htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>';
 					}
 				}
 
@@ -340,7 +340,7 @@ switch ($mode) {
 				if ($abodata['username'] != '') {
 					$tags_replace['NAME'] = $abodata['username'];
 					if ($format == FORMAT_HTML) {
-						$tags_replace['NAME'] = wan_htmlspecialchars($abodata['username']);
+						$tags_replace['NAME'] = htmlspecialchars($abodata['username']);
 					}
 				}
 				else {
@@ -351,7 +351,7 @@ switch ($mode) {
 					foreach ($other_tags as $tag) {
 						if ($abodata[$tag['column_name']] != '') {
 							if (!is_numeric($abodata[$tag['column_name']]) && $format == FORMAT_HTML) {
-								$tags_replace[$tag['tag_name']] = wan_htmlspecialchars($abodata[$tag['column_name']]);
+								$tags_replace[$tag['tag_name']] = htmlspecialchars($abodata[$tag['column_name']]);
 							}
 							else {
 								$tags_replace[$tag['tag_name']] = $abodata[$tag['column_name']];
@@ -388,7 +388,7 @@ switch ($mode) {
 				}
 				catch (\Exception $e) {
 					trigger_error(sprintf($lang['Message']['Failed_sending2'],
-						wan_htmlspecialchars($e->getMessage())
+						htmlspecialchars($e->getMessage())
 					), E_USER_ERROR);
 				}
 			}
@@ -441,14 +441,14 @@ switch ($mode) {
 				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
 
 				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; '
-					. wan_htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
+					. htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
 				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
 			}
 			$select_log .= '</select>';
 
 			$output->assign_block_vars('listerow', array(
 				'LISTE_ID'   => $liste_id,
-				'LISTE_NAME' => wan_htmlspecialchars($listdata['liste_name']),
+				'LISTE_NAME' => htmlspecialchars($listdata['liste_name']),
 				'SELECT_LOG' => $select_log
 			));
 		}

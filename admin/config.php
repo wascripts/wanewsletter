@@ -61,7 +61,7 @@ if (isset($_POST['submit'])) {
 	if (strncmp($new_config['cookie_path'], $new_config['path'], $len) != 0) {
 		$error = true;
 		$msg_error[] = nl2br(sprintf($lang['Message']['Invalid_cookie_path'],
-			wan_htmlspecialchars($new_config['path'])
+			htmlspecialchars($new_config['path'])
 		));
 	}
 
@@ -84,14 +84,14 @@ if (isset($_POST['submit'])) {
 				if (!mkdir($dest_upload, 0755)) {
 					$error = true;
 					$msg_error[] = sprintf($lang['Message']['Cannot_create_dir'],
-						wan_htmlspecialchars($dest_upload)
+						htmlspecialchars($dest_upload)
 					);
 				}
 			}
 			else if (!is_writable($dest_upload)) {
 				$error = true;
 				$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-					wan_htmlspecialchars($dest_upload)
+					htmlspecialchars($dest_upload)
 				);
 			}
 		}
@@ -169,7 +169,7 @@ if (isset($_POST['submit'])) {
 		catch (\Exception $e) {
 			$error = true;
 			$msg_error[] = sprintf(nl2br($lang['Message']['bad_smtp_param']),
-				wan_htmlspecialchars($e->getMessage())
+				htmlspecialchars($e->getMessage())
 			);
 		}
 
@@ -185,7 +185,7 @@ if (isset($_POST['submit'])) {
 		if (!is_writable(WA_STATSDIR)) {
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-				wan_htmlspecialchars(WA_STATSDIR)
+				htmlspecialchars(WA_STATSDIR)
 			);
 		}
 	}
@@ -296,7 +296,7 @@ $output->assign_vars( array(
 	'L_DEBUG_LEVEL'             => $lang['Debug_level'],
 
 	'LANG_BOX'                  => lang_box($new_config['language']),
-	'SITENAME'                  => wan_htmlspecialchars($new_config['sitename']),
+	'SITENAME'                  => htmlspecialchars($new_config['sitename']),
 	'URLSITE'                   => $new_config['urlsite'],
 	'URLSCRIPT'                 => $new_config['path'],
 	'DATE_FORMAT'               => $new_config['date_format'],

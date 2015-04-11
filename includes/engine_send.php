@@ -268,7 +268,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					}
 					catch (\Exception $e) {
 						trigger_error(sprintf($lang['Message']['Failed_sending2'],
-							wan_htmlspecialchars($e->getMessage())
+							htmlspecialchars($e->getMessage())
 						), E_USER_ERROR);
 					}
 
@@ -340,7 +340,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				if ($row['abo_pseudo'] != '') {
 					$tags_replace['NAME'] = $row['abo_pseudo'];
 					if ($abo_format == FORMAT_HTML) {
-						$tags_replace['NAME'] = wan_htmlspecialchars($row['abo_pseudo']);
+						$tags_replace['NAME'] = htmlspecialchars($row['abo_pseudo']);
 					}
 				}
 				else {
@@ -352,7 +352,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					foreach ($other_tags as $tag) {
 						if (isset($row[$tag['column_name']])) {
 							if (!is_numeric($row[$tag['column_name']]) && $abo_format == FORMAT_HTML) {
-								$row[$tag['column_name']] = wan_htmlspecialchars($row[$tag['column_name']]);
+								$row[$tag['column_name']] = htmlspecialchars($row[$tag['column_name']]);
 							}
 
 							$tags_replace[$tag['tag_name']] = $row[$tag['column_name']];
@@ -421,7 +421,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 				unlink($lockfile);
 
 				trigger_error(sprintf($lang['Message']['Failed_sending2'],
-					wan_htmlspecialchars($lastError)
+					htmlspecialchars($lastError)
 				), E_USER_ERROR);
 			}
 		}
@@ -578,7 +578,7 @@ function newsletter_links($listdata)
 		if ($nl_config['engine_send'] == ENGINE_BCC) {
 			$link = array(
 				FORMAT_TEXTE => $listdata['form_url'],
-				FORMAT_HTML  => sprintf($link_template, wan_htmlspecialchars($listdata['form_url']))
+				FORMAT_HTML  => sprintf($link_template, htmlspecialchars($listdata['form_url']))
 			);
 		}
 		else {
@@ -586,7 +586,7 @@ function newsletter_links($listdata)
 
 			$link = array(
 				FORMAT_TEXTE => $tmp_link,
-				FORMAT_HTML  => sprintf($link_template, wan_htmlspecialchars($tmp_link))
+				FORMAT_HTML  => sprintf($link_template, htmlspecialchars($tmp_link))
 			);
 		}
 	}
