@@ -25,7 +25,6 @@ use Wanewsletter\Dblayer\WadbResult;
 function wan_autoloader($classname)
 {
 	$catalog = array();
-	$catalog['popclient']    = '%s/includes/class.pop.php';
 	$catalog['wanewsletter'] = '%s/includes/class.form.php';
 
 	$rootdir = dirname(__DIR__);
