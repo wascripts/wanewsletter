@@ -9,7 +9,7 @@
 
 namespace Wanewsletter;
 
-if (__FILE__ == $_SERVER['SCRIPT_FILENAME']) {
+if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 	exit('<b>No hacking</b>');
 }
 

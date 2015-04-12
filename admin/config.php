@@ -9,7 +9,7 @@
 
 namespace Wanewsletter;
 
-require './pagestart.php';
+require './start.inc.php';
 
 if (!wan_is_admin($admindata)) {
 	http_response_code(401);

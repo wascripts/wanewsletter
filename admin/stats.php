@@ -9,7 +9,7 @@
 
 namespace Wanewsletter;
 
-require './pagestart.php';
+require './start.inc.php';
 require WA_ROOTDIR . '/includes/functions.stats.php';
 
 //

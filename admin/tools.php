@@ -12,7 +12,7 @@ namespace Wanewsletter;
 use Patchwork\Utf8 as u;
 use ZipArchive;
 
-require './pagestart.php';
+require './start.inc.php';
 
 //
 // Compression éventuelle des données et réglage du mime-type et du

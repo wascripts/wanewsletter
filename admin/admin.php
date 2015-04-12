@@ -12,7 +12,7 @@ namespace Wanewsletter;
 use Wamailer\Mailer;
 use Wamailer\Email;
 
-require './pagestart.php';
+require './start.inc.php';
 
 $mode     = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
 $admin_id = (!empty($_REQUEST['admin_id'])) ? intval($_REQUEST['admin_id']) : 0;

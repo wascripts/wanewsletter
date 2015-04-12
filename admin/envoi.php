@@ -23,7 +23,7 @@ namespace Wanewsletter;
 //
 const DISABLE_CHECK_LINKS = false;
 
-require './pagestart.php';
+require './start.inc.php';
 
 if (!$_SESSION['liste']) {
 	$output->build_listbox(Auth::VIEW);

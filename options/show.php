@@ -9,7 +9,7 @@
 
 namespace Wanewsletter;
 
-require '../admin/pagestart.php';
+require '../admin/start.inc.php';
 
 if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);

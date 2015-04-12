@@ -13,7 +13,7 @@ use Wamailer\Mailer;
 use Wamailer\Mime;
 use ZipArchive;
 
-require './pagestart.php';
+require './start.inc.php';
 
 $mode      = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
 $action    = (!empty($_REQUEST['action'])) ? $_REQUEST['action'] : '';

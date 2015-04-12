@@ -9,7 +9,7 @@
 
 namespace Wanewsletter;
 
-if (__FILE__ == $_SERVER['SCRIPT_FILENAME']) {
+if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 	exit('<b>No hacking</b>');
 }
 
@@ -92,16 +92,20 @@ spl_autoload_register(__NAMESPACE__.'\\wan_autoloader');
 //
 // Pas installé ?
 //
-$current_script = str_replace(dirname(__DIR__).'/', '', $_SERVER['SCRIPT_FILENAME']);
+$install_script = 'install.php';
+$current_script = basename($_SERVER['SCRIPT_FILENAME']);
 
-if ($current_script != 'install.php' && !defined('NL_INSTALLED')) {
+if ($current_script != $install_script && !defined('NL_INSTALLED')) {
 	if (!check_cli()) {
-		$install_path = (file_exists('install.php')) ? 'install.php' : '../install.php';
-		http_redirect($install_path);
+		if (!file_exists($install_script)) {
+			$install_script = '../'.$install_script;
+		}
+
+		http_redirect($install_script);
 	}
 	else {
 		echo "Wanewsletter seems not to be installed!\n";
-		echo "Call install.php in your web browser.\n";
+		echo "Call $install_script in your web browser.\n";
 		exit(1);
 	}
 }

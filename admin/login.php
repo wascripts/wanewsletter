@@ -11,5 +11,5 @@ namespace Wanewsletter;
 
 const IN_LOGIN = true;
 
-require './pagestart.php';
+require './start.inc.php';
 require '../includes/login.inc.php';

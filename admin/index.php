@@ -9,7 +9,7 @@
 
 namespace Wanewsletter;
 
-require './pagestart.php';
+require './start.inc.php';
 
 $num_inscrits = $num_temp = $num_logs = $last_log = $filesize = 0;
 

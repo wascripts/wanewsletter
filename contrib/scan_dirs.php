@@ -30,7 +30,7 @@ admin/config.php
 admin/envoi.php
 admin/index.php
 admin/login.php
-admin/pagestart.php
+admin/start.inc.php
 admin/stats.php
 admin/tools.php
 admin/upgrade.php
@@ -215,8 +215,6 @@ define('WA_ROOTDIR', dirname(__DIR__));
 
 ini_set('xdebug.default_enable', false);
 ini_set('default_mimetype', 'text/plain');
-
-//$files .= ltrim(str_replace(WA_ROOTDIR, '', __FILE__), '/');
 
 function scan_dir($dir)
 {

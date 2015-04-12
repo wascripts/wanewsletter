@@ -9,10 +9,6 @@
 
 namespace Wanewsletter;
 
-if (__FILE__ == $_SERVER['SCRIPT_FILENAME']) {
-	exit('<b>No hacking</b>');
-}
-
 if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', __DIR__);
 }
