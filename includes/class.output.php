@@ -466,14 +466,14 @@ class Output extends Template
 	{
 		global $lang;
 
-		$lang = (!empty($lang['CONTENT_LANG'])) ? $lang['CONTENT_LANG'] : 'fr';
-		$dir  = (!empty($lang['CONTENT_DIR'])) ? $lang['CONTENT_DIR'] : 'ltr';
+		$lang_code = (!empty($lang['CONTENT_LANG'])) ? $lang['CONTENT_LANG'] : 'fr';
+		$direction = (!empty($lang['CONTENT_DIR'])) ? $lang['CONTENT_DIR'] : 'ltr';
 
 		$this->send_headers();
 
 		echo <<<BASIC
 <!DOCTYPE html>
-<html lang="$lang" dir="$dir">
+<html lang="$lang_code" dir="$direction">
 <head>
 	<meta charset="UTF-8" />
 	$this->meta_redirect
