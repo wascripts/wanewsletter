@@ -525,12 +525,16 @@ switch ($mode) {
 				$msg_error[] = $lang['Subject_empty'];
 			}
 
-			if ($mode == 'send' && $listdata['liste_format'] != FORMAT_HTML && $logdata['log_body_text'] == '') {
+			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_text'] == '' &&
+				$listdata['liste_format'] != FORMAT_HTML
+			) {
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
 			}
 
-			if ($mode == 'send' && $listdata['liste_format'] != FORMAT_TEXTE && $logdata['log_body_html'] == '') {
+			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_html'] == '' &&
+				$listdata['liste_format'] != FORMAT_TEXTE
+			) {
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
 			}
@@ -855,16 +859,21 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 // Envois des emails
 //
 $supp_address = array();
-if ($mode == 'test' && !empty($_POST['test_address'])) {
+if ($mode == 'test' && isset($_POST['test_address'])) {
 	$supp_address = explode(',', $_POST['test_address']);
 	$supp_address = array_map('trim', $supp_address);
 	$supp_address = array_unique($supp_address);
 	$supp_address = array_filter($supp_address, function ($email) {
 		return \Wamailer\Mailer::checkMailSyntax($email);
 	});
+
+	if (count($supp_address) == 0) {
+		$error = true;
+		$msg_error[] = $lang['Message']['Invalid_email'];
+	}
 }
 
-if (($mode == 'test' && count($supp_address) > 0) || $mode == 'progress') {
+if (($mode == 'test' && !$error) || $mode == 'progress') {
 	if (!$auth->check_auth(Auth::SEND, $listdata['liste_id'])) {
 		http_response_code(401);
 		$output->displayMessage('Not_auth_send');

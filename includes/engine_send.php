@@ -234,9 +234,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 			$tpl->assign_vars($tags_replace);
 
-			$body[FORMAT_TEXTE] = $tpl->pparse('textbody', true);
-			$body[FORMAT_HTML]  = $tpl->pparse('htmlbody', true);
-
 			foreach (array(FORMAT_TEXTE, FORMAT_HTML) as $format) {
 				if (count($abonnes[$format]) > 0) {
 
@@ -246,12 +243,14 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 					}
 
 					if ($listdata['liste_format'] != FORMAT_HTML) {
+						$body[FORMAT_TEXTE] = $tpl->pparse('textbody', true);
 						$email->setTextBody($body[FORMAT_TEXTE]);
 					}
 
 					if ($listdata['liste_format'] == FORMAT_HTML || (
 						$listdata['liste_format'] == FORMAT_MULTIPLE && $format == FORMAT_HTML
 					)) {
+						$body[FORMAT_HTML]  = $tpl->pparse('htmlbody', true);
 						$email->setHTMLBody($body[FORMAT_HTML]);
 					}
 
@@ -365,8 +364,12 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 
 				$tpl->assign_vars($tags_replace);
 
-				$textBody = $tpl->pparse('textbody', true);
-				$htmlBody = $tpl->pparse('htmlbody', true);
+				if ($listdata['liste_format'] != FORMAT_HTML) {
+					$textBody = $tpl->pparse('textbody', true);
+				}
+				if ($listdata['liste_format'] != FORMAT_TEXTE) {
+					$htmlBody = $tpl->pparse('htmlbody', true);
+				}
 
 				if ($abo_format == FORMAT_TEXTE) {
 					$email->setTextBody($textBody);
