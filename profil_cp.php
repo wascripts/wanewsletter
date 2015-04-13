@@ -12,6 +12,8 @@ namespace Wanewsletter;
 use Wamailer\Mailer;
 use Wamailer\Email;
 
+const IN_PROFILCP = true;
+
 require './includes/common.inc.php';
 require WA_ROOTDIR . '/includes/functions.validate.php';
 

@@ -387,21 +387,6 @@ function load_settings($admindata = array())
  */
 function wan_error_handler($errno, $errstr, $errfile, $errline)
 {
-	$simple = (check_cli() || !check_in_admin());
-	$fatal  = ($errno == E_USER_ERROR || $errno == E_RECOVERABLE_ERROR);
-
-	$debug_level = wan_get_debug_level();
-
-	//
-	// On affiche pas les erreurs non prises en compte dans le réglage du
-	// error_reporting si error_reporting vaut 0, sauf si DEBUG_MODE est au max
-	//
-	if (!$fatal && ($debug_level == DEBUG_LEVEL_QUIET ||
-		($debug_level == DEBUG_LEVEL_NORMAL && !(error_reporting() & $errno))
-	)) {
-		return true;
-	}
-
 	//
 	// On s'assure que si des erreurs surviennent au sein même du gestionnaire
 	// d'erreurs alors que l'opérateur @ a été utilisé en amont, elles seront
@@ -409,28 +394,34 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	// soit par le gestionnaire d'erreurs natif de PHP
 	// (dans le cas d'erreurs fatales par exemple <= C'est du vécu :().
 	//
-	error_reporting($GLOBALS['default_error_reporting']);
+	$error_reporting = error_reporting($GLOBALS['default_error_reporting']);
+
+	//
+	// On affiche pas les erreurs non prises en compte dans le réglage du
+	// error_reporting si error_reporting vaut 0, sauf si le niveau de
+	// débogage est au maximum.
+	//
+	$debug_level = wan_get_debug_level();
+	$debug  = ($debug_level == DEBUG_LEVEL_ALL);
+	$debug |= ($debug_level == DEBUG_LEVEL_NORMAL && ($error_reporting & $errno));
+
+	// Si l’affichage des erreurs peut être délégué à la classe Output.
+	$skip  = check_theme_is_used();
+	// Si l’affichage en bloc dans le bas de page est activé (défaut).
+	$skip &= DISPLAY_ERRORS_IN_LOG;
 
 	$error = new Error(array(
 		'type'    => $errno,
 		'message' => $errstr,
 		'file'    => $errfile,
-		'line'    => $errline
+		'line'    => $errline,
+		'ignore'  => (!$debug || !$skip)
 	));
 
-	if ($simple || $fatal) {
-		wan_display_error($error, $simple);
+	wanlog($error);
 
-		if ($fatal) {
-			exit(1);
-		}
-	}
-	else {
-		wanlog($error);
-
-		if (!DISPLAY_ERRORS_IN_LOG) {
-			wan_display_error($error, true);
-		}
+	if ($error->isFatal() || ($debug && !$skip)) {
+		wan_display_error($error);
 	}
 
 	return true;
@@ -444,7 +435,6 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 function wan_exception_handler($e)
 {
 	wan_display_error($e);
-	exit(1);
 }
 
 /**
@@ -491,6 +481,14 @@ function wan_format_error($error)
 		// Si on est en mode de non-débogage, on a forcément attrapé une erreur
 		// critique pour arriver ici.
 		$message  = $lang['Message']['Critical_error'];
+
+		if ($errno == E_USER_ERROR) {
+			if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
+				$errstr = $lang['Message'][$errstr];
+			}
+
+			$message = $errstr;
+		}
 	}
 	else if ($error instanceof Dblayer\Exception) {
 		if ($db instanceof Wadb && $db->sqlstate != '') {
@@ -542,12 +540,19 @@ function wan_format_error($error)
 /**
  * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
  *
- * @param Exception $error      Exception décrivant l'erreur
- * @param boolean   $simpleHTML Si true, affichage simple dans un paragraphe
+ * @param Exception $error Exception décrivant l'erreur
  */
-function wan_display_error($error, $simpleHTML = false)
+function wan_display_error($error)
 {
 	global $output;
+
+	if ($error instanceof \Exception) {
+		$exit = true;
+
+		if ($error instanceof Error) {
+			$exit = $error->isFatal();
+		}
+	}
 
 	$message = wan_format_error($error);
 
@@ -567,37 +572,29 @@ function wan_display_error($error, $simpleHTML = false)
 
 		fwrite(STDERR, $message);
 	}
-	else if ($simpleHTML) {
+	else if (!$exit) {
 		echo '<p>' . nl2br($message) . '</p>';
 	}
 	else {
 		http_response_code(500);
 
-		if ($output instanceof Output) {
+		if (check_theme_is_used()) {
 			$output->displayMessage($message, 'error');
 		}
 		else {
 			$message = nl2br($message);
 			echo <<<BASIC
-<!DOCTYPE html>
-<html dir="ltr">
-<head>
-	<title>Erreur critique&nbsp;!</title>
+<div>
+	<h1>Erreur critique&nbsp;!</h1>
 
-	<style>
-	body { margin: 10px; text-align: left; }
-	</style>
-</head>
-<body>
-	<div>
-		<h1>Erreur critique&nbsp;!</h1>
-
-		<p>$message</p>
-	</div>
-</body>
-</html>
+	<p>$message</p>
+</div>
 BASIC;
 		}
+	}
+
+	if ($exit) {
+		exit(1);
 	}
 }
 
@@ -1526,4 +1523,17 @@ function check_cli()
 function check_in_admin()
 {
 	return defined(__NAMESPACE__.'\\IN_ADMIN');
+}
+
+/**
+ * Indique si le thème Wanewsletter est utilisé pour afficher cette page.
+ *
+ * @return boolean
+ */
+function check_theme_is_used()
+{
+	return (!check_cli() && (check_in_admin() ||
+		defined(__NAMESPACE__.'\\IN_INSTALL') ||
+		defined(__NAMESPACE__.'\\IN_PROFILCP')
+	));
 }

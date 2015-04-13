@@ -388,8 +388,12 @@ class Output extends Template
 
 		foreach ($entries as $entry) {
 			if ($entry instanceof Exception) {
-				if (!DISPLAY_ERRORS_IN_LOG) {
-					continue;
+				if ($entry instanceof Error) {
+					// L’affichage des erreurs fatales est fait directement dans le
+					// gestionnaire d’erreurs.
+					if ($entry->isFatal() || $entry->ignore()) {
+						continue;
+					}
 				}
 
 				$entry = wan_format_error($entry);
@@ -573,6 +577,7 @@ BASIC;
 		$this->pparse('body');
 
 		$this->page_footer();
+
 		exit;
 	}
 

@@ -9,6 +9,8 @@
 
 namespace Wanewsletter;
 
+const IN_INSTALL = true;
+
 if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 	exit('<b>No hacking</b>');
 }

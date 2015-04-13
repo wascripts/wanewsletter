@@ -111,6 +111,16 @@ if ($current_script != $install_script && !defined('NL_INSTALLED')) {
 }
 
 //
+// Initialisation du système de templates
+//
+if (!check_cli()) {
+	$output = new Output(sprintf('%s/templates/%s',
+		WA_ROOTDIR,
+		(check_in_admin() ? 'admin/' : '')
+	));
+}
+
+//
 // Initialisation de patchwork/utf8
 //
 \Patchwork\Utf8\Bootup::initAll();
@@ -119,13 +129,6 @@ if ($current_script != $install_script && !defined('NL_INSTALLED')) {
 // Configuration par défaut
 //
 load_settings();
-
-if (!check_cli()) {
-	$output = new Output(sprintf('%s/templates/%s',
-		WA_ROOTDIR,
-		(check_in_admin() ? 'admin/' : '')
-	));
-}
 
 //
 // Désactivation de magic_quotes_runtime +
