@@ -190,6 +190,9 @@ define('ZIPLIB_LOADED', extension_loaded('zip'));
 define('ZLIB_LOADED',   extension_loaded('zlib'));
 define('BZIP2_LOADED',  extension_loaded('bz2'));
 
+$user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS);
+$EOL = (stripos($user_agent, 'Win')) ? "\r\n" : "\n";
+
 //
 // On augmente le temps d'exécution du script
 // Certains hébergeurs empèchent pour des raisons évidentes cette possibilité
@@ -318,9 +321,7 @@ switch ($mode) {
 			wan_print_row(' - Jeu de caractères', $db->encoding());
 		}
 
-		wan_print_row('Agent utilisateur',
-			filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS)
-		);
+		wan_print_row('Agent utilisateur', $user_agent);
 
 		echo "</pre>";
 
@@ -334,7 +335,7 @@ switch ($mode) {
 				$format = $listdata['liste_format'];
 			}
 
-			$glue = ($glue != '') ? $glue : WA_EOL;
+			$glue = ($glue != '') ? $glue : $EOL;
 
 			$sql = "SELECT a.abo_email
 				FROM " . ABONNES_TABLE . " AS a
@@ -600,7 +601,7 @@ switch ($mode) {
 						return true;
 					}
 					else {
-						$report .= sprintf('%s : %s%s', $email, $lang['Message']['Invalid_email2'], WA_EOL);
+						$report .= sprintf('%s : %s%s', $email, $lang['Message']['Invalid_email2'], $EOL);
 						return false;
 					}
 				}
@@ -642,7 +643,7 @@ switch ($mode) {
 						$report .= sprintf('%s : %s%s',
 							$abodata['abo_email'],
 							$lang['Message']['Allready_reg'],
-							WA_EOL
+							$EOL
 						);
 					}
 
@@ -665,7 +666,7 @@ switch ($mode) {
 						$db->insert(ABONNES_TABLE, $sql_data);
 					}
 					catch (Dblayer\Exception $e) {
-						$report .= sprintf('%s : SQL error (#%d: %s)%s', $email, $db->errno, $db->error, WA_EOL);
+						$report .= sprintf('%s : SQL error (#%d: %s)%s', $email, $db->errno, $db->error, $EOL);
 						$db->rollBack();
 						continue;
 					}
@@ -691,12 +692,12 @@ switch ($mode) {
 			// et mise à disposition éventuelle du rapport d'erreurs
 			//
 			if ($report != '') {
-				$report_str  = '#' . WA_EOL;
-				$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . WA_EOL;
-				$report_str .= '#' . WA_EOL;
-				$report_str .= WA_EOL;
-				$report_str .= $report . WA_EOL;
-				$report_str .= '# END' . WA_EOL;
+				$report_str  = '#' . $EOL;
+				$report_str .= '# Rapport des adresses emails refusées / Bad address email report' . $EOL;
+				$report_str .= '#' . $EOL;
+				$report_str .= $EOL;
+				$report_str .= $report . $EOL;
+				$report_str .= '# END' . $EOL;
 
 				$url = 'data:text/plain;base64,' . base64_encode($report_str);
 				$output->addLine($lang['Message']['Success_import3'], $url);
@@ -962,7 +963,7 @@ switch ($mode) {
 					$contents .= $backup->get_table_data($tabledata['name']);
 				}
 
-				$contents .= WA_EOL . WA_EOL;
+				$contents .= $EOL . $EOL;
 
 				fake_header(true);
 			}
