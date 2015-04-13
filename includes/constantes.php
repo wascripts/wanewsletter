@@ -109,10 +109,10 @@ const X_MAILER_HEADER = USER_AGENT_SIG;
 //
 // Utilisées dans le cadre de la classe de vérification de mise à jour
 //
-const WA_DOWNLOAD_PAGE      = 'http://phpcodeur.net/wascripts/wanewsletter/telecharger';
-const WA_CHECK_UPDATE_URL   = 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version';
-const WA_CHECK_UPDATE_CACHE = 'wa-check-update.cache';
-const WA_CHECK_UPDATE_CACHE_TTL = 3600;
+const DOWNLOAD_PAGE      = 'http://phpcodeur.net/wascripts/wanewsletter/telecharger';
+const CHECK_UPDATE_URL   = 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version';
+const CHECK_UPDATE_CACHE = 'wa-check-update.cache';
+const CHECK_UPDATE_CACHE_TTL = 3600;
 
 //
 // Déclaration des dossiers et fichiers spéciaux utilisés par le script

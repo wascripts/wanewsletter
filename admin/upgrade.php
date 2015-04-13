@@ -44,7 +44,7 @@ if (filter_input(INPUT_GET, 'mode') == 'check') {
 		if ($result !== false) {
 			if ($result === 1) {
 				$output->addLine($lang['New_version_available']);
-				$output->addLine(sprintf('<a href="%s">%s</a>', WA_DOWNLOAD_PAGE, $lang['Download_page']));
+				$output->addLine(sprintf('<a href="%s">%s</a>', DOWNLOAD_PAGE, $lang['Download_page']));
 			}
 			else {
 				$output->addLine($lang['Version_up_to_date']);

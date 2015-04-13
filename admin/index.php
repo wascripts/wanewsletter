@@ -221,7 +221,7 @@ if ($result !== false) {
 			'L_NEW_VERSION_AVAILABLE' => $lang['New_version_available'],
 			'L_DOWNLOAD_PAGE'         => $lang['Download_page'],
 
-			'U_DOWNLOAD_PAGE' => WA_DOWNLOAD_PAGE
+			'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
 		));
 	}
 	else {
@@ -238,7 +238,7 @@ else {
 		'L_SITE_UNREACHABLE'      => str_replace('\'', '\\\'', $lang['Site_unreachable']),
 		'L_DOWNLOAD_PAGE'         => str_replace('\'', '\\\'', $lang['Download_page']),
 
-		'U_DOWNLOAD_PAGE' => WA_DOWNLOAD_PAGE
+		'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
 	));
 }
 

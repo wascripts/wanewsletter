@@ -75,8 +75,8 @@ function check_db_version($version)
  */
 function wa_check_update($complete = false)
 {
-	$cache_file = sprintf('%s/%s', WA_TMPDIR, WA_CHECK_UPDATE_CACHE);
-	$cache_ttl  = WA_CHECK_UPDATE_CACHE_TTL;
+	$cache_file = sprintf('%s/%s', WA_TMPDIR, CHECK_UPDATE_CACHE);
+	$cache_ttl  = CHECK_UPDATE_CACHE_TTL;
 
 	$result = false;
 	$data   = '';
@@ -85,7 +85,7 @@ function wa_check_update($complete = false)
 		$data = file_get_contents($cache_file);
 	}
 	else if ($complete) {
-		$result = http_get_contents(WA_CHECK_UPDATE_URL, $errstr);
+		$result = http_get_contents(CHECK_UPDATE_URL, $errstr);
 		$data = $result['data'];
 
 		if ($data) {
