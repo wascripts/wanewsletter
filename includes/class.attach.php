@@ -24,95 +24,17 @@ class Attach
 	private $upload_path = '';
 
 	/**
-	 * Utilisation ou non de l'option ftp
-	 *
-	 * @var boolean
-	 */
-	private $use_ftp     = false;
-
-	/**
-	 * Chemin vers le dossier de stockage des fichiers sur le ftp
-	 *
-	 * @var string
-	 */
-	private $ftp_path    = '';
-
-	/**
-	 * Identifiant de ressource au serveur ftp
-	 *
-	 * @var resource
-	 */
-	private $connect_id  = null;
-
-	/**
 	 * Initialisation des variables de la classe
-	 * Initialisation de la connexion au serveur ftp le cas échéant
 	 */
 	public function __construct()
 	{
 		global $nl_config;
 
 		$this->upload_path = WA_ROOTDIR . '/' . $nl_config['upload_path'];
-		$this->use_ftp     = $nl_config['use_ftp'];
-
-		if ($this->use_ftp) {
-			$result = $this->connect_to_ftp(
-				$nl_config['ftp_server'],
-				$nl_config['ftp_port'],
-				$nl_config['ftp_user'],
-				$nl_config['ftp_pass'],
-				$nl_config['ftp_pasv'],
-				$nl_config['ftp_path']
-			);
-
-			if ($result['error']) {
-				trigger_error($result['message'], E_USER_ERROR);
-			}
-
-			$this->connect_id = $result['connect_id'];
-			$this->ftp_path   = $nl_config['ftp_path'];
-		}
 	}
 
 	/**
-	 * Fonction de connexion au serveur ftp
-	 * La fonction a été affranchi de façon à être utilisable sans créer
-	 * une instance de la classe. (pour tester la connexion dans la config. générale)
-	 *
-	 * @param string  $ftp_server Nom du serveur ftp
-	 * @param integer $ftp_port   Port de connexion
-	 * @param string  $ftp_user   Nom d'utilisateur si besoin
-	 * @param string  $ftp_pass   Mot de passe si besoin
-	 * @param integer $ftp_pasv   Mode actif ou passif
-	 * @param string  $ftp_path   Chemin vers le dossier des fichiers joints
-	 *
-	 * @return array
-	 */
-	public static function connect_to_ftp($ftp_server, $ftp_port, $ftp_user, $ftp_pass, $ftp_pasv, $ftp_path)
-	{
-		if (!($connect_id = @ftp_connect($ftp_server, $ftp_port))) {
-			return array('error' => true, 'message' => 'Ftp_unable_connect');
-		}
-
-		if ($ftp_user != '' && $ftp_pass != '') {
-			if (!@ftp_login($connect_id, $ftp_user, $ftp_pass)) {
-				return array('error' => true, 'message' => 'Ftp_error_login');
-			}
-		}
-
-		if (!@ftp_pasv($connect_id, $ftp_pasv)) {
-			return array('error' => true, 'message' => 'Ftp_error_mode');
-		}
-
-		if (!@ftp_chdir($connect_id, $ftp_path)) {
-			return array('error' => true, 'message' => 'Ftp_error_path');
-		}
-
-		return array('error' => false, 'connect_id' => $connect_id);
-	}
-
-	/**
-	 * Verifie la présence du fichier demandé dans le dossier des fichier joints ou sur le ftp
+	 * Verifie la présence du fichier demandé dans le dossier des fichier joints
 	 *
 	 * @param string  $filename  Nom du fichier
 	 * @param boolean $error     True si une erreur s'est produite
@@ -127,26 +49,7 @@ class Attach
 		$file_exists = false;
 		$filesize    = 0;
 
-		if ($this->use_ftp) {
-			$listing = @ftp_rawlist($this->connect_id, $this->ftp_path);
-
-			if (is_array($listing) && count($listing)) {
-				//
-				// On vérifie chaque entrée du listing pour retrouver le fichier spécifié
-				//
-				foreach ($listing as $line_info) {
-					if (preg_match('/^\s*([d-])[rwxst-]{9} .+ ([0-9]*) [a-zA-Z]+ [0-9:\s]+ (.+)$/i', $line_info, $m)) {
-						if ($m[1] != 'd' && $m[3] == $filename) {
-							$file_exists = true;
-							$filesize    = $m[2];
-
-							break;
-						}
-					}
-				}
-			}
-		}
-		else if (file_exists($this->upload_path . $filename)) {
+		if (file_exists($this->upload_path . $filename)) {
 			$file_exists = true;
 			$filesize    = filesize($this->upload_path . $filename);
 		}
@@ -218,7 +121,7 @@ class Attach
 		//
 		// Vérification de l'accès en écriture au répertoire de stockage
 		//
-		if ($upload_mode != 'local' && !$this->use_ftp && !is_writable($this->upload_path)) {
+		if ($upload_mode != 'local' && !is_writable($this->upload_path)) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Uploaddir_not_writable'];
 			return;
@@ -264,11 +167,7 @@ class Attach
 				$URL  = $tmp_filename;
 				$part = parse_url($URL);
 
-				if (!is_array($part) || !isset($part['scheme']) || (
-					$part['scheme'] != 'http' && (
-						$part['scheme'] != 'ftp' || !extension_loaded('ftp')
-					)
-				)) {
+				if (!is_array($part) || !isset($part['scheme']) || $part['scheme'] != 'http') {
 					$error = true;
 					$msg_error[] = $lang['Message']['Invalid_url'];
 
@@ -286,65 +185,21 @@ class Attach
 					return;
 				}
 
-				if ($part['scheme'] == 'http') {
-					$result = http_get_contents($URL, $errstr);
+				$result = http_get_contents($URL, $errstr);
 
-					if (!$result) {
-						$error = true;
-						$msg_error[] = $errstr;
-						fclose($fw);
-						$this->remove_file($tmp_filename);
-
-						return;
-					}
-
-					fwrite($fw, $result['data']);
+				if (!$result) {
+					$error = true;
+					$msg_error[] = $errstr;
 					fclose($fw);
-					$filesize = strlen($result['data']);
-					$filetype = $result['type'];
+					$this->remove_file($tmp_filename);
+
+					return;
 				}
-				else {
-					if (!isset($part['user'])) {
-						$part['user'] = 'anonymous';
-					}
-					if (!isset($part['pass'])) {
-						$part['pass'] = 'anonymous';
-					}
 
-					$port = (!isset($part['port'])) ? 21 : $part['port'];
-
-					if (!($cid = @ftp_connect($part['host'], $port)) ||
-						!@ftp_login($cid, $part['user'], $part['pass'])
-					) {
-						$error = true;
-						$msg_error[] = sprintf(
-							$lang['Message']['Unaccess_host'],
-							htmlspecialchars($part['host'])
-						);
-						fclose($fw);
-						$this->remove_file($tmp_filename);
-
-						return;
-					}
-
-					$path  = (!isset($part['path'])) ? '/' : $part['path'];
-					$path .= (!isset($part['query'])) ? '' : '?'.$part['query'];
-
-					$filesize = ftp_size($cid, $path);
-
-					if (!ftp_fget($cid, $fw, $path, FTP_BINARY)) {
-						$error = true;
-						$msg_error[] = $lang['Message']['Not_found_at_url'];
-						fclose($fw);
-						$this->remove_file($tmp_filename);
-
-						return;
-					}
-					ftp_close($cid);
-					fclose($fw);
-
-					$filetype = \Wamailer\Mime::getType($tmp_filename);
-				}
+				fwrite($fw, $result['data']);
+				fclose($fw);
+				$filesize = strlen($result['data']);
+				$filetype = $result['type'];
 			}
 
 			//
@@ -380,29 +235,16 @@ class Attach
 		if (!$error && $upload_mode != 'local') {
 			$physical_filename = $this->make_filename();
 
-			if ($this->use_ftp) {
-				$mode = $this->get_mode($filetype);
-
-				if (!@ftp_put($this->connect_id, $physical_filename, $tmp_filename, $mode)) {
-					$error = true;
-					$msg_error[] = $lang['Message']['Ftp_error_put'];
-				}
-				else {
-					@ftp_site($this->connect_id, 'CHMOD 0644 ' . $physical_filename);
-				}
+			if ($upload_mode == 'remote') {
+				$result_upload = copy($tmp_filename, $this->upload_path . $physical_filename);
 			}
 			else {
-				if ($upload_mode == 'remote') {
-					$result_upload = copy($tmp_filename, $this->upload_path . $physical_filename);
-				}
-				else {
-					$result_upload = move_uploaded_file($tmp_filename, $this->upload_path . $physical_filename);
-				}
+				$result_upload = move_uploaded_file($tmp_filename, $this->upload_path . $physical_filename);
+			}
 
-				if (!$result_upload) {
-					$error = true;
-					$msg_error[] = $lang['Message']['Upload_error_5'];
-				}
+			if (!$result_upload) {
+				$error = true;
+				$msg_error[] = $lang['Message']['Upload_error_5'];
 			}
 
 			//
@@ -434,8 +276,6 @@ class Attach
 
 			$db->commit();
 		}
-
-		$this->quit();
 	}
 
 	/**
@@ -486,8 +326,6 @@ class Attach
 				VALUES($log_id, $file_id)";
 			$db->query($sql);
 		}
-
-		$this->quit();
 	}
 
 	/**
@@ -563,61 +401,17 @@ class Attach
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
-			if ($this->use_ftp) {
-				$tmp_filename = $this->ftp_to_tmp($row);
-			}
-			else {
-				$tmp_filename = $this->upload_path . $row['file_physical_name'];
-			}
+			$tmp_filename = $this->upload_path . $row['file_physical_name'];
 
 			$data = file_get_contents($tmp_filename);
 			if ($data === false) {
 				trigger_error('Impossible de lire le fichier spécifié', E_USER_ERROR);
 			}
 
-			if ($this->use_ftp) {
-				$this->remove_file($tmp_filename);
-			}
-
-			$this->quit();
 			$this->send_file($row['file_real_name'], $row['file_mimetype'], $data, $row['file_size']);
 		}
 
 		$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
-	}
-
-	/**
-	 * Déplacement du fichier demandé du serveur ftp vers le dossier temporaire
-	 * Retourne le nom du fichier temporaire
-	 *
-	 * @param array $data Données du fichier joint
-	 *
-	 * @return string
-	 */
-	public function ftp_to_tmp($data)
-	{
-		$mode         = $this->get_mode($data['file_mimetype']);
-		$tmp_path     = (config_value('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
-		$tmp_filename = tempnam($tmp_path, 'wa1');
-
-		if (!@ftp_get($this->connect_id, $tmp_filename, $data['file_physical_name'], $mode)) {
-			$this->remove_file($tmp_filename);
-			trigger_error('Ftp_error_get', E_USER_ERROR);
-		}
-
-		return $tmp_filename;
-	}
-
-	/**
-	 * Mode à utiliser pour le ftp, ascii ou binaire
-	 *
-	 * @param string $mime_type Type mime du fichier concerné
-	 *
-	 * @return integer
-	 */
-	private function get_mode($mime_type)
-	{
-		return (preg_match('/text|html|xml/i', $mime_type)) ? FTP_ASCII : FTP_BINARY;
 	}
 
 	/**
@@ -688,14 +482,7 @@ class Attach
 				// Suppression physique des fichiers joints devenus inutiles
 				//
 				foreach ($filename_ary as $filename) {
-					if ($this->use_ftp) {
-						if (!@ftp_delete($this->connect_id, $filename)) {
-							trigger_error('Ftp_error_del', E_USER_ERROR);
-						}
-					}
-					else {
-						$this->remove_file($this->upload_path . $filename);
-					}
+					$this->remove_file($this->upload_path . $filename);
 				}
 
 				return count($filename_ary);
@@ -771,15 +558,5 @@ class Attach
 
 		echo $data;
 		exit;
-	}
-
-	/**
-	 * Fermeture de la connexion au serveur ftp
-	 */
-	public function quit()
-	{
-		if ($this->use_ftp) {
-			@ftp_close($this->connect_id);
-		}
 	}
 }

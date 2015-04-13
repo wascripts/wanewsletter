@@ -97,11 +97,9 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 	}
 
 	//
-	// On s'occupe maintenant des fichiers joints ou incorporés
-	// Si les fichiers sont stockés sur un serveur ftp, on les rapatrie le temps du flot d'envoi
+	// On s’occupe maintenant des fichiers joints ou incorporés.
 	//
 	$total_files = count($logdata['joined_files']);
-	$tmp_files   = array();
 
 	$attach = new Attach();
 
@@ -120,13 +118,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 			continue;
 		}
 
-		if ($nl_config['use_ftp']) {
-			$file_path = $attach->ftp_to_tmp($logdata['joined_files'][$i]);
-			$tmp_files[] = $file_path;
-		}
-		else {
-			$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
-		}
+		$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 
 		$email->attach($file_path, $real_name, $mime_type);
 	}
@@ -438,16 +430,6 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		//
 		return $lang['Message']['No_subscribers'];
 	}
-
-	//
-	// Si l'option FTP est utilisée, suppression des fichiers temporaires
-	//
-	if ($nl_config['use_ftp']) {
-		foreach ($tmp_files as $filename) {
-			$attach->remove_file($filename);
-		}
-	}
-	unset($tmp_files);
 
 	$no_sent = $sent = 0;
 

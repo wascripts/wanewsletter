@@ -765,7 +765,7 @@ switch ($mode) {
 				if (!empty($local_file)) {
 					$tmp_filename = str_replace('\\', '/', $tmp_filename);
 
-					if (preg_match('#^(?:http|ftp)://.+/([^/]+)$#', $tmp_filename, $match)) {
+					if (preg_match('#^(?:http)://.+/([^/]+)$#', $tmp_filename, $match)) {
 						$upload_mode = 'remote';
 						$filename    = $match[1];
 					}

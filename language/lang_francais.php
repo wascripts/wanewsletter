@@ -181,7 +181,6 @@ $lang['Message']['Not_auth_attach']         = "Vous n’êtes pas autorisé à j
 $lang['Message']['Error_login']             = "Ces identifiants sont incorrects. Échec de l’authentification";
 $lang['Message']['Bad_confirm_pass']        = "La confirmation du mot de passe ne correspond pas au mot de passe entré";
 $lang['Message']['Bad_confirm_email']       = "La confirmation de votre nouvelle adresse email est erronée";
-$lang['Message']['bad_ftp_param']           = "La connexion au serveur ftp n’a pu être établie, vérifiez vos paramètres \n(%s)";
 $lang['Message']['bad_smtp_param']          = "La connexion au serveur smtp n’a pu être établie, vérifiez vos paramètres \n(%s)";
 $lang['Message']['bad_pop_param']           = "La connexion au serveur pop n’a pu être établie, vérifiez vos paramètres \n(%s)";
 $lang['Message']['Alphanum_pass']           = "Le mot de passe doit être composé au minimum de 6 caractères ASCII imprimables";
@@ -218,14 +217,6 @@ $lang['Message']['File_not_found']          = "Ce fichier est introuvable sur le
 $lang['Message']['Cannot_create_dir']       = "Impossible de créer le répertoire %s";
 $lang['Message']['Dir_not_writable']        = "Le répertoire <samp>%s</samp> n’existe pas ou n’est pas accessible en écriture";
 $lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (includes/sql/schemas/)";
-
-$lang['Message']['Ftp_unable_connect']      = "Impossible de se connecter au serveur ftp";
-$lang['Message']['Ftp_error_login']         = "L’authentification auprès du serveur ftp a échoué";
-$lang['Message']['Ftp_error_mode']          = "Impossible de changer le mode du serveur";
-$lang['Message']['Ftp_error_path']          = "Impossible d’accéder au répertoire spécifié";
-$lang['Message']['Ftp_error_put']           = "Impossible d’uploader le fichier sur le serveur ftp";
-$lang['Message']['Ftp_error_get']           = "Impossible de récupérer le fichier du serveur ftp";
-$lang['Message']['Ftp_error_del']           = "Impossible de supprimer le fichier du serveur ftp";
 
 $lang['Message']['Uploaddir_not_writable']  = "Le répertoire de stockage des fichiers joints n’est pas accessible en écriture";
 $lang['Message']['Upload_error_1']          = "Le fichier excède le poids autorisé par la directive upload_max_filesize de php.ini";
@@ -388,7 +379,7 @@ $lang['Total_Filesize']             = "Espace disque occupé par les fichiers (p
 //
 $lang['Explain']['config']          = "Le formulaire ci-dessous vous permet de configurer tous les aspects du script";
 $lang['Explain']['config_cookies']  = "Ces paramètres vous permettent de régler les cookies utilisés par le script. \nSi vous n’êtes pas sûr de vous, laissez les paramètres par défaut";
-$lang['Explain']['config_files']    = "Vous avez la possibilité de joindre des fichiers à vos envois de newsletters. \nPour ce faire, le script offre deux options. Le plus simple est de stocker les fichiers sur le serveur, dans le répertoire défini comme répertoire de stockage (le répertoire en question doit être accessible en écriture). \nSi, pour une raison ou une autre, cela n’est pas rendu possible sur votre serveur, le script a la possibilité de stocker les fichiers sur un serveur <abbr title=\"File Transfert Protocol\" lang=\"en\">ftp</abbr>.\n Vous devez alors entrer les paramètres d’accès au serveur ftp en question.";
+$lang['Explain']['config_files']    = "Vous avez la possibilité de joindre des fichiers à vos envois de newsletters. \nLes fichiers seront stockés sur le serveur, dans le répertoire défini comme répertoire de stockage, lequel doit être accessible en écriture.";
 $lang['Explain']['config_email']    = "Ces paramètres vous permettent de configurer vos envois d’emails.\nPar défaut, le script envoie un email personnalisé à chaque abonné, mais vous pouvez le configurer pour qu’il envoie un ou plusieurs emails avec une liste de destinataires en copie cachée.\nSi vous souhaitez utiliser un serveur <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">SMTP</abbr> spécifique, activez l’option puis renseignez les informations de connexion. Par défaut, le script utilise la fonction <code>mail()</code> de <abbr title=\"PHP: Hypertext Preprocessor\" lang=\"en\">PHP</abbr>. Consultez la %sFAQ%s au sujet des limitations existantes dans le cadre de l’utilisation d’un serveur <abbr>SMTP</abbr>.";
 $lang['Explain']['config_stats']    = "Le script dispose d’un petit module de statistique. Celui-ci demande que la librairie GD soit installée sur votre serveur pour fonctionner. \nSi vous ne souhaitez pas utiliser cette fonctionnalité, il est recommandé de désactiver le module de statistiques pour éviter des traitement de données superflus par le script.";
 $lang['Explain']['config_debug']    = "Le débogueur permet d’afficher les erreurs non fatales survenant lors de l’exécution du script. Cela peut aider à trouver l’origine d’un dysfonctionnement.\n Les informations de débogage sont visibles uniquement aux administrateurs.";
@@ -410,16 +401,6 @@ $lang['Session_length']             = "Durée d’une session sur l’administra
 $lang['Upload_path']                = "Répertoire de stockage des fichiers joints";
 $lang['Max_filesize']               = "Poids total des fichiers joints à une newsletter";
 $lang['Max_filesize_note']          = "(somme de la taille en octet des fichiers joints)";
-$lang['Use_ftp']                    = "Utilisation d’un serveur ftp pour stocker les fichiers joints";
-$lang['Ftp_server']                 = "Nom du serveur ftp";
-$lang['Ftp_server_note']            = "(nom sans le ftp:// initial, ou adresse ip)";
-$lang['Ftp_port']                   = "Port de connexion";
-$lang['Ftp_port_note']              = "La valeur par défaut conviendra la plupart du temps";
-$lang['Ftp_pasv']                   = "Serveur ftp en mode passif";
-$lang['Ftp_pasv_note']              = "(Mode actif ou passif)";
-$lang['Ftp_path']                   = "Chemin vers le répertoire de stockage des fichiers";
-$lang['Ftp_user']                   = "Nom d’utilisateur";
-$lang['Ftp_pass']                   = "Mot de passe";
 $lang['Choice_engine_send']         = "Méthode d’envoi à utiliser";
 $lang['With_engine_bcc']            = "Un envoi avec les destinataires en copie cachée";
 $lang['With_engine_uniq']           = "Un envoi pour chaque abonné";

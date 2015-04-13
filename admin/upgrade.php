@@ -657,6 +657,16 @@ if (isset($_POST['start'])) {
 				WHERE config_name = 'check_email_mx'";
 		}
 
+		//
+		// Suppression des options relatives au système de stockage des
+		// pièces jointes sur FTP.
+		//
+		if ($nl_config['db_version'] < 22) {
+			$sql_update[] = "DELETE FROM " . CONFIG_TABLE . "
+				WHERE config_name IN('use_ftp','ftp_server','ftp_port',
+					'ftp_user','ftp_pass','ftp_pasv','ftp_path')";
+		}
+
 		exec_queries($sql_update);
 
 		//

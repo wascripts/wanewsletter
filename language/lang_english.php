@@ -181,7 +181,6 @@ $lang['Message']['Not_auth_attach']         = "You are not authorized to attach 
 $lang['Message']['Error_login']             = "Login incorrect. Authentication failure";
 $lang['Message']['Bad_confirm_pass']        = "The new password and confirmed password are not the same";
 $lang['Message']['Bad_confirm_email']       = "The confirmation of your new email address is incorrect";
-$lang['Message']['bad_ftp_param']           = "The connexion to the ftp server could not be established, please check your settings \n(%s)";
 $lang['Message']['bad_smtp_param']          = "The connexion to the smtp server could not be established, please check your settings \n(%s)";
 $lang['Message']['bad_pop_param']           = "The connexion to the pop server could not be established, please check your settings \n(%s)";
 $lang['Message']['Alphanum_pass']           = "The password must consist of a minimum of 6 ASCII printable characters";
@@ -218,14 +217,6 @@ $lang['Message']['File_not_found']          = "This file was not found on server
 $lang['Message']['Cannot_create_dir']       = "Cannot create %s directory";
 $lang['Message']['Dir_not_writable']        = "The directory <samp>%s</samp> doesn't exist or is not writable";
 $lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading! (includes/sql/schemas/)";
-
-$lang['Message']['Ftp_unable_connect']      = "Unable to connect to the ftp server";
-$lang['Message']['Ftp_error_login']         = "Authentification with the ftp server has failed";
-$lang['Message']['Ftp_error_mode']          = "Impossible to change server mode";
-$lang['Message']['Ftp_error_path']          = "Impossible to access the specified folder";
-$lang['Message']['Ftp_error_put']           = "Impossible to upload the file on the ftp server";
-$lang['Message']['Ftp_error_get']           = "Impossible to get the file from the ftp server";
-$lang['Message']['Ftp_error_del']           = "Impossible to delete the file from the ftp server";
 
 $lang['Message']['Uploaddir_not_writable']  = "The upload dir isn't writable";
 $lang['Message']['Upload_error_1']          = "The file exceeds the size authorized by the upload_max_filesize directive in php.ini";
@@ -388,7 +379,7 @@ $lang['Total_Filesize']             = "Disk space used by files (joined files an
 //
 $lang['Explain']['config']          = "The following form will allow you to configure all of the script's settings";
 $lang['Explain']['config_cookies']  = "These parameters allow you to set the cookies used by the script. \nIf you feel unsure about this, leave the settings to their default values";
-$lang['Explain']['config_files']    = "You can attach files to your outgoing newsletters. \nTo accomplish this, the script has two options. The easiest option is to have files stored on the server, in the folder defined as a storage directory (the folder must have writing permissions). \nIf, for any reason, this option is not possible on your server, the script offers you the possibility to store the files on a <abbr title=\"File Transfert Protocol\" lang=\"en\">FTP</abbr> server.\n For this option, you must enter acces parameters for the ftp server.";
+$lang['Explain']['config_files']    = "You can join files to your newsletters. \nThe files are stored on the server, in the folder defined as a storage directory (the folder must have writing permissions).";
 $lang['Explain']['config_email']    = "These settings allow you to configure sending emails.\nBy default, the script send a personalized email to each subscriber, but you can configure it to send one or more emails with a list of recipients in a BCC field.\nIf you want to use a specific <abbr title=\"Simple Mail Transfert Protocol\">SMTP</abbr> server, turn on the option and fill in the login informations. By default, the script uses the <abbr title=\"PHP: Hypertext Preprocessor\">PHP</abbr> <code>mail()</code> function. See %sFAQ%s about limitations in the context of using <abbr>SMTP</abbr> server.";
 $lang['Explain']['config_stats']    = "The script has a small statistics module. The module requires that the GD libraty is installed on your server to make it work. \nIf you don't wish to use this functionnality, it is recommended that you deactivate the statistics module to avoid unnecessary data processing by the script.";
 $lang['Explain']['config_debug']    = "The debugger displays the non-fatal error occuring during the run-time of the script.  It can help to find the source of a bug.\n The debug informations are shown only to administrators.";
@@ -410,16 +401,6 @@ $lang['Session_length']             = "Administration session lenght";
 $lang['Upload_path']                = "Attached files storage directory";
 $lang['Max_filesize']               = "Maximum total size of a newsletter's attached files";
 $lang['Max_filesize_note']          = "(sum of the size of all attached files, in bytes)";
-$lang['Use_ftp']                    = "Use a ftp server to store files";
-$lang['Ftp_server']                 = "Ftp server name";
-$lang['Ftp_server_note']            = "(name without the inital ftp://, or ip address)";
-$lang['Ftp_port']                   = "Connection port";
-$lang['Ftp_port_note']              = "The default value should be appropriate in most cases.";
-$lang['Ftp_pasv']                   = "Ftp server passive mode";
-$lang['Ftp_pasv_note']              = "(Active or passive mode)";
-$lang['Ftp_path']                   = "Path to the file storage directory";
-$lang['Ftp_user']                   = "User name";
-$lang['Ftp_pass']                   = "Password";
 $lang['Choice_engine_send']         = "Email send method to use";
 $lang['With_engine_bcc']            = "One email with recipients in hidden copy";
 $lang['With_engine_uniq']           = "One email to each subscriber";

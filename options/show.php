@@ -37,13 +37,7 @@ $sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_m
 $result = $db->query($sql);
 
 if ($filedata = $result->fetch()) {
-	if ($nl_config['use_ftp']) {
-		$attach = new Attach();
-		$tmp_filename = $attach->ftp_to_tmp($filedata);
-	}
-	else {
-		$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $filedata['file_physical_name'];
-	}
+	$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $filedata['file_physical_name'];
 
 	if (!is_readable($tmp_filename)) {
 		http_response_code(500);
@@ -93,14 +87,6 @@ if ($filedata = $result->fetch()) {
 	}
 
 	echo $data;
-
-	//
-	// Si l'option FTP est utilisée, suppression du fichier temporaire
-	//
-	if ($nl_config['use_ftp']) {
-		$attach->remove_file($tmp_filename);
-	}
-
 	exit;
 }
 else {

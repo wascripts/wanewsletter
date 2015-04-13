@@ -298,12 +298,10 @@ switch ($mode) {
 				$body = str_replace('{LINKS}', $link, $body);
 
 				//
-				// On s'occupe maintenant des fichiers joints ou incorporés
-				// Si les fichiers sont stockés sur un serveur ftp, on les rapatrie le temps du flot d'envoi
+				// On s’occupe maintenant des fichiers joints ou incorporés.
 				//
 				if (isset($files[$row['log_id']]) && count($files[$row['log_id']]) > 0) {
 					$total_files = count($files[$row['log_id']]);
-					$tmp_files	 = array();
 
 					$attach = new Attach();
 
@@ -322,13 +320,7 @@ switch ($mode) {
 							continue;
 						}
 
-						if ($nl_config['use_ftp']) {
-							$file_path = $attach->ftp_to_tmp($files[$row['log_id']][$i]);
-							$tmp_files[] = $file_path;
-						}
-						else {
-							$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
-						}
+						$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 
 						$email->attach($file_path, $real_name, $mime_type);
 					}

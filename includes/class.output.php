@@ -678,7 +678,7 @@ BASIC;
 			$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $logdata['joined_files'][$i]['file_physical_name'];
 			$s_show = '';
 
-			if ($nl_config['use_ftp'] || file_exists($tmp_filename)) {
+			if (file_exists($tmp_filename)) {
 				//
 				// On affiche pas dans la liste les fichiers incorporés dans
 				// une newsletter au format HTML.

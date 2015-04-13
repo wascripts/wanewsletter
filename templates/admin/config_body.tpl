@@ -16,9 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	var configForm = document.forms['config-form'];
 
-	configForm.elements['use_ftp'][0].addEventListener('change', toggleView, false);
-	configForm.elements['use_ftp'][1].addEventListener('change', toggleView, false);
-
 	configForm.elements['use_smtp'][0].addEventListener('change', toggleView, false);
 	configForm.elements['use_smtp'][1].addEventListener('change', toggleView, false);
 }, false);
@@ -100,46 +97,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			<td><label for="max_filesize">{L_MAX_FILESIZE}&nbsp;:</label><br /><span class="notice">{L_MAX_FILESIZE_NOTE}</span></td>
 			<td><input type="text" id="max_filesize" name="max_filesize" value="{MAX_FILESIZE}" size="7" maxlength="8" /> <span class="notice">{L_OCTETS}</span></td>
 		</tr>
-		<!-- BEGIN extension_ftp -->
-		<tr id="use_ftp_choice" class="{extension_ftp.FTP_ROW_CLASS}">
-			<td><label>{extension_ftp.L_USE_FTP}&nbsp;:</label></td>
-			<td>
-				<input type="radio" id="use_ftp_yes" name="use_ftp" value="1" {extension_ftp.CHECKED_USE_FTP_ON}/>
-				<label for="use_ftp_yes" class="notice">{L_YES}</label>
-				<input type="radio" id="use_ftp_no" name="use_ftp" value="0" {extension_ftp.CHECKED_USE_FTP_OFF}/>
-				<label for="use_ftp_no" class="notice">{L_NO}</label>
-			</td>
-		</tr>
-		<tr>
-			<td><label for="ftp_server">{extension_ftp.L_FTP_SERVER}&nbsp;:</label><br /><span class="notice">{L_FTP_SERVER_NOTE}</span></td>
-			<td><input type="text" id="ftp_server" name="ftp_server" value="{extension_ftp.FTP_SERVER}" size="30" maxlength="100" /></td>
-		</tr>
-		<tr>
-			<td><label for="ftp_port">{extension_ftp.L_FTP_PORT}&nbsp;:</label><br /><span class="notice">{L_FTP_PORT_NOTE}</span></td>
-			<td><input type="text" id="ftp_port" name="ftp_port" value="{extension_ftp.FTP_PORT}" maxlength="5" class="number" /></td>
-		</tr>
-		<tr>
-			<td><label>{extension_ftp.L_FTP_PASV}&nbsp;:</label><br /><span class="notice">{extension_ftp.L_FTP_PASV_NOTE}</span></td>
-			<td>
-				<input type="radio" id="ftp_pasv_on" name="ftp_pasv" value="1" {extension_ftp.CHECKED_FTP_PASV_ON}/>
-				<label for="ftp_pasv_on" class="notice">{L_YES}</label>
-				<input type="radio" id="ftp_pasv_off" name="ftp_pasv" value="0" {extension_ftp.CHECKED_FTP_PASV_OFF}/>
-				<label for="ftp_pasv_off" class="notice">{L_NO}</label>
-			</td>
-		</tr>
-		<tr>
-			<td><label for="ftp_path">{extension_ftp.L_FTP_PATH}&nbsp;:</label></td>
-			<td><input type="text" id="ftp_path" name="ftp_path" value="{extension_ftp.FTP_PATH}" size="30" maxlength="100" /></td>
-		</tr>
-		<tr>
-			<td><label for="ftp_user">{extension_ftp.L_FTP_USER}&nbsp;:</label><br /><span class="notice">{extension_ftp.L_FTP_USER_NOTE}</span></td>
-			<td><input type="text" id="ftp_user" name="ftp_user" value="{extension_ftp.FTP_USER}" size="30" maxlength="100" /></td>
-		</tr>
-		<tr>
-			<td><label for="ftp_pass">{extension_ftp.L_FTP_PASS}&nbsp;:</label><br /><span class="notice">{extension_ftp.L_FTP_PASS_NOTE}</span></td>
-			<td><input type="password" id="ftp_pass" name="ftp_pass" size="30" maxlength="100" autocomplete="off" /></td>
-		</tr>
-		<!-- END extension_ftp -->
 	</table>
 
 	<h2>{TITLE_CONFIG_EMAIL}</h2>

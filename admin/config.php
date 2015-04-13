@@ -73,9 +73,7 @@ if (isset($_POST['submit'])) {
 	if ($new_config['upload_path'] != '/') {
 		$new_config['upload_path'] = trim($new_config['upload_path'], '/') . '/';
 
-		if ($nl_config['use_ftp'] == 0 && $new_config['use_ftp'] == 0 &&
-			strcmp($nl_config['upload_path'], $new_config['upload_path']) !== 0
-		) {
+		if (strcmp($nl_config['upload_path'], $new_config['upload_path']) !== 0) {
 			$move_files = true;
 			$source_upload = WA_ROOTDIR . '/' . $nl_config['upload_path'];
 			$dest_upload   = WA_ROOTDIR . '/' . $new_config['upload_path'];
@@ -102,43 +100,11 @@ if (isset($_POST['submit'])) {
 		$new_config['max_filesize'] = 100000;
 	}
 
-	$new_config['ftp_server']    = preg_replace('/^(?:ftp:\/\/)?(.*)$/i', '\\1', $new_config['ftp_server']);
 	$new_config['sending_limit'] = intval($new_config['sending_limit']);
-
-	$new_config['ftp_port'] = intval($new_config['ftp_port']);
-	if ($new_config['ftp_port'] < 1 || $new_config['ftp_port'] > 65535) {
-		$new_config['ftp_port'] = 21;
-	}
 
 	$new_config['smtp_port'] = intval($new_config['smtp_port']);
 	if ($new_config['smtp_port'] < 1 || $new_config['smtp_port'] > 65535) {
 		$new_config['smtp_port'] = 25;
-	}
-
-	if (empty($new_config['ftp_pass'])) {
-		$new_config['ftp_pass'] = $old_config['ftp_pass'];
-	}
-
-	if ($new_config['use_ftp'] && extension_loaded('ftp')) {
-		$result = Attach::connect_to_ftp(
-			$new_config['ftp_server'],
-			$new_config['ftp_port'],
-			$new_config['ftp_user'],
-			$new_config['ftp_pass'],
-			$new_config['ftp_pasv'],
-			$new_config['ftp_path']
-		);
-
-		if ($result['error']) {
-			$error = true;
-			$msg_error[] = sprintf(nl2br($lang['Message']['bad_ftp_param']), $result['message']);
-		}
-		else {
-			ftp_close($result['connect_id']);
-		}
-	}
-	else {
-		$new_config['use_ftp'] = 0;
 	}
 
 	if ($new_config['smtp_pass'] == '' && $new_config['smtp_user'] != '') {
@@ -320,31 +286,6 @@ $output->assign_vars( array(
 	'SMTP_USER'                 => $new_config['smtp_user'],
 	'DEBUG_BOX'                 => $debug_box
 ));
-
-if (extension_loaded('ftp')) {
-	$output->assign_block_vars('extension_ftp', array(
-		'L_USE_FTP'            => $lang['Use_ftp'],
-		'L_FTP_SERVER'         => $lang['Ftp_server'],
-		'L_FTP_SERVER_NOTE'    => $lang['Ftp_server_note'],
-		'L_FTP_PORT'           => $lang['Ftp_port'],
-		'L_FTP_PORT_NOTE'      => $lang['Ftp_port_note'],
-		'L_FTP_PASV'           => $lang['Ftp_pasv'],
-		'L_FTP_PASV_NOTE'      => $lang['Ftp_pasv_note'],
-		'L_FTP_PATH'           => $lang['Ftp_path'],
-		'L_FTP_USER'           => $lang['Ftp_user'],
-		'L_FTP_PASS'           => $lang['Ftp_pass'],
-
-		'FTP_ROW_CLASS'        => ($new_config['use_ftp']) ? '' : 'inactive',
-		'CHECKED_USE_FTP_ON'   => $output->getBoolAttr('checked', $new_config['use_ftp']),
-		'CHECKED_USE_FTP_OFF'  => $output->getBoolAttr('checked', !$new_config['use_ftp']),
-		'CHECKED_FTP_PASV_ON'  => $output->getBoolAttr('checked', $new_config['ftp_pasv']),
-		'CHECKED_FTP_PASV_OFF' => $output->getBoolAttr('checked', !$new_config['ftp_pasv']),
-		'FTP_SERVER'           => $new_config['ftp_server'],
-		'FTP_PORT'             => $new_config['ftp_port'],
-		'FTP_PATH'             => $new_config['ftp_path'],
-		'FTP_USER'             => $new_config['ftp_user'],
-	));
-}
 
 if (check_ssl_support()) {
 	$output->assign_block_vars('ssl_support', array(
