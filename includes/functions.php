@@ -437,6 +437,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
  */
 function wan_exception_handler($e)
 {
+	wanlog($e);
 	wan_display_error($e);
 }
 

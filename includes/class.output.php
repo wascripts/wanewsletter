@@ -387,13 +387,11 @@ class Output extends Template
 		$wanlog_box = '';
 
 		foreach ($entries as $entry) {
-			if ($entry instanceof Exception) {
-				if ($entry instanceof Error) {
-					// L’affichage des erreurs fatales est fait directement dans le
-					// gestionnaire d’erreurs.
-					if ($entry->isFatal() || $entry->ignore()) {
-						continue;
-					}
+			if ($entry instanceof \Exception) {
+				// Les exceptions sont affichées via wan_exception_handler().
+				// Les erreurs fatales sont affichées via wan_error_handler().
+				if (!($entry instanceof Error) || $entry->isFatal() || $entry->ignore()) {
+					continue;
 				}
 
 				$entry = wan_format_error($entry);
