@@ -57,3 +57,17 @@ if (PHP_VERSION_ID < 50400) {
 		return \html_entity_decode($string, $flags, $encoding);
 	}
 }
+
+/**
+ * parse_str() est affecté par l’option 'magic_quotes_gpc', ainsi que par
+ * l’option 'filter.default', qui peut valoir 'magic_quotes'.
+ * L’appel à cette fonction sans l’argument $arr n’est pas supporté.
+ *
+ * @param string $str
+ * @param array  $arr
+ */
+function parse_str($str, &$arr)
+{
+	\parse_str($str, $arr);
+	strip_magic_quotes_gpc($arr);
+}

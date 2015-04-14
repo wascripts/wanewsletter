@@ -262,8 +262,6 @@ function wan_build_url($url, $params = array(), $session = false)
 	$cur_params = array();
 	if ($query != '') {
 		parse_str($query, $cur_params);
-		// parse_str est affecté par l'option magic_quotes_gpc donc...
-		strip_magic_quotes_gpc($cur_params);
 	}
 
 	if ($session && defined('SID') && SID != '') {
