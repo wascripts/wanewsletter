@@ -596,7 +596,7 @@ switch ($mode) {
 			// Vérification syntaxique des emails
 			//
 			$emails = array_filter($emails,
-				function ($email) use (&$lang, &$report) {
+				function ($email) use (&$lang, &$report, &$EOL) {
 					if (\Wamailer\Mailer::checkMailSyntax($email)) {
 						return true;
 					}
