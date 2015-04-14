@@ -887,7 +887,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  * Annule l'effet produit par l'option de configuration magic_quotes_gpc à On
  * Fonction récursive
  *
- * @param array   $data         Tableau des données
+ * @param mixed   $data         Tableau de données ou chaîne de caractères
  * @param boolean $isFilesArray Exception pour $_FILES
  */
 function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
@@ -901,14 +901,16 @@ function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 		}
 	}
 
-	if ($doStrip && is_array($data)) {
-		foreach ($data as $key => &$val) {
-			if (is_array($val)) {
-				strip_magic_quotes_gpc($val, $isFilesArray);
-			}
-			else if (is_string($val) && (!$isFilesArray || $key != 'tmp_name')) {
-				$data[$key] = stripslashes($val);
-			}
+	if ($doStrip) {
+		if (is_array($data)) {
+			array_walk($data, function (&$data, $key) use ($isFilesArray) {
+				if (!$isFilesArray || $key != 'tmp_name') {
+					strip_magic_quotes_gpc($data, $isFilesArray);
+				}
+			});
+		}
+		else if (is_string($data)) {
+			$data = stripslashes($data);
 		}
 	}
 }
