@@ -896,7 +896,9 @@ function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 
 	if (is_null($doStrip)) {
 		$doStrip = false;
-		if (PHP_VERSION_ID < 50400 && get_magic_quotes_gpc()) {
+		if ((PHP_VERSION_ID < 50400 && get_magic_quotes_gpc()) ||
+			ini_get('filter.default') == 'magic_quotes'
+		) {
 			$doStrip = true;
 		}
 	}
