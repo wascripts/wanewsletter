@@ -88,8 +88,11 @@ function wa_check_update($complete = false)
 		$result = http_get_contents(CHECK_UPDATE_URL, $errstr);
 		$data = $result['data'];
 
-		if ($data) {
+		if (preg_match('#^[A-Za-z0-9.-]+$#', $data)) {
 			file_put_contents($cache_file, $data);
+		}
+		else {
+			$data = '';
 		}
 	}
 

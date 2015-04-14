@@ -110,6 +110,11 @@ const X_MAILER_HEADER = USER_AGENT_SIG;
 // Utilisées dans le cadre de la classe de vérification de mise à jour
 //
 const DOWNLOAD_PAGE      = 'http://phpcodeur.net/wascripts/wanewsletter/telecharger';
+// Le serveur renvoie le tag de la dernière version stable si WANEWSLETTER_VERSION
+// contient un numéro en x.y.z, ou le tag de la dernière version non stable, si
+// WANEWSLETTER_VERSION contient -dev, -alpha, -beta ou -rc.
+// Vous pouvez forcer l’une ou l’autre réponse en ajoutant le paramètre d’url
+// 'channel' avec la valeur 'stable' ou 'unstable' dans l’url suivante.
 const CHECK_UPDATE_URL   = 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version';
 const CHECK_UPDATE_CACHE = 'wa-check-update.cache';
 const CHECK_UPDATE_CACHE_TTL = 3600;
