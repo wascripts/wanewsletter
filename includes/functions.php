@@ -626,6 +626,10 @@ function wanlog($entry = null)
 		);
 
 		$entries[$hash] = $entry;
+
+		if (DEBUG_LOG_ENABLED) {
+			error_log(preg_replace('#</?b>#', '', trim(wan_format_error($entry))));
+		}
 	}
 	else {
 		$entries[] = $entry;

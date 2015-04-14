@@ -47,6 +47,21 @@ const DEBUG_MODE = DEBUG_LEVEL_NORMAL;
 //
 const DISPLAY_ERRORS_IN_LOG = true;
 
+//
+// Active/Désactive l’enregistrement des erreurs dans un fichier de log.
+//
+// Le fichier de log spécifié dans la configuration de PHP est utilisé par
+// défaut par la fonction error_log().
+// Pour utiliser un autre fichier de log, indiquez son emplacement dans la
+// constante suivante (par exemple 'debug.log').
+// Si le chemin est relatif, il sera préfixé par la valeur de la constante
+// WA_LOGSDIR (voir plus bas).
+//
+// Note : Toutes les erreurs sont stockées, sans tenir compte de DEBUG_MODE.
+// De plus, la taille du fichier de log n’est pas limitée !
+//
+const DEBUG_LOG_ENABLED = false;
+const DEBUG_LOG_FILE    = '';
 
 ##################################################################
 ## Il est recommandé de ne rien modifier au-delà de cette ligne ##
