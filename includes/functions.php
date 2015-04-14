@@ -906,20 +906,6 @@ function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
 }
 
 /**
- * @param string $relative_path Chemin relatif à résoudre
- *
- * @return string
- */
-function wa_realpath($relative_path)
-{
-	if (!function_exists('realpath') || !($absolute_path = realpath($relative_path))) {
-		return $relative_path;
-	}
-
-	return str_replace('\\', '/', $absolute_path);
-}
-
-/**
  * Pour limiter la longueur d'une chaine de caractère à afficher
  *
  * @param string  $str
