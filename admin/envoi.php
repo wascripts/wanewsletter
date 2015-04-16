@@ -729,7 +729,7 @@ switch ($mode) {
 
 				if ($mode == 'save' || $mode == 'send') {
 					if ($mode == 'save') {
-						$output->redirect('./envoi.php?mode=load&amp;id=' . $logdata['log_id'], 4);
+						$output->redirect('./envoi.php?mode=load&id=' . $logdata['log_id'], 4);
 						$output->addLine($lang['Message']['log_saved']);
 						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load&id=' . $logdata['log_id']);
 					}

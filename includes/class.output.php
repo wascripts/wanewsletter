@@ -230,7 +230,11 @@ class Output extends Template
 	public function redirect($url, $timer)
 	{
 		if (wan_get_debug_level() == DEBUG_LEVEL_QUIET) {
-			$this->meta_redirect = sprintf('<meta http-equiv="Refresh" content="%d; url=%s" />', $timer, $url);
+			$this->meta_redirect = sprintf(
+				'<meta http-equiv="Refresh" content="%d; url=%s" />',
+				intval($timer),
+				htmlspecialchars($url)
+			);
 		}
 	}
 
