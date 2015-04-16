@@ -81,7 +81,7 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 		$_SESSION['liste'] = $liste;
 	}
 
-	if (strtoupper(server_info('REQUEST_METHOD')) == 'POST' && $session->new_session) {
+	if (strtoupper(filter_input(INPUT_SERVER, 'REQUEST_METHOD')) == 'POST' && $session->new_session) {
 		$output->displayMessage('Invalid_session');
 	}
 }

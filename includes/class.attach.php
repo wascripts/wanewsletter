@@ -524,7 +524,7 @@ class Attach
 		//
 
 		// TODO : Obsolète ?
-		$user_agent = server_info('HTTP_USER_AGENT');
+		$user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT');
 		if (stristr($user_agent, 'opera')) {
 			$user_agent = 'opera';
 		}

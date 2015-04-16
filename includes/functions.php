@@ -324,11 +324,12 @@ function load_settings($admindata = array())
 
 	$check_list[] = 'francais';
 
-	if (server_info('HTTP_ACCEPT_LANGUAGE') != '') {
-		$accepted_langs = array_map('trim', explode(',', server_info('HTTP_ACCEPT_LANGUAGE')));
+	$accept_language = filter_input(INPUT_SERVER, 'HTTP_ACCEPT_LANGUAGE');
+	if ($accept_language) {
+		$accept_language = explode(',', $accept_language);
 
-		foreach ($accepted_langs as $langcode) {
-			$langcode = strtolower(substr($langcode, 0, 2));
+		foreach ($accept_language as $langcode) {
+			$langcode = strtolower(substr(trim($langcode), 0, 2));
 
 			if (isset($supported_lang[$langcode])) {
 				$check_list[] = $supported_lang[$langcode];
@@ -971,20 +972,6 @@ function ini_get_flag($name)
 }
 
 /**
- * Retourne l'information serveur demandée
- *
- * @param string $name Nom de l'information
- *
- * @return string
- */
-function server_info($name)
-{
-	$name = strtoupper($name);
-
-	return (!empty($_SERVER[$name])) ? $_SERVER[$name] : ((!empty($_ENV[$name])) ? $_ENV[$name] : '');
-}
-
-/**
  * Fonctions à utiliser lors des longues boucles (backup, envois)
  * qui peuvent provoquer un time out du navigateur client
  * Inspiré d'un code équivalent dans phpMyAdmin 2.5.0 (libraries/build_dump.lib.php précisément)
@@ -1062,7 +1049,7 @@ function wan_get_contents($URL, &$errstr)
 	}
 	else {
 		if ($URL[0] == '~') {
-			$URL = server_info('DOCUMENT_ROOT') . substr($URL, 1);
+			$URL = $_SERVER['DOCUMENT_ROOT'] . substr($URL, 1);
 		}
 		else if ($URL[0] != '/') {
 			$URL = WA_ROOTDIR . '/' . $URL;

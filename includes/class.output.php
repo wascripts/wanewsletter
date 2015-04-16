@@ -616,7 +616,7 @@ BASIC;
 	{
 		global $lang, $nl_config;
 
-		$page_envoi  = (strpos(server_info('PHP_SELF'), 'envoi.php') !== false);
+		$page_envoi  = (strpos($_SERVER['SCRIPT_NAME'], 'envoi.php') !== false);
 		$body_size   = (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
 		$total_size  = 1024; // ~ 1024 correspond au poids de base d'un email (en-têtes)
 		$total_size += ($body_size > 0) ? ($body_size / 2) : 0;
@@ -736,9 +736,9 @@ BASIC;
 		$tmp_box = '';
 		$liste_id_ary = $auth->check_auth($auth_type);
 
-		if (empty($jump_to)) {
-			$jump_to = './' . htmlspecialchars(basename(server_info('SCRIPT_NAME')));
-			$query_string = server_info('QUERY_STRING');
+		if (!$jump_to) {
+			$jump_to = './' . htmlspecialchars(basename($_SERVER['SCRIPT_NAME']));
+			$query_string = $_SERVER['QUERY_STRING'];
 
 			if ($query_string != '') {
 				$jump_to .= '?' . htmlspecialchars($query_string);
