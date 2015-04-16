@@ -17,6 +17,8 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
+
 define('WA_ROOTDIR', dirname(__DIR__));
 
 require WA_ROOTDIR . '/includes/common.inc.php';
@@ -313,12 +315,12 @@ else if ($process_subscribe) {
 	foreach ($mail_box as $mail_id => $mail_size) {
 		$headers = $pop->parse_headers($mail_id);
 
-		if (!isset($headers['from']) || !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $match)) {
+		if (!isset($headers['from']) || !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $m)) {
 			continue;
 		}
 
-		$pseudo = (isset($match[1])) ? strip_tags(trim($match[1])) : '';
-		$email  = trim($match[2]);
+		$pseudo = (isset($m[1])) ? strip_tags(trim(u::filter($m[1]))) : '';
+		$email  = trim($m[2]);
 
 		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
 			continue;
@@ -328,7 +330,7 @@ else if ($process_subscribe) {
 			continue;
 		}
 
-		$action = mb_strtolower(trim($headers['subject']));
+		$action = mb_strtolower(trim(u::filter($headers['subject'])));
 
 		switch ($action) {
 			case 'désinscription':

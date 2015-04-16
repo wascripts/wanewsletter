@@ -9,6 +9,8 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
+
 require '../includes/common.inc.php';
 
 //
@@ -115,7 +117,7 @@ if ($listdata = $result->fetch()) {
 				continue;
 			}
 
-			$pseudo = (isset($m[1])) ? strip_tags(trim($m[1])) : '';
+			$pseudo = (isset($m[1])) ? strip_tags(trim(u::filter($m[1]))) : '';
 			$email  = trim($m[2]);
 
 			if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
@@ -126,7 +128,7 @@ if ($listdata = $result->fetch()) {
 				continue;
 			}
 
-			$action = mb_strtolower(trim($headers['subject']));
+			$action = mb_strtolower(trim(u::filter($headers['subject'])));
 
 			switch ($action) {
 				case 'désinscription':
