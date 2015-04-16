@@ -62,7 +62,7 @@ if (!is_int($prev_status)) {
 }
 
 if (isset($_POST['cancel'])) {
-	http_redirect('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
+	http_redirect('envoi.php?mode=load&id=' . $logdata['log_id']);
 }
 
 $mode = filter_input(INPUT_GET, 'mode');
