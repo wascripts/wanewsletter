@@ -238,6 +238,8 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 				if (count($abonnes[$format]) > 0) {
 
 					$email->clearRecipients();
+					$email->addRecipient($listdata['sender_email'], $listdata['liste_name']);
+
 					foreach ($abonnes[$format] as $abo_address) {
 						$email->addBCCRecipient($abo_address);
 					}
