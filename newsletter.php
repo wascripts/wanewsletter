@@ -10,7 +10,7 @@
 namespace Wanewsletter;
 
 if (!defined('WA_ROOTDIR')) {
-	define('WA_ROOTDIR', str_replace('\\', '/', dirname(__DIR__)));
+	define('WA_ROOTDIR', str_replace('\\', '/', __DIR__));
 }
 
 define('WA_INITIAL_ERROR_REPORTING', error_reporting());
