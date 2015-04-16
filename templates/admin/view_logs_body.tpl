@@ -1,10 +1,11 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<form id="logs" method="post" action="{U_FORM}">
+<form method="get" action="view.php">
 <div id="aside-top" class="aside">
 	<div>{PAGEOF} {NUM_LOGS}</div>
 
-	<div>{S_HIDDEN_FIELDS}
+	<div>
+		<input type="hidden" name="mode" value="log" />
 		<span>{L_CLASSEMENT}&nbsp;:</span>
 		<select name="type">
 			<option value="log_subject"{SELECTED_TYPE_SUBJECT}>{L_BY_SUBJECT}</option>
@@ -12,10 +13,12 @@
 		</select>&nbsp;&nbsp;<select name="order">
 			<option value="ASC"{SELECTED_ORDER_ASC}>{L_BY_ASC}</option>
 			<option value="DESC"{SELECTED_ORDER_DESC}>{L_BY_DESC}</option>
-		</select>&nbsp;&nbsp;<button type="submit" name="tri">{L_CLASSER_BUTTON}</button>
+		</select>&nbsp;&nbsp;<button type="submit">{L_CLASSER_BUTTON}</button>
 	</div>
 </div>
+</form>
 
+<form id="logs" method="post" action="view.php?mode=log{PAGING}">
 <div class="block">
 	<h2>{L_TITLE}</h2>
 

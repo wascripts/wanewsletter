@@ -9,6 +9,8 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
+
 //
 // Vous pouvez, grâce à cette constante, désactiver la vérification de
 // l'existence du tag {LINKS} dans les lettres au moment de l'envoi.
@@ -34,30 +36,38 @@ if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 	$output->displayMessage('Not_auth_view');
 }
 
-//
-// End of Configuration
-//
-
 $listdata = $auth->listdata[$_SESSION['liste']];
+$logdata  = array();
 
-$logdata = array();
-$logdata['log_id']        = (!empty($_REQUEST['id'])) ? intval($_REQUEST['id']) : 0;
-$logdata['log_subject']   = (!empty($_POST['subject'])) ? trim($_POST['subject']) : '';
-$logdata['log_body_text'] = (!empty($_POST['body_text'])) ? trim($_POST['body_text']) : '';
-$logdata['log_body_html'] = (!empty($_POST['body_html'])) ? trim($_POST['body_html']) : '';
-$logdata['log_status']    = (!empty($_POST['log_status'])) ? STATUS_MODEL : STATUS_WRITING;
-$logdata['log_date']      = (!empty($_POST['log_date'])) ? intval($_POST['log_date']) : -1;
+$logdata['log_id'] = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if (!is_int($logdata['log_id'])) {
+	$logdata['log_id'] = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+}
 
-$mode = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
-$prev_status = (isset($_POST['prev_status'])) ? intval($_POST['prev_status']) : $logdata['log_status'];
+$logdata['log_subject']   = trim(u::filter_input(INPUT_POST, 'subject'));
+$logdata['log_body_text'] = trim(u::filter_input(INPUT_POST, 'body_text'));
+$logdata['log_body_html'] = trim(u::filter_input(INPUT_POST, 'body_html'));
+$logdata['log_status']    = filter_input(INPUT_POST, 'log_status', FILTER_VALIDATE_INT);
+$logdata['log_date']      = filter_input(INPUT_POST, 'log_date', FILTER_VALIDATE_INT, array(
+	'options' => array('default' => -1)
+));
+
+if (!is_int($logdata['log_status']) || !in_array($logdata['log_status'], array(STATUS_MODEL, STATUS_WRITING))) {
+	$logdata['log_status'] = STATUS_WRITING;
+}
+
+$prev_status = filter_input(INPUT_POST, 'prev_status', FILTER_VALIDATE_INT);
+if (!is_int($prev_status)) {
+	$prev_status = $logdata['log_status'];
+}
 
 if (isset($_POST['cancel'])) {
 	http_redirect('envoi.php?mode=load&amp;id=' . $logdata['log_id']);
 }
 
-$vararray = array('test', 'send', 'save', 'delete', 'attach', 'unattach');
-foreach ($vararray as $varname) {
-	if (isset($_REQUEST[$varname])) {
+$mode = filter_input(INPUT_GET, 'mode');
+foreach (array('test', 'send', 'save', 'delete', 'attach', 'unattach') as $varname) {
+	if (isset($_POST[$varname])) {
 		$mode = $varname;
 		break;
 	}
@@ -70,7 +80,7 @@ switch ($mode) {
 	// Téléchargement d'un fichier joint
 	//
 	case 'download':
-		$file_id = (!empty($_GET['fid'])) ? intval($_GET['fid']) : 0;
+		$file_id = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
 		$attach  = new Attach();
 		$attach->download_file($file_id);
 		break;
@@ -277,10 +287,13 @@ switch ($mode) {
 	// Chargement d'un log dont on veut reprendre l'écriture ou l'envoi
 	//
 	case 'load':
+		$body_text_url = trim(filter_input(INPUT_POST, 'body_text_url'));
+		$body_html_url = trim(filter_input(INPUT_POST, 'body_html_url'));
+
 		if (isset($_POST['submit']) || $logdata['log_id']) {
-			if (!empty($_POST['body_text_url']) || !empty($_POST['body_html_url'])) {
-				if (!empty($_POST['body_text_url'])) {
-					$result = wan_get_contents($_POST['body_text_url'], $errstr);
+			if ($body_text_url || $body_html_url) {
+				if ($body_text_url) {
+					$result = wan_get_contents($body_text_url, $errstr);
 
 					if (!$result) {
 						$output->addLine($errstr);
@@ -291,8 +304,8 @@ switch ($mode) {
 					$logdata['log_body_text'] = convert_encoding($result['data'], $result['charset']);
 				}
 
-				if (!empty($_POST['body_html_url'])) {
-					$result = wan_get_contents($_POST['body_html_url'], $errstr);
+				if ($body_html_url) {
+					$result = wan_get_contents($body_html_url, $errstr);
 
 					if (!$result) {
 						$output->addLine($errstr);
@@ -322,8 +335,8 @@ switch ($mode) {
 							$logdata['log_subject'] = html_entity_decode($logdata['log_subject']);
 						}
 
-						if (strncmp($_POST['body_html_url'], 'http://', 7) == 0) {
-							$URL = substr($_POST['body_html_url'], 0, strrpos($_POST['body_html_url'], '/'));
+						if (strncmp($body_html_url, 'http://', 7) == 0) {
+							$URL = substr($body_html_url, 0, strrpos($body_html_url, '/'));
 							$result['data'] = preg_replace('/<(head[^>]*)>/si',
 								"<\\1>\n<base href=\"" . htmlspecialchars($URL) . "/\">", $result['data']);
 						}
@@ -357,8 +370,6 @@ switch ($mode) {
 					AND (log_status = " . STATUS_WRITING . " OR log_status = " . STATUS_MODEL . ")
 				ORDER BY log_date DESC";
 			$result = $db->query($sql);
-
-			$output->addHiddenField('mode', 'load');
 
 			$output->page_header();
 
@@ -405,10 +416,7 @@ switch ($mode) {
 			$output->assign_vars(array(
 				'L_TITLE'         => $lang['Title']['select'],
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
-				'L_EXPLAIN_LOAD'  => $lang['Explain']['load'],
-
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM'          => 'envoi.php'
+				'L_EXPLAIN_LOAD'  => $lang['Explain']['load']
 			));
 
 			switch ($listdata['liste_format']) {
@@ -428,10 +436,8 @@ switch ($mode) {
 				'L_FORMAT_TEXT' => $lang['Format_text'],
 				'L_FORMAT_HTML' => $lang['Format_html'],
 
-				'BODY_TEXT_URL' => (!empty($_POST['body_text_url']))
-					? htmlspecialchars(trim($_POST['body_text_url'])) : '',
-				'BODY_HTML_URL' => (!empty($_POST['body_html_url']))
-					? htmlspecialchars(trim($_POST['body_html_url'])) : ''
+				'BODY_TEXT_URL' => htmlspecialchars($body_text_url),
+				'BODY_HTML_URL' => htmlspecialchars($body_html_url)
 			));
 
 			$output->pparse('body');
@@ -474,7 +480,6 @@ switch ($mode) {
 			$output->displayMessage();
 		}
 		else {
-			$output->addHiddenField('mode', 'delete');
 			$output->addHiddenField('id',   $logdata['log_id']);
 
 			$output->page_header();
@@ -491,7 +496,7 @@ switch ($mode) {
 				'L_NO'  => $lang['No'],
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => 'envoi.php'
+				'U_FORM' => 'envoi.php?mode=delete'
 			));
 
 			$output->pparse('body');
@@ -504,7 +509,7 @@ switch ($mode) {
 	case 'send':
 	case 'save':
 	case 'test':
-		$cc_admin = (!empty($_POST['cc_admin'])) ? 1 : 0;
+		$cc_admin = filter_input(INPUT_POST, 'cc_admin', FILTER_VALIDATE_BOOLEAN);
 
 		if (($mode == 'save' || $mode == 'send') && $listdata['cc_admin'] != $cc_admin) {
 			$listdata['cc_admin'] = $cc_admin;
@@ -741,19 +746,11 @@ switch ($mode) {
 		//
 		// Attachement de fichiers
 		//
-		if ($mode == 'attach' && !empty($logdata['log_id']) && $auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
-			$join_file  = (isset($_FILES['join_file'])) ? $_FILES['join_file'] : array();
-			$local_file = (!empty($_POST['join_file'])) ? trim($_POST['join_file']) : '';
-
-			$tmp_filename = (!empty($join_file['tmp_name']) && $join_file['tmp_name'] != 'none')
-				? $join_file['tmp_name'] : $local_file;
-			$filename     = (!empty($join_file['name'])) ? $join_file['name'] : '';
-			$filesize     = (!empty($join_file['size'])) ? intval($join_file['size']) : 0;
-			$filetype     = (!empty($join_file['type'])) ? $join_file['type'] : '';
-			$errno_code   = (!empty($join_file['error'])) ? intval($join_file['error']) : UPLOAD_ERR_OK;
-			$file_id      = (!empty($_POST['fid'])) ? intval($_POST['fid']) : 0;
-
-			$attach = new Attach();
+		if ($mode == 'attach' && !empty($logdata['log_id']) &&
+			$auth->check_auth(Auth::ATTACH, $listdata['liste_id'])
+		) {
+			$attach  = new Attach();
+			$file_id = (int) filter_input(INPUT_POST, 'fid', FILTER_VALIDATE_INT);
 
 			if (!empty($file_id)) {
 				//
@@ -762,33 +759,55 @@ switch ($mode) {
 				$attach->use_file_exists($file_id, $logdata['log_id'], $error, $msg_error);
 			}
 			else {
+				$local_file = trim(filter_input(INPUT_POST, 'local_file'));
+				$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : array();
+
 				//
 				// On a affaire soit à un fichier présent localement, soit à un fichier
 				// distant, soit à un fichier uploadé
 				//
 				if (!empty($local_file)) {
-					$tmp_filename = str_replace('\\', '/', $tmp_filename);
-
-					if (preg_match('#^(?:http)://.+/([^/]+)$#', $tmp_filename, $match)) {
-						$upload_mode = 'remote';
+					if (preg_match('#^(?:http)://.+/([^/]+)$#', $local_file, $match)) {
+						$upload_mode =  'remote';
 						$filename    = $match[1];
 					}
 					else {
 						$upload_mode = 'local';
-						$filename    = $tmp_filename;
+						$filename    = $local_file;
 					}
+
+					$tmp_filename = $local_file;
+					$filesize     = 0;
+					$filetype     = '';
+					$errno_code   = UPLOAD_ERR_OK;
 				}
 				else {
-					$upload_mode = 'upload';
+					$upload_mode  = 'upload';
+					$tmp_filename = $join_file['tmp_name'];
+					$filename     = $join_file['name'];
+					$filesize     = $join_file['size'];
+					$filetype     = $join_file['type'];
+					$errno_code   = $join_file['error'];
 				}
 
-				$attach->upload_file($upload_mode, $logdata['log_id'], $filename, $tmp_filename, $filesize, $filetype, $errno_code, $error, $msg_error);
+				$attach->upload_file($upload_mode, $logdata['log_id'], $filename,
+					$tmp_filename,
+					$filesize,
+					$filetype,
+					$errno_code,
+					$error,
+					$msg_error
+				);
 			}
 		}
 		break;
 
 	case 'unattach':
-		$file_ids = (!empty($_POST['file_ids'])) ? (array) $_POST['file_ids'] : array();
+		$file_ids = (array) filter_input(INPUT_POST, 'file_ids',
+			FILTER_VALIDATE_INT,
+			FILTER_REQUIRE_ARRAY
+		);
+		$file_ids = array_filter($file_ids);
 
 		if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id']) && count($file_ids) > 0) {
 			//
@@ -858,11 +877,9 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 //
 // Envois des emails
 //
-$supp_address = array();
-if ($mode == 'test' && isset($_POST['test_address'])) {
-	$supp_address = explode(',', $_POST['test_address']);
-	$supp_address = array_map('trim', $supp_address);
-	$supp_address = array_unique($supp_address);
+$supp_address = trim(filter_input(INPUT_POST, 'test_address'));
+if ($mode == 'test' && $supp_address) {
+	$supp_address = array_unique(array_map('trim', explode(',', $supp_address)));
 	$supp_address = array_filter($supp_address, function ($email) {
 		return \Wamailer\Mailer::checkMailSyntax($email);
 	});
@@ -871,6 +888,9 @@ if ($mode == 'test' && isset($_POST['test_address'])) {
 		$error = true;
 		$msg_error[] = $lang['Message']['Invalid_email'];
 	}
+}
+else {
+	$supp_address = array();
 }
 
 if (($mode == 'test' && !$error) || $mode == 'progress') {

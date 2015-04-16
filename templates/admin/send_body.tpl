@@ -94,8 +94,8 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 
 	<table class="dataset compact">
 		<tr>
-			<td rowspan="{joined_files.S_ROWSPAN}"><label for="join_file">{joined_files.L_ADD_FILE}&nbsp;:</label></td>
-			<td><input type="text" id="join_file" name="join_file" size="40" /></td>
+			<td rowspan="{joined_files.S_ROWSPAN}"><label for="local_file">{joined_files.L_ADD_FILE}&nbsp;:</label></td>
+			<td><input type="text" id="local_file" name="local_file" size="40" /></td>
 		</tr>
 		<!-- BEGIN upload_input -->
 		<tr>

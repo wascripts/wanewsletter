@@ -9,6 +9,8 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
+
 if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 	exit('<b>No hacking</b>');
 }
@@ -17,8 +19,6 @@ $output->set_rootdir(sprintf('%s/templates/', WA_ROOTDIR));
 
 $mode      = filter_input(INPUT_GET, 'mode');
 $reset_key = filter_input(INPUT_GET, 'k');
-$redirect  = (check_in_admin()) ? 'index.php' : 'profil_cp.php';
-$redirect  = (!empty($_REQUEST['redirect'])) ? trim($_REQUEST['redirect']) : $redirect;
 
 //
 // Si la clé est fournie, on est forcément dans le mode 'reset_passwd'
@@ -47,8 +47,8 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 			$userdata = $auth->getUserData($_SESSION['uid']);
 
 			if (isset($_POST['submit'])) {
-				$passwd = filter_input(INPUT_POST, 'new_passwd');
-				$confirm_passwd = filter_input(INPUT_POST, 'confirm_passwd');
+				$passwd = trim(u::filter_input(INPUT_POST, 'new_passwd'));
+				$confirm_passwd = trim(u::filter_input(INPUT_POST, 'confirm_passwd'));
 
 				if (!validate_pass($passwd)) {
 					$error = true;
@@ -104,7 +104,7 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 		}
 	}
 
-	$login_or_email = trim(filter_input(INPUT_POST, 'login_or_email'));
+	$login_or_email = trim(u::filter_input(INPUT_POST, 'login_or_email'));
 
 	if (!$error && isset($_POST['submit'])) {
 		if (empty($login_or_email)) {
@@ -180,8 +180,8 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 // Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
 //
 else if (isset($_POST['submit']) && !$auth->isLoggedIn()) {
-	$login  = trim(filter_input(INPUT_POST, 'login'));
-	$passwd = trim(filter_input(INPUT_POST, 'passwd'));
+	$login  = trim(u::filter_input(INPUT_POST, 'login'));
+	$passwd = trim(u::filter_input(INPUT_POST, 'passwd'));
 
 	if ($userdata = $auth->checkCredentials($login, $passwd)) {
 		session_regenerate_id();
@@ -211,10 +211,16 @@ else if ($mode == 'logout') {
 // Dans ce cas, on le redirige vers la page demandée
 //
 if ($auth->isLoggedIn()) {
+	if (isset($_SESSION['redirect'])) {
+		$redirect = $_SESSION['redirect'];
+		unset($_SESSION['redirect']);
+	}
+	else {
+		$redirect  = (check_in_admin()) ? 'index.php' : 'profil_cp.php';
+	}
+
 	http_redirect($redirect);
 }
-
-$output->addHiddenField('redirect', htmlspecialchars($redirect));
 
 $output->page_header();
 
@@ -222,10 +228,12 @@ $output->set_filenames(array(
 	'body' => 'login.tpl'
 ));
 
+$login_script = (check_in_admin()) ? 'login.php' : 'profil_cp.php';
+
 $output->assign_vars(array(
 	'TITLE'          => $lang['Module']['login'],
 	'L_EXPLAIN'      => sprintf($lang['Explain']['login'],
-		sprintf('<a href="%s">', $_SERVER['SCRIPT_NAME'].'?mode=cp'),
+		sprintf('<a href="%s?mode=cp">', $login_script),
 		'</a>'
 	),
 	'L_LOGIN'        => $lang['Login_or_email'],
@@ -234,11 +242,10 @@ $output->assign_vars(array(
 	'L_RESET_PASSWD' => $lang['Reset_passwd'],
 	'L_VALID_BUTTON' => $lang['Button']['valid'],
 
-	'S_SCRIPT_NAME'   => $_SERVER['SCRIPT_NAME'],
-	'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+	'S_SCRIPT_NAME'   => $login_script
 ));
 
-if (!isset($_COOKIE[session_name()])) {
+if (!filter_input(INPUT_COOKIE, session_name())) {
 	$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
 }
 

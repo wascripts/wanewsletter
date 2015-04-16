@@ -15,7 +15,7 @@
 
 	<table class="dataset">
 		<tr>
-			<td><label for="unban_list_id">{L_UNBAN_EMAIL}&nbsp;:</label></td>
+			<td><label for="unban_ids">{L_UNBAN_EMAIL}&nbsp;:</label></td>
 			<td>{UNBAN_EMAIL_BOX}</td>
 		</tr>
 	</table>

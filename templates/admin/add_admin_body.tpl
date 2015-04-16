@@ -1,6 +1,6 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./admin.php">
+<form method="post" action="./admin.php?mode=adduser">
 <div class="block">
 	<h2>{L_TITLE}</h2>
 

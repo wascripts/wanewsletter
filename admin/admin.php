@@ -9,13 +9,14 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wamailer\Email;
 
 require './start.inc.php';
 
-$mode     = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
-$admin_id = (!empty($_REQUEST['admin_id'])) ? intval($_REQUEST['admin_id']) : 0;
+$mode     = filter_input(INPUT_GET, 'mode');
+$admin_id = (int) filter_input(INPUT_POST, 'uid', FILTER_VALIDATE_INT);
 
 if (isset($_POST['cancel'])) {
 	http_redirect('admin.php');
@@ -37,8 +38,8 @@ if (($mode == 'adduser' || $mode == 'deluser') && !wan_is_admin($admindata)) {
 }
 
 if ($mode == 'adduser') {
-	$new_login = (!empty($_POST['new_login'])) ? trim($_POST['new_login']) : '';
-	$new_email = (!empty($_POST['new_email'])) ? trim($_POST['new_email']) : '';
+	$new_login = trim(u::filter_input(INPUT_POST, 'new_login'));
+	$new_email = trim(u::filter_input(INPUT_POST, 'new_email'));
 
 	if (isset($_POST['submit'])) {
 		require WA_ROOTDIR . '/includes/functions.validate.php';
@@ -73,6 +74,7 @@ if ($mode == 'adduser') {
 			$sql_data['admin_level']      = USER_LEVEL;
 
 			$db->insert(ADMIN_TABLE, $sql_data);
+			$admin_id = $db->lastInsertId();
 
 			$tpl = new Template(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
 			$tpl->set_filenames(array('mail' => 'new_admin.txt'));
@@ -100,13 +102,11 @@ if ($mode == 'adduser') {
 
 			$output->redirect('./admin.php', 6);
 			$output->addLine($lang['Message']['Admin_added']);
-			$output->addLine($lang['Click_return_profile'], './admin.php');
+			$output->addLine($lang['Click_return_profile'], './admin.php?uid=' . $admin_id);
 			$output->addLine($lang['Click_return_index'], './index.php');
 			$output->displayMessage();
 		}
 	}
-
-	$output->addHiddenField('mode', 'adduser');
 
 	$output->page_header();
 
@@ -123,9 +123,7 @@ if ($mode == 'adduser') {
 		'L_CANCEL_BUTTON' => $lang['Button']['cancel'],
 
 		'LOGIN' => htmlspecialchars($new_login),
-		'EMAIL' => htmlspecialchars($new_email),
-
-		'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+		'EMAIL' => htmlspecialchars($new_email)
 	));
 
 	$output->pparse('body');
@@ -155,8 +153,7 @@ else if ($mode == 'deluser') {
 		$output->displayMessage();
 	}
 	else {
-		$output->addHiddenField('mode'    , 'deluser');
-		$output->addHiddenField('admin_id', $admin_id);
+		$output->addHiddenField('uid', $admin_id);
 
 		$output->page_header();
 
@@ -172,7 +169,7 @@ else if ($mode == 'deluser') {
 			'L_NO'  => $lang['No'],
 
 			'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-			'U_FORM' => 'admin.php'
+			'U_FORM' => 'admin.php?mode=deluser'
 		));
 
 		$output->pparse('body');
@@ -192,7 +189,7 @@ if (isset($_POST['submit'])) {
 
 	$vararray = array('current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'dateformat', 'language');
 	foreach ($vararray as $varname) {
-		${$varname} = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : '';
+		${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 	}
 
 	require WA_ROOTDIR . '/includes/functions.validate.php';
@@ -205,8 +202,8 @@ if (isset($_POST['submit'])) {
 		$language = $nl_config['language'];
 	}
 
-	$email_new_subscribe = (!empty($_POST['email_new_subscribe'])) ? intval($_POST['email_new_subscribe']) : SUBSCRIBE_NOTIFY_NO;
-	$email_unsubscribe   = (!empty($_POST['email_unsubscribe'])) ? intval($_POST['email_unsubscribe']) : UNSUBSCRIBE_NOTIFY_NO;
+	$email_new_subscribe = (bool) filter_input(INPUT_POST, 'email_new_subscribe', FILTER_VALIDATE_BOOLEAN);
+	$email_unsubscribe   = (bool) filter_input(INPUT_POST, 'email_unsubscribe', FILTER_VALIDATE_BOOLEAN);
 
 	$set_password = false;
 	if ($new_passwd != '') {
@@ -247,25 +244,38 @@ if (isset($_POST['submit'])) {
 			$sql_data['admin_pwd'] = $passwd_hash;
 		}
 
-		if (wan_is_admin($admindata) && $admin_id != $admindata['admin_id'] && !empty($_POST['admin_level'])) {
-			$sql_data['admin_level'] = ($_POST['admin_level'] == ADMIN_LEVEL) ? ADMIN_LEVEL : USER_LEVEL;
+		if (wan_is_admin($admindata) && $admin_id != $admindata['admin_id']) {
+			$admin_level = filter_input(INPUT_POST, 'admin_level', FILTER_VALIDATE_INT);
+
+			if (is_int($admin_level) && in_array($admin_level, array(ADMIN_LEVEL,USER_LEVEL))) {
+				$sql_data['admin_level'] = $admin_level;
+			}
 		}
 
 		$db->update(ADMIN_TABLE, $sql_data, array('admin_id' => $admin_id));
 
 		if (wan_is_admin($admindata)) {
 			$auth_data = ($admindata['admin_id'] == $admin_id) ? $auth->listdata : $auth->read_data($admin_id);
-			$liste_ids = (!empty($_POST['liste_id']) && is_array($_POST['liste_id'])) ? $_POST['liste_id'] : array();
+			$liste_ids = (array) filter_input(INPUT_POST, 'liste_id',
+				FILTER_VALIDATE_INT,
+				FILTER_REQUIRE_ARRAY
+			);
+			$liste_ids = array_filter($liste_ids);
 
+			$auth_post = array();
 			foreach ($auth->auth_ary as $auth_name) {
-				${$auth_name . '_ary'} = (!empty($_POST[$auth_name])) ? $_POST[$auth_name] : array();
+				$auth_post[$auth_name] = (array) filter_input(INPUT_POST, $auth_name,
+					FILTER_VALIDATE_BOOLEAN,
+					FILTER_REQUIRE_ARRAY
+				);
 			}
 
 			for ($i = 0, $total_liste = count($liste_ids); $i < $total_liste; $i++) {
 				$sql_data = array();
 
 				foreach ($auth->auth_ary as $auth_name) {
-					$sql_data[$auth_name] = ${$auth_name . '_ary'}[$i];
+					$sql_data[$auth_name] = (isset($auth_post[$auth_name][$i]))
+						? $auth_post[$auth_name][$i] : false;
 				}
 
 				if (!isset($auth_data[$liste_ids[$i]]['auth_view'])) {
@@ -283,18 +293,18 @@ if (isset($_POST['submit'])) {
 
 		$output->redirect('./admin.php', 6);
 		$output->addLine($lang['Message']['Profile_updated']);
-		$output->addLine($lang['Click_return_profile'], './admin.php?admin_id=' . $admin_id);
+		$output->addLine($lang['Click_return_profile'], './admin.php?uid=' . $admin_id);
 		$output->addLine($lang['Click_return_index'], './index.php');
 		$output->displayMessage();
 	}
 }
 
-$admin_box = '';
-
 if (wan_is_admin($admindata)) {
 	$current_admin = null;
 
-	if (!empty($admin_id) && $admin_id != $admindata['admin_id']) {
+	$admin_id = filter_input(INPUT_GET, 'uid', FILTER_VALIDATE_INT);
+
+	if (is_int($admin_id) && $admin_id != $admindata['admin_id']) {
 		$sql = "SELECT  admin_id, admin_login, admin_pwd, admin_email, admin_lang,
 				admin_dateformat, admin_level, email_new_subscribe, email_unsubscribe
 			FROM " . ADMIN_TABLE . "
@@ -316,8 +326,9 @@ if (wan_is_admin($admindata)) {
 		ORDER BY admin_login ASC";
 	$result = $db->query($sql);
 
+	$admin_box = '';
 	if ($row = $result->fetch()) {
-		$admin_box  = '<select id="admin_id" name="admin_id">';
+		$admin_box  = '<select id="uid" name="uid">';
 		$admin_box .= '<option value="0">' . $lang['Choice_user'] . '</option>';
 
 		do {
@@ -337,11 +348,12 @@ if (wan_is_admin($admindata)) {
 }
 else {
 	$current_admin = $admindata;
+	$admin_box = '';
 }
 
 require WA_ROOTDIR . '/includes/functions.box.php';
 
-$output->addHiddenField('admin_id', $current_admin['admin_id']);
+$output->addHiddenField('uid', $current_admin['admin_id']);
 
 if (wan_is_admin($admindata)) {
 	$output->addLink('subsection', './admin.php?mode=adduser', $lang['Add_user']);

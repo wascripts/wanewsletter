@@ -18,10 +18,10 @@ if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 
 $listdata = $auth->listdata[$_SESSION['liste']];
 
-$file_id  = (!empty($_GET['fid'])) ? intval($_GET['fid']) : 0;
-$filename = (!empty($_GET['file'])) ? trim($_GET['file']) : '';
+$file_id  = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
+$filename = trim(filter_input(INPUT_GET, 'file'));
 
-if ($filename != '') {
+if ($filename) {
 	$sql_where = 'jf.file_real_name = \'' . $db->escape($filename) . '\'';
 }
 else {

@@ -9,6 +9,7 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wamailer\Email;
 
@@ -86,9 +87,11 @@ $other_tags = wan_get_tags();
 switch ($mode) {
 	case 'editprofile':
 		if (isset($_POST['submit'])) {
-			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language', 'current_passwd', 'new_passwd', 'confirm_passwd');
+			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language',
+				'current_passwd', 'new_passwd', 'confirm_passwd'
+			);
 			foreach ($vararray as $varname) {
-				${$varname} = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : '';
+				${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 			}
 
 			if ($language == '' || !validate_lang($language)) {
@@ -153,11 +156,11 @@ switch ($mode) {
 				}
 
 				foreach ($other_tags as $tag) {
-					if (!empty($tag['field_name']) && !empty($_REQUEST[$tag['field_name']])) {
-						$sql_data[$tag['column_name']] = $_REQUEST[$tag['field_name']];
-					}
-					else if (!empty($_REQUEST[$tag['column_name']])) {
-						$sql_data[$tag['column_name']] = $_REQUEST[$tag['column_name']];
+					$input_name = (!empty($tag['field_name'])) ? $tag['field_name'] : $tag['column_name'];
+					$data = u::filter_input(INPUT_POST, $input_name);
+
+					if (!is_null($data)) {
+						$sql_data[$tag['column_name']] = trim($data);
 					}
 				}
 
@@ -208,12 +211,15 @@ switch ($mode) {
 
 	case 'archives':
 		if (isset($_POST['submit'])) {
-			$listlog = (!empty($_POST['log'])) ? (array) $_POST['log'] : array();
+			$listlog = (array) filter_input(INPUT_POST, 'log',
+				FILTER_VALIDATE_INT,
+				FILTER_REQUIRE_ARRAY
+			);
+			$listlog = array_filter($listlog);
 
 			$sql_log_id = array();
 			foreach ($listlog as $liste_id => $logs) {
 				if (isset($abodata['listes'][$liste_id])) {
-					$logs = array_map('intval', $logs);
 					$sql_log_id = array_merge($sql_log_id, $logs);
 				}
 			}
@@ -438,7 +444,7 @@ switch ($mode) {
 					. htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
 				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
 			}
-			$select_log .= '</select>';
+			$select_log .= '</select>'."\n";
 
 			$output->assign_block_vars('listerow', array(
 				'LISTE_ID'   => $liste_id,

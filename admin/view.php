@@ -9,20 +9,25 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wamailer\Mime;
 use ZipArchive;
 
 require './start.inc.php';
 
-$mode      = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
-$action    = (!empty($_REQUEST['action'])) ? $_REQUEST['action'] : '';
-$page_id   = (!empty($_REQUEST['page'])) ? intval($_REQUEST['page']) : 1;
-$sql_type  = (!empty($_REQUEST['type'])) ? trim($_REQUEST['type']) : '';
-$sql_order = (!empty($_REQUEST['order'])) ? trim($_REQUEST['order']) : '';
-$mode_ary  = array('liste', 'log', 'abonnes', 'download', 'iframe', 'export');
+$mode      = filter_input(INPUT_GET, 'mode');
+$action    = filter_input(INPUT_GET, 'action');
+$sql_type  = filter_input(INPUT_GET, 'type');
+$sql_order = filter_input(INPUT_GET, 'order');
+$page_id   = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, array(
+	'options' => array(
+		'min_range' => 1,
+		'default'   => 1
+	)
+));
 
-if (!in_array($mode, $mode_ary)) {
+if (!in_array($mode, array('liste', 'log', 'abonnes', 'download', 'iframe', 'export'))) {
 	http_redirect('index.php');
 }
 
@@ -55,7 +60,7 @@ if ($mode == 'download') {
 		$output->displayMessage('Not_auth_view');
 	}
 
-	$file_id = (!empty($_GET['fid'])) ? intval($_GET['fid']) : 0;
+	$file_id = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
 	$attach  = new Attach();
 	$attach->download_file($file_id);
 }
@@ -64,7 +69,7 @@ if ($mode == 'download') {
 // Mode export : Export d'une archive et de ses fichiers joints
 //
 else if ($mode == 'export') {
-	$log_id = (!empty($_GET['id'])) ? intval($_GET['id']) : 0;
+	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 	$sql = "SELECT log_subject, log_body_text, log_body_html, log_date
 		FROM " . LOG_TABLE . "
@@ -142,8 +147,8 @@ else if ($mode == 'iframe') {
 		$output->basic($lang['Message']['Not_auth_view']);
 	}
 
-	$log_id = (!empty($_GET['id'])) ? intval($_GET['id']) : 0;
-	$format = (isset($_GET['format'])) ? $_GET['format'] : 0;
+	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+	$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
 	if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
 		$format = $listdata['liste_format'];
@@ -219,7 +224,7 @@ else if ($mode == 'abonnes') {
 		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
 	}
 
-	$abo_id     = (!empty($_REQUEST['id'])) ? intval($_REQUEST['id']) : 0;
+	$abo_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$get_string = '';
 
 	//
@@ -228,10 +233,10 @@ else if ($mode == 'abonnes') {
 	$abo_confirmed   = SUBSCRIBE_CONFIRMED;
 	$sql_search      = '';
 	$sql_search_date = '';
-	$search_keyword  = (!empty($_REQUEST['keyword'])) ? trim($_REQUEST['keyword']) : '';
-	$search_date     = (!empty($_REQUEST['days'])) ? intval($_REQUEST['days']) : 0;
+	$search_keyword  = trim(u::filter_input(INPUT_GET, 'keyword'));
+	$search_date     = (int) filter_input(INPUT_GET, 'days');
 
-	if ($search_keyword != '' || $search_date) {
+	if ($search_keyword || $search_date) {
 		if (strlen($search_keyword) > 1) {
 			$get_string .= '&amp;keyword=' . htmlspecialchars(urlencode($search_keyword));
 			$sql_search  = sprintf("WHERE a.abo_email LIKE '%s' ",
@@ -250,10 +255,6 @@ else if ($mode == 'abonnes') {
 					strtotime(sprintf('-%d days', $search_date))
 				);
 			}
-		}
-
-		if (isset($_POST['search'])) {
-			$page_id = 1;
 		}
 	}
 
@@ -406,7 +407,7 @@ else if ($mode == 'abonnes') {
 		$liste_ids = $auth->check_auth(Auth::EDIT);
 
 		if (isset($_POST['submit'])) {
-			$email = (!empty($_POST['email'])) ? trim($_POST['email']) : '';
+			$email = trim(u::filter_input(INPUT_POST, 'email'));
 
 			if (!Mailer::checkMailSyntax($email)) {
 				$error = true;
@@ -436,24 +437,32 @@ else if ($mode == 'abonnes') {
 
 				$sql_data = array(
 					'abo_email'  => $email,
-					'abo_pseudo' => (!empty($_POST['pseudo'])) ? strip_tags(trim($_POST['pseudo'])) : '',
+					'abo_pseudo' => strip_tags(trim(u::filter_input(INPUT_POST, 'pseudo'))),
 					'abo_status' => (filter_input(INPUT_POST, 'status') == ABO_ACTIF) ? ABO_ACTIF : ABO_INACTIF
 				);
 
 				//
 				// Récupération des champs des tags personnalisés
 				//
-				if (count($other_tags) > 0 && isset($_POST['tags'])) {
+				if (count($other_tags) > 0) {
+					$tags_data = (array) u::filter_input(INPUT_POST, 'tags',
+						FILTER_DEFAULT,
+						FILTER_REQUIRE_ARRAY
+					);
+
 					foreach ($other_tags as $tag) {
-						if (isset($_POST['tags'][$tag['column_name']])) {
-							$sql_data[$tag['column_name']] = $_POST['tags'][$tag['column_name']];
+						if (isset($tags_data[$tag['column_name']])) {
+							$sql_data[$tag['column_name']] = trim($tags_data[$tag['column_name']]);
 						}
 					}
 				}
 
 				$db->update(ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id));
 
-				$formatList = (!empty($_POST['format']) && is_array($_POST['format'])) ? $_POST['format'] : array();
+				$formatList = (array) filter_input(INPUT_POST, 'format',
+					FILTER_VALIDATE_INT,
+					FILTER_REQUIRE_ARRAY
+				);
 
 				$update = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
 
@@ -504,9 +513,6 @@ else if ($mode == 'abonnes') {
 		if ($row = $result->fetch()) {
 			require WA_ROOTDIR . '/includes/functions.box.php';
 
-			$output->addHiddenField('id', $row['abo_id']);
-			$output->addHiddenField('action', 'edit');
-
 			$output->page_header();
 
 			$output->set_filenames(array(
@@ -535,9 +541,7 @@ else if ($mode == 'abonnes') {
 				'S_ABO_EMAIL'          => htmlspecialchars($row['abo_email']),
 				'S_ABO_ID'             => $row['abo_id'],
 				'S_STATUS_ACTIVE'      => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_ACTIF)),
-				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIF)),
-
-				'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
+				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIF))
 			));
 
 			//
@@ -588,11 +592,17 @@ else if ($mode == 'abonnes') {
 	// Suppression d'un ou plusieurs profils abonnés
 	//
 	else if ($action == 'delete') {
-		$email_list = (!empty($_POST['email_list'])) ? $_POST['email_list'] : '';
-		$abo_ids    = (!empty($_REQUEST['id'])) ? $_REQUEST['id'] : array();
+		$email_list = trim(u::filter_input(INPUT_POST, 'email_list'));
+		$abo_ids    = (array) filter_input(INPUT_POST, 'id',
+			FILTER_VALIDATE_INT,
+			FILTER_REQUIRE_ARRAY
+		);
+		$abo_ids = array_filter($abo_ids);
 
-		if (!is_array($abo_ids)) {
-			$abo_ids = array(intval($abo_ids));
+		// Spécial. Cas où on veut supprimer un  seul compte et l'ID est
+		// fourni seul via le lien "Supprimer ce compte".
+		if (count($abo_ids) == 0 && $abo_id > 0) {
+			$abo_ids = array($abo_id);
 		}
 
 		if ($email_list == '' && count($abo_ids) == 0) {
@@ -632,10 +642,6 @@ else if ($mode == 'abonnes') {
 			$output->displayMessage();
 		}
 		else {
-			unset($abo_id);
-
-			$output->addHiddenField('action', 'delete');
-
 			if ($email_list != '') {
 				$email_list   = array_map('trim', explode(',', $email_list));
 				$total_emails = count($email_list);
@@ -691,7 +697,7 @@ else if ($mode == 'abonnes') {
 				'L_NO'  => $lang['No'],
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => 'view.php?mode=abonnes'
+				'U_FORM' => 'view.php?mode=abonnes&amp;action=delete'
 			));
 
 			$output->pparse('body');
@@ -792,8 +798,7 @@ else if ($mode == 'abonnes') {
 		'PAGEOF'               => ($total_abo > 0) ? sprintf($lang['Page_of'], $page_id, ceil($total_abo / $abo_per_page)) : '',
 		'NUM_SUBSCRIBERS'      => ($total_abo > 0) ? '[ <b>' . $total_abo . '</b> ' . $lang['Module']['subscribers'] . ' ]' : '',
 
-		'S_HIDDEN_FIELDS'      => $output->getHiddenFields(),
-		'U_FORM'               => 'view.php?mode=abonnes' . $get_page
+		'PAGING'               => $get_page
 	));
 
 	if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
@@ -837,7 +842,8 @@ else if ($mode == 'abonnes') {
 	}
 	else {
 		$output->assign_block_vars('empty', array(
-			'L_EMPTY' => (isset($_POST['search'])) ? $lang['No_search_result'] : $lang['No_abo_in_list']
+			'L_EMPTY' => ($search_keyword || $search_date)
+				? $lang['No_search_result'] : $lang['No_abo_in_list']
 		));
 	}
 }
@@ -884,7 +890,7 @@ else if ($mode == 'liste') {
 			'pop_host', 'pop_user', 'pop_pass', 'liste_alias'
 		);
 		foreach ($vararray as $varname) {
-			${$varname} = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : '';
+			${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 		}
 
 		$default_values = array(
@@ -892,6 +898,7 @@ else if ($mode == 'liste') {
 			'limitevalidate'    => 3,
 			'auto_purge'        => true,
 			'purge_freq'        => 7,
+			'use_cron'          => false,
 			'pop_port'          => 110,
 			'pop_tls'           => SECURITY_NONE,
 			'liste_public'      => true,
@@ -903,12 +910,8 @@ else if ($mode == 'liste') {
 			'auto_purge', 'purge_freq', 'use_cron', 'pop_port', 'pop_tls'
 		);
 		foreach ($vararray2 as $varname) {
-			if (isset($_POST[$varname])) {
-				${$varname} = intval($_POST[$varname]);
-			}
-			else {
-				${$varname} = (isset($default_values[$varname])) ? $default_values[$varname] : 0;
-			}
+			$value = filter_input(INPUT_POST, $varname, FILTER_VALIDATE_INT);
+			${$varname} = (is_int($value)) ? $value : $default_values[$varname];
 		}
 
 		if (!check_ssl_support()) {
@@ -1017,8 +1020,6 @@ else if ($mode == 'liste') {
 
 		require WA_ROOTDIR . '/includes/functions.box.php';
 
-		$output->addHiddenField('action', $action);
-
 		$output->page_header();
 
 		$output->set_filenames(array(
@@ -1087,8 +1088,7 @@ else if ($mode == 'liste') {
 			'POP_PORT'             => intval($pop_port),
 			'POP_USER'             => htmlspecialchars($pop_user),
 			'LISTE_ALIAS'          => htmlspecialchars($liste_alias),
-
-			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
+			'ACTION'               => $action
 		));
 
 		if (check_ssl_support()) {
@@ -1111,8 +1111,6 @@ else if ($mode == 'liste') {
 	//
 	else if ($action == 'delete') {
 		if (isset($_POST['confirm'])) {
-			$liste_id = (!empty($_POST['liste_id'])) ? intval($_POST['liste_id']) : 0;
-
 			$db->beginTransaction();
 
 			$sql = "DELETE FROM " . AUTH_ADMIN_TABLE . "
@@ -1173,8 +1171,12 @@ else if ($mode == 'liste') {
 
 				include WA_ROOTDIR . '/includes/functions.stats.php';
 				remove_stats($listdata['liste_id']);
+
+				$message = $lang['Message']['Liste_del_all'];
 			}
 			else {
+				$liste_id = (int) filter_input(INPUT_POST, 'liste_id', FILTER_VALIDATE_INT);
+
 				if (!isset($auth->listdata[$liste_id])) {
 					trigger_error('No_liste_id', E_USER_ERROR);
 				}
@@ -1238,6 +1240,8 @@ else if ($mode == 'liste') {
 
 				include WA_ROOTDIR . '/includes/functions.stats.php';
 				remove_stats($listdata['liste_id'], $liste_id);
+
+				$message = $lang['Message']['Liste_del_move'];
 			}
 
 			$sql = "DELETE FROM " . LISTE_TABLE . "
@@ -1249,13 +1253,13 @@ else if ($mode == 'liste') {
 			//
 			// Optimisation des tables
 			//
-			$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE, LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE, LISTE_TABLE));
+			$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE, LOG_TABLE,
+				LOG_FILES_TABLE, JOINED_FILES_TABLE, LISTE_TABLE
+			));
 
 			$target = './index.php';
 			$output->redirect($target, 4);
-			$output->addLine(
-				isset($_POST['delete_all']) ? $lang['Message']['Liste_del_all'] : $lang['Message']['Liste_del_move']
-			);
+			$output->addLine($message);
 			$output->addLine($lang['Click_return_index'], $target);
 			$output->displayMessage();
 		}
@@ -1281,8 +1285,6 @@ else if ($mode == 'liste') {
 				$message = $lang['Delete_all'];
 			}
 
-			$output->addHiddenField('action', 'delete');
-
 			$output->page_header();
 
 			$output->set_filenames(array(
@@ -1297,7 +1299,7 @@ else if ($mode == 'liste') {
 				'L_NO'	=> $lang['No'],
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => 'view.php?mode=liste'
+				'U_FORM' => 'view.php?mode=liste&amp;action=delete'
 			));
 
 			$output->pparse('body');
@@ -1472,13 +1474,15 @@ else if ($mode == 'log') {
 		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
 	}
 
-	$log_id = (!empty($_GET['id'])) ? intval($_GET['id']) : 0;
-
 	//
 	// Suppression d'une archive
 	//
 	if ($action == 'delete') {
-		$log_ids = (!empty($_POST['log_id']) && is_array($_POST['log_id'])) ? array_map('intval', $_POST['log_id']) : array();
+		$log_ids = (array) filter_input(INPUT_POST, 'log_id',
+			FILTER_VALIDATE_INT,
+			FILTER_REQUIRE_ARRAY
+		);
+		$log_ids = array_filter($log_ids);
 
 		if (count($log_ids) == 0) {
 			$output->redirect('./view.php?mode=log', 4);
@@ -1509,10 +1513,6 @@ else if ($mode == 'log') {
 			$output->displayMessage();
 		}
 		else {
-			unset($log_id);
-
-			$output->addHiddenField('action', 'delete');
-
 			foreach ($log_ids as $log_id) {
 				$output->addHiddenField('log_id[]', $log_id);
 			}
@@ -1531,7 +1531,7 @@ else if ($mode == 'log') {
 				'L_NO'  => $lang['No'],
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-				'U_FORM' => 'view.php?mode=log'
+				'U_FORM' => 'view.php?mode=log&amp;action=delete'
 			));
 
 			$output->pparse('body');
@@ -1540,6 +1540,7 @@ else if ($mode == 'log') {
 		}
 	}
 
+	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$get_string = '';
 
 	//
@@ -1638,10 +1639,6 @@ else if ($mode == 'log') {
 
 	$navigation = navigation('view.php?mode=log' . $get_string, $total_logs, $log_per_page, $page_id);
 
-	$u_form	 = 'view.php?mode=log' . ($log_id > 0 ? '&amp;id=' . $log_id : '');
-	$u_form .= ($action != '') ? '&amp;action=' . $action : '';
-	$u_form .= ($page_id > 1) ? '&amp;page=' . $page_id : '';
-
 	$get_string .= ($page_id > 1) ? '&amp;page=' . $page_id : '';
 
 	$output->page_header();
@@ -1671,8 +1668,7 @@ else if ($mode == 'log') {
 		'PAGEOF'                => ($total_logs > 0) ? sprintf($lang['Page_of'], $page_id, ceil($total_logs / $log_per_page)) : '',
 		'NUM_LOGS'              => ($total_logs > 0) ? '[ <b>' . $total_logs . '</b> ' . $lang['Module']['log'] . ' ]' : '',
 
-		'S_HIDDEN_FIELDS'       => $output->getHiddenFields(),
-		'U_FORM'                => $u_form
+		'PAGING'                => $get_string
 	));
 
 	if ($num_logs = count($logrow)) {
@@ -1715,7 +1711,7 @@ else if ($mode == 'log') {
 		}
 
 		if ($action == 'view' && is_array($logdata)) {
-			$format = (!empty($_GET['format'])) ? intval($_GET['format']) : 0;
+			$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
 			$output->set_filenames(array(
 				'iframe_body' => 'iframe_body.tpl'
@@ -1741,6 +1737,7 @@ else if ($mode == 'log') {
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
 				require WA_ROOTDIR . '/includes/functions.box.php';
 
+				// Par champ caché, car ce formulaire est en méthode GET.
 				$output->addHiddenField('mode', 'log');
 				$output->addHiddenField('action', 'view');
 				$output->addHiddenField('id', $log_id);

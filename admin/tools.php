@@ -82,19 +82,7 @@ function decompress_filedata($tmp_filename, $filename)
 	return file_get_contents($scheme . $tmp_filename);
 }
 
-$mode     = (!empty($_REQUEST['mode'])) ? $_REQUEST['mode'] : '';
-$format   = (!empty($_POST['format'])) ? intval($_POST['format']) : FORMAT_TEXTE;
-$eformat  = (!empty($_POST['eformat'])) ? $_POST['eformat'] : '';
-$glue     = (!empty($_POST['glue'])) ? trim($_POST['glue']) : '';
-$action   = (!empty($_POST['action'])) ? $_POST['action'] : 'download';
-$compress = (!empty($_POST['compress'])) ? $_POST['compress'] : 'none';
-
-$file_local  = (!empty($_POST['file_local'])) ? trim($_POST['file_local']) : '';
-$file_upload = (!empty($_FILES['file_upload'])) ? $_FILES['file_upload'] : array();
-
-if (!in_array($format, array(FORMAT_TEXTE, FORMAT_HTML))) {
-	$format = FORMAT_TEXTE;
-}
+$mode = filter_input(INPUT_GET, 'mode');
 
 switch ($mode) {
 	case 'export':
@@ -334,8 +322,12 @@ switch ($mode) {
 			if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
 				$format = $listdata['liste_format'];
 			}
-
-			$glue = ($glue != '') ? $glue : $EOL;
+			else {
+				$format = filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
+				if (!in_array($format, array(FORMAT_TEXTE, FORMAT_HTML))) {
+					$format = FORMAT_TEXTE;
+				}
+			}
 
 			$sql = "SELECT a.abo_email
 				FROM " . ABONNES_TABLE . " AS a
@@ -347,7 +339,7 @@ switch ($mode) {
 			$result = $db->query($sql);
 
 			$contents = '';
-			if ($eformat == 'xml') {
+			if (filter_input(INPUT_POST, 'eformat') == 'xml') {
 				while ($email = $result->column('abo_email')) {
 					$contents .= sprintf("\t<email>%s</email>\n", $email);
 				}
@@ -361,6 +353,11 @@ switch ($mode) {
 				$ext = 'xml';
 			}
 			else {
+				$glue = trim(filter_input(INPUT_POST, 'glue'));
+				if (!$glue) {
+					$glue = $EOL;
+				}
+
 				while ($email = $result->column('abo_email')) {
 					$contents .= ($contents != '' ? $glue : '') . $email;
 				}
@@ -375,9 +372,10 @@ switch ($mode) {
 			//
 			// Préparation des données selon l'option demandée
 			//
+			$compress = filter_input(INPUT_POST, 'compress');
 			$contents = compress_filedata($filename, $mime_type, $contents, $compress);
 
-			if ($action == 'download') {
+			if (filter_input(INPUT_POST, 'action') == 'download') {
 				Attach::send_file($filename, $mime_type, $contents);
 			}
 			else {
@@ -444,19 +442,22 @@ switch ($mode) {
 
 	case 'import':
 		if (isset($_POST['submit'])) {
-			$list_email  = (!empty($_POST['list_email'])) ? trim($_POST['list_email']) : '';
+			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : array();
+			$local_file  = trim(filter_input(INPUT_POST, 'local_file'));
+			$list_email  = trim(filter_input(INPUT_POST, 'list_email'));
+
 			$list_tmp    = '';
 			$data_is_xml = false;
 
 			//
 			// Import via upload ou fichier local ?
 			//
-			if (!empty($file_local) || !empty($file_upload['name'])) {
+			if ($local_file || $upload_file) {
 				$unlink = false;
 
-				if (!empty($file_local)) {
-					$tmp_filename = WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local);
-					$filename     = $file_local;
+				if ($local_file) {
+					$tmp_filename = WA_ROOTDIR . '/' . str_replace('\\', '/', $local_file);
+					$filename     = $local_file;
 
 					if (!file_exists($tmp_filename)) {
 						$output->redirect('./tools.php?mode=import', 4);
@@ -466,16 +467,16 @@ switch ($mode) {
 					}
 				}
 				else {
-					$tmp_filename = $file_upload['tmp_name'];
-					$filename     = $file_upload['name'];
+					$tmp_filename = $upload_file['tmp_name'];
+					$filename     = $upload_file['name'];
 
-					if (!isset($file_upload['error']) && empty($tmp_filename)) {
-						$file_upload['error'] = -1;
+					if (!isset($upload_file['error']) && empty($tmp_filename)) {
+						$upload_file['error'] = -1;
 					}
 
-					if ($file_upload['error'] != UPLOAD_ERR_OK) {
-						if (isset($lang['Message']['Upload_error_'.$file_upload['error']])) {
-							$upload_error = 'Upload_error_'.$file_upload['error'];
+					if ($upload_file['error'] != UPLOAD_ERR_OK) {
+						if (isset($lang['Message']['Upload_error_'.$upload_file['error']])) {
+							$upload_error = 'Upload_error_'.$upload_file['error'];
 						}
 						else {
 							$upload_error = 'Upload_error_5';
@@ -493,7 +494,7 @@ switch ($mode) {
 						$unlink = true;
 						$tmp_filename = tempnam(WA_TMPDIR, 'wa');
 
-						if (!move_uploaded_file($file_upload['tmp_name'], $tmp_filename)) {
+						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
 							$output->displayMessage('Upload_error_5');
 						}
@@ -513,10 +514,6 @@ switch ($mode) {
 			//
 			else if (strlen($list_email) > 5) {
 				$list_tmp = $list_email;
-			}
-
-			if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
-				$format = $listdata['liste_format'];
 			}
 
 			if (!empty($list_tmp) && $data_is_xml) {
@@ -568,7 +565,8 @@ switch ($mode) {
 				}
 			}
 			else {
-				if ($glue == '') {
+				$glue = trim(filter_input(INPUT_POST, 'glue'));
+				if (!$glue) {
 					$list_tmp = preg_replace("/\r\n?/", "\n", $list_tmp);
 					$glue = "\n";
 				}
@@ -608,6 +606,16 @@ switch ($mode) {
 			);
 
 			if (count($emails) > 0) {
+				if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
+					$format = $listdata['liste_format'];
+				}
+				else {
+					$format = filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
+					if (!in_array($format, array(FORMAT_TEXTE, FORMAT_HTML))) {
+						$format = FORMAT_TEXTE;
+					}
+				}
+
 				$current_time = time();
 				$emails_ok    = array();
 
@@ -725,7 +733,7 @@ switch ($mode) {
 				'</a>'
 			)),
 			'L_GLUE'           => $lang['Char_glue'],
-			'L_FILE_LOCAL'     => $lang['File_local'],
+			'L_LOCAL_FILE'     => $lang['File_local'],
 			'L_VALID_BUTTON'   => $lang['Button']['valid'],
 			'L_RESET_BUTTON'   => $lang['Button']['reset'],
 
@@ -749,7 +757,7 @@ switch ($mode) {
 			//
 			$output->assign_block_vars('upload_file', array(
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
-				'L_FILE_UPLOAD'   => $lang['File_upload'],
+				'L_UPLOAD_FILE'   => $lang['File_upload'],
 				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
 				'MAX_FILE_SIZE'   => $max_filesize
 			));
@@ -760,17 +768,21 @@ switch ($mode) {
 
 	case 'ban':
 		if (isset($_POST['submit'])) {
-			$pattern       = (!empty($_POST['pattern'])) ? trim(str_replace('\\\'', '', $_POST['pattern'])) : '';
-			$unban_list_id = (!empty($_POST['unban_list_id'])) ? array_map('intval', $_POST['unban_list_id']) : array();
+			$pattern   = trim(u::filter_input(INPUT_POST, 'pattern'));
+			$unban_ids = (array) filter_input(INPUT_POST, 'unban_ids',
+				FILTER_VALIDATE_INT,
+				FILTER_REQUIRE_ARRAY
+			);
+			$unban_ids = array_filter($unban_ids);
 
-			if ($pattern != '') {
-				$pattern_ary = array_map('trim', explode(',', $pattern));
-				$sql_dataset = array();
+			if ($pattern) {
+				$pattern_list = explode(',', $pattern);
+				$sql_dataset  = array();
 
-				foreach ($pattern_ary as $pattern) {
+				foreach ($pattern_list as $pattern) {
 					$sql_dataset[] = array(
 						'liste_id'  => $listdata['liste_id'],
-						'ban_email' => $pattern
+						'ban_email' => trim($pattern)
 					);
 				}
 
@@ -781,9 +793,9 @@ switch ($mode) {
 				unset($sql_dataset);
 			}
 
-			if (count($unban_list_id) > 0) {
+			if (count($unban_ids) > 0) {
 				$sql = "DELETE FROM " . BANLIST_TABLE . "
-					WHERE ban_id IN (" . implode(', ', $unban_list_id) . ")";
+					WHERE ban_id IN (" . implode(', ', $unban_ids) . ")";
 				$db->query($sql);
 
 				//
@@ -804,7 +816,7 @@ switch ($mode) {
 			WHERE liste_id = " . $listdata['liste_id'];
 		$result = $db->query($sql);
 
-		$unban_email_box = '<select id="unban_list_id" name="unban_list_id[]" multiple="multiple" size="10">';
+		$unban_email_box = '<select id="unban_ids" name="unban_ids[]" multiple="multiple" size="10">';
 		if ($row = $result->fetch()) {
 			do {
 				$unban_email_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['ban_id'], $row['ban_email']);
@@ -838,20 +850,22 @@ switch ($mode) {
 
 	case 'attach':
 		if (isset($_POST['submit'])) {
-			$ext_list    = (!empty($_POST['ext_list'])) ? trim($_POST['ext_list']) : '';
-			$ext_list_id = (!empty($_POST['ext_list_id'])) ? array_map('intval', $_POST['ext_list_id']) : array();
+			$ext_list = trim(u::filter_input(INPUT_POST, 'ext_list'));
+			$ext_ids  = (array) filter_input(INPUT_POST, 'ext_ids',
+				FILTER_VALIDATE_INT,
+				FILTER_REQUIRE_ARRAY
+			);
+			$ext_ids = array_filter($ext_ids);
 
 			if ($ext_list != '') {
-				$ext_ary	= array_map('trim', explode(',', $ext_list));
+				$ext_list    = explode(',', $ext_list);
 				$sql_dataset = array();
 
-				foreach ($ext_ary as $ext) {
-					$ext = strtolower($ext);
-
+				foreach ($ext_list as $ext) {
 					if (preg_match('/^[\w_-]+$/', $ext)) {
 						$sql_dataset[] = array(
 							'liste_id' => $listdata['liste_id'],
-							'fe_ext'   => $ext
+							'fe_ext'   => trim(mb_strtolower($ext))
 						);
 					}
 				}
@@ -863,9 +877,9 @@ switch ($mode) {
 				unset($sql_dataset);
 			}
 
-			if (count($ext_list_id) > 0) {
+			if (count($ext_ids) > 0) {
 				$sql = "DELETE FROM " . FORBIDDEN_EXT_TABLE . "
-					WHERE fe_id IN (" . implode(', ', $ext_list_id) . ")";
+					WHERE fe_id IN (" . implode(', ', $ext_ids) . ")";
 				$db->query($sql);
 
 				//
@@ -886,7 +900,7 @@ switch ($mode) {
 			WHERE liste_id = " . $listdata['liste_id'];
 		$result = $db->query($sql);
 
-		$reallow_ext_box = '<select id="ext_list_id" name="ext_list_id[]" multiple="multiple" size="10">';
+		$reallow_ext_box = '<select id="ext_ids" name="ext_ids[]" multiple="multiple" size="10">';
 		if ($row = $result->fetch()) {
 			do {
 				$reallow_ext_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $row['fe_id'], $row['fe_ext']);
@@ -919,20 +933,21 @@ switch ($mode) {
 		break;
 
 	case 'backup':
-		$tables      = array();
-		$tables_plus = (!empty($_POST['tables_plus'])) ? array_map('trim', $_POST['tables_plus']) : array();
-		$backup_type = (isset($_POST['backup_type'])) ? intval($_POST['backup_type']) : 0;
-		$drop_option = !empty($_POST['drop_option']);
+		$tables_plus = (array) filter_input(INPUT_POST, 'tables_plus',
+			FILTER_DEFAULT,
+			FILTER_REQUIRE_ARRAY
+		);
+		$backup_type = filter_input(INPUT_POST, 'backup_type', FILTER_VALIDATE_INT);
+		$drop_option = filter_input(INPUT_POST, 'drop_option', FILTER_VALIDATE_BOOLEAN);
 
-		$backup = $db->initBackup();
-
-		if ($backup == null) {
+		if (!($backup = $db->initBackup())) {
 			$output->displayMessage('Database_unsupported');
 		}
 
-		$tables_ary = $backup->get_tables();
+		$tables_list = $backup->get_tables();
+		$tables      = array();
 
-		foreach ($tables_ary as $tablename => $tabletype) {
+		foreach ($tables_list as $tablename => $tabletype) {
 			if (!isset($_POST['submit'])) {
 				if (!isset($sql_schemas[$tablename])) {
 					$tables_plus[] = $tablename;
@@ -974,9 +989,10 @@ switch ($mode) {
 			//
 			// Préparation des données selon l'option demandée
 			//
+			$compress = filter_input(INPUT_POST, 'compress');
 			$contents = compress_filedata($filename, $mime_type, $contents, $compress);
 
-			if ($action == 'download') {
+			if (filter_input(INPUT_POST, 'action') == 'download') {
 				Attach::send_file($filename, $mime_type, $contents);
 			}
 			else {
@@ -1059,6 +1075,9 @@ switch ($mode) {
 		if (isset($_POST['submit'])) {
 			require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
+			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : array();
+			$local_file  = trim(filter_input(INPUT_POST, 'local_file'));
+
 			//
 			// On règle le script pour ignorer une déconnexion du client et mener
 			// la restauration à son terme
@@ -1068,12 +1087,12 @@ switch ($mode) {
 			//
 			// Import via upload ou fichier local ?
 			//
-			if (!empty($file_local) || !empty($file_upload['name'])) {
+			if ($local_file || $upload_file) {
 				$unlink = false;
 
-				if (!empty($file_local)) {
-					$tmp_filename = WA_ROOTDIR . '/' . str_replace('\\', '/', $file_local);
-					$filename     = $file_local;
+				if ($local_file) {
+					$tmp_filename = WA_ROOTDIR . '/' . str_replace('\\', '/', $local_file);
+					$filename     = $local_file;
 
 					if (!file_exists($tmp_filename)) {
 						$output->redirect('./tools.php?mode=restore', 4);
@@ -1083,16 +1102,16 @@ switch ($mode) {
 					}
 				}
 				else {
-					$tmp_filename = $file_upload['tmp_name'];
-					$filename     = $file_upload['name'];
+					$tmp_filename = $upload_file['tmp_name'];
+					$filename     = $upload_file['name'];
 
-					if (!isset($file_upload['error']) && empty($tmp_filename)) {
-						$file_upload['error'] = -1;
+					if (!isset($upload_file['error']) && empty($tmp_filename)) {
+						$upload_file['error'] = -1;
 					}
 
-					if ($file_upload['error'] != UPLOAD_ERR_OK) {
-						if (isset($lang['Message']['Upload_error_'.$file_upload['error']])) {
-							$upload_error = 'Upload_error_'.$file_upload['error'];
+					if ($upload_file['error'] != UPLOAD_ERR_OK) {
+						if (isset($lang['Message']['Upload_error_'.$upload_file['error']])) {
+							$upload_error = 'Upload_error_'.$upload_file['error'];
 						}
 						else {
 							$upload_error = 'Upload_error_5';
@@ -1110,7 +1129,7 @@ switch ($mode) {
 						$unlink = true;
 						$tmp_filename = tempnam(WA_TMPDIR, 'wa');
 
-						if (!move_uploaded_file($file_upload['tmp_name'], $tmp_filename)) {
+						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
 							$output->displayMessage('Upload_error_5');
 						}
@@ -1158,7 +1177,7 @@ switch ($mode) {
 		$output->assign_vars(array(
 			'L_TITLE_RESTORE'   => $lang['Title']['restore'],
 			'L_EXPLAIN_RESTORE' => nl2br($lang['Explain']['restore']),
-			'L_FILE_LOCAL'      => $lang['File_local'],
+			'L_LOCAL_FILE'      => $lang['File_local'],
 			'L_VALID_BUTTON'    => $lang['Button']['valid'],
 			'L_RESET_BUTTON'    => $lang['Button']['reset'],
 
@@ -1173,7 +1192,7 @@ switch ($mode) {
 			//
 			$output->assign_block_vars('upload_file', array(
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
-				'L_FILE_UPLOAD'   => $lang['File_upload_restore'],
+				'L_UPLOAD_FILE'   => $lang['File_upload_restore'],
 				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
 				'MAX_FILE_SIZE'   => $max_filesize
 			));
@@ -1184,7 +1203,7 @@ switch ($mode) {
 
 	case 'generator':
 		if (isset($_POST['generate'])) {
-			$url_form = (!empty($_POST['url_form'])) ? trim($_POST['url_form']) : '';
+			$url_form = trim(filter_input(INPUT_POST, 'url_form'));
 
 			$code_html  = "<form method=\"post\" action=\"" . htmlspecialchars($url_form) . "\">\n";
 			$code_html .= $lang['Email_address'] . " : <input type=\"text\" name=\"email\" maxlength=\"100\" /> &nbsp; \n";

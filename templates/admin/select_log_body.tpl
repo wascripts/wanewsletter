@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <!-- END script_load_by_url -->
 
-<form method="post" action="envoi.php">
+<form method="post" action="envoi.php?mode=load">
 <div class="block">
 	<h2>{L_TITLE}</h2>
 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	</table>
 	</div>
 
-	<div class="bottom">{S_HIDDEN_FIELDS}
+	<div class="bottom">
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>

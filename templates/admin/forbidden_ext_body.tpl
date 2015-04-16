@@ -15,7 +15,7 @@
 
 	<table class="dataset compact">
 		<tr>
-			<td><label for="ext_list_id">{L_REALLOW_EXT}&nbsp;:</label></td>
+			<td><label for="ext_ids">{L_REALLOW_EXT}&nbsp;:</label></td>
 			<td>{REALLOW_EXT_BOX} </td>
 		</tr>
 	</table>

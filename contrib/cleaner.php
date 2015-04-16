@@ -31,7 +31,8 @@ $db = WaDatabase($dsn);
 
 load_settings();
 
-$type = (!empty($_GET['type'])) ? $_GET['type'] : '';
+$type = filter_input(INPUT_GET, 'type');
+$action = filter_input(INPUT_GET, 'action');
 
 if ($type != 'files' && $type != 'files2' && $type != 'subscribers') {
     $output->basic(
@@ -78,7 +79,7 @@ if ($type == 'subscribers') {
     $total_diff_1 = count($diff_1);
     $total_diff_2 = count($diff_2);
 
-    if (!empty($_GET['delete']) && ($total_diff_1 > 0 || $total_diff_2 > 0)) {
+    if ($action == 'delete' && ($total_diff_1 > 0 || $total_diff_2 > 0)) {
         if ($total_diff_1 > 0) {
             $sql = "DELETE FROM " . ABONNES_TABLE . "
                 WHERE abo_id IN(" . implode(', ', $diff_1) . ")";
@@ -100,7 +101,7 @@ if ($type == 'subscribers') {
     $data .= '</ul>';
 
     if ($total_diff_1 > 0 || $total_diff_2 > 0) {
-        $data .= '<p><a href="cleaner.php?type=subscribers&amp;delete=true">Effacer les entrées orphelines</a></p>';
+        $data .= '<p><a href="cleaner.php?type=subscribers&amp;action=delete">Effacer les entrées orphelines</a></p>';
     }
 
     $output->basic($data);
@@ -131,7 +132,7 @@ else if ($type == 'files') {
     $total_diff_1 = count($diff_1);
     $total_diff_2 = count($diff_2);
 
-    if (!empty($_GET['delete']) && ($total_diff_1 > 0 || $total_diff_2 > 0)) {
+    if ($action == 'delete' && ($total_diff_1 > 0 || $total_diff_2 > 0)) {
         if ($total_diff_1 > 0) {
             $sql = "DELETE FROM " . JOINED_FILES_TABLE . "
                 WHERE file_id IN(" . implode(', ', $diff_1) . ")";
@@ -153,7 +154,7 @@ else if ($type == 'files') {
     $data .= '</ul>';
 
     if ($total_diff_1 > 0 || $total_diff_2 > 0) {
-        $data .= '<p><a href="cleaner.php?type=files&amp;delete=true">Effacer les entrées orphelines</p>';
+        $data .= '<p><a href="cleaner.php?type=files&amp;action=delete">Effacer les entrées orphelines</p>';
     }
 
     $output->basic($data);
@@ -180,13 +181,13 @@ else if ($type == 'files2') {
 		if (is_file($upload_path . $entry) && $entry != 'index.html' && !in_array($entry, $joined_files)) {
 			$delete_files[] = $entry;
 
-			if (!empty($_GET['delete'])) {
+			if ($action == 'delete') {
 				unlink($upload_path . $entry);
 			}
 		}
 	}
 
-	if (!empty($_GET['delete'])) {
+	if ($action == 'delete') {
 		if (count($sql_delete_ids) > 0) {
 			$db->beginTransaction();
 
@@ -210,7 +211,7 @@ else if ($type == 'files2') {
     $data .= '</ul>';
 
     if (count($sql_delete_ids) > 0 || count($delete_files) > 0) {
-        $data .= '<p><a href="cleaner.php?type=files2&amp;delete=true">Effacer les entrées orphelines</p>';
+        $data .= '<p><a href="cleaner.php?type=files2&amp;action=delete">Effacer les entrées orphelines</p>';
     }
 
     $output->basic($data);

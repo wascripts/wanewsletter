@@ -36,9 +36,13 @@ if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 
 $listdata = $auth->listdata[$_SESSION['liste']];
 
-$img   = (!empty($_GET['img'])) ? trim($_GET['img']) : '';
-$year  = (!empty($_GET['year'])) ? intval($_GET['year']) : date('Y');
-$month = (!empty($_GET['month'])) ? intval($_GET['month']) : date('n');
+$img   = filter_input(INPUT_GET, 'img');
+$year  = filter_input(INPUT_GET, 'year', FILTER_VALIDATE_INT,
+	array('options' => array('default' => date('Y')))
+);
+$month = filter_input(INPUT_GET, 'month', FILTER_VALIDATE_INT,
+	array('options' => array('default' => date('n')))
+);
 
 $img_type = (imagetypes() & IMG_GIF) ? 'gif' : null;
 $img_type = (imagetypes() & IMG_PNG) ? 'png' : $img_type;

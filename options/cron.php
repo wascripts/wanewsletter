@@ -19,8 +19,8 @@ $nl_config = wa_get_config();
 
 load_settings();
 
-$mode     = (!empty($_REQUEST['mode'])) ? trim($_REQUEST['mode']) : '';
-$liste_id = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
+$mode     = filter_input(INPUT_GET, 'mode');
+$liste_id = (int) filter_input(INPUT_GET, 'liste', FILTER_VALIDATE_INT);
 
 $sql = 'SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
 		liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe,

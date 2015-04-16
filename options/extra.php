@@ -19,7 +19,7 @@ $nl_config = wa_get_config();
 
 load_settings();
 
-$liste_ids = (!empty($_GET['liste'])) ? $_GET['liste'] : 0;
+$liste_ids = trim(filter_input(INPUT_GET, 'liste'));
 $liste_ids = array_unique(array_map('intval', explode(' ', $liste_ids)));
 
 if (count($liste_ids) > 0) {
@@ -39,7 +39,7 @@ else {
 	$data   = '-1';
 }
 
-if (isset($_GET['output']) && $_GET['output'] == 'json') {
+if (filter_input(INPUT_GET, 'output') == 'json') {
 	header('Content-Type: application/json');
 
 	printf('{"numSubscribe":"%d"}', $data);
@@ -47,9 +47,9 @@ if (isset($_GET['output']) && $_GET['output'] == 'json') {
 else {
 	header('Content-Type: application/x-javascript');
 
-	if (isset($_GET['use-variable'])) {
-		$varname = trim($_GET['use-variable']);
+	$varname = trim(filter_input(INPUT_GET, 'use-variable'));
 
+	if ($varname) {
 		if (!preg_match('/^[A-Za-z0-9_.$\\\\]+$/', $varname)) {
 			$varname = 'var numSubscribe';
 			echo "console.log('Rejected variable name. Accepted chars are [A-Za-z0-9_.\$\\\\].');\n";

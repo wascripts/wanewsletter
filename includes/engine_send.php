@@ -21,7 +21,7 @@ namespace Wanewsletter;
  *
  * @return string
  */
-function launch_sending($listdata, $logdata, $supp_address = array())
+function launch_sending($listdata, $logdata, array $supp_address = array())
 {
 	global $nl_config, $db, $lang;
 
@@ -493,7 +493,7 @@ function launch_sending($listdata, $logdata, $supp_address = array())
 		);
 
 		if (!check_cli()) {
-			if (!empty($_GET['step']) && $_GET['step'] == 'auto') {
+			if (filter_input(INPUT_GET, 'step') == 'auto') {
 				http_redirect("envoi.php?mode=progress&id=$logdata[log_id]&step=auto");
 			}
 

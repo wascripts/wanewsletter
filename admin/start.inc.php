@@ -52,10 +52,9 @@ $auth = new Auth();
 if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 	if (!$auth->isLoggedIn() || !($admindata = $auth->getUserData($_SESSION['uid']))) {
 		$session->reset();
-		$redirect  = '?redirect=' . basename(server_info('SCRIPT_NAME'));
-		$redirect .= (server_info('QUERY_STRING') != '') ? rawurlencode('?' . server_info('QUERY_STRING')) : '';
+		$_SESSION['redirect'] = filter_input(INPUT_SERVER, 'REQUEST_URI');
 
-		http_redirect('login.php' . $redirect);
+		http_redirect('login.php');
 	}
 
 	load_settings($admindata);
@@ -76,7 +75,7 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 		$_SESSION['liste'] = 0;
 	}
 
-	$liste = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
+	$liste = (int) filter_input(INPUT_POST, 'liste', FILTER_VALIDATE_INT);
 
 	if (isset($auth->listdata[$liste])) {
 		$_SESSION['liste'] = $liste;

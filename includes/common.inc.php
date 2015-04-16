@@ -147,16 +147,9 @@ if (!check_cli()) {
 load_settings();
 
 //
-// Désactivation de magic_quotes_runtime +
-// magic_quotes_gpc et retrait éventuel des backslashes
+// Désactivation de magic_quotes_runtime (PHP < 5.4)
 //
 @ini_set('magic_quotes_runtime', 0);
-
-strip_magic_quotes_gpc($_GET);
-strip_magic_quotes_gpc($_POST);
-strip_magic_quotes_gpc($_COOKIE);
-strip_magic_quotes_gpc($_FILES, true);
-strip_magic_quotes_gpc($_REQUEST);
 
 // Compatibilité avec wanewsletter < 2.3-beta2
 if (empty($dsn)) {

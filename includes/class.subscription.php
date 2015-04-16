@@ -9,6 +9,7 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wamailer\Email;
 
@@ -129,7 +130,7 @@ class Subscription
 
 			$this->account['abo_id'] = 0;
 			$this->account['email']  = $email;
-			$this->account['pseudo'] = (!empty($_REQUEST['pseudo'])) ? $_REQUEST['pseudo'] : '';
+			$this->account['pseudo'] = trim(u::filter_input(INPUT_POST, 'pseudo'));
 			$this->account['status'] = ($this->listdata['confirm_subscribe'] == CONFIRM_NONE) ? ABO_ACTIF : ABO_INACTIF;
 		}
 
@@ -245,16 +246,15 @@ class Subscription
 			);
 
 			foreach ($this->other_tags as $tag) {
-				if (!empty($tag['field_name']) && !empty($_REQUEST[$tag['field_name']])) {
-					$this->account['tags'][$tag['column_name']] = $_REQUEST[$tag['field_name']];
-				}
-				else if (!empty($_REQUEST[$tag['column_name']])) {
-					$this->account['tags'][$tag['column_name']] = $_REQUEST[$tag['column_name']];
-				}
+				$input_name = (!empty($tag['field_name'])) ? $tag['field_name'] : $tag['column_name'];
+				$data = u::filter_input(INPUT_POST, $input_name);
 
-				$sql_data = array_merge($sql_data, $this->account['tags']);
+				if (!is_null($data)) {
+					$this->account['tags'][$tag['column_name']] = trim($data);
+				}
 			}
 
+			$sql_data = array_merge($sql_data, $this->account['tags']);
 			$db->insert(ABONNES_TABLE, $sql_data);
 
 			$this->account['abo_id'] = $db->lastInsertId();

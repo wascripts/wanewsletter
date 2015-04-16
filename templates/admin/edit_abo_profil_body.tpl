@@ -17,7 +17,9 @@ function checkForm_editAboProfil()
 
 <p id="explain">{L_EXPLAIN}</p>
 
-<form class="compact" method="post" action="./view.php?mode=abonnes" onsubmit="return checkForm_editAboProfil();">
+<form class="compact" method="post" action="./view.php?mode=abonnes&amp;action=edit&amp;id={S_ABO_ID}"
+	onsubmit="return checkForm_editAboProfil();"
+>
 <ul class="links">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=view&amp;id={S_ABO_ID}">{L_VIEW_ACCOUNT}</a></li>

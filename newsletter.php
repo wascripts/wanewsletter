@@ -9,6 +9,8 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
+
 if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', str_replace('\\', '/', __DIR__));
 }
@@ -31,32 +33,26 @@ else {
 	load_settings();
 }
 
-$action  = (!empty($_REQUEST['action'])) ? trim($_REQUEST['action']) : '';
-$email   = (!empty($_REQUEST['email'])) ? trim($_REQUEST['email']) : '';
-$format  = (isset($_REQUEST['format'])) ? intval($_REQUEST['format']) : 0;
-$liste   = (isset($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
-$message = '';
-$code    = '';
+$action = trim(filter_input(INPUT_POST, 'action'));
+$email  = trim(u::filter_input(INPUT_POST, 'email'));
+$format = (int) filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
+$liste  = (int) filter_input(INPUT_POST, 'liste', FILTER_VALIDATE_INT);
+$code   = '';
 
-if (empty($action) && preg_match('/([a-z0-9]{20})(?:&|$)/i', $_SERVER['QUERY_STRING'], $m)) {
+if (!$action && preg_match('/([a-z0-9]{20})(?:&|$)/i', $_SERVER['QUERY_STRING'], $m)) {
 	$code = $m[1];
 }
 
-//
-// Compatibilité avec les version < 2.3.x
-//
-else if (!empty($action) && !empty($email) && strlen($code) == 32) {
-	$code = substr($code, 0, 20);
-}
+$message = '';
 
-if (!empty($action) || !empty($code)) {
+if ($action || $code) {
 	//
 	// Purge des éventuelles inscriptions dépassées
 	// pour parer au cas d'une réinscription
 	//
 	purge_liste();
 
-	if (!empty($action)) {
+	if ($action) {
 		if (in_array($action, array('inscription', 'setformat', 'desinscription'))) {
 			$sql = "SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
 					liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe

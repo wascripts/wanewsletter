@@ -1,6 +1,6 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./view.php?mode=liste">
+<form method="post" action="./view.php?mode=liste&amp;action={ACTION}">
 <div class="block">
 	<h2>{L_TITLE}</h2>
 

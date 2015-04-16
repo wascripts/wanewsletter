@@ -9,6 +9,8 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
+
 const IN_INSTALL = true;
 
 if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
@@ -49,7 +51,9 @@ $output->assign_vars( array(
 	'CONTENT_DIR'  => $lang['CONTENT_DIR']
 ));
 
-$prefixe = (!empty($_POST['prefixe'])) ? trim($_POST['prefixe']) : 'wa_';
+$prefixe = trim(filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT,
+	array('options' => array('default' => 'wa_'))
+));
 $infos   = array(
 	'engine' => 'mysql',
 	'host'   => null,
@@ -65,7 +69,9 @@ if (defined('NL_INSTALLED')) {
 }
 
 foreach (array('engine', 'host', 'user', 'pass', 'dbname', 'path') as $varname) {
-	$infos[$varname] = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : $infos[$varname];
+	$infos[$varname] = trim(u::filter_input(INPUT_POST, $varname, FILTER_DEFAULT,
+		array('options' => array('default' => $infos[$varname]))
+	));
 }
 
 // Récupération du port, si associé avec le nom d'hôte
@@ -102,7 +108,7 @@ $vararray = array(
 	'confirm_pass', 'urlsite', 'urlscript'
 );
 foreach ($vararray as $varname) {
-	${$varname} = (!empty($_POST[$varname])) ? trim($_POST[$varname]) : '';
+	${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 }
 
 //

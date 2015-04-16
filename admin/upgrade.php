@@ -9,6 +9,8 @@
 
 namespace Wanewsletter;
 
+use Patchwork\Utf8 as u;
+
 const IN_ADMIN = true;
 
 require '../includes/common.inc.php';
@@ -110,8 +112,8 @@ if (isset($_POST['start'])) {
 		$msg_error[] = $lang['Message']['sql_file_not_readable'];
 	}
 
-	$login  = trim(filter_input(INPUT_POST, 'login'));
-	$passwd = trim(filter_input(INPUT_POST, 'passwd'));
+	$login  = trim(u::filter_input(INPUT_POST, 'login'));
+	$passwd = trim(u::filter_input(INPUT_POST, 'passwd'));
 
 	if (!($admindata = $auth->checkCredentials($login, $passwd))) {
 		$error = true;

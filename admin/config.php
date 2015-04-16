@@ -27,7 +27,9 @@ if (isset($_POST['submit'])) {
 
 	$new_config = array();
 	foreach ($old_config as $name => $value) {
-		$new_config[$name] = (isset($_POST[$name])) ? trim($_POST[$name]) : $value;
+		$new_config[$name] = trim(filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW,
+			array('options' => array('default' => $value))
+		));
 	}
 
 	if ($new_config['language'] == '' || !validate_lang($new_config['language'])) {
