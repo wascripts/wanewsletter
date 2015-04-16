@@ -887,7 +887,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  *
  * @param mixed $data Tableau de données ou chaîne de caractères
  */
-function strip_magic_quotes_gpc(&$data)
+function strip_magic_quotes(&$data)
 {
 	static $doStrip = null;
 
@@ -903,7 +903,7 @@ function strip_magic_quotes_gpc(&$data)
 	if ($doStrip) {
 		if (is_array($data)) {
 			array_walk($data, function (&$data, $key) {
-				strip_magic_quotes_gpc($data);
+				strip_magic_quotes($data);
 			});
 		}
 		else if (is_string($data)) {

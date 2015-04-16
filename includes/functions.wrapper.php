@@ -69,5 +69,5 @@ if (PHP_VERSION_ID < 50400) {
 function parse_str($str, &$arr)
 {
 	\parse_str($str, $arr);
-	strip_magic_quotes_gpc($arr);
+	strip_magic_quotes($arr);
 }
