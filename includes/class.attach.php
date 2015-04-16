@@ -174,7 +174,7 @@ class Attach
 					return;
 				}
 
-				$tmp_path = (config_value('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
+				$tmp_path = (ini_get('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
 				$tmp_filename = tempnam($tmp_path, 'wa0');
 
 				if (!($fw = fopen($tmp_filename, 'wb'))) {

@@ -956,37 +956,18 @@ function active_urls($str)
 }
 
 /**
- * Retourne la valeur d'une directive de configuration
+ * Retourne la valeur booléenne d'une directive de configuration.
+ * Certaines options de configuration peuvent avoir été incorrectement
+ * paramétrées avec la directive php_value|php_admin_value alors que dans
+ * le cas des options on/off, il faut utiliser php_flag|php_admin_flag.
  *
  * @param string $name Nom de la directive
  *
  * @return boolean
  */
-function config_status($name)
+function ini_get_flag($name)
 {
-	return config_value($name, true);
-}
-
-/**
- * Retourne la valeur d'une directive de configuration
- *
- * @param string  $name         Nom de la directive
- * @param boolean $need_boolean Nécessaire pour obtenir un booléen en retour (pour les directives on/off)
- *
- * @return boolean|string
- */
-function config_value($name, $need_boolean = false)
-{
-	$value = ini_get($name);
-	if ($need_boolean) {
-		if (preg_match('#^off|false$#i', $value)) {
-			$value = false;
-		}
-
-		settype($value, 'boolean');
-	}
-
-	return $value;
+	return (bool) preg_match('#^(on|yes|true|1)$#i', ini_get($name));
 }
 
 /**
@@ -1385,7 +1366,7 @@ function wan_get_tags()
  */
 function get_max_filesize()
 {
-	if (!config_status('file_uploads')) {
+	if (!ini_get_flag('file_uploads')) {
 		return 0;
 	}
 
@@ -1410,13 +1391,13 @@ function get_max_filesize()
 		return $size;
 	};
 
-	if (!($filesize = config_value('upload_max_filesize'))) {
+	if (!($filesize = ini_get('upload_max_filesize'))) {
         $filesize = '2M'; // 2 Méga-Octets
     }
 
 	$upload_max_size = $literal2integer($filesize);
 
-    if ($postsize = config_value('post_max_size')) {
+    if ($postsize = ini_get('post_max_size')) {
         $postsize = $literal2integer($postsize);
         if ($postsize < $upload_max_size) {
             $upload_max_size = $postsize;
