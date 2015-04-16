@@ -17,11 +17,6 @@ if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', str_replace('\\', '/', dirname(__DIR__)));
 }
 
-// @link http://bugs.php.net/bug.php?id=31440
-if (isset($_REQUEST['GLOBALS']) || isset($_FILES['GLOBALS'])) {
-	exit('GLOBALS overwrite attempt detected');
-}
-
 // $default_error_reporting est utilisé ultérieurement dans le gestionnaire d'erreurs
 $default_error_reporting = (E_ALL & ~(E_STRICT|E_DEPRECATED));
 error_reporting($default_error_reporting);
