@@ -136,7 +136,7 @@ function preview()
 		var rex_title = new RegExp("<title>.*</title>", "i");
 
 		texte = texte.replace("{LINKS}", '<a href="http://www.example.org/">Example</a>');
-		texte = texte.replace(rex_img, "<$1\"../options/show.php?file=$2\"$3>");
+		texte = texte.replace(rex_img, "<$1\"show.php?file=$2\"$3>");
 		texte = texte.replace(rex_title, '<title>' + subject + '</title>');
 
 		preview.document.write(texte);

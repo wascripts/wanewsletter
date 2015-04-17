@@ -168,7 +168,7 @@ else if ($mode == 'iframe') {
 			if ($format == FORMAT_HTML) {
 				$body = preg_replace(
 					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/si',
-					'<\\1"' . $nl_config['path'] . 'options/show.php?file=\\2"\\3>',
+					'<\\1"show.php?file=\\2"\\3>',
 					$body
 				);
 

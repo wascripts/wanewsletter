@@ -30,6 +30,7 @@ admin/config.php
 admin/envoi.php
 admin/index.php
 admin/login.php
+admin/show.php
 admin/start.inc.php
 admin/stats.php
 admin/tools.php
@@ -131,7 +132,6 @@ newsletter.php
 options/cron.php
 options/extra.php
 options/index.html
-options/show.php
 profil_cp.php
 subscribe.php
 templates/admin/add_admin_body.tpl

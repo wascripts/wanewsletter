@@ -669,8 +669,6 @@ BASIC;
 			$u_download = './view.php?mode=download&amp;fid=%d';
 		}
 
-		$u_show = '../options/show.php?fid=%d';
-
 		for ($i = 0; $i < $num_files; $i++) {
 			$filesize  = $logdata['joined_files'][$i]['file_size'];
 			$filename  = $logdata['joined_files'][$i]['file_real_name'];
@@ -689,11 +687,15 @@ BASIC;
 					continue;
 				}
 
-				$filename = sprintf('<a href="%s">%s</a>', sprintf($u_download, $file_id), htmlspecialchars($filename));
+				$filename = sprintf('<a href="%s">%s</a>',
+					sprintf($u_download, $file_id),
+					htmlspecialchars($filename)
+				);
 
 				if (preg_match('#^image/#', $mime_type)) {
-					$s_show  = sprintf('<a class="show" href="%s" type="%s">', sprintf($u_show, $file_id), $mime_type);
-					$s_show .= '<img src="../templates/images/icon_loupe.png" width="14" height="14" alt="voir" title="' . $lang['Show'] . '" />';
+					$s_show  = sprintf('<a class="show" href="show.php?fid=%d" type="%s">', $file_id, $mime_type);
+					$s_show .= '<img src="../templates/images/icon_loupe.png" width="14"';
+					$s_show .= ' height="14" alt="voir" title="' . $lang['Show'] . '" />';
 					$s_show .= '</a>';
 				}
 			}
