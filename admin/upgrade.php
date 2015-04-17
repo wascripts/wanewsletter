@@ -378,6 +378,7 @@ if (isset($_POST['start'])) {
 					MODIFY COLUMN liste_alias VARCHAR(254) NOT NULL DEFAULT ''";
 			}
 
+			$sql_schemas[CONFIG_TABLE]['updated'] = true;
 			$sql_update[] = "DROP TABLE " . CONFIG_TABLE;
 			$sql_update   = array_merge($sql_update, $sql_create[CONFIG_TABLE]);
 			$sql_update   = array_merge($sql_update, $sql_data[CONFIG_TABLE]);
@@ -496,9 +497,11 @@ if (isset($_POST['start'])) {
 		}
 
 		//
-		// Ajout de l'entrée de configuration 'debug_level'.
+		// Ajout de l'entrée de configuration 'debug_level', mais seulement
+		// si table config n’a pas été entièrement réécrite dans dans le
+		// bloc db_version < 8 plus haut.
 		//
-		if ($nl_config['db_version'] < 15) {
+		if ($nl_config['db_version'] < 15 && empty($sql_schemas[CONFIG_TABLE]['updated'])) {
 			$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
 				VALUES('debug_level', '1')";
 		}
@@ -632,23 +635,29 @@ if (isset($_POST['start'])) {
 		// Support SSL/TLS pour les connexions aux serveurs SMTP et POP
 		//
 		if ($nl_config['db_version'] < 20) {
-			$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
-				VALUES('smtp_tls', '0')";
-
-			switch ($db::ENGINE) {
-				case 'mysql':
-					$type = 'TINYINT(1)';
-					break;
-				case 'postgres':
-					$type = 'SMALLINT';
-					break;
-				case 'sqlite':
-					$type = 'INTEGER';
-					break;
+			// Seulement si la table config n'a pas été entièrement réécrite plus haut.
+			if (empty($sql_schemas[CONFIG_TABLE]['updated'])) {
+				$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
+					VALUES('smtp_tls', '0')";
 			}
 
-			$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-				ADD COLUMN pop_tls $type NOT NULL DEFAULT 0";
+			// Seulement si la table liste n'a pas été entièrement réécrite plus haut.
+			if (empty($sql_schemas[LISTE_TABLE]['updated'])) {
+				switch ($db::ENGINE) {
+					case 'mysql':
+						$type = 'TINYINT(1)';
+						break;
+					case 'postgres':
+						$type = 'SMALLINT';
+						break;
+					case 'sqlite':
+						$type = 'INTEGER';
+						break;
+				}
+
+				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
+					ADD COLUMN pop_tls $type NOT NULL DEFAULT 0";
+			}
 		}
 
 		//
@@ -679,7 +688,6 @@ if (isset($_POST['start'])) {
 		//
 		// Affichage message de résultat
 		//
-
 		if (defined('UPDATE_CONFIG_FILE') || $moved_dirs) {
 			$config_file  = '<' . "?php\n";
 			$config_file .= "//\n";
