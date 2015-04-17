@@ -92,7 +92,12 @@ function createDSN($infos, $options = null)
 	}
 
 	if (!empty($infos['host'])) {
-		$connect .= rawurlencode($infos['host']);
+		$infos['host'] = trim($infos['host'], '[]');
+		if (filter_var($infos['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+			$infos['host'] = sprintf('[%s]', $infos['host']);
+		}
+
+		$connect .= $infos['host'];
 		if (!empty($infos['port'])) {
 			$connect .= ':' . intval($infos['port']);
 		}
