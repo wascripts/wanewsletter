@@ -155,7 +155,7 @@ class Auth
 	 */
 	public function getUserTableInfos()
 	{
-		if (check_in_admin()) {
+		if (check_in_admin() || defined(__NAMESPACE__.'\\IN_INSTALL')) {
 			$tablename = ADMIN_TABLE;
 			$columns   = array();
 

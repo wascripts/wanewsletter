@@ -272,14 +272,6 @@ if ($start) {
 				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
 					str_replace('wa_', $prefixe, $tablename)
 				);
-
-				if (!empty($schema['index'])) {
-					foreach ($schema['index'] as $index) {
-						$sql_drop[] = sprintf("DROP INDEX IF EXISTS %s",
-							str_replace('wa_', $prefixe, $index)
-						);
-					}
-				}
 			}
 
 			exec_queries($sql_drop);

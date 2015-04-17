@@ -61,14 +61,6 @@ foreach ($sql_schemas as $tablename => $schema) {
 	$db_to->query(sprintf('DROP TABLE IF EXISTS %s',
 		$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))
 	));
-
-	if (!empty($schema['index'])) {
-		foreach ($schema['index'] as $index) {
-			$db_to->query(sprintf('DROP INDEX IF EXISTS %s',
-				$db_to->quote(str_replace('wa_', $prefixe_to, $index))
-			));
-		}
-	}
 }
 
 // Create table

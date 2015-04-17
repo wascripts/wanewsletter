@@ -45,26 +45,16 @@ $GLOBALS['supported_db'] = array(
 );
 
 $GLOBALS['sql_schemas'] = array(
-	ABO_LISTE_TABLE     => array(
-		'index'    => array('register_key_idx')
-	),
-	ABONNES_TABLE       => array(
-		'index'    => array('abo_email_idx', 'abo_status_idx')
-	),
+	ABO_LISTE_TABLE     => array(),
+	ABONNES_TABLE       => array(),
 	ADMIN_TABLE         => array(),
-	AUTH_ADMIN_TABLE    => array(
-		'index'    => array('admin_id_idx')
-	),
+	AUTH_ADMIN_TABLE    => array(),
 	BANLIST_TABLE       => array(),
-	CONFIG_TABLE        => array(
-		'index'    => array('config_name_idx')
-	),
+	CONFIG_TABLE        => array(),
 	FORBIDDEN_EXT_TABLE => array(),
 	JOINED_FILES_TABLE  => array(),
 	LISTE_TABLE         => array(),
-	LOG_TABLE           => array(
-		'index'    => array('liste_id_idx', 'log_status_idx')
-	),
+	LOG_TABLE           => array(),
 	LOG_FILES_TABLE     => array(),
 	SESSIONS_TABLE      => array()
 );
@@ -317,16 +307,7 @@ function wa_sqlite_recreate_table($tablename, $restore_data = true)
 		$columns[] = $row['name'];
 	}
 
-	$sql_update = array();
-
-	if (isset($schema['index'])) {
-		foreach ($schema['index'] as $index) {
-			$sql_update[] = sprintf("DROP INDEX IF EXISTS %s",
-				str_replace('wa_', $prefixe, $index)
-			);
-		}
-	}
-
+	$sql_update   = array();
 	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
 	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
 
