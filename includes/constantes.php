@@ -135,16 +135,6 @@ const CHECK_UPDATE_CACHE = 'wa-check-update.cache';
 const CHECK_UPDATE_CACHE_TTL = 3600;
 
 //
-// Déclaration des dossiers et fichiers spéciaux utilisés par le script
-//
-// TODO fix
-define('WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
-define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
-define('WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
-
-define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
-
-//
 // Sécurité des connexions (SMTP, POP, ...)
 //
 const SECURITY_NONE     = 0;

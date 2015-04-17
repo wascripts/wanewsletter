@@ -24,39 +24,6 @@ error_reporting($default_error_reporting);
 $starttime = array_sum(explode(' ', microtime()));
 
 //
-// Intialisation des variables pour éviter toute injection malveillante de code
-//
-$simple_header = $error = false;
-$nl_config     = $lang = $datetime = $admindata = $msg_error = array();
-$output = null;
-$dsn = $prefixe = '';
-$prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
-// Compatibilité avec wanewsletter < 2.3-beta2
-$dbtype = $dbhost = $dbuser = $dbpassword = $dbname = '';
-
-//
-// Réglage des divers répertoires utilisés par le script.
-// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
-// de Wanewsletter.
-// Ces variables sont ensuite utilisées dans constantes.php pour définir les
-// constantes WA_*DIR
-//
-$logs_dir  = '~/data/logs';
-$stats_dir = '~/data/stats';
-$tmp_dir   = '~/data/tmp';
-
-$config_file = WA_ROOTDIR . '/includes/config.inc.php';
-if (file_exists($config_file)) {
-	if (!is_readable($config_file)) {
-		echo "Cannot read the config file. Please fix this mistake and reload.";
-		exit;
-	}
-
-	include $config_file;
-	unset($config_file);
-}
-
-//
 // On vérifie proprement la présence des dépendances.
 // Évite que l'utilisateur prenne un méchant et énigmatique fatal error sur le require() suivant.
 //
@@ -67,11 +34,10 @@ if (!file_exists(WA_ROOTDIR . '/vendor/autoload.php')) {
 	exit;
 }
 
+require WA_ROOTDIR . '/includes/constantes.php';
 require WA_ROOTDIR . '/includes/compat.inc.php';
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/functions.wrapper.php';
-require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/includes/wadb_init.php';
 require WA_ROOTDIR . '/vendor/autoload.php';
 
 //
@@ -101,12 +67,75 @@ if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
 spl_autoload_register(__NAMESPACE__.'\\wan_autoloader');
 
 //
+// Désactivation de magic_quotes_runtime (PHP < 5.4)
+//
+ini_set('magic_quotes_runtime', 0);
+
+//
+// Intialisation des variables pour éviter toute injection malveillante de code
+//
+$simple_header = $error = false;
+$nl_config     = $lang = $datetime = $admindata = $msg_error = array();
+
+$prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
+// Les variables en $db* pour la compatibilité avec wanewsletter < 2.3-beta2
+$dsn = $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = '';
+
+// Réglage par défaut des divers répertoires utilisés par le script.
+// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
+// de Wanewsletter (voir plus bas).
+$logs_dir  = '~/data/logs';
+$stats_dir = '~/data/stats';
+$tmp_dir   = '~/data/tmp';
+
+$config_file = WA_ROOTDIR . '/includes/config.inc.php';
+if (file_exists($config_file)) {
+	if (!is_readable($config_file)) {
+		echo "Cannot read the config file. Please fix this mistake and reload.";
+		exit;
+	}
+
+	include $config_file;
+	unset($config_file);
+}
+
+// Compatibilité avec wanewsletter < 2.3-beta2
+if (!$dsn && $dbtype) {
+	$infos = array();
+	$infos['engine'] = $dbtype;
+	$infos['host']   = $dbhost;
+	$infos['user']   = $dbuser;
+	$infos['pass']   = $dbpassword;
+	$infos['dbname'] = $dbname;
+
+	if ($infos['engine'] == 'mssql') {
+		echo "Support for Microsoft SQL Server has been removed in Wanewsletter 2.3\n";
+		exit;
+	}
+	else if ($infos['engine'] == 'postgre') {
+		$infos['engine'] = 'postgres';
+	}
+	else if ($infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli') {
+		$infos['engine'] = 'mysql';
+	}
+
+	$dsn = createDSN($infos);
+	unset($infos);
+
+	define('UPDATE_CONFIG_FILE', true);
+}
+
+unset($dbtype, $dbhost, $dbuser, $dbpassword, $dbname);
+
+require WA_ROOTDIR . '/includes/wadb_init.php';
+
+//
 // Pas installé ?
 //
 $install_script = 'install.php';
 $current_script = basename($_SERVER['SCRIPT_FILENAME']);
 
-if ($current_script != $install_script && !defined('NL_INSTALLED')) {
+if ($current_script != $install_script && !$dsn) {
 	if (!check_cli()) {
 		if (!file_exists($install_script)) {
 			$install_script = '../'.$install_script;
@@ -120,10 +149,20 @@ if ($current_script != $install_script && !defined('NL_INSTALLED')) {
 		exit(1);
 	}
 }
+unset($current_script, $install_script);
+
+//
+// Déclaration des dossiers et fichiers spéciaux utilisés par le script
+//
+define('WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
+define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
+define('WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
+define('WA_LOCKFILE', WA_TMPDIR . '/liste-%d.lock');
 
 //
 // Initialisation du système de templates
 //
+$output = null;
 if (!check_cli()) {
 	$output = new Output(sprintf('%s/templates/%s',
 		WA_ROOTDIR,
@@ -140,36 +179,3 @@ if (!check_cli()) {
 // Configuration par défaut
 //
 load_settings();
-
-//
-// Désactivation de magic_quotes_runtime (PHP < 5.4)
-//
-@ini_set('magic_quotes_runtime', 0);
-
-// Compatibilité avec wanewsletter < 2.3-beta2
-if (empty($dsn)) {
-	$infos = array();
-	$infos['engine'] = (!empty($dbtype)) ? $dbtype : 'mysql';
-	$infos['host']   = $dbhost;
-	$infos['user']   = $dbuser;
-	$infos['pass']   = $dbpassword;
-	$infos['dbname'] = $dbname;
-
-	if ($infos['engine'] == 'mssql') {
-		exit($lang['mssql_support_end']);
-	}
-	else if ($infos['engine'] == 'postgre') {
-		$infos['engine'] = 'postgres';
-	}
-	else if ($infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli') {
-		$infos['engine'] = 'mysql';
-	}
-
-	$dsn = createDSN($infos);
-	unset($infos);
-
-	define('UPDATE_CONFIG_FILE', true);
-}
-
-// Pas la peine de polluer le scope global
-unset($current_script, $dbtype, $dbhost, $dbuser, $dbpassword, $dbname);
