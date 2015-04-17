@@ -76,11 +76,18 @@ foreach (array('engine', 'host', 'user', 'pass', 'dbname', 'path') as $varname) 
 	));
 }
 
-// Récupération du port, si associé avec le nom d'hôte
+// Récupération du port, si associé avec le nom d’hôte ou l’IP.
 if (strpos($infos['host'], ':')) {
-	$tmp = explode(':', $infos['host']);
-	$infos['host'] = $tmp[0];
-	$infos['port'] = $tmp[1];
+	// Est-ce une IPv6 délimitée avec des crochets ?
+	if (preg_match('#^(?<ip>\[[^]]+\])(?::(?<port>\d+))?$#', $infos['host'], $m)) {
+		$infos['host'] = $m['ip'];
+		$infos['port'] = (!empty($m['port'])) ? $m['port'] : 0;
+	}
+	else if (!filter_var($infos['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+		$tmp = explode(':', $infos['host']);
+		$infos['host'] = $tmp[0];
+		$infos['port'] = $tmp[1];
+	}
 }
 
 foreach ($supported_db as $name => $data) {
