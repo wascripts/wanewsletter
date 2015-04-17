@@ -72,7 +72,7 @@
 		</tr>
 		<tr class="only-server">
 			<td><label for="host">{install.L_DBHOST}&nbsp;:</label></td>
-			<td><input type="text" id="host" name="host" size="30" value="{install.DBHOST}" /> (syntaxe&nbsp;: <em>host[:port]</em>)</td>
+			<td><input type="text" id="host" name="host" size="30" value="{install.DBHOST}" /> (ex&nbsp;: <em>localhost</em>, <em>myhost.tld:3306</em>, <em>[::1]:3306</em>)</td>
 		</tr>
 		<tr class="only-server">
 			<td><label for="dbname">{install.L_DBNAME}&nbsp;:</label></td>

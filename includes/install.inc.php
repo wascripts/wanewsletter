@@ -59,6 +59,7 @@ $prefixe = trim(filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT,
 $infos   = array(
 	'engine' => 'mysql',
 	'host'   => null,
+	'port'   => 0,
 	'user'   => null,
 	'pass'   => null,
 	'dbname' => null,
@@ -394,6 +395,10 @@ if (!$reinstall) {
 
 	if ($infos['host'] == '') {
 		$infos['host'] = 'localhost';
+	}
+
+	if ($infos['port'] > 0) {
+		$infos['host'] .= ':'.$infos['port'];
 	}
 
 	$output->assign_block_vars('install', array(
