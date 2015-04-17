@@ -459,6 +459,7 @@ class Output extends Template
 		header('Cache-Control: no-cache, must-revalidate, max-age=0');
 		header('Content-Language: ' . $lang['CONTENT_LANG']);
 		header('Content-Type: text/html; charset=UTF-8');
+		header('X-Frame-Options: sameorigin');
 	}
 
 	/**
