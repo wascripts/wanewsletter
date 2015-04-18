@@ -78,10 +78,20 @@ class Postgres extends Wadb
 			$connect = 'pg_pconnect';
 		}
 
-		if (!($this->link = $connect($connectString)) || pg_connection_status($this->link) !== PGSQL_CONNECTION_OK) {
-			$tmp = wan_error_get_last();
+		// Les closures supportent $this à partir de PHP 5.4
+		if (PHP_VERSION_ID >= 50400) {
+			set_error_handler(function ($errno, $errstr) {
+				$this->error = $errstr;
+			});
+			$this->link = $connect($connectString);
+			restore_error_handler();
+		}
+		else {
+			$this->link = $connect($connectString);
+		}
+
+		if (!$this->link || pg_connection_status($this->link) !== PGSQL_CONNECTION_OK) {
 			$this->errno = -1;
-			$this->error = $tmp['message'];
 			$this->link  = null;
 
 			throw new Exception($this->error, $this->errno);
