@@ -257,7 +257,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 					}
 
 					try {
-						wan_sendmail($email);
+						wan_sendmail($email, true);
 					}
 					catch (\Exception $e) {
 						trigger_error(sprintf($lang['Message']['Failed_sending2'],
@@ -385,7 +385,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 				}
 
 				try {
-					wan_sendmail($email);
+					wan_sendmail($email, true);
 				}
 				catch (\Exception $e) {
 					$sendError++;

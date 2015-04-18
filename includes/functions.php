@@ -1292,17 +1292,19 @@ function wan_get_faq_url($entry_id)
 /**
  * Envoi d'email
  *
- * @param Email $email
+ * @param Email   $email
+ * @param boolean $keepalive Maintient ouvert la connexion au serveur SMTP, le cas échéant
  *
  * @return boolean
  */
-function wan_sendmail(Email $email)
+function wan_sendmail(Email $email, $keepalive = false)
 {
 	global $nl_config;
+	static $smtp;
 
 	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
 
-	if ($nl_config['use_smtp']) {
+	if ($nl_config['use_smtp'] && is_null($smtp)) {
 		$server = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 		$options = array(
 			'server'   => sprintf($server, $nl_config['smtp_host'], $nl_config['smtp_port']),
@@ -1310,9 +1312,10 @@ function wan_sendmail(Email $email)
 			'auth' => array(
 				'username'  => $nl_config['smtp_user'],
 				'secretkey' => $nl_config['smtp_pass']
-			)
+			),
+			'keepalive' => $keepalive
 		);
-		Mailer::setTransport('smtp', $options);
+		$smtp = Mailer::setTransport('smtp', $options);
 	}
 
 	Mailer::send($email);
