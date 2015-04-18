@@ -61,6 +61,10 @@ class Postgres extends Wadb
 						$connectString .= "password='$infos[$info]' ";
 					}
 					else {
+						if ($info == 'host') {
+							// In case of IPv6 enclosed in brackets
+							$infos['host'] = trim($infos['host'], '[]');
+						}
 						$connectString .= "$info='$infos[$info]' ";
 					}
 				}
