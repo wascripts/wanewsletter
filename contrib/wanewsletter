@@ -49,7 +49,7 @@ $liste_id = null;
 $message  = null;
 
 $process_send = $process_subscribe = $import_mail = false;
-$send_packet  = 400;
+$send_packet  = 30;
 $send_delay   = 10;
 
 if ($argc == 1) {
