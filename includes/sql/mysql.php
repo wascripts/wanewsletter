@@ -47,6 +47,13 @@ class Mysql extends Wadb
 			$this->options = array_merge($this->options, $options);
 		}
 
+		$this->clientVersion = mysql_get_client_info();
+
+		// PHP bug 67563 <https://bugs.php.net/bug.php?id=67563>
+		if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+			throw new Exception("The mysql extension doesn't have support for IPv6 address. Use mysqli instead.");
+		}
+
 		$connect = 'mysql_connect';
 		if (!empty($this->options['persistent'])) {
 			$connect = 'mysql_pconnect';
@@ -73,7 +80,6 @@ class Mysql extends Wadb
 		}
 		else {
 			$this->serverVersion = mysql_get_server_info($this->link);
-			$this->clientVersion = mysql_get_client_info();
 
 			if (!empty($this->options['charset'])) {
 				$this->encoding($this->options['charset']);

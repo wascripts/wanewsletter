@@ -47,6 +47,17 @@ class Mysqli extends Wadb
 			$this->options = array_merge($this->options, $options);
 		}
 
+		$this->clientVersion = mysqli_get_client_info();
+
+		// libmysqlclient veut une ipv6 sans crochets (eg: ::1), mais
+		// mysqlnd veut une ipv6 délimitée par des crochets (eg: [::1])
+		// PHP bug 67563 <https://bugs.php.net/bug.php?id=67563>
+		if (stripos($this->clientVersion, 'mysqlnd') !== false &&
+			filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+		) {
+			$host = "[$host]";
+		}
+
 		if (!empty($this->options['persistent'])) {
 			$host = "p:$host";
 		}
@@ -60,7 +71,6 @@ class Mysqli extends Wadb
 		}
 		else {
 			$this->serverVersion = mysqli_get_server_info($this->link);
-			$this->clientVersion = mysqli_get_client_info();
 
 			if (!empty($this->options['charset'])) {
 				$this->encoding($this->options['charset']);

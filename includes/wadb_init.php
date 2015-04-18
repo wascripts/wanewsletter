@@ -155,7 +155,12 @@ function parseDSN($dsn)
 				break;
 
 			case 'host':
+				// trim brackets in case of IPv6
+				$value = trim($value, '[]');
 			case 'port':
+				$infos[$key] = $value;
+				break;
+
 			case 'user':
 			case 'pass':
 				$infos[$key] = rawurldecode($value);
