@@ -1325,8 +1325,13 @@ function wan_sendmail(Email $email)
  */
 function wan_get_tags()
 {
+	static $other_tags = array();
+
+	if (count($other_tags) > 0) {
+		return $other_tags;
+	}
+
 	$tags_file  = WA_ROOTDIR . '/data/tags.inc.php';
-	$other_tags = array();
 
 	if (is_readable($tags_file)) {
 		include $tags_file;
