@@ -435,7 +435,6 @@ class Attach {
 		//
 		// Vérification de la taille du fichier par rapport à la taille maximale autorisée
 		//
-		$total_size = 0;
 		if( !$this->check_maxsize($log_id, $filesize, $total_size) )
 		{
 			$error = TRUE;
@@ -571,7 +570,6 @@ class Attach {
 			$filesize = $this->joined_file_exists($physical_name, $error, $msg_error);
 		}
 		
-		$total_size = 0;
 		if( !$error && !$this->check_maxsize($log_id, $filesize, $total_size) )
 		{
 			$error = TRUE;
@@ -655,7 +653,9 @@ class Attach {
 			trigger_error('Impossible d\'obtenir la somme du poids des fichiers joints', ERROR);
 		}
 		
-		return ( ($result->column('total_size') + $filesize) > $nl_config['max_filesize'] ) ? false : true;
+		$total_size = $result->column('total_size');
+		
+		return ( ($total_size + $filesize) > $nl_config['max_filesize'] ) ? false : true;
 	}
 	
 	/**
