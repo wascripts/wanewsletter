@@ -652,7 +652,7 @@ class WadbResult_postgres {
 /**
  * Certaines parties sont basées sur phpPgAdmin 2.4.2
  */
-class WadbBackup_postgres {
+class WadbBackup_postgres_disabled {
 	
 	/**
 	 * Informations concernant la base de données
