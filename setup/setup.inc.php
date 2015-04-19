@@ -130,7 +130,12 @@ function exec_queries($sql_ary, $return_error = false)
 	}
 }
 
-error_reporting(E_ALL);
+$level = E_ALL;
+if( defined('PHP_VERSION_ID') && PHP_VERSION_ID >= 50400 )
+{
+	$level &= ~E_STRICT;
+}
+error_reporting($level);
 
 require WA_ROOTDIR . '/includes/functions.php';
 require WA_ROOTDIR . '/includes/constantes.php';
