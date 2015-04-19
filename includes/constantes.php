@@ -32,13 +32,13 @@
 // 1 - Seules les erreurs en rapport avec la base de données sont affichées (le script donne des détails sur l'erreur)
 // 0 - Le script affiche simplement un message d'erreur lors de problèmes SQL, sans donner plus de détails 
 //
-define('DEBUG_MODE', 3);
+define('DEBUG_MODE', 1);
 
 //
 // Pour visualiser le temps d'exécution du script et le nombre de requètes effectuées
 //
-define('DEV_INFOS', TRUE);
-//define('DEV_INFOS', FALSE);
+//define('DEV_INFOS', TRUE);
+define('DEV_INFOS', FALSE);
 
 //
 // Active/Désactive l'affichage des erreurs proprement dans un bloc html en bas de page
