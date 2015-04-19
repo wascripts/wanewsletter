@@ -21,47 +21,6 @@ require '../includes/common.inc.php';
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
 
-$auth = new Auth();
-
-if (filter_input(INPUT_GET, 'mode') == 'check') {
-	$session = new Session($nl_config);
-
-	if (!$auth->isLoggedIn()) {
-		exit;
-	}
-
-	$result = wa_check_update(true);
-
-	if (filter_input(INPUT_GET, 'output') == 'json') {
-		header('Content-Type: application/json');
-
-		if ($result !== false) {
-			printf('{"code":"%d"}', $result);
-		}
-		else {
-			echo '{"code":"2"}';
-		}
-	}
-	else {
-		if ($result !== false) {
-			if ($result === 1) {
-				$output->addLine($lang['New_version_available']);
-				$output->addLine(sprintf('<a href="%s">%s</a>', DOWNLOAD_PAGE, $lang['Download_page']));
-			}
-			else {
-				$output->addLine($lang['Version_up_to_date']);
-			}
-		}
-		else {
-			$output->addLine($lang['Site_unreachable']);
-		}
-
-		$output->displayMessage();
-	}
-
-	exit;
-}
-
 //
 // Compatibilité avec Wanewsletter < 2.4-beta2
 //
@@ -99,6 +58,52 @@ if (!isset($nl_config['db_version'])) {
 	}
 }
 
+$auth = new Auth();
+// Le système de sessions a été réécrit dans la version 19 des tables.
+$session = null;
+if ($nl_config['db_version'] > 18) {
+	$session = new Session($nl_config);
+	$admindata = $auth->getUserData($_SESSION['uid']);
+}
+
+//
+// Ne concerne pas directement le système de mises à jour.
+// L’URL ~/admin/upgrade.php?mode=check est appelée à partir de
+// l’accueil, soit en AJAX quand c’est possible, soit directement.
+//
+if (filter_input(INPUT_GET, 'mode') == 'check') {
+	$result = wa_check_update(true);
+
+	if (filter_input(INPUT_GET, 'output') == 'json') {
+		header('Content-Type: application/json');
+
+		if ($result !== false) {
+			printf('{"code":"%d"}', $result);
+		}
+		else {
+			echo '{"code":"2"}';
+		}
+	}
+	else {
+		if ($result !== false) {
+			if ($result === 1) {
+				$output->addLine($lang['New_version_available']);
+				$output->addLine(sprintf('<a href="%s">%s</a>', DOWNLOAD_PAGE, $lang['Download_page']));
+			}
+			else {
+				$output->addLine($lang['Version_up_to_date']);
+			}
+		}
+		else {
+			$output->addLine($lang['Site_unreachable']);
+		}
+
+		$output->displayMessage();
+	}
+
+	exit;
+}
+
 if (check_db_version($nl_config['db_version'])) {
 	$output->displayMessage($lang['Upgrade_not_required']);
 }
@@ -112,20 +117,26 @@ if (isset($_POST['start'])) {
 		$msg_error[] = $lang['Message']['sql_file_not_readable'];
 	}
 
-	$login  = trim(u::filter_input(INPUT_POST, 'login'));
-	$passwd = trim(u::filter_input(INPUT_POST, 'passwd'));
+	if (!$auth->isLoggedIn()) {
+		$login  = trim(u::filter_input(INPUT_POST, 'login'));
+		$passwd = trim(u::filter_input(INPUT_POST, 'passwd'));
+		$admindata = $auth->checkCredentials($login, $passwd);
 
-	if (!($admindata = $auth->checkCredentials($login, $passwd))) {
-		$error = true;
-		$msg_error[] = $lang['Message']['Error_login'];
+		if (!$admindata) {
+			$error = true;
+			$msg_error[] = $lang['Message']['Error_login'];
+		}
 	}
-	else if (!wan_is_admin($admindata)) {
+
+	if (!$error && !wan_is_admin($admindata)) {
 		http_response_code(401);
 		$output->redirect('./index.php', 6);
 		$output->addLine($lang['Message']['Not_authorized']);
 		$output->addLine($lang['Click_return_index'], './index.php');
 		$output->displayMessage();
 	}
+
+	load_settings($admindata);
 
 	if (!$error) {
 		//
@@ -686,6 +697,18 @@ if (isset($_POST['start'])) {
 		wa_update_config('db_version', WANEWSLETTER_DB_VERSION);
 
 		//
+		// Création d’une session si besoin.
+		//
+		if (!$auth->isLoggedIn()) {
+			if (is_null($session)) {
+				$session = new Session($nl_config);
+			}
+			session_regenerate_id();
+			$_SESSION['is_logged_in'] = true;
+			$_SESSION['uid'] = intval($admindata['uid']);
+		}
+
+		//
 		// Affichage message de résultat
 		//
 		if (defined('UPDATE_CONFIG_FILE') || $moved_dirs) {
@@ -743,10 +766,16 @@ $output->set_filenames( array(
 $output->assign_vars( array(
 	'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
 	'L_EXPLAIN'       => nl2br(sprintf($lang['Welcome_in_upgrade'], WANEWSLETTER_VERSION)),
-	'L_LOGIN'         => $lang['Login'],
-	'L_PASSWD'        => $lang['Password'],
 	'L_START_BUTTON'  => $lang['Start_upgrade']
 ));
+
+if (!$auth->isLoggedIn()) {
+	// ajouter formulaire de connexion
+	$output->assign_block_vars('login_form', array(
+		'L_LOGIN'  => $lang['Login'],
+		'L_PASSWD' => $lang['Password']
+	));
+}
 
 $output->pparse('body');
 
