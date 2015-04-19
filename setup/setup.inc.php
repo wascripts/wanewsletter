@@ -153,7 +153,7 @@ if( get_magic_quotes_gpc() || ini_get('filter.default') === 'magic_quotes' )
 	strip_magic_quotes_gpc($_REQUEST);
 }
 
-define('WA_NEW_VERSION', '2.3-dev');
+define('WA_NEW_VERSION', '2.3.4');
 
 $default_lang   = 'francais';
 $supported_lang = array(
