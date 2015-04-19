@@ -44,6 +44,11 @@ if( !defined('NL_INSTALLED') )
 	plain_error("Wanewsletter ne semble pas installé");
 }
 
+if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
+{
+	plain_error("Le fichier de configuration doit être accessible en écriture le temps de la mise à jour.");
+}
+
 $db = WaDatabase($dsn);
 
 if( !$db->isConnected() )
@@ -970,35 +975,8 @@ if( $start )
 		// Modification fichier de configuration +
 		// Affichage message de résultat
 		//
-		if( !is_writable(WA_ROOTDIR . '/includes/config.inc.php') )
-		{
-			$output->addHiddenField('driver',  $infos['driver']);
-			$output->addHiddenField('host',    $infos['host']);
-			$output->addHiddenField('user',    $infos['user']);
-			$output->addHiddenField('pass',    $infos['pass']);
-			$output->addHiddenField('dbname',  $infos['dbname']);
-			$output->addHiddenField('prefixe', $prefixe);
-			
-			$output->assign_block_vars('download_file', array(
-				'L_TITLE'         => $lang['Result_upgrade'],
-				'L_DL_BUTTON'     => $lang['Button']['dl'],
-				
-				'MSG_RESULT'      => nl2br($lang['Success_without_config']),						
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
-			));
-			
-			$output->pparse('body');
-			exit;
-		}
+		file_put_contents(WA_ROOTDIR . '/includes/config.inc.php', $config_file);
 		
-		$fw = fopen(WA_ROOTDIR . '/includes/config.inc.php', 'w');
-		fwrite($fw, $config_file);
-		fclose($fw);
-		
-		//
-		// Modification fichier de configuration +
-		// Affichage message de résultat
-		//
 		$message = sprintf($lang['Success_upgrade'], '<a href="' . WA_ROOTDIR . '/admin/login.php">', '</a>');
 		
 		message($message, $lang['Result_upgrade']);

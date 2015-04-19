@@ -383,6 +383,11 @@ $config_file .= '?' . '>';
 //
 if( $sendfile == true )
 {
+	if( file_exists(WA_ROOTDIR . '/includes/config.inc.php') )
+	{
+		echo "Config file already installed on the server\n";
+		exit;
+	}
 	require WA_ROOTDIR . '/includes/class.attach.php';
 	
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
