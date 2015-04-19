@@ -186,7 +186,6 @@ else if (isset($_POST['submit']) && !$auth->isLoggedIn()) {
 	if ($userdata = $auth->checkCredentials($login, $passwd)) {
 		session_regenerate_id();
 		$_SESSION['is_logged_in'] = true;
-		$_SESSION['is_admin_session'] = check_in_admin();
 		$_SESSION['uid'] = intval($userdata['uid']);
 	}
 	else {
