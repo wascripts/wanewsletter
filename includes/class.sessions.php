@@ -278,7 +278,8 @@ class Session {
 				//
 				$len_check_ip = 4;
 				
-				if( strncasecmp($row['session_ip'], $this->user_ip, $len_check_ip) == 0 )
+				// $this->user_ip peut être vide en cas d'IPv6
+				if( !$this->user_ip || strncasecmp($row['session_ip'], $this->user_ip, $len_check_ip) == 0 )
 				{
 					$force_update = false;
 					if( ( $liste > 0 && $liste != $row['session_liste'] ) || $liste == -1 )
@@ -479,6 +480,10 @@ class Session {
 	 */
 	function encode_ip($dotquad_ip)
 	{
+		// On ne gère pas les ipv6
+		if (strpos($dotquad_ip, ':') !== false) {
+			return '';
+		}
 		$ip_sep = explode('.', $dotquad_ip);
 		return sprintf('%02x%02x%02x%02x', $ip_sep[0], $ip_sep[1], $ip_sep[2], $ip_sep[3]);
 	}

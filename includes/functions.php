@@ -202,7 +202,7 @@ function wan_web_handler($errno, $errstr, $errfile, $errline)
 		$errno = CRITICAL_ERROR;
 	}
 	
-	if( $output == null ) {// load_settings() par encore appelé
+	if( $output == null && $errno == ERROR ) {// load_settings() par encore appelé
 		$errno = CRITICAL_ERROR;
 	}
 	
@@ -300,7 +300,7 @@ BASIC;
 			
 			if( DEBUG_MODE == 3 || ( $display_error && DEBUG_MODE > 1 ) )
 			{
-				if( defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
+				if( $output != null && defined('IN_NEWSLETTER') == TRUE && DISPLAY_ERRORS_IN_BLOCK == TRUE && defined('IN_ADMIN') )
 				{
 					array_push($GLOBALS['_php_errors'], $php_errormsg);
 				}
