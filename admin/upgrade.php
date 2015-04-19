@@ -108,6 +108,21 @@ if (check_db_version($nl_config['db_version'])) {
 	$output->displayMessage($lang['Upgrade_not_required']);
 }
 
+//
+// Envoi du fichier au client si demandé
+//
+$config_file  = '<' . "?php\n";
+$config_file .= "//\n";
+$config_file .= "// Paramètres d'accès à la base de données\n";
+$config_file .= "//\n";
+$config_file .= "\$dsn = '$dsn';\n";
+$config_file .= "\$prefixe = '$prefixe';\n";
+$config_file .= "\n";
+
+if ($auth->isLoggedIn() && wan_is_admin($admindata) && isset($_POST['sendfile'])) {
+	Attach::send_file('config.inc.php', 'text/plain', $config_file);
+}
+
 if (isset($_POST['start'])) {
 	$sql_create = WA_ROOTDIR . '/includes/sql/schemas/' . $db::ENGINE . '_tables.sql';
 	$sql_data   = WA_ROOTDIR . '/includes/sql/schemas/data.sql';
@@ -711,15 +726,7 @@ if (isset($_POST['start'])) {
 		//
 		// Affichage message de résultat
 		//
-		if (defined('UPDATE_CONFIG_FILE') || $moved_dirs) {
-			$config_file  = '<' . "?php\n";
-			$config_file .= "//\n";
-			$config_file .= "// Paramètres d'accès à la base de données\n";
-			$config_file .= "//\n";
-			$config_file .= "\$dsn = '$dsn';\n";
-			$config_file .= "\$prefixe = '$prefixe';\n";
-			$config_file .= "\n";
-
+		if (UPDATE_CONFIG_FILE || $moved_dirs) {
 			$output->page_header();
 
 			$output->set_filenames(array(
@@ -728,17 +735,17 @@ if (isset($_POST['start'])) {
 
 			$message = $lang['Success_upgrade'];
 
-			if (defined('UPDATE_CONFIG_FILE')) {
-				$output->assign_block_vars('update_config_file', array(
-					'CONTENT' => $config_file
+			if (UPDATE_CONFIG_FILE) {
+				$output->assign_block_vars('download_file', array(
+					'L_DL_BUTTON' => $lang['Button']['dl']
 				));
 
 				$message = $lang['Success_upgrade_no_config'];
 			}
 
-			$output->assign_vars( array(
+			$output->assign_vars(array(
 				'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
-				'MESSAGE' => $message
+				'MESSAGE' => nl2br($message)
 			));
 
 			if ($moved_dirs) {
