@@ -100,7 +100,7 @@ else
 //
 @ini_set('magic_quotes_runtime', 0);
 
-if( get_magic_quotes_gpc() )
+if( get_magic_quotes_gpc() || ini_get('filter.default') === 'magic_quotes' )
 {
 	strip_magic_quotes_gpc($_GET);
 	strip_magic_quotes_gpc($_POST);
