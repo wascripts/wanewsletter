@@ -263,7 +263,13 @@ else if( $mode == 'iframe' )
 					$body
 				);
 				
-				echo str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $lang['Label_link'] . ' (lien fictif)</a>', $body);
+				$output->send_headers();
+
+				echo str_replace(
+					'{LINKS}',
+					'<a href="#" onclick="return false;">' . $lang['Label_link'] . ' (lien fictif)</a>',
+					purge_latin1($body)
+				);
 			}
 			else
 			{
