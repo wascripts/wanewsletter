@@ -197,8 +197,6 @@ templates/wanewsletter.css
 
 .git
 composer.lock
-includes/config.inc.php
-includes/tags.inc.php
 templates/wanewsletter.custom.css
 vendor
 

@@ -54,6 +54,102 @@ function wan_autoloader($classname)
 }
 
 /**
+ * Chargement du fichier de configuration initial, et redirection vers
+ * install.php si le fichier n’existe pas.
+ */
+function load_config_file()
+{
+	global $dsn, $prefixe;// Sale mais bon...
+
+	// Réglage par défaut des divers répertoires utilisés par le script.
+	// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
+	// de Wanewsletter (voir plus bas).
+	$logs_dir  = '~/data/logs';
+	$stats_dir = '~/data/stats';
+	$tmp_dir   = '~/data/tmp';
+
+	$need_update  = false;
+	$test_files[] = WA_ROOTDIR . '/data/config.inc.php';
+	// Emplacement du fichier dans Wanewsletter < 2.4-beta3
+	$test_files[] = WA_ROOTDIR . '/includes/config.inc.php';
+
+	foreach ($test_files as $file) {
+		if (file_exists($file)) {
+			if (!is_readable($file)) {
+				echo "Cannot read the config file. Please fix this mistake and reload.";
+				exit;
+			}
+
+			include $file;
+		}
+	}
+
+	//
+	// Compatibilité avec Wanewsletter < 2.3-beta2
+	//
+	if (!$dsn && !empty($dbtype)) {
+		$infos = array();
+		$infos['engine'] = $dbtype;
+		$infos['host']   = $dbhost;
+		$infos['user']   = $dbuser;
+		$infos['pass']   = $dbpassword;
+		$infos['dbname'] = $dbname;
+
+		if ($infos['engine'] == 'mssql') {
+			echo "Support for Microsoft SQL Server has been removed in Wanewsletter 2.3\n";
+			exit;
+		}
+		else if ($infos['engine'] == 'postgre') {
+			$infos['engine'] = 'postgres';
+		}
+		else if ($infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli') {
+			$infos['engine'] = 'mysql';
+		}
+
+		$dsn = createDSN($infos);
+
+		$need_update = true;
+	}
+
+	//
+	// Les constantes NL_INSTALLED et WA_VERSION sont obsolètes.
+	//
+	if (defined('NL_INSTALLED') || defined('WA_VERSION') || !file_exists($test_files[0])) {
+		$need_update = true;
+	}
+
+	//
+	// Pas installé ?
+	//
+	$install_script = 'install.php';
+
+	if (!$dsn && $install_script != basename($_SERVER['SCRIPT_FILENAME'])) {
+		if (!check_cli()) {
+			if (!file_exists($install_script)) {
+				$install_script = '../'.$install_script;
+			}
+
+			http_redirect($install_script);
+		}
+		else {
+			echo "Wanewsletter seems not to be installed!\n";
+			echo "Call $install_script in your web browser.\n";
+			exit(1);
+		}
+	}
+
+	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
+
+	//
+	// Déclaration des dossiers et fichiers spéciaux utilisés par le script
+	//
+	define(__NAMESPACE__.'\\WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
+	define(__NAMESPACE__.'\\WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
+	define(__NAMESPACE__.'\\WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
+	define(__NAMESPACE__.'\\WA_LOCKFILE', WA_TMPDIR . '/liste-%d.lock');
+}
+
+/**
  * Vérifie que les numéros de version des tables dans le fichier constantes.php
  * et dans la table de configuration du script sont synchro
  *

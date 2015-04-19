@@ -77,87 +77,14 @@ ini_set('magic_quotes_runtime', 0);
 $simple_header = $error = false;
 $nl_config     = $lang = $datetime = $admindata = $msg_error = array();
 
+// Chargement du fichier de configuration initial
 $prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
-// Les variables en $db* pour la compatibilité avec wanewsletter < 2.3-beta2
-$dsn = $dbtype = $dbhost = $dbuser = $dbpassword = $dbname = '';
+$dsn     = '';
 
-// Réglage par défaut des divers répertoires utilisés par le script.
-// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
-// de Wanewsletter (voir plus bas).
-$logs_dir  = '~/data/logs';
-$stats_dir = '~/data/stats';
-$tmp_dir   = '~/data/tmp';
+load_config_file();
 
-$config_file = WA_ROOTDIR . '/includes/config.inc.php';
-if (file_exists($config_file)) {
-	if (!is_readable($config_file)) {
-		echo "Cannot read the config file. Please fix this mistake and reload.";
-		exit;
-	}
-
-	include $config_file;
-	unset($config_file);
-}
-
-// Compatibilité avec wanewsletter < 2.3-beta2
-if (!$dsn && $dbtype) {
-	$infos = array();
-	$infos['engine'] = $dbtype;
-	$infos['host']   = $dbhost;
-	$infos['user']   = $dbuser;
-	$infos['pass']   = $dbpassword;
-	$infos['dbname'] = $dbname;
-
-	if ($infos['engine'] == 'mssql') {
-		echo "Support for Microsoft SQL Server has been removed in Wanewsletter 2.3\n";
-		exit;
-	}
-	else if ($infos['engine'] == 'postgre') {
-		$infos['engine'] = 'postgres';
-	}
-	else if ($infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli') {
-		$infos['engine'] = 'mysql';
-	}
-
-	$dsn = createDSN($infos);
-	unset($infos);
-
-	define('UPDATE_CONFIG_FILE', true);
-}
-
-unset($dbtype, $dbhost, $dbuser, $dbpassword, $dbname);
-
+// Doit être placé après load_config_file()
 require WA_ROOTDIR . '/includes/wadb_init.php';
-
-//
-// Pas installé ?
-//
-$install_script = 'install.php';
-$current_script = basename($_SERVER['SCRIPT_FILENAME']);
-
-if ($current_script != $install_script && !$dsn) {
-	if (!check_cli()) {
-		if (!file_exists($install_script)) {
-			$install_script = '../'.$install_script;
-		}
-
-		http_redirect($install_script);
-	}
-	else {
-		echo "Wanewsletter seems not to be installed!\n";
-		echo "Call $install_script in your web browser.\n";
-		exit(1);
-	}
-}
-unset($current_script, $install_script);
-
-//
-// Déclaration des dossiers et fichiers spéciaux utilisés par le script
-//
-define('WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
-define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
-define('WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
-define('WA_LOCKFILE', WA_TMPDIR . '/liste-%d.lock');
 
 //
 // Initialisation du système de templates
