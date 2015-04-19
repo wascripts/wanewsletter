@@ -136,6 +136,13 @@ $config_file .= "\$prefixe = '$prefixe';\n";
 $config_file .= "\n";
 
 if (isset($_POST['sendfile'])) {
+	if (file_exists(WA_ROOTDIR . '/data/config.inc.php') ||
+		file_exists(WA_ROOTDIR . '/includes/config.inc.php')
+	) {
+		echo "The config file is already installed on the server.";
+		exit;
+	}
+
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
 }
 
