@@ -451,9 +451,13 @@ switch ($mode) {
 
 	case 'import':
 		if (isset($_POST['submit'])) {
-			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : array();
+			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : null;
 			$local_file  = trim(filter_input(INPUT_POST, 'local_file'));
 			$list_email  = trim(filter_input(INPUT_POST, 'list_email'));
+
+			if (is_array($upload_file) && $upload_file['error'] == UPLOAD_ERR_NO_FILE) {
+				$upload_file = null;
+			}
 
 			$list_tmp    = '';
 			$data_is_xml = false;
@@ -1084,8 +1088,12 @@ switch ($mode) {
 		if (isset($_POST['submit'])) {
 			require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
-			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : array();
+			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : null;
 			$local_file  = trim(filter_input(INPUT_POST, 'local_file'));
+
+			if (is_array($upload_file) && $upload_file['error'] == UPLOAD_ERR_NO_FILE) {
+				$upload_file = null;
+			}
 
 			//
 			// On règle le script pour ignorer une déconnexion du client et mener
