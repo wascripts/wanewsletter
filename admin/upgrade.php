@@ -104,10 +104,6 @@ if (filter_input(INPUT_GET, 'mode') == 'check') {
 	exit;
 }
 
-if (check_db_version($nl_config['db_version'])) {
-	$output->displayMessage($lang['Upgrade_not_required']);
-}
-
 //
 // Envoi du fichier au client si demandé
 //
@@ -121,6 +117,10 @@ $config_file .= "\n";
 
 if ($auth->isLoggedIn() && wan_is_admin($admindata) && isset($_POST['sendfile'])) {
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
+}
+
+if (check_db_version($nl_config['db_version'])) {
+	$output->displayMessage($lang['Upgrade_not_required']);
 }
 
 if (isset($_POST['start'])) {
