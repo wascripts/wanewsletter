@@ -80,7 +80,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="session_length">{L_LENGTH_SESSION}&nbsp;:</label></td>
-			<td><input type="text" id="session_length" name="session_length" value="{LENGTH_SESSION}" size="5" maxlength="5" /> <span class="notice">{L_SECONDS}</span></td>
+			<td><input type="number" id="session_length" name="session_length"
+				value="{LENGTH_SESSION}" min="300" size="5"
+			/> <span class="notice">{L_SECONDS}</span>
+			</td>
 		</tr>
 	</table>
 
@@ -95,7 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="max_filesize">{L_MAX_FILESIZE}&nbsp;:</label><br /><span class="notice">{L_MAX_FILESIZE_NOTE}</span></td>
-			<td><input type="text" id="max_filesize" name="max_filesize" value="{MAX_FILESIZE}" size="7" maxlength="8" /> <span class="notice">{L_OCTETS}</span></td>
+			<td><input type="number" id="max_filesize" name="max_filesize"
+				value="{MAX_FILESIZE}" size="8" maxlength="8"
+			/> <span class="notice">{L_OCTETS}</span></td>
 		</tr>
 	</table>
 
@@ -115,7 +120,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="sending_limit">{L_SENDING_LIMIT}&nbsp;:</label><br /><span class="notice">{L_SENDING_LIMIT_NOTE}</span></td>
-			<td><input type="text" id="sending_limit" name="sending_limit" value="{SENDING_LIMIT}" size="5" maxlength="5" class="number" /></td>
+			<td><input type="number" id="sending_limit" name="sending_limit"
+				value="{SENDING_LIMIT}" min="0" size="5"
+			/></td>
 		</tr>
 		<tr id="use_smtp_choice" class="{SMTP_ROW_CLASS}">
 			<td><label>{L_USE_SMTP}&nbsp;:{WARNING_SMTP}</label><br /><span class="notice">{L_USE_SMTP_NOTE}</span></td>
@@ -132,7 +139,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="smtp_port">{L_SMTP_PORT}&nbsp;:</label><br /><span class="notice">{L_SMTP_PORT_NOTE}</span></td>
-			<td><input type="text" id="smtp_port" name="smtp_port" maxlength="5" value="{SMTP_PORT}" class="number"{DISABLED_SMTP} /></td>
+			<td><input type="number" id="smtp_port" name="smtp_port"
+			value="{SMTP_PORT}" min="1" max="65535" size="5" {DISABLED_SMTP}
+			/></td>
 		</tr>
 		<tr>
 			<td><label for="smtp_user">{L_SMTP_USER}&nbsp;:</label><br /><span class="notice">{L_AUTH_SMTP_NOTE}</span></td>

@@ -468,15 +468,18 @@ button:disabled {
 }
 
 input[type="text"]:disabled,
+input[type="number"]:disabled,
 input[type="password"]:disabled  { background-color: #D6D8DA; }
 
 input[type="radio"],
 input[type="checkbox"] { margin: 0 2px; vertical-align: middle; }
 
 input[type="text"],
+input[type="number"],
 input[type="password"] { text-indent: 2px; }
 
 input[type="text"],
+input[type="number"],
 input[type="password"],
 textarea, select       {
 	background-color: #FAFAFA;
@@ -485,12 +488,14 @@ textarea, select       {
 	border-width:1px;
 }
 input[type="text"]:focus,
+input[type="number"]:focus,
 input[type="password"]:focus,
 textarea:focus { background-color: white; }
 
-input[type="text"].number { width: 40px; }
-select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil */
+input[type="number"][size="5"] { width: 5em; }
+input[type="number"][size="8"] { width: 8em; }
 
+select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil */
 
 /* Barre de progression */
 progress {

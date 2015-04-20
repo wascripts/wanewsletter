@@ -7,7 +7,7 @@
 	<table class="dataset">
 		<tr>
 			<td><label for="glue">{L_GLUE}&nbsp;:</label></td>
-			<td><input type="text" id="glue" name="glue" maxlength="3" class="number" /></td>
+			<td><input type="text" id="glue" name="glue" size="3" maxlength="3" /></td>
 		</tr>
 		<!-- BEGIN format_box -->
 		<tr>

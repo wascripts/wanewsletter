@@ -47,7 +47,9 @@
 		</tr>
 		<tr>
 			<td><label for="limitevalidate">{L_LIMITEVALIDATE}&nbsp;:</label><br /><span class="notice">{L_NOTE_VALIDATE}</span></td>
-			<td><input type="text" id="limitevalidate" name="limitevalidate" value="{LIMITEVALIDATE}" size="5" maxlength="3" class="number" /> <span class="notice">{L_DAYS}</span></td>
+			<td><input type="number" id="limitevalidate" name="limitevalidate"
+				value="{LIMITEVALIDATE}" min="1" max="365" size="5"
+			/> <span class="notice">{L_DAYS}</span></td>
 		</tr>
 		<tr>
 			<td><label for="liste_sig">{L_SIG_EMAIL}&nbsp;:</label><br /><span class="notice">{L_SIG_EMAIL_NOTE}</span></td>
@@ -71,7 +73,9 @@
 		</tr>
 		<tr>
 			<td><label for="purge_freq">{L_PURGE_FREQ}&nbsp;:</label></td>
-			<td><input type="text" id="purge_freq" name="purge_freq" value="{PURGE_FREQ}" size="5" maxlength="3" class="number" /> <span class="notice">{L_DAYS}</span></td>
+			<td><input type="number" id="purge_freq" name="purge_freq"
+				value="{PURGE_FREQ}" min="1" max="365" size="5"
+			/> <span class="notice">{L_DAYS}</span></td>
 		</tr>
 	</table>
 
@@ -95,7 +99,9 @@
 		</tr>
 		<tr>
 			<td><label for="pop_port">{L_POP_PORT}&nbsp;:</label><br /><span class="notice">{L_POP_PORT_NOTE}</span></td>
-			<td><input type="text" id="pop_port" name="pop_port" maxlength="5" value="{POP_PORT}" class="number"{DISABLED_CRON} /></td>
+			<td><input type="number" id="pop_port" name="pop_port"
+			value="{POP_PORT}" min="1" max="65535" size="5" {DISABLED_CRON}
+			/></td>
 		</tr>
 		<tr>
 			<td><label for="pop_user">{L_POP_USER}&nbsp;:</label></td>
