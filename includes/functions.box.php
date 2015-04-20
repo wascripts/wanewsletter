@@ -20,29 +20,37 @@ function lang_box($default_lang = '')
 {
 	global $output;
 
-	$lang_ary = array();
-	$browse   = dir(WA_ROOTDIR . '/language');
+	$lang_names = array(
+		'fr' => 'francais',
+		'en' => 'english'
+	);
+
+	$lang_list = array();
+	$browse    = dir(WA_ROOTDIR . '/languages');
 
 	while (($entry = $browse->read()) !== false) {
-		if (preg_match('/^lang_([\w_-]+)\.php$/', $entry, $m)) {
-			$lang_ary[] = $m[1];
+		if (is_dir(WA_ROOTDIR . '/languages/' . $entry) && preg_match('/^\w+(_\w+)?$/', $entry, $m)) {
+			$lang_list[] = $m[0];
 		}
 	}
 	$browse->close();
 
-	if (count($lang_ary) > 1) {
-		asort($lang_ary);
-
+	if (count($lang_list) > 1) {
 		$lang_box = '<select id="language" name="language">';
-		foreach ($lang_ary as $lang_name) {
-			$selected  = $output->getBoolAttr('selected', ($default_lang == $lang_name));
-			$lang_box .= sprintf('<option value="%1$s"%2$s>%1$s</option>', $lang_name, $selected);
+		foreach ($lang_list as $lang) {
+			$selected  = $output->getBoolAttr('selected', ($default_lang == $lang));
+			$lang_box .= sprintf('<option value="%1$s"%2$s>%3$s</option>',
+				$lang,
+				$selected,
+				(isset($lang_names[$lang])) ? $lang_names[$lang] : $lang
+			);
 		}
 		$lang_box .= '</select>';
 	}
 	else {
-		$lang_box = '<span class="notice">' . $lang_ary[0]
-			. '<input type="hidden" id="language" name="language" value="' . $lang_ary[0] . '" />';
+		$lang = array_pop($lang_list);
+		$lang_box = '<span class="notice">' . $lang
+			. '<input type="hidden" id="language" name="language" value="' . $lang . '" />';
 	}
 
 	return $lang_box;

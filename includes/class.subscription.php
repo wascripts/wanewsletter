@@ -31,7 +31,7 @@ class Subscription
 	{
 		global $nl_config;
 
-		$this->tpl_dir = WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/';
+		$this->tpl_dir = WA_ROOTDIR . '/languages/' . $nl_config['language'] . '/emails/';
 
 		if (isset($listdata)) {
 			$this->listdata    = $listdata;

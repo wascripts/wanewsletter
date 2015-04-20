@@ -76,7 +76,7 @@ if ($mode == 'adduser') {
 			$db->insert(ADMIN_TABLE, $sql_data);
 			$admin_id = $db->lastInsertId();
 
-			$tpl = new Template(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+			$tpl = new Template(WA_ROOTDIR . '/languages/' . $nl_config['language'] . '/emails/');
 			$tpl->set_filenames(array('mail' => 'new_admin.txt'));
 			$tpl->assign_vars(array(
 				'PSEUDO'        => $new_login,

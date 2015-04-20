@@ -407,30 +407,21 @@ function http_redirect($url, $params = array(), $session = false, $status = 0)
  *
  * @param array $admindata Données utilisateur
  */
-function load_settings($admindata = array())
+function load_settings(&$admindata = array())
 {
 	global $nl_config;
 
+	$file_pattern = WA_ROOTDIR . '/languages/%s/main.php';
+
 	$check_list = array();
-	$supported_lang = array(
-		'fr' => 'francais',
-		'en' => 'english'
-	);
-	$file_pattern = WA_ROOTDIR . '/language/lang_%s.php';
 
-	$check_list[] = 'francais';
+	if (is_array($admindata)) {
+		if (!empty($admindata['admin_lang'])) {
+			$check_list[] = $admindata['admin_lang'];
+		}
 
-	$accept_language = filter_input(INPUT_SERVER, 'HTTP_ACCEPT_LANGUAGE');
-	if ($accept_language) {
-		$accept_language = explode(',', $accept_language);
-
-		foreach ($accept_language as $langcode) {
-			$langcode = strtolower(substr(trim($langcode), 0, 2));
-
-			if (isset($supported_lang[$langcode])) {
-				$check_list[] = $supported_lang[$langcode];
-				break;
-			}
+		if (!empty($admindata['admin_dateformat'])) {
+			$nl_config['date_format'] = $admindata['admin_dateformat'];
 		}
 	}
 
@@ -438,25 +429,21 @@ function load_settings($admindata = array())
 		$check_list[] = $nl_config['language'];
 	}
 
-	if (!is_array($admindata)) {
-		$admindata = array();
+	$accept_language = filter_input(INPUT_SERVER, 'HTTP_ACCEPT_LANGUAGE');
+	if ($accept_language) {
+		$accept_language = explode(',', $accept_language);
+
+		foreach ($accept_language as $langcode) {
+			$check_list[] = strtolower(substr(trim($langcode), 0, 2));
+		}
 	}
 
-	if (!empty($admindata['admin_lang'])) {
-		$check_list[] = $admindata['admin_lang'];
-	}
-
-	if (!empty($admindata['admin_dateformat'])) {
-		$nl_config['date_format'] = $admindata['admin_dateformat'];
-	}
-
-	$check_list = array_unique(array_reverse($check_list));
-
-	$lang = $datetime = array();
+	$check_list[] = 'fr';
+	$check_list = array_unique($check_list);
 
 	foreach ($check_list as $language) {
 		if (is_readable(sprintf($file_pattern, $language))) {
-			if (empty($lang) || $supported_lang[$lang['CONTENT_LANG']] != $language) {
+			if (empty($lang) || $lang['CONTENT_LANG'] != $language) {
 				require sprintf($file_pattern, $language);
 			}
 
@@ -465,12 +452,15 @@ function load_settings($admindata = array())
 	}
 
 	if (empty($lang)) {
-		trigger_error('<b>Les fichiers de localisation sont introuvables !</b>', E_USER_ERROR);
+		plain_error('Les fichiers de localisation sont introuvables !');
 	}
-	else {
-		$GLOBALS['lang'] =& $lang;
-		$GLOBALS['datetime'] =& $datetime;
+
+	if (is_array($admindata)) {
+		$admindata['admin_lang'] = $lang['CONTENT_LANG'];
 	}
+
+	$GLOBALS['lang'] =& $lang;
+	$GLOBALS['datetime'] =& $datetime;
 }
 
 /**

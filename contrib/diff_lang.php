@@ -17,10 +17,10 @@
 echo "This script has been disabled for security reasons\n";
 exit(0);
 
-define('WA_LANGUAGE_DIR', '../language');
+define('WA_ROOTDIR', dirname(__DIR__));
 
-$FICHIER_REFERENCE = 'lang_francais.php';
-$FICHIER_A_TESTER  = 'lang_english.php';
+$FICHIER_REFERENCE = 'fr/main.php';
+$FICHIER_A_TESTER  = 'en/main.php';
 
 header('Content-Type: text/plain; charset=UTF-8');
 
@@ -49,13 +49,13 @@ function diff_lang($tab_1, $tab_2, $namespace = '')
 }
 
 $lang = array();
-require WA_LANGUAGE_DIR . '/' . $FICHIER_REFERENCE;
+require WA_ROOTDIR . '/languages/' . $FICHIER_REFERENCE;
 
 $lang_ary_1 = $lang;
 unset($lang);
 
 $lang = array();
-require WA_LANGUAGE_DIR . '/' . $FICHIER_A_TESTER;
+require WA_ROOTDIR . '/languages/' . $FICHIER_A_TESTER;
 
 $lang_ary_2 = $lang;
 unset($lang);

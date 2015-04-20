@@ -704,6 +704,20 @@ if (isset($_POST['start'])) {
 					'ftp_user','ftp_pass','ftp_pasv','ftp_path')";
 		}
 
+		//
+		// Stockage du code langue au lieu du nom complet.
+		//
+		if ($nl_config['db_version'] < 23) {
+			$sql_update[] = "UPDATE " . CONFIG_TABLE . " SET config_value = 'en'
+				WHERE config_name = 'language' AND config_value = 'english'";
+			$sql_update[] = "UPDATE " . CONFIG_TABLE . " SET config_value = 'fr'
+				WHERE config_name = 'language' AND config_value = 'francais'";
+			$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_lang = 'en' WHERE abo_lang = 'english'";
+			$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_lang = 'fr' WHERE abo_lang = 'francais'";
+			$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_lang = 'en' WHERE admin_lang = 'english'";
+			$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_lang = 'fr' WHERE admin_lang = 'francais'";
+		}
+
 		exec_queries($sql_update);
 
 		//

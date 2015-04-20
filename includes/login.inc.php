@@ -120,7 +120,7 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 				$_SESSION['reset_key'] = $reset_key = generate_key(12);
 				$_SESSION['reset_key_expire'] = strtotime('+15 min');
 
-				$tpl = new Template(WA_ROOTDIR . '/language/email_' . $nl_config['language'] . '/');
+				$tpl = new Template(WA_ROOTDIR . '/languages/' . $nl_config['language'] . '/emails/');
 				$tpl->set_filenames(array('mail' => 'reset_passwd.txt'));
 				$tpl->assign_vars(array(
 					'PSEUDO'    => $userdata['username'],

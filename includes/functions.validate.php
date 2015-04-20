@@ -36,7 +36,7 @@ function validate_pass($passwd)
  */
 function validate_lang($language)
 {
-	return (preg_match('/^[\w_-]+$/', $language) &&
-		file_exists(WA_ROOTDIR . '/language/lang_' . $language . '.php')
+	return (preg_match('/^[\w_]+$/', $language) &&
+		file_exists(WA_ROOTDIR . '/languages/' . $language . '/main.php')
 	);
 }

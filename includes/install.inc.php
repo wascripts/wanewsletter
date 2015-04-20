@@ -146,12 +146,7 @@ if (isset($_POST['sendfile'])) {
 	Attach::send_file('config.inc.php', 'text/plain', $config_file);
 }
 
-$supported_lang = array(
-	'fr' => 'francais',
-	'en' => 'english'
-);
-
-$language = ($language != '') ? $language : $supported_lang[$lang['CONTENT_LANG']];
+$language = ($language != '') ? $language : $lang['CONTENT_LANG'];
 
 $start = isset($_POST['start']);
 
