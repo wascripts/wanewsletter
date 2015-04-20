@@ -75,11 +75,13 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 		$_SESSION['liste'] = 0;
 	}
 
-	$liste = (int) filter_input(INPUT_POST, 'liste', FILTER_VALIDATE_INT);
+	$liste = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
 
-	if (isset($auth->listdata[$liste])) {
+	if ($liste && isset($auth->listdata[$liste])) {
 		$_SESSION['liste'] = $liste;
 	}
+
+	unset($liste);
 
 	if (strtoupper(filter_input(INPUT_SERVER, 'REQUEST_METHOD')) == 'POST' && $session->new_session) {
 		$output->displayMessage('Invalid_session');
