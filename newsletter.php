@@ -26,11 +26,10 @@ $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
 
 if (!empty($language) && validate_lang($language)) {
-	load_settings(array('admin_lang' => $language));
+	$nl_config['language'] = $language;
 }
-else {
-	load_settings();
-}
+
+load_settings();
 
 $action = trim(filter_input(INPUT_POST, 'action'));
 $email  = trim(u::filter_input(INPUT_POST, 'email'));

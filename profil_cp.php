@@ -79,7 +79,9 @@ if (empty($abodata['abo_lang'])) {
 	$abodata['abo_lang'] = $nl_config['language'];
 }
 
-load_settings(array('admin_lang' => $abodata['abo_lang']));
+// Crade, mais on fera avec pour l'instant.
+$abodata['admin_lang'] = $abodata['abo_lang'];
+load_settings($abodata);
 
 $other_tags = wan_get_tags();
 
