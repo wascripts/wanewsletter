@@ -6,7 +6,9 @@ tinyMCE.init({
 	theme: "modern",
 	skin: "lightgray",
 	menubar: false,
-	language_url:"{BASEDIR}/languages/{CONTENT_LANG}/tinymce.js",
+<!-- BEGIN tinymce_lang -->
+	language_url:"{BASEDIR}/languages/{tinymce_lang.CODE}/tinymce.js",
+<!-- END tinymce_lang -->
 	plugins: [
 		"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 		"searchreplace wordcount visualblocks visualchars code",

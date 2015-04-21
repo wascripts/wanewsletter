@@ -990,6 +990,12 @@ if ($logdata['log_date'] != -1) {
 	));
 }
 
+if (is_readable(WA_ROOTDIR . '/languages/'.$admindata['admin_lang'].'/tinymce.js')) {
+	$output->assign_block_vars('tinymce_lang', array(
+		'CODE' => $admindata['admin_lang']
+	));
+}
+
 if ($listdata['liste_format'] != FORMAT_HTML) {
 	$output->assign_block_vars('nl_text_textarea', array(
 		'L_TITLE'    => $lang['Log_in_text'],
