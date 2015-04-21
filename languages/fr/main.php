@@ -324,6 +324,7 @@ $lang['Active']                     = "Actif";
 $lang['Inactive']                   = "Inactif";
 $lang['None']                       = "Aucune";
 $lang['Connection_security']        = "Sécurité de la connexion";
+$lang['Server_password_note']       = "Si laissé vide, le mot de passe précédent est conservé, sauf si aucun nom d’utilisateur n’est fourni.";
 
 $lang['Click_return_index']         = "Cliquez %sici%s pour retourner sur l’accueil";
 $lang['Click_return_back']          = "Cliquez %sici%s pour retourner sur la page précédente";
@@ -408,12 +409,10 @@ $lang['Sending_limit']              = "Nombre d’emails par flot d’envoi";
 $lang['Sending_limit_note']         = "Laissez à 0 pour envoyer tous les emails en une fois";
 $lang['Use_smtp']                   = "Utilisation d’un serveur <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">smtp</abbr> pour les envois";
 $lang['Use_smtp_note']              = "Seulement si votre serveur ne dispose d’aucune fonction d’envoi d’emails ou que vous désirez utiliser un serveur SMTP spécifique !";
-$lang['Smtp_server']                = "Adresse du serveur smtp";
+$lang['Smtp_server']                = "Nom ou IP du serveur SMTP";
 $lang['Smtp_port']                  = "Port de connexion";
-$lang['Smtp_port_note']             = "La valeur par défaut conviendra dans la grande majorité des cas.";
-$lang['Smtp_user']                  = "Votre login smtp";
-$lang['Smtp_pass']                  = "Votre mot de passe smtp";
-$lang['Auth_smtp_note']             = "Seulement si votre serveur smtp requiert une authentification !";
+$lang['Smtp_user']                  = "Nom d’utilisateur";
+$lang['Smtp_pass']                  = "Mot de passe";
 $lang['Disable_stats']              = "Désactiver le module de statistiques";
 $lang['Debug_level']                = "Niveau de débogage";
 $lang['Debug_level_1']              = "désactivé";
@@ -480,9 +479,8 @@ $lang['Delete_abo_logs']            = "Ou les retirer de la base de données";
 $lang['Use_cron']                   = "Utiliser l’option cron";
 $lang['Pop_server']                 = "Nom ou IP du serveur POP";
 $lang['Pop_port']                   = "Port de connexion";
-$lang['Pop_port_note']              = "La valeur par défaut conviendra dans la grande majorité des cas.";
-$lang['Pop_user']                   = "Login de connexion";
-$lang['Pop_pass']                   = "Mot de passe de connexion";
+$lang['Pop_user']                   = "Nom d’utilisateur";
+$lang['Pop_pass']                   = "Mot de passe";
 $lang['Liste_alias']                = "Alias de la liste (si nécessaire)";
 
 

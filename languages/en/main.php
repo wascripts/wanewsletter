@@ -323,6 +323,7 @@ $lang['Active']                     = "Active";
 $lang['Inactive']                   = "Inactive";
 $lang['None']                       = "None";
 $lang['Connection_security']        = "Connection security";
+$lang['Server_password_note']       = "If left empty, the previous password is kept unless no username is provided.";
 
 $lang['Click_return_index']         = "Click %shere%s to return to the home page";
 $lang['Click_return_back']          = "Click %shere%s to go back to the previous page";
@@ -408,12 +409,10 @@ $lang['Sending_limit']              = "Number of mails sent by process";
 $lang['Sending_limit_note']         = "Leave to 0 to send all mails in one time";
 $lang['Use_smtp']                   = "Use of a <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">smtp</abbr> server to send emails";
 $lang['Use_smtp_note']              = "Use only if your server does not have an email sending function or if you want to use a specific SMTP server!";
-$lang['Smtp_server']                = "smtp server address";
+$lang['Smtp_server']                = "Name or IP of the SMTP server";
 $lang['Smtp_port']                  = "Connection port";
-$lang['Smtp_port_note']             = "The default value should be appropriate in most cases.";
-$lang['Smtp_user']                  = "Your smtp login";
-$lang['Smtp_pass']                  = "Your smtp password";
-$lang['Auth_smtp_note']             = "Only if your smtp server requires authentication!";
+$lang['Smtp_user']                  = "Username";
+$lang['Smtp_pass']                  = "Password";
 $lang['Disable_stats']              = "Deactivate the statistics module";
 $lang['Debug_level']                = "Debug level";
 $lang['Debug_level_1']              = "disabled";
@@ -478,11 +477,10 @@ $lang['Delete_all']                 = "Are you sure you want to delete this list
 $lang['Move_to_liste']              = "Move subscribers and newsletters to";
 $lang['Delete_abo_logs']            = "Or remove them from the database";
 $lang['Use_cron']                   = "Use cron";
-$lang['Pop_server']                 = "POP server's name or IP address";
+$lang['Pop_server']                 = "Name or IP of the POP server";
 $lang['Pop_port']                   = "Connection port";
-$lang['Pop_port_note']              = "The default value should be appropriate in most cases.";
-$lang['Pop_user']                   = "Connection login";
-$lang['Pop_pass']                   = "Connection password";
+$lang['Pop_user']                   = "Username";
+$lang['Pop_pass']                   = "Password";
 $lang['Liste_alias']                = "List's alias (if necessary)";
 
 

@@ -98,7 +98,7 @@
 			<td><input type="text" id="pop_host" name="pop_host" value="{POP_HOST}" size="30" maxlength="100"{DISABLED_CRON} /></td>
 		</tr>
 		<tr>
-			<td><label for="pop_port">{L_POP_PORT}&nbsp;:</label><br /><span class="notice">{L_POP_PORT_NOTE}</span></td>
+			<td><label for="pop_port">{L_POP_PORT}&nbsp;:</label></td>
 			<td><input type="number" id="pop_port" name="pop_port"
 			value="{POP_PORT}" min="1" max="65535" size="5" {DISABLED_CRON}
 			/></td>
@@ -108,7 +108,7 @@
 			<td><input type="text" id="pop_user" name="pop_user" value="{POP_USER}" size="30" maxlength="100"{DISABLED_CRON} /></td>
 		</tr>
 		<tr>
-			<td><label for="pop_pass">{L_POP_PASS}&nbsp;:</label></td>
+			<td><label for="pop_pass">{L_POP_PASS}&nbsp;:</label><br /><span class="notice">{L_POP_PASS_NOTE}</span></td>
 			<td><input type="password" id="pop_pass" name="pop_pass" size="30" maxlength="100"{DISABLED_CRON} autocomplete="off" /></td>
 		</tr>
 		<!-- BEGIN ssl_support -->

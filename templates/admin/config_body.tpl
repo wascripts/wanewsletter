@@ -144,11 +144,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			/></td>
 		</tr>
 		<tr>
-			<td><label for="smtp_user">{L_SMTP_USER}&nbsp;:</label><br /><span class="notice">{L_AUTH_SMTP_NOTE}</span></td>
+			<td><label for="smtp_user">{L_SMTP_USER}&nbsp;:</label></td>
 			<td><input type="text" id="smtp_user" name="smtp_user" value="{SMTP_USER}" size="30" maxlength="100"{DISABLED_SMTP} /></td>
 		</tr>
 		<tr>
-			<td><label for="smtp_pass">{L_SMTP_PASS}&nbsp;:</label><br /><span class="notice">{L_AUTH_SMTP_NOTE}</span></td>
+			<td><label for="smtp_pass">{L_SMTP_PASS}&nbsp;:</label><br /><span class="notice">{L_SMTP_PASS_NOTE}</span></td>
 			<td><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="100"{DISABLED_SMTP} autocomplete="off" /></td>
 		</tr>
 		<!-- BEGIN ssl_support -->
