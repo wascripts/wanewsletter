@@ -1,3 +1,44 @@
+<script src="{BASEDIR}/vendor/tinymce/tinymce/tinymce.min.js"></script>
+<script>
+<!--
+tinyMCE.init({
+	selector: "textarea[name='body_html']",
+	theme: "modern",
+	skin: "lightgray",
+	menubar: false,
+	language_url:"{BASEDIR}/languages/{CONTENT_LANG}/tinymce.js",
+	plugins: [
+		"advlist autolink lists link image charmap print preview hr anchor pagebreak",
+		"searchreplace wordcount visualblocks visualchars code",
+		"insertdatetime media nonbreaking table contextmenu directionality",
+		"paste textcolor colorpicker textpattern"
+	],
+	toolbar1: "bold italic underline strikethrough bullist numlist blockquote hr alignleft aligncenter alignright link unlink image spellchecker",
+	toolbar2: "forecolor pastetext removeformat charmap outdent indent code undo redo",
+
+	entity_encoding: "raw",
+	relative_urls: false,
+	setup: function(ed) {
+		ed.on('BeforeSetContent', function(e) {
+			e.content = e.content.replace(/<([^>]+)=\s*("|\')cid:/g,'<$1=$2show.php?file=');
+		});
+		ed.on('GetContent', function(e) {
+			e.content = e.content.replace(/<([^>]+)=\s*("|\').*?show\.php\?file=/g,'<$1=$2cid:');
+		});
+	}
+});
+
+window._old_addLinks = window.addLinks;
+window.addLinks = function(evt) {
+	if( evt.currentTarget.id == 'addLinks2' ) {
+		tinyMCE.execCommand('mceInsertContent', false, '&#123;LINKS&#125;');
+	}
+	else {
+		window._old_addLinks(evt);
+	}
+};
+//-->
+</script>
 <script>
 <!--
 var lang = [];
