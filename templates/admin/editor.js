@@ -132,6 +132,11 @@ function preview()
 	}
 	else {
 		var texte     = document.forms['send-form'].elements['body_html'].value;
+
+		if (typeof(tinyMCE) != 'undefined') {
+			texte = tinyMCE.activeEditor.getContent();
+		}
+
 		var rex_img   = new RegExp("<([^<]+)\"cid:([^\\:*/?<\">|]+)\"([^>]*)?>", "gi");
 		var rex_title = new RegExp("<title>.*</title>", "i");
 
