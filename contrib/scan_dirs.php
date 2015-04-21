@@ -130,6 +130,7 @@ languages/en/index.html
 languages/en/main.php
 languages/fr/index.html
 languages/fr/main.php
+languages/fr/tinymce.js
 newsletter.php
 options/cron.php
 options/extra.php
