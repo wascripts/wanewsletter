@@ -48,6 +48,8 @@ contrib/testlock.php
 contrib/wanewsletter
 contrib/wanewsletter.bat
 data/.htaccess
+data/config.sample.inc.php
+data/tags.sample.inc.php
 data/db/.gitignore
 data/stats/.gitignore
 data/stats/index.html
@@ -76,7 +78,6 @@ includes/class.session.php
 includes/class.template.php
 includes/common.inc.php
 includes/compat.inc.php
-includes/config.sample.inc.php
 includes/constantes.php
 includes/engine_send.php
 includes/functions.box.php
@@ -99,7 +100,6 @@ includes/sql/sqlite3.php
 includes/sql/sqlitepdo.php
 includes/sql/sqlparser.php
 includes/sql/wadb.php
-includes/tags.sample.inc.php
 includes/wadb_init.php
 index.html
 install.php
@@ -199,6 +199,9 @@ templates/wanewsletter.css
 
 .git
 composer.lock
+# Pour les anciennes versions
+includes/config.inc.php
+
 templates/wanewsletter.custom.css
 vendor
 
