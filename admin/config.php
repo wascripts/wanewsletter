@@ -73,25 +73,25 @@ if (isset($_POST['submit'])) {
 	if ($new_config['upload_path'] != '/') {
 		$new_config['upload_path'] = trim($new_config['upload_path'], '/') . '/';
 
+		$current_upload_dir = WA_ROOTDIR . '/' . $new_config['upload_path'];
 		if (strcmp($nl_config['upload_path'], $new_config['upload_path']) !== 0) {
 			$move_files = true;
-			$source_upload = WA_ROOTDIR . '/' . $nl_config['upload_path'];
-			$dest_upload   = WA_ROOTDIR . '/' . $new_config['upload_path'];
+			$old_upload_dir = WA_ROOTDIR . '/' . $nl_config['upload_path'];
+		}
 
-			if (!file_exists($dest_upload)) {
-				if (!mkdir($dest_upload, 0755)) {
-					$error = true;
-					$msg_error[] = sprintf($lang['Message']['Cannot_create_dir'],
-						htmlspecialchars($dest_upload)
-					);
-				}
-			}
-			else if (!is_writable($dest_upload)) {
+		if (!file_exists($current_upload_dir)) {
+			if (!mkdir($current_upload_dir, 0755)) {
 				$error = true;
-				$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-					htmlspecialchars($dest_upload)
+				$msg_error[] = sprintf($lang['Message']['Cannot_create_dir'],
+					htmlspecialchars($current_upload_dir)
 				);
 			}
+		}
+		else if (!is_writable($current_upload_dir)) {
+			$error = true;
+			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
+				htmlspecialchars($current_upload_dir)
+			);
 		}
 	}
 
@@ -169,11 +169,11 @@ if (isset($_POST['submit'])) {
 		//
 		// Déplacement des fichiers joints dans le nouveau dossier de stockage s'il est changé
 		//
-		if ($move_files) {
-			if ($browse = dir($source_upload)) {
+		if ($move_files && is_readable($old_upload_dir)) {
+			if ($browse = dir($old_upload_dir)) {
 				while (($entry = $browse->read()) !== false) {
-					$source_file = $source_upload . $entry;
-					$dest_file   = $dest_upload . $entry;
+					$source_file = $old_upload_dir . $entry;
+					$dest_file   = $current_upload_dir . $entry;
 
 					if (is_file($source_file)) {
 						rename($source_file, $dest_file);
