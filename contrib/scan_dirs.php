@@ -82,7 +82,6 @@ includes/engine_send.php
 includes/functions.box.php
 includes/functions.php
 includes/functions.stats.php
-includes/functions.validate.php
 includes/index.html
 includes/install.inc.php
 includes/login.inc.php

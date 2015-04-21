@@ -16,7 +16,6 @@ use Wamailer\Email;
 const IN_PROFILCP = true;
 
 require './includes/common.inc.php';
-require WA_ROOTDIR . '/includes/functions.validate.php';
 
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration

@@ -180,8 +180,6 @@ $output->assign_vars(array(
 ));
 
 if ($start) {
-	require WA_ROOTDIR . '/includes/functions.validate.php';
-
 	if ($reinstall) {
 		$auth = new Auth();
 

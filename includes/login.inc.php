@@ -28,8 +28,6 @@ if ($reset_key) {
 }
 
 if ($mode == 'reset_passwd' || $mode == 'cp') {
-	require WA_ROOTDIR . '/includes/functions.validate.php';
-
 	if (!is_null($reset_key)) {
 		if (!isset($_SESSION['reset_key']) || !hash_equals($_SESSION['reset_key'], $reset_key)) {
 			$error = true;

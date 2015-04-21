@@ -80,7 +80,6 @@ if ($listdata = $result->fetch()) {
 		$output->displayMessage($message);
 	}
 	else if ($mode == 'validate') {
-		require WA_ROOTDIR . '/includes/functions.validate.php';
 		require WA_ROOTDIR . '/includes/functions.stats.php';
 
 		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel

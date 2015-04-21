@@ -285,7 +285,6 @@ if ($process_send) {
 	echo "\n";
 }
 else if ($process_subscribe) {
-	require WA_ROOTDIR . '/includes/functions.validate.php';
 	require WA_ROOTDIR . '/includes/functions.stats.php';
 
 	$sub = new Subscription($listdata);

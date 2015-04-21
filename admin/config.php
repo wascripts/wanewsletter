@@ -23,8 +23,6 @@ $old_config = $nl_config;
 $move_files = false;
 
 if (isset($_POST['submit'])) {
-	require WA_ROOTDIR . '/includes/functions.validate.php';
-
 	$new_config = array();
 	foreach ($old_config as $name => $value) {
 		$new_config[$name] = trim(filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW,

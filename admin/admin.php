@@ -42,8 +42,6 @@ if ($mode == 'adduser') {
 	$new_email = trim(u::filter_input(INPUT_POST, 'new_email'));
 
 	if (isset($_POST['submit'])) {
-		require WA_ROOTDIR . '/includes/functions.validate.php';
-
 		if (!validate_pseudo($new_login)) {
 			$error = true;
 			$msg_error[] = $lang['Message']['Invalid_login'];
@@ -191,8 +189,6 @@ if (isset($_POST['submit'])) {
 	foreach ($vararray as $varname) {
 		${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 	}
-
-	require WA_ROOTDIR . '/includes/functions.validate.php';
 
 	if ($dateformat == '') {
 		$dateformat = $nl_config['date_format'];

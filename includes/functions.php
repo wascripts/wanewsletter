@@ -1545,3 +1545,35 @@ function check_theme_is_used()
 		defined(__NAMESPACE__.'\\IN_PROFILCP')
 	));
 }
+
+/**
+ * @param string $pseudo
+ *
+ * @return boolean
+ */
+function validate_pseudo($pseudo)
+{
+	return (mb_strlen($pseudo) >= 2 && mb_strlen($pseudo) <= 30);
+}
+
+/**
+ * @param string $passwd
+ *
+ * @return boolean
+ */
+function validate_pass($passwd)
+{
+	return (bool) preg_match('/^[\x20-\x7E]{6,1024}$/', $passwd);
+}
+
+/**
+ * @param string $language
+ *
+ * @return boolean
+ */
+function validate_lang($language)
+{
+	return (preg_match('/^[\w_]+$/', $language) &&
+		file_exists(WA_ROOTDIR . '/languages/' . $language . '/main.php')
+	);
+}

@@ -18,7 +18,6 @@ if (!defined('WA_ROOTDIR')) {
 define('WA_INITIAL_ERROR_REPORTING', error_reporting());
 
 require WA_ROOTDIR . '/includes/common.inc.php';
-require WA_ROOTDIR . '/includes/functions.validate.php';
 
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration
