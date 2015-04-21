@@ -434,7 +434,11 @@ function load_settings(&$admindata = array())
 		$accept_language = explode(',', $accept_language);
 
 		foreach ($accept_language as $langcode) {
-			$check_list[] = strtolower(substr(trim($langcode), 0, 2));
+			$langcode = strtolower(substr(trim($langcode), 0, 2));
+
+			if (validate_lang($langcode)) {
+				$check_list[] = $langcode;
+			}
 		}
 	}
 
@@ -442,7 +446,7 @@ function load_settings(&$admindata = array())
 	$check_list = array_unique($check_list);
 
 	foreach ($check_list as $language) {
-		if (is_readable(sprintf($file_pattern, $language))) {
+		if (file_exists(sprintf($file_pattern, $language))) {
 			if (empty($lang) || $lang['CONTENT_LANG'] != $language) {
 				require sprintf($file_pattern, $language);
 			}
