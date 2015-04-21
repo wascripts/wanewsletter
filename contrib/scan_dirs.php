@@ -82,6 +82,7 @@ includes/engine_send.php
 includes/functions.box.php
 includes/functions.php
 includes/functions.stats.php
+includes/functions.wrapper.php
 includes/index.html
 includes/install.inc.php
 includes/login.inc.php
@@ -125,7 +126,9 @@ languages/fr/emails/welcome_cron2.txt
 languages/fr/emails/welcome_form1.txt
 languages/fr/emails/welcome_form2.txt
 languages/index.html
+languages/en/index.html
 languages/en/main.php
+languages/fr/index.html
 languages/fr/main.php
 newsletter.php
 options/cron.php
