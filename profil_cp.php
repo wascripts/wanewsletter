@@ -386,7 +386,7 @@ switch ($mode) {
 					wan_sendmail($email);
 				}
 				catch (\Exception $e) {
-					trigger_error(sprintf($lang['Message']['Failed_sending2'],
+					trigger_error(sprintf($lang['Message']['Failed_sending'],
 						htmlspecialchars($e->getMessage())
 					), E_USER_ERROR);
 				}

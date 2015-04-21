@@ -260,7 +260,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 						wan_sendmail($email, true);
 					}
 					catch (\Exception $e) {
-						trigger_error(sprintf($lang['Message']['Failed_sending2'],
+						trigger_error(sprintf($lang['Message']['Failed_sending'],
 							htmlspecialchars($e->getMessage())
 						), E_USER_ERROR);
 					}
@@ -417,7 +417,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 				fclose($fp);
 				unlink($lockfile);
 
-				trigger_error(sprintf($lang['Message']['Failed_sending2'],
+				trigger_error(sprintf($lang['Message']['Failed_sending'],
 					htmlspecialchars($lastError)
 				), E_USER_ERROR);
 			}

@@ -30,7 +30,7 @@ function message($message)
 	$output->send_headers();
 
 	$output->assign_block_vars('result', array(
-		'L_TITLE'    => $lang['Result_install'],
+		'L_TITLE'    => $lang['Title']['install'],
 		'MSG_RESULT' => nl2br($message)
 	));
 
@@ -356,7 +356,7 @@ if ($start) {
 				$output->send_headers();
 
 				$output->assign_block_vars('download_file', array(
-					'L_TITLE'         => $lang['Result_install'],
+					'L_TITLE'         => $lang['Title']['install'],
 					'L_DL_BUTTON'     => $lang['Button']['dl'],
 
 					'MSG_RESULT'      => nl2br(sprintf($lang['Success_install_no_config'], sprintf('<a href="%s">', $login_page), '</a>')),

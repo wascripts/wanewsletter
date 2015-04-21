@@ -368,7 +368,7 @@ class Subscription
 			wan_sendmail($email);
 		}
 		catch (\Exception $e) {
-			$this->message = sprintf($lang['Message']['Failed_sending2'],
+			$this->message = sprintf($lang['Message']['Failed_sending'],
 				htmlspecialchars($e->getMessage())
 			);
 			return false;
@@ -512,7 +512,7 @@ class Subscription
 				wan_sendmail($email);
 			}
 			catch (\Exception $e) {
-				$this->message = sprintf($lang['Message']['Failed_sending2'],
+				$this->message = sprintf($lang['Message']['Failed_sending'],
 					htmlspecialchars($e->getMessage())
 				);
 				return false;
