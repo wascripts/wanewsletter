@@ -70,7 +70,7 @@ function load_config_file()
 
 	$need_update  = false;
 	$test_files[] = WA_ROOTDIR . '/data/config.inc.php';
-	// Emplacement du fichier dans Wanewsletter < 2.4-beta3
+	// Emplacement du fichier dans Wanewsletter < 3.0-beta1
 	$test_files[] = WA_ROOTDIR . '/includes/config.inc.php';
 
 	foreach ($test_files as $file) {
@@ -1430,7 +1430,7 @@ function wan_get_tags()
 		include $tags_file;
 	}
 	else {
-		// compatibilité Wanewsletter < 2.4-beta3
+		// compatibilité Wanewsletter < 3.0-beta1
 		$tags_file  = WA_ROOTDIR . '/includes/tags.inc.php';
 		if (is_readable($tags_file)) {
 			include $tags_file;
