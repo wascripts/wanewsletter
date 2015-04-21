@@ -949,7 +949,7 @@ $output->set_filenames(array(
 
 $output->assign_vars(array(
 	'L_EXPLAIN'               => nl2br(sprintf($lang['Explain']['send'],
-		sprintf('<a href="%s">', wan_get_faq_url(26)),
+		sprintf('<a href="%s">', wan_get_faq_url('external_data')),
 		'</a>'
 	)),
 	'L_LOAD_LOG'              => $lang['Load_log'],

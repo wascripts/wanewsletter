@@ -220,7 +220,7 @@ $output->assign_vars( array(
 	'L_EXPLAIN_COOKIES'         => nl2br($lang['Explain']['config_cookies']),
 	'L_EXPLAIN_JOINED_FILES'    => nl2br($lang['Explain']['config_files']),
 	'L_EXPLAIN_EMAIL'           => nl2br(sprintf($lang['Explain']['config_email'],
-		sprintf('<a href="%s">', wan_get_faq_url(9)),
+		sprintf('<a href="%s">', wan_get_faq_url('smtp_server')),
 		'</a>'
 	)),
 	'L_EXPLAIN_DEBUG_MODE'      => nl2br($lang['Explain']['config_debug']),

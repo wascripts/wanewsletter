@@ -1033,7 +1033,7 @@ else if ($mode == 'liste') {
 			'L_EXPLAIN'            => nl2br($lang['Explain']['liste']),
 			'L_EXPLAIN_PURGE'      => nl2br($lang['Explain']['purge']),
 			'L_EXPLAIN_CRON'       => nl2br(sprintf($lang['Explain']['cron'],
-				sprintf('<a href="%s">', wan_get_faq_url(5)),
+				sprintf('<a href="%s">', wan_get_faq_url('where_is_form')),
 				'</a>'
 			)),
 			'L_LISTE_NAME'         => $lang['Liste_name'],

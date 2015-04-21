@@ -742,7 +742,7 @@ switch ($mode) {
 			'L_TITLE_IMPORT'   => $lang['Title']['import'],
 			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'],
 				MAX_IMPORT,
-				sprintf('<a href="%s">', wan_get_faq_url(3)),
+				sprintf('<a href="%s">', wan_get_faq_url('import')),
 				'</a>'
 			)),
 			'L_GLUE'           => $lang['Char_glue'],

@@ -1364,18 +1364,18 @@ function wan_get_debug_level()
 /**
  * Forge l'url vers une entrée de la FAQ
  *
- * @param integer $entry_id
+ * @param string $chapter
  *
  * @return string
  */
-function wan_get_faq_url($entry_id)
+function wan_get_faq_url($chapter)
 {
 	global $nl_config, $lang;
 
-	return sprintf('%s/docs/faq.%s.html#p%d',
+	return sprintf('%s/docs/faq.%s.html#%s',
 		rtrim($nl_config['path'], '/'),
 		$lang['CONTENT_LANG'],
-		$entry_id
+		$chapter
 	);
 }
 
