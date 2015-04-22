@@ -276,8 +276,14 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 				//
 				// Initialisation de la barre de progression des envois
 				//
-				$progressbar = new \ProgressBar\Manager(0, ($total_abo + count($supp_address)), 80, '=', ' ');
-				$progressbar->setFormat('Sending emails %percent%% [%bar%] %current%/%max%');
+				$progressbar = new \Elkuku\Console\Helper\ConsoleProgressBar(
+					'Sending emails [%bar%] %current%/%max% %percent%',
+					'=>',
+					' ',
+					76,
+					($total_abo + count($supp_address)),
+					array('ansi_terminal' => function_exists('posix_isatty') && posix_isatty(STDOUT))
+				);
 			}
 			else {
 				fake_header(false);
