@@ -210,7 +210,7 @@ function wan_subdir_status($dir)
 
 function wan_print_head($name)
 {
-	echo "<u><b>", $name, "</b></u>\n";
+	echo "<u><b>", htmlspecialchars($name), "</b></u>\n";
 }
 
 function wan_print_row($name, $value = null)
@@ -218,7 +218,7 @@ function wan_print_row($name, $value = null)
 	global $lang;
 
 	echo '- ';
-	echo u::str_pad($name, 30);
+	echo htmlspecialchars(u::str_pad($name, 30));
 
 	if (!is_null($value)) {
 		echo ' : ';
@@ -236,7 +236,7 @@ function wan_print_row($name, $value = null)
 
 switch ($mode) {
 	case 'debug':
-		printf("<h2>%s</h2>", $lang['Title']['debug']);
+		printf("<h2>%s</h2>\n", $lang['Title']['debug']);
 		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;line-height:1.3em;'>";
 
 		wan_print_head('Wanewsletter');
