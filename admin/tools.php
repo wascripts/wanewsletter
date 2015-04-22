@@ -226,8 +226,11 @@ function wan_print_row($name, $value = null)
 		if (is_bool($value)) {
 			echo ($value) ? $lang['Yes'] : $lang['No'];
 		}
-		else {
+		else if (is_int($value) || $value != '') {
 			echo htmlspecialchars($value);
+		}
+		else {
+			echo '<i style="color:hsl(0, 0%, 60%)">no value</i>';
 		}
 	}
 
