@@ -4,7 +4,7 @@
 
 	<div class="textinput">
 		<object id="iframe" data="view.php?mode=iframe&amp;id={LOG_ID}&amp;format={FORMAT}"
-			type="text/html" width="600" height="400"><p>Unknown error</p></object>
+			type="text/html" width="600" height="500"><p>Unknown error</p></object>
 	</div>
 	<div id="log-details">
 		<span><em>{L_NUMDEST}&nbsp;:</em> {NUMDEST}</span>
