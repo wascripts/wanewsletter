@@ -208,45 +208,86 @@ function wan_subdir_status($dir)
 	return $str;
 }
 
-function wan_print_row($name, $value)
+function wan_print_head($name)
+{
+	echo "<u><b>", $name, "</b></u>\n";
+}
+
+function wan_print_row($name, $value = null)
 {
 	global $lang;
 
+	echo '- ';
 	echo u::str_pad($name, 30);
-	echo ' : ';
 
-	if (is_bool($value)) {
-		echo ($value) ? $lang['Yes'] : $lang['No'];
-	}
-	else {
-		echo htmlspecialchars($value);
+	if (!is_null($value)) {
+		echo ' : ';
+
+		if (is_bool($value)) {
+			echo ($value) ? $lang['Yes'] : $lang['No'];
+		}
+		else {
+			echo htmlspecialchars($value);
+		}
 	}
 
-	echo "\r\n";
+	echo "\n";
 }
 
 switch ($mode) {
 	case 'debug':
 		printf("<h2>%s</h2>", $lang['Title']['debug']);
-		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;'>";
+		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;line-height:1.3em;'>";
 
-		wan_print_row('Version Wanewsletter', WANEWSLETTER_VERSION);
-		wan_print_row(' - db_version',     $nl_config['db_version']);
-		wan_print_row(' - session_length', $nl_config['session_length']);
-		wan_print_row(' - language',       $nl_config['language']);
-		wan_print_row(' - Upload dir',     wan_subdir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
+		wan_print_head('Wanewsletter');
+		wan_print_row('Version/db_version', WANEWSLETTER_VERSION.'/'.$nl_config['db_version']);
+		wan_print_row('session_length',     $nl_config['session_length']);
+		wan_print_row('language',           $nl_config['language']);
+		wan_print_row('upload dir',         wan_subdir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
 
 		if (!$nl_config['disable_stats']) {
 			require WA_ROOTDIR . '/includes/functions.stats.php';
-			wan_print_row(' - Stats dir',     wan_subdir_status(WA_STATSDIR));
+			wan_print_row('stats dir', wan_subdir_status(WA_STATSDIR));
 		}
-		wan_print_row(' - max_filesize',   $nl_config['max_filesize']);
-		wan_print_row(' - engine_send',    $nl_config['engine_send']);
-		wan_print_row(' - sending_limit',  $nl_config['sending_limit']);
-		wan_print_row(' - use_smtp',       (bool) $nl_config['use_smtp']);
+		wan_print_row('max_filesize',  $nl_config['max_filesize']);
+		wan_print_row('engine_send',   $nl_config['engine_send']);
+		wan_print_row('sending_limit', $nl_config['sending_limit']);
+		wan_print_row('use_smtp',      (bool) $nl_config['use_smtp']);
 
-		wan_print_row('Version de PHP', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
-		wan_print_row(' - Extension Bz2', extension_loaded('zlib'));
+		wan_print_head('Librairies tierces');
+
+		$composer_file = WA_ROOTDIR . '/composer.lock';
+		if (!function_exists('json_decode')) {
+			wan_print_row('Cannot read the composer.lock file! (JSON extension needed)');
+		}
+		else if (is_readable($composer_file)) {
+			$composer = json_decode(file_get_contents($composer_file));
+
+			foreach ($composer->packages as $package) {
+				$ver = $package->version;
+				if (strpos($ver, 'dev') !== false) {
+					if (isset($package->dist)) {
+						$ref = $package->dist->reference;
+					}
+					else {
+						$ref = $package->source->reference;
+					}
+
+					$ver .= ' ('.$ref.')';
+				}
+				else {
+					$ver = ltrim($ver, 'v');// eg: v2.3.4 => 2.3.4
+				}
+				wan_print_row($package->name, $ver);
+			}
+		}
+		else {
+			wan_print_row('Cannot read the composer.lock file!');
+		}
+
+		wan_print_head('PHP');
+		wan_print_row('Version & SAPI', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
+		wan_print_row('Extension Bz2', extension_loaded('zlib'));
 
 		if (extension_loaded('gd')) {
 			$tmp = gd_info();
@@ -257,68 +298,67 @@ switch ($mode) {
 		else {
 			$str = 'non';
 		}
-		wan_print_row(' - Extension GD', $str);
-		wan_print_row(' - Extension Iconv',
+		wan_print_row('Extension GD', $str);
+		wan_print_row('Extension Iconv',
 			extension_loaded('iconv') ?
 				sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
 		);
-		wan_print_row(' - Extension Mbstring', extension_loaded('mbstring'));
-		wan_print_row(' - Extension OpenSSL',
+		wan_print_row('Extension JSON', extension_loaded('json'));
+		wan_print_row('Extension Mbstring', extension_loaded('mbstring'));
+		wan_print_row('Extension OpenSSL',
 			extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
 		);
-		wan_print_row(' - Extension SimpleXML', extension_loaded('simplexml'));
-		wan_print_row(' - Extension XML', extension_loaded('xml'));
-		wan_print_row(' - Extension Zip', extension_loaded('zip'));
-		wan_print_row(' - Extension Zlib', extension_loaded('zlib'));
+		wan_print_row('Extension SimpleXML', extension_loaded('simplexml'));
+		wan_print_row('Extension XML', extension_loaded('xml'));
+		wan_print_row('Extension Zip', extension_loaded('zip'));
+		wan_print_row('Extension Zlib', extension_loaded('zlib'));
 
 		// Le safe mode et les magic quotes ont été supprimés à partir de PHP 5.4
 		if (PHP_VERSION_ID < 50400) {
-			wan_print_row(' - safe_mode', ini_get_flag('safe_mode'));
-			wan_print_row(' - magic_quotes_gpc', ini_get_flag('magic_quotes_gpc'));
-			wan_print_row(' - magic_quotes_runtime', ini_get_flag('magic_quotes_runtime'));
+			wan_print_row('safe_mode', ini_get_flag('safe_mode'));
+			wan_print_row('magic_quotes_gpc', ini_get_flag('magic_quotes_gpc'));
+			wan_print_row('magic_quotes_runtime', ini_get_flag('magic_quotes_runtime'));
 		}
 
-		wan_print_row(' - open_basedir',  ini_get('open_basedir'));
-		wan_print_row(' - sys_temp_dir', sys_get_temp_dir());
-		wan_print_row(' - filter.default', ini_get('filter.default'));
-		wan_print_row(' - allow_url_fopen', ini_get_flag('allow_url_fopen'));
-		wan_print_row(' - allow_url_include', ini_get_flag('allow_url_include'));
-		wan_print_row(' - file_uploads', ini_get_flag('file_uploads'));
-		wan_print_row(' - upload_tmp_dir', ini_get('upload_tmp_dir'));
-		wan_print_row(' - upload_max_filesize', ini_get('upload_max_filesize'));
-		wan_print_row(' - post_max_size', ini_get('post_max_size'));
-		wan_print_row(' - max_input_time', ini_get('max_input_time'));
-		wan_print_row(' - memory_limit', ini_get('memory_limit'));
-		wan_print_row(' - mail.add_x_header', ini_get_flag('mail.add_x_header'));
-		wan_print_row(' - mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
-		wan_print_row(' - sendmail_from', ini_get('sendmail_from'));
-		wan_print_row(' - sendmail_path', ini_get('sendmail_path'));
+		wan_print_row('open_basedir',  ini_get('open_basedir'));
+		wan_print_row('sys_temp_dir', sys_get_temp_dir());
+		wan_print_row('filter.default', ini_get('filter.default'));
+		wan_print_row('allow_url_fopen', ini_get_flag('allow_url_fopen'));
+		wan_print_row('allow_url_include', ini_get_flag('allow_url_include'));
+		wan_print_row('file_uploads', ini_get_flag('file_uploads'));
+		wan_print_row('upload_tmp_dir', ini_get('upload_tmp_dir'));
+		wan_print_row('upload_max_filesize', ini_get('upload_max_filesize'));
+		wan_print_row('post_max_size', ini_get('post_max_size'));
+		wan_print_row('max_input_time', ini_get('max_input_time'));
+		wan_print_row('memory_limit', ini_get('memory_limit'));
+		wan_print_row('mail.add_x_header', ini_get_flag('mail.add_x_header'));
+		wan_print_row('mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
+		wan_print_row('sendmail_from', ini_get('sendmail_from'));
+		wan_print_row('sendmail_path', ini_get('sendmail_path'));
 
 		if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
-			wan_print_row(' - SMTP Server', ini_get('SMTP').':'.ini_get('smtp_port'));
+			wan_print_row('SMTP Server', ini_get('SMTP').':'.ini_get('smtp_port'));
 		}
 
-		wan_print_row('Type de serveur', $_SERVER['SERVER_SOFTWARE'] . ' - ' . PHP_OS);
+		wan_print_head('Base de données');
+
+		wan_print_row('Nom/Version', sprintf('%s %s',
+			$db->infos['label'],
+			($db::ENGINE == 'sqlite') ? $db->libVersion : $db->serverVersion
+		));
+
+		if ($db::ENGINE != 'sqlite') {
+			wan_print_row('Librairie cliente', $db->clientVersion);
+			wan_print_row('Jeu de caractères', $db->encoding());
+		}
+
+		wan_print_row('Driver', $db->infos['driver']);
+
+		wan_print_head('Divers');
+
+		wan_print_row('Serveur HTTP/OS', $_SERVER['SERVER_SOFTWARE'] . ' on ' . PHP_OS);
+		wan_print_row('Agent utilisateur',   $user_agent);
 		wan_print_row('Connexion sécurisée', wan_ssl_connection());
-
-		if ($db::ENGINE == 'sqlite') {
-			wan_print_row('Base de données', sprintf('%s %s - Driver : %s',
-				$db->infos['label'],
-				$db->libVersion,
-				$db->infos['driver']
-			));
-		}
-		else {
-			wan_print_row('Base de données', sprintf('%s %s',
-				$db->infos['label'],
-				$db->serverVersion
-			));
-			wan_print_row(' - Librairie cliente', $db->clientVersion);
-			wan_print_row(' - Driver', $db->infos['driver']);
-			wan_print_row(' - Jeu de caractères', $db->encoding());
-		}
-
-		wan_print_row('Agent utilisateur', $user_agent);
 
 		echo "</pre>";
 
