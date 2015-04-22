@@ -261,16 +261,21 @@ switch ($mode) {
 			wan_print_row('Cannot read the composer.lock file! (JSON extension needed)');
 		}
 		else if (is_readable($composer_file)) {
-			$composer = json_decode(file_get_contents($composer_file));
+			$composer = json_decode(file_get_contents($composer_file), true);
 
-			foreach ($composer->packages as $package) {
-				$ver = $package->version;
-				if (strpos($ver, 'dev') !== false) {
-					if (isset($package->dist)) {
-						$ref = $package->dist->reference;
+			foreach ($composer['packages'] as $package) {
+				$ver = $package['version'];
+
+				if (strpos($ver, 'dev-') === 0) {
+					if (isset($package['dist'])) {
+						$ref = $package['dist']['reference'];
 					}
 					else {
-						$ref = $package->source->reference;
+						$ref = $package['source']['reference'];
+					}
+
+					if (isset($package['extra']['branch-alias'][$ver])) {
+						$ver = $package['extra']['branch-alias'][$ver];
 					}
 
 					$ver .= ' ('.$ref.')';
@@ -278,7 +283,8 @@ switch ($mode) {
 				else {
 					$ver = ltrim($ver, 'v');// eg: v2.3.4 => 2.3.4
 				}
-				wan_print_row($package->name, $ver);
+
+				wan_print_row($package['name'], $ver);
 			}
 		}
 		else {
