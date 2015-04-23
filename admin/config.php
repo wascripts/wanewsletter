@@ -41,7 +41,9 @@ if (isset($_POST['submit'])) {
 		$new_config['path'] = preg_replace('/^\/?(.*?)\/?$/i', '/\\1/', $new_config['path']);
 	}
 
-	$new_config['date_format'] = ($new_config['date_format'] == '') ? 'd M Y H:i' : $new_config['date_format'];
+	if (!$new_config['date_format']) {
+		$new_config['date_format'] = DEFAULT_DATE_FORMAT;
+	}
 
 	// Restriction de caractères sur le nom du cookie
 	if (preg_match("/[=,;\s\v]/", $new_config['cookie_name'])) {

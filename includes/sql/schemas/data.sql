@@ -7,7 +7,7 @@
 -- Création d'un compte administrateur (mot de passe par défaut: admin)
 --
 INSERT INTO wa_admin (admin_login, admin_pwd, admin_email, admin_lang, admin_dateformat, admin_level)
-	VALUES('admin', '$2y$10$5IAy.2zYfrQ9YxUmcZWW4ubOnGwO9RdE1ci/rtkkxehOY/ehS0ylm', 'admin@domaine.com', 'fr', 'd M Y H:i', 2);
+	VALUES('admin', '$2y$10$5IAy.2zYfrQ9YxUmcZWW4ubOnGwO9RdE1ci/rtkkxehOY/ehS0ylm', 'admin@domaine.com', 'fr', 'd F Y H:i', 2);
 INSERT INTO wa_auth_admin (admin_id, liste_id, auth_view, auth_edit, auth_del, auth_send, auth_import, auth_export, auth_ban, auth_attach)
 	VALUES (1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
@@ -18,7 +18,7 @@ INSERT INTO wa_auth_admin (admin_id, liste_id, auth_view, auth_edit, auth_del, a
 INSERT INTO wa_config (config_name, config_value) VALUES('sitename',       'Yourdomaine');
 INSERT INTO wa_config (config_name, config_value) VALUES('urlsite',        'http://www.yourdomaine.com');
 INSERT INTO wa_config (config_name, config_value) VALUES('path',           '/');
-INSERT INTO wa_config (config_name, config_value) VALUES('date_format',    'd M Y H:i');
+INSERT INTO wa_config (config_name, config_value) VALUES('date_format',    'd F Y H:i');
 INSERT INTO wa_config (config_name, config_value) VALUES('session_length', '3600');
 INSERT INTO wa_config (config_name, config_value) VALUES('language',       'fr');
 INSERT INTO wa_config (config_name, config_value) VALUES('cookie_name',    'wanewsletter');
