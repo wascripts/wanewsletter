@@ -95,7 +95,11 @@ class Session
 		$_SESSION['is_admin_session'] = check_in_admin();
 		$_SESSION['is_logged_in'] = false;
 		$_SESSION['uid']   = null;
-		$this->new_session = true;
+
+		if (!$this->new_session) {
+			session_regenerate_id();
+			$this->new_session = true;
+		}
 	}
 
 	/**

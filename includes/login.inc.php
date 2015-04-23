@@ -182,7 +182,7 @@ else if (isset($_POST['submit']) && !$auth->isLoggedIn()) {
 	$passwd = trim(u::filter_input(INPUT_POST, 'passwd'));
 
 	if ($userdata = $auth->checkCredentials($login, $passwd)) {
-		session_regenerate_id();
+		$session->reset();
 		$_SESSION['is_logged_in'] = true;
 		$_SESSION['uid'] = intval($userdata['uid']);
 	}
