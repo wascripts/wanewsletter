@@ -418,9 +418,9 @@ form#smallbox {
 	text-align: right;
 }
 
-/* Boîte de sélection de liste */
+/* Boîte de sélection de liste/utilisateur */
 #liste option[value="0"]:first-child,
-#admin_id option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
+#uid option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
 
 input, select, button {
 	line-height: normal;/* Sur IE, les <button> héritent du line-height du parent */
