@@ -46,21 +46,6 @@ require WA_ROOTDIR . '/vendor/autoload.php';
 set_error_handler(__NAMESPACE__.'\\wan_error_handler');
 set_exception_handler(__NAMESPACE__.'\\wan_exception_handler');
 
-if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
-	$filename = DEBUG_LOG_FILE;
-	if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
-		if (!preg_match('#^[a-z]:[/\\]#i', $filename)) {
-			$filename = WA_LOGSDIR . '/' . $filename;
-		}
-	}
-	else if ($filename[0] != '/') {
-		$filename = WA_LOGSDIR . '/' . $filename;
-	}
-
-	ini_set('error_log', $filename);
-	unset($filename);
-}
-
 //
 // Chargement automatique des classes
 //
@@ -82,6 +67,22 @@ $prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
 $dsn     = '';
 
 load_config_file();
+
+// Log éventuels des erreurs
+if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
+	$filename = DEBUG_LOG_FILE;
+	if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
+		if (!preg_match('#^[a-z]:[/\\]#i', $filename)) {
+			$filename = WA_LOGSDIR . '/' . $filename;
+		}
+	}
+	else if ($filename[0] != '/') {
+		$filename = WA_LOGSDIR . '/' . $filename;
+	}
+
+	ini_set('error_log', $filename);
+	unset($filename);
+}
 
 // Doit être placé après load_config_file()
 require WA_ROOTDIR . '/includes/wadb_init.php';
