@@ -55,13 +55,13 @@ const DISPLAY_ERRORS_IN_LOG = true;
 // Pour utiliser un autre fichier de log, indiquez son emplacement dans la
 // constante suivante (par exemple 'debug.log').
 // Si le chemin est relatif, il sera préfixé par la valeur de la constante
-// WA_LOGSDIR (voir plus bas).
+// WA_LOGSDIR (voir load_config_file() dans includes/functions.php).
 //
 // Note : Toutes les erreurs sont stockées, sans tenir compte de DEBUG_MODE.
 // De plus, la taille du fichier de log n’est pas limitée !
 //
 const DEBUG_LOG_ENABLED = false;
-const DEBUG_LOG_FILE    = '';
+const DEBUG_LOG_FILE    = 'debug.log';
 
 ##################################################################
 ## Il est recommandé de ne rien modifier au-delà de cette ligne ##
