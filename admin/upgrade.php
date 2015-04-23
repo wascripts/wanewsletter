@@ -732,7 +732,10 @@ if (isset($_POST['start'])) {
 			if (is_null($session)) {
 				$session = new Session($nl_config);
 			}
-			session_regenerate_id();
+			else {
+				$session->reset();
+			}
+
 			$_SESSION['is_logged_in'] = true;
 			$_SESSION['uid'] = intval($admindata['uid']);
 		}

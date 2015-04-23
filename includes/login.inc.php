@@ -196,7 +196,7 @@ else if (isset($_POST['submit']) && !$auth->isLoggedIn()) {
 //
 else if ($mode == 'logout') {
 	if ($auth->isLoggedIn()) {
-		session_destroy();
+		$session->end();
 	}
 
 	$error = true;
@@ -242,7 +242,7 @@ $output->assign_vars(array(
 	'S_SCRIPT_NAME'   => $login_script
 ));
 
-if (!filter_input(INPUT_COOKIE, session_name())) {
+if (!filter_input(INPUT_COOKIE, $session->getName())) {
 	$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
 }
 

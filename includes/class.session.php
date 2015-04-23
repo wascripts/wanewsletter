@@ -103,6 +103,26 @@ class Session
 	}
 
 	/**
+	 * Fin de la session.
+	 * Équivaut à appeler session_destroy() mais évite d’exposer l’API session
+	 * de PHP en dehors de la classe.
+	 */
+	public function end()
+	{
+		$this->destroy(session_id());
+	}
+
+	/**
+	 * Nom de la session.
+	 * Équivaut à appeler session_name() mais évite d’exposer l’API session
+	 * de PHP en dehors de la classe.
+	 */
+	public function getName()
+	{
+		return session_name();
+	}
+
+	/**
 	 * Ouverture de session
 	 *
 	 * @return boolean

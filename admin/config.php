@@ -164,10 +164,6 @@ if (isset($_POST['submit'])) {
 	if (!$error) {
 		wa_update_config(array_merge($old_config, $new_config));
 
-		if ($new_config['cookie_name'] !== $old_config['cookie_name']) {
-			session_destroy();
-		}
-
 		//
 		// Déplacement des fichiers joints dans le nouveau dossier de stockage s'il est changé
 		//
