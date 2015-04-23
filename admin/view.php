@@ -390,7 +390,7 @@ else if ($mode == 'abonnes') {
 			}
 			while ($row = $result->fetch());
 
-			$output->assign_var('S_REGISTER_DATE', convert_time($nl_config['date_format'], $register_date));
+			$output->assign_var('S_REGISTER_DATE', convert_time($admindata['admin_dateformat'], $register_date));
 
 			$output->pparse('body');
 			$output->page_footer();
@@ -823,7 +823,7 @@ else if ($mode == 'abonnes') {
 		for ($i = 0; $i < $num_abo; $i++) {
 			$output->assign_block_vars('aborow', array(
 				'ABO_EMAIL'         => htmlspecialchars($aborow[$i]['abo_email']),
-				'ABO_REGISTER_DATE' => convert_time($nl_config['date_format'], $aborow[$i]['register_date']),
+				'ABO_REGISTER_DATE' => convert_time($admindata['admin_dateformat'], $aborow[$i]['register_date']),
 				'U_VIEW'            => sprintf('view.php?mode=abonnes&amp;action=view&amp;id=%d%s%s', $aborow[$i]['abo_id'], $get_string, $get_page)
 			));
 
@@ -1415,7 +1415,7 @@ else if ($mode == 'liste') {
 		'NUM_SUBSCRIBERS'     => $num_inscrits,
 		'NUM_LOGS'            => $listdata['liste_numlogs'],
 		'FORM_URL'            => htmlspecialchars($listdata['form_url']),
-		'STARTDATE'           => convert_time($nl_config['date_format'], $listdata['liste_startdate'])
+		'STARTDATE'           => convert_time($admindata['admin_dateformat'], $listdata['liste_startdate'])
 	));
 
 	if ($listdata['confirm_subscribe']) {
@@ -1432,7 +1432,7 @@ else if ($mode == 'liste') {
 	if ($listdata['liste_numlogs'] > 0) {
 		$output->assign_block_vars('date_last_log', array(
 			'L_LAST_LOG' => $lang['Last_newsletter2'],
-			'LAST_LOG'   => convert_time($nl_config['date_format'], $last_log)
+			'LAST_LOG'   => convert_time($admindata['admin_dateformat'], $last_log)
 		));
 	}
 
@@ -1699,7 +1699,7 @@ else if ($mode == 'log') {
 			$output->assign_block_vars('logrow', array(
 				'ITEM_CLIP'   => $s_clip,
 				'LOG_SUBJECT' => htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
-				'LOG_DATE'    => convert_time($nl_config['date_format'], $logrow[$i]['log_date']),
+				'LOG_DATE'    => convert_time($admindata['admin_dateformat'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sprintf('view.php?mode=log&amp;action=view&amp;id=%d%s', $logrow[$i]['log_id'], $get_string)
 			));
 

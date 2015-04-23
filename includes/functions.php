@@ -414,14 +414,8 @@ function load_settings(&$admindata = array())
 
 	$check_list = array();
 
-	if (is_array($admindata)) {
-		if (!empty($admindata['admin_lang'])) {
-			$check_list[] = $admindata['admin_lang'];
-		}
-
-		if (!empty($admindata['admin_dateformat'])) {
-			$nl_config['date_format'] = $admindata['admin_dateformat'];
-		}
+	if (!empty($admindata['admin_lang'])) {
+		$check_list[] = $admindata['admin_lang'];
 	}
 
 	if (!empty($nl_config['language'])) {

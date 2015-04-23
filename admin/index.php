@@ -192,7 +192,7 @@ if ($num_logs > 0) {
 	}
 
 	$output->assign_block_vars('switch_last_newsletter', array(
-		'DATE_LAST_NEWSLETTER' => sprintf($lang['Last_newsletter'], convert_time($nl_config['date_format'], $last_log))
+		'DATE_LAST_NEWSLETTER' => sprintf($lang['Last_newsletter'], convert_time($admindata['admin_dateformat'], $last_log))
 	));
 }
 else {
