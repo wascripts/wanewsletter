@@ -223,7 +223,6 @@ function wa_get_config()
 	}
 	// Wanewsletter < 2.4-beta2
 	else {
-		trigger_error("La table de configuration du script est obsolète. Mise à jour requise", E_USER_WARNING);
 		$config = $row;
 	}
 
