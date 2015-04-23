@@ -166,7 +166,32 @@ function initUploadButton(inputFile)
 	}, false);
 }
 
+function addRestoreDefaultLink()
+{
+	var inputList = document.querySelectorAll('form input[data-default]');
+
+	var link = document.createElement('a');
+	link.href = '#restore-default';
+	link.className = 'restore-default';
+	link.title = lang['restore-default'];
+
+	var image = document.createElement('img');
+	image.src = basedir + '/templates/images/icon_reset.png';
+	image.alt = 'reset';
+	link.appendChild(image);
+
+	link.addEventListener('click', function(evt) {
+		this.parentNode.firstElementChild.value = this.parentNode.firstElementChild.getAttribute('data-default');
+		evt.preventDefault();
+	}, false);
+
+	for (var i = 0, m = inputList.length; i < m; i++) {
+		inputList[i].parentNode.appendChild(link);
+	}
+}
+
 document.addEventListener('DOMContentLoaded', make_admin, false);
+document.addEventListener('DOMContentLoaded', addRestoreDefaultLink, false);
 document.addEventListener('DOMContentLoaded', function() {
 	if (window.FileList) {
 		var inputList = document.querySelectorAll('input[type="file"][data-button-label]');

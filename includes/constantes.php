@@ -63,6 +63,16 @@ const DISPLAY_ERRORS_IN_LOG = true;
 const DEBUG_LOG_ENABLED = false;
 const DEBUG_LOG_FILE    = 'debug.log';
 
+//
+// Signature du script pour divers cas de figure (entête X-Mailer dans les emails
+// envoyés, entête User-Agent lors des requètes HTTP, etc)
+//
+const USER_AGENT_SIG  = 'Wanewsletter/%s';// %s est remplacé par la valeur de WANEWSLETTER_VERSION
+const X_MAILER_HEADER = USER_AGENT_SIG;
+
+// Format par défaut des dates
+const DEFAULT_DATE_FORMAT = 'd F Y H:i';
+
 ##################################################################
 ## Il est recommandé de ne rien modifier au-delà de cette ligne ##
 ##################################################################
@@ -113,13 +123,6 @@ const ENGINE_UNIQ = 2;
 const CONFIRM_ALWAYS = 2;
 const CONFIRM_ONCE   = 1;
 const CONFIRM_NONE   = 0;
-
-//
-// Signature du script pour divers cas de figure (entête X-Mailer dans les emails
-// envoyés, entête User-Agent lors des requètes HTTP, etc)
-//
-const USER_AGENT_SIG  = 'Wanewsletter/%s';// %s est remplacé par la valeur de WANEWSLETTER_VERSION
-const X_MAILER_HEADER = USER_AGENT_SIG;
 
 //
 // Utilisées dans le cadre de la classe de vérification de mise à jour

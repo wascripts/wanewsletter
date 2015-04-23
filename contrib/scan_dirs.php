@@ -185,6 +185,7 @@ templates/images/icon_loupe.png
 templates/images/index.html
 templates/images/loading.gif
 templates/images/puce.png
+templates/images/icon_reset.png
 templates/index.html
 templates/index_body.tpl
 templates/install.tpl

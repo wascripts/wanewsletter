@@ -19,6 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	configForm.elements['use_smtp'][0].addEventListener('change', toggleView, false);
 	configForm.elements['use_smtp'][1].addEventListener('change', toggleView, false);
 }, false);
+
+var lang = [];
+lang['restore-default'] = '{L_RESTORE_DEFAULT}';
+// Vite fait mal fait. On fera un truc propre plus tard.
+var basedir = '{BASEDIR}';
 //-->
 </script>
 
@@ -52,7 +57,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		</tr>
 		<tr>
 			<td><label for="date_format">{L_DATE_FORMAT}&nbsp;:</label><br /><span class="notice">{L_NOTE_DATE}</span></td>
-			<td><input type="text" id="date_format" name="date_format" maxlength="20" size="15" value="{DATE_FORMAT}" /></td>
+			<td><input type="text" id="date_format" name="date_format"
+				value="{DATE_FORMAT}" size="15" maxlength="20" data-default="{DEFAULT_DATE_FORMAT}"
+			/></td>
 		</tr>
 		<tr>
 			<td><label>{L_ENABLE_PROFIL_CP}&nbsp;:</label></td>

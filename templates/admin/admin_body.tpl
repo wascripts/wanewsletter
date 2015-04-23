@@ -1,3 +1,12 @@
+<script>
+<!--
+var lang = [];
+lang['restore-default'] = '{L_RESTORE_DEFAULT}';
+// Vite fait mal fait. On fera un truc propre plus tard.
+var basedir = '{BASEDIR}';
+//-->
+</script>
+
 <p id="explain">{L_EXPLAIN}</p>
 
 <form method="post" action="./admin.php">
@@ -20,8 +29,10 @@
 			<td><input type="text" id="email" name="email" value="{EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 		<tr>
-			<td><label for="dateformat">{L_DATEFORMAT}&nbsp;:</label><br /><span class="notice">{L_NOTE_DATE}</span></td>
-			<td><input type="text" id="dateformat" name="dateformat" value="{DATEFORMAT}" size="15" maxlength="20" /></td>
+			<td><label for="date_format">{L_DATE_FORMAT}&nbsp;:</label><br /><span class="notice">{L_NOTE_DATE}</span></td>
+			<td><input type="text" id="date_format" name="date_format"
+				value="{DATE_FORMAT}" size="15" maxlength="20" data-default="{DEFAULT_DATE_FORMAT}"
+			/></td>
 		</tr>
 		<tr>
 			<td><label>{L_EMAIL_NEW_SUBSCRIBE}&nbsp;:</label></td>

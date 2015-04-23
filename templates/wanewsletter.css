@@ -496,6 +496,17 @@ input[type="number"][size="8"] { width: 8em; }
 
 select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil */
 
+/* Lien de restauration des valeurs par défaut */
+a.restore-default {
+	opacity: .30;
+	display: inline-block;
+	line-height:1;
+	vertical-align: bottom;
+	margin-left: 4px;
+}
+a.restore-default:hover { opacity: 1; }
+a.restore-default:focus { outline: none; }
+
 /* Barre de progression */
 progress {
 	width: 100%;

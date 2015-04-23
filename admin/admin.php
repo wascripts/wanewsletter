@@ -185,13 +185,13 @@ if (isset($_POST['submit'])) {
 		$output->displayMessage();
 	}
 
-	$vararray = array('current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'dateformat', 'language');
+	$vararray = array('current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'date_format', 'language');
 	foreach ($vararray as $varname) {
 		${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 	}
 
-	if ($dateformat == '') {
-		$dateformat = $nl_config['date_format'];
+	if ($date_format == '') {
+		$date_format = $nl_config['date_format'];
 	}
 
 	if ($language == '' || !validate_lang($language)) {
@@ -227,7 +227,7 @@ if (isset($_POST['submit'])) {
 	if (!$error) {
 		$sql_data = array(
 			'admin_email'         => $email,
-			'admin_dateformat'    => $dateformat,
+			'admin_dateformat'    => $date_format,
 			'admin_lang'          => $language,
 			'email_new_subscribe' => $email_new_subscribe,
 			'email_unsubscribe'   => $email_unsubscribe
@@ -366,7 +366,7 @@ $output->assign_vars(array(
 	'L_EXPLAIN'             => nl2br($lang['Explain']['admin']),
 	'L_DEFAULT_LANG'        => $lang['Default_lang'],
 	'L_EMAIL'               => $lang['Email_address'],
-	'L_DATEFORMAT'          => $lang['Dateformat'],
+	'L_DATE_FORMAT'         => $lang['Dateformat'],
 	'L_NOTE_DATE'           => sprintf($lang['Fct_date'], '<a href="http://www.php.net/date">', '</a>'),
 	'L_EMAIL_NEW_SUBSCRIBE' => $lang['Email_new_subscribe'],
 	'L_EMAIL_UNSUBSCRIBE'   => $lang['Email_unsubscribe'],
@@ -378,10 +378,12 @@ $output->assign_vars(array(
 	'L_NO'                  => $lang['No'],
 	'L_VALID_BUTTON'        => $lang['Button']['valid'],
 	'L_RESET_BUTTON'        => $lang['Button']['reset'],
+	'L_RESTORE_DEFAULT'     => $lang['Restore_default'],
 
 	'LANG_BOX'              => lang_box($current_admin['admin_lang']),
 	'EMAIL'                 => $current_admin['admin_email'],
-	'DATEFORMAT'            => $current_admin['admin_dateformat'],
+	'DATE_FORMAT'           => $current_admin['admin_dateformat'],
+	'DEFAULT_DATE_FORMAT'   => DEFAULT_DATE_FORMAT,
 
 	'EMAIL_NEW_SUBSCRIBE_YES' => $output->getBoolAttr('checked', ($current_admin['email_new_subscribe'] == SUBSCRIBE_NOTIFY_YES)),
 	'EMAIL_NEW_SUBSCRIBE_NO'  => $output->getBoolAttr('checked', ($current_admin['email_new_subscribe'] == SUBSCRIBE_NOTIFY_NO)),
