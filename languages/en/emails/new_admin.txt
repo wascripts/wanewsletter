@@ -1,6 +1,6 @@
 Hi {PSEUDO},
 
-You have been added as a {SITENAME} newsletter administrator.
+You have been added as an administrator on the mailing manager of {SITENAME} with the username “{PSEUDO}”.
 
 In order to create your password and activate your account, please follow this link:
 {INIT_PASS_URL}
