@@ -72,6 +72,23 @@ if ($nl_config['db_version'] > 18) {
 // l’accueil, soit en AJAX quand c’est possible, soit directement.
 //
 if (filter_input(INPUT_GET, 'mode') == 'check') {
+	if (!$auth->isLoggedIn() || is_null($session) || !wan_is_admin($admindata)) {
+		// Utilisateur non authentifié ou n'ayant pas le niveau d’administrateur
+		if (filter_input(INPUT_GET, 'output') == 'json') {
+			header('Content-Type: application/json');
+			echo '{"code":"-1"}';
+		}
+		else {
+			http_response_code(401);
+			$output->redirect('./index.php', 5);
+			$output->addLine($lang['Message']['Not_authorized']);
+			$output->addLine($lang['Click_return_index'], './index.php');
+			$output->displayMessage();
+		}
+
+		exit;
+	}
+
 	$result = wa_check_update(true);
 
 	if (filter_input(INPUT_GET, 'output') == 'json') {

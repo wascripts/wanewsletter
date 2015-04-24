@@ -209,37 +209,45 @@ $output->assign_vars( array(
 	'TEMP_SUBSCRIBERS'       => $l_num_temp,
 	'NEWSLETTERS_SENDED'     => $l_num_logs,
 	'DBSIZE'                 => (is_numeric($dbsize)) ? formateSize($dbsize) : $dbsize,
-	'FILESIZE'               => formateSize($filesize),
-	'USED_VERSION'           => sprintf($lang['Used_version'], WANEWSLETTER_VERSION)
+	'FILESIZE'               => formateSize($filesize)
 ));
 
-$result = wa_check_update();
+if (wan_is_admin($admindata)) {
+	$result = wa_check_update();
 
-if ($result !== false) {
-	if ($result === 1) {
-		$output->assign_block_vars('new_version_available', array(
-			'L_NEW_VERSION_AVAILABLE' => $lang['New_version_available'],
-			'L_DOWNLOAD_PAGE'         => $lang['Download_page'],
+	$output->assign_block_vars('version_info', array(
+		'VERSION' => sprintf($lang['Used_version'], WANEWSLETTER_VERSION)
+	));
+
+	if ($result !== false) {
+		if ($result === 1) {
+			$output->assign_block_vars('version_info.update_available', array(
+				'L_UPDATE_AVAILABLE' => $lang['New_version_available'],
+				'L_DOWNLOAD_PAGE'    => $lang['Download_page'],
+
+				'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
+			));
+		}
+		else {
+			$output->assign_block_vars('version_info.up_to_date', array(
+				'L_UP_TO_DATE' => $lang['Version_up_to_date'],
+			));
+		}
+	}
+	else {
+		$output->assign_block_vars('check_update_js', array(
+			'L_UPDATE_AVAILABLE' => str_replace('\'', '\\\'', $lang['New_version_available']),
+			'L_UP_TO_DATE'       => str_replace('\'', '\\\'', $lang['Version_up_to_date']),
+			'L_SITE_UNREACHABLE' => str_replace('\'', '\\\'', $lang['Site_unreachable']),
+			'L_DOWNLOAD_PAGE'    => str_replace('\'', '\\\'', $lang['Download_page']),
 
 			'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
 		));
-	}
-	else {
-		$output->assign_block_vars('version_up_to_date', array(
-			'L_VERSION_UP_TO_DATE' => $lang['Version_up_to_date'],
+
+		$output->assign_block_vars('version_info.check_update', array(
+			'L_CHECK_UPDATE' => $lang['Check_update']
 		));
 	}
-}
-else {
-	$output->assign_block_vars('check_update', array(
-		'L_CHECK_UPDATE'          => $lang['Check_update'],
-		'L_NEW_VERSION_AVAILABLE' => str_replace('\'', '\\\'', $lang['New_version_available']),
-		'L_VERSION_UP_TO_DATE'    => str_replace('\'', '\\\'', $lang['Version_up_to_date']),
-		'L_SITE_UNREACHABLE'      => str_replace('\'', '\\\'', $lang['Site_unreachable']),
-		'L_DOWNLOAD_PAGE'         => str_replace('\'', '\\\'', $lang['Download_page']),
-
-		'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
-	));
 }
 
 $output->pparse('body');
