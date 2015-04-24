@@ -170,6 +170,10 @@ function addRestoreDefaultLink()
 {
 	var inputList = document.querySelectorAll('form input[data-default]');
 
+	if (inputList.length == 0) {
+		return false;
+	}
+
 	var link = document.createElement('a');
 	link.href = '#restore-default';
 	link.className = 'restore-default';
@@ -180,12 +184,14 @@ function addRestoreDefaultLink()
 	image.alt = 'reset';
 	link.appendChild(image);
 
-	link.addEventListener('click', function(evt) {
+	var restoreDefault = function(evt) {
 		this.parentNode.firstElementChild.value = this.parentNode.firstElementChild.getAttribute('data-default');
 		evt.preventDefault();
-	}, false);
+	};
 
 	for (var i = 0, m = inputList.length; i < m; i++) {
+		link = link.cloneNode(true);
+		link.addEventListener('click', restoreDefault, false);
 		inputList[i].parentNode.appendChild(link);
 	}
 }
