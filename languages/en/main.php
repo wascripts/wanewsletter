@@ -646,9 +646,10 @@ $lang['Connect_db_error']           = "Unable to connect to database (%s)";
 $lang['sqldir_perms_problem']       = "To use Wanewsletter with a SQLite database, you have to give the right permissions (read and write) to the targeted <samp>%s</samp> directory";
 $lang['DB_type_undefined']          = "The database type isn't defined!";
 
-$lang['Success_install']            = "The installation was succesfully completed.\nYou can now go to the script %sadministration%s";
+$lang['Success_install']            = "The installation was succesfully completed.\nYou can now access the %sadministration%s";
+$lang['Success_install2']           = "The installation was succesfully completed, but you should read the entry <q>%sprotect the <samp>data/</samp> repertory%s</q> in the FAQ. \nYou can now access the %sadministration%s.";
 $lang['Success_upgrade']            = "The upgrade was succesfully completed.";
-$lang['Success_install_no_config']  = "The installation was succesfully completed, but the configuration file could not be created.\nYou can download the file and upload it in the <samp>data/</samp> directory.\nYou can now access to %sadministration%s.";
+$lang['Success_install_no_config']  = "The installation was succesfully completed, but the configuration file could not be created. \nYou can download the file and upload it in the <samp>data/</samp> directory (See also the entry <q>%sprotect the <samp>data/</samp> repertory%s</q> in the FAQ). \nYou can now access the %sadministration%s.";
 $lang['Success_upgrade_no_config']  = "The upgrade was succesfully completed, but the configuration file is obsolete and needs to be refreshed. \nYou can download the file and upload it in the <samp>data/</samp> directory (the previous place in <samp>includes/</samp> works but is obsolete).";
 $lang['Upgrade_not_required']       = "No upgrade is required for your current version of Wanewsletter";
 $lang['Unsupported_version']        = "This version of Wanewsletter no longer supported by the upgrade script. You should first upgrade your installation to version 2.3.x.";

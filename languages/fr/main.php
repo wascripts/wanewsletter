@@ -648,8 +648,9 @@ $lang['sqldir_perms_problem']       = "Pour utiliser Wanewsletter avec une base 
 $lang['DB_type_undefined']          = "Le type de base de données n’est pas défini !";
 
 $lang['Success_install']            = "L’installation s’est bien déroulée.\nVous pouvez maintenant accéder à %sl’administration%s";
+$lang['Success_install2']           = "L’installation s’est bien déroulée, mais vous devriez lire l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ. \nVous pouvez maintenant accéder à %sl’administration%s";
 $lang['Success_upgrade']            = "La mise à jour s’est bien déroulée.";
-$lang['Success_install_no_config']  = "L’installation s’est bien effectuée mais le fichier de configuration n’a pu être créé.\nVous pouvez le télécharger puis l’uploader par vos propres moyens sur le serveur dans le répertoire <samp>data/</samp> du script.\nVous pourrez ensuite accéder à %sl’administration%s.";
+$lang['Success_install_no_config']  = "L’installation s’est bien déroulée, mais le fichier de configuration n’a pu être créé. \nVous pouvez le télécharger, puis le placer par vos propres moyens dans le répertoire <samp>data/</samp> du script (voir aussi l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ). \nVous pouvez ensuite accéder à %sl’administration%s.";
 $lang['Success_upgrade_no_config']  = "La mise à jour s’est bien déroulée, mais votre fichier de configuration est obsolète et doit être actualisé. \nVous pouvez le télécharger puis l’uploader par vos propres moyens sur le serveur dans le répertoire <samp>data/</samp> du script (l’ancien emplacement dans le répertoire <samp>includes/</samp> est obsolète mais fonctionne toujours).";
 $lang['Upgrade_not_required']       = "Aucune mise à jour n’est nécessaire pour votre version actuelle de Wanewsletter";
 $lang['Unsupported_version']        = "Cette version de Wanewsletter n’est plus supportée par le script de mise à jour. Vous devriez d’abord faire une mise à jour vers une version 2.3.x.";

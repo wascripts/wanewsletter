@@ -342,8 +342,6 @@ if ($start) {
 
 		$db->close();
 
-		$login_page = wan_build_url('admin/login.php');
-
 		if (!$reinstall) {
 			if (!($fw = fopen(WA_ROOTDIR . '/data/config.inc.php', 'w'))) {
 				$output->addHiddenField('engine',  $infos['engine']);
@@ -359,7 +357,12 @@ if ($start) {
 					'L_TITLE'         => $lang['Title']['install'],
 					'L_DL_BUTTON'     => $lang['Button']['dl'],
 
-					'MSG_RESULT'      => nl2br(sprintf($lang['Success_install_no_config'], sprintf('<a href="%s">', $login_page), '</a>')),
+					'MSG_RESULT'      => nl2br(sprintf($lang['Success_install_no_config'],
+						'<a href="docs/faq.fr.html#data_access">',
+						'</a>',
+						'<a href="admin/login.php">',
+						'</a>'
+					)),
 					'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 				));
 
@@ -371,7 +374,21 @@ if ($start) {
 			fclose($fw);
 		}
 
-		message(sprintf($lang['Success_install'], sprintf('<a href="%s">', $login_page), '</a>'));
+		$server = filter_input(INPUT_SERVER, 'SERVER_SOFTWARE');
+		if (stripos($server, 'Apache') !== false) {
+			message(sprintf($lang['Success_install'],
+				'<a href="admin/login.php">',
+				'</a>'
+			));
+		}
+		else {
+			message(sprintf($lang['Success_install2'],
+				'<a href="docs/faq.fr.html#data_access">',
+				'</a>',
+				'<a href="admin/login.php">',
+				'</a>'
+			));
+		}
 	}
 }
 
