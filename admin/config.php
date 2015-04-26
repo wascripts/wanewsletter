@@ -194,7 +194,7 @@ $debug_box  = '<select name="debug_level">';
 foreach (array(DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL) as $debug_level) {
 	$debug_box .= sprintf('<option value="%d"%s>%s</option>',
 		$debug_level,
-		$output->getBoolAttr('selected', ($nl_config['debug_level'] == $debug_level)),
+		$output->getBoolAttr('selected', ($new_config['debug_level'] == $debug_level)),
 		$lang['Debug_level_'.$debug_level]
 	);
 }
