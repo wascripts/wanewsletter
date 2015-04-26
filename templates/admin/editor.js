@@ -158,6 +158,11 @@ function addLinks()
 		texte = document.forms['send-form'].elements['body_text'];
 	}
 	else {
+		if (this.id == 'addLinks2' && typeof(tinyMCE) != 'undefined') {
+			tinyMCE.execCommand('mceInsertContent', false, '&#123;LINKS&#125;');
+			return true;
+		}
+
 		texte = document.forms['send-form'].elements['body_html'];
 	}
 

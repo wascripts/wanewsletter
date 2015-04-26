@@ -29,16 +29,6 @@ tinyMCE.init({
 		});
 	}
 });
-
-window._old_addLinks = window.addLinks;
-window.addLinks = function(evt) {
-	if( evt.currentTarget.id == 'addLinks2' ) {
-		tinyMCE.execCommand('mceInsertContent', false, '&#123;LINKS&#125;');
-	}
-	else {
-		window._old_addLinks(evt);
-	}
-};
 //-->
 </script>
 <script>
