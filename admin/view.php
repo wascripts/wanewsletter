@@ -326,15 +326,12 @@ else if ($mode == 'abonnes') {
 				'L_REGISTER_DATE'     => $lang['Susbcribed_date'],
 				'L_LISTE_TO_REGISTER' => $lang['Liste_to_register'],
 				'L_GOTO_LIST'         => $lang['Goto_list'],
-				'L_EDIT_ACCOUNT'      => $lang['Edit_account'],
-				'L_DELETE_ACCOUNT'    => $lang['Button']['del_account'],
 
 				'U_GOTO_LIST'         => 'view.php?mode=abonnes' . $get_string . $get_page,
 				'S_ABO_PSEUDO'        => (!empty($row['abo_pseudo']))
 					? htmlspecialchars($row['abo_pseudo']) : '<b>' . $lang['No_data'] . '</b>',
 				'S_ABO_EMAIL'         => htmlspecialchars($row['abo_email']),
-				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIF) ? $lang['Active'] : $lang['Inactive'],
-				'S_ABO_ID'            => $row['abo_id']
+				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIF) ? $lang['Active'] : $lang['Inactive']
 			));
 
 			//
@@ -356,6 +353,15 @@ else if ($mode == 'abonnes') {
 						'VALUE' => $value,
 					));
 				}
+			}
+
+			// Actions possibles sur cette liste
+			if ($auth->check_auth(Auth::EDIT, $_SESSION['liste'])) {
+				$output->assign_block_vars('actions', array(
+					'L_EDIT_ACCOUNT'   => $lang['Edit_account'],
+					'L_DELETE_ACCOUNT' => $lang['Button']['del_account'],
+					'S_ABO_ID'         => $row['abo_id']
+				));
 			}
 
 			// Affichage des listes de diffusion auxquelles l'abonné est inscrit

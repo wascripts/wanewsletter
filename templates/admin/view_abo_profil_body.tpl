@@ -3,8 +3,10 @@
 <div class="compact">
 <ul class="links">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
-	<li><a href="./view.php?mode=abonnes&amp;action=edit&amp;id={S_ABO_ID}">{L_EDIT_ACCOUNT}</a></li>
-	<li><a href="./view.php?mode=abonnes&amp;action=delete&amp;id={S_ABO_ID}">{L_DELETE_ACCOUNT}</a></li>
+	<!-- BEGIN actions -->
+	<li><a href="./view.php?mode=abonnes&amp;action=edit&amp;id={actions.S_ABO_ID}">{actions.L_EDIT_ACCOUNT}</a></li>
+	<li><a href="./view.php?mode=abonnes&amp;action=delete&amp;id={actions.S_ABO_ID}">{actions.L_DELETE_ACCOUNT}</a></li>
+	<!-- END actions -->
 </ul>
 
 <div class="block">
