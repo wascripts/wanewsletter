@@ -406,6 +406,28 @@ else if ($mode == 'abonnes') {
 	else if ($action == 'edit') {
 		$liste_ids = $auth->check_auth(Auth::EDIT);
 
+		$sql = "SELECT liste_id
+			FROM " . ABO_LISTE_TABLE . "
+			WHERE abo_id = " . $abo_id;
+		$result = $db->query($sql);
+
+		$tmp_ids = array();
+		while ($tmp_id = $result->column('liste_id')) {
+			$tmp_ids[] = $tmp_id;
+		}
+
+		$tmp_ids = array_intersect($liste_ids, $tmp_ids);
+
+		//
+		// Cet utilisateur n’a pas les droits nécessaires pour faire cette opération
+		//
+		if (count($tmp_ids) == 0) {
+			http_response_code(401);
+			$output->displayMessage('Not_auth_edit');
+		}
+
+		unset($tmp_ids);
+
 		if (isset($_POST['submit'])) {
 			$email = trim(u::filter_input(INPUT_POST, 'email'));
 
@@ -415,26 +437,6 @@ else if ($mode == 'abonnes') {
 			}
 
 			if (!$error) {
-				$sql = "SELECT liste_id
-					FROM " . ABO_LISTE_TABLE . "
-					WHERE abo_id = " . $abo_id;
-				$result = $db->query($sql);
-
-				$tmp_ids = array();
-				while ($tmp_id = $result->column('liste_id')) {
-					$tmp_ids[] = $tmp_id;
-				}
-
-				$result_ids = array_intersect($liste_ids, $tmp_ids);
-
-				//
-				// Cet utiliteur n'a pas les droits nécessaires pour faire cette opération
-				//
-				if (count($result_ids) == 0) {
-					http_response_code(401);
-					$output->displayMessage('Not_auth_edit');
-				}
-
 				$sql_data = array(
 					'abo_email'  => $email,
 					'abo_pseudo' => strip_tags(trim(u::filter_input(INPUT_POST, 'pseudo'))),
