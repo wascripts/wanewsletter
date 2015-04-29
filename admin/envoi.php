@@ -85,11 +85,11 @@ switch ($mode) {
 		$attach = new Attach();
 		$file   = $attach->getFile($file_id);
 
-		if (!$file || $file['data'] === false) {
+		if (!$file || !($fp = fopen($file['path'], 'rb'))) {
 			$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
 		}
 
-		sendfile($file['name'], $file['type'], $file['data']);
+		sendfile($file['name'], $file['type'], $fp);
 		break;
 
 	case 'cancel':

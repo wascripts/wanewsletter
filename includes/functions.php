@@ -1581,7 +1581,8 @@ function validate_lang($language)
  *
  * @param string $filename
  * @param string $mime_type
- * @param string $data
+ * @param mixed  $data      Soit directement les données à envoyer, soit une
+ *                          ressource de flux.
  */
 function sendfile($filename, $mime_type, $data)
 {
@@ -1615,15 +1616,33 @@ function sendfile($filename, $mime_type, $data)
 		}
 	}
 
+	if (is_resource($data)) {
+		$meta = stream_get_meta_data($data);
+		$size = filesize($meta['uri']);
+	}
+	else {
+		$size = strlen($data);
+	}
+
 	//
 	// Désactivation de la compression de sortie de php au cas où
 	// et envoi des en-têtes appropriés au client.
 	//
 	@ini_set('zlib.output_compression', 'Off');
-	header(sprintf('Content-Length: %d', strlen($data)));
+	header(sprintf('Content-Length: %d', $size));
 	header(sprintf('Content-Disposition: attachment; filename="%s"', $filename));
 	header(sprintf('Content-Type: %s; name="%s"', $mime_type, $filename));
 
-	echo $data;
+	if (is_resource($data)) {
+		while (!feof($data)) {
+			echo fgets($data, 1048576);
+		}
+
+		fclose($data);
+	}
+	else {
+		echo $data;
+	}
+
 	exit;
 }

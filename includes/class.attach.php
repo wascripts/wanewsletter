@@ -317,7 +317,6 @@ class Attach
 			$file['path'] = $this->upload_path . $row['file_physical_name'];
 			$file['size'] = $row['file_size'];
 			$file['type'] = $row['file_mimetype'];
-			$file['data'] = file_get_contents($file['path']);
 
 			return $file;
 		}
