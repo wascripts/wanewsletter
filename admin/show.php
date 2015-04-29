@@ -21,31 +21,17 @@ $listdata = $auth->listdata[$_SESSION['liste']];
 $file_id  = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
 $filename = trim(filter_input(INPUT_GET, 'file'));
 
-if ($filename) {
-	$sql_where = 'jf.file_real_name = \'' . $db->escape($filename) . '\'';
-}
-else {
-	$sql_where = 'jf.file_id = ' . $file_id;
-}
+$attach = new Attach();
+$file = $attach->getFile($filename ?: $file_id);
 
-$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-	FROM " . JOINED_FILES_TABLE . " AS jf
-		INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
-		INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-			AND l.liste_id = $listdata[liste_id]
-	WHERE $sql_where";
-$result = $db->query($sql);
-
-if ($filedata = $result->fetch()) {
-	$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $filedata['file_physical_name'];
-
-	if (!is_readable($tmp_filename)) {
+if ($file) {
+	if (!is_readable($file['path'])) {
 		http_response_code(500);
 		plain_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
 	}
 
 	$maxAge = 0;
-	$lastModified = filemtime($tmp_filename);
+	$lastModified = filemtime($file['path']);
 	$canUseCache  = true;
 	$cachetime    = (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
 
@@ -67,26 +53,17 @@ if ($filedata = $result->fetch()) {
 	header('Expires: ' . gmdate(DATE_RFC1123, (time() + $maxAge)));// HTTP 1.0
 	header('Pragma: private');// HTTP 1.0
 	header('Cache-Control: private, must-revalidate, max-age='.$maxAge);
-	header('Content-Disposition: inline; filename="' . $filedata['file_real_name'] . '"');
-	header('Content-Length: ' . $filedata['file_size']);
+	header('Content-Disposition: inline; filename="' . $file['name'] . '"');
+	header('Content-Type: ' . $file['type']);
+	header('Content-Length: ' . $file['size']);
 
-	$data = file_get_contents($tmp_filename);
+	$fp = fopen($file['path'], 'rb');
 
-	if (strcasecmp($filedata['file_mimetype'], 'image/svg+xml') === 0) {
-		$charset = 'UTF-8';
-		if (preg_match('/^<\?xml(.+?)\?>/', $data, $m)) {
-			if (preg_match('/encoding="([a-z0-9.:_-]+)"/i', $m[0], $m2)) {
-				$charset = $m2[1];
-			}
-		}
-
-		header('Content-Type: ' . $filedata['file_mimetype'] . '; charset=' . $charset);
-	}
-	else {
-		header('Content-Type: ' . $filedata['file_mimetype']);
+	while (!feof($fp)) {
+		echo fgets($fp, 1048576);
 	}
 
-	echo $data;
+	fclose($fp);
 	exit;
 }
 else {

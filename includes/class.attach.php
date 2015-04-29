@@ -288,20 +288,27 @@ class Attach
 	/**
 	 * Récupère les infos sur le fichier joint
 	 *
-	 * @param integer $file_id Identifiant du fichier joint
+	 * @param mixed $file Peut être l’identifiant ou le nom du fichier joint
 	 *
 	 * @return boolean|array
 	 */
-	public function getFile($file_id)
+	public function getFile($file)
 	{
 		global $db, $lang, $output, $listdata;
+
+		if (!is_numeric($file)) {
+			$sql_where = 'jf.file_real_name = \'' . $db->escape($file) . '\'';
+		}
+		else {
+			$sql_where = 'jf.file_id = ' . intval($file);
+		}
 
 		$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 			FROM " . JOINED_FILES_TABLE . " AS jf
 				INNER JOIN " . LOG_TABLE . " AS l ON l.liste_id = $listdata[liste_id]
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = l.log_id
-			WHERE jf.file_id = " . intval($file_id);
+			WHERE " . $sql_where;
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
