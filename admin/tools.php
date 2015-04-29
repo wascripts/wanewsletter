@@ -434,7 +434,7 @@ switch ($mode) {
 			$contents = compress_filedata($filename, $mime_type, $contents, $compress);
 
 			if (filter_input(INPUT_POST, 'action') == 'download') {
-				Attach::send_file($filename, $mime_type, $contents);
+				sendfile($filename, $mime_type, $contents);
 			}
 			else {
 				if (!($fw = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
@@ -1055,7 +1055,7 @@ switch ($mode) {
 			$contents = compress_filedata($filename, $mime_type, $contents, $compress);
 
 			if (filter_input(INPUT_POST, 'action') == 'download') {
-				Attach::send_file($filename, $mime_type, $contents);
+				sendfile($filename, $mime_type, $contents);
 			}
 			else {
 				if (!($fw = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {

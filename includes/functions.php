@@ -1574,3 +1574,56 @@ function validate_lang($language)
 		file_exists(WA_ROOTDIR . '/languages/' . $language . '/main.php')
 	);
 }
+
+/**
+ * Envoi d’un fichier au client.
+ * Sert les en-têtes nécessaires au téléchargement.
+ *
+ * @param string $filename
+ * @param string $mime_type
+ * @param string $data
+ */
+function sendfile($filename, $mime_type, $data)
+{
+	//
+	// Si aucun type de média n'est indiqué, on utilisera par défaut
+	// le type application/octet-stream (application/octetstream pour IE et Opera).
+	// Si le type application/octet-stream	ou application/octetstream est indiqué, on fait
+	// éventuellement le changement si le type n'est pas bon pour l'agent utilisateur.
+	// Si on a à faire à Opera, on utilise application/octetstream car toute autre type peut poser
+	// d'éventuels problèmes.
+	//
+
+	// TODO : Obsolète ?
+	$user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT');
+	if (stristr($user_agent, 'opera')) {
+		$user_agent = 'opera';
+	}
+	else if (stristr($user_agent, 'msie')) {
+		$user_agent = 'msie';
+	}
+	else {
+		$user_agent = null;
+	}
+
+	if (preg_match('#application/octet-?stream#i', $mime_type) || $user_agent == 'opera') {
+		if ($user_agent == 'msie' || $user_agent == 'opera') {
+			$mime_type = 'application/octetstream';
+		}
+		else {
+			$mime_type = 'application/octet-stream';
+		}
+	}
+
+	//
+	// Désactivation de la compression de sortie de php au cas où
+	// et envoi des en-têtes appropriés au client.
+	//
+	@ini_set('zlib.output_compression', 'Off');
+	header(sprintf('Content-Length: %d', strlen($data)));
+	header(sprintf('Content-Disposition: attachment; filename="%s"', $filename));
+	header(sprintf('Content-Type: %s; name="%s"', $mime_type, $filename));
+
+	echo $data;
+	exit;
+}

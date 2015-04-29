@@ -21,7 +21,7 @@ class Attach
 	 *
 	 * @var string
 	 */
-	private $upload_path = '';
+	private $upload_path;
 
 	/**
 	 * Initialisation des variables de la classe
@@ -34,263 +34,205 @@ class Attach
 	}
 
 	/**
-	 * Verifie la présence du fichier demandé dans le dossier des fichier joints
+	 * Effectue les vérifications nécessaires et ajoute une entrée dans
+	 * les tables de gestion des fichiers joints.
 	 *
-	 * @param string  $filename  Nom du fichier
-	 * @param boolean $error     True si une erreur s'est produite
-	 * @param array   $msg_error Tableau des erreurs
+	 * Le fichier peut être uploadé via le formulaire adéquat, être sur
+	 * un serveur distant, ou avoir été uploadé manuellement sur le serveur.
 	 *
-	 * @return integer
+	 * @param integer $log_id Identifiant du log
+	 * @param mixed   $file   Nom ou URL du fichier, ou tableau d’un fichier uploadé
+	 *
+	 * @throws Exception
 	 */
-	public function joined_file_exists($filename, &$error, &$msg_error)
+	public function addFile($log_id, $file)
 	{
-		global $lang;
+		global $db, $lang, $nl_config, $listdata;
 
-		$file_exists = false;
-		$filesize    = 0;
+		if (!is_array($file)) {
+			$url = parse_url($file);
 
-		if (file_exists($this->upload_path . $filename)) {
-			$file_exists = true;
-			$filesize    = filesize($this->upload_path . $filename);
-		}
+			if (isset($url['scheme'])) {
+				if ($url['scheme'] != 'http') {
+					throw new Exception($lang['Message']['Invalid_url']);
+				}
 
-		if (!$file_exists) {
-			$error = true;
-			$msg_error[] = sprintf($lang['Message']['File_not_exists'], '');
-		}
+				if (!isset($url['path']) || substr($url['path'], -1) == '/') {
+					$filename = 'index';
+				}
+				else {
+					$filename = basename($url['path']);
+				}
 
-		return $filesize;
-	}
-
-	/**
-	 * Génération d'un nom de fichier unique
-	 * Fonction récursive
-	 *
-	 * @param string $prev_filename Nom du fichier temporaire précédemment généré et refusé
-	 *
-	 * @return string
-	 */
-	public function make_filename($prev_filename = '')
-	{
-		global $db;
-
-		$physical_filename = md5(microtime()) . '.dl';
-
-		if ($physical_filename != $prev_filename) {
-			$sql = "SELECT COUNT(file_id) AS test_name
-				FROM " . JOINED_FILES_TABLE . "
-				WHERE file_physical_name = '" . $db->escape($physical_filename) . "'";
-			$result = $db->query($sql);
-
-			$test_name = $result->column('test_name');
+				$mode = 'remote';
+				$url  = $file;
+			}
+			else {
+				$mode = 'local';
+				$filename = $file;
+			}
 		}
 		else {
-			$test_name = true;
+			$mode = 'upload';
+			$filename = $file['name'];
 		}
 
-		return ($test_name) ? $this->make_filename($physical_filename) : $physical_filename;
-	}
+		//
+		// Vérification de l’accès en écriture au répertoire de stockage
+		//
+		if ($mode != 'local' && !is_writable($this->upload_path)) {
+			throw new Exception($lang['Message']['Uploaddir_not_writable']);
+		}
 
-	/**
-	 * Effectue les vérifications nécessaires et ajoute une entrée dans les tables de
-	 * gestion des fichiers joints
-	 *
-	 * Le fichier peut être uploadé via le formulaire adéquat, être sur un serveur distant,
-	 * ou avoir été uploadé manuellement sur le serveur
-	 *
-	 * @param string  $upload_mode  Mode d'upload du fichier (upload http, à distance, fichier local)
-	 * @param integer $log_id       Identifiant du log
-	 * @param string  $filename     Nom du fichier
-	 * @param string  $tmp_filename Nom temporaire du fichier/nom du fichier local/url du fichier distant
-	 * @param integer $filesize     Taille du fichier
-	 * @param string  $filetype     Type mime du fichier
-	 * @param string  $errno_code   Code erreur éventuel de l'upload http
-	 * @param boolean $error        True si une erreur survient
-	 * @param array   $msg_error    Tableau des messages d'erreur
-	 */
-	public function upload_file($upload_mode, $log_id, $filename, $tmp_filename, $filesize, $filetype, $errno_code, &$error, &$msg_error)
-	{
-		global $db, $lang, $nl_config;
-
-		$extension = pathinfo($filename, PATHINFO_EXTENSION);
-
-		if ($extension == '') {
+		//
+		// Vérification de l’extension du fichier
+		//
+		if (!($extension = pathinfo($filename, PATHINFO_EXTENSION))) {
 			$extension = 'x-wa';
 		}
 
-		//
-		// Vérification de l'accès en écriture au répertoire de stockage
-		//
-		if ($upload_mode != 'local' && !is_writable($this->upload_path)) {
-			$error = true;
-			$msg_error[] = $lang['Message']['Uploaddir_not_writable'];
-			return;
+		$sql = sprintf("SELECT COUNT(fe_id) AS test_extension
+			FROM %s
+			WHERE LOWER(fe_ext) = '%s' AND liste_id = %d",
+			FORBIDDEN_EXT_TABLE,
+			$db->escape(strtolower($extension)),
+			$listdata['liste_id']
+		);
+		$result = $db->query($sql);
+
+		if ($result->column('test_extension') > 0) {
+			throw new Exception($lang['Message']['Invalid_ext']);
 		}
 
 		//
 		// Vérification de la validité du nom du fichier
 		//
-		if (!$this->check_filename($filename)) {
-			$error = true;
-			$msg_error[] = $lang['Message']['Invalid_filename'];
+		if (preg_match('/[\\:*\/?<">|\x00-\x1F\x7F-\x9F]/', $filename)) {
+			throw new Exception($lang['Message']['Invalid_filename']);
 		}
 
-		//
-		// Vérification de l'extension du fichier
-		//
-		if (!$this->check_extension($extension)) {
-			$error = true;
-			$msg_error[] = $lang['Message']['Invalid_ext'];
-		}
-
-		if (!$error) {
-			//
-			// Si l'upload a échoué, on récupère le message correspondant à l'erreur survenue
-			//
-			if ($upload_mode == 'upload' && $errno_code != UPLOAD_ERR_OK) {
-				$error = true;
-
-				if (isset($lang['Message']['Upload_error_'.$errno_code])) {
-					$msg_error[] = $lang['Message']['Upload_error_'.$errno_code];
-				}
-				else {
-					$msg_error[] = $lang['Message']['Upload_error_5'];
+		if ($mode == 'upload') {
+			// Si l’upload a échoué, on récupère le message correspondant à l’erreur survenue
+			if ($file['error'] != UPLOAD_ERR_OK) {
+				$errstr = $lang['Message']['Upload_error_5'];
+				if (isset($lang['Message']['Upload_error_'.$file['error']])) {
+					$errstr = $lang['Message']['Upload_error_'.$file['error']];
 				}
 
-				return;
+				throw new Exception($errstr);
 			}
 
-			//
-			// Récupération d'un fichier distant
-			//
-			else if ($upload_mode == 'remote') {
-				$URL  = $tmp_filename;
-				$part = parse_url($URL);
+			$filesize = $file['size'];
+			$filetype = $file['type'];
+			$tmp_filename = $file['tmp_name'];
+		}
+		else if ($mode == 'remote') {
+			$tmp_path = (ini_get('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
+			$tmp_filename = tempnam($tmp_path, 'wa0');
 
-				if (!is_array($part) || !isset($part['scheme']) || $part['scheme'] != 'http') {
-					$error = true;
-					$msg_error[] = $lang['Message']['Invalid_url'];
+			if (!($fw = fopen($tmp_filename, 'wb'))) {
+				throw new Exception($lang['Message']['Upload_error_5']);
+			}
 
-					return;
-				}
+			$result = http_get_contents($url, $errstr);
 
-				$tmp_path = (ini_get('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
-				$tmp_filename = tempnam($tmp_path, 'wa0');
-
-				if (!($fw = fopen($tmp_filename, 'wb'))) {
-					$error = true;
-					$msg_error[] = $lang['Message']['Upload_error_5'];
-					$this->remove_file($tmp_filename);
-
-					return;
-				}
-
-				$result = http_get_contents($URL, $errstr);
-
-				if (!$result) {
-					$error = true;
-					$msg_error[] = $errstr;
-					fclose($fw);
-					$this->remove_file($tmp_filename);
-
-					return;
-				}
-
-				fwrite($fw, $result['data']);
+			if (!$result) {
 				fclose($fw);
-				$filesize = strlen($result['data']);
-				$filetype = $result['type'];
+				unlink($tmp_filename);
+				throw new Exception($errstr);
 			}
 
-			//
-			// Fichier uploadé manuellement sur le serveur
-			//
-			else if ($upload_mode == 'local') {
-				//
-				// On verifie si le fichier est bien présent sur le serveur
-				//
-				$filesize = $this->joined_file_exists($tmp_filename, $error, $msg_error);
-
-				if (!$error) {
-					$filetype = \Wamailer\Mime::getType($this->upload_path . $tmp_filename);
-				}
+			fwrite($fw, $result['data']);
+			fclose($fw);
+			$filesize = strlen($result['data']);
+			$filetype = $result['type'];
+		}
+		else if ($mode == 'local') {
+			if (!file_exists($this->upload_path . $filename)) {
+				throw new Exception(sprintf($lang['Message']['File_not_exists'], $filename));
 			}
-		}
-		else {
-			return;
+
+			$filesize = filesize($this->upload_path . $filename);
+			$filetype = \Wamailer\Mime::getType($this->upload_path . $filename);
+			$tmp_filename = $file;
 		}
 
-		//
-		// Vérification de la taille du fichier par rapport à la taille maximale autorisée
-		//
-		if (!$this->check_maxsize($log_id, $filesize, $total_size)) {
-			$error = true;
-			$msg_error[] = sprintf($lang['Message']['weight_too_big'],
-				formateSize($nl_config['max_filesize'] - $total_size));
+		if (!$this->checkFileSize($log_id, $filesize, $total_size)) {
+			throw new Exception(sprintf($lang['Message']['weight_too_big'],
+				formateSize($nl_config['max_filesize'] - $total_size)
+			));
 		}
 
 		//
 		// Si fichier uploadé ou fichier distant, on déplace le fichier à son emplacement final
 		//
-		if (!$error && $upload_mode != 'local') {
-			$physical_filename = $this->make_filename();
+		if ($mode != 'local') {
+			while (true) {
+				$physical_filename = md5($log_id . $filename . microtime()) . '.dl';
 
-			if ($upload_mode == 'remote') {
-				$result_upload = copy($tmp_filename, $this->upload_path . $physical_filename);
+				if (!file_exists($this->upload_path . $physical_filename)) {
+					break;
+				}
+			}
+
+			if ($mode == 'remote') {
+				$result = copy($tmp_filename, $this->upload_path . $physical_filename);
+
+				// Suppression du fichier temporaire créé par nos soins
+				unlink($tmp_filename);
 			}
 			else {
-				$result_upload = move_uploaded_file($tmp_filename, $this->upload_path . $physical_filename);
+				$result = move_uploaded_file($tmp_filename, $this->upload_path . $physical_filename);
+
+				if ($result) {
+					$filetype = \Wamailer\Mime::getType($this->upload_path . $physical_filename);
+				}
 			}
 
-			if (!$result_upload) {
-				$error = true;
-				$msg_error[] = $lang['Message']['Upload_error_5'];
+			if (!$result) {
+				throw new Exception($lang['Message']['Upload_error_5']);
 			}
-
-			//
-			// Suppression du fichier temporaire créé par nos soins
-			//
-			$this->remove_file($tmp_filename);
+		}
+		else {
+			$physical_filename = $filename;
 		}
 
-		if (!$error) {
-			//
-			// Tout s'est bien passé, on entre les nouvelles données dans la base de données
-			//
-			$db->beginTransaction();
+		//
+		// Tout s’est bien passé, on entre les nouvelles données dans la base de données
+		//
+		$db->beginTransaction();
 
-			$filedata = array(
-				'file_real_name'     => $filename,
-				'file_physical_name' => ($upload_mode == 'local') ? $tmp_filename : $physical_filename,
-				'file_size'          => $filesize,
-				'file_mimetype'      => $filetype
-			);
+		$sql_data = array(
+			'file_real_name'     => $filename,
+			'file_physical_name' => $physical_filename,
+			'file_size'          => $filesize,
+			'file_mimetype'      => $filetype
+		);
 
-			$db->insert(JOINED_FILES_TABLE, $filedata);
+		$db->insert(JOINED_FILES_TABLE, $sql_data);
 
-			$data = array(
-				'log_id'  => $log_id,
-				'file_id' => $db->lastInsertId()
-			);
-			$db->insert(LOG_FILES_TABLE, $data);
+		$sql_data = array(
+			'log_id'  => $log_id,
+			'file_id' => $db->lastInsertId()
+		);
+		$db->insert(LOG_FILES_TABLE, $sql_data);
 
-			$db->commit();
-		}
+		$db->commit();
 	}
 
 	/**
 	 * Ajoute une entrée pour le log courant avec l'identifiant d'un fichier existant
 	 *
-	 * @param integer $file_id   Identifiant du fichier
-	 * @param integer $log_id    Identifiant du log
-	 * @param boolean $error     True si erreur
-	 * @param array	  $msg_error Tableau des messages d'erreur
+	 * @param integer $log_id  Identifiant du log
+	 * @param integer $file_id Identifiant du fichier
+	 *
+	 * @throws Exception
 	 */
-	public function use_file_exists($file_id, $log_id, &$error, &$msg_error)
+	public function useFile($log_id, $file_id)
 	{
 		global $db, $nl_config, $lang, $listdata;
 
-		$sql = "SELECT jf.file_physical_name
+		$sql = "SELECT jf.file_physical_name, jf.file_size
 			FROM " . JOINED_FILES_TABLE . " AS jf
 				INNER JOIN " . LOG_TABLE . " AS l ON l.liste_id = $listdata[liste_id]
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
@@ -298,66 +240,26 @@ class Attach
 			WHERE jf.file_id = " . $file_id;
 		$result = $db->query($sql);
 
-		$physical_name = $result->column('file_physical_name');
-
-		if (!$physical_name) {
-			$error = true;
-			$msg_error[] = sprintf($lang['Message']['File_not_exists'], '');
+		if (!($row = $result->fetch())) {
+			throw new Exception("Invalid File ID");
 		}
 
-		if (!$error) {
-			//
-			// On verifie si le fichier est bien présent sur le serveur
-			//
-			$filesize = $this->joined_file_exists($physical_name, $error, $msg_error);
+		if (!file_exists($this->upload_path . $row['file_physical_name'])) {
+			throw new Exception(sprintf($lang['Message']['File_not_exists'], $row['file_physical_name']));
 		}
 
-		if (!$error && !$this->check_maxsize($log_id, $filesize, $total_size)) {
-			$error = true;
-			$msg_error[] = sprintf($lang['Message']['weight_too_big'],
-				formateSize($nl_config['max_filesize'] - $total_size));
+		if (!$this->checkFileSize($log_id, $row['file_size'], $total_size)) {
+			throw new Exception(sprintf($lang['Message']['weight_too_big'],
+				formateSize($nl_config['max_filesize'] - $total_size)
+			));
 		}
 
-		//
-		// Insertion des données
-		//
-		if (!$error) {
-			$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id)
-				VALUES($log_id, $file_id)";
-			$db->query($sql);
-		}
-	}
-
-	/**
-	 * Vérification de la validité du nom de fichier
-	 *
-	 * @param string $filename
-	 *
-	 * @return boolean
-	 */
-	public function check_filename($filename)
-	{
-		return !preg_match('/[\\:*\/?<">|\x00-\x1F\x7F-\x9F]/', $filename);
-	}
-
-	/**
-	 * Vérification de la validité de l'extension du fichier
-	 *
-	 * @param string $extension
-	 *
-	 * @return integer
-	 */
-	public function check_extension($extension)
-	{
-		global $db, $listdata;
-
-		$sql = "SELECT COUNT(fe_id) AS test_extension
-			FROM " . FORBIDDEN_EXT_TABLE . "
-			WHERE LOWER(fe_ext) = '" . $db->escape(strtolower($extension)) . "'
-				AND liste_id = " . $listdata['liste_id'];
-		$result = $db->query($sql);
-
-		return ($result->column('test_extension') == 0);
+		$sql = sprintf("INSERT INTO %s (log_id, file_id) VALUES (%d, %d)",
+			LOG_FILES_TABLE,
+			$log_id,
+			$file_id
+		);
+		$db->query($sql);
 	}
 
 	/**
@@ -369,7 +271,7 @@ class Attach
 	 *
 	 * @return boolean
 	 */
-	private function check_maxsize($log_id, $filesize, &$total_size)
+	private function checkFileSize($log_id, $filesize, &$total_size)
 	{
 		global $db, $nl_config;
 
@@ -384,179 +286,90 @@ class Attach
 	}
 
 	/**
-	 * Récupère les infos sur le fichier joint à télécharger (envoyer au client)
+	 * Récupère les infos sur le fichier joint
 	 *
 	 * @param integer $file_id Identifiant du fichier joint
+	 *
+	 * @return boolean|array
 	 */
-	public function download_file($file_id)
+	public function getFile($file_id)
 	{
-		global $db, $listdata, $lang, $output;
+		global $db, $lang, $output, $listdata;
 
 		$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 			FROM " . JOINED_FILES_TABLE . " AS jf
 				INNER JOIN " . LOG_TABLE . " AS l ON l.liste_id = $listdata[liste_id]
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = l.log_id
-			WHERE jf.file_id = " . $file_id;
+			WHERE jf.file_id = " . intval($file_id);
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
-			$tmp_filename = $this->upload_path . $row['file_physical_name'];
+			$file = array();
+			$file['name'] = $row['file_real_name'];
+			$file['path'] = $this->upload_path . $row['file_physical_name'];
+			$file['size'] = $row['file_size'];
+			$file['type'] = $row['file_mimetype'];
+			$file['data'] = file_get_contents($file['path']);
 
-			$data = file_get_contents($tmp_filename);
-			if ($data === false) {
-				trigger_error('Impossible de lire le fichier spécifié', E_USER_ERROR);
-			}
-
-			$this->send_file($row['file_real_name'], $row['file_mimetype'], $data, $row['file_size']);
+			return $file;
 		}
-
-		$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
-	}
-
-	/**
-	 * Fonction de suppression de fichiers joints
-	 * Retourne le nombre des fichiers supprimés, en cas de succés
-	 *
-	 * @param boolean $massive_delete Si true, suppression des fichiers joints du ou des logs concernés
-	 * @param mixed   $log_ids        id ou tableau des id des logs concernés
-	 * @param mixed   $file_ids       id ou tableau des id des fichiers joints concernés (si $massive_delete à false)
-	 *
-	 * @return mixed
-	 */
-	public function delete_joined_files($massive_delete, $log_ids, $file_ids = array())
-	{
-		global $db;
-
-		if (!is_array($log_ids)) {
-			$log_ids = array($log_ids);
-		}
-
-		if (!is_array($file_ids)) {
-			$file_ids = array($file_ids);
-		}
-
-		if (count($log_ids) > 0) {
-			if ($massive_delete) {
-				$sql = "SELECT file_id
-					FROM " . LOG_FILES_TABLE . "
-					WHERE log_id IN(" . implode(', ', $log_ids) . ")
-					GROUP BY file_id";
-				$result = $db->query($sql);
-
-				$file_ids = array();
-				while ($file_id = $result->column('file_id')) {
-					$file_ids[] = $file_id;
-				}
-			}
-
-			if (count($file_ids) > 0) {
-				$filename_ary = array();
-
-				$sql = "SELECT lf.file_id, jf.file_physical_name
-					FROM " . LOG_FILES_TABLE . " AS lf
-						INNER JOIN " . JOINED_FILES_TABLE . " AS jf ON jf.file_id = lf.file_id
-					WHERE lf.file_id IN(" . implode(', ', $file_ids) . ")
-					GROUP BY lf.file_id, jf.file_physical_name
-					HAVING COUNT(lf.file_id) = 1";
-				$result = $db->query($sql);
-
-				$ids = array();
-				while ($row = $result->fetch()) {
-					$ids[]          = $row['file_id'];
-					$filename_ary[] = $row['file_physical_name'];
-				}
-
-				if (count($ids) > 0) {
-					$sql = "DELETE FROM " . JOINED_FILES_TABLE . "
-						WHERE file_id IN(" . implode(', ', $ids) . ")";
-					$db->query($sql);
-				}
-
-				$sql = "DELETE FROM " . LOG_FILES_TABLE . "
-					WHERE log_id IN(" . implode(', ', $log_ids) . ")
-						AND file_id IN(" . implode(', ', $file_ids) . ")";
-				$db->query($sql);
-
-				//
-				// Suppression physique des fichiers joints devenus inutiles
-				//
-				foreach ($filename_ary as $filename) {
-					$this->remove_file($this->upload_path . $filename);
-				}
-
-				return count($filename_ary);
-			}// end count file_id_ary
-		}// end count log_id_ary
 
 		return false;
 	}
 
 	/**
-	 * Suppression d'un fichier du serveur
+	 * Suppression des fichiers joints aux logs concernés.
 	 *
-	 * @param string $filename Nom du fichier sur le serveur
+	 * @param mixed $log_ids  id ou tableau des id des logs concernés
+	 * @param mixed $file_ids id ou tableau des id des fichiers joints concernés
+	 *                        (par défaut, tous les fichiers liés aux logs
+	 *                        spécifiés sont supprimés)
 	 */
-	public static function remove_file($filename)
+	public function deleteFiles($log_ids, $file_ids = array())
 	{
-		if (file_exists($filename)) {
-			unlink($filename);
-		}
-	}
+		global $db;
 
-	/**
-	 * Fonction d'envois des entêtes nécessaires au téléchargement et
-	 * des données du fichier à télécharger
-	 *
-	 * @param string $filename  Nom réel du fichier
-	 * @param string $mime_type Mime type du fichier
-	 * @param string $data      Contenu du fichier
-	 */
-	public static function send_file($filename, $mime_type, $data)
-	{
-		//
-		// Si aucun type de média n'est indiqué, on utilisera par défaut
-		// le type application/octet-stream (application/octetstream pour IE et Opera).
-		// Si le type application/octet-stream	ou application/octetstream est indiqué, on fait
-		// éventuellement le changement si le type n'est pas bon pour l'agent utilisateur.
-		// Si on a à faire à Opera, on utilise application/octetstream car toute autre type peut poser
-		// d'éventuels problèmes.
-		//
+		$log_ids  = (array) $log_ids;
+		$file_ids = (array) $file_ids;
 
-		// TODO : Obsolète ?
-		$user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT');
-		if (stristr($user_agent, 'opera')) {
-			$user_agent = 'opera';
-		}
-		else if (stristr($user_agent, 'msie')) {
-			$user_agent = 'msie';
-		}
-		else {
-			$user_agent = null;
+		if (count($log_ids) == 0) {
+			return null;
 		}
 
-		if (empty($mime_type) ||
-			preg_match('#application/octet-?stream#i', $mime_type) ||
-			$user_agent == 'opera'
-		) {
-			if ($user_agent == 'msie' || $user_agent == 'opera') {
-				$mime_type = 'application/octetstream';
+		$db->beginTransaction();
+
+		$sql = "DELETE FROM " . LOG_FILES_TABLE . "
+			WHERE log_id IN(" . implode(', ', $log_ids) . ")";
+		if (count($file_ids) > 0) {
+			$sql .= " AND file_id IN(" . implode(', ', $file_ids) . ")";
+		}
+
+		$db->query($sql);
+
+		$sql = "SELECT jf.file_id, jf.file_physical_name
+			FROM " . JOINED_FILES_TABLE . " AS jf
+			LEFT JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+			WHERE lf.log_id IS NULL";
+		$result = $db->query($sql);
+
+		if ($row = $result->fetch()) {
+			$file_ids = array();
+			do {
+				$file_ids[] = $row['file_id'];
+
+				if (file_exists($this->upload_path . $row['file_physical_name'])) {
+					unlink($this->upload_path . $row['file_physical_name']);
+				}
 			}
-			else {
-				$mime_type = 'application/octet-stream';
-			}
+			while ($row = $result->fetch());
+
+			$sql = "DELETE FROM " . JOINED_FILES_TABLE . "
+				WHERE file_id IN(" . implode(', ', $file_ids) . ")";
+			$db->query($sql);
 		}
 
-		//
-		// Désactivation de la compression de sortie de php au cas où
-		// et envoi des en-têtes appropriés au client.
-		//
-		@ini_set('zlib.output_compression', 'Off');
-		header('Content-Length: ' . strlen($data));
-		header('Content-Disposition: attachment; filename="' . $filename . '"');
-		header('Content-Type: ' . $mime_type . '; name="' . $filename . '"');
-
-		echo $data;
-		exit;
+		$db->commit();
+		$db->vacuum(array(LOG_FILES_TABLE, JOINED_FILES_TABLE));
 	}
 }

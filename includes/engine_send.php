@@ -101,24 +101,15 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 	//
 	$total_files = count($logdata['joined_files']);
 
-	$attach = new Attach();
-
 	for ($i = 0; $i < $total_files; $i++) {
 		$real_name     = $logdata['joined_files'][$i]['file_real_name'];
 		$physical_name = $logdata['joined_files'][$i]['file_physical_name'];
 		$mime_type     = $logdata['joined_files'][$i]['file_mimetype'];
 
-		$error = false;
-		$msg   = array();
-
-		$attach->joined_file_exists($physical_name, $error, $msg);
-
-		if ($error) {
-			$error = false;
+		$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
+		if (!file_exists($file_path)) {
 			continue;
 		}
-
-		$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 
 		$email->attach($file_path, $real_name, $mime_type);
 	}

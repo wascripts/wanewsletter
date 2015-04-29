@@ -179,7 +179,7 @@ function remove_stats($liste_from, $liste_to = false)
 					fclose($fp);
 				}
 
-				Attach::remove_file($filename);
+				unlink($filename);
 			}
 		}
 		$browse->close();

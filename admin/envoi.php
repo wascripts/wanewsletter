@@ -81,8 +81,15 @@ switch ($mode) {
 	//
 	case 'download':
 		$file_id = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
-		$attach  = new Attach();
-		$attach->download_file($file_id);
+
+		$attach = new Attach();
+		$file   = $attach->getFile($file_id);
+
+		if (!$file || $file['data'] === false) {
+			$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
+		}
+
+		sendfile($file['name'], $file['type'], $file['data']);
 		break;
 
 	case 'cancel':
@@ -465,7 +472,7 @@ switch ($mode) {
 			$db->query($sql);
 
 			$attach = new Attach();
-			$attach->delete_joined_files(true, $logdata['log_id']);
+			$attach->deleteFiles($logdata['log_id']);
 
 			$db->commit();
 
@@ -746,58 +753,30 @@ switch ($mode) {
 		//
 		// Attachement de fichiers
 		//
-		if ($mode == 'attach' && !empty($logdata['log_id']) &&
+		if ($mode == 'attach' && $logdata['log_id'] &&
 			$auth->check_auth(Auth::ATTACH, $listdata['liste_id'])
 		) {
 			$attach  = new Attach();
-			$file_id = (int) filter_input(INPUT_POST, 'fid', FILTER_VALIDATE_INT);
 
-			if (!empty($file_id)) {
-				//
-				// Attachement d'un fichier utilisé dans une autre newsletter de la liste
-				//
-				$attach->use_file_exists($file_id, $logdata['log_id'], $error, $msg_error);
-			}
-			else {
-				$local_file = trim(filter_input(INPUT_POST, 'local_file'));
-				$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : array();
-
-				//
-				// On a affaire soit à un fichier présent localement, soit à un fichier
-				// distant, soit à un fichier uploadé
-				//
-				if (!empty($local_file)) {
-					if (preg_match('#^(?:http)://.+/([^/]+)$#', $local_file, $match)) {
-						$upload_mode =  'remote';
-						$filename    = $match[1];
-					}
-					else {
-						$upload_mode = 'local';
-						$filename    = $local_file;
-					}
-
-					$tmp_filename = $local_file;
-					$filesize     = 0;
-					$filetype     = '';
-					$errno_code   = UPLOAD_ERR_OK;
+			try {
+				$file_id = (int) filter_input(INPUT_POST, 'fid', FILTER_VALIDATE_INT);
+				if ($file_id) {
+					// Ajout d’un fichier déjà existant.
+					$attach->useFile($logdata['log_id'], $file_id);
 				}
 				else {
-					$upload_mode  = 'upload';
-					$tmp_filename = $join_file['tmp_name'];
-					$filename     = $join_file['name'];
-					$filesize     = $join_file['size'];
-					$filetype     = $join_file['type'];
-					$errno_code   = $join_file['error'];
-				}
+					$local_file = trim(filter_input(INPUT_POST, 'local_file'));
+					$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : array();
 
-				$attach->upload_file($upload_mode, $logdata['log_id'], $filename,
-					$tmp_filename,
-					$filesize,
-					$filetype,
-					$errno_code,
-					$error,
-					$msg_error
-				);
+					$attach->addFile($logdata['log_id'], $local_file ?: $join_file);
+				}
+			}
+			catch (Dblayer\Exception $e) {
+				throw $e;
+			}
+			catch (Exception $e) {
+				$error = true;
+				$msg_error[] = $e->getMessage();
 			}
 		}
 		break;
@@ -814,7 +793,7 @@ switch ($mode) {
 			// Suppression du fichier joint spécifié
 			//
 			$attach = new Attach();
-			$attach->delete_joined_files(false, $logdata['log_id'], $file_ids);
+			$attach->deleteFiles($logdata['log_id'], $file_ids);
 
 			//
 			// Optimisation des tables

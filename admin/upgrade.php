@@ -129,7 +129,7 @@ $config_file .= "\$prefixe = '$prefixe';\n";
 $config_file .= "\n";
 
 if ($auth->isLoggedIn() && wan_is_admin($admindata) && isset($_POST['sendfile'])) {
-	Attach::send_file('config.inc.php', 'text/plain', $config_file);
+	sendfile('config.inc.php', 'text/plain', $config_file);
 }
 
 if (check_db_version($nl_config['db_version'])) {

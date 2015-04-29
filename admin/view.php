@@ -61,8 +61,15 @@ if ($mode == 'download') {
 	}
 
 	$file_id = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
-	$attach  = new Attach();
-	$attach->download_file($file_id);
+
+	$attach = new Attach();
+	$file   = $attach->getFile($file_id);
+
+	if (!$file || $file['data'] === false) {
+		$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
+	}
+
+	sendfile($file['name'], $file['type'], $file['data']);
 }
 
 //
@@ -135,7 +142,7 @@ else if ($mode == 'export') {
 	$data = file_get_contents($tmp_filename);
 	unlink($tmp_filename);
 
-	Attach::send_file($filename, 'application/zip', $data);
+	sendfile($filename, 'application/zip', $data);
 }
 
 //
@@ -1171,7 +1178,7 @@ else if ($mode == 'liste') {
 				}
 
 				$attach = new Attach();
-				$attach->delete_joined_files(true, $log_ids);
+				$attach->deleteFiles($log_ids);
 
 				$sql = "DELETE FROM " . LOG_TABLE . "
 					WHERE liste_id = " . $listdata['liste_id'];
@@ -1505,7 +1512,7 @@ else if ($mode == 'log') {
 			$db->query($sql);
 
 			$attach = new Attach();
-			$attach->delete_joined_files(true, $log_ids);
+			$attach->deleteFiles($log_ids);
 
 			$db->commit();
 

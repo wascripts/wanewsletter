@@ -310,24 +310,15 @@ switch ($mode) {
 				if (isset($files[$row['log_id']]) && count($files[$row['log_id']]) > 0) {
 					$total_files = count($files[$row['log_id']]);
 
-					$attach = new Attach();
-
 					for ($i = 0; $i < $total_files; $i++) {
 						$real_name     = $files[$row['log_id']][$i]['file_real_name'];
 						$physical_name = $files[$row['log_id']][$i]['file_physical_name'];
 						$mime_type     = $files[$row['log_id']][$i]['file_mimetype'];
 
-						$error = false;
-						$msg   = array();
-
-						$attach->joined_file_exists($physical_name, $error, $msg);
-
-						if ($error) {
-							$error = false;
+						$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
+						if (!file_exists($file_path)) {
 							continue;
 						}
-
-						$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
 
 						$email->attach($file_path, $real_name, $mime_type);
 					}

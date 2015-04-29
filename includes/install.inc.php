@@ -143,7 +143,7 @@ if (isset($_POST['sendfile'])) {
 		exit;
 	}
 
-	Attach::send_file('config.inc.php', 'text/plain', $config_file);
+	sendfile('config.inc.php', 'text/plain', $config_file);
 }
 
 $language = ($language != '') ? $language : $lang['CONTENT_LANG'];
