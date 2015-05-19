@@ -17,8 +17,8 @@
 
 namespace Wanewsletter;
 
-class PopClient {
-
+class PopClient
+{
 	/**
 	 * Identifiant de connexion
 	 *
