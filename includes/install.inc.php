@@ -264,11 +264,6 @@ if ($start) {
 	if (!$error) {
 		require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 
-		//
-		// On allonge le temps maximum d'execution du script.
-		//
-		@set_time_limit(300);
-
 		if (!($passwd_hash = password_hash($admin_pass, PASSWORD_DEFAULT))) {
 			trigger_error("Unexpected error returned by password API", E_USER_ERROR);
 		}

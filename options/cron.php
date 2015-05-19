@@ -44,7 +44,7 @@ if ($listdata = $result->fetch()) {
 	// Certains hébergeurs désactivent pour des raisons évidentes cette fonction
 	// Si c'est votre cas, vous êtes mal barré
 	//
-	@set_time_limit(1200);
+	@set_time_limit(3600);
 
 	if ($mode == 'send') {
 		require WA_ROOTDIR . '/includes/engine_send.php';

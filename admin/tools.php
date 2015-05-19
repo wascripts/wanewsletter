@@ -186,7 +186,7 @@ $EOL = (stripos($user_agent, 'Win')) ? "\r\n" : "\n";
 // Certains hébergeurs empèchent pour des raisons évidentes cette possibilité
 // Si c'est votre cas, vous êtes mal barré
 //
-@set_time_limit(1200);
+@set_time_limit(3600);
 
 function wan_subdir_status($dir)
 {

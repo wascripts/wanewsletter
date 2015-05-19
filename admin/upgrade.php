@@ -171,7 +171,7 @@ if (isset($_POST['start'])) {
 		// Lancement de la mise à jour
 		// On allonge le temps maximum d'execution du script.
 		//
-		@set_time_limit(1200);
+		@set_time_limit(3600);
 
 		require WA_ROOTDIR . '/includes/sql/sqlparser.php';
 

@@ -892,7 +892,7 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 	// Certains hébergeurs désactivent pour des raisons évidentes cette fonction
 	// Si c'est votre cas, vous êtes mal barré
 	//
-	@set_time_limit(1200);
+	@set_time_limit(3600);
 
 	//
 	// On lance l'envoi

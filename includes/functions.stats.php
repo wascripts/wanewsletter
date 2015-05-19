@@ -77,8 +77,6 @@ function create_stats($listdata, $month, $year)
 		return false;
 	}
 
-	@set_time_limit(300);
-
 	$filename = filename_stats(date('Y_F', mktime(0, 0, 0, $month, 1, $year)), $listdata['liste_id']);
 
 	if ($fw = fopen(WA_STATSDIR . '/' . $filename, 'w')) {
@@ -165,8 +163,6 @@ function remove_stats($liste_from, $liste_to = false)
 	if ($nl_config['disable_stats'] || !extension_loaded('gd')) {
 		return false;
 	}
-
-	@set_time_limit(300);
 
 	if ($browse = dir(WA_STATSDIR . '/')) {
 		$old_stats = array();
