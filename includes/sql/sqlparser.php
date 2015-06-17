@@ -57,7 +57,7 @@ function parseSQL($input, $prefixe = '')
 			//
 			// Nombre de simple quotes non échappés
 			//
-			$unescaped_quotes = preg_match_all("/(?<!\\\\)(\\\\\\\\)*'/", $lines[$i], $matches);
+			$unescaped_quotes = preg_match_all("/(?<!\\\\)(\\\\\\\\)*'/", $lines[$i]);
 
 			if ((!$between_quotes && !($unescaped_quotes % 2)) ||
 				($between_quotes && ($unescaped_quotes % 2))

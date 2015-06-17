@@ -322,13 +322,6 @@ switch ($mode) {
 		wan_print_row('Extension Zip', extension_loaded('zip'));
 		wan_print_row('Extension Zlib', extension_loaded('zlib'));
 
-		// Le safe mode et les magic quotes ont été supprimés à partir de PHP 5.4
-		if (PHP_VERSION_ID < 50400) {
-			wan_print_row('safe_mode', ini_get_flag('safe_mode'));
-			wan_print_row('magic_quotes_gpc', ini_get_flag('magic_quotes_gpc'));
-			wan_print_row('magic_quotes_runtime', ini_get_flag('magic_quotes_runtime'));
-		}
-
 		wan_print_row('open_basedir',  ini_get('open_basedir'));
 		wan_print_row('sys_temp_dir', sys_get_temp_dir());
 		wan_print_row('filter.default', ini_get('filter.default'));

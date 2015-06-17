@@ -556,7 +556,7 @@ class Subscription
 	private function make_link()
 	{
 		$formURL = $this->listdata['form_url'];
-		if (!empty($GLOBALS['formURL']) && empty($_REQUEST['formURL']) && empty($_FILES['formURL'])) {
+		if (!empty($GLOBALS['formURL'])) {
 			$formURL = $GLOBALS['formURL'];
 		}
 

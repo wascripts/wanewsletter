@@ -82,17 +82,11 @@ class Postgres extends Wadb
 			$connect = 'pg_pconnect';
 		}
 
-		// Les closures supportent $this à partir de PHP 5.4
-		if (PHP_VERSION_ID >= 50400) {
-			set_error_handler(function ($errno, $errstr) {
-				$this->error = $errstr;
-			});
-			$this->link = $connect($connectString);
-			restore_error_handler();
-		}
-		else {
-			$this->link = $connect($connectString);
-		}
+		set_error_handler(function ($errno, $errstr) {
+			$this->error = $errstr;
+		});
+		$this->link = $connect($connectString);
+		restore_error_handler();
 
 		if (!$this->link || pg_connection_status($this->link) !== PGSQL_CONNECTION_OK) {
 			$this->errno = -1;
@@ -164,14 +158,7 @@ class Postgres extends Wadb
 
 	public function quote($name)
 	{
-		if (function_exists('pg_escape_identifier')) {// TODO PHP 5.4.4+
-			$name = pg_escape_identifier($this->link, $name);
-		}
-		else {
-			$name = '"' . $name . '"';
-		}
-
-		return $name;
+		return pg_escape_identifier($this->link, $name);
 	}
 
 	public function vacuum($tables)

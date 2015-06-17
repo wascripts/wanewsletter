@@ -17,7 +17,7 @@
 		"source": "https://github.com/wascripts/wanewsletter"
 	},
 	"require": {
-		"php": ">=5.3.7",
+		"php": ">=5.4.4",
 		"patchwork/utf8": "~1.2",
 		"ircmaxell/password-compat": "1.0.*",
 		"wascripts/wamailer": "~4.0@dev",

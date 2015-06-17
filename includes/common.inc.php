@@ -52,11 +52,6 @@ set_exception_handler(__NAMESPACE__.'\\wan_exception_handler');
 spl_autoload_register(__NAMESPACE__.'\\wan_autoloader');
 
 //
-// Désactivation de magic_quotes_runtime (PHP < 5.4)
-//
-ini_set('magic_quotes_runtime', 0);
-
-//
 // Intialisation des variables pour éviter toute injection malveillante de code
 //
 $simple_header = $error = false;

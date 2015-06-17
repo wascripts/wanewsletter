@@ -966,7 +966,8 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 }
 
 /**
- * Annule l'effet produit par l'option de configuration magic_quotes_gpc à On
+ * Annule l’effet produit par l’option de configuration 'filter.default'
+ * positionnée sur 'magic_quotes'.
  * Fonction récursive
  *
  * @param mixed $data Tableau de données ou chaîne de caractères
@@ -977,9 +978,7 @@ function strip_magic_quotes(&$data)
 
 	if (is_null($doStrip)) {
 		$doStrip = false;
-		if ((PHP_VERSION_ID < 50400 && get_magic_quotes_gpc()) ||
-			ini_get('filter.default') == 'magic_quotes'
-		) {
+		if (ini_get('filter.default') == 'magic_quotes') {
 			$doStrip = true;
 		}
 	}
@@ -1265,7 +1264,7 @@ function http_get_contents($URL, &$errstr)
  */
 function wa_number_format($number, $decimals = 2)
 {
-	$number = u::number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
+	$number = number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
 	$number = rtrim($number, '0');
 	$dec_point_len = strlen($GLOBALS['lang']['DEC_POINT']);
 

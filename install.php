@@ -10,7 +10,7 @@
  */
 
 // Check PHP version here to avoid parse error with PHP < 5.3 in install.inc.php
-define('WA_PHP_VERSION_REQUIRED', '5.3.7');
+define('WA_PHP_VERSION_REQUIRED', '5.4.4');
 if (!version_compare(PHP_VERSION, WA_PHP_VERSION_REQUIRED, '>=')) {
 	printf("Your server is running PHP %s, but Wanewsletter requires PHP %s or higher",
 		PHP_VERSION,
