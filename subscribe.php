@@ -50,11 +50,9 @@ $list_box .= '</select>';
 
 $output->send_headers();
 
-$output->set_filenames(array(
-	'body' => 'subscribe_body.tpl'
-));
+$output->set_filenames(['body' => 'subscribe_body.tpl']);
 
-$output->assign_vars(array(
+$output->assign_vars([
 	'PAGE_TITLE'      => $lang['Title']['form'],
 	'L_INVALID_EMAIL' => str_replace('\'', '\\\'', $lang['Message']['Invalid_email']),
 	'L_PAGE_LOADING'  => str_replace('\'', '\\\'', $lang['Page_loading']),
@@ -68,7 +66,7 @@ $output->assign_vars(array(
 
 	'LIST_BOX' => $list_box,
 	'MESSAGE'  => $message
-));
+]);
 
 $output->pparse('body');
 

@@ -23,11 +23,11 @@ $old_config = $nl_config;
 $move_files = false;
 
 if (isset($_POST['submit'])) {
-	$new_config = array();
+	$new_config = [];
 	foreach ($old_config as $name => $value) {
-		$new_config[$name] = trim(filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW,
-			array('options' => array('default' => $value))
-		));
+		$new_config[$name] = trim(filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW, [
+			'options' => ['default' => $value]
+		]));
 	}
 
 	if ($new_config['language'] == '' || !validate_lang($new_config['language'])) {
@@ -119,9 +119,9 @@ if (isset($_POST['submit'])) {
 
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
 		$smtp = new \Wamailer\Transport\SmtpClient();
-		$smtp->options(array(
+		$smtp->options([
 			'starttls' => ($new_config['smtp_tls'] == SECURITY_STARTTLS)
-		));
+		]);
 
 		$server = ($new_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 		$server = sprintf($server, $new_config['smtp_host'], $new_config['smtp_port']);
@@ -191,7 +191,7 @@ else {
 require WA_ROOTDIR . '/includes/functions.box.php';
 
 $debug_box  = '<select name="debug_level">';
-foreach (array(DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL) as $debug_level) {
+foreach ([DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL] as $debug_level) {
 	$debug_box .= sprintf('<option value="%d"%s>%s</option>',
 		$debug_level,
 		$output->getBoolAttr('selected', ($new_config['debug_level'] == $debug_level)),
@@ -202,11 +202,9 @@ $debug_box .= '</select>';
 
 $output->page_header();
 
-$output->set_filenames( array(
-	'body' => 'config_body.tpl'
-));
+$output->set_filenames(['body' => 'config_body.tpl']);
 
-$output->assign_vars( array(
+$output->assign_vars([
 	'TITLE_CONFIG_LANGUAGE'     => $lang['Title']['config_lang'],
 	'TITLE_CONFIG_PERSO'        => $lang['Title']['config_perso'],
 	'TITLE_CONFIG_COOKIES'      => $lang['Title']['config_cookies'],
@@ -284,26 +282,26 @@ $output->assign_vars( array(
 	'SMTP_PORT'                 => $new_config['smtp_port'],
 	'SMTP_USER'                 => $new_config['smtp_user'],
 	'DEBUG_BOX'                 => $debug_box
-));
+]);
 
 if (check_ssl_support()) {
-	$output->assign_block_vars('ssl_support', array(
+	$output->assign_block_vars('ssl_support', [
 		'L_SECURITY'        => $lang['Connection_security'],
 		'L_NONE'            => $lang['None'],
 		'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $new_config['smtp_tls'] == SECURITY_STARTTLS),
 		'SSL_TLS_SELECTED'  => $output->getBoolAttr('selected', $new_config['smtp_tls'] == SECURITY_FULL_TLS)
-	));
+	]);
 }
 
 if (extension_loaded('gd')) {
-	$output->assign_block_vars('extension_gd', array(
+	$output->assign_block_vars('extension_gd', [
 		'TITLE_CONFIG_STATS'        => $lang['Title']['config_stats'],
 		'L_EXPLAIN_STATS'           => nl2br($lang['Explain']['config_stats']),
 		'L_DISABLE_STATS'           => $lang['Disable_stats'],
 
 		'CHECKED_DISABLE_STATS_ON'  => $output->getBoolAttr('checked', $new_config['disable_stats']),
 		'CHECKED_DISABLE_STATS_OFF' => $output->getBoolAttr('checked', !$new_config['disable_stats'])
-	));
+	]);
 }
 else {
 	$output->addHiddenField('disable_stats', '1');

@@ -81,11 +81,9 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'reset_passwd.tpl'
-			));
+			$output->set_filenames(['body' => 'reset_passwd.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'TITLE'            => ($userdata['passwd'] == '')
 					? $lang['Title']['Create_passwd'] : $lang['Title']['Reset_passwd'],
 				'L_NEW_PASSWD'     => $lang['New_passwd'],
@@ -94,7 +92,7 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 
 				'S_SCRIPT_NAME'    => $_SERVER['SCRIPT_NAME'],
 				'S_RESETKEY'       => $reset_key
-			));
+			]);
 
 			$output->pparse('body');
 
@@ -119,11 +117,11 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 				$_SESSION['reset_key_expire'] = strtotime('+15 min');
 
 				$tpl = new Template(WA_ROOTDIR . '/languages/' . $nl_config['language'] . '/emails/');
-				$tpl->set_filenames(array('mail' => 'reset_passwd.txt'));
-				$tpl->assign_vars(array(
+				$tpl->set_filenames(['mail' => 'reset_passwd.txt']);
+				$tpl->assign_vars([
 					'PSEUDO'    => $userdata['username'],
 					'RESET_URL' => wan_build_url($_SERVER['SCRIPT_NAME'].'?k='.$reset_key)
-				));
+				]);
 				$message = $tpl->pparse('mail', true);
 
 				$hostname = parse_url($nl_config['urlsite'], PHP_URL_HOST);
@@ -154,11 +152,9 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 
 	$output->page_header();
 
-	$output->set_filenames(array(
-		'body' => 'lost_passwd.tpl'
-	));
+	$output->set_filenames(['body' => 'lost_passwd.tpl']);
 
-	$output->assign_vars(array(
+	$output->assign_vars([
 		'TITLE'            => ($mode == 'cp')
 			? $lang['Title']['Create_passwd'] : $lang['Title']['Reset_passwd'],
 		'L_EXPLAIN'        => $lang['Explain']['Reset_passwd'],
@@ -168,7 +164,7 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 
 		'S_MODE'           => $mode,
 		'S_SCRIPT_NAME'    => $_SERVER['SCRIPT_NAME']
-	));
+	]);
 
 	$output->pparse('body');
 
@@ -221,13 +217,11 @@ if ($auth->isLoggedIn()) {
 
 $output->page_header();
 
-$output->set_filenames(array(
-	'body' => 'login.tpl'
-));
+$output->set_filenames(['body' => 'login.tpl']);
 
 $login_script = (check_in_admin()) ? 'login.php' : 'profil_cp.php';
 
-$output->assign_vars(array(
+$output->assign_vars([
 	'TITLE'          => $lang['Module']['login'],
 	'L_EXPLAIN'      => sprintf($lang['Explain']['login'],
 		sprintf('<a href="%s?mode=cp">', $login_script),
@@ -240,10 +234,10 @@ $output->assign_vars(array(
 	'L_VALID_BUTTON' => $lang['Button']['valid'],
 
 	'S_SCRIPT_NAME'   => $login_script
-));
+]);
 
 if (!filter_input(INPUT_COOKIE, $session->getName())) {
-	$output->assign_block_vars('cookie_notice', array('L_TEXT' => $lang['Cookie_notice']));
+	$output->assign_block_vars('cookie_notice', ['L_TEXT' => $lang['Cookie_notice']]);
 }
 
 

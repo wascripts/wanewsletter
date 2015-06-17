@@ -21,7 +21,7 @@ namespace Wanewsletter;
  *
  * @return string
  */
-function launch_sending($listdata, $logdata, array $supp_address = array())
+function launch_sending($listdata, $logdata, array $supp_address = [])
 {
 	global $nl_config, $db, $lang;
 
@@ -35,7 +35,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 	if (file_exists($lockfile)) {
 		$isBeginning = false;
 		$fp = fopen($lockfile, 'r+');
-		$supp_address = array();// On en tient pas compte, ça l'a déjà été lors du premier flôt
+		$supp_address = [];// On en tient pas compte, ça l'a déjà été lors du premier flôt
 	}
 	else {
 		$isBeginning = true;
@@ -81,10 +81,10 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 		$email->setReturnPath($listdata['return_email']);
 	}
 
-	$body = array(
+	$body = [
 		FORMAT_TEXTE => $logdata['log_body_text'],
 		FORMAT_HTML  => $logdata['log_body_html']
-	);
+	];
 
 	//
 	// Ajout du lien de désinscription, selon les méthodes d'envoi/format utilisés
@@ -148,9 +148,9 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 		$supp_address = array_unique($supp_address); // Au cas où...
 	}
 
-	$abo_ids     = array();
+	$abo_ids     = [];
 	$total_abo   = 0;
-	$abo_address = array();
+	$abo_address = [];
 
 	if ($logdata['log_status'] == STATUS_STANDBY) {
 		//
@@ -194,8 +194,8 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 		$tpl->loadFromString('htmlbody', $body[FORMAT_HTML]);
 
 		if ($nl_config['engine_send'] == ENGINE_BCC) {
-			$abonnes = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
-			$abo_ids = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
+			$abonnes = [FORMAT_TEXTE => [], FORMAT_HTML => []];
+			$abo_ids = [FORMAT_TEXTE => [], FORMAT_HTML => []];
 
 			foreach ($abo_address as $row) {
 				$abo_format = ($listdata['liste_format'] != FORMAT_MULTIPLE)
@@ -216,7 +216,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 			// Tableau pour remplacer les tags par des chaines vides
 			// Non utilisation des tags avec le moteur d'envoi en copie cachée
 			//
-			$tags_replace = array('NAME' => '', 'PSEUDO' => '');
+			$tags_replace = ['NAME' => '', 'PSEUDO' => ''];
 			if (count($other_tags) > 0) {
 				foreach ($other_tags as $tag) {
 					$tags_replace[$tag['tag_name']] = '';
@@ -225,7 +225,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 
 			$tpl->assign_vars($tags_replace);
 
-			foreach (array(FORMAT_TEXTE, FORMAT_HTML) as $format) {
+			foreach ([FORMAT_TEXTE, FORMAT_HTML] as $format) {
 				if (count($abonnes[$format]) > 0) {
 
 					$email->clearRecipients();
@@ -273,7 +273,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 					' ',
 					76,
 					($total_abo + count($supp_address)),
-					array('ansi_terminal' => function_exists('posix_isatty') && posix_isatty(STDOUT))
+					['ansi_terminal' => function_exists('posix_isatty') && posix_isatty(STDOUT)]
 				);
 			}
 			else {
@@ -285,26 +285,26 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 				$body[FORMAT_HTML]  = str_replace('{LINKS}', $link[FORMAT_HTML], $body[FORMAT_HTML]);
 			}
 
-			$supp_address_ok = array();
+			$supp_address_ok = [];
 			foreach ($supp_address as $address) {
 				if ($listdata['liste_format'] != FORMAT_HTML) {
-					$supp_address_ok[] = array(
+					$supp_address_ok[] = [
 						'format' => FORMAT_TEXTE,
 						'abo_pseudo' => '',
 						'abo_email'  => $address,
 						'register_key' => '',
 						'abo_id'     => -1
-					);
+					];
 				}
 
 				if ($listdata['liste_format'] != FORMAT_TEXTE) {
-					$supp_address_ok[] = array(
+					$supp_address_ok[] = [
 						'format' => FORMAT_HTML,
 						'abo_pseudo' => '',
 						'abo_email'  => $address,
 						'register_key' => '',
 						'abo_id'     => -1
-					);
+					];
 				}
 			}
 
@@ -325,7 +325,7 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 				//
 				// Traitement des tags et tags personnalisés
 				//
-				$tags_replace = array();
+				$tags_replace = [];
 
 				if ($row['abo_pseudo'] != '') {
 					$tags_replace['NAME'] = $row['abo_pseudo'];
@@ -355,10 +355,10 @@ function launch_sending($listdata, $logdata, array $supp_address = array())
 				}
 
 				if (!$listdata['use_cron']) {
-					$tags_replace = array_merge($tags_replace, array(
+					$tags_replace = array_merge($tags_replace, [
 						'WA_CODE'  => $row['register_key'],
 						'WA_EMAIL' => $row['abo_email']
-					));
+					]);
 				}
 
 				$tpl->assign_vars($tags_replace);
@@ -551,27 +551,27 @@ function newsletter_links($listdata)
 	if ($listdata['use_cron']) {
 		$liste_email = (!empty($listdata['liste_alias'])) ? $listdata['liste_alias'] : $listdata['sender_email'];
 
-		$link = array(
+		$link = [
 			FORMAT_TEXTE => $liste_email,
 			FORMAT_HTML  => sprintf($link_template,
 				sprintf('mailto:%s?subject=unsubscribe', $liste_email)
 			)
-		);
+		];
 	}
 	else {
 		if ($nl_config['engine_send'] == ENGINE_BCC) {
-			$link = array(
+			$link = [
 				FORMAT_TEXTE => $listdata['form_url'],
 				FORMAT_HTML  => sprintf($link_template, htmlspecialchars($listdata['form_url']))
-			);
+			];
 		}
 		else {
 			$tmp_link = $listdata['form_url'] . (strstr($listdata['form_url'], '?') ? '&' : '?') . '{WA_CODE}';
 
-			$link = array(
+			$link = [
 				FORMAT_TEXTE => $tmp_link,
 				FORMAT_HTML  => sprintf($link_template, htmlspecialchars($tmp_link))
-			);
+			];
 		}
 	}
 

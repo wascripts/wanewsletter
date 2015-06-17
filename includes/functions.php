@@ -88,7 +88,7 @@ function load_config_file()
 	// Compatibilité avec Wanewsletter < 2.3-beta2
 	//
 	if (!$dsn && !empty($dbtype)) {
-		$infos = array();
+		$infos = [];
 		$infos['engine'] = $dbtype;
 		$infos['host']   = $dbhost;
 		$infos['user']   = $dbuser;
@@ -211,7 +211,7 @@ function wa_get_config()
 	$result = $db->query("SELECT * FROM " . CONFIG_TABLE);
 	$result->setFetchMode(WadbResult::FETCH_ASSOC);
 	$row    = $result->fetch();
-	$config = array();
+	$config = [];
 
 	if (isset($row['config_name'])) {
 		do {
@@ -242,7 +242,7 @@ function wa_update_config($config, $value = null)
 	global $db;
 
 	if (is_string($config)) {
-		$config = array($config => $value);
+		$config = [$config => $value];
 	}
 
 	foreach ($config as $name => $value) {
@@ -309,13 +309,9 @@ function wan_ssl_connection()
  *
  * @return string
  */
-function wan_build_url($url, $params = array(), $session = false)
+function wan_build_url($url, array $params = [], $session = false)
 {
 	$parts = parse_url($url);
-
-	if (!is_array($params)) {
-		$params = array();
-	}
 
 	if (empty($parts['scheme'])) {
 		$proto = (wan_ssl_connection()) ? 'https' : 'http';
@@ -338,7 +334,7 @@ function wan_build_url($url, $params = array(), $session = false)
 
 	if ($path[0] != '/') {
 		$parts = explode('/', dirname($_SERVER['SCRIPT_NAME']).'/'.$path);
-		$path  = array();
+		$path  = [];
 
 		foreach ($parts as $part) {
 			if ($part == '.' || $part == '') {
@@ -354,7 +350,7 @@ function wan_build_url($url, $params = array(), $session = false)
 		$path = implode('/', $path);
 	}
 
-	$cur_params = array();
+	$cur_params = [];
 	if ($query != '') {
 		parse_str($query, $cur_params);
 	}
@@ -381,10 +377,10 @@ function wan_build_url($url, $params = array(), $session = false)
  * @param integer $status  Code de redirection HTTP
  */
 if (!function_exists('http_redirect')) {
-function http_redirect($url, $params = array(), $session = false, $status = 0)
+function http_redirect($url, array $params = [], $session = false, $status = 0)
 {
 	$status = intval($status);
-	if (!in_array($status, array(301, 302, 303, 307, 308))) {
+	if (!in_array($status, [301, 302, 303, 307, 308])) {
 		$status = 302;
 	}
 
@@ -406,13 +402,13 @@ function http_redirect($url, $params = array(), $session = false, $status = 0)
  *
  * @param array $admindata Données utilisateur
  */
-function load_settings(&$admindata = array())
+function load_settings(&$admindata = [])
 {
 	global $nl_config;
 
 	$file_pattern = WA_ROOTDIR . '/languages/%s/main.php';
 
-	$check_list = array();
+	$check_list = [];
 
 	if (!empty($admindata['admin_lang'])) {
 		$check_list[] = $admindata['admin_lang'];
@@ -495,13 +491,13 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	// Si l’affichage en bloc dans le bas de page est activé (défaut).
 	$skip &= DISPLAY_ERRORS_IN_LOG;
 
-	$error = new Error(array(
+	$error = new Error([
 		'type'    => $errno,
 		'message' => $errstr,
 		'file'    => $errfile,
 		'line'    => $errline,
 		'ignore'  => (!$debug || !$skip)
-	));
+	]);
 
 	wanlog($error);
 
@@ -591,7 +587,7 @@ function wan_format_error($error)
 		$message .= $backtrace;
 	}
 	else {
-		$labels  = array(
+		$labels  = [
 			E_NOTICE => 'PHP Notice',
 			E_WARNING => 'PHP Warning',
 			E_USER_ERROR => 'Error',
@@ -601,7 +597,7 @@ function wan_format_error($error)
 			E_DEPRECATED => 'PHP Deprecated',
 			E_USER_DEPRECATED => 'Deprecated',
 			E_RECOVERABLE_ERROR => 'PHP Error'
-		);
+		];
 
 		$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
 		$errfile = str_replace(dirname(__DIR__), '~', $errfile);
@@ -694,7 +690,7 @@ BASIC;
  */
 function wanlog($entry = null)
 {
-	static $entries = array();
+	static $entries = [];
 
 	if (func_num_args() == 0) {
 		return $entries;
@@ -731,12 +727,12 @@ function wan_error_get_last()
 
 	while ($e = array_pop($errors)) {
 		if ($e instanceof Exception) {
-			$error = array(
+			$error = [
 				'type'    => $e->getCode(),
 				'message' => $e->getMessage(),
 				'file'    => $e->getFile(),
 				'line'    => $e->getLine()
-			);
+			];
 			break;
 		}
 	}
@@ -873,7 +869,7 @@ function convert_time($dateformat, $timestamp)
 	if (!isset($search) || !isset($replace)) {
 		global $datetime;
 
-		$search = $replace = array();
+		$search = $replace = [];
 
 		foreach ($datetime as $orig_word => $repl_word) {
 			$search[]  = '/\b' . $orig_word . '\b/i';
@@ -915,7 +911,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 		//
 		// Optimisation des tables
 		//
-		$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE));
+		$db->vacuum([ABONNES_TABLE, ABO_LISTE_TABLE]);
 
 		return $total_entries_deleted;
 	}
@@ -927,7 +923,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 				AND register_date < " . strtotime(sprintf('-%d days', $limitevalidate));
 		$result = $db->query($sql);
 
-		$abo_ids = array();
+		$abo_ids = [];
 		while ($abo_id = $result->column('abo_id')) {
 			$abo_ids[] = $abo_id;
 		}
@@ -1138,7 +1134,7 @@ function wan_get_contents($URL, &$errstr)
 		}
 
 		if (is_readable($URL)) {
-			$result = array('data' => file_get_contents($URL), 'charset' => null);
+			$result = ['data' => file_get_contents($URL), 'charset' => null];
 		}
 		else {
 			$result = false;
@@ -1250,7 +1246,7 @@ function http_get_contents($URL, &$errstr)
 		}
 	}
 
-	return array('type' => $datatype, 'charset' => $charset, 'data' => $data);
+	return ['type' => $datatype, 'charset' => $charset, 'data' => $data];
 }
 
 /**
@@ -1388,15 +1384,15 @@ function wan_sendmail(Email $email, $keepalive = false)
 
 	if ($nl_config['use_smtp'] && is_null($smtp)) {
 		$server = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
-		$options = array(
+		$options = [
 			'server'   => sprintf($server, $nl_config['smtp_host'], $nl_config['smtp_port']),
 			'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
-			'auth' => array(
+			'auth' => [
 				'username'  => $nl_config['smtp_user'],
 				'secretkey' => $nl_config['smtp_pass']
-			),
+			],
 			'keepalive' => $keepalive
-		);
+		];
 		$smtp = Mailer::setTransport('smtp', $options);
 	}
 
@@ -1410,7 +1406,7 @@ function wan_sendmail(Email $email, $keepalive = false)
  */
 function wan_get_tags()
 {
-	static $other_tags = array();
+	static $other_tags = [];
 
 	if (count($other_tags) > 0) {
 		return $other_tags;
@@ -1491,7 +1487,7 @@ function get_max_filesize()
  */
 function check_ssl_support()
 {
-	$transports = array();
+	$transports = [];
 	if (function_exists('stream_get_transports')) {
 		$transports = stream_get_transports();
 	}

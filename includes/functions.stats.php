@@ -36,7 +36,7 @@ function convertToRGB($hexColor)
 
 	preg_match($pattern, $hexColor, $tmp);
 
-	$parts = array();
+	$parts = [];
 	$parts['red']   = str_repeat($tmp[1], $repeat);
 	$parts['green'] = str_repeat($tmp[2], $repeat);
 	$parts['blue']  = str_repeat($tmp[3], $repeat);
@@ -57,7 +57,7 @@ function xy_arc($degre, $diametre)
 	$x_arc = (cos($degre * (M_PI / 180.0)) * ($diametre / 2));
 	$y_arc = (sin($degre * (M_PI / 180.0)) * ($diametre / 2));
 
-	return array($x_arc, $y_arc);
+	return [$x_arc, $y_arc];
 }
 
 /**
@@ -80,7 +80,7 @@ function create_stats($listdata, $month, $year)
 	$filename = filename_stats(date('Y_F', mktime(0, 0, 0, $month, 1, $year)), $listdata['liste_id']);
 
 	if ($fw = fopen(WA_STATSDIR . '/' . $filename, 'w')) {
-		$stats    = array();
+		$stats    = [];
 		$max_days = date('t', mktime(0, 0, 0, $month, 15, $year));
 
 		for ($day = 1, $i = 0; $day <= $max_days; $day++, $i++) {
@@ -165,7 +165,7 @@ function remove_stats($liste_from, $liste_to = false)
 	}
 
 	if ($browse = dir(WA_STATSDIR . '/')) {
-		$old_stats = array();
+		$old_stats = [];
 
 		while (($filename = $browse->read()) !== false) {
 			if (preg_match("/^([0-9]{4}_[a-zA-Z]+)_list$liste_from\.txt$/i", $filename, $m)) {

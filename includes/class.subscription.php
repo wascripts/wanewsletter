@@ -16,10 +16,10 @@ use Wamailer\Email;
 class Subscription
 {
 	private $format      = FORMAT_TEXTE;
-	private $listdata    = array();
+	private $listdata    = [];
 	public  $liste_email = '';
 
-	private $account      = array();
+	private $account      = [];
 	private $hasAccount   = false;
 	private $isRegistered = false;
 	public  $message      = '';
@@ -54,7 +54,7 @@ class Subscription
 		// Vérification syntaxique de l'email
 		//
 		if (!Mailer::checkMailSyntax($email)) {
-			return array('error' => true, 'message' => $lang['Message']['Invalid_email']);
+			return ['error' => true, 'message' => $lang['Message']['Invalid_email']];
 		}
 
 		//
@@ -68,7 +68,7 @@ class Subscription
 
 			while ($ban_email = $result->column('ban_email')) {
 				if (preg_match('/\b' . str_replace('*', '.*?', $ban_email) . '\b/i', $email)) {
-					return array('error' => true, 'message' => $lang['Message']['Email_banned']);
+					return ['error' => true, 'message' => $lang['Message']['Email_banned']];
 				}
 			}
 		}
@@ -94,21 +94,21 @@ class Subscription
 		if ($abodata = $result->fetch()) {
 			if (!is_null($abodata['confirmed'])) {
 				if ($action == 'inscription' && $abodata['confirmed'] == SUBSCRIBE_CONFIRMED) {
-					return array('error' => true, 'message' => $lang['Message']['Allready_reg']);
+					return ['error' => true, 'message' => $lang['Message']['Allready_reg']];
 				}
 				else if ($action == 'desinscription' && $abodata['confirmed'] == SUBSCRIBE_NOT_CONFIRMED) {
-					return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
+					return ['error' => true, 'message' => $lang['Message']['Unknown_email']];
 				}
 			}
 			else if ($action != 'inscription') {
-				return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
+				return ['error' => true, 'message' => $lang['Message']['Unknown_email']];
 			}
 		}
 		else if ($action != 'inscription') {
-			return array('error' => true, 'message' => $lang['Message']['Unknown_email']);
+			return ['error' => true, 'message' => $lang['Message']['Unknown_email']];
 		}
 
-		$this->account['tags'] = array();
+		$this->account['tags'] = [];
 
 		if (is_array($abodata)) {
 			$this->hasAccount   = true;
@@ -145,14 +145,14 @@ class Subscription
 			$this->account['format'] = $this->format;
 		}
 
-		return array('error' => false, 'abodata' => $abodata);
+		return ['error' => false, 'abodata' => $abodata];
 	}
 
 	public function do_action($action, $email, $format = null)
 	{
 		if ($this->listdata['liste_format'] == FORMAT_MULTIPLE &&
 			!is_null($format) &&
-			in_array($format, array(FORMAT_TEXTE, FORMAT_HTML))
+			in_array($format, [FORMAT_TEXTE, FORMAT_HTML])
 		) {
 			$this->format = $format;
 		}
@@ -209,7 +209,7 @@ class Subscription
 			$this->account['status'] = $abodata['abo_status'];
 			$this->account['date']   = $abodata['register_date'];
 			$this->account['code']   = $code;
-			$this->account['tags']   = array();
+			$this->account['tags']   = [];
 
 			foreach ($this->other_tags as $tag) {
 				if (isset($abodata[$tag['column_name']])) {
@@ -238,12 +238,12 @@ class Subscription
 		$db->beginTransaction();
 
 		if (!$this->hasAccount) {
-			$sql_data = array(
+			$sql_data = [
 				'abo_email'  => $this->account['email'],
 				'abo_pseudo' => $this->account['pseudo'],
 				'abo_pwd'    => md5($this->account['code']),
 				'abo_status' => $this->account['status']
-			);
+			];
 
 			foreach ($this->other_tags as $tag) {
 				$input_name = (!empty($tag['field_name'])) ? $tag['field_name'] : $tag['column_name'];
@@ -273,14 +273,14 @@ class Subscription
 				$confirmed = SUBSCRIBE_CONFIRMED;
 			}
 
-			$sql_data = array(
+			$sql_data = [
 				'abo_id'        => $this->account['abo_id'],
 				'liste_id'      => $this->listdata['liste_id'],
 				'format'        => $this->format,
 				'register_key'  => $this->account['code'],
 				'register_date' => $this->account['date'],
 				'confirmed'     => $confirmed
-			);
+			];
 			$db->insert(ABO_LISTE_TABLE, $sql_data);
 		}
 
@@ -314,28 +314,28 @@ class Subscription
 		}
 
 		$tpl = new Template($this->tpl_dir);
-		$tpl->set_filenames(array('mail' => $email_tpl.'.txt'));
-		$tpl->assign_vars(array(
+		$tpl->set_filenames(['mail' => $email_tpl.'.txt']);
+		$tpl->assign_vars([
 			'LISTE'    => $this->listdata['liste_name'],
 			'SITENAME' => $nl_config['sitename'],
 			'URLSITE'  => $nl_config['urlsite'],
 			'SIG'      => $this->listdata['liste_sig'],
 			'PSEUDO'   => $this->account['pseudo']
-		));
+		]);
 
 		if ($this->listdata['use_cron']) {
-			$tpl->assign_vars(array(
+			$tpl->assign_vars([
 				'EMAIL_NEWSLETTER' => $this->liste_email
-			));
+			]);
 		}
 		else {
-			$tpl->assign_vars(array(
+			$tpl->assign_vars([
 				'LINK' => $this->make_link()
-			));
+			]);
 		}
 
 		if (count($this->other_tags) > 0) {
-			$tags = array();
+			$tags = [];
 			foreach ($this->other_tags as $tag) {
 				if (isset($this->account['tags'][$tag['column_name']])) {
 					$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
@@ -347,9 +347,9 @@ class Subscription
 
 		if ($nl_config['enable_profil_cp']) {
 			$link_profil_cp = $nl_config['urlsite'] . $nl_config['path'] . 'profil_cp.php';
-			$tpl->assign_block_vars('enable_profil_cp', array(
+			$tpl->assign_block_vars('enable_profil_cp', [
 				'LINK_PROFIL_CP' => $link_profil_cp
-			));
+			]);
 		}
 
 		$body = $tpl->pparse('mail', true);
@@ -464,29 +464,29 @@ class Subscription
 			$email_tpl = ($this->listdata['use_cron']) ? 'unsubscribe_cron' : 'unsubscribe_form';
 
 			$tpl = new Template($this->tpl_dir);
-			$tpl->set_filenames(array('mail' => $email_tpl.'.txt'));
-			$tpl->assign_vars(array(
+			$tpl->set_filenames(['mail' => $email_tpl.'.txt']);
+			$tpl->assign_vars([
 				'LISTE'    => $this->listdata['liste_name'],
 				'SITENAME' => $nl_config['sitename'],
 				'URLSITE'  => $nl_config['urlsite'],
 				'SIG'      => $this->listdata['liste_sig'],
 				'PSEUDO'   => $this->account['pseudo']
-			));
+			]);
 
 			if ($this->listdata['use_cron']) {
-				$tpl->assign_vars(array(
+				$tpl->assign_vars([
 					'EMAIL_NEWSLETTER' => $this->liste_email,
 					'CODE'             => $this->account['code']
-				));
+				]);
 			}
 			else {
-				$tpl->assign_vars(array(
+				$tpl->assign_vars([
 					'LINK' => $this->make_link()
-				));
+				]);
 			}
 
 			if (count($this->other_tags) > 0) {
-				$tags = array();
+				$tags = [];
 				foreach ($this->other_tags as $tag) {
 					if (isset($this->account['tags'][$tag['column_name']])) {
 						$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];
@@ -588,14 +588,14 @@ class Subscription
 		if ($result = $db->query($sql)) {
 			if ($row = $result->fetch()) {
 				$tpl = new Template($this->tpl_dir);
-				$tpl->set_filenames(array('mail' => $template.'.txt'));
-				$tpl->assign_vars(array(
+				$tpl->set_filenames(['mail' => $template.'.txt']);
+				$tpl->assign_vars([
 					'EMAIL'   => $this->account['email'],
 					'LISTE'   => $this->listdata['liste_name'],
 					'URLSITE' => $nl_config['urlsite'],
 					'SIG'     => $this->listdata['liste_sig'],
 					'PSEUDO'  => $this->account['pseudo']
-				));
+				]);
 
 				$email = new Email();
 				$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
@@ -606,7 +606,7 @@ class Subscription
 				}
 
 				if (count($this->other_tags) > 0) {
-					$tags = array();
+					$tags = [];
 					foreach ($this->other_tags as $tag) {
 						if (isset($this->account['tags'][$tag['column_name']])) {
 							$tags[$tag['tag_name']] = $this->account['tags'][$tag['column_name']];

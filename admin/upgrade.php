@@ -178,7 +178,7 @@ if (isset($_POST['start'])) {
 		$sql_create = Dblayer\parseSQL(file_get_contents($sql_create), $prefixe);
 		$sql_data   = Dblayer\parseSQL(file_get_contents($sql_data), $prefixe);
 
-		$sql_create_by_table = $sql_data_by_table = array();
+		$sql_create_by_table = $sql_data_by_table = [];
 
 		foreach ($sql_create as $query) {
 			if (preg_match("/CREATE\s+(TABLE|INDEX)\s+([A-Za-z0-9_$]+?)\s+/", $query, $m)) {
@@ -195,7 +195,7 @@ if (isset($_POST['start'])) {
 					}
 
 					if (!isset($sql_create_by_table[$tablename])) {
-						$sql_create_by_table[$tablename] = array();
+						$sql_create_by_table[$tablename] = [];
 					}
 					$sql_create_by_table[$tablename][] = $query;
 				}
@@ -205,7 +205,7 @@ if (isset($_POST['start'])) {
 		foreach ($sql_data as $query) {
 			if (preg_match('/INSERT\s+INTO\s+([A-Za-z0-9_$]+)/', $query, $m)) {
 				if (!array_key_exists($m[1], $sql_data_by_table) && array_key_exists($m[1], $sql_schemas)) {
-					$sql_data_by_table[$m[1]] = array();
+					$sql_data_by_table[$m[1]] = [];
 				}
 				$sql_data_by_table[$m[1]][] = $query;
 			}
@@ -217,7 +217,7 @@ if (isset($_POST['start'])) {
 		//
 		// Début de la mise à jour
 		//
-		$sql_update = array();
+		$sql_update = [];
 
 		if ($nl_config['db_version'] < 7) {
 			//
@@ -234,7 +234,7 @@ if (isset($_POST['start'])) {
 			$result = $db->query($sql);
 
 			if ($row = $result->fetch()) {
-				$emails = array();
+				$emails = [];
 
 				do {
 					$emails[] = $row['abo_email'];
@@ -341,7 +341,7 @@ if (isset($_POST['start'])) {
 			}
 			$result->free();
 
-			$sql_update = array();
+			$sql_update = [];
 			$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
 				DROP COLUMN abo_register_key,
 				DROP COLUMN abo_register_date";
@@ -387,7 +387,7 @@ if (isset($_POST['start'])) {
 					ALTER COLUMN liste_alias TYPE VARCHAR(254)";
 			}
 			else if ($db::ENGINE == 'sqlite') {
-				foreach (array(ABONNES_TABLE, ADMIN_TABLE, BANLIST_TABLE, LISTE_TABLE) as $tablename) {
+				foreach ([ABONNES_TABLE, ADMIN_TABLE, BANLIST_TABLE, LISTE_TABLE] as $tablename) {
 					wa_sqlite_recreate_table($tablename);
 				}
 			}
@@ -441,7 +441,7 @@ if (isset($_POST['start'])) {
 					ALTER COLUMN admin_pwd TYPE VARCHAR(255)";
 			}
 			else if ($db::ENGINE == 'sqlite') {
-				foreach (array(ABONNES_TABLE, ADMIN_TABLE) as $tablename) {
+				foreach ([ABONNES_TABLE, ADMIN_TABLE] as $tablename) {
 					wa_sqlite_recreate_table($tablename);
 				}
 			}
@@ -562,7 +562,7 @@ if (isset($_POST['start'])) {
 				}
 			}
 			else if ($db::ENGINE == 'sqlite') {
-				$db->createFunction('utf8_encode', array('\Patchwork\Utf8', 'utf8_encode'));
+				$db->createFunction('utf8_encode', ['\Patchwork\Utf8', 'utf8_encode']);
 
 				$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_pseudo = utf8_encode(abo_pseudo)";
 				$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_login = utf8_encode(admin_login)";
@@ -746,29 +746,27 @@ if (isset($_POST['start'])) {
 		if (UPDATE_CONFIG_FILE || $moved_dirs) {
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'result_upgrade_body.tpl'
-			));
+			$output->set_filenames(['body' => 'result_upgrade_body.tpl']);
 
 			$message = $lang['Success_upgrade'];
 
 			if (UPDATE_CONFIG_FILE) {
-				$output->assign_block_vars('download_file', array(
+				$output->assign_block_vars('download_file', [
 					'L_DL_BUTTON' => $lang['Button']['dl']
-				));
+				]);
 
 				$message = $lang['Success_upgrade_no_config'];
 			}
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
 				'MESSAGE' => nl2br($message)
-			));
+			]);
 
 			if ($moved_dirs) {
-				$output->assign_block_vars('moved_dirs', array(
+				$output->assign_block_vars('moved_dirs', [
 					'MOVED_DIRS_NOTICE' => nl2br($lang['Moved_dirs_notice'])
-				));
+				]);
 			}
 
 			$output->pparse('body');
@@ -783,22 +781,20 @@ if (isset($_POST['start'])) {
 
 $output->page_header();
 
-$output->set_filenames( array(
-	'body' => 'upgrade_body.tpl'
-));
+$output->set_filenames(['body' => 'upgrade_body.tpl']);
 
-$output->assign_vars( array(
+$output->assign_vars([
 	'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
 	'L_EXPLAIN'       => nl2br(sprintf($lang['Welcome_in_upgrade'], WANEWSLETTER_VERSION)),
 	'L_START_BUTTON'  => $lang['Start_upgrade']
-));
+]);
 
 if (!$auth->isLoggedIn()) {
 	// ajouter formulaire de connexion
-	$output->assign_block_vars('login_form', array(
+	$output->assign_block_vars('login_form', [
 		'L_LOGIN'  => $lang['Login'],
 		'L_PASSWD' => $lang['Password']
-	));
+	]);
 }
 
 $output->pparse('body');

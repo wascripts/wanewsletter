@@ -25,39 +25,38 @@ define('LOG_TABLE',           $prefixe . 'log');
 define('LOG_FILES_TABLE',     $prefixe . 'log_files');
 define('SESSIONS_TABLE',      $prefixe . 'session');
 
-$GLOBALS['supported_db'] = array(
-	'mysql' => array(
-		'label'        => 'MySQL',
-		'Name'         => 'MySQL &#8805; 5.0.7',
-		'extension'    => (extension_loaded('mysql') || extension_loaded('mysqli'))
-	),
-	'postgres' => array(
-		'label'        => 'PostgreSQL',
-		'Name'         => 'PostgreSQL &#8805; 8.3',
-		'extension'    => extension_loaded('pgsql')
-	),
-	'sqlite' => array(
-		'label'        => 'SQLite',
-		'Name'         => 'SQLite 3',
-		'extension'    => (class_exists('SQLite3') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite'))
-		)
-	)
-);
+$GLOBALS['supported_db'] = [
+	'mysql' => [
+		'label'     => 'MySQL',
+		'Name'      => 'MySQL &#8805; 5.0.7',
+		'extension' => (extension_loaded('mysql') || extension_loaded('mysqli'))
+	],
+	'postgres' => [
+		'label'     => 'PostgreSQL',
+		'Name'      => 'PostgreSQL &#8805; 8.3',
+		'extension' => extension_loaded('pgsql')
+	],
+	'sqlite' => [
+		'label'     => 'SQLite',
+		'Name'      => 'SQLite 3',
+		'extension' => (class_exists('SQLite3') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
+	]
+];
 
-$GLOBALS['sql_schemas'] = array(
-	ABO_LISTE_TABLE     => array(),
-	ABONNES_TABLE       => array(),
-	ADMIN_TABLE         => array(),
-	AUTH_ADMIN_TABLE    => array(),
-	BANLIST_TABLE       => array(),
-	CONFIG_TABLE        => array(),
-	FORBIDDEN_EXT_TABLE => array(),
-	JOINED_FILES_TABLE  => array(),
-	LISTE_TABLE         => array(),
-	LOG_TABLE           => array(),
-	LOG_FILES_TABLE     => array(),
-	SESSIONS_TABLE      => array()
-);
+$GLOBALS['sql_schemas'] = [
+	ABO_LISTE_TABLE     => [],
+	ABONNES_TABLE       => [],
+	ADMIN_TABLE         => [],
+	AUTH_ADMIN_TABLE    => [],
+	BANLIST_TABLE       => [],
+	CONFIG_TABLE        => [],
+	FORBIDDEN_EXT_TABLE => [],
+	JOINED_FILES_TABLE  => [],
+	LISTE_TABLE         => [],
+	LOG_TABLE           => [],
+	LOG_FILES_TABLE     => [],
+	SESSIONS_TABLE      => []
+];
 
 /**
  * Génère une chaîne DSN
@@ -134,7 +133,7 @@ function parseDSN($dsn)
 		return false;
 	}
 
-	$infos = $options = array();
+	$infos = $options = [];
 
 	foreach ($dsn_parts as $key => $value) {
 		switch ($key) {
@@ -203,7 +202,7 @@ function parseDSN($dsn)
 		}
 	}
 
-	return array($infos, $options);
+	return [$infos, $options];
 }
 
 /**
@@ -277,7 +276,7 @@ function exec_queries(&$queries)
 	global $db;
 
 	if (!is_array($queries)) {
-		$queries = array($queries);
+		$queries = [$queries];
 	}
 
 	foreach ($queries as $query) {
@@ -286,7 +285,7 @@ function exec_queries(&$queries)
 		}
 	}
 
-	$queries = array();
+	$queries = [];
 }
 
 /**
@@ -310,14 +309,14 @@ function wa_sqlite_recreate_table($tablename, $restore_data = true)
 	}
 
 	$schema['updated'] = true;
-	$columns = array();
+	$columns = [];
 
 	$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
 	while ($row = $result->fetch()) {
 		$columns[] = $row['name'];
 	}
 
-	$sql_update   = array();
+	$sql_update   = [];
 	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
 	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
 

@@ -20,14 +20,11 @@ $mode      = filter_input(INPUT_GET, 'mode');
 $action    = filter_input(INPUT_GET, 'action');
 $sql_type  = filter_input(INPUT_GET, 'type');
 $sql_order = filter_input(INPUT_GET, 'order');
-$page_id   = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, array(
-	'options' => array(
-		'min_range' => 1,
-		'default'   => 1
-	)
-));
+$page_id   = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
+	'options' => ['min_range' => 1, 'default' => 1]
+]);
 
-if (!in_array($mode, array('liste', 'log', 'abonnes', 'download', 'iframe', 'export'))) {
+if (!in_array($mode, ['liste', 'log', 'abonnes', 'download', 'iframe', 'export'])) {
 	http_redirect('index.php');
 }
 
@@ -35,7 +32,7 @@ if (isset($_POST['cancel'])) {
 	http_redirect('view.php?mode=' . $mode);
 }
 
-$vararray = array('purge', 'edit', 'delete');
+$vararray = ['purge', 'edit', 'delete'];
 foreach ($vararray as $varname) {
 	if (isset($_POST[$varname])) {
 		$action = $varname;
@@ -318,11 +315,9 @@ else if ($mode == 'abonnes') {
 		if ($row = $result->fetch()) {
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'view_abo_profil_body.tpl'
-			));
+			$output->set_filenames(['body' => 'view_abo_profil_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_TITLE'             => sprintf($lang['Title']['profile'],
 					htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
 				),
@@ -339,36 +334,36 @@ else if ($mode == 'abonnes') {
 					? htmlspecialchars($row['abo_pseudo']) : '<b>' . $lang['No_data'] . '</b>',
 				'S_ABO_EMAIL'         => htmlspecialchars($row['abo_email']),
 				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIF) ? $lang['Active'] : $lang['Inactive']
-			));
+			]);
 
 			//
 			// Affichage des valeurs des tags enregistrés
 			//
 			if (count($other_tags) > 0) {
-				$output->assign_block_vars('tags', array(
+				$output->assign_block_vars('tags', [
 					'L_CAPTION' => $lang['TagsList'],
 					'L_NAME'    => $lang['Name'],
 					'L_VALUE'   => $lang['Value']
-				));
+				]);
 
 				foreach ($other_tags as $tag) {
 					$value = $row[$tag['column_name']];
 					$value = (!is_null($value)) ? nl2br(htmlspecialchars($value)) : '<i>NULL</i>';
 
-					$output->assign_block_vars('tags.row', array(
+					$output->assign_block_vars('tags.row', [
 						'NAME'  => $tag['tag_name'],
 						'VALUE' => $value,
-					));
+					]);
 				}
 			}
 
 			// Actions possibles sur cette liste
 			if ($auth->check_auth(Auth::EDIT, $_SESSION['liste'])) {
-				$output->assign_block_vars('actions', array(
+				$output->assign_block_vars('actions', [
 					'L_EDIT_ACCOUNT'   => $lang['Edit_account'],
 					'L_DELETE_ACCOUNT' => $lang['Button']['del_account'],
 					'S_ABO_ID'         => $row['abo_id']
-				));
+				]);
 			}
 
 			// Affichage des listes de diffusion auxquelles l'abonné est inscrit
@@ -391,11 +386,11 @@ else if ($mode == 'abonnes') {
 					);
 				}
 
-				$output->assign_block_vars('listerow', array(
+				$output->assign_block_vars('listerow', [
 					'LISTE_NAME'    => htmlspecialchars($liste_name),
 					'CHOICE_FORMAT' => $format,
 					'LISTE_ID'      => $row['liste_id']
-				));
+				]);
 
 				if ($row['register_date'] < $register_date) {
 					$register_date = $row['register_date'];
@@ -424,7 +419,7 @@ else if ($mode == 'abonnes') {
 			WHERE abo_id = " . $abo_id;
 		$result = $db->query($sql);
 
-		$tmp_ids = array();
+		$tmp_ids = [];
 		while ($tmp_id = $result->column('liste_id')) {
 			$tmp_ids[] = $tmp_id;
 		}
@@ -450,11 +445,11 @@ else if ($mode == 'abonnes') {
 			}
 
 			if (!$error) {
-				$sql_data = array(
+				$sql_data = [
 					'abo_email'  => $email,
 					'abo_pseudo' => strip_tags(trim(u::filter_input(INPUT_POST, 'pseudo'))),
 					'abo_status' => (filter_input(INPUT_POST, 'status') == ABO_ACTIF) ? ABO_ACTIF : ABO_INACTIF
-				);
+				];
 
 				//
 				// Récupération des champs des tags personnalisés
@@ -472,17 +467,17 @@ else if ($mode == 'abonnes') {
 					}
 				}
 
-				$db->update(ABONNES_TABLE, $sql_data, array('abo_id' => $abo_id));
+				$db->update(ABONNES_TABLE, $sql_data, ['abo_id' => $abo_id]);
 
 				$formatList = (array) filter_input(INPUT_POST, 'format',
 					FILTER_VALIDATE_INT,
 					FILTER_REQUIRE_ARRAY
 				);
 
-				$update = array(FORMAT_TEXTE => array(), FORMAT_HTML => array());
+				$update = [FORMAT_TEXTE => [], FORMAT_HTML => []];
 
 				foreach ($formatList as $liste_id => $format) {
-					if (in_array($format, array(FORMAT_TEXTE, FORMAT_HTML)) && $auth->check_auth(Auth::EDIT, $liste_id)) {
+					if (in_array($format, [FORMAT_TEXTE, FORMAT_HTML]) && $auth->check_auth(Auth::EDIT, $liste_id)) {
 						$update[$format][] = $liste_id;
 					}
 				}
@@ -530,11 +525,9 @@ else if ($mode == 'abonnes') {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'edit_abo_profil_body.tpl'
-			));
+			$output->set_filenames(['body' => 'edit_abo_profil_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_TITLE'              => sprintf($lang['Title']['mod_profile'],
 					htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
 				),
@@ -557,22 +550,22 @@ else if ($mode == 'abonnes') {
 				'S_ABO_ID'             => $row['abo_id'],
 				'S_STATUS_ACTIVE'      => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_ACTIF)),
 				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIF))
-			));
+			]);
 
 			//
 			// Affichage des valeurs des tags enregistrés
 			//
 			if (count($other_tags) > 0) {
-				$output->assign_block_vars('tags', array(
+				$output->assign_block_vars('tags', [
 					'L_TITLE' => $lang['TagsEdit']
-				));
+				]);
 
 				foreach ($other_tags as $tag) {
-					$output->assign_block_vars('tags.row', array(
+					$output->assign_block_vars('tags.row', [
 						'NAME'      => $tag['tag_name'],
 						'FIELDNAME' => $tag['column_name'],
 						'VALUE'     => htmlspecialchars($row[$tag['column_name']])
-					));
+					]);
 				}
 			}
 
@@ -587,11 +580,11 @@ else if ($mode == 'abonnes') {
 					$format_box = ($format == FORMAT_HTML) ? 'HTML' : 'texte';
 				}
 
-				$output->assign_block_vars('listerow', array(
+				$output->assign_block_vars('listerow', [
 					'LISTE_NAME' => htmlspecialchars($auth->listdata[$row['liste_id']]['liste_name']),
 					'FORMAT_BOX' => $format_box,
 					'LISTE_ID'   => $row['liste_id']
-				));
+				]);
 			}
 			while ($row = $result->fetch());
 
@@ -617,7 +610,7 @@ else if ($mode == 'abonnes') {
 		// Spécial. Cas où on veut supprimer un  seul compte et l'ID est
 		// fourni seul via le lien "Supprimer ce compte".
 		if (count($abo_ids) == 0 && $abo_id > 0) {
-			$abo_ids = array($abo_id);
+			$abo_ids = [$abo_id];
 		}
 
 		if ($email_list == '' && count($abo_ids) == 0) {
@@ -648,7 +641,7 @@ else if ($mode == 'abonnes') {
 			//
 			// Optimisation des tables
 			//
-			$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE));
+			$db->vacuum([ABONNES_TABLE, ABO_LISTE_TABLE]);
 
 			$target = './view.php?mode=abonnes';
 			$output->redirect($target, 4);
@@ -700,11 +693,9 @@ else if ($mode == 'abonnes') {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'confirm_body.tpl'
-			));
+			$output->set_filenames(['body' => 'confirm_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $lang['Delete_abo'],
@@ -713,7 +704,7 @@ else if ($mode == 'abonnes') {
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM' => 'view.php?mode=abonnes&amp;action=delete'
-			));
+			]);
 
 			$output->pparse('body');
 
@@ -762,7 +753,7 @@ else if ($mode == 'abonnes') {
 		}
 	}
 	else {
-		$aborow = array();
+		$aborow = [];
 	}
 
 	$search_days_box  = '<select name="days">';
@@ -781,11 +772,9 @@ else if ($mode == 'abonnes') {
 
 	$output->page_header();
 
-	$output->set_filenames(array(
-		'body' => 'view_abo_list_body.tpl'
-	));
+	$output->set_filenames(['body' => 'view_abo_list_body.tpl']);
 
-	$output->assign_vars(array(
+	$output->assign_vars([
 		'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
 		'L_TITLE'              => sprintf($lang['Title']['abo'], htmlspecialchars($listdata['liste_name'])),
 		'L_SEARCH'             => $lang['Search_abo'],
@@ -814,52 +803,52 @@ else if ($mode == 'abonnes') {
 		'NUM_SUBSCRIBERS'      => ($total_abo > 0) ? '[ <b>' . $total_abo . '</b> ' . $lang['Module']['subscribers'] . ' ]' : '',
 
 		'PAGING'               => $get_page
-	));
+	]);
 
 	if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-		$output->assign_block_vars('view_format', array(
+		$output->assign_block_vars('view_format', [
 			'L_FORMAT' => $lang['Format']
-		));
+		]);
 	}
 
 	if ($num_abo = count($aborow)) {
 		$display_checkbox = false;
 		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
-			$output->assign_block_vars('delete_option', array(
+			$output->assign_block_vars('delete_option', [
 				'L_FAST_DELETION'      => $lang['Fast_deletion'],
 				'L_FAST_DELETION_NOTE' => $lang['Fast_deletion_note'],
 				'L_DELETE_BUTTON'      => $lang['Button']['delete'],
 				'L_DELETE_ABO_BUTTON'  => $lang['Button']['del_abo']
-			));
+			]);
 
 			$display_checkbox = true;
 		}
 
 		for ($i = 0; $i < $num_abo; $i++) {
-			$output->assign_block_vars('aborow', array(
+			$output->assign_block_vars('aborow', [
 				'ABO_EMAIL'         => htmlspecialchars($aborow[$i]['abo_email']),
 				'ABO_REGISTER_DATE' => convert_time($admindata['admin_dateformat'], $aborow[$i]['register_date']),
 				'U_VIEW'            => sprintf('view.php?mode=abonnes&amp;action=view&amp;id=%d%s%s', $aborow[$i]['abo_id'], $get_string, $get_page)
-			));
+			]);
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-				$output->assign_block_vars('aborow.format', array(
+				$output->assign_block_vars('aborow.format', [
 					'ABO_FORMAT' => ($aborow[$i]['format'] == FORMAT_HTML) ? 'html' : 'texte'
-				));
+				]);
 			}
 
 			if ($display_checkbox) {
-				$output->assign_block_vars('aborow.delete', array(
+				$output->assign_block_vars('aborow.delete', [
 					'ABO_ID' => $aborow[$i]['abo_id']
-				));
+				]);
 			}
 		}
 	}
 	else {
-		$output->assign_block_vars('empty', array(
+		$output->assign_block_vars('empty', [
 			'L_EMPTY' => ($search_keyword || $search_date)
 				? $lang['No_search_result'] : $lang['No_abo_in_list']
-		));
+		]);
 	}
 }
 
@@ -900,15 +889,15 @@ else if ($mode == 'liste') {
 	// Ajout ou édition d'une liste
 	//
 	if ($action == 'add' || $action == 'edit') {
-		$vararray = array(
+		$vararray = [
 			'liste_name', 'sender_email', 'return_email', 'form_url', 'liste_sig',
 			'pop_host', 'pop_user', 'pop_pass', 'liste_alias'
-		);
+		];
 		foreach ($vararray as $varname) {
 			${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 		}
 
-		$default_values = array(
+		$default_values = [
 			'liste_format'      => FORMAT_TEXTE,
 			'limitevalidate'    => 3,
 			'auto_purge'        => true,
@@ -918,12 +907,12 @@ else if ($mode == 'liste') {
 			'pop_tls'           => SECURITY_NONE,
 			'liste_public'      => true,
 			'confirm_subscribe' => CONFIRM_ALWAYS,
-		);
+		];
 
-		$vararray2 = array(
+		$vararray2 = [
 			'liste_format', 'confirm_subscribe', 'liste_public', 'limitevalidate',
 			'auto_purge', 'purge_freq', 'use_cron', 'pop_port', 'pop_tls'
-		);
+		];
 		foreach ($vararray2 as $varname) {
 			$value = filter_input(INPUT_POST, $varname, FILTER_VALIDATE_INT);
 			${$varname} = (is_int($value)) ? $value : $default_values[$varname];
@@ -942,7 +931,7 @@ else if ($mode == 'liste') {
 				$msg_error[] = $lang['Invalid_liste_name'];
 			}
 
-			if (!in_array($liste_format, array(FORMAT_TEXTE, FORMAT_HTML, FORMAT_MULTIPLE))) {
+			if (!in_array($liste_format, [FORMAT_TEXTE, FORMAT_HTML, FORMAT_MULTIPLE])) {
 				$error = true;
 				$msg_error[] = $lang['Unknown_format'];
 			}
@@ -968,9 +957,9 @@ else if ($mode == 'liste') {
 
 			if ($use_cron && function_exists('stream_socket_client')) {
 				$pop = new PopClient();
-				$pop->options(array(
+				$pop->options([
 					'starttls' => ($pop_tls == SECURITY_STARTTLS)
-				));
+				]);
 
 				try {
 					$server = ($pop_tls == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
@@ -997,7 +986,7 @@ else if ($mode == 'liste') {
 			}
 
 			if (!$error) {
-				$sql_data = $sql_where = array();
+				$sql_data = $sql_where = [];
 				$vararray = array_merge($vararray, $vararray2);
 
 				foreach ($vararray as $varname) {
@@ -1037,11 +1026,9 @@ else if ($mode == 'liste') {
 
 		$output->page_header();
 
-		$output->set_filenames(array(
-			'body' => 'edit_liste_body.tpl'
-		));
+		$output->set_filenames(['body' => 'edit_liste_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'L_TITLE'              => ($action == 'add') ? $lang['Title']['add_liste'] : $lang['Title']['edit_liste'],
 			'L_TITLE_PURGE'        => $lang['Title']['purge_sys'],
 			'L_TITLE_CRON'         => $lang['Title']['cron'],
@@ -1104,15 +1091,15 @@ else if ($mode == 'liste') {
 			'POP_USER'             => htmlspecialchars($pop_user),
 			'LISTE_ALIAS'          => htmlspecialchars($liste_alias),
 			'ACTION'               => $action
-		));
+		]);
 
 		if (check_ssl_support()) {
-			$output->assign_block_vars('ssl_support', array(
+			$output->assign_block_vars('ssl_support', [
 				'L_SECURITY'        => $lang['Connection_security'],
 				'L_NONE'            => $lang['None'],
 				'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $pop_tls == SECURITY_STARTTLS),
 				'SSL_TLS_SELECTED'  => $output->getBoolAttr('selected', $pop_tls == SECURITY_FULL_TLS)
-			));
+			]);
 		}
 
 		$output->pparse('body');
@@ -1132,7 +1119,7 @@ else if ($mode == 'liste') {
 				WHERE liste_id = " . $listdata['liste_id'];
 			$db->query($sql);
 
-			$update_abo_ids = $delete_abo_ids = array();
+			$update_abo_ids = $delete_abo_ids = [];
 
 			if (isset($_POST['delete_all'])) {
 				$sql = "SELECT abo_id
@@ -1146,7 +1133,7 @@ else if ($mode == 'liste') {
 					HAVING COUNT(abo_id) = 1";
 				$result = $db->query($sql);
 
-				$delete_abo_ids = array();
+				$delete_abo_ids = [];
 				while ($abo_id = $result->column('abo_id')) {
 					$delete_abo_ids[] = $abo_id;
 				}
@@ -1172,7 +1159,7 @@ else if ($mode == 'liste') {
 					WHERE liste_id = " . $listdata['liste_id'];
 				$result = $db->query($sql);
 
-				$log_ids = array();
+				$log_ids = [];
 				while ($log_id = $result->column('log_id')) {
 					$log_ids[] = $log_id;
 				}
@@ -1205,7 +1192,7 @@ else if ($mode == 'liste') {
 					) AND liste_id = " . $liste_id;
 				$result = $db->query($sql);
 
-				$delete_abo_ids = array();
+				$delete_abo_ids = [];
 				while ($abo_id = $result->column('abo_id')) {
 					$delete_abo_ids[] = $abo_id;
 				}
@@ -1219,7 +1206,7 @@ else if ($mode == 'liste') {
 					) AND liste_id <> " . $liste_id;
 				$result = $db->query($sql);
 
-				$update_abo_ids = array();
+				$update_abo_ids = [];
 				while ($abo_id = $result->column('abo_id')) {
 					$update_abo_ids[] = $abo_id;
 				}
@@ -1268,9 +1255,9 @@ else if ($mode == 'liste') {
 			//
 			// Optimisation des tables
 			//
-			$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE, LOG_TABLE,
+			$db->vacuum([ABONNES_TABLE, ABO_LISTE_TABLE, LOG_TABLE,
 				LOG_FILES_TABLE, JOINED_FILES_TABLE, LISTE_TABLE
-			));
+			]);
 
 			$target = './index.php';
 			$output->redirect($target, 4);
@@ -1302,11 +1289,9 @@ else if ($mode == 'liste') {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'confirm_body.tpl'
-			));
+			$output->set_filenames(['body' => 'confirm_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $message,
@@ -1315,7 +1300,7 @@ else if ($mode == 'liste') {
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM' => 'view.php?mode=liste&amp;action=delete'
-			));
+			]);
 
 			$output->pparse('body');
 
@@ -1388,9 +1373,7 @@ else if ($mode == 'liste') {
 
 	$output->page_header();
 
-	$output->set_filenames( array(
-		'body' => 'view_liste_body.tpl'
-	));
+	$output->set_filenames(['body' => 'view_liste_body.tpl']);
 
 	switch ($listdata['confirm_subscribe']) {
 		case CONFIRM_ALWAYS:
@@ -1405,7 +1388,7 @@ else if ($mode == 'liste') {
 			break;
 	}
 
-	$output->assign_vars( array(
+	$output->assign_vars([
 		'L_TITLE'             => $lang['Title']['info_liste'],
 		'L_EXPLAIN'           => nl2br($lang['Explain']['liste']),
 		'L_LISTE_ID'          => $lang['ID_list'],
@@ -1431,50 +1414,50 @@ else if ($mode == 'liste') {
 		'NUM_LOGS'            => $listdata['liste_numlogs'],
 		'FORM_URL'            => htmlspecialchars($listdata['form_url']),
 		'STARTDATE'           => convert_time($admindata['admin_dateformat'], $listdata['liste_startdate'])
-	));
+	]);
 
 	if ($listdata['confirm_subscribe']) {
-		$output->assign_block_vars('liste_confirm', array(
+		$output->assign_block_vars('liste_confirm', [
 			'L_LIMITEVALIDATE' => $lang['Limite_validate'],
 			'L_NUM_TEMP'       => $lang['Tmp_subscribers_list'],
 			'L_DAYS'           => $lang['Days'],
 
 			'LIMITEVALIDATE'   => $listdata['limitevalidate'],
 			'NUM_TEMP'         => $num_temp
-		));
+		]);
 	}
 
 	if ($listdata['liste_numlogs'] > 0) {
-		$output->assign_block_vars('date_last_log', array(
+		$output->assign_block_vars('date_last_log', [
 			'L_LAST_LOG' => $lang['Last_newsletter2'],
 			'LAST_LOG'   => convert_time($admindata['admin_dateformat'], $last_log)
-		));
+		]);
 	}
 
 	if ($auth->check_auth(Auth::DEL, $listdata['liste_id']) || $auth->check_auth(Auth::EDIT, $listdata['liste_id'])) {
-		$output->assign_block_vars('admin_options', array());
+		$output->assign_block_vars('admin_options', []);
 
 		if (wan_is_admin($admindata)) {
-			$output->assign_block_vars('admin_options.auth_add', array(
+			$output->assign_block_vars('admin_options.auth_add', [
 				'L_ADD_LISTE' => $lang['Create_liste']
-			));
+			]);
 
-			$output->assign_block_vars('admin_options.auth_del', array(
+			$output->assign_block_vars('admin_options.auth_del', [
 				'L_DELETE_LISTE' => $lang['Delete_liste']
-			));
+			]);
 		}
 
 		if ($auth->check_auth(Auth::EDIT, $listdata['liste_id'])) {
-			$output->assign_block_vars('admin_options.auth_edit', array(
+			$output->assign_block_vars('admin_options.auth_edit', [
 				'L_EDIT_LISTE' => $lang['Edit_liste']
-			));
+			]);
 		}
 
 		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
-			$output->assign_block_vars('purge_option', array(
+			$output->assign_block_vars('purge_option', [
 				'L_PURGE_BUTTON'  => $lang['Button']['purge'],
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
-			));
+			]);
 		}
 	}
 }
@@ -1519,7 +1502,7 @@ else if ($mode == 'log') {
 			//
 			// Optimisation des tables
 			//
-			$db->vacuum(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
+			$db->vacuum([LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE]);
 
 			$target = './view.php?mode=log';
 			$output->redirect($target, 4);
@@ -1534,11 +1517,9 @@ else if ($mode == 'log') {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'confirm_body.tpl'
-			));
+			$output->set_filenames(['body' => 'confirm_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $lang['Delete_logs'],
@@ -1547,7 +1528,7 @@ else if ($mode == 'log') {
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM' => 'view.php?mode=log&amp;action=delete'
-			));
+			]);
 
 			$output->pparse('body');
 
@@ -1587,7 +1568,7 @@ else if ($mode == 'log') {
 	$total_logs = $result->column('total_logs');
 
 	$logdata  = '';
-	$logrow   = array();
+	$logrow   = [];
 	$num_logs = 0;
 
 	if ($total_logs) {
@@ -1602,7 +1583,7 @@ else if ($mode == 'log') {
 		while ($row = $result->fetch()) {
 			if ($action == 'view' && $log_id == $row['log_id']) {
 				$logdata = $row;
-				$logdata['joined_files'] = array();
+				$logdata['joined_files'] = [];
 			}
 
 			$logrow[] = $row;
@@ -1616,7 +1597,7 @@ else if ($mode == 'log') {
 			GROUP BY l.log_id";
 		$result = $db->query($sql);
 
-		$files_count = array();
+		$files_count = [];
 		while ($row = $result->fetch()) {
 			$files_count[$row['log_id']] = $row['num_files'];
 		}
@@ -1658,11 +1639,9 @@ else if ($mode == 'log') {
 
 	$output->page_header();
 
-	$output->set_filenames(array(
-		'body' => 'view_logs_body.tpl'
-	));
+	$output->set_filenames(['body' => 'view_logs_body.tpl']);
 
-	$output->assign_vars(array(
+	$output->assign_vars([
 		'L_EXPLAIN'             => nl2br($lang['Explain']['logs']),
 		'L_TITLE'               => sprintf($lang['Title']['logs'], htmlspecialchars($listdata['liste_name'])),
 		'L_CLASSEMENT'          => $lang['Classement'],
@@ -1684,14 +1663,14 @@ else if ($mode == 'log') {
 		'NUM_LOGS'              => ($total_logs > 0) ? '[ <b>' . $total_logs . '</b> ' . $lang['Module']['log'] . ' ]' : '',
 
 		'PAGING'                => $get_string
-	));
+	]);
 
 	if ($num_logs = count($logrow)) {
 		$display_checkbox = false;
 		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
-			$output->assign_block_vars('delete_option', array(
+			$output->assign_block_vars('delete_option', [
 				'L_DELETE' => $lang['Button']['del_logs']
-			));
+			]);
 
 			$display_checkbox = true;
 		}
@@ -1711,28 +1690,26 @@ else if ($mode == 'log') {
 				$s_clip = '&nbsp;&nbsp;';
 			}
 
-			$output->assign_block_vars('logrow', array(
+			$output->assign_block_vars('logrow', [
 				'ITEM_CLIP'   => $s_clip,
 				'LOG_SUBJECT' => htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
 				'LOG_DATE'    => convert_time($admindata['admin_dateformat'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sprintf('view.php?mode=log&amp;action=view&amp;id=%d%s', $logrow[$i]['log_id'], $get_string)
-			));
+			]);
 
 			if ($display_checkbox) {
-				$output->assign_block_vars('logrow.delete', array(
+				$output->assign_block_vars('logrow.delete', [
 					'LOG_ID' => $logrow[$i]['log_id']
-				));
+				]);
 			}
 		}
 
 		if ($action == 'view' && is_array($logdata)) {
 			$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
-			$output->set_filenames(array(
-				'iframe_body' => 'iframe_body.tpl'
-			));
+			$output->set_filenames(['iframe_body' => 'iframe_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_SUBJECT'  => $lang['Log_subject'],
 				'L_NUMDEST'  => $lang['Log_numdest'],
 
@@ -1740,13 +1717,13 @@ else if ($mode == 'log') {
 				'NUMDEST'    => $logdata['log_numdest'],
 				'FORMAT'     => $format,
 				'LOG_ID'     => $log_id
-			));
+			]);
 
 			if (extension_loaded('zip')) {
-				$output->assign_block_vars('export', array(
+				$output->assign_block_vars('export', [
 					'L_EXPORT_T' => $lang['Export_nl'],
 					'L_EXPORT'   => $lang['Export']
-				));
+				]);
 			}
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
@@ -1761,12 +1738,12 @@ else if ($mode == 'log') {
 					$output->addHiddenField('page', $page_id);
 				}
 
-				$output->assign_block_vars('format_box', array(
+				$output->assign_block_vars('format_box', [
 					'L_FORMAT'        => $lang['Format'],
 					'L_GO_BUTTON'     => $lang['Button']['go'],
 					'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 					'FORMAT_BOX'      => format_box('format', $format, true)
-				));
+				]);
 			}
 
 			$output->files_list($logdata, $format);
@@ -1774,9 +1751,9 @@ else if ($mode == 'log') {
 		}
 	}
 	else {
-		$output->assign_block_vars('empty', array(
+		$output->assign_block_vars('empty', [
 			'L_EMPTY' => $lang['No_log_sended']
-		));
+		]);
 	}
 }
 

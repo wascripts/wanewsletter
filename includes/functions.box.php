@@ -20,12 +20,12 @@ function lang_box($default_lang = '')
 {
 	global $output;
 
-	$lang_names = array(
+	$lang_names = [
 		'fr' => 'francais',
 		'en' => 'english'
-	);
+	];
 
-	$lang_list = array();
+	$lang_list = [];
 	$browse    = dir(WA_ROOTDIR . '/languages');
 
 	while (($entry = $browse->read()) !== false) {

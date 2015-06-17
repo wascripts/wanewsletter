@@ -179,9 +179,7 @@ else {
 $output->build_listbox(Auth::VIEW, false, './view.php?mode=liste');
 $output->page_header();
 
-$output->set_filenames( array(
-	'body' => 'index_body.tpl'
-));
+$output->set_filenames(['body' => 'index_body.tpl']);
 
 if ($num_logs > 0) {
 	if ($num_logs > 1) {
@@ -191,15 +189,15 @@ if ($num_logs > 0) {
 		$l_num_logs = sprintf($lang['Total_newsletter'], wa_number_format($num_logs/$month));
 	}
 
-	$output->assign_block_vars('switch_last_newsletter', array(
+	$output->assign_block_vars('switch_last_newsletter', [
 		'DATE_LAST_NEWSLETTER' => sprintf($lang['Last_newsletter'], convert_time($admindata['admin_dateformat'], $last_log))
-	));
+	]);
 }
 else {
 	$l_num_logs = $lang['No_newsletter_sended'];
 }
 
-$output->assign_vars( array(
+$output->assign_vars([
 	'TITLE_HOME'             => $lang['Title']['accueil'],
 	'L_EXPLAIN'              => nl2br($lang['Explain']['accueil']),
 	'L_DBSIZE'               => $lang['Dbsize'],
@@ -210,43 +208,43 @@ $output->assign_vars( array(
 	'NEWSLETTERS_SENDED'     => $l_num_logs,
 	'DBSIZE'                 => (is_numeric($dbsize)) ? formateSize($dbsize) : $dbsize,
 	'FILESIZE'               => formateSize($filesize)
-));
+]);
 
 if (wan_is_admin($admindata)) {
 	$result = wa_check_update();
 
-	$output->assign_block_vars('version_info', array(
+	$output->assign_block_vars('version_info', [
 		'VERSION' => sprintf($lang['Used_version'], WANEWSLETTER_VERSION)
-	));
+	]);
 
 	if ($result !== false) {
 		if ($result === 1) {
-			$output->assign_block_vars('version_info.update_available', array(
+			$output->assign_block_vars('version_info.update_available', [
 				'L_UPDATE_AVAILABLE' => $lang['New_version_available'],
 				'L_DOWNLOAD_PAGE'    => $lang['Download_page'],
 
 				'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
-			));
+			]);
 		}
 		else {
-			$output->assign_block_vars('version_info.up_to_date', array(
+			$output->assign_block_vars('version_info.up_to_date', [
 				'L_UP_TO_DATE' => $lang['Version_up_to_date'],
-			));
+			]);
 		}
 	}
 	else {
-		$output->assign_block_vars('check_update_js', array(
+		$output->assign_block_vars('check_update_js', [
 			'L_UPDATE_AVAILABLE' => str_replace('\'', '\\\'', $lang['New_version_available']),
 			'L_UP_TO_DATE'       => str_replace('\'', '\\\'', $lang['Version_up_to_date']),
 			'L_SITE_UNREACHABLE' => str_replace('\'', '\\\'', $lang['Site_unreachable']),
 			'L_DOWNLOAD_PAGE'    => str_replace('\'', '\\\'', $lang['Download_page']),
 
 			'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
-		));
+		]);
 
-		$output->assign_block_vars('version_info.check_update', array(
+		$output->assign_block_vars('version_info.check_update', [
 			'L_CHECK_UPDATE' => $lang['Check_update']
-		));
+		]);
 	}
 }
 

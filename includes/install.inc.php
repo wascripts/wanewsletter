@@ -29,10 +29,10 @@ function message($message)
 
 	$output->send_headers();
 
-	$output->assign_block_vars('result', array(
+	$output->assign_block_vars('result', [
 		'L_TITLE'    => $lang['Title']['install'],
 		'MSG_RESULT' => nl2br($message)
-	));
+	]);
 
 	$output->pparse('body');
 	$output->page_footer();
@@ -43,20 +43,18 @@ $reinstall = !empty($dsn);
 
 // On prépare dès maintenant install.tpl. C'est nécessaire en cas d'appel
 // précoce à la fonction message()
-$output->set_filenames(array(
-	'body' => 'install.tpl'
-));
+$output->set_filenames(['body' => 'install.tpl']);
 
-$output->assign_vars(array(
+$output->assign_vars([
 	'PAGE_TITLE'   => ($reinstall) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR']
-));
+]);
 
-$prefixe = trim(filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT,
-	array('options' => array('default' => 'wa_'))
-));
-$infos   = array(
+$prefixe = trim(filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
+	'options' => ['default' => 'wa_']
+]));
+$infos   = [
 	'engine' => 'mysql',
 	'host'   => null,
 	'port'   => 0,
@@ -64,17 +62,17 @@ $infos   = array(
 	'pass'   => null,
 	'dbname' => null,
 	'path'   => 'data/db/wanewsletter.sqlite'
-);
+];
 
 if ($reinstall) {
 	$tmp = parseDSN($dsn);
 	$infos = array_merge($infos, $tmp[0]);
 }
 
-foreach (array('engine', 'host', 'user', 'pass', 'dbname', 'path') as $varname) {
-	$infos[$varname] = trim(u::filter_input(INPUT_POST, $varname, FILTER_DEFAULT,
-		array('options' => array('default' => $infos[$varname]))
-	));
+foreach (['engine', 'host', 'user', 'pass', 'dbname', 'path'] as $varname) {
+	$infos[$varname] = trim(u::filter_input(INPUT_POST, $varname, FILTER_DEFAULT, [
+		'options' => ['default' => $infos[$varname]]
+	]));
 }
 
 // Récupération du port, si associé avec le nom d’hôte ou l’IP.
@@ -113,10 +111,10 @@ if (!empty($infos['dbname'])) {
 	$dsn = createDSN($infos);
 }
 
-$vararray = array(
+$vararray = [
 	'language', 'prev_language', 'admin_login', 'admin_email', 'admin_pass',
 	'confirm_pass', 'urlsite', 'urlscript'
-);
+];
 foreach ($vararray as $varname) {
 	${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 }
@@ -173,11 +171,11 @@ load_settings();
 //
 // Idem qu'au début, mais avec éventuellement un fichier de langue différent chargé
 //
-$output->assign_vars(array(
+$output->assign_vars([
 	'PAGE_TITLE'   => ($reinstall) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR']
-));
+]);
 
 if ($start) {
 	if ($reinstall) {
@@ -269,7 +267,7 @@ if ($start) {
 		}
 
 		if ($reinstall) {
-			$sql_drop = array();
+			$sql_drop = [];
 
 			foreach ($sql_schemas as $tablename => $schema) {
 				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
@@ -348,7 +346,7 @@ if ($start) {
 
 				$output->send_headers();
 
-				$output->assign_block_vars('download_file', array(
+				$output->assign_block_vars('download_file', [
 					'L_TITLE'         => $lang['Title']['install'],
 					'L_DL_BUTTON'     => $lang['Button']['dl'],
 
@@ -359,7 +357,7 @@ if ($start) {
 						'</a>'
 					)),
 					'S_HIDDEN_FIELDS' => $output->getHiddenFields()
-				));
+				]);
 
 				$output->pparse('body');
 				exit;
@@ -413,7 +411,7 @@ if (!$reinstall) {
 		$infos['host'] .= ':'.$infos['port'];
 	}
 
-	$output->assign_block_vars('install', array(
+	$output->assign_block_vars('install', [
 		'L_EXPLAIN'         => $l_explain,
 		'TITLE_DATABASE'    => $lang['Title']['database'],
 		'TITLE_ADMIN'       => $lang['Title']['admin'],
@@ -442,17 +440,17 @@ if (!$reinstall) {
 		'LOGIN'     => htmlspecialchars($admin_login),
 		'EMAIL'     => htmlspecialchars($admin_email),
 		'LANG_BOX'  => lang_box($language)
-	));
+	]);
 }
 else {
-	$output->assign_block_vars('reinstall', array(
+	$output->assign_block_vars('reinstall', [
 		'L_EXPLAIN'      => nl2br($lang['Warning_reinstall']),
 		'L_LOGIN'        => $lang['Login'],
 		'L_PASS'         => $lang['Password'],
 		'L_START_BUTTON' => $lang['Start_install'],
 
 		'LOGIN' => htmlspecialchars($admin_login)
-	));
+	]);
 }
 
 $output->assign_var('S_PREV_LANGUAGE', $language);

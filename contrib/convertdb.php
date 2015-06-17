@@ -73,7 +73,7 @@ foreach ($sql_create as $query) {
 
 // On récupère les séquences PostgreSQL pour les initialiser correctement après les insertions
 if ($db_to::ENGINE == 'postgres') {
-	$sequences = array();
+	$sequences = [];
 
 	$sql = "SELECT t.relname AS tablename, a.attname AS fieldname, s.relname AS seqname
 		FROM pg_class s
@@ -86,11 +86,11 @@ if ($db_to::ENGINE == 'postgres') {
 
 	while ($row = $res->fetch()) {
 		if (isset($sql_schemas[$row['tablename']])) {
-			$sequences[$row['tablename']] = array(
+			$sequences[$row['tablename']] = [
 				'seqname' => $row['seqname'],
 				'seqval'  => 1,
 				'field'   => $row['fieldname']
-			);
+			];
 		}
 	}
 }
@@ -113,7 +113,7 @@ function fields_list($tablename)
 {
 	global $db_to;
 
-	$fields = array();
+	$fields = [];
 
 	if ($db_to::ENGINE == 'mysql') {
 		$result = $db_to->query(sprintf("SHOW COLUMNS FROM %s", $db_to->quote($tablename)));

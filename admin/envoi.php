@@ -37,7 +37,7 @@ if (!$auth->check_auth(Auth::SEND, $_SESSION['liste'])) {
 }
 
 $listdata = $auth->listdata[$_SESSION['liste']];
-$logdata  = array();
+$logdata  = [];
 
 $logdata['log_id'] = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 if (!is_int($logdata['log_id'])) {
@@ -48,11 +48,11 @@ $logdata['log_subject']   = trim(u::filter_input(INPUT_POST, 'subject'));
 $logdata['log_body_text'] = trim(u::filter_input(INPUT_POST, 'body_text'));
 $logdata['log_body_html'] = trim(u::filter_input(INPUT_POST, 'body_html'));
 $logdata['log_status']    = filter_input(INPUT_POST, 'log_status', FILTER_VALIDATE_INT);
-$logdata['log_date']      = filter_input(INPUT_POST, 'log_date', FILTER_VALIDATE_INT, array(
-	'options' => array('default' => -1)
-));
+$logdata['log_date']      = filter_input(INPUT_POST, 'log_date', FILTER_VALIDATE_INT, [
+	'options' => ['default' => -1]
+]);
 
-if (!is_int($logdata['log_status']) || !in_array($logdata['log_status'], array(STATUS_MODEL, STATUS_WRITING))) {
+if (!is_int($logdata['log_status']) || !in_array($logdata['log_status'], [STATUS_MODEL, STATUS_WRITING])) {
 	$logdata['log_status'] = STATUS_WRITING;
 }
 
@@ -66,7 +66,7 @@ if (isset($_POST['cancel'])) {
 }
 
 $mode = filter_input(INPUT_GET, 'mode');
-foreach (array('test', 'send', 'save', 'delete', 'attach', 'unattach') as $varname) {
+foreach (['test', 'send', 'save', 'delete', 'attach', 'unattach'] as $varname) {
 	if (isset($_POST[$varname])) {
 		$mode = $varname;
 		break;
@@ -152,11 +152,9 @@ switch ($mode) {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'confirm_body.tpl'
-			));
+			$output->set_filenames(['body' => 'confirm_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $lang['Cancel_send_log'],
@@ -165,7 +163,7 @@ switch ($mode) {
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM' => 'envoi.php?mode=cancel'
-			));
+			]);
 
 			$output->pparse('body');
 
@@ -231,10 +229,10 @@ switch ($mode) {
 				GROUP BY liste_id, send";
 			$result = $db->query($sql);
 
-			$data = array();
+			$data = [];
 			while ($row = $result->fetch()) {
 				if (!isset($data[$row['liste_id']])) {
-					$data[$row['liste_id']] = array(0, 0, 't' => 0);
+					$data[$row['liste_id']] = [0, 0, 't' => 0];
 				}
 				$data[$row['liste_id']][$row['send']] = $row['num'];
 				$data[$row['liste_id']]['t'] += $row['num'];
@@ -256,11 +254,9 @@ switch ($mode) {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'send_progress_body.tpl'
-			));
+			$output->set_filenames(['body' => 'send_progress_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_TITLE'       => $lang['List_send'],
 				'L_SUBJECT'     => $lang['Log_subject'],
 				'L_DONE'        => $lang['Done'],
@@ -268,7 +264,7 @@ switch ($mode) {
 				'L_CANCEL_SEND' => $lang['Cancel_send'],
 				'L_CREATE_LOG'  => $lang['Create_log'],
 				'L_LOAD_LOG'    => $lang['Load_log']
-			));
+			]);
 
 			do {
 				$percent = 0;
@@ -276,11 +272,11 @@ switch ($mode) {
 					$percent = wa_number_format(round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2));
 				}
 
-				$output->assign_block_vars('logrow', array(
+				$output->assign_block_vars('logrow', [
 					'LOG_ID'       => $row['log_id'],
 					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
 					'SEND_PERCENT' => $percent
-				));
+				]);
 			}
 			while ($row = $result->fetch());
 
@@ -380,9 +376,7 @@ switch ($mode) {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'select_log_body.tpl'
-			));
+			$output->set_filenames(['body' => 'select_log_body.tpl']);
 
 			if ($row = $result->fetch()) {
 				$log_box = '<select name="id">';
@@ -410,21 +404,21 @@ switch ($mode) {
 
 				$log_box .= '</select>';
 
-				$output->assign_block_vars('load_draft', array(
+				$output->assign_block_vars('load_draft', [
 					'L_SELECT_LOG' => $lang['Select_log_to_load'],
 					'LOG_BOX'      => $log_box
-				));
+				]);
 
-				$output->assign_block_vars('script_load_by_url', array(
+				$output->assign_block_vars('script_load_by_url', [
 					'L_FROM_AN_URL' => str_replace('\'', '\\\'', $lang['From_an_URL'])
-				));
+				]);
 			}
 
-			$output->assign_vars(array(
-				'L_TITLE'         => $lang['Title']['select'],
-				'L_VALID_BUTTON'  => $lang['Button']['valid'],
-				'L_EXPLAIN_LOAD'  => $lang['Explain']['load']
-			));
+			$output->assign_vars([
+				'L_TITLE'        => $lang['Title']['select'],
+				'L_VALID_BUTTON' => $lang['Button']['valid'],
+				'L_EXPLAIN_LOAD' => $lang['Explain']['load']
+			]);
 
 			switch ($listdata['liste_format']) {
 				case FORMAT_TEXTE:
@@ -438,14 +432,14 @@ switch ($mode) {
 					break;
 			}
 
-			$output->assign_block_vars($bloc_name, array(
+			$output->assign_block_vars($bloc_name, [
 				'L_LOAD_BY_URL' => $lang['Load_by_URL'],
 				'L_FORMAT_TEXT' => $lang['Format_text'],
 				'L_FORMAT_HTML' => $lang['Format_html'],
 
 				'BODY_TEXT_URL' => htmlspecialchars($body_text_url),
 				'BODY_HTML_URL' => htmlspecialchars($body_html_url)
-			));
+			]);
 
 			$output->pparse('body');
 
@@ -479,7 +473,7 @@ switch ($mode) {
 			//
 			// Optimisation des tables
 			//
-			$db->vacuum(array(LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE));
+			$db->vacuum([LOG_TABLE, LOG_FILES_TABLE, JOINED_FILES_TABLE]);
 
 			$output->redirect('envoi.php', 4);
 			$output->addLine($lang['Message']['log_deleted']);
@@ -491,11 +485,9 @@ switch ($mode) {
 
 			$output->page_header();
 
-			$output->set_filenames(array(
-				'body' => 'confirm_body.tpl'
-			));
+			$output->set_filenames(['body' => 'confirm_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $lang['Delete_log'],
@@ -504,7 +496,7 @@ switch ($mode) {
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM' => 'envoi.php?mode=delete'
-			));
+			]);
 
 			$output->pparse('body');
 
@@ -521,8 +513,8 @@ switch ($mode) {
 		if (($mode == 'save' || $mode == 'send') && $listdata['cc_admin'] != $cc_admin) {
 			$listdata['cc_admin'] = $cc_admin;
 
-			$sql_data  = array('cc_admin' => $cc_admin);
-			$sql_where = array('admin_id' => $admindata['admin_id'], 'liste_id' => $listdata['liste_id']);
+			$sql_data  = ['cc_admin' => $cc_admin];
+			$sql_where = ['admin_id' => $admindata['admin_id'], 'liste_id' => $listdata['liste_id']];
 
 			$db->update(AUTH_ADMIN_TABLE, $sql_data, $sql_where);
 			if ($db->affectedRows() == 0) {
@@ -589,7 +581,7 @@ switch ($mode) {
 			};
 
 			$regexp = '/<\\?inclu[dr]e(\\s+[^>]+)\\?>/i';
-			foreach (array('log_body_text', 'log_body_html') as $key) {
+			foreach (['log_body_text', 'log_body_html'] as $key) {
 				$logdata[$key] = preg_replace_callback($regexp, $replace_include, $logdata[$key]);
 			}
 
@@ -615,7 +607,7 @@ switch ($mode) {
 						ORDER BY jf.file_real_name ASC";
 					$result = $db->query($sql);
 
-					$files = $files_error = array();
+					$files = $files_error = [];
 					while ($row = $result->fetch()) {
 						if ($row['log_id'] == $logdata['log_id']) {
 							$files[] = $row['file_real_name'];
@@ -692,7 +684,7 @@ switch ($mode) {
 					$tmp_id = $db->lastInsertId();
 				}
 				else {
-					$sql_where = array('log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']);
+					$sql_where = ['log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']];
 					$db->update(LOG_TABLE, $logdata, $sql_where);
 				}
 
@@ -717,10 +709,10 @@ switch ($mode) {
 						WHERE log_id = " . $handle_id;
 					$result = $db->query($sql);
 
-					$sql_dataset = array();
+					$sql_dataset = [];
 
 					while ($row = $result->fetch()) {
-						$sql_dataset[] = array('log_id' => $tmp_id, 'file_id' => $row['file_id']);
+						$sql_dataset[] = ['log_id' => $tmp_id, 'file_id' => $row['file_id']];
 					}
 
 					if (count($sql_dataset) > 0) {
@@ -766,7 +758,7 @@ switch ($mode) {
 				}
 				else {
 					$local_file = trim(filter_input(INPUT_POST, 'local_file'));
-					$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : array();
+					$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : [];
 
 					$attach->addFile($logdata['log_id'], $local_file ?: $join_file);
 				}
@@ -798,13 +790,13 @@ switch ($mode) {
 			//
 			// Optimisation des tables
 			//
-			$db->vacuum(array(LOG_FILES_TABLE, JOINED_FILES_TABLE));
+			$db->vacuum([LOG_FILES_TABLE, JOINED_FILES_TABLE]);
 		}
 		break;
 }
 
 $file_box = '';
-$logdata['joined_files'] = array();
+$logdata['joined_files'] = [];
 
 //
 // Récupération des fichiers joints de la liste
@@ -822,7 +814,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 		ORDER BY jf.file_real_name ASC";
 	$result = $db->query($sql);
 
-	$other_files = $joined_files_id = array();
+	$other_files = $joined_files_id = [];
 
 	//
 	// On dispatche les données selon que le fichier appartient à la newsletter en cours ou non.
@@ -869,7 +861,7 @@ if ($mode == 'test' && $supp_address) {
 	}
 }
 else {
-	$supp_address = array();
+	$supp_address = [];
 }
 
 if (($mode == 'test' && !$error) || $mode == 'progress') {
@@ -922,11 +914,9 @@ $output->addHiddenField('log_date',    $logdata['log_date']);
 
 $output->page_header();
 
-$output->set_filenames(array(
-	'body' => 'send_body.tpl'
-));
+$output->set_filenames(['body' => 'send_body.tpl']);
 
-$output->assign_vars(array(
+$output->assign_vars([
 	'L_EXPLAIN'               => nl2br(sprintf($lang['Explain']['send'],
 		sprintf('<a href="%s">', wan_get_faq_url('external_data')),
 		'</a>'
@@ -959,46 +949,46 @@ $output->assign_vars(array(
 	'S_ENCTYPE'               => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
 	'S_DELETE_BUTTON_DISABLED' => $output->getBoolAttr('disabled', ($logdata['log_id'] == 0)),
 	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
-));
+]);
 
 if ($logdata['log_date'] != -1) {
-	$output->assign_block_vars('last_modified', array(
+	$output->assign_block_vars('last_modified', [
 		'S_LAST_MODIFIED' => sprintf($lang['Last_modified'],
 			convert_time($admindata['admin_dateformat'], $logdata['log_date'])
 		)
-	));
+	]);
 }
 
 if (is_readable(WA_ROOTDIR . '/languages/'.$admindata['admin_lang'].'/tinymce.js')) {
-	$output->assign_block_vars('tinymce_lang', array(
+	$output->assign_block_vars('tinymce_lang', [
 		'CODE' => $admindata['admin_lang']
-	));
+	]);
 }
 
 if ($listdata['liste_format'] != FORMAT_HTML) {
-	$output->assign_block_vars('nl_text_textarea', array(
+	$output->assign_block_vars('nl_text_textarea', [
 		'L_TITLE'    => $lang['Log_in_text'],
 		'L_EXPLAIN'  => nl2br($lang['Explain']['text']),
 
 		'S_BODY'     => $body_text
-	));
+	]);
 }
 
 if ($listdata['liste_format'] != FORMAT_TEXTE) {
-	$output->assign_block_vars('nl_html_textarea', array(
+	$output->assign_block_vars('nl_html_textarea', [
 		'L_TITLE'    => $lang['Log_in_html'],
 		'L_EXPLAIN'  => nl2br($lang['Explain']['html']),
 
 		'S_BODY'     => $body_html
-	));
+	]);
 }
 
 if ($auth->check_auth(Auth::SEND, $listdata['liste_id'])) {
-	$output->assign_block_vars('test_send', array(
+	$output->assign_block_vars('test_send', [
 		'L_TEST_SEND'      => $lang['Test_send'],
 		'L_TEST_SEND_NOTE' => $lang['Test_send_note'],
 		'L_SEND_BUTTON'    => $lang['Button']['send']
-	));
+	]);
 }
 
 if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
@@ -1011,33 +1001,33 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 		$rowspan++;
 	}
 
-	$output->assign_block_vars('joined_files', array(
+	$output->assign_block_vars('joined_files', [
 		'L_TITLE_ADD_FILE'   => $lang['Title']['join'],
 		'L_EXPLAIN_ADD_FILE' => nl2br($lang['Explain']['join']),
 		'L_ADD_FILE'         => $lang['Join_file_to_log'],
 		'L_ADD_FILE_BUTTON'  => $lang['Button']['add_file'],
 
 		'S_ROWSPAN' => $rowspan
-	));
+	]);
 
 	//
 	// Si l'upload est autorisé, on affiche le champs type file
 	//
 	if ($max_filesize) {
-		$output->assign_block_vars('joined_files.upload_input', array(
+		$output->assign_block_vars('joined_files.upload_input', [
 			'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 			'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
 			'MAX_FILE_SIZE'   => $max_filesize
-		));
+		]);
 	}
 
 	//
 	// Box de sélection de fichiers existants
 	//
 	if ($file_box != '') {
-		$output->assign_block_vars('joined_files.select_box', array(
+		$output->assign_block_vars('joined_files.select_box', [
 			'SELECT_BOX' => $file_box
-		));
+		]);
 	}
 
 	$output->files_list($logdata);

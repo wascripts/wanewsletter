@@ -25,9 +25,9 @@ class Auth
 	const BAN    = 7;
 	const ATTACH = 8;
 
-	public $listdata = array();
+	public $listdata = [];
 
-	public $auth_ary = array(
+	public $auth_ary = [
 		self::VIEW   => 'auth_view',
 		self::EDIT   => 'auth_edit',
 		self::DEL    => 'auth_del',
@@ -36,7 +36,7 @@ class Auth
 		self::EXPORT => 'auth_export',
 		self::BAN    => 'auth_ban',
 		self::ATTACH => 'auth_attach'
-	);
+	];
 
 	/**
 	 * Vérifie si l'utilisateur s'est authentifié
@@ -103,8 +103,8 @@ class Auth
 			trigger_error("Unexpected error returned by password API", E_USER_ERROR);
 		}
 
-		$data = array($columns['passwd'] => $passwd_hash);
-		$cond = array($columns['uid'] => $uid);
+		$data = [$columns['passwd'] => $passwd_hash];
+		$cond = [$columns['uid'] => $uid];
 		$db->update($tablename, $data, $cond);
 	}
 
@@ -157,7 +157,7 @@ class Auth
 	{
 		if (check_in_admin() || defined(__NAMESPACE__.'\\IN_INSTALL')) {
 			$tablename = ADMIN_TABLE;
-			$columns   = array();
+			$columns   = [];
 
 			$columns['uid']      = 'admin_id';
 			$columns['passwd']   = 'admin_pwd';
@@ -166,7 +166,7 @@ class Auth
 		}
 		else {
 			$tablename = ABONNES_TABLE;
-			$columns   = array();
+			$columns   = [];
 
 			$columns['uid']      = 'abo_id';
 			$columns['passwd']   = 'abo_pwd';
@@ -174,7 +174,7 @@ class Auth
 			$columns['email']    = 'abo_email';
 		}
 
-		return array($tablename, $columns);
+		return [$tablename, $columns];
 	}
 
 	/**
@@ -199,7 +199,7 @@ class Auth
 			ORDER BY li.liste_name ASC";
 		$result = $db->query($sql);
 
-		$tmp_ary = array();
+		$tmp_ary = [];
 		while ($row = $result->fetch()) {
 			$tmp_ary[$row['liste_id']] = $row;
 		}
@@ -228,7 +228,7 @@ class Auth
 		$auth_name = $this->auth_ary[$auth_type];
 
 		if ($liste_id == null) {
-			$liste_id_ary = array();
+			$liste_id_ary = [];
 			foreach ($this->listdata as $liste_id => $auth_list) {
 				if (wan_is_admin($admindata) || !empty($auth_list[$auth_name])) {
 					$liste_id_ary[] = $liste_id;

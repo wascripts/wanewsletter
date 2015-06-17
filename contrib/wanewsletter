@@ -43,7 +43,7 @@ load_settings();
 
 $argv[0]  = basename($argv[0]);
 $version  = WANEWSLETTER_VERSION;
-$emails   = array();
+$emails   = [];
 $format   = FORMAT_TEXTE;
 $liste_id = null;
 $message  = null;
@@ -67,9 +67,9 @@ if ($nl_config['engine_send'] == ENGINE_UNIQ) {
 }
 
 $shortopts = 'p:l:k:d:vh';
-$longopts  = array('process-send:','limit:','packet:', 'delay:',
+$longopts  = ['process-send:','limit:','packet:', 'delay:',
 	'process-subscribe:', 'import-mail:', 'format:', 'help', 'version', 'license'
-);
+];
 $opts = getopt($shortopts, $longopts);
 
 foreach ($opts as $name => $value) {
@@ -210,7 +210,7 @@ WANSHELL;
 	else if ($name == 'format') {
 		$format = $value;
 
-		if (in_array($format, array('plain', 'text', 'texte'))) {
+		if (in_array($format, ['plain', 'text', 'texte'])) {
 			$format = FORMAT_TEXTE;
 		}
 		else if ($format == 'html') {
@@ -289,9 +289,9 @@ else if ($process_subscribe) {
 
 	$sub = new Subscription($listdata);
 	$pop = new PopClient();
-	$pop->options(array(
+	$pop->options([
 		'starttls' => ($pop_tls == SECURITY_STARTTLS)
-	));
+	]);
 
 	try {
 		$server = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
@@ -357,7 +357,7 @@ else if ($process_subscribe) {
 
 			$sub->check_code($code, $time);
 		}
-		else if (in_array($action, array('inscription','setformat','desinscription'))) {
+		else if (in_array($action, ['inscription','setformat','desinscription'])) {
 			$sub->do_action($action, $email);
 		}
 
@@ -383,12 +383,12 @@ else if ($import_mail) {
 		}
 
 		$emails = trim($emails);
-		$emails = ($emails != '') ? preg_split('/\s+/', $emails) : array();
+		$emails = ($emails != '') ? preg_split('/\s+/', $emails) : [];
 	}
 
 	$emails = array_unique($emails);
 	$current_time = time();
-	$emails_ok    = array();
+	$emails_ok    = [];
 
 	if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
 		$format = $listdata['liste_format'];
@@ -413,7 +413,7 @@ else if ($import_mail) {
 		$counter = 0;
 
 		$sql_emails = array_map('strtolower', $emails);
-		$sql_emails = array_map(array($db, 'escape'), $sql_emails);
+		$sql_emails = array_map([$db, 'escape'], $sql_emails);
 
 		$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
 			FROM " . ABONNES_TABLE . " AS a
@@ -427,7 +427,7 @@ else if ($import_mail) {
 		//
 		while ($abodata = $result->fetch()) {
 			if (!isset($abodata['confirmed'])) {
-				$sql_data = array();
+				$sql_data = [];
 				$sql_data['abo_id']        = $abodata['abo_id'];
 				$sql_data['liste_id']      = $listdata['liste_id'];
 				$sql_data['format']        = $format;
@@ -456,7 +456,7 @@ else if ($import_mail) {
 		foreach ($emails as $email) {
 			$db->beginTransaction();
 
-			$sql_data = array();
+			$sql_data = [];
 			$sql_data['abo_email']  = $email;
 			$sql_data['abo_status'] = ABO_ACTIF;
 
@@ -469,7 +469,7 @@ else if ($import_mail) {
 				continue;
 			}
 
-			$sql_data = array();
+			$sql_data = [];
 			$sql_data['abo_id']        = $db->lastInsertId();
 			$sql_data['liste_id']      = $listdata['liste_id'];
 			$sql_data['format']        = $format;

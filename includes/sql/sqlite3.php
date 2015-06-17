@@ -111,7 +111,7 @@ class Sqlite3 extends Wadb
 			$this->lastQuery = '';
 			$this->result = $result;
 
-			if (in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE'))) {
+			if (in_array(strtoupper(substr($query, 0, 6)), ['INSERT', 'UPDATE', 'DELETE'])) {
 				$result = true;
 			}
 			else {
@@ -131,7 +131,7 @@ class Sqlite3 extends Wadb
 
 		// voir parent::insert()
 		if (!is_array($dataset[0])) {
-			$dataset = array($dataset);
+			$dataset = [$dataset];
 		}
 
 		//
@@ -160,7 +160,7 @@ class Sqlite3 extends Wadb
 	public function vacuum($tables)
 	{
 		if (!is_array($tables)) {
-			$tables = array($tables);
+			$tables = [$tables];
 		}
 
 		foreach ($tables as $tablename) {
@@ -252,11 +252,11 @@ class Sqlite3Result extends WadbResult
 {
 	public function fetch($mode = null)
 	{
-		$modes = array(
+		$modes = [
 			self::FETCH_NUM   => SQLITE3_NUM,
 			self::FETCH_ASSOC => SQLITE3_ASSOC,
 			self::FETCH_BOTH  => SQLITE3_BOTH
-		);
+		];
 
 		return $this->result->fetchArray($this->getFetchMode($modes, $mode));
 	}
@@ -305,7 +305,7 @@ class Sqlite3Backup extends WadbBackup
 	public function get_tables()
 	{
 		$result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
-		$tables = array();
+		$tables = [];
 
 		while ($row = $result->fetch()) {
 			$tables[$row['tbl_name']] = '';

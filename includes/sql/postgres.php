@@ -42,7 +42,7 @@ class Postgres extends Wadb
 	 *
 	 * @var array
 	 */
-	protected static $seqlist = array();
+	protected static $seqlist = [];
 
 	public function connect($infos = null, $options = null)
 	{
@@ -52,7 +52,7 @@ class Postgres extends Wadb
 		$connectString = '';
 
 		if (is_array($infos)) {
-			foreach (array('host', 'username', 'passwd', 'port', 'dbname') as $info) {
+			foreach (['host', 'username', 'passwd', 'port', 'dbname'] as $info) {
 				if (isset($infos[$info])) {
 					if ($info == 'username') {
 						$connectString .= "user='$infos[$info]' ";
@@ -133,7 +133,7 @@ class Postgres extends Wadb
 			if (0 == $this->sqlstate) {
 				$this->error = '';
 
-				if (in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE'))) {
+				if (in_array(strtoupper(substr($query, 0, 6)), ['INSERT', 'UPDATE', 'DELETE'])) {
 					$this->_affectedRows = pg_affected_rows($result);
 					$result = true;
 				}
@@ -164,7 +164,7 @@ class Postgres extends Wadb
 	public function vacuum($tables)
 	{
 		if (!is_array($tables)) {
-			$tables = array($tables);
+			$tables = [$tables];
 		}
 
 		foreach ($tables as $tablename) {
@@ -263,11 +263,11 @@ class PostgresResult extends WadbResult
 {
 	public function fetch($mode = null)
 	{
-		$modes = array(
+		$modes = [
 			self::FETCH_NUM   => PGSQL_NUM,
 			self::FETCH_ASSOC => PGSQL_ASSOC,
 			self::FETCH_BOTH  => PGSQL_BOTH
-		);
+		];
 
 		return pg_fetch_array($this->result, null, $this->getFetchMode($modes, $mode));
 	}
@@ -325,7 +325,7 @@ class PostgresBackup extends WadbBackup
 			WHERE NOT tablename ~ '^(pg|sql)_'
 			ORDER BY tablename";
 		$result = $this->db->query($sql);
-		$tables = array();
+		$tables = [];
 
 		while ($row = $result->fetch()) {
 			$tables[$row['tablename']] = '';
@@ -336,8 +336,8 @@ class PostgresBackup extends WadbBackup
 
 	public function get_table_structure($tabledata, $drop_option)
 	{
-		$contents = '';
-		$sequences = array();
+		$contents  = '';
+		$sequences = [];
 
 		$sql = sprintf("SELECT a.attname AS fieldname, s.relname AS seqname
 			FROM pg_class s
@@ -354,7 +354,7 @@ class PostgresBackup extends WadbBackup
 
 			if ($seq = $result_seq->fetch()) {
 				if (!isset($sequences[$tabledata['name']])) {
-					$sequences[$tabledata['name']] = array();
+					$sequences[$tabledata['name']] = [];
 				}
 				$sequences[$tabledata['name']][$row['fieldname']] = $seq;
 			}
@@ -464,8 +464,8 @@ class PostgresBackup extends WadbBackup
 		$result = $this->db->query($sql);
 
 		$primary_key_name = '';
-		$primary_key_fields = array();
-		$index_rows  = array();
+		$primary_key_fields = [];
+		$index_rows  = [];
 
 		while ($row = $result->fetch()) {
 			if ($row['primary_key'] == 't') {
@@ -481,7 +481,7 @@ class PostgresBackup extends WadbBackup
 				$index_rows[$row['index_name']]['unique'] = ($row['unique_key'] == 't') ? 'UNIQUE' : '';
 
 				if (!isset($index_rows[$row['index_name']]['column_names'])) {
-					$index_rows[$row['index_name']]['column_names'] = array();
+					$index_rows[$row['index_name']]['column_names'] = [];
 				}
 
 				$index_rows[$row['index_name']]['column_names'][] = $row['column_name'];
@@ -490,7 +490,7 @@ class PostgresBackup extends WadbBackup
 		$result->free();
 
 		if (!empty($primary_key_name)) {
-			$primary_key_fields = array_map(array($this->db, 'quote'), $primary_key_fields);
+			$primary_key_fields = array_map([$this->db, 'quote'], $primary_key_fields);
 			$contents .= sprintf("CONSTRAINT %s PRIMARY KEY (%s),%s",
 				$this->db->quote($primary_key_name),
 				implode(', ', $primary_key_fields),
@@ -502,7 +502,7 @@ class PostgresBackup extends WadbBackup
 
 		if (count($index_rows) > 0) {
 			foreach ($index_rows as $idx_name => $props) {
-				$props['column_names'] = array_map(array($this->db, 'quote'), $props['column_names']);
+				$props['column_names'] = array_map([$this->db, 'quote'], $props['column_names']);
 				$props['column_names'] = implode(', ', $props['column_names']);
 
 				if (!empty($props['unique'])) {

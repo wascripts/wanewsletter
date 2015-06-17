@@ -118,7 +118,7 @@ switch ($mode) {
 $url_page  = './tools.php';
 $url_page .= ($mode != '') ? '?mode=' . $mode : '';
 
-if (!in_array($mode, array('backup','restore','debug', '')) && !$_SESSION['liste']) {
+if (!in_array($mode, ['backup','restore','debug', '']) && !$_SESSION['liste']) {
 	$output->build_listbox($auth_type, true, $url_page);
 }
 else if ($_SESSION['liste']) {
@@ -137,7 +137,7 @@ if (!isset($_POST['submit'])) {
 		$output->build_listbox($auth_type, false, $url_page);
 	}
 
-	$tools_ary = array('export', 'import', 'ban', 'generator');
+	$tools_ary = ['export', 'import', 'ban', 'generator'];
 
 	if (wan_is_admin($admindata)) {
 		array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
@@ -156,11 +156,9 @@ if (!isset($_POST['submit'])) {
 
 	$output->page_header();
 
-	$output->set_filenames(array(
-		'body' => 'tools_body.tpl'
-	));
+	$output->set_filenames(['body' => 'tools_body.tpl']);
 
-	$output->assign_vars(array(
+	$output->assign_vars([
 		'L_TITLE'        => $lang['Title']['tools'],
 		'L_EXPLAIN'      => nl2br($lang['Explain']['tools']),
 		'L_SELECT_TOOL'  => $lang['Select_tool'],
@@ -168,7 +166,7 @@ if (!isset($_POST['submit'])) {
 
 		'S_TOOLS_BOX'    => $tools_box,
 		'S_TOOLS_HIDDEN_FIELDS' => $output->getHiddenFields()
-	));
+	]);
 }
 
 //
@@ -375,7 +373,7 @@ switch ($mode) {
 			}
 			else {
 				$format = filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
-				if (!in_array($format, array(FORMAT_TEXTE, FORMAT_HTML))) {
+				if (!in_array($format, [FORMAT_TEXTE, FORMAT_HTML])) {
 					$format = FORMAT_TEXTE;
 				}
 			}
@@ -441,11 +439,9 @@ switch ($mode) {
 			}
 		}
 
-		$output->set_filenames(array(
-			'tool_body' => 'export_body.tpl'
-		));
+		$output->set_filenames(['tool_body' => 'export_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'L_TITLE_EXPORT'    => $lang['Title']['export'],
 			'L_EXPLAIN_EXPORT'  => nl2br($lang['Explain']['export']),
 			'L_EXPORT_FORMAT'   => $lang['Export_format'],
@@ -458,34 +454,34 @@ switch ($mode) {
 			'L_RESET_BUTTON'    => $lang['Button']['reset'],
 
 			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
-		));
+		]);
 
 		if (ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED) {
-			$output->assign_block_vars('compress_option', array(
+			$output->assign_block_vars('compress_option', [
 				'L_COMPRESS' => $lang['Compress'],
 				'L_NO'       => $lang['No']
-			));
+			]);
 
 			if (ZIPLIB_LOADED) {
-				$output->assign_block_vars('compress_option.zip_compress', array());
+				$output->assign_block_vars('compress_option.zip_compress', []);
 			}
 
 			if (ZLIB_LOADED) {
-				$output->assign_block_vars('compress_option.gzip_compress', array());
+				$output->assign_block_vars('compress_option.gzip_compress', []);
 			}
 
 			if (BZIP2_LOADED) {
-				$output->assign_block_vars('compress_option.bz2_compress', array());
+				$output->assign_block_vars('compress_option.bz2_compress', []);
 			}
 		}
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
 			require WA_ROOTDIR . '/includes/functions.box.php';
 
-			$output->assign_block_vars('format_box', array(
+			$output->assign_block_vars('format_box', [
 				'L_FORMAT'   => $lang['Format_to_export'],
 				'FORMAT_BOX' => format_box('format')
-			));
+			]);
 		}
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
@@ -572,7 +568,7 @@ switch ($mode) {
 			}
 
 			if (!empty($list_tmp) && $data_is_xml) {
-				$emails = array();
+				$emails = [];
 
 				if (extension_loaded('simplexml')) {
 					$xml = simplexml_load_string($list_tmp);
@@ -666,18 +662,18 @@ switch ($mode) {
 				}
 				else {
 					$format = filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
-					if (!in_array($format, array(FORMAT_TEXTE, FORMAT_HTML))) {
+					if (!in_array($format, [FORMAT_TEXTE, FORMAT_HTML])) {
 						$format = FORMAT_TEXTE;
 					}
 				}
 
 				$current_time = time();
-				$emails_ok    = array();
+				$emails_ok    = [];
 
 				fake_header(false);
 
 				$sql_emails = array_map('strtolower', $emails);
-				$sql_emails = array_map(array($db, 'escape'), $sql_emails);
+				$sql_emails = array_map([$db, 'escape'], $sql_emails);
 
 				$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
 					FROM " . ABONNES_TABLE . " AS a
@@ -691,7 +687,7 @@ switch ($mode) {
 				//
 				while ($abodata = $result->fetch()) {
 					if (!isset($abodata['confirmed'])) { // N'est pas inscrit à cette liste
-						$sql_data = array();
+						$sql_data = [];
 						$sql_data['abo_id']        = $abodata['abo_id'];
 						$sql_data['liste_id']      = $listdata['liste_id'];
 						$sql_data['format']        = $format;
@@ -721,7 +717,7 @@ switch ($mode) {
 				foreach ($emails as $email) {
 					$db->beginTransaction();
 
-					$sql_data = array();
+					$sql_data = [];
 					$sql_data['abo_email']  = $email;
 					$sql_data['abo_status'] = ABO_ACTIF;
 
@@ -734,7 +730,7 @@ switch ($mode) {
 						continue;
 					}
 
-					$sql_data = array();
+					$sql_data = [];
 					$sql_data['abo_id']        = $db->lastInsertId();
 					$sql_data['liste_id']      = $listdata['liste_id'];
 					$sql_data['format']        = $format;
@@ -776,11 +772,9 @@ switch ($mode) {
 
 		$max_filesize = get_max_filesize();
 
-		$output->set_filenames(array(
-			'tool_body' => 'import_body.tpl'
-		));
+		$output->set_filenames(['tool_body' => 'import_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'L_TITLE_IMPORT'   => $lang['Title']['import'],
 			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'],
 				MAX_IMPORT,
@@ -794,15 +788,15 @@ switch ($mode) {
 
 			'S_HIDDEN_FIELDS'  => $output->getHiddenFields(),
 			'S_ENCTYPE'        => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
-		));
+		]);
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
 			require WA_ROOTDIR . '/includes/functions.box.php';
 
-			$output->assign_block_vars('format_box', array(
+			$output->assign_block_vars('format_box', [
 				'L_FORMAT'   => $lang['Format_to_import'],
 				'FORMAT_BOX' => format_box('format')
-			));
+			]);
 		}
 
 		if ($max_filesize) {
@@ -810,12 +804,12 @@ switch ($mode) {
 			// L'upload est disponible sur le serveur
 			// Affichage du champ file pour importation
 			//
-			$output->assign_block_vars('upload_file', array(
+			$output->assign_block_vars('upload_file', [
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 				'L_UPLOAD_FILE'   => $lang['File_upload'],
 				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
 				'MAX_FILE_SIZE'   => $max_filesize
-			));
+			]);
 		}
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
@@ -832,13 +826,13 @@ switch ($mode) {
 
 			if ($pattern) {
 				$pattern_list = explode(',', $pattern);
-				$sql_dataset  = array();
+				$sql_dataset  = [];
 
 				foreach ($pattern_list as $pattern) {
-					$sql_dataset[] = array(
+					$sql_dataset[] = [
 						'liste_id'  => $listdata['liste_id'],
 						'ban_email' => trim($pattern)
-					);
+					];
 				}
 
 				if (count($sql_dataset) > 0) {
@@ -883,11 +877,9 @@ switch ($mode) {
 		}
 		$unban_email_box .= '</select>';
 
-		$output->set_filenames( array(
-			'tool_body' => 'ban_list_body.tpl'
-		));
+		$output->set_filenames(['tool_body' => 'ban_list_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'L_TITLE_BAN'     => $lang['Title']['ban'],
 			'L_EXPLAIN_BAN'   => nl2br($lang['Explain']['ban']),
 			'L_EXPLAIN_UNBAN' => nl2br($lang['Explain']['unban']),
@@ -898,7 +890,7 @@ switch ($mode) {
 
 			'UNBAN_EMAIL_BOX' => $unban_email_box,
 			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
-		));
+		]);
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
 		break;
@@ -914,14 +906,14 @@ switch ($mode) {
 
 			if ($ext_list != '') {
 				$ext_list    = explode(',', $ext_list);
-				$sql_dataset = array();
+				$sql_dataset = [];
 
 				foreach ($ext_list as $ext) {
 					if (preg_match('/^[\w_-]+$/', $ext)) {
-						$sql_dataset[] = array(
+						$sql_dataset[] = [
 							'liste_id' => $listdata['liste_id'],
 							'fe_ext'   => trim(mb_strtolower($ext))
-						);
+						];
 					}
 				}
 
@@ -967,11 +959,9 @@ switch ($mode) {
 		}
 		$reallow_ext_box .= '</select>';
 
-		$output->set_filenames( array(
-			'tool_body' => 'forbidden_ext_body.tpl'
-		));
+		$output->set_filenames(['tool_body' => 'forbidden_ext_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'L_TITLE_EXT'          => $lang['Title']['attach'],
 			'L_EXPLAIN_TO_FORBID'  => nl2br($lang['Explain']['forbid_ext']),
 			'L_EXPLAIN_TO_REALLOW' => nl2br($lang['Explain']['reallow_ext']),
@@ -982,7 +972,7 @@ switch ($mode) {
 
 			'REALLOW_EXT_BOX'      => $reallow_ext_box,
 			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
-		));
+		]);
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
 		break;
@@ -1000,7 +990,7 @@ switch ($mode) {
 		}
 
 		$tables_list = $backup->get_tables();
-		$tables      = array();
+		$tables      = [];
 
 		foreach ($tables_list as $tablename => $tabletype) {
 			if (!isset($_POST['submit'])) {
@@ -1010,7 +1000,7 @@ switch ($mode) {
 			}
 			else {
 				if (isset($sql_schemas[$tablename]) || in_array($tablename, $tables_plus)) {
-					$tables[] = array('name' => $tablename, 'type' => $tabletype);
+					$tables[] = ['name' => $tablename, 'type' => $tabletype];
 				}
 			}
 		}
@@ -1062,11 +1052,9 @@ switch ($mode) {
 			}
 		}
 
-		$output->set_filenames(array(
-			'tool_body' => 'backup_body.tpl'
-		));
+		$output->set_filenames(['tool_body' => 'backup_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'L_TITLE_BACKUP'    => $lang['Title']['backup'],
 			'L_EXPLAIN_BACKUP'  => nl2br($lang['Explain']['backup']),
 			'L_BACKUP_TYPE'     => $lang['Backup_type'],
@@ -1083,7 +1071,7 @@ switch ($mode) {
 			'L_RESET_BUTTON'    => $lang['Button']['reset'],
 
 			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
-		));
+		]);
 
 		if ($total_tables = count($tables_plus)) {
 			if ($total_tables > 10) {
@@ -1099,27 +1087,27 @@ switch ($mode) {
 			}
 			$tables_box .= '</select>';
 
-			$output->assign_block_vars('tables_box', array(
+			$output->assign_block_vars('tables_box', [
 				'L_ADDITIONAL_TABLES' => $lang['Additionnal_tables'],
 				'S_TABLES_BOX'        => $tables_box
-			));
+			]);
 		}
 
 		if (ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED) {
-			$output->assign_block_vars('compress_option', array(
+			$output->assign_block_vars('compress_option', [
 				'L_COMPRESS' => $lang['Compress']
-			));
+			]);
 
 			if (ZIPLIB_LOADED) {
-				$output->assign_block_vars('compress_option.zip_compress', array());
+				$output->assign_block_vars('compress_option.zip_compress', []);
 			}
 
 			if (ZLIB_LOADED) {
-				$output->assign_block_vars('compress_option.gzip_compress', array());
+				$output->assign_block_vars('compress_option.gzip_compress', []);
 			}
 
 			if (BZIP2_LOADED) {
-				$output->assign_block_vars('compress_option.bz2_compress', array());
+				$output->assign_block_vars('compress_option.bz2_compress', []);
 			}
 		}
 
@@ -1229,11 +1217,9 @@ switch ($mode) {
 
 		$max_filesize = get_max_filesize();
 
-		$output->set_filenames(array(
-			'tool_body' => 'restore_body.tpl'
-		));
+		$output->set_filenames(['tool_body' => 'restore_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'L_TITLE_RESTORE'   => $lang['Title']['restore'],
 			'L_EXPLAIN_RESTORE' => nl2br($lang['Explain']['restore']),
 			'L_LOCAL_FILE'      => $lang['File_local'],
@@ -1242,19 +1228,19 @@ switch ($mode) {
 
 			'S_HIDDEN_FIELDS'   => $output->getHiddenFields(),
 			'S_ENCTYPE'         => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
-		));
+		]);
 
 		if ($max_filesize) {
 			//
 			// L'upload est disponible sur le serveur
 			// Affichage du champ file pour importation
 			//
-			$output->assign_block_vars('upload_file', array(
+			$output->assign_block_vars('upload_file', [
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 				'L_UPLOAD_FILE'   => $lang['File_upload_restore'],
 				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
 				'MAX_FILE_SIZE'   => $max_filesize
-			));
+			]);
 		}
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
@@ -1289,32 +1275,28 @@ switch ($mode) {
 			$code_php .= sprintf("require '%s/newsletter.php';\n", WA_ROOTDIR);
 			$code_php .= '?' . ">\n";
 
-			$output->set_filenames(array(
-				'tool_body' => 'result_generator_body.tpl'
-			));
+			$output->set_filenames(['tool_body' => 'result_generator_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_TITLE_GENERATOR'   => $lang['Title']['generator'],
 				'L_EXPLAIN_CODE_HTML' => nl2br($lang['Explain']['code_html']),
 				'L_EXPLAIN_CODE_PHP'  => nl2br($lang['Explain']['code_php']),
 
 				'CODE_HTML' => htmlspecialchars($code_html, ENT_NOQUOTES),
 				'CODE_PHP'  => htmlspecialchars($code_php, ENT_NOQUOTES)
-			));
+			]);
 		}
 		else {
-			$output->set_filenames(array(
-				'tool_body' => 'generator_body.tpl'
-			));
+			$output->set_filenames(['tool_body' => 'generator_body.tpl']);
 
-			$output->assign_vars(array(
+			$output->assign_vars([
 				'L_TITLE_GENERATOR'   => $lang['Title']['generator'],
 				'L_EXPLAIN_GENERATOR' => nl2br($lang['Explain']['generator']),
 				'L_TARGET_FORM'       => $lang['Target_form'],
 				'L_VALID_BUTTON'      => $lang['Button']['valid'],
 
 				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
-			));
+			]);
 		}
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');

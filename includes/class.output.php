@@ -16,21 +16,21 @@ class Output extends Template
 	 *
 	 * @var array
 	 */
-	private $links         = array();
+	private $links         = [];
 
 	/**
 	 * Scripts clients liés au document
 	 *
 	 * @var array
 	 */
-	private $scripts       = array();
+	private $scripts       = [];
 
 	/**
 	 * Champs cachés d'un formulaire du document
 	 *
 	 * @var array
 	 */
-	private $hidden_fields = array();
+	private $hidden_fields = [];
 
 	/**
 	 * Meta de redirection
@@ -44,7 +44,7 @@ class Output extends Template
 	 *
 	 * @var array
 	 */
-	private $messageList   = array();
+	private $messageList   = [];
 
 	/**
 	 * Indique si la méthode page_header() a déjà été appelée.
@@ -80,12 +80,12 @@ class Output extends Template
 			$attrs = $rel;
 		}
 		else {
-			$attrs = array(
+			$attrs = [
 				'rel'   => $rel,
 				'href'  => $href,
 				'title' => $title,
 				'type'  => $type
-			);
+			];
 		}
 
 		$this->links[] = $attrs;
@@ -103,7 +103,7 @@ class Output extends Template
 		}
 
 		$links = implode("\r\n\t", $this->links);
-		$this->links = array();
+		$this->links = [];
 
 		return $links;
 	}
@@ -124,12 +124,12 @@ class Output extends Template
 			$attrs = $src;
 		}
 		else {
-			$attrs = array(
+			$attrs = [
 				'src'   => $src,
 				'type'  => $type,
 				'async' => $async,
 				'defer' => $defer
-			);
+			];
 		}
 
 		$this->scripts[] = $attrs;
@@ -147,7 +147,7 @@ class Output extends Template
 		}
 
 		$scripts = implode("\r\n\t", $this->scripts);
-		$this->scripts = array();
+		$this->scripts = [];
 
 		return $scripts;
 	}
@@ -160,7 +160,7 @@ class Output extends Template
 	 */
 	public function addHiddenField($name, $value)
 	{
-		$this->hidden_fields[] = array('name' => $name, 'value' => $value);
+		$this->hidden_fields[] = ['name' => $name, 'value' => $value];
 	}
 
 	/**
@@ -170,14 +170,14 @@ class Output extends Template
 	 */
 	public function getHiddenFields()
 	{
-		$type = array('type' => 'hidden');
+		$type = ['type' => 'hidden'];
 		foreach ($this->hidden_fields as &$field) {
 			$field = array_merge($type, $field);
 			$field = $this->getHTMLElement('input', $field);
 		}
 
 		$fields = implode("\r\n\t", $this->hidden_fields);
-		$this->hidden_fields = array();
+		$this->hidden_fields = [];
 
 		return $fields;
 	}
@@ -271,9 +271,9 @@ class Output extends Template
 
 		$this->send_headers();
 
-		$this->set_filenames(array(
+		$this->set_filenames([
 			'header' => ($simple_header) ? 'simple_header.tpl' :'header.tpl'
-		));
+		]);
 
 		if (check_in_admin()) {
 			$this->addLink('home', './',              				$lang['Title']['accueil']);
@@ -328,7 +328,7 @@ class Output extends Template
 			$this->addLink('stylesheet', sprintf('%s/templates/wanewsletter.custom.css', $base_dir));
 		}
 
-		$this->assign_vars( array(
+		$this->assign_vars([
 			'PAGE_TITLE'   => $page_title,
 			'META'         => $this->meta_redirect,
 			'CONTENT_LANG' => $lang['CONTENT_LANG'],
@@ -338,7 +338,7 @@ class Output extends Template
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts(),
 			'SITENAME'     => htmlspecialchars($sitename, ENT_NOQUOTES)
-		));
+		]);
 
 		// Si l'utilisateur est connecté, affichage du menu
 		if (!$simple_header) {
@@ -348,7 +348,7 @@ class Output extends Template
 					htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
 				);
 
-				$this->assign_vars(array(
+				$this->assign_vars([
 					'L_INDEX'       => $lang['Module']['accueil'],
 					'L_CONFIG'      => $lang['Module']['config'],
 					'L_SEND'        => $lang['Module']['send'],
@@ -357,20 +357,20 @@ class Output extends Template
 					'L_TOOLS'       => $lang['Module']['tools'],
 					'L_USERS'       => $lang['Module']['users'],
 					'L_STATS'       => $lang['Module']['stats'],
-				));
+				]);
 			}
 			else {
 				$l_logout = $lang['Module']['logout'];
 
-				$this->assign_vars(array(
+				$this->assign_vars([
 					'L_EDITPROFILE' => $lang['Module']['editprofile']
-				));
+				]);
 			}
 
-			$this->assign_vars(array(
+			$this->assign_vars([
 				'L_LOG'    => $lang['Module']['log'],
 				'L_LOGOUT' => $l_logout,
-			));
+			]);
 		}
 
 		if ($error) {
@@ -407,9 +407,7 @@ class Output extends Template
 			$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
 		}
 
-		$this->set_filenames(array(
-			'footer' => 'footer.tpl'
-		));
+		$this->set_filenames(['footer' => 'footer.tpl']);
 
 		$version = WANEWSLETTER_VERSION;
 
@@ -418,28 +416,28 @@ class Output extends Template
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);
 
-			$this->assign_block_vars('dev_infos', array(
+			$this->assign_block_vars('dev_infos', [
 				'TIME_TOTAL' => sprintf('%.8f', $totaltime),
 				'TIME_PHP'   => sprintf('%.3f', $totaltime - $db->sqltime),
 				'TIME_SQL'   => sprintf('%.3f', $db->sqltime),
 				'MEM_USAGE'  => (function_exists('memory_get_usage'))
 					? formateSize(memory_get_usage()) : 'Unavailable',
 				'QUERIES'    => $db->queries
-			));
+			]);
 		}
 
-		$this->assign_vars( array(
+		$this->assign_vars([
 			'VERSION'   => $version,
 			'TRANSLATE' => (!empty($lang['TRANSLATE'])) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
-		));
+		]);
 
 		if ($wanlog_box != '') {
-			$this->assign_vars(array(
+			$this->assign_vars([
 				'WANLOG_BOX' => sprintf('<ul class="warning"
 					style="font-family:monospace;font-size:12px;">%s</ul>',
 					$wanlog_box
 				)
-			));
+			]);
 		}
 
 		$this->pparse('footer');
@@ -568,14 +566,12 @@ BASIC;
 			$this->page_header();
 		}
 
-		$this->set_filenames(array(
-			'body' => 'message_body.tpl'
-		));
+		$this->set_filenames(['body' => 'message_body.tpl']);
 
-		$this->assign_vars( array(
+		$this->assign_vars([
 			'MSG_TITLE' => $title,
 			'MSG_TEXT'  => $str
-		));
+		]);
 
 		$this->pparse('body');
 
@@ -592,7 +588,7 @@ BASIC;
 	public function error_box($msg_errors)
 	{
 		if (!is_array($msg_errors)) {
-			$msg_errors = array($msg_errors);
+			$msg_errors = [$msg_errors];
 		}
 
 		$error_box = '';
@@ -600,9 +596,9 @@ BASIC;
 			$error_box .= sprintf("<li>%s</li>\n", $msg_error);
 		}
 
-		$this->assign_vars(array(
+		$this->assign_vars([
 			'ERROR_BOX' => sprintf('<ul class="warning">%s</ul>', $error_box)
-		));
+		]);
 	}
 
 	/**
@@ -627,7 +623,7 @@ BASIC;
 			return false;
 		}
 
-		$test_files = array();
+		$test_files = [];
 		for ($i = 0; $i < $num_files; $i++) {
 			$total_size  += $logdata['joined_files'][$i]['file_size'];
 			$test_files[] = $logdata['joined_files'][$i]['file_real_name'];
@@ -641,14 +637,12 @@ BASIC;
 			}
 		}
 		else {
-			$embed_files = array();
+			$embed_files = [];
 		}
 
-		$this->set_filenames(array(
-			'files_box_body' => 'files_box.tpl'
-		));
+		$this->set_filenames(['files_box_body' => 'files_box.tpl']);
 
-		$this->assign_vars(array(
+		$this->assign_vars([
 			'L_JOINED_FILES'   => $lang['Title']['joined_files'],
 			'L_FILENAME'       => $lang['Filename'],
 			'L_FILESIZE'       => $lang['Filesize'],
@@ -656,13 +650,13 @@ BASIC;
 
 			'TOTAL_LOG_SIZE'   => formateSize($total_size),
 			'S_ROWSPAN'        => ($page_envoi) ? '4' : '3'
-		));
+		]);
 
 		if ($page_envoi) {
-			$this->assign_block_vars('del_column', array());
-			$this->assign_block_vars('joined_files.files_box', array( // dans send_body.tpl
+			$this->assign_block_vars('del_column', []);
+			$this->assign_block_vars('joined_files.files_box', [ // dans send_body.tpl
 				'L_DEL_FILE_BUTTON' => $lang['Button']['del_file']
-			));
+			]);
 
 			$u_download = './envoi.php?mode=download&amp;fid=%d';
 		}
@@ -705,17 +699,17 @@ BASIC;
 					$lang['Message']['File_not_found'], htmlspecialchars($filename));
 			}
 
-			$this->assign_block_vars('file_info', array(
+			$this->assign_block_vars('file_info', [
 				'OFFSET'   => ($i + 1),
 				'FILENAME' => $filename,
 				'FILESIZE' => formateSize($filesize),
 				'S_SHOW'   => $s_show
-			));
+			]);
 
 			if ($page_envoi) {
-				$this->assign_block_vars('file_info.delete_options', array(
+				$this->assign_block_vars('file_info.delete_options', [
 					'FILE_ID' => $file_id
-				));
+				]);
 			}
 		}
 
@@ -782,35 +776,31 @@ BASIC;
 		if ($display) {
 			$this->page_header();
 
-			$this->set_filenames(array(
-				'body' => 'select_liste_body.tpl'
-			));
+			$this->set_filenames(['body' => 'select_liste_body.tpl']);
 
-			$this->assign_vars(array(
+			$this->assign_vars([
 				'L_TITLE'         => $lang['Title']['select'],
 				'L_SELECT_LISTE'  => $lang['Choice_liste'],
 				'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
 				'LISTE_BOX'       => $list_box,
 				'U_FORM'          => $jump_to
-			));
+			]);
 
 			$this->pparse('body');
 
 			$this->page_footer();
 		}
 		else {
-			$this->set_filenames(array(
-				'list_box_body' => 'list_box.tpl'
-			));
+			$this->set_filenames(['list_box_body' => 'list_box.tpl']);
 
-			$this->assign_vars(array(
+			$this->assign_vars([
 				'L_VIEW_LIST' => $lang['View_liste'],
 				'L_BUTTON_GO' => $lang['Button']['go'],
 
 				'S_LISTBOX'   => $list_box,
 				'U_LISTBOX'   => $jump_to
-			));
+			]);
 
 			$this->assign_var_from_handle('LISTBOX', 'list_box_body');
 		}

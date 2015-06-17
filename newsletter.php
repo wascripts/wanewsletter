@@ -51,7 +51,7 @@ if ($action || $code) {
 	purge_liste();
 
 	if ($action) {
-		if (in_array($action, array('inscription', 'setformat', 'desinscription'))) {
+		if (in_array($action, ['inscription', 'setformat', 'desinscription'])) {
 			$sql = "SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
 					liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe
 				FROM " . LISTE_TABLE . "

@@ -21,7 +21,7 @@ namespace Wanewsletter\Dblayer;
 function parseSQL($input, $prefixe = '')
 {
 	$tmp            = '';
-	$output         = array();
+	$output         = [];
 	$in_comments    = false;
 	$between_quotes = false;
 

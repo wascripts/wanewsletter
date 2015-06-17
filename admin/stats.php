@@ -37,12 +37,12 @@ if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 $listdata = $auth->listdata[$_SESSION['liste']];
 
 $img   = filter_input(INPUT_GET, 'img');
-$year  = filter_input(INPUT_GET, 'year', FILTER_VALIDATE_INT,
-	array('options' => array('default' => date('Y')))
-);
-$month = filter_input(INPUT_GET, 'month', FILTER_VALIDATE_INT,
-	array('options' => array('default' => date('n')))
-);
+$year  = filter_input(INPUT_GET, 'year', FILTER_VALIDATE_INT, [
+	'options' => ['default' => date('Y')]
+]);
+$month = filter_input(INPUT_GET, 'month', FILTER_VALIDATE_INT, [
+	'options' => ['default' => date('n')]
+]);
 
 $img_type = (imagetypes() & IMG_GIF) ? 'gif' : null;
 $img_type = (imagetypes() & IMG_PNG) ? 'png' : $img_type;
@@ -188,7 +188,7 @@ if ($img == 'graph') {
 	// Échelle horizontale et lecture du fichier des stats
 	//
 	$max_days    = date('t', $ts);
-	$num_per_day = array();
+	$num_per_day = [];
 	$max_value   = 10;
 
 	for ($day = 1, $i = 0, $int = 0; $day <= $max_days; $day++, $i++, $int += 16) {
@@ -228,7 +228,7 @@ if ($img == 'graph') {
 	for ($i = 0, $int = 0; $i < ($numgrad * 2); $i++, $int += (200/($numgrad * 2))) {
 		if (($i % 2) == 0) {
 			imagestring($im, $text_font, 7, (29 + $int), $top_value, $black);
-			imagesetstyle($im, array($gray, $gray, $gray, $gray, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT));
+			imagesetstyle($im, [$gray, $gray, $gray, $gray, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT, IMG_COLOR_TRANSPARENT]);
 			imageline($im, 32, (37 + $int), ($imageW - 33), (37 + $int), IMG_COLOR_STYLED);
 			imageline($im, 25, (37 + $int), 28, (37 + $int), $black);
 			imageline($im, ($imageW - 29), (37 + $int), ($imageW - 26), (37 + $int), $black);
@@ -271,18 +271,18 @@ if ($img == 'camembert') {
 		GROUP BY al.liste_id";
 	$result = $db->query($sql);
 
-	$tmpdata = array();
+	$tmpdata = [];
 	while ($row = $result->fetch()) {
 		$tmpdata[$row['liste_id']] = $row['num_inscrits'];
 	}
 
 	$total_inscrits = 0;
-	$listes = array();
+	$listes = [];
 	foreach ($liste_ids as $liste_id) {
 		$liste_name   = cut_str($auth->listdata[$liste_id]['liste_name'], 30);
 		$num_inscrits = (!empty($tmpdata[$liste_id])) ? $tmpdata[$liste_id] : 0;
 
-		$listes[] = array('name' => $liste_name, 'num' => $num_inscrits);
+		$listes[] = ['name' => $liste_name, 'num' => $num_inscrits];
 		$total_inscrits += $num_inscrits;
 	}
 
@@ -311,8 +311,8 @@ if ($img == 'camembert') {
 	$gray2 = convertToRGB('888');
 	$gray2 = imagecolorallocate($im, $gray2->red, $gray2->green, $gray2->blue);
 
-	$color = array();
-	$colorList = array('F80', '0A0', '0BC', '30C', '608', 'C03');
+	$color = [];
+	$colorList = ['F80', '0A0', '0BC', '30C', '608', 'C03'];
 	foreach ($colorList as $hexColor) {
 		$tmp = convertToRGB($hexColor);
 		$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
@@ -425,9 +425,9 @@ require WA_ROOTDIR . '/includes/functions.box.php';
 
 $output->page_header();
 
-$output->set_filenames( array(
+$output->set_filenames([
 	'body' => 'stats_body.tpl'
-));
+]);
 
 $y_list = '';
 $m_list = '';
@@ -465,7 +465,7 @@ if ($next_m > 12) {
 
 $aTitle = sprintf('%s &ndash; %%s', $lang['Module']['stats']);
 
-$output->assign_vars(array(
+$output->assign_vars([
 	'L_TITLE'         => $lang['Title']['stats'],
 	'L_EXPLAIN_STATS' => nl2br($lang['Explain']['stats']),
 	'L_GO_BUTTON'     => $lang['Button']['go'],
@@ -481,16 +481,16 @@ $output->assign_vars(array(
 	'U_PREV_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $prev_y, $prev_m),
 	'U_NEXT_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $next_y, $next_m),
 	'U_IMG_GRAPH'     => sprintf('stats.php?img=graph&amp;year=%d&amp;month=%d', $year, $month)
-));
+]);
 
 //
 // Affichons un message d'alerte au cas où le répertoire de statistiques n'est pas
 // accessible en écriture.
 //
 if (!is_writable(WA_STATSDIR)) {
-	$output->assign_block_vars('statsdir_error', array(
+	$output->assign_block_vars('statsdir_error', [
 		'MESSAGE' => $lang['Stats_dir_not_writable']
-	));
+	]);
 }
 
 $output->pparse('body');

@@ -68,7 +68,7 @@ class Sqlitepdo extends Wadb
 			$this->options = array_merge($this->options, $options);
 		}
 
-		$opt = array();
+		$opt = [];
 		if (!empty($options['persistent'])) {
 			$opt[PDO::ATTR_PERSISTENT] = true;
 		}
@@ -147,7 +147,7 @@ class Sqlitepdo extends Wadb
 			$this->lastQuery = '';
 			$this->result = $result;
 
-			if (in_array(strtoupper(substr($query, 0, 6)), array('INSERT', 'UPDATE', 'DELETE'))) {
+			if (in_array(strtoupper(substr($query, 0, 6)), ['INSERT', 'UPDATE', 'DELETE'])) {
 				$this->_affectedRows = $result->rowCount();
 				$result = true;
 			}
@@ -168,7 +168,7 @@ class Sqlitepdo extends Wadb
 
 		// voir parent::insert()
 		if (!is_array($dataset[0])) {
-			$dataset = array($dataset);
+			$dataset = [$dataset];
 		}
 
 		//
@@ -197,7 +197,7 @@ class Sqlitepdo extends Wadb
 	public function vacuum($tables)
 	{
 		if (!is_array($tables)) {
-			$tables = array($tables);
+			$tables = [$tables];
 		}
 
 		foreach ($tables as $tablename) {
@@ -281,11 +281,11 @@ class SqlitepdoResult extends WadbResult
 {
 	public function fetch($mode = null)
 	{
-		$modes = array(
+		$modes = [
 			self::FETCH_NUM   => PDO::FETCH_NUM,
 			self::FETCH_ASSOC => PDO::FETCH_ASSOC,
 			self::FETCH_BOTH  => PDO::FETCH_BOTH
-		);
+		];
 
 		return $this->result->fetch($this->getFetchMode($modes, $mode));
 	}
@@ -297,11 +297,11 @@ class SqlitepdoResult extends WadbResult
 
 	public function fetchAll($mode = null)
 	{
-		$modes = array(
+		$modes = [
 			self::FETCH_NUM   => PDO::FETCH_NUM,
 			self::FETCH_ASSOC => PDO::FETCH_ASSOC,
 			self::FETCH_BOTH  => PDO::FETCH_BOTH
-		);
+		];
 
 		return $this->result->fetchAll($this->getFetchMode($modes, $mode));
 	}
@@ -345,7 +345,7 @@ class SqlitepdoBackup extends WadbBackup
 	public function get_tables()
 	{
 		$result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
-		$tables = array();
+		$tables = [];
 
 		while ($row = $result->fetch()) {
 			$tables[$row['tbl_name']] = '';

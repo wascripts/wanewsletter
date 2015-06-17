@@ -86,9 +86,9 @@ if ($listdata = $result->fetch()) {
 
 		$sub = new Subscription($listdata);
 		$pop = new PopClient();
-		$pop->options(array(
+		$pop->options([
 			'starttls' => ($listdata['pop_tls'] == SECURITY_STARTTLS)
-		));
+		]);
 
 		try {
 			$server = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
@@ -155,7 +155,7 @@ if ($listdata = $result->fetch()) {
 
 				$sub->check_code($code, $time);
 			}
-			else if (in_array($action, array('inscription','setformat','desinscription'))) {
+			else if (in_array($action, ['inscription','setformat','desinscription'])) {
 				$sub->do_action($action, $email);
 			}
 

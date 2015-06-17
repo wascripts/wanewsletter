@@ -36,7 +36,7 @@ class Mysqli extends Wadb
 		$options = (is_null($options)) ? $this->options : $options;
 
 		if (is_array($infos)) {
-			foreach (array('host', 'username', 'passwd', 'port', 'dbname') as $info) {
+			foreach (['host', 'username', 'passwd', 'port', 'dbname'] as $info) {
 				$$info = (isset($infos[$info])) ? $infos[$info] : null;
 			}
 
@@ -202,11 +202,11 @@ class MysqliResult extends WadbResult
 {
 	public function fetch($mode = null)
 	{
-		$modes = array(
+		$modes = [
 			self::FETCH_NUM   => MYSQLI_NUM,
 			self::FETCH_ASSOC => MYSQLI_ASSOC,
 			self::FETCH_BOTH  => MYSQLI_BOTH
-		);
+		];
 
 		return mysqli_fetch_array($this->result, $this->getFetchMode($modes, $mode));
 	}
@@ -255,7 +255,7 @@ class MysqliBackup extends WadbBackup
 	public function get_tables()
 	{
 		$result = $this->db->query('SHOW TABLE STATUS FROM ' . $this->db->quote($this->db->dbname));
-		$tables = array();
+		$tables = [];
 
 		while ($row = $result->fetch()) {
 			$tables[$row['Name']] = $row['Engine'];

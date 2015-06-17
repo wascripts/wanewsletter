@@ -38,7 +38,7 @@ class PopClient
 	 *
 	 * @var array
 	 */
-	public $contents    = array();
+	public $contents    = [];
 
 	/**
 	 * Durée maximale d’une tentative de connexion
@@ -63,7 +63,7 @@ class PopClient
 	 *
 	 * @var array
 	 */
-	protected $opts     = array(
+	protected $opts     = [
 		/**
 		 * Utilisation de la commande STLS pour sécuriser la connexion.
 		 * Ignoré si la connexion est sécurisée en utilisant un des préfixes de
@@ -80,13 +80,13 @@ class PopClient
 		 *
 		 * @var array
 		 */
-		'stream_opts'   => array(
-			'ssl' => array(
+		'stream_opts'   => [
+			'ssl' => [
 				'disable_compression' => true, // default value in PHP ≥ 5.6
-			)
-		),
+			]
+		],
 		'stream_params' => null
-	);
+	];
 
 	/**
 	 * Liste des extensions POP supportées.
@@ -95,7 +95,7 @@ class PopClient
 	 *
 	 * @var array
 	 */
-	protected $extensions = array();
+	protected $extensions = [];
 
 	/**
 	 * Dernier message de réponse retourné par le serveur.
@@ -110,7 +110,7 @@ class PopClient
 	 *
 	 * @var array
 	 */
-	protected $serverInfos = array(
+	protected $serverInfos = [
 		'host'      => '',
 		'port'      => 0,
 		// true si la connexion est chiffrée avec SSL/TLS
@@ -119,12 +119,12 @@ class PopClient
 		'trusted'   => false,
 		// Ressource de contexte de flux manipulable avec les fonctions stream_context_*
 		'context'   => null
-	);
+	];
 
 	/**
 	 * @param array $opts
 	 */
-	public function __construct(array $opts = array())
+	public function __construct(array $opts = [])
 	{
 		if (!strpos($this->server, '://')) {
 			$this->server = 'tcp://'.$this->server;
@@ -142,10 +142,10 @@ class PopClient
 	 *
 	 * @return array
 	 */
-	public function options(array $opts = array())
+	public function options(array $opts = [])
 	{
 		// Configuration alternative
-		foreach (array('debug','timeout') as $name) {
+		foreach (['debug','timeout'] as $name) {
 			if (!empty($opts[$name])) {
 				$this->{$name} = $opts[$name];
 				unset($opts[$name]);
@@ -171,7 +171,7 @@ class PopClient
 	{
 		// Reset des données relatives à l’éventuelle connexion précédente
 		$this->responseData = '';
-		$this->contents = array();
+		$this->contents = [];
 
 		if (!$server) {
 			$server = $this->server;
@@ -246,7 +246,7 @@ class PopClient
 
 		if ($this->checkResponse(true)) {
 			// On récupère la liste des extensions supportées par ce serveur
-			$this->extensions = array();
+			$this->extensions = [];
 			$lines = explode("\r\n", trim($this->responseData));
 			array_shift($lines);// On zappe la réponse serveur +OK...
 
@@ -268,7 +268,7 @@ class PopClient
 		}
 
 		// On compile les informations sur la connexion
-		$infos = array();
+		$infos = [];
 		$infos['host']      = $url['host'];
 		$infos['port']      = $url['port'];
 		$infos['encrypted'] = ($useSSL || $startTLS);
@@ -477,7 +477,7 @@ class PopClient
 
 		sscanf($this->responseData, '+OK %d %d', $total_msg, $total_size);
 
-		return array('total_msg' => $total_msg, 'total_size' => $total_size);
+		return ['total_msg' => $total_msg, 'total_size' => $total_size];
 	}
 
 	/**
@@ -497,7 +497,7 @@ class PopClient
 		}
 
 		if ($num == 0) {
-			$list  = array();
+			$list  = [];
 			$lines = explode("\r\n", trim($this->responseData));
 			array_shift($lines);// On zappe la réponse serveur +OK...
 
@@ -572,7 +572,7 @@ class PopClient
 			$str = $this->contents[$str]['headers'];
 		}
 
-		$headers = array();
+		$headers = [];
 
 		$lines = explode("\r\n", $str);
 		for ($i = 0; $i < count($lines); $i++) {
@@ -594,7 +594,7 @@ class PopClient
 	{
 		$total = preg_match_all("/([^ =]+)=\"?([^\" ]+)/", $str, $matches);
 
-		$infos = array();
+		$infos = [];
 		for ($i = 0; $i < $total; $i++) {
 			$infos[strtolower($matches[1][$i])] = $matches[2][$i];
 		}
@@ -668,8 +668,8 @@ class PopClient
 		$infos = $this->infos_header($headers['content-type']);
 
 		$boundary = $infos['boundary'];
-		$parts    = array();
-		$files    = array();
+		$parts    = [];
+		$files    = [];
 		$lines    = explode("\r\n", $message);
 		$offset   = 0;
 
@@ -765,7 +765,7 @@ class PopClient
 			$this->socket = null;
 		}
 
-		$infos = array();
+		$infos = [];
 		$infos['host']      = '';
 		$infos['port']      = 0;
 		$infos['encrypted'] = false;

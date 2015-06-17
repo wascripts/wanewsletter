@@ -58,7 +58,7 @@ if ($type == 'subscribers') {
         FROM " . ABONNES_TABLE;
     $result = $db->query($sql);
 
-    $abonnes_id = array();
+    $abonnes_id = [];
     while ($abo_id = $result->column('abo_id')) {
         $abonnes_id[] = $abo_id;
     }
@@ -68,7 +68,7 @@ if ($type == 'subscribers') {
         GROUP BY abo_id";
     $result = $db->query($sql);
 
-    $abo_liste_id = array();
+    $abo_liste_id = [];
     while ($abo_id = $result->column('abo_id')) {
 		$abo_liste_id[] = $abo_id;
     }
@@ -111,7 +111,7 @@ else if ($type == 'files') {
         FROM " . JOINED_FILES_TABLE;
     $result = $db->query($sql);
 
-    $jf_id = array();
+    $jf_id = [];
     while ($id = $result->column('file_id')) {
         $jf_id[] = $id;
     }
@@ -121,7 +121,7 @@ else if ($type == 'files') {
         GROUP BY file_id";
     $result = $db->query($sql);
 
-    $lf_id = array();
+    $lf_id = [];
     while ($id = $result->column('file_id')) {
         $lf_id[] = $id;
     }
@@ -165,9 +165,9 @@ else if ($type == 'files2') {
 	$result = $db->query($sql);
 
 	$upload_path    = WA_ROOTDIR . '/' . $nl_config['upload_path'];
-	$sql_delete_ids = array();
-	$joined_files   = array();
-	$delete_files   = array();
+	$sql_delete_ids = [];
+	$joined_files   = [];
+	$delete_files   = [];
 	while ($row = $result->fetch()) {
 		if (!file_exists($upload_path . $row['file_physical_name'])) {
 			$sql_delete_ids[] = $row['file_id'];

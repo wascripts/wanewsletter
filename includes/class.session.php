@@ -19,7 +19,7 @@ class Session
 	 *
 	 * @var array
 	 */
-	protected $cfg_cookie = array();
+	protected $cfg_cookie = [];
 
 	/**
 	 * La session vient elle d'être créée ?
@@ -61,12 +61,12 @@ class Session
 		ini_set('session.use_trans_sid', false);
 
 		session_set_save_handler(
-			array($this, 'open'),
-			array($this, 'close'),
-			array($this, 'read'),
-			array($this, 'write'),
-			array($this, 'destroy'),
-			array($this, 'gc')
+			[$this, 'open'],
+			[$this, 'close'],
+			[$this, 'read'],
+			[$this, 'write'],
+			[$this, 'destroy'],
+			[$this, 'gc']
 		);
 
 		session_set_cookie_params(
@@ -188,12 +188,12 @@ class Session
 		);
 		$result = $db->query($sql);
 
-		$sql_data = array(
+		$sql_data = [
 			'session_data' => $data
-		);
+		];
 
 		if ($result->column(0) == 1) {
-			$db->update(SESSIONS_TABLE, $sql_data, array('session_id' => $sid));
+			$db->update(SESSIONS_TABLE, $sql_data, ['session_id' => $sid]);
 		}
 		else {
 			$sql_data['session_id']     = $sid;

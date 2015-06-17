@@ -48,13 +48,13 @@ function diff_lang($tab_1, $tab_2, $namespace = '')
     }
 }
 
-$lang = array();
+$lang = [];
 require WA_ROOTDIR . '/languages/' . $FICHIER_REFERENCE;
 
 $lang_ary_1 = $lang;
 unset($lang);
 
-$lang = array();
+$lang = [];
 require WA_ROOTDIR . '/languages/' . $FICHIER_A_TESTER;
 
 $lang_ary_2 = $lang;

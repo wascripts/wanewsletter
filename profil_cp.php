@@ -88,9 +88,9 @@ $other_tags = wan_get_tags();
 switch ($mode) {
 	case 'editprofile':
 		if (isset($_POST['submit'])) {
-			$vararray = array('new_email', 'confirm_email', 'pseudo', 'language',
+			$vararray = ['new_email', 'confirm_email', 'pseudo', 'language',
 				'current_passwd', 'new_passwd', 'confirm_passwd'
-			);
+			];
 			foreach ($vararray as $varname) {
 				${$varname} = trim(u::filter_input(INPUT_POST, $varname));
 			}
@@ -140,10 +140,10 @@ switch ($mode) {
 			}
 
 			if (!$error) {
-				$sql_data = array(
+				$sql_data = [
 					'abo_pseudo' => strip_tags($pseudo),
 					'abo_lang'   => $language
-				);
+				];
 
 				if ($set_password) {
 					if (!($passwd_hash = password_hash($new_passwd, PASSWORD_DEFAULT))) {
@@ -165,7 +165,7 @@ switch ($mode) {
 					}
 				}
 
-				$db->update(ABONNES_TABLE, $sql_data, array('abo_id' => $abodata['uid']));
+				$db->update(ABONNES_TABLE, $sql_data, ['abo_id' => $abodata['uid']]);
 
 				$output->redirect('profil_cp.php', 4);
 				$output->displayMessage('Profile_updated');
@@ -176,11 +176,9 @@ switch ($mode) {
 
 		$output->page_header();
 
-		$output->set_filenames(array(
-			'body' => 'editprofile_body.tpl'
-		));
+		$output->set_filenames(['body' => 'editprofile_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'TITLE'           => $lang['Module']['editprofile'],
 			'L_EXPLAIN'       => nl2br($lang['Explain']['editprofile']),
 			'L_EXPLAIN_EMAIL' => nl2br($lang['Explain']['change_email']),
@@ -197,7 +195,7 @@ switch ($mode) {
 			'EMAIL'    => htmlspecialchars($abodata['email']),
 			'PSEUDO'   => htmlspecialchars($abodata['username']),
 			'LANG_BOX' => lang_box($abodata['abo_lang'])
-		));
+		]);
 
 		foreach ($other_tags as $tag) {
 			if (isset($abodata[$tag['column_name']])) {
@@ -218,7 +216,7 @@ switch ($mode) {
 			);
 			$listlog = array_filter($listlog);
 
-			$sql_log_id = array();
+			$sql_log_id = [];
 			foreach ($listlog as $liste_id => $logs) {
 				if (isset($abodata['listes'][$liste_id])) {
 					$sql_log_id = array_merge($sql_log_id, $logs);
@@ -236,7 +234,7 @@ switch ($mode) {
 						AND lf.log_id IN(" . implode(', ', $sql_log_id) . ")";
 			$result = $db->query($sql);
 
-			$files = array();
+			$files = [];
 			while ($row = $result->fetch()) {
 				$files[$row['log_id']][] = $row;
 			}
@@ -327,7 +325,7 @@ switch ($mode) {
 				//
 				// Traitement des tags et tags personnalisés
 				//
-				$tags_replace = array();
+				$tags_replace = [];
 
 				if ($abodata['username'] != '') {
 					$tags_replace['NAME'] = $abodata['username'];
@@ -357,10 +355,10 @@ switch ($mode) {
 				}
 
 				if (!$listdata['use_cron']) {
-					$tags_replace = array_merge($tags_replace, array(
+					$tags_replace = array_merge($tags_replace, [
 						'CODE'  => $listdata['register_key'],
 						'EMAIL' => rawurlencode($abodata['email'])
-					));
+					]);
 				}
 
 				$tpl = new Template();
@@ -388,7 +386,7 @@ switch ($mode) {
 			$output->displayMessage(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
 		}
 
-		$liste_ids = array();
+		$liste_ids = [];
 		foreach ($abodata['listes'] as $liste_id => $listdata) {
 			$liste_ids[] = $liste_id;
 		}
@@ -406,17 +404,15 @@ switch ($mode) {
 
 		$output->page_header();
 
-		$output->set_filenames(array(
-			'body' => 'archives_body.tpl'
-		));
+		$output->set_filenames(['body' => 'archives_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'TITLE'           => $lang['Title']['archives'],
 			'L_EXPLAIN'       => $lang['Explain']['archives'],
 			'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
 			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
-		));
+		]);
 
 		foreach ($abodata['listes'] as $liste_id => $listdata) {
 			if (!isset($abodata['listes'][$liste_id]['archives'])) {
@@ -438,11 +434,11 @@ switch ($mode) {
 			}
 			$select_log .= '</select>'."\n";
 
-			$output->assign_block_vars('listerow', array(
+			$output->assign_block_vars('listerow', [
 				'LISTE_ID'   => $liste_id,
 				'LISTE_NAME' => htmlspecialchars($listdata['liste_name']),
 				'SELECT_LOG' => $select_log
-			));
+			]);
 		}
 
 		$output->pparse('body');
@@ -451,14 +447,12 @@ switch ($mode) {
 	default:
 		$output->page_header();
 
-		$output->set_filenames(array(
-			'body' => 'index_body.tpl'
-		));
+		$output->set_filenames(['body' => 'index_body.tpl']);
 
-		$output->assign_vars(array(
+		$output->assign_vars([
 			'TITLE'     => $lang['Title']['profil_cp'],
 			'L_EXPLAIN' => nl2br($lang['Welcome_profil_cp'])
-		));
+		]);
 
 		$output->pparse('body');
 		break;

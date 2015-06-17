@@ -202,19 +202,19 @@ class Attach
 		//
 		$db->beginTransaction();
 
-		$sql_data = array(
+		$sql_data = [
 			'file_real_name'     => $filename,
 			'file_physical_name' => $physical_filename,
 			'file_size'          => $filesize,
 			'file_mimetype'      => $filetype
-		);
+		];
 
 		$db->insert(JOINED_FILES_TABLE, $sql_data);
 
-		$sql_data = array(
+		$sql_data = [
 			'log_id'  => $log_id,
 			'file_id' => $db->lastInsertId()
-		);
+		];
 		$db->insert(LOG_FILES_TABLE, $sql_data);
 
 		$db->commit();
@@ -312,7 +312,7 @@ class Attach
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
-			$file = array();
+			$file = [];
 			$file['name'] = $row['file_real_name'];
 			$file['path'] = $this->upload_path . $row['file_physical_name'];
 			$file['size'] = $row['file_size'];
@@ -332,7 +332,7 @@ class Attach
 	 *                        (par défaut, tous les fichiers liés aux logs
 	 *                        spécifiés sont supprimés)
 	 */
-	public function deleteFiles($log_ids, $file_ids = array())
+	public function deleteFiles($log_ids, $file_ids = [])
 	{
 		global $db;
 
@@ -360,7 +360,7 @@ class Attach
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
-			$file_ids = array();
+			$file_ids = [];
 			do {
 				$file_ids[] = $row['file_id'];
 
@@ -376,6 +376,6 @@ class Attach
 		}
 
 		$db->commit();
-		$db->vacuum(array(LOG_FILES_TABLE, JOINED_FILES_TABLE));
+		$db->vacuum([LOG_FILES_TABLE, JOINED_FILES_TABLE]);
 	}
 }

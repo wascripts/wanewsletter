@@ -33,13 +33,13 @@ abstract class Wadb
 	 *
 	 * @var array
 	 */
-	protected $infos = array();
+	protected $infos = [];
 	/**
 	 * Options de connexion
 	 *
 	 * @var array
 	 */
-	protected $options = array();
+	protected $options = [];
 
 	/**
 	 * Code d'erreur SQLSTATE
@@ -194,10 +194,10 @@ abstract class Wadb
 		// Si ce n'est pas le cas, on créé un tableau multi-dimensionnel pour
 		// traiter correctement dans notre boucle l'unique ligne à insérer.
 		if (!isset($dataset[0]) || !is_array($dataset[0])) {
-			$dataset = array($dataset);
+			$dataset = [$dataset];
 		}
 
-		$values = array();
+		$values = [];
 		foreach ($dataset as $data) {
 			$values[] = '(' . implode(', ', $this->prepareData($data)) . ')';
 		}
@@ -418,7 +418,7 @@ abstract class WadbResult
 	 */
 	public function fetchAll($mode = null)
 	{
-		$rowset = array();
+		$rowset = [];
 		while ($row = $this->fetch($mode)) {
 			$rowset[] = $row;
 		}
@@ -445,7 +445,7 @@ abstract class WadbResult
 	 */
 	final public function setFetchMode($mode)
 	{
-		if (in_array($mode, array(self::FETCH_NUM, self::FETCH_ASSOC, self::FETCH_BOTH))) {
+		if (in_array($mode, [self::FETCH_NUM, self::FETCH_ASSOC, self::FETCH_BOTH])) {
 			$this->fetchMode = $mode;
 			return true;
 		}
@@ -574,7 +574,7 @@ abstract class WadbBackup
 			$contents .= '-- Contenu de la table ' . $tablename . $this->eol;
 			$contents .= '-- ' . $this->eol;
 
-			$fields = array_map(array($this->db, 'quote'), array_keys($row));
+			$fields = array_map([$this->db, 'quote'], array_keys($row));
 			$fields = implode(', ', $fields);
 
 			do {
