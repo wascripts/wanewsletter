@@ -12,7 +12,7 @@ namespace Wanewsletter;
 /**
  * Gestion des connexions à l'administration
  */
-class Session
+class Session implements \SessionHandlerInterface
 {
 	/**
 	 * Configuration pour l'envoi des cookies
@@ -60,14 +60,7 @@ class Session
 		ini_set('session.use_only_cookies', true);
 		ini_set('session.use_trans_sid', false);
 
-		session_set_save_handler(
-			[$this, 'open'],
-			[$this, 'close'],
-			[$this, 'read'],
-			[$this, 'write'],
-			[$this, 'destroy'],
-			[$this, 'gc']
-		);
+		session_set_save_handler($this);
 
 		session_set_cookie_params(
 			$this->cfg_cookie['lifetime'],
@@ -83,8 +76,6 @@ class Session
 		if (!isset($_SESSION['is_logged_in'])) {
 			$this->reset();
 		}
-
-		session_register_shutdown();
 	}
 
 	/**
@@ -125,9 +116,12 @@ class Session
 	/**
 	 * Ouverture de session
 	 *
+	 * @param string $save_path
+	 * @param string $sid
+	 *
 	 * @return boolean
 	 */
-	public function open()
+	public function open($save_path, $sid)
 	{
 		return true;
 	}
@@ -229,9 +223,11 @@ class Session
 	/**
 	 * Suppression des sessions ayant expiré
 	 *
+	 * @param integer $lifetime
+	 *
 	 * @return boolean
 	 */
-	public function gc()
+	public function gc($lifetime)
 	{
 		global $db;
 
