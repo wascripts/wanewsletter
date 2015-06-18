@@ -211,7 +211,7 @@ $lang['Message']['File_not_found']          = "This file was not found on server
 
 $lang['Message']['Cannot_create_dir']       = "Cannot create %s directory";
 $lang['Message']['Dir_not_writable']        = "The directory <samp>%s</samp> doesn't exist or is not writable";
-$lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading! (includes/sql/schemas/)";
+$lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading! (includes/dblayer/schemas/)";
 
 $lang['Message']['Uploaddir_not_writable']  = "The upload dir isn't writable";
 $lang['Message']['Upload_error_1']          = "The file exceeds the size authorized by the upload_max_filesize directive in php.ini";

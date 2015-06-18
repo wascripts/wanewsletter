@@ -211,7 +211,7 @@ $lang['Message']['File_not_found']          = "Ce fichier est introuvable sur le
 
 $lang['Message']['Cannot_create_dir']       = "Impossible de créer le répertoire %s";
 $lang['Message']['Dir_not_writable']        = "Le répertoire <samp>%s</samp> n’existe pas ou n’est pas accessible en écriture";
-$lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (includes/sql/schemas/)";
+$lang['Message']['sql_file_not_readable']   = "Les fichiers sql ne sont pas accessibles en lecture ! (includes/dblayer/schemas/)";
 
 $lang['Message']['Uploaddir_not_writable']  = "Le répertoire de stockage des fichiers joints n’est pas accessible en écriture";
 $lang['Message']['Upload_error_1']          = "Le fichier excède le poids autorisé par la directive upload_max_filesize de php.ini";

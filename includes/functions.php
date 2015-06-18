@@ -38,8 +38,6 @@ function wan_autoloader($classname)
 	$classname = strtolower($classname);
 
 	if (strpos($classname, '\\')) {
-		// cas spécial pour dblayer qui est localisé dans sql/
-		$classname = str_replace('dblayer\\', 'sql/', $classname);
 		// Chemin includes/<namespace>/<classname>.php
 		$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
 	}

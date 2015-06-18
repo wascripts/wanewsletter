@@ -222,8 +222,8 @@ if ($start) {
 		}
 	}
 
-	$sql_create = WA_ROOTDIR . '/includes/sql/schemas/' . $infos['engine'] . '_tables.sql';
-	$sql_data   = WA_ROOTDIR . '/includes/sql/schemas/data.sql';
+	$sql_create = WA_ROOTDIR . '/includes/dblayer/schemas/' . $infos['engine'] . '_tables.sql';
+	$sql_data   = WA_ROOTDIR . '/includes/dblayer/schemas/data.sql';
 
 	if (!is_readable($sql_create) || !is_readable($sql_data)) {
 		$error = true;
@@ -260,7 +260,7 @@ if ($start) {
 	}
 
 	if (!$error) {
-		require WA_ROOTDIR . '/includes/sql/sqlparser.php';
+		require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
 
 		if (!($passwd_hash = password_hash($admin_pass, PASSWORD_DEFAULT))) {
 			trigger_error("Unexpected error returned by password API", E_USER_ERROR);

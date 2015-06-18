@@ -137,8 +137,8 @@ if (check_db_version($nl_config['db_version'])) {
 }
 
 if (isset($_POST['start'])) {
-	$sql_create = WA_ROOTDIR . '/includes/sql/schemas/' . $db::ENGINE . '_tables.sql';
-	$sql_data   = WA_ROOTDIR . '/includes/sql/schemas/data.sql';
+	$sql_create = WA_ROOTDIR . '/includes/dblayer/schemas/' . $db::ENGINE . '_tables.sql';
+	$sql_data   = WA_ROOTDIR . '/includes/dblayer/schemas/data.sql';
 
 	if (!is_readable($sql_create) || !is_readable($sql_data)) {
 		$error = true;
@@ -173,7 +173,7 @@ if (isset($_POST['start'])) {
 		//
 		@set_time_limit(3600);
 
-		require WA_ROOTDIR . '/includes/sql/sqlparser.php';
+		require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
 
 		$sql_create = Dblayer\parseSQL(file_get_contents($sql_create), $prefixe);
 		$sql_data   = Dblayer\parseSQL(file_get_contents($sql_data), $prefixe);
