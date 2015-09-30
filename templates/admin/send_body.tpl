@@ -1,38 +1,34 @@
-<script src="{BASEDIR}/vendor/tinymce/tinymce/tinymce.min.js"></script>
 <script>
 <!--
-tinyMCE.init({
-	selector: "textarea[name='body_html']",
-	theme: "modern",
-	skin: "lightgray",
-	menubar: false,
-<!-- BEGIN tinymce_lang -->
-	language_url:"{BASEDIR}/languages/{tinymce_lang.CODE}/tinymce.js",
-<!-- END tinymce_lang -->
-	plugins: [
-		"advlist autolink lists link image charmap print preview hr anchor pagebreak",
-		"searchreplace wordcount visualblocks visualchars code",
-		"insertdatetime media nonbreaking table contextmenu directionality",
-		"paste textcolor colorpicker textpattern"
-	],
-	toolbar1: "bold italic underline strikethrough bullist numlist blockquote hr alignleft aligncenter alignright link unlink image spellchecker",
-	toolbar2: "forecolor pastetext removeformat charmap outdent indent code undo redo",
+if (typeof(tinyMCE) != 'undefined') {
+	tinyMCE.init({
+		selector: "textarea[name='body_html']",
+		theme: "modern",
+		skin: "lightgray",
+		menubar: false,
+		language_url:"{BASEDIR}/languages/" + document.documentElement.lang.substr(0, 2) + "/tinymce.js",
+		plugins: [
+			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
+			"searchreplace wordcount visualblocks visualchars code",
+			"insertdatetime media nonbreaking table contextmenu directionality",
+			"paste textcolor colorpicker textpattern"
+		],
+		toolbar1: "bold italic underline strikethrough bullist numlist blockquote hr alignleft aligncenter alignright link unlink image spellchecker",
+		toolbar2: "forecolor pastetext removeformat charmap outdent indent code undo redo",
 
-	entity_encoding: "raw",
-	relative_urls: false,
-	setup: function(ed) {
-		ed.on('BeforeSetContent', function(e) {
-			e.content = e.content.replace(/<([^>]+)=\s*("|\')cid:/g,'<$1=$2show.php?file=');
-		});
-		ed.on('GetContent', function(e) {
-			e.content = e.content.replace(/<([^>]+)=\s*("|\').*?show\.php\?file=/g,'<$1=$2cid:');
-		});
-	}
-});
-//-->
-</script>
-<script>
-<!--
+		entity_encoding: "raw",
+		relative_urls: false,
+		setup: function(ed) {
+			ed.on('BeforeSetContent', function(e) {
+				e.content = e.content.replace(/<([^>]+)=\s*("|\')cid:/g,'<$1=$2show.php?file=');
+			});
+			ed.on('GetContent', function(e) {
+				e.content = e.content.replace(/<([^>]+)=\s*("|\').*?show\.php\?file=/g,'<$1=$2cid:');
+			});
+		}
+	});
+}
+
 var lang = [];
 lang["preview"] = '{L_PREVIEW_BUTTON}';
 lang["addlink"] = '{L_ADDLINK_BUTTON}';

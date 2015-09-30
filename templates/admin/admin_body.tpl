@@ -52,6 +52,15 @@ var basedir = '{BASEDIR}';
 				<label for="email_unsubscribe_no" class="notice">{L_NO}</label>
 			</td>
 		</tr>
+		<tr>
+			<td><label>{L_HTML_EDITOR}&nbsp;:</label></td>
+			<td>
+				<input type="radio" id="html_editor_yes" name="html_editor" value="1" {HTML_EDITOR_YES}/>
+				<label for="html_editor_yes" class="notice">{L_YES}</label>
+				<input type="radio" id="html_editor_no" name="html_editor" value="0" {HTML_EDITOR_NO}/>
+				<label for="html_editor_no" class="notice">{L_NO}</label>
+			</td>
+		</tr>
 		<!-- BEGIN owner_profil -->
 		<tr>
 			<td><label for="current_passwd">{L_PASSWD}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASSWD}</span></td>

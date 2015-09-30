@@ -431,6 +431,7 @@ $lang['View_profile']               = "View profile of";
 $lang['Confirm_del_user']           = "Do you confirm the removal of the selected user?";
 $lang['User_level']                 = "This user's level";
 $lang['Liste_name2']                = "List name";
+$lang['HTML_editor']                = "Enable HTML editor";
 
 
 //

@@ -48,6 +48,7 @@ CREATE TABLE wa_admin (
 	admin_level         SMALLINT     NOT NULL DEFAULT 1,
 	email_new_subscribe SMALLINT     NOT NULL DEFAULT 0,
 	email_unsubscribe   SMALLINT     NOT NULL DEFAULT 0,
+	html_editor         SMALLINT     NOT NULL DEFAULT 1,
 	CONSTRAINT wa_admin_pk PRIMARY KEY (admin_id)
 );
 

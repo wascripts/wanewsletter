@@ -51,6 +51,7 @@ CREATE TABLE wa_admin (
 	admin_level         TINYINT(1)   NOT NULL DEFAULT 1,
 	email_new_subscribe TINYINT(1)   NOT NULL DEFAULT 0,
 	email_unsubscribe   TINYINT(1)   NOT NULL DEFAULT 0,
+	html_editor         TINYINT(1)   NOT NULL DEFAULT 1,
 	CONSTRAINT wa_admin_pk PRIMARY KEY (admin_id)
 )
 	ENGINE = MyISAM

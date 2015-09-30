@@ -908,6 +908,10 @@ $output->addLink('subsection', './envoi.php?mode=load', $lang['Load_log']);
 $output->addLink('subsection', './envoi.php?mode=progress', $lang['List_send']);
 $output->addScript($nl_config['path'] . 'templates/admin/editor.js');
 
+if ($admindata['html_editor'] == HTML_EDITOR_YES) {
+	$output->addScript($nl_config['path'] . 'vendor/tinymce/tinymce/tinymce.min.js');
+}
+
 $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $prev_status);
 $output->addHiddenField('log_date',    $logdata['log_date']);
@@ -956,12 +960,6 @@ if ($logdata['log_date'] != -1) {
 		'S_LAST_MODIFIED' => sprintf($lang['Last_modified'],
 			convert_time($admindata['admin_dateformat'], $logdata['log_date'])
 		)
-	]);
-}
-
-if (is_readable(WA_ROOTDIR . '/languages/'.$admindata['admin_lang'].'/tinymce.js')) {
-	$output->assign_block_vars('tinymce_lang', [
-		'CODE' => $admindata['admin_lang']
 	]);
 }
 

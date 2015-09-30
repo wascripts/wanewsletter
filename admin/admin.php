@@ -194,8 +194,10 @@ if (isset($_POST['submit'])) {
 		$language = $nl_config['language'];
 	}
 
-	$email_new_subscribe = (bool) filter_input(INPUT_POST, 'email_new_subscribe', FILTER_VALIDATE_BOOLEAN);
-	$email_unsubscribe   = (bool) filter_input(INPUT_POST, 'email_unsubscribe', FILTER_VALIDATE_BOOLEAN);
+	$vararray = ['email_new_subscribe', 'email_unsubscribe', 'html_editor'];
+	foreach ($vararray as $varname) {
+		${$varname} = (bool) filter_input(INPUT_POST, $varname, FILTER_VALIDATE_BOOLEAN);
+	}
 
 	$set_password = false;
 	if ($new_passwd != '') {
@@ -226,7 +228,8 @@ if (isset($_POST['submit'])) {
 			'admin_dateformat'    => $date_format,
 			'admin_lang'          => $language,
 			'email_new_subscribe' => $email_new_subscribe,
-			'email_unsubscribe'   => $email_unsubscribe
+			'email_unsubscribe'   => $email_unsubscribe,
+			'html_editor'         => $html_editor
 		];
 
 		if ($set_password) {
@@ -364,6 +367,7 @@ $output->assign_vars([
 	'L_NOTE_DATE'           => sprintf($lang['Fct_date'], '<a href="http://www.php.net/date">', '</a>'),
 	'L_EMAIL_NEW_SUBSCRIBE' => $lang['Email_new_subscribe'],
 	'L_EMAIL_UNSUBSCRIBE'   => $lang['Email_unsubscribe'],
+	'L_HTML_EDITOR'         => $lang['HTML_editor'],
 	'L_PASSWD'              => $lang['Password'],
 	'L_NEW_PASSWD'          => $lang['New_passwd'],
 	'L_CONFIRM_PASSWD'      => $lang['Confirm_passwd'],
@@ -384,6 +388,9 @@ $output->assign_vars([
 
 	'EMAIL_UNSUBSCRIBE_YES' => $output->getBoolAttr('checked', ($current_admin['email_unsubscribe'] == UNSUBSCRIBE_NOTIFY_YES)),
 	'EMAIL_UNSUBSCRIBE_NO'  => $output->getBoolAttr('checked', ($current_admin['email_unsubscribe'] == UNSUBSCRIBE_NOTIFY_NO)),
+
+	'HTML_EDITOR_YES'       => $output->getBoolAttr('checked', ($current_admin['html_editor'] == HTML_EDITOR_YES)),
+	'HTML_EDITOR_NO'        => $output->getBoolAttr('checked', ($current_admin['html_editor'] == HTML_EDITOR_NO)),
 
 	'S_HIDDEN_FIELDS'       => $output->getHiddenFields()
 ]);

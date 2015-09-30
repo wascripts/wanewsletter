@@ -718,6 +718,29 @@ if (isset($_POST['start'])) {
 			$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_lang = 'fr' WHERE admin_lang = 'francais'";
 		}
 
+		//
+		// Activation/Désactivation de l’éditeur HTML intégré
+		//
+		if ($nl_config['db_version'] < 24) {
+			// Seulement si la table admin n'a pas été entièrement réécrite plus haut.
+			if (empty($sql_schemas[ADMIN_TABLE]['updated'])) {
+				switch ($db::ENGINE) {
+					case 'mysql':
+						$type = 'TINYINT(1)';
+						break;
+					case 'postgres':
+						$type = 'SMALLINT';
+						break;
+					case 'sqlite':
+						$type = 'INTEGER';
+						break;
+				}
+
+				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
+					ADD COLUMN html_editor $type NOT NULL DEFAULT 1";
+			}
+		}
+
 		exec_queries($sql_update);
 
 		//
