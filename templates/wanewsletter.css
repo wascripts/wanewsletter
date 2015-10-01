@@ -241,7 +241,7 @@ div.bottom {
 	color: black;
 }
 /* Exception quand le div ne suit pas une table (page des statistiques notamment) */
-*:not(table) + div.bottom { margin-top: 1px }
+*:not(table):not(#loadByURL) + div.bottom { margin-top: 1px }
 
 ul.links    { margin: 1em 0 -1em; padding: 0; text-align: left; }
 ul.links li { display: inline; font-size: .85em; }
