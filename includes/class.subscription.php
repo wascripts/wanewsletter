@@ -220,7 +220,7 @@ class Subscription
 			$this->listdata = $abodata;// Récupération des données relatives à la liste
 
 			if ($abodata['confirmed'] == SUBSCRIBE_NOT_CONFIRMED) {
-				$this->confirm($code, $time);
+				$this->confirm($time);
 			}
 			else {
 				$this->unsubscribe($code);
@@ -377,7 +377,7 @@ class Subscription
 		$this->message = $message;
 	}
 
-	private function confirm($code, $time = null)
+	private function confirm($time = null)
 	{
 		global $db, $lang;
 
