@@ -227,7 +227,7 @@ class Session implements \SessionHandlerInterface
 	 *
 	 * @return boolean
 	 */
-	public function gc($lifetime)
+	public function gc($lifetime = -1)
 	{
 		global $db;
 
