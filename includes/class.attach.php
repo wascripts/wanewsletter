@@ -158,6 +158,11 @@ class Attach
 		}
 
 		if (!$this->checkFileSize($log_id, $filesize, $total_size)) {
+			if ($mode == 'remote') {
+				// Suppression du fichier temporaire créé par nos soins
+				unlink($tmp_filename);
+			}
+
 			throw new Exception(sprintf($lang['Message']['weight_too_big'],
 				formateSize($nl_config['max_filesize'] - $total_size)
 			));
