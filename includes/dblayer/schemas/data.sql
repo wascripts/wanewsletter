@@ -26,7 +26,7 @@ INSERT INTO wa_config (config_name, config_value) VALUES('cookie_path',    '/');
 INSERT INTO wa_config (config_name, config_value) VALUES('upload_path',    'data/uploads/');
 INSERT INTO wa_config (config_name, config_value) VALUES('max_filesize',   '80000');
 INSERT INTO wa_config (config_name, config_value) VALUES('engine_send',    '2');
-INSERT INTO wa_config (config_name, config_value) VALUES('sending_limit',  '0');
+INSERT INTO wa_config (config_name, config_value) VALUES('sending_limit',  '100');
 INSERT INTO wa_config (config_name, config_value) VALUES('use_smtp',       '0');
 INSERT INTO wa_config (config_name, config_value) VALUES('smtp_host',      '');
 INSERT INTO wa_config (config_name, config_value) VALUES('smtp_port',      '25');
