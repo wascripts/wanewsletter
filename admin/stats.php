@@ -9,6 +9,8 @@
 
 namespace Wanewsletter;
 
+const FONT_FILE = '~/languages/DejaVuSans.ttf';
+
 require './start.inc.php';
 require WA_ROOTDIR . '/includes/functions.stats.php';
 
@@ -132,8 +134,7 @@ if ($img == 'graph') {
 	//
 	$imageW = 560;
 	$imageH = 260;
-	$title_font = 3;
-	$text_font  = 2;
+	$text_font = 2;
 
 	//
 	// Récupération des statistiques
@@ -180,9 +181,15 @@ if ($img == 'graph') {
 	//
 	// titre du graphe
 	//
-	$title = sprintf('%s - %s', $lang['Subscribe_per_day'], convert_time('F Y', $ts));
-	$start = (($imageW - (imagefontwidth($title_font) * strlen($title))) / 2);
-	imagestring($im, $title_font, $start, 5, $title, $black);
+	$font_size = 8;
+	$font_file = str_replace('~/', WA_ROOTDIR . '/', FONT_FILE);
+
+	$title  = sprintf('%s - %s', $lang['Subscribe_per_day'], convert_time('F Y', $ts));
+	$coords = imagettfbbox($font_size, 0, $font_file , $title);
+	$width  = ($coords[4] - $coords[6]);
+	$height = ($coords[3] - $coords[5]);
+	$start  = (($imageW - $width) / 2);
+	imagettftext($im, $font_size, 0, $start, (4 + $height), $black, $font_file, $title);
 
 	//
 	// Échelle horizontale et lecture du fichier des stats
@@ -293,8 +300,6 @@ if ($img == 'camembert') {
 	//
 	$imageW = 560;
 	$imageH = 170;
-	$title_font = 3;
-	$text_font  = 2;
 
 	if ($total_listes > 3) {
 		$imageH += (($total_listes - 3) * 20);
@@ -327,9 +332,16 @@ if ($img == 'camembert') {
 	//
 	// Titre du graphe
 	//
-	$title = $lang['Num_abo_per_liste'];
-	$start = (($imageW - (imagefontwidth($title_font) * strlen($title))) / 2);
-	imagestring($im, $title_font, $start, 4, $title, $black);
+	$font_size = 8;
+	$font_file = str_replace('~/', WA_ROOTDIR . '/', FONT_FILE);
+
+	$title  = $lang['Num_abo_per_liste'];
+	$coords = imagettfbbox($font_size, 0, $font_file , $title);
+	$width  = ($coords[4] - $coords[6]);
+	$height = ($coords[3] - $coords[5]);
+	$start  = (($imageW - $width) / 2);
+
+	imagettftext($im, $font_size, 0, $start, (4 + $height), $black, $font_file, $title);
 
 	//
 	// Positionnement de départ du camenbert
@@ -403,14 +415,21 @@ if ($img == 'camembert') {
 		imagefilledrectangle($im, 165, ($globalY + $int + 2), 175, ($globalY + $int + 12), $gray2);
 		imagefilledrectangle($im, 166, ($globalY + $int + 1), 176, ($globalY + $int + 11), $color_arc);
 
-		imagestring($im, $text_font, 185, ($globalY + $int),
-			sprintf('%s [%d] [%s%%]',
-				$listes[$i]['name'],
-				$listes[$i]['num'],
-				wa_number_format(($part > 0 ? round($part * 100, 2) : 0), 1)
-			),
-			$black
+		$title  = $lang['Num_abo_per_liste'];
+		$coords = imagettfbbox($font_size, 0, $font_file , $title);
+		$width  = ($coords[4] - $coords[6]);
+		$height = ($coords[3] - $coords[5]);
+		$start  = (($imageW - $width) / 2);
+
+		$text = sprintf('%s [%d] [%s%%]',
+			$listes[$i]['name'],
+			$listes[$i]['num'],
+			wa_number_format(($part > 0 ? round($part * 100, 2) : 0), 1)
 		);
+		imagettftext($im, $font_size, 0, 185, ($globalY + $int + 11), $black, $font_file, $text);
+
+
+//		imagestring($im, 2, 185, ($globalY + $int), $text, $black);
 	}
 
 	imagearc($im, $startX, $startY, 100, 100, 0, 360, $black);

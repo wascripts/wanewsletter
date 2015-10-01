@@ -103,6 +103,7 @@ includes/dblayer/wadb.php
 includes/wadb_init.php
 index.html
 install.php
+languages/DejaVuSans.ttf
 languages/en/emails/admin_new_subscribe.txt
 languages/en/emails/admin_unsubscribe.txt
 languages/en/emails/index.html
