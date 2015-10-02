@@ -6,7 +6,9 @@ if (typeof(tinyMCE) != 'undefined') {
 		theme: "modern",
 		skin: "lightgray",
 		menubar: false,
-		language_url:"{BASEDIR}/languages/" + document.documentElement.lang.substr(0, 2) + "/tinymce.js",
+		<!-- BEGIN tinymce_lang -->
+		language_url:"{BASEDIR}/languages/{tinymce_lang.CODE}/tinymce.js",
+		<!-- END tinymce_lang -->
 		plugins: [
 			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 			"searchreplace wordcount visualblocks visualchars code",
