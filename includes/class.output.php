@@ -805,4 +805,29 @@ BASIC;
 			$this->assign_var_from_handle('LISTBOX', 'list_box_body');
 		}
 	}
+
+	/**
+	 * Construction de la liste déroulante oui/non pour la permission concernée et la liste concernée
+	 *
+	 * @param integer $auth_type Code de la permission
+	 * @param array   $listdata  Tableau des permissions pour la liste en cours
+	 *
+	 * @return string
+	 */
+	public function build_authbox($auth_type, $listdata)
+	{
+		global $auth, $lang;
+
+		$auth_name = $auth->auth_ary[$auth_type];
+
+		$selected_yes = $this->getBoolAttr('selected', !empty($listdata[$auth_name]));
+		$selected_no  = $this->getBoolAttr('selected', empty($listdata[$auth_name]));
+
+		$box_auth  = '<select name="' . $auth_name . '[]">';
+		$box_auth .= '<option value="1"' . $selected_yes . '> ' . $lang['Yes'] . ' </option>';
+		$box_auth .= '<option value="0"' . $selected_no . '> ' . $lang['No'] . ' </option>';
+		$box_auth .= '</select>';
+
+		return $box_auth;
+	}
 }

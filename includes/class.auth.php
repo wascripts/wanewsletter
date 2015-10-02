@@ -247,29 +247,4 @@ class Auth
 			return false;
 		}
 	}
-
-	/**
-	 * Construction de la liste déroulante oui/non pour la permission concernée et la liste concernée
-	 *
-	 * @param integer $auth_type Code de la permission
-	 * @param array   $listdata  Tableau des permissions pour la liste en cours
-	 *
-	 * @return string
-	 */
-	public function box_auth($auth_type, $listdata)
-	{
-		global $output, $lang;
-
-		$auth_name = $this->auth_ary[$auth_type];
-
-		$selected_yes = $output->getBoolAttr('selected', !empty($listdata[$auth_name]));
-		$selected_no  = $output->getBoolAttr('selected', empty($listdata[$auth_name]));
-
-		$box_auth  = '<select name="' . $auth_name . '[]">';
-		$box_auth .= '<option value="1"' . $selected_yes . '> ' . $lang['Yes'] . ' </option>';
-		$box_auth .= '<option value="0"' . $selected_no . '> ' . $lang['No'] . ' </option>';
-		$box_auth .= '</select>';
-
-		return $box_auth;
-	}
 }

@@ -424,14 +424,14 @@ if (wan_is_admin($admindata)) {
 			'LISTE_NAME'      => htmlspecialchars($listrow['liste_name']),
 			'LISTE_ID'        => $listrow['liste_id'],
 
-			'BOX_AUTH_VIEW'   => $auth->box_auth(Auth::VIEW,   $listrow),
-			'BOX_AUTH_EDIT'   => $auth->box_auth(Auth::EDIT,   $listrow),
-			'BOX_AUTH_DEL'    => $auth->box_auth(Auth::DEL,    $listrow),
-			'BOX_AUTH_SEND'   => $auth->box_auth(Auth::SEND,   $listrow),
-			'BOX_AUTH_IMPORT' => $auth->box_auth(Auth::IMPORT, $listrow),
-			'BOX_AUTH_EXPORT' => $auth->box_auth(Auth::EXPORT, $listrow),
-			'BOX_AUTH_BACKUP' => $auth->box_auth(Auth::BAN,    $listrow),
-			'BOX_AUTH_ATTACH' => $auth->box_auth(Auth::ATTACH, $listrow)
+			'BOX_AUTH_VIEW'   => $output->build_authbox(Auth::VIEW,   $listrow),
+			'BOX_AUTH_EDIT'   => $output->build_authbox(Auth::EDIT,   $listrow),
+			'BOX_AUTH_DEL'    => $output->build_authbox(Auth::DEL,    $listrow),
+			'BOX_AUTH_SEND'   => $output->build_authbox(Auth::SEND,   $listrow),
+			'BOX_AUTH_IMPORT' => $output->build_authbox(Auth::IMPORT, $listrow),
+			'BOX_AUTH_EXPORT' => $output->build_authbox(Auth::EXPORT, $listrow),
+			'BOX_AUTH_BACKUP' => $output->build_authbox(Auth::BAN,    $listrow),
+			'BOX_AUTH_ATTACH' => $output->build_authbox(Auth::ATTACH, $listrow)
 		]);
 	}
 
