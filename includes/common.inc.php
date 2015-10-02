@@ -18,8 +18,8 @@ if (!defined('WA_ROOTDIR')) {
 }
 
 // $default_error_reporting est utilisé ultérieurement dans le gestionnaire d'erreurs
-$default_error_reporting = (E_ALL & ~(E_STRICT|E_DEPRECATED));
-error_reporting($default_error_reporting);
+define(__NAMESPACE__.'\\DEFAULT_ERROR_REPORTING', (E_ALL & ~(E_STRICT|E_DEPRECATED)));
+error_reporting(DEFAULT_ERROR_REPORTING);
 
 $starttime = array_sum(explode(' ', microtime()));
 

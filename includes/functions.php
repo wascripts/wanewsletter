@@ -473,7 +473,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	// soit par le gestionnaire d'erreurs natif de PHP
 	// (dans le cas d'erreurs fatales par exemple <= C'est du vécu :().
 	//
-	$error_reporting = error_reporting($GLOBALS['default_error_reporting']);
+	$error_reporting = error_reporting(DEFAULT_ERROR_REPORTING);
 
 	//
 	// On affiche pas les erreurs non prises en compte dans le réglage du
