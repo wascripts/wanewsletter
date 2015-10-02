@@ -379,7 +379,7 @@ if (isset($_POST['start'])) {
 					ALTER COLUMN abo_email TYPE VARCHAR(254)";
 				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
 					ALTER COLUMN admin_email TYPE VARCHAR(254)";
-				$sql_update[] = "ALTER TABLE " . BANLIST_TABLE . "
+				$sql_update[] = "ALTER TABLE " . BAN_LIST_TABLE . "
 					ALTER COLUMN ban_email TYPE VARCHAR(254)";
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
 					ALTER COLUMN sender_email TYPE VARCHAR(254),
@@ -387,7 +387,7 @@ if (isset($_POST['start'])) {
 					ALTER COLUMN liste_alias TYPE VARCHAR(254)";
 			}
 			else if ($db::ENGINE == 'sqlite') {
-				foreach ([ABONNES_TABLE, ADMIN_TABLE, BANLIST_TABLE, LISTE_TABLE] as $tablename) {
+				foreach ([ABONNES_TABLE, ADMIN_TABLE, BAN_LIST_TABLE, LISTE_TABLE] as $tablename) {
 					wa_sqlite_recreate_table($tablename);
 				}
 			}
@@ -396,7 +396,7 @@ if (isset($_POST['start'])) {
 					MODIFY COLUMN abo_email VARCHAR(254) NOT NULL DEFAULT ''";
 				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
 					MODIFY COLUMN admin_email VARCHAR(254) NOT NULL DEFAULT ''";
-				$sql_update[] = "ALTER TABLE " . BANLIST_TABLE . "
+				$sql_update[] = "ALTER TABLE " . BAN_LIST_TABLE . "
 					MODIFY COLUMN ban_email VARCHAR(254) NOT NULL DEFAULT ''";
 				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
 					MODIFY COLUMN sender_email VARCHAR(254) NOT NULL DEFAULT '',
@@ -538,11 +538,11 @@ if (isset($_POST['start'])) {
 		//
 		if ($nl_config['db_version'] < 16 && $db::ENGINE == 'postgres') {
 			// La séquence pour la table ban_list ne suit pas le nommage {tablename}_id_seq
-			$sql_update[] = sprintf('ALTER SEQUENCE %1$sban_id_seq RENAME TO %2$s_id_seq', $prefixe, BANLIST_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$sban_id_seq RENAME TO %2$s_id_seq', $prefixe, BAN_LIST_TABLE);
 
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.abo_id', ABONNES_TABLE);
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.admin_id', ADMIN_TABLE);
-			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.ban_id', BANLIST_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.ban_id', BAN_LIST_TABLE);
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.config_id', CONFIG_TABLE);
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.fe_id', FORBIDDEN_EXT_TABLE);
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.file_id', JOINED_FILES_TABLE);
@@ -622,39 +622,39 @@ if (isset($_POST['start'])) {
 		if ($nl_config['db_version'] < 19) {
 			if ($db::ENGINE != 'sqlite') {
 				if ($db::ENGINE == 'mysql') {
-					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 						ENGINE = MyISAM";
-					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 						MODIFY COLUMN session_id VARCHAR(100)";
-					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 						CHANGE COLUMN session_time session_expire INTEGER";
-					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 						ADD COLUMN session_data MEDIUMTEXT";
 				}
 				else {
-					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 						ALTER COLUMN session_id TYPE VARCHAR(100)";
-					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 						RENAME COLUMN session_time TO session_expire";
-					$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+					$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 						ADD COLUMN session_data TEXT";
 				}
 
-				$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+				$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 					DROP COLUMN admin_id";
-				$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+				$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 					DROP COLUMN session_ip";
-				$sql_update[] = "ALTER TABLE " . SESSIONS_TABLE . "
+				$sql_update[] = "ALTER TABLE " . SESSION_TABLE . "
 					DROP COLUMN session_liste";
 			}
 			else {
-				wa_sqlite_recreate_table(SESSIONS_TABLE, false);
+				wa_sqlite_recreate_table(SESSION_TABLE, false);
 			}
 
-			$sql_update[] = "DELETE FROM " . SESSIONS_TABLE;
+			$sql_update[] = "DELETE FROM " . SESSION_TABLE;
 
 			exec_queries($sql_update);
-			$db->vacuum(SESSIONS_TABLE);
+			$db->vacuum(SESSION_TABLE);
 		}
 
 		//

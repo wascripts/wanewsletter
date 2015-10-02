@@ -108,7 +108,7 @@ if ($db::ENGINE == 'mysql') {
 			$add = false;
 
 			if ($prefixe != '') {
-				if ($row['Name'] != SESSIONS_TABLE && strncmp($row['Name'], $prefixe, strlen($prefixe)) == 0) {
+				if ($row['Name'] != SESSION_TABLE && strncmp($row['Name'], $prefixe, strlen($prefixe)) == 0) {
 					$add = true;
 				}
 			}

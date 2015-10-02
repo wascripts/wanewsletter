@@ -62,7 +62,7 @@ class Subscription
 		//
 		if ($action == 'inscription') {
 			$sql = "SELECT ban_email
-				FROM " . BANLIST_TABLE . "
+				FROM " . BAN_LIST_TABLE . "
 				WHERE liste_id = " . $this->listdata['liste_id'];
 			$result = $db->query($sql);
 

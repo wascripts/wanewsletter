@@ -150,7 +150,7 @@ class Session implements \SessionHandlerInterface
 
 		$sql = sprintf("SELECT session_data FROM %s
 			WHERE session_id = '%s' AND session_expire > %d",
-			SESSIONS_TABLE,
+			SESSION_TABLE,
 			$db->escape($sid),
 			time()
 		);
@@ -177,7 +177,7 @@ class Session implements \SessionHandlerInterface
 
 		$sql = sprintf("SELECT COUNT(session_id)
 			FROM %s WHERE session_id = '%s'",
-			SESSIONS_TABLE,
+			SESSION_TABLE,
 			$db->escape($sid)
 		);
 		$result = $db->query($sql);
@@ -187,13 +187,13 @@ class Session implements \SessionHandlerInterface
 		];
 
 		if ($result->column(0) == 1) {
-			$db->update(SESSIONS_TABLE, $sql_data, ['session_id' => $sid]);
+			$db->update(SESSION_TABLE, $sql_data, ['session_id' => $sid]);
 		}
 		else {
 			$sql_data['session_id']     = $sid;
 			$sql_data['session_start']  = time();
 			$sql_data['session_expire'] = (time() + $this->maxlifetime);
-			$db->insert(SESSIONS_TABLE, $sql_data);
+			$db->insert(SESSION_TABLE, $sql_data);
 		}
 
 		return ($db->affectedRows() == 1);
@@ -211,7 +211,7 @@ class Session implements \SessionHandlerInterface
 		global $db;
 
 		$db->query(sprintf("DELETE FROM %s WHERE session_id = '%s'",
-			SESSIONS_TABLE,
+			SESSION_TABLE,
 			$db->escape($sid)
 		));
 
@@ -233,12 +233,12 @@ class Session implements \SessionHandlerInterface
 
 		$db->query(sprintf("DELETE FROM %s
 			WHERE session_expire < %d",
-			SESSIONS_TABLE,
+			SESSION_TABLE,
 			time()
 		));
 
 		if ($db->affectedRows() > 0) {
-			$db->vacuum(SESSIONS_TABLE);
+			$db->vacuum(SESSION_TABLE);
 		}
 
 		return true;

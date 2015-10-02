@@ -836,21 +836,21 @@ switch ($mode) {
 				}
 
 				if (count($sql_dataset) > 0) {
-					$db->insert(BANLIST_TABLE, $sql_dataset);
+					$db->insert(BAN_LIST_TABLE, $sql_dataset);
 				}
 
 				unset($sql_dataset);
 			}
 
 			if (count($unban_ids) > 0) {
-				$sql = "DELETE FROM " . BANLIST_TABLE . "
+				$sql = "DELETE FROM " . BAN_LIST_TABLE . "
 					WHERE ban_id IN (" . implode(', ', $unban_ids) . ")";
 				$db->query($sql);
 
 				//
 				// Optimisation des tables
 				//
-				$db->vacuum(BANLIST_TABLE);
+				$db->vacuum(BAN_LIST_TABLE);
 			}
 
 			$output->redirect('./tools.php?mode=ban', 4);
@@ -861,7 +861,7 @@ switch ($mode) {
 		}
 
 		$sql = "SELECT ban_id, ban_email
-			FROM " . BANLIST_TABLE . "
+			FROM " . BAN_LIST_TABLE . "
 			WHERE liste_id = " . $listdata['liste_id'];
 		$result = $db->query($sql);
 
