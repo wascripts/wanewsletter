@@ -300,8 +300,9 @@ if (wan_is_admin($admindata)) {
 	$admin_id = filter_input(INPUT_GET, 'uid', FILTER_VALIDATE_INT);
 
 	if (is_int($admin_id) && $admin_id != $admindata['admin_id']) {
-		$sql = "SELECT  admin_id, admin_login, admin_pwd, admin_email, admin_lang,
-				admin_dateformat, admin_level, email_new_subscribe, email_unsubscribe
+		$sql = "SELECT  admin_id, admin_login, admin_pwd, admin_email,
+				admin_lang, admin_dateformat, admin_level, email_new_subscribe,
+				email_unsubscribe, html_editor
 			FROM " . ADMIN_TABLE . "
 			WHERE admin_id = " . $admin_id;
 		$result = $db->query($sql);
