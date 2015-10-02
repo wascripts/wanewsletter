@@ -9,22 +9,6 @@
 
 namespace Wanewsletter;
 
-//
-// Tables du script
-//
-define('ABO_LISTE_TABLE',     $prefixe . 'abo_liste');
-define('ABONNES_TABLE',       $prefixe . 'abonnes');
-define('ADMIN_TABLE',         $prefixe . 'admin');
-define('AUTH_ADMIN_TABLE',    $prefixe . 'auth_admin');
-define('BANLIST_TABLE',       $prefixe . 'ban_list');
-define('CONFIG_TABLE',        $prefixe . 'config');
-define('FORBIDDEN_EXT_TABLE', $prefixe . 'forbidden_ext');
-define('JOINED_FILES_TABLE',  $prefixe . 'joined_files');
-define('LISTE_TABLE',         $prefixe . 'liste');
-define('LOG_TABLE',           $prefixe . 'log');
-define('LOG_FILES_TABLE',     $prefixe . 'log_files');
-define('SESSIONS_TABLE',      $prefixe . 'session');
-
 $GLOBALS['supported_db'] = [
 	'mysql' => [
 		'label'     => 'MySQL',
@@ -43,20 +27,22 @@ $GLOBALS['supported_db'] = [
 	]
 ];
 
-$GLOBALS['sql_schemas'] = [
-	ABO_LISTE_TABLE     => [],
-	ABONNES_TABLE       => [],
-	ADMIN_TABLE         => [],
-	AUTH_ADMIN_TABLE    => [],
-	BANLIST_TABLE       => [],
-	CONFIG_TABLE        => [],
-	FORBIDDEN_EXT_TABLE => [],
-	JOINED_FILES_TABLE  => [],
-	LISTE_TABLE         => [],
-	LOG_TABLE           => [],
-	LOG_FILES_TABLE     => [],
-	SESSIONS_TABLE      => []
+//
+// Tables du script
+//
+$tables = [
+	'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
+	'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
 ];
+
+foreach ($tables as $table) {
+	$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__, strtoupper($table));
+	$table = $prefixe . $table;
+	define($constant, $table);
+	$GLOBALS['sql_schemas'][$table] = [];
+}
+
+unset($tables, $table);
 
 /**
  * Génère une chaîne DSN
