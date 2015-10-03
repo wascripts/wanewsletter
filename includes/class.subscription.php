@@ -46,7 +46,7 @@ class Subscription
 		$this->other_tags = wan_get_tags();
 	}
 
-	private function check($action, $email)
+	private function check($action, $email, $pseudo)
 	{
 		global $db, $lang;
 
@@ -130,7 +130,7 @@ class Subscription
 
 			$this->account['abo_id'] = 0;
 			$this->account['email']  = $email;
-			$this->account['pseudo'] = trim(u::filter_input(INPUT_POST, 'pseudo'));
+			$this->account['pseudo'] = (is_string($pseudo)) ? trim($pseudo) : '';
 			$this->account['status'] = ($this->listdata['confirm_subscribe'] == CONFIRM_NONE) ? ABO_ACTIF : ABO_INACTIF;
 		}
 
@@ -148,7 +148,7 @@ class Subscription
 		return ['error' => false, 'abodata' => $abodata];
 	}
 
-	public function do_action($action, $email, $format = null)
+	public function do_action($action, $email, $format = null, $pseudo = null)
 	{
 		if ($this->listdata['liste_format'] == FORMAT_MULTIPLE &&
 			!is_null($format) &&
@@ -157,8 +157,7 @@ class Subscription
 			$this->format = $format;
 		}
 
-		$email  = trim($email);
-		$result = $this->check($action, $email);
+		$result = $this->check($action, $email, $pseudo);
 
 		if (!$result['error']) {
 			switch ($action) {

@@ -33,6 +33,7 @@ load_settings();
 
 $action = trim(filter_input(INPUT_POST, 'action'));
 $email  = trim(u::filter_input(INPUT_POST, 'email'));
+$pseudo = trim(u::filter_input(INPUT_POST, 'pseudo'));
 $format = (int) filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
 $liste  = (int) filter_input(INPUT_POST, 'liste', FILTER_VALIDATE_INT);
 $code   = '';
@@ -61,7 +62,7 @@ if ($action || $code) {
 			if ($listdata = $result->fetch()) {
 				$sub = new Subscription($listdata);
 				$sub->message =& $message;
-				$sub->do_action($action, $email, $format);
+				$sub->do_action($action, $email, $format, $pseudo);
 			}
 			else {
 				$message = $lang['Message']['Unknown_list'];

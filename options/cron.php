@@ -116,7 +116,7 @@ if ($listdata = $result->fetch()) {
 				continue;
 			}
 
-			$pseudo = (isset($m[1])) ? strip_tags(trim(u::filter($m[1]))) : '';
+			$pseudo = (isset($m[1])) ? trim(strip_tags(u::filter($m[1]))) : '';
 			$email  = trim($m[2]);
 
 			if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
@@ -152,7 +152,7 @@ if ($listdata = $result->fetch()) {
 				$sub->check_code($code, $time);
 			}
 			else if (in_array($action, ['inscription','setformat','desinscription'])) {
-				$sub->do_action($action, $email);
+				$sub->do_action($action, $email, null, $pseudo);
 			}
 
 			//
