@@ -378,8 +378,10 @@ class Subscription
 	{
 		global $db, $lang;
 
-		$time = (is_null($time)) ? time() : $time;
-		$time_limit = strtotime(sprintf('-%d days', $this->listdata['limitevalidate']));
+		$time_limit = strtotime(
+			sprintf('-%d days', $this->listdata['limitevalidate']),
+			(!is_int($time)) ? time() : $time
+		);
 
 		if ($this->account['date'] > $time_limit) {
 			$db->beginTransaction();

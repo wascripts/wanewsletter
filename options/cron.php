@@ -145,7 +145,7 @@ if ($listdata = $result->fetch()) {
 			$code = $pop->contents[$mail_id]['message'];
 
 			if (!empty($code) && ($action =='confirmation' || $action == 'desinscription')) {
-				if (empty($headers['date']) || intval($time = strtotime($headers['date'])) > 0) {
+				if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
 					$time = time();
 				}
 
