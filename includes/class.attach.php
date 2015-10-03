@@ -299,7 +299,7 @@ class Attach
 	 */
 	public function getFile($file)
 	{
-		global $db, $lang, $output, $listdata;
+		global $db, $listdata;
 
 		if (!is_numeric($file)) {
 			$sql_where = 'jf.file_real_name = \'' . $db->escape($file) . '\'';

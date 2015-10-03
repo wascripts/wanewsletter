@@ -48,7 +48,7 @@ class Subscription
 
 	private function check($action, $email)
 	{
-		global $db, $nl_config, $lang;
+		global $db, $lang;
 
 		//
 		// Vérification syntaxique de l'email
@@ -368,10 +368,7 @@ class Subscription
 			wan_sendmail($email);
 		}
 		catch (\Exception $e) {
-			$this->message = sprintf($lang['Message']['Failed_sending'],
-				htmlspecialchars($e->getMessage())
-			);
-			return false;
+			$message = sprintf($lang['Message']['Failed_sending'], htmlspecialchars($e->getMessage()));
 		}
 
 		$this->message = $message;

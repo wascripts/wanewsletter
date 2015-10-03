@@ -764,7 +764,7 @@ BASIC;
 				$this->displayMessage();
 			}
 
-			return '';
+			return null;
 		}
 
 		$list_box = '<select id="liste" name="liste">';

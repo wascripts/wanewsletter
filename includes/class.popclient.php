@@ -361,7 +361,6 @@ class PopClient
 		}
 
 		$data .= "\r\n";
-		$total = strlen($data);
 		$this->log(sprintf('C: %s', $data));
 
 		while ($data) {
@@ -667,7 +666,6 @@ class PopClient
 
 		$infos = $this->infos_header($headers['content-type']);
 
-		$boundary = $infos['boundary'];
 		$parts    = [];
 		$files    = [];
 		$lines    = explode("\r\n", $message);
@@ -777,6 +775,8 @@ class PopClient
 
 	/**
 	 * Débogage
+	 *
+	 * @param string $str
 	 */
 	protected function log($str)
 	{

@@ -100,7 +100,6 @@ class Sqlite3 extends Wadb
 			$this->errno = $this->link->lastErrorCode();
 			$this->error = $this->link->lastErrorMsg();
 			$this->lastQuery = $query;
-			$this->result = null;
 			$this->rollBack();
 
 			throw new Exception($this->error, $this->errno);
@@ -109,7 +108,6 @@ class Sqlite3 extends Wadb
 			$this->errno = 0;
 			$this->error = '';
 			$this->lastQuery = '';
-			$this->result = $result;
 
 			if (in_array(strtoupper(substr($query, 0, 6)), ['INSERT', 'UPDATE', 'DELETE'])) {
 				$result = true;

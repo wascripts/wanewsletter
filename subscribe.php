@@ -13,8 +13,6 @@ $return_message = true;
 
 require './newsletter.php';
 
-$list_box = '';
-
 $sql = "SELECT liste_id, liste_name, liste_format
 	FROM " . LISTE_TABLE . "
 	WHERE liste_public = 1";
