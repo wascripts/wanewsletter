@@ -143,10 +143,6 @@ if ($listdata = $result->fetch()) {
 			}
 
 			$code = $pop->contents[$mail_id]['message'];
-			// Compatibilité avec versions < 2.3
-			if (strlen($code) == 32) {
-				$code = substr($code, 0, 20);
-			}
 
 			if (!empty($code) && ($action =='confirmation' || $action == 'desinscription')) {
 				if (empty($headers['date']) || intval($time = strtotime($headers['date'])) > 0) {
