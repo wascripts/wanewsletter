@@ -195,6 +195,9 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	font-size: 1em;
 	color: #FAFAFA;
 }
+.block.error > h2 {
+	color: #F66;
+}
 
 .block > p,
 .block > div.message {
@@ -212,6 +215,9 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 .block > p.message {
 	padding: 2em;
 	text-align: center;
+}
+.block.error > p.message {
+	text-align: left;
 }
 
 .block div.explain {

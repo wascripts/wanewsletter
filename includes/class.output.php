@@ -550,16 +550,17 @@ BASIC;
 		}
 		$str = substr($str, 8);
 
+		$type = '';
+
 		if (empty($title)) {
 			$title = $lang['Title']['info'];
 		}
 		else if (!empty($lang['Title'][$title])) {
 			if ($title == 'error') {
-				$title = '<span style="color: #F66;">' . $lang['Title']['error'] . '</span>';
+				$type = 'error';
 			}
-			else {
-				$title = $lang['Title'][$title];
-			}
+
+			$title = $lang['Title'][$title];
 		}
 
 		if (!$this->header_displayed) {
@@ -570,7 +571,8 @@ BASIC;
 
 		$this->assign_vars([
 			'MSG_TITLE' => $title,
-			'MSG_TEXT'  => $str
+			'MSG_TEXT'  => $str,
+			'MSG_TYPE'  => $type
 		]);
 
 		$this->pparse('body');
