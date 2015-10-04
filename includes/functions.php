@@ -3,19 +3,155 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 AurÈlien Maille
+ * @copyright 2002-2015 Aur√©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('FUNCTIONS_INC') ) {
+namespace Wanewsletter;
 
-define('FUNCTIONS_INC', true);
+use Patchwork\Utf8 as u;
+use Wamailer\Mailer;
+use Wamailer\Email;
+use Wanewsletter\Dblayer\Wadb;
+use Wanewsletter\Dblayer\WadbResult;
 
 /**
- * VÈrifie que les numÈros de version des tables dans le fichier constantes.php
+ * Fonction de chargement automatique de classes.
+ * Impl√©mentation √† la barbare. On verra plus tard pour
+ * faire quelque chose de plus propre...
+ *
+ * @param string $classname Nom de la classe
+ */
+function wan_autoloader($classname)
+{
+	$rootdir = dirname(__DIR__);
+	$prefix  = '';
+
+	if (strpos($classname, '\\')) {
+		list($prefix, $classname) = explode('\\', $classname, 2);
+	}
+
+	if ($prefix != 'Wanewsletter') {
+		return null;
+	}
+
+	$classname = strtolower($classname);
+
+	if (strpos($classname, '\\')) {
+		// Chemin includes/<namespace>/<classname>.php
+		$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
+	}
+	else {
+		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
+		$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
+	}
+
+	if (is_readable($filename)) {
+		require $filename;
+	}
+}
+
+/**
+ * Chargement du fichier de configuration initial, et redirection vers
+ * install.php si le fichier n‚Äôexiste pas.
+ */
+function load_config_file()
+{
+	global $dsn, $prefixe;// Sale mais bon...
+
+	// R√©glage par d√©faut des divers r√©pertoires utilis√©s par le script.
+	// Le tilde est remplac√© par WA_ROOTDIR, qui m√®ne au r√©pertoire d'installation
+	// de Wanewsletter (voir plus bas).
+	$logs_dir  = '~/data/logs';
+	$stats_dir = '~/data/stats';
+	$tmp_dir   = '~/data/tmp';
+
+	$need_update  = false;
+	$test_files[] = WA_ROOTDIR . '/data/config.inc.php';
+	// Emplacement du fichier dans Wanewsletter < 3.0-beta1
+	$test_files[] = WA_ROOTDIR . '/includes/config.inc.php';
+
+	foreach ($test_files as $file) {
+		if (file_exists($file)) {
+			if (!is_readable($file)) {
+				echo "Cannot read the config file. Please fix this mistake and reload.";
+				exit;
+			}
+
+			include $file;
+		}
+	}
+
+	//
+	// Compatibilit√© avec Wanewsletter < 2.3-beta2
+	//
+	if (!$dsn && !empty($dbtype)) {
+		$infos = [];
+		$infos['engine'] = $dbtype;
+		$infos['host']   = $dbhost;
+		$infos['user']   = $dbuser;
+		$infos['pass']   = $dbpassword;
+		$infos['dbname'] = $dbname;
+
+		if ($infos['engine'] == 'mssql') {
+			echo "Support for Microsoft SQL Server has been removed in Wanewsletter 2.3\n";
+			exit;
+		}
+		else if ($infos['engine'] == 'postgre') {
+			$infos['engine'] = 'postgres';
+		}
+		else if ($infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli') {
+			$infos['engine'] = 'mysql';
+		}
+
+		$dsn = createDSN($infos);
+
+		$need_update = true;
+	}
+
+	//
+	// Les constantes NL_INSTALLED et WA_VERSION sont obsol√®tes.
+	//
+	if (defined('NL_INSTALLED') || defined('WA_VERSION') || !file_exists($test_files[0])) {
+		$need_update = true;
+	}
+
+	//
+	// Pas install√© ?
+	//
+	$install_script = 'install.php';
+
+	if (!$dsn && $install_script != basename($_SERVER['SCRIPT_FILENAME'])) {
+		if (!check_cli()) {
+			if (!file_exists($install_script)) {
+				$install_script = '../'.$install_script;
+			}
+
+			http_redirect($install_script);
+		}
+		else {
+			echo "Wanewsletter seems not to be installed!\n";
+			echo "Call $install_script in your web browser.\n";
+			exit(1);
+		}
+	}
+
+	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
+
+	//
+	// D√©claration des dossiers et fichiers sp√©ciaux utilis√©s par le script
+	//
+	define(__NAMESPACE__.'\\WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
+	define(__NAMESPACE__.'\\WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
+	define(__NAMESPACE__.'\\WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
+	define(__NAMESPACE__.'\\WA_LOCKFILE', WA_TMPDIR . '/liste-%d.lock');
+}
+
+/**
+ * V√©rifie que les num√©ros de version des tables dans le fichier constantes.php
  * et dans la table de configuration du script sont synchro
  *
- * @param integer $version Version prÈsente dans la base de donnÈes (clÈ 'db_version')
+ * @param integer $version Version pr√©sente dans la base de donn√©es (cl√© 'db_version')
  *
  * @return boolean
  */
@@ -25,51 +161,89 @@ function check_db_version($version)
 }
 
 /**
- * Retourne la configuration du script stockÈe dans la base de donnÈes
+ * V√©rifie la pr√©sence d'une mise √† jour
+ *
+ * @param boolean $complete true pour v√©rifier aussi l'URL distante
+ *
+ * @return boolean|integer
+ */
+function wa_check_update($complete = false)
+{
+	$cache_file = sprintf('%s/%s', WA_TMPDIR, CHECK_UPDATE_CACHE);
+	$cache_ttl  = CHECK_UPDATE_CACHE_TTL;
+
+	$result = false;
+	$data   = '';
+
+	if (is_readable($cache_file) && filemtime($cache_file) > (time() - $cache_ttl)) {
+		$data = file_get_contents($cache_file);
+	}
+	else if ($complete) {
+		$result = http_get_contents(CHECK_UPDATE_URL, $errstr);
+		$data = $result['data'];
+
+		if (preg_match('#^[A-Za-z0-9.-]+$#', $data)) {
+			file_put_contents($cache_file, $data);
+		}
+		else {
+			$data = '';
+		}
+	}
+
+	if ($data) {
+		$result = intval(version_compare(WANEWSLETTER_VERSION, trim($data), '<'));
+	}
+
+	return $result;
+}
+
+/**
+ * Retourne la configuration du script stock√©e dans la base de donn√©es
  *
  * @return array
  */
 function wa_get_config()
 {
 	global $db;
-	
+
 	$result = $db->query("SELECT * FROM " . CONFIG_TABLE);
-	$row    = $result->fetch($result->SQL_FETCH_ASSOC);
-	$config = array();
-	
-	if( isset($row['config_name']) ) {// Wanewsletter 2.4-beta2+
+	$result->setFetchMode(WadbResult::FETCH_ASSOC);
+	$row    = $result->fetch();
+	$config = [];
+
+	if (isset($row['config_name'])) {
 		do {
-			if( $row['config_name'] != null ) {
+			if ($row['config_name'] != null) {
 				$config[$row['config_name']] = $row['config_value'];
 			}
 		}
-		while( $row = $result->fetch() );
+		while ($row = $result->fetch());
 	}
+	// Wanewsletter < 2.4-beta2
 	else {
-		trigger_error("La table de configuration du script est obsolËte. Mise ‡ jour requise", E_USER_WARNING);
 		$config = $row;
 	}
-	
+
 	return $config;
 }
 
 /**
- * Sauvegarde les clÈs de configuration fournies dans la base de donnÈes
+ * Sauvegarde les cl√©s de configuration fournies dans la base de donn√©es
  *
- * @param mixed $config  Soit le nom de l'option de configuration ‡ mettre ‡ jour,
+ * @param mixed $config  Soit le nom de l'option de configuration √† mettre √† jour,
  *                       soit un tableau d'options
- * @param string $value  Si le premier argument est une chaÓne, utilisÈ comme
- *                       valeur pour l'option ciblÈe
+ * @param string $value  Si le premier argument est une cha√Æne, utilis√© comme
+ *                       valeur pour l'option cibl√©e
  */
 function wa_update_config($config, $value = null)
 {
 	global $db;
-	
-	if( is_string($config) ) {
-		$config = array($config => $value);
+
+	if (is_string($config)) {
+		$config = [$config => $value];
 	}
-	
-	foreach( $config as $name => $value ) {
+
+	foreach ($config as $name => $value) {
 		$db->query(sprintf(
 			"UPDATE %s SET config_value = '%s' WHERE config_name = '%s'",
 			CONFIG_TABLE,
@@ -80,101 +254,91 @@ function wa_update_config($config, $value = null)
 }
 
 /**
- * generate_key()
- * 
- * GÈnÈration d'une chaÓne alÈatoire
- * 
- * @param integer $length       Nombre de caractËres
- * @param integer $specialChars Ajout de caractËres spÈciaux
- * 
+ * G√©n√©ration d'une cha√Æne al√©atoire
+ *
+ * @param integer $length       Nombre de caract√®res
+ * @param boolean $specialChars Ajout de caract√®res sp√©ciaux
+ *
  * @return string
  */
 function generate_key($length = 32, $specialChars = false)
 {
 	static $charList = null;
-	
-	if( $charList == null ) {
+
+	if ($charList == null) {
 		$charList = range('0', '9');
 		$charList = array_merge($charList, range('A', 'Z'));
 		$charList = array_merge($charList, range('a', 'z'));
-		
-		if( $specialChars ) {
+
+		if ($specialChars) {
 			$charList = array_merge($charList, range(' ', '/'));
 			$charList = array_merge($charList, range(':', '@'));
 			$charList = array_merge($charList, range('[', '`'));
 			$charList = array_merge($charList, range('{', '~'));
 		}
-		
+
 		shuffle($charList);
 	}
-	
+
 	$key = '';
-	for( $i = 0, $m = count($charList)-1; $i < $length; $i++ ) {
+	for ($i = 0, $m = count($charList)-1; $i < $length; $i++) {
 		$key .= $charList[mt_rand(0, $m)];
 	}
-	
+
 	return $key;
 }
 
 /**
- * wan_ssl_connection()
- *
- * Indique si on est sur une connexion sÈcurisÈe
+ * Indique si on est sur une connexion s√©curis√©e
  *
  * @return boolean
  */
 function wan_ssl_connection()
 {
-	return ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 443 == $_SERVER['SERVER_PORT'] );
+	return ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 443 == $_SERVER['SERVER_PORT']);
 }
 
 /**
- * wan_build_url()
- * 
  * Construction d'une url
- * 
- * @param string  $url      Url ‡ complÈter
- * @param array   $params   ParamËtres ‡ ajouter en fin d'url
- * @param boolean $session  Ajout de l'ID de session PHP s'il y a lieu
- * 
+ *
+ * @param string  $url     Url √† compl√©ter
+ * @param array   $params  Param√®tres √† ajouter en fin d'url
+ * @param boolean $session Ajout de l'ID de session PHP s'il y a lieu
+ *
  * @return string
  */
-function wan_build_url($url, $params = array(), $session = false)
+function wan_build_url($url, array $params = [], $session = false)
 {
 	$parts = parse_url($url);
-	
-	if( !is_array($params) ) {
-		$params = array();
-	}
-	
-	if( empty($parts['scheme']) ) {
-		$proto = wan_ssl_connection() ? 'https' : 'http';
+
+	if (empty($parts['scheme'])) {
+		$proto = (wan_ssl_connection()) ? 'https' : 'http';
 	}
 	else {
 		$proto = $parts['scheme'];
 	}
-	
-	$server = !empty($parts['host']) ? $parts['host'] : $_SERVER['HTTP_HOST'];
-	
-	if( !empty($parts['port']) ) {
+
+	$server = (!empty($parts['host'])) ? $parts['host'] : $_SERVER['HTTP_HOST'];
+
+	if (!empty($parts['port'])) {
 		$server .= ':'.$parts['port'];
 	}
-	else if( $_SERVER['SERVER_PORT'] != 80 && $_SERVER['SERVER_PORT'] != 443 ) {
+	else if ($_SERVER['SERVER_PORT'] != 80 && $_SERVER['SERVER_PORT'] != 443) {
 		$server .= ':'.$_SERVER['SERVER_PORT'];
 	}
-	
-	$path  = !empty($parts['path']) ? $parts['path'] : '/';
-	$query = !empty($parts['query']) ? $parts['query'] : '';
-	
-	if( $path[0] != '/' ) {
+
+	$path  = (!empty($parts['path'])) ? $parts['path'] : '/';
+	$query = (!empty($parts['query'])) ? $parts['query'] : '';
+
+	if ($path[0] != '/') {
 		$parts = explode('/', dirname($_SERVER['SCRIPT_NAME']).'/'.$path);
-		$path  = array();
-		
-		foreach( $parts as $part ) {
-			if( $part == '.' || $part == '' ) {
+		$path  = [];
+
+		foreach ($parts as $part) {
+			if ($part == '.' || $part == '') {
 				continue;
 			}
-			if( $part == '..' ) {
+			if ($part == '..') {
 				array_pop($path);
 			}
 			else {
@@ -183,255 +347,245 @@ function wan_build_url($url, $params = array(), $session = false)
 		}
 		$path = implode('/', $path);
 	}
-	
-	$cur_params = array();
-	if( $query != '' ) {
+
+	$cur_params = [];
+	if ($query != '') {
 		parse_str($query, $cur_params);
 	}
-	
-	if( defined('SID') && SID != '' ) {
+
+	if ($session && defined('SID') && SID != '') {
 		list($name, $value) = explode('=', SID);
 		$params[$name] = $value;
 	}
-	
+
 	$params = array_merge($cur_params, $params);
 	$query  = http_build_query($params);
-	
+
 	$url = $proto . '://' . $server . '/' . ltrim($path, '/') . ($query != '' ? '?' . $query : '');
-	
+
 	return $url;
 }
 
 /**
- * http_redirect()
+ * Version adapt√©e de la fonction http_redirect() de pecl_http
  *
- * Version adaptÈe de la fonction http_redirect() de pecl_http
- *
- * @param string  $url      Url de redirection
- * @param array   $params   ParamËtres ‡ ajouter en fin d'url
- * @param boolean $session  Ajout de l'ID de session PHP s'il y a lieu
- * @param integer $status   Code de redirection HTTP
+ * @param string  $url     Url de redirection
+ * @param array   $params  Param√®tres √† ajouter en fin d'url
+ * @param boolean $session Ajout de l'ID de session PHP s'il y a lieu
+ * @param integer $status  Code de redirection HTTP
  */
-if( !function_exists('http_redirect') ) {
-function http_redirect($url, $params = array(), $session = false, $status = 0)
+if (!function_exists('http_redirect')) {
+function http_redirect($url, array $params = [], $session = false, $status = 0)
 {
 	$status = intval($status);
-	if( !in_array($status, array(301, 302, 303, 307, 308)) ) {
+	if (!in_array($status, [301, 302, 303, 307, 308])) {
 		$status = 302;
 	}
-	
+
 	$url = wan_build_url($url, $params, $session);
 	http_response_code($status);
 	header(sprintf('Location: %s', $url));
-	
+
 	//
-	// Si la fonction header() ne donne rien, on affiche une page de redirection 
+	// Si la fonction header() ne donne rien, on affiche une page de redirection
 	//
 	printf('<p>If your browser doesn\'t support meta redirect, click
-		<a href="%s">here</a> to go on next page.</p>', wan_htmlspecialchars($url));
+		<a href="%s">here</a> to go on next page.</p>', htmlspecialchars($url));
 	exit;
 }
 }
 
 /**
- * load_settings()
- * 
- * Initialisation des prÈfÈrences et du moteur de templates
- * 
- * @param array $admindata    DonnÈes utilisateur
- * 
- * @return void
+ * Initialisation des pr√©f√©rences et du moteur de templates
+ *
+ * @param array $admindata Donn√©es utilisateur
  */
-function load_settings($admindata = array())
+function load_settings(&$admindata = [])
 {
-	global $nl_config, $lang, $datetime;
-	
-	$check_list = array();
-	$supported_lang = array(
-		'fr' => 'francais',
-		'en' => 'english'
-	);
-	$file_pattern = WA_ROOTDIR . '/language/lang_%s.php';
-	
-	$check_list[] = 'francais';
-	
-	if( server_info('HTTP_ACCEPT_LANGUAGE') != '' )
-	{
-		$accepted_langs = array_map('trim', explode(',', server_info('HTTP_ACCEPT_LANGUAGE')));
-		
-		foreach( $accepted_langs as $langcode )
-		{
-			$langcode = strtolower(substr($langcode, 0, 2));
-			
-			if( isset($supported_lang[$langcode]) )
-			{
-				$check_list[] = $supported_lang[$langcode];
-				break;
+	global $nl_config;
+
+	$file_pattern = WA_ROOTDIR . '/languages/%s/main.php';
+
+	$check_list = [];
+
+	if (!empty($admindata['admin_lang'])) {
+		$check_list[] = $admindata['admin_lang'];
+	}
+
+	if (!empty($nl_config['language'])) {
+		$check_list[] = $nl_config['language'];
+	}
+
+	$accept_language = filter_input(INPUT_SERVER, 'HTTP_ACCEPT_LANGUAGE');
+	if ($accept_language) {
+		$accept_language = explode(',', $accept_language);
+
+		foreach ($accept_language as $langcode) {
+			$langcode = strtolower(substr(trim($langcode), 0, 2));
+
+			if (validate_lang($langcode)) {
+				$check_list[] = $langcode;
 			}
 		}
 	}
-	
-	if( !empty($nl_config['language']) )
-	{
-		$check_list[] = $nl_config['language'];
-	}
-	
-	if( !is_array($admindata) )
-	{
-		$admindata = array();
-	}
-	
-	if( !empty($admindata['admin_lang']) )
-	{
-		$check_list[] = $admindata['admin_lang'];
-	}
-	
-	if( !empty($admindata['admin_dateformat']) )
-	{
-		$nl_config['date_format'] = $admindata['admin_dateformat'];
-	}
-	
-	$check_list = array_unique(array_reverse($check_list));
-	
-	foreach( $check_list as $language )
-	{
-		if( @is_readable(sprintf($file_pattern, $language)) )
-		{
-			if( empty($lang) || $supported_lang[$lang['CONTENT_LANG']] != $language )
-			{
+
+	$check_list[] = 'fr';
+	$check_list = array_unique($check_list);
+
+	foreach ($check_list as $language) {
+		if (file_exists(sprintf($file_pattern, $language))) {
+			if (empty($lang) || $lang['CONTENT_LANG'] != $language) {
 				require sprintf($file_pattern, $language);
 			}
-			
+
 			break;
 		}
 	}
-	
-	if( empty($lang) )
-	{
-		trigger_error('<b>Les fichiers de localisation sont introuvables !</b>', E_USER_ERROR);
+
+	if (empty($lang)) {
+		plain_error('Les fichiers de localisation sont introuvables !');
 	}
+
+	if (is_array($admindata)) {
+		$admindata['admin_lang'] = $lang['CONTENT_LANG'];
+	}
+
+	$GLOBALS['lang'] =& $lang;
+	$GLOBALS['datetime'] =& $datetime;
 }
 
 /**
- * wan_error_handler()
- * 
- * Gestionnaire d'erreur personnalisÈ du script (en sortie http)
- * 
- * @param integer $errno      Code de l'erreur
- * @param string  $errstr     Texte proprement dit de l'erreur
- * @param string  $errfile    Fichier o˘ s'est produit l'erreur
- * @param integer $errline    NumÈro de la ligne
+ * Gestionnaire d'erreur personnalis√© du script
+ *
+ * @param integer $errno   Code de l'erreur
+ * @param string  $errstr  Texte proprement dit de l'erreur
+ * @param string  $errfile Fichier o√π s'est produit l'erreur
+ * @param integer $errline Num√©ro de la ligne
  *
  * @return boolean
  */
 function wan_error_handler($errno, $errstr, $errfile, $errline)
 {
-	$simple = (defined('IN_COMMANDLINE') || defined('IN_SUBSCRIBE') || defined('IN_WA_FORM') || defined('IN_CRON'));
-	$fatal  = ($errno == E_USER_ERROR || $errno == E_RECOVERABLE_ERROR);
-	
 	//
-	// On affiche pas les erreurs non prises en compte dans le rÈglage du
-	// error_reporting si error_reporting vaut 0, sauf si DEBUG_MODE est au max
+	// On s'assure que si des erreurs surviennent au sein m√™me du gestionnaire
+	// d'erreurs alors que l'op√©rateur @ a √©t√© utilis√© en amont, elles seront
+	// bien trait√©es correctement, soit par le gestionnaire d'erreurs personnalis√©,
+	// soit par le gestionnaire d'erreurs natif de PHP
+	// (dans le cas d'erreurs fatales par exemple <= C'est du v√©cu :().
 	//
-	if( !$fatal && (DEBUG_MODE == DEBUG_LEVEL_QUIET
-		|| (DEBUG_MODE == DEBUG_LEVEL_NORMAL && !(error_reporting() & $errno))) )
-	{
-		return true;
-	}
-	
-	$error = new WanError(array(
+	$error_reporting = error_reporting(DEFAULT_ERROR_REPORTING);
+
+	//
+	// On affiche pas les erreurs non prises en compte dans le r√©glage du
+	// error_reporting si error_reporting vaut 0, sauf si le niveau de
+	// d√©bogage est au maximum.
+	//
+	$debug_level = wan_get_debug_level();
+	$debug  = ($debug_level == DEBUG_LEVEL_ALL);
+	$debug |= ($debug_level == DEBUG_LEVEL_NORMAL && ($error_reporting & $errno));
+
+	// Si l‚Äôaffichage des erreurs peut √™tre d√©l√©gu√© √† la classe Output.
+	$skip  = check_theme_is_used();
+	// Si l‚Äôaffichage en bloc dans le bas de page est activ√© (d√©faut).
+	$skip &= DISPLAY_ERRORS_IN_LOG;
+
+	$error = new Error([
 		'type'    => $errno,
 		'message' => $errstr,
 		'file'    => $errfile,
-		'line'    => $errline
-	));
-	
-	if( $simple || $fatal ) {
-		wan_display_error($error, $simple);
-		
-		if( $fatal ) {
-			exit(1);
-		}
+		'line'    => $errline,
+		'ignore'  => (!$debug || !$skip)
+	]);
+
+	wanlog($error);
+
+	if ($error->isFatal() || ($debug && !$skip)) {
+		wan_display_error($error);
 	}
-	else {
-		wanlog($error);
-		
-		if( !DISPLAY_ERRORS_IN_LOG ) {
-			wan_display_error($error, true);
-		}
-	}
-	
+
 	return true;
 }
 
 /**
- * wan_exception_handler()
- * 
- * Gestionnaire d'erreur personnalisÈ du script (en sortie http)
- * 
- * @param Exception $e  Exception "attrapÈe" par le gestionnaire
+ * Gestionnaire d'erreur personnalis√© du script
+ *
+ * @param Exception $e Exception "attrap√©e" par le gestionnaire
  */
 function wan_exception_handler($e)
 {
+	wanlog($e);
 	wan_display_error($e);
-	exit(1);
 }
 
 /**
- * wan_format_error()
- *
  * Formatage du message d'erreurs
  *
- * @param Exception  $error  Exception dÈcrivant l'erreur
+ * @param Exception $error Exception d√©crivant l'erreur
  *
  * @return string
  */
 function wan_format_error($error)
 {
 	global $db, $lang;
-	
+
 	$errno   = $error->getCode();
 	$errstr  = $error->getMessage();
 	$errfile = $error->getFile();
 	$errline = $error->getLine();
 	$backtrace = $error->getTrace();
-	
-	if( $error instanceof WanError ) {
-		// Cas spÈcial. L'exception personnalisÈe a ÈtÈ crÈÈ dans wan_error_handler()
-		// et contient donc l'appel ‡ wan_error_handler() elle-mÍme. On corrige.
+
+	if ($error instanceof Error) {
+		// Cas sp√©cial. L'exception personnalis√©e a √©t√© cr√©√© dans wan_error_handler()
+		// et contient donc l'appel √† wan_error_handler() elle-m√™me. On corrige.
 		array_shift($backtrace);
 	}
-	
-	foreach( $backtrace as $i => &$t ) {
-		$file = wan_htmlspecialchars(str_replace(dirname(dirname(__FILE__)), '~', $t['file']));
+
+	foreach ($backtrace as $i => &$t) {
+		if (!isset($t['file'])) {
+			$t['file'] = 'unknown';
+			$t['line'] = 0;
+		}
+		$file = htmlspecialchars(str_replace(dirname(__DIR__), '~', $t['file']));
 		$call = (isset($t['class']) ? $t['class'].$t['type'] : '') . $t['function'];
 		$t = sprintf('#%d  %s() called at [%s:%d]', $i, $call, $file, $t['line']);
 	}
-	
-	if( count($backtrace) > 0 ) {
+
+	if (count($backtrace) > 0) {
 		$backtrace = sprintf("<b>Backtrace:</b>\n%s\n", implode("\n", $backtrace));
 	}
 	else {
 		$backtrace = '';
 	}
-	
-	if( DEBUG_MODE == DEBUG_LEVEL_QUIET ) {
-		// Si on est en mode de non-dÈbogage, on a forcÈment attrapÈ une erreur
+
+	if (wan_get_debug_level() == DEBUG_LEVEL_QUIET) {
+		// Si on est en mode de non-d√©bogage, on a forc√©ment attrap√© une erreur
 		// critique pour arriver ici.
 		$message  = $lang['Message']['Critical_error'];
-	}
-	else if( $error instanceof SQLException ) {
-		$message  = "<b>SQL errno:</b> $errno\n";
-		$message .= sprintf("<b>SQL error:</b> %s\n", wan_htmlspecialchars($errstr));
-		
-		if( is_object($db) ) {
-			$message .= sprintf("<b>SQL query:</b> %s\n", wan_htmlspecialchars($db->lastQuery));
+
+		if ($errno == E_USER_ERROR) {
+			if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
+				$errstr = $lang['Message'][$errstr];
+			}
+
+			$message = $errstr;
 		}
-		
+	}
+	else if ($error instanceof Dblayer\Exception) {
+		if ($db instanceof Wadb && $db->sqlstate != '') {
+			$errno = $db->sqlstate;
+		}
+
+		$message  = sprintf("<b>SQL errno:</b> %s\n", $errno);
+		$message .= sprintf("<b>SQL error:</b> %s\n", htmlspecialchars($errstr));
+
+		if ($db instanceof Wadb && $db->lastQuery != '') {
+			$message .= sprintf("<b>SQL query:</b> %s\n", htmlspecialchars($db->lastQuery));
+		}
+
 		$message .= $backtrace;
 	}
 	else {
-		$labels  = array(
+		$labels  = [
 			E_NOTICE => 'PHP Notice',
 			E_WARNING => 'PHP Warning',
 			E_USER_ERROR => 'Error',
@@ -441,117 +595,126 @@ function wan_format_error($error)
 			E_DEPRECATED => 'PHP Deprecated',
 			E_USER_DEPRECATED => 'Deprecated',
 			E_RECOVERABLE_ERROR => 'PHP Error'
-		);
-		
-		$label = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
-		$errfile = str_replace(dirname(dirname(__FILE__)), '~', $errfile);
-		
-		if( !empty($lang['Message']) && !empty($lang['Message'][$errstr]) ) {
+		];
+
+		$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
+		$errfile = str_replace(dirname(__DIR__), '~', $errfile);
+
+		if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
 			$errstr = $lang['Message'][$errstr];
 		}
-		
+
 		$message = sprintf(
 			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
-			($error instanceof WanError) ? $label : get_class($error),
+			($error instanceof Error) ? $label : get_class($error),
 			$errstr,
 			$errfile,
 			$errline
 		);
 		$message .= $backtrace;
 	}
-	
+
 	return $message;
 }
 
 /**
- * wan_display_error()
- *
  * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
  *
- * @param Exception  $error       Exception dÈcrivant l'erreur
- * @param boolean    $simpleHTML  Si true, affichage simple dans un paragraphe
+ * @param Exception $error Exception d√©crivant l'erreur
  */
-function wan_display_error($error, $simpleHTML = false)
+function wan_display_error($error)
 {
 	global $output;
-	
+
+	if ($error instanceof \Exception) {
+		$exit = true;
+
+		if ($error instanceof Error) {
+			$exit = $error->isFatal();
+		}
+	}
+
 	$message = wan_format_error($error);
-	
-	if( defined('IN_COMMANDLINE') ) {
-		if( defined('ANSI_TERMINAL') ) {
+
+	if (check_cli()) {
+		if (function_exists('posix_isatty') && posix_isatty(STDOUT)) {
 			$message = preg_replace("#<b>#",  "\033[1;31m", $message, 1);
 			$message = preg_replace("#</b>#", "\033[0m", $message, 1);
-			
+
 			$message = preg_replace("#<b>#",  "\033[1;37m", $message);
 			$message = preg_replace("#</b>#", "\033[0m", $message);
 		}
-		
-		$message = htmlspecialchars_decode($message);
-		
-		// Au cas o˘ le terminal utilise l'encodage utf-8
-		if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) {
-			$message = wan_utf8_encode($message);
+		else {
+			$message = preg_replace("#</?b>#", "", $message);
 		}
-		
-		fputs(STDERR, $message);
+
+		$message = htmlspecialchars_decode($message);
+
+		fwrite(STDERR, $message);
 	}
-	else if( $simpleHTML ) {
+	else if (!$exit) {
 		echo '<p>' . nl2br($message) . '</p>';
 	}
-	else if( $output instanceof output ) {
-		$output->displayMessage($message, 'error');
-	}
 	else {
-		$message = nl2br($message);
-		echo <<<BASIC
-<!DOCTYPE html>
-<html dir="ltr">
-<head>
-	<title>Erreur critique&nbsp;!</title>
-	
-	<style>
-	body { margin: 10px; text-align: left; }
-	</style>
-</head>
-<body>
-	<div>
-		<h1>Erreur critique&nbsp;!</h1>
-		
-		<p>$message</p>
-	</div>
-</body>
-</html>
+		http_response_code(500);
+
+		if (check_theme_is_used()) {
+			$output->displayMessage($message, 'error');
+		}
+		else {
+			$message = nl2br($message);
+			echo <<<BASIC
+<div>
+	<h1>Erreur critique&nbsp;!</h1>
+
+	<p>$message</p>
+</div>
 BASIC;
+		}
+	}
+
+	if ($exit) {
+		exit(1);
 	}
 }
 
 /**
- * wanlog()
- *
- * Si elle est appelÈe avec un argument, ajoute l'entrÈe dans le journal,
+ * Si elle est appel√©e avec un argument, ajoute l'entr√©e dans le journal,
  * sinon, renvoie le journal.
- * 
- * @param mixed  $entry  Peut Ítre un objet Exception, ou une simple chaÓne
- * 
+ *
+ * @param mixed $entry Peut √™tre un objet Exception, ou n'importe quelle autre valeur
+ *
  * @return array
  */
 function wanlog($entry = null)
 {
-	static $entries = array();
-	
-	if( $entry === null ) {
+	static $entries = [];
+
+	if (func_num_args() == 0) {
 		return $entries;
 	}
-	
-	array_push($entries, $entry);
+
+	if ($entry instanceof Exception) {
+		$hash = md5(
+			$entry->getCode() .
+			$entry->getMessage() .
+			$entry->getFile() .
+			$entry->getLine()
+		);
+
+		$entries[$hash] = $entry;
+
+		if (DEBUG_LOG_ENABLED) {
+			error_log(preg_replace('#</?b>#', '', trim(wan_format_error($entry))));
+		}
+	}
+	else {
+		$entries[] = $entry;
+	}
 }
 
 /**
- * wan_error_get_last()
- *
- * MÍme fonctionnement que la fonction native error_get_last()
- *
- * @param mixed  $entry  Peut Ítre un objet Exception, ou une simple chaÓne
+ * M√™me fonctionnement que la fonction native error_get_last()
  *
  * @return array
  */
@@ -559,244 +722,216 @@ function wan_error_get_last()
 {
 	$errors = wanlog();
 	$error  = null;
-	
-	while( $e = array_pop($errors) ) {
-		if( $e instanceof Exception ) {
-			$error = array(
+
+	while ($e = array_pop($errors)) {
+		if ($e instanceof Exception) {
+			$error = [
 				'type'    => $e->getCode(),
 				'message' => $e->getMessage(),
 				'file'    => $e->getFile(),
 				'line'    => $e->getLine()
-			);
+			];
 			break;
 		}
 	}
-	
+
 	return $error;
 }
 
 /**
- * plain_error()
- * 
- * @param mixed   $var      Variable ‡ afficher
- * @param boolean $exit     True pour terminer l'exÈcution du script
- * @param boolean $verbose  True pour utiliser var_dump() (dÈtails sur le contenu de la variable)
- * 
- * @return void
+ * @param mixed   $var     Variable √† afficher
+ * @param boolean $exit    True pour terminer l'ex√©cution du script
+ * @param boolean $verbose True pour utiliser var_dump() (d√©tails sur le contenu de la variable)
  */
 function plain_error($var, $exit = true, $verbose = false)
 {
-	if( headers_sent() == false ) {
-		header('Content-Type: text/plain; charset=ISO-8859-15');
+	if (!headers_sent()) {
+		header('Content-Type: text/plain; charset=UTF-8');
 	}
-	
-	if( $verbose == true ) {
+
+	if ($verbose) {
 		var_dump($var);
-	} else {
-		if( is_scalar($var) ) {
+	}
+	else {
+		if (is_scalar($var)) {
 			echo $var;
-		} else {
+		}
+		else {
 			print_r($var);
 		}
 	}
-	
-	if( $exit ) {
+
+	if ($exit) {
 		exit;
 	}
 }
 
 /**
- * navigation()
- * 
  * Fonction d'affichage par page.
- * 
- * @param string  $url              Adresse vers laquelle doivent pointer les liens de navigation
- * @param integer $total_item       Nombre total d'ÈlÈments
- * @param integer $item_per_page    Nombre d'ÈlÈments par page
- * @param integer $page_id          Identifiant de la page en cours
- * 
+ *
+ * @param string  $url           Adresse vers laquelle doivent pointer les liens de navigation
+ * @param integer $total_item    Nombre total d'√©l√©ments
+ * @param integer $item_per_page Nombre d'√©l√©ments par page
+ * @param integer $page_id       Identifiant de la page en cours
+ *
  * @return string
  */
 function navigation($url, $total_item, $item_per_page, $page_id)
 {
 	global $lang;
-	
+
 	$total_pages = ceil($total_item / $item_per_page);
-	
-	// premier caractËre de l'url au moins en position 1 
-	// on place un espace ‡ la position 0 de la chaÓne
+
+	// premier caract√®re de l'url au moins en position 1
+	// on place un espace √† la position 0 de la cha√Æne
 	$url = ' ' . $url;
-	
-	$url .= ( strpos($url, '?') ) ? '&amp;' : '?';
-	
-	// suppression de l'espace prÈcÈdemment ajoutÈ 
+
+	$url .= (strpos($url, '?')) ? '&amp;' : '?';
+
+	// suppression de l'espace pr√©c√©demment ajout√©
 	$url = substr($url, 1);
-	
-	if( $total_pages == 1 )
-	{
+
+	if ($total_pages == 1) {
 		return '&nbsp;';
 	}
-	
+
 	$nav_string = '';
-	
-	if( $total_pages > 10 )
-	{
-		if( $page_id > 10 )
-		{
+
+	if ($total_pages > 10) {
+		if ($page_id > 10) {
 			$prev = $page_id;
-			do
-			{
+			do {
 				$prev--;
 			}
-			while( $prev % 10 );
-			
+			while ($prev % 10);
+
 			$nav_string .= '<a href="' . $url . 'page=1">' . $lang['Start'] . '</a>&nbsp;&nbsp;';
 			$nav_string .= '<a href="' . $url . 'page=' . $prev . '">' . $lang['Prev'] . '</a>&nbsp;&nbsp;';
 		}
-		
+
 		$current = $page_id;
-		do
-		{
+		do {
 			$current--;
 		}
-		while( $current % 10 );
-		
+		while ($current % 10);
+
 		$current++;
-		
-		for( $i = $current; $i < ($current + 10); $i++ )
-		{
-			if( $i <= $total_pages )
-			{
-				if( $i > $current )
-				{
+
+		for ($i = $current; $i < ($current + 10); $i++) {
+			if ($i <= $total_pages) {
+				if ($i > $current) {
 					$nav_string .= ', ';
 				}
-				
-				$nav_string .= ( $i == $page_id ) ? '<b>' . $i . '</b>' : '<a href="' . $url . 'page=' . $i . '">' . $i . '</a>';
+
+				$nav_string .= ($i == $page_id) ? '<b>' . $i . '</b>' : '<a href="' . $url . 'page=' . $i . '">' . $i . '</a>';
 			}
 		}
-		
+
 		$next = $page_id;
-		while( $next % 10 )
-		{
+		while ($next % 10) {
 			$next++;
 		}
 		$next++;
-		
-		if( $total_pages >= $next )
-		{
+
+		if ($total_pages >= $next) {
 			$nav_string .= '&nbsp;&nbsp;<a href="' . $url . 'page=' . $next . '">' . $lang['Next'] . '</a>';
 			$nav_string .= '&nbsp;&nbsp;<a href="' . $url . 'page=' . $total_pages . '">' . $lang['End'] . '</a>';
 		}
 	}
-	else
-	{
-		for( $i = 1; $i <= $total_pages; $i++ )
-		{
-			if( $i > 1 )
-			{
+	else {
+		for ($i = 1; $i <= $total_pages; $i++) {
+			if ($i > 1) {
 				$nav_string .= ', ';
 			}
-			
-			$nav_string .= ( $i == $page_id ) ? '<b>' . $i . '</b>' : '<a href="' . $url . 'page=' . $i . '">' . $i . '</a>';
-			
+
+			$nav_string .= ($i == $page_id) ? '<b>' . $i . '</b>' : '<a href="' . $url . 'page=' . $i . '">' . $i . '</a>';
+
 		}
 	}
-	
+
 	return $nav_string;
 }
 
 /**
- * convert_time()
- * 
  * Fonction de renvoi de date selon la langue
- * 
- * @param string  $dateformat    Format demandÈ
- * @param integer $timestamp     Timestamp unix ‡ convertir
- * 
+ *
+ * @param string  $dateformat Format demand√©
+ * @param integer $timestamp  Timestamp unix √† convertir
+ *
  * @return string
  */
 function convert_time($dateformat, $timestamp)
 {
 	static $search, $replace;
-	
-	if( !isset($search) || !isset($replace) )
-	{
+
+	if (!isset($search) || !isset($replace)) {
 		global $datetime;
-		
-		$search = $replace = array();
-		
-		foreach( $datetime as $orig_word => $repl_word )
-		{
-			array_push($search,  '/\b' . $orig_word . '\b/i');
-			array_push($replace, $repl_word);
+
+		$search = $replace = [];
+
+		foreach ($datetime as $orig_word => $repl_word) {
+			$search[]  = '/\b' . $orig_word . '\b/i';
+			$replace[] = $repl_word;
 		}
 	}
-	
+
 	return preg_replace($search, $replace, date($dateformat, $timestamp));
 }
 
 /**
- * purge_liste()
- * 
- * Fonction de purge de la table des abonnÈs 
- * Retourne le nombre d'entrÈes supprimÈes
- * Fonction rÈcursive
- * 
- * @param integer $liste_id          Liste concernÈe
- * @param integer $limitevalidate    Limite de validitÈ pour confirmer une inscription
- * @param integer $purge_freq        FrÈquence des purges
- * 
+ * Fonction de purge de la table des abonn√©s
+ * Retourne le nombre d'entr√©es supprim√©es
+ * Fonction r√©cursive
+ *
+ * @param integer $liste_id       Liste concern√©e
+ * @param integer $limitevalidate Limite de validit√© pour confirmer une inscription
+ * @param integer $purge_freq     Fr√©quence des purges
+ *
  * @return integer
  */
 function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 {
-	global $db, $nl_config;
-	
-	if( !$liste_id )
-	{
+	global $db;
+
+	if (!$liste_id) {
 		$total_entries_deleted = 0;
-		
-		$sql = "SELECT liste_id, limitevalidate, purge_freq 
-			FROM " . LISTE_TABLE . " 
-			WHERE purge_next < " . time() . " 
-				AND auto_purge = " . TRUE;
+
+		$sql = "SELECT liste_id, limitevalidate, purge_freq
+			FROM " . LISTE_TABLE . "
+			WHERE purge_next < " . time() . "
+				AND auto_purge = 1";
 		$result = $db->query($sql);
-		
-		while( $row = $result->fetch() )
-		{
+
+		while ($row = $result->fetch()) {
 			$total_entries_deleted += purge_liste($row['liste_id'], $row['limitevalidate'], $row['purge_freq']);
 		}
-		
+
 		//
 		// Optimisation des tables
 		//
-		$db->vacuum(array(ABONNES_TABLE, ABO_LISTE_TABLE));
-		
+		$db->vacuum([ABONNES_TABLE, ABO_LISTE_TABLE]);
+
 		return $total_entries_deleted;
 	}
-	else
-	{
+	else {
 		$sql = "SELECT abo_id
 			FROM " . ABO_LISTE_TABLE . "
 			WHERE liste_id = $liste_id
 				AND confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
-				AND register_date < " . (time() - ($limitevalidate * 86400));
+				AND register_date < " . strtotime(sprintf('-%d days', $limitevalidate));
 		$result = $db->query($sql);
-		
-		$abo_ids = array();
-		while( $abo_id = $result->column('abo_id') )
-		{
-			array_push($abo_ids, $abo_id);
+
+		$abo_ids = [];
+		while ($abo_id = $result->column('abo_id')) {
+			$abo_ids[] = $abo_id;
 		}
 		$result->free();
-		
-		if( ($num_abo_deleted = count($abo_ids)) > 0 )
-		{
+
+		if (($num_abo_deleted = count($abo_ids)) > 0) {
 			$sql_abo_ids = implode(', ', $abo_ids);
-			
+
 			$db->beginTransaction();
-			
+
 			$sql = "DELETE FROM " . ABONNES_TABLE . "
 				WHERE abo_id IN(
 					SELECT abo_id
@@ -806,547 +941,355 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 					HAVING COUNT(abo_id) = 1
 				)";
 			$db->query($sql);
-			
+
 			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
 				WHERE abo_id IN($sql_abo_ids)
 					AND liste_id = " . $liste_id;
 			$db->query($sql);
-			
+
 			$db->commit();
 		}
-		
-		$sql = "UPDATE " . LISTE_TABLE . " 
-			SET purge_next = " . (time() + ($purge_freq * 86400)) . " 
+
+		$sql = "UPDATE " . LISTE_TABLE . "
+			SET purge_next = " . strtotime(sprintf('+%d days', $purge_freq)) . "
 			WHERE liste_id = " . $liste_id;
 		$db->query($sql);
-		
+
 		return $num_abo_deleted;
 	}
 }
 
 /**
- * strip_magic_quotes_gpc()
- * 
- * Annule l'effet produit par l'option de configuration magic_quotes_gpc ‡ On
- * Fonction rÈcursive
- * 
- * @param array $data    Tableau des donnÈes
- * 
- * @return array
+ * Annule l‚Äôeffet produit par l‚Äôoption de configuration 'filter.default'
+ * positionn√©e sur 'magic_quotes'.
+ * Fonction r√©cursive
+ *
+ * @param mixed $data Tableau de donn√©es ou cha√Æne de caract√®res
  */
-function strip_magic_quotes_gpc(&$data, $isFilesArray = false)
+function strip_magic_quotes(&$data)
 {
-	if( is_array($data) )
-	{
-		foreach( $data as $key => $val )
-		{
-			if( is_array($val) )
-			{
-				$data[$key] = strip_magic_quotes_gpc($val, $isFilesArray);
-			}
-			else if( is_string($val) && (!$isFilesArray || $key != 'tmp_name') )
-			{
-				$data[$key] = stripslashes($val);
-			}
+	static $doStrip = null;
+
+	if (is_null($doStrip)) {
+		$doStrip = false;
+		if (ini_get('filter.default') == 'magic_quotes') {
+			$doStrip = true;
 		}
 	}
-	
-	return $data;
-}
 
-/**
- * wa_realpath()
- * 
- * @param string $relative_path  Chemin relatif ‡ rÈsoudre
- * 
- * @return string
- */
-function wa_realpath($relative_path)
-{
-	if( !function_exists('realpath') || !($absolute_path = @realpath($relative_path)) )
-	{
-		return $relative_path;
+	if ($doStrip) {
+		if (is_array($data)) {
+			array_walk($data, function (&$data, $key) {
+				strip_magic_quotes($data);
+			});
+		}
+		else if (is_string($data)) {
+			$data = stripslashes($data);
+		}
 	}
-	
-	return str_replace('\\', '/', $absolute_path);
 }
 
 /**
- * cut_str()
- * 
- * Pour limiter la longueur d'une chaine de caractËre ‡ afficher
- * 
+ * Pour limiter la longueur d'une chaine de caract√®re √† afficher
+ *
  * @param string  $str
  * @param integer $len
- * 
+ *
  * @return string
  */
 function cut_str($str, $len)
 {
-	if( strlen($str) > $len )
-	{ 
-		$str = substr($str, 0, ($len - 3));
-		
-		if( $space = strrpos($str, ' ') )
-		{
-			$str = substr($str, 0, $space);
+	if (mb_strlen($str) > $len) {
+		$str = mb_substr($str, 0, $len);
+
+		if ($space = mb_strrpos($str, ' ')) {
+			$str = mb_substr($str, 0, $space);
 		}
-		
-		$str .= '...';
+
+		$str .= "\xe2\x80\xa6";// (U+2026) Horizontal ellipsis char
 	}
-	
+
 	return $str;
 }
 
 /**
- * active_urls()
- * 
  * Convertit les liens dans un texte en lien html
- * ImportÈ de WAgoldBook 2.0.x et prÈcÈdemment importÈ de phpBB 2.0.x
- * 
+ * Import√© de WAgoldBook 2.0.x et pr√©c√©demment import√© de phpBB 2.0.x
+ *
  * @param string $str
- * 
+ *
  * @return string
  */
 function active_urls($str)
 {
 	$str = ' ' . $str;
-	
+
 	$str = preg_replace("#([\n ])([a-z]+?)://([^,\t \n\r\"]+)#i", "\\1<a href=\"\\2://\\3\">\\2://\\3</a>", $str);
 	$str = preg_replace("#([\n ])www\.([a-z0-9\-]+)\.([a-z0-9\-.\~]+)((?:/[^,\t \n\r\"]*)?)#i", "\\1<a href=\"http://www.\\2.\\3\\4\">www.\\2.\\3\\4</a>", $str);
 	$str = preg_replace("#([\n ])([a-z0-9\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)?[\w]+)#i", "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>", $str);
-	
+
 	// Remove our padding..
 	return substr($str, 1);
 }
 
 /**
- * config_status()
- * 
- * Retourne la valeur d'une directive de configuration
- * 
- * @param string  $name          Nom de la directive
- * 
+ * Retourne la valeur bool√©enne d'une directive de configuration.
+ * Certaines options de configuration peuvent avoir √©t√© incorrectement
+ * param√©tr√©es avec la directive php_value|php_admin_value alors que dans
+ * le cas des options on/off, il faut utiliser php_flag|php_admin_flag.
+ *
+ * @param string $name Nom de la directive
+ *
  * @return boolean
  */
-function config_status($name)
+function ini_get_flag($name)
 {
-	return config_value($name, true);
+	return (bool) preg_match('#^(on|yes|true|1)$#i', ini_get($name));
 }
 
 /**
- * config_value()
- * 
- * Retourne la valeur d'une directive de configuration
- * 
- * @param string  $name          Nom de la directive
- * @param boolean $need_boolean  NÈcessaire pour obtenir un boolÈen en retour (pour les directives on/off)
- * 
- * @return mixed
- */
-function config_value($name, $need_boolean = false)
-{
-	$value = ini_get($name);
-	if( $need_boolean ) {
-		if( preg_match('#^off|false$#i', $value) ) {
-			$value = false;
-		}
-		
-		settype($value, 'boolean');
-	}
-	return $value;
-}
-
-/**
- * server_info()
- * 
- * Retourne l'information serveur demandÈe
- * 
- * @param string $name    Nom de l'information
- * 
- * @return string
- */
-function server_info($name)
-{
-	$name = strtoupper($name);
-	
-	return ( !empty($_SERVER[$name]) ) ? $_SERVER[$name] : ( ( !empty($_ENV[$name]) ) ? $_ENV[$name] : '' );
-}
-
-/**
- * fake_header()
- * 
- * Fonctions ‡ utiliser lors des longues boucles (backup, envois) 
- * qui peuvent provoquer un time out du navigateur client 
- * InspirÈ d'un code Èquivalent dans phpMyAdmin 2.5.0 (libraries/build_dump.lib.php prÈcisÈment)
- * 
- * @param boolean $in_loop    True si on est dans la boucle, false pour initialiser $time
- * 
- * @return void
+ * Fonctions √† utiliser lors des longues boucles (backup, envois)
+ * qui peuvent provoquer un time out du navigateur client
+ * Inspir√© d'un code √©quivalent dans phpMyAdmin 2.5.0 (libraries/build_dump.lib.php pr√©cis√©ment)
+ *
+ * @param boolean $in_loop True si on est dans la boucle, false pour initialiser $time
  */
 function fake_header($in_loop)
 {
 	static $time;
-	
-	if( $in_loop )
-	{
+
+	if ($in_loop) {
 		$new_time = time();
-		
-		if( ($new_time - $time) >= 30 )
-		{
+
+		if (($new_time - $time) >= 30) {
 			$time = $new_time;
 			header('X-WaPing: Pong');
 		}
 	}
-	else
-	{
+	else {
 		$time = time();
 	}
 }
 
 /**
- * purge_latin1()
- * 
- * Effectue une translitÈration sur les caractËres interdits provenant de Windows-1252
- * ou les transforme en rÈfÈrences d'entitÈ numÈrique selon que la chaÓne est du texte brut ou du HTML
- * 
- * @param string $data       ChaÓne ‡ modifier
- * @param string $translite  Active ou non la translitÈration
- * 
+ * D√©tection d'encodage et conversion de $charset
+ *
+ * @param string  $data
+ * @param string  $charset   Jeu de caract√®res des donn√©es fournies
+ * @param boolean $check_bom D√©tection du BOM en t√™te des donn√©es
+ *
  * @return string
  */
-function purge_latin1($data, $translite = false)
+function convert_encoding($data, $charset = null, $check_bom = true)
 {
-	global $lang;
-	
-	if( $lang['CHARSET'] == 'ISO-8859-1' )
-	{
-		$convmap_name = ( $translite == true ) ? 'translite_cp1252' : 'cp1252_to_entity';
-		
-		return strtr($data, $GLOBALS['CONVMAP'][$convmap_name]);
-	}
-	
-	return $data;
-}
-
-/**
- * is_utf8()
- * 
- * DÈtecte si une chaÓne est encodÈe ou non en UTF-8
- * 
- * @param string $string    ChaÓne ‡ modifier
- * 
- * @link   http://w3.org/International/questions/qa-forms-utf-8.html
- * @see    http://bugs.php.net/bug.php?id=37793 (segfault qui oblige ‡ tronÁonner la chaÓne)
- * @return boolean
- */
-function is_utf8($string)
-{
-	return !strlen(
-		preg_replace(
-		'/[\x09\x0A\x0D\x20-\x7E]'              # ASCII
-		. '|[\xC2-\xDF][\x80-\xBF]'             # non-overlong 2-byte
-		. '|\xE0[\xA0-\xBF][\x80-\xBF]'         # excluding overlongs
-		. '|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}'  # straight 3-byte
-		. '|\xED[\x80-\x9F][\x80-\xBF]'         # excluding surrogates
-		. '|\xF0[\x90-\xBF][\x80-\xBF]{2}'      # planes 1-3
-		. '|[\xF1-\xF3][\x80-\xBF]{3}'          # planes 4-15
-		. '|\xF4[\x80-\x8F][\x80-\xBF]{2}'      # plane 16
-		. '/sS', '', $string));
-}
-
-/**
- * wan_utf8_encode()
- * 
- * Encode une chaÓne en UTF-8
- * 
- * @param string $data
- * 
- * @return string
- */
-function wan_utf8_encode($data)
-{
-	$data = strtr($data, $GLOBALS['CONVMAP']['cp1252_to_entity']);
-	$data = utf8_encode($data);
-	$data = strtr($data, array_flip($GLOBALS['CONVMAP']['utf8_to_entity']));
-	
-	return $data;
-}
-
-/**
- * wan_utf8_decode()
- * 
- * DÈcode une chaÓne en UTF-8
- * 
- * @param string $data
- * 
- * @return string
- */
-function wan_utf8_decode($data)
-{
-	$data = strtr($data, $GLOBALS['CONVMAP']['utf8_to_entity']);
-	$data = utf8_decode($data);
-	$data = strtr($data, array_flip($GLOBALS['CONVMAP']['cp1252_to_entity']));
-	
-	return $data;
-}
-
-/**
- * convert_encoding()
- * 
- * DÈtection d'encodage et conversion vers $charset
- * 
- * @param string $data
- * 
- * @return string
- */
-function convert_encoding($data, $charset, $check_bom = true)
-{
-	if( empty($charset) )
-	{
-		if( $check_bom == true && strncmp($data, "\xEF\xBB\xBF", 3) == 0 ) // dÈtection du BOM
-		{
+	if (empty($charset)) {
+		if ($check_bom && strncmp($data, "\xEF\xBB\xBF", 3) == 0) {
 			$charset = 'UTF-8';
 			$data = substr($data, 3);
 		}
-		else if( is_utf8($data) )
-		{
+		else if (u::isUtf8($data)) {
 			$charset = 'UTF-8';
 		}
 	}
-	
-	if( strtoupper($charset) == 'UTF-8' )
-	{
-		if( $GLOBALS['lang']['CHARSET'] == 'ISO-8859-1' )
-		{
-			$data = wan_utf8_decode($data);
-		}
-		else if( extension_loaded('iconv') )
-		{
-			$data = iconv($charset, $GLOBALS['lang']['CHARSET'] . '//TRANSLIT', $data);
-		}
-		else if( extension_loaded('mbstring') )
-		{
-			$data = mb_convert_encoding($data, $GLOBALS['lang']['CHARSET'], $charset);
-		}
+
+	if (empty($charset)) {
+		$charset = 'windows-1252';
+		trigger_error("Cannot found valid charset. Using windows-1252 as fallback", E_USER_NOTICE);
 	}
-	
+
+	if (strtoupper($charset) != 'UTF-8') {
+		$data = iconv($charset, 'UTF-8', $data);
+	}
+
 	return $data;
 }
 
 /**
- * wan_get_contents()
- * 
- * RÈcupËre un contenu local ou via HTTP et le retourne, ainsi que le jeu de
- * caractËre et le type de mÈdia de la chaÓne, si disponible.
- * 
- * @param string $URL      L'URL ‡ appeller
- * @param string $errstr  Conteneur pour un Èventuel message d'erreur
- * 
- * @return mixed
+ * R√©cup√®re un contenu local ou via HTTP et le retourne, ainsi que le jeu de
+ * caract√®re et le type de m√©dia de la cha√Æne, si disponible.
+ *
+ * @param string $URL    L'URL √† appeller
+ * @param string $errstr Conteneur pour un √©ventuel message d'erreur
+ *
+ * @return boolean|array
  */
 function wan_get_contents($URL, &$errstr)
 {
 	global $lang;
-	
-	if( strncmp($URL, 'http://', 7) == 0 )
-	{
+
+	if (strncmp($URL, 'http://', 7) == 0) {
 		$result = http_get_contents($URL, $errstr);
-		if( $result == false )
-		{
-			$errstr = sprintf($lang['Message']['Error_load_url'], wan_htmlspecialchars($URL), $errstr);
+		if (!$result) {
+			$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($URL), $errstr);
 		}
 	}
-	else
-	{
-		if( $URL[0] == '~' )
-		{
-			$URL = server_info('DOCUMENT_ROOT') . substr($URL, 1);
+	else {
+		if ($URL[0] == '~') {
+			$URL = $_SERVER['DOCUMENT_ROOT'] . substr($URL, 1);
 		}
-		else if( $URL[0] != '/' )// Chemin non absolu
-		{
+		else if ($URL[0] != '/') {
 			$URL = WA_ROOTDIR . '/' . $URL;
 		}
-		
-		if( is_readable($URL) )
-		{
-			$result = array('data' => file_get_contents($URL), 'charset' => null);
+
+		if (is_readable($URL)) {
+			$result = ['data' => file_get_contents($URL), 'charset' => null];
 		}
-		else
-		{
+		else {
 			$result = false;
-			$errstr = sprintf($lang['Message']['File_not_exists'], wan_htmlspecialchars($URL));
+			$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($URL));
 		}
 	}
-	
+
 	return $result;
 }
 
 /**
- * http_get_contents()
- * 
- * RÈcupËre un contenu via HTTP et le retourne, ainsi que le jeu de
- * caractËre et le type de mÈdia de la chaÓne, si disponible.
- * 
- * @param string $URL      L'URL ‡ appeller
- * @param string $errstr  Conteneur pour un Èventuel message d'erreur
- * 
- * @return mixed
+ * R√©cup√®re un contenu via HTTP et le retourne, ainsi que le jeu de
+ * caract√®re et le type de m√©dia de la cha√Æne, si disponible.
+ *
+ * @param string $URL    L'URL √† appeller
+ * @param string $errstr Conteneur pour un √©ventuel message d'erreur
+ *
+ * @return boolean|array
  */
 function http_get_contents($URL, &$errstr)
 {
 	global $lang;
-	
-	if( !($part = parse_url($URL)) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http' )
-	{
+
+	if (!($part = parse_url($URL)) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http') {
 		$errstr = $lang['Message']['Invalid_url'];
 		return false;
 	}
-	
-	$port = !isset($part['port']) ? 80 : $part['port'];
-	
-	if( !($fs = fsockopen($part['host'], $port, $null, $null, 5)) )
-	{
-		$errstr = sprintf($lang['Message']['Unaccess_host'], wan_htmlspecialchars($part['host']));
+
+	$port = (!isset($part['port'])) ? 80 : $part['port'];
+
+	if (!($fs = fsockopen($part['host'], $port, $null, $null, 5))) {
+		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
 		return false;
 	}
-	
+
 	stream_set_timeout($fs, 5);
-	
-	$path  = !isset($part['path']) ? '/' : $part['path'];
-	$path .= !isset($part['query']) ? '' : '?'.$part['query'];
-	
-	fputs($fs, sprintf("GET %s HTTP/1.0\r\n", $path));// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
-	fputs($fs, sprintf("Host: %s\r\n", $part['host']));
-	fputs($fs, sprintf("User-Agent: %s\r\n", WA_SIGNATURE));
-	fputs($fs, "Accept: */*\r\n");
-	
-	if( extension_loaded('zlib') )
-	{
-		fputs($fs, "Accept-Encoding: gzip\r\n");
+
+	$path  = (!isset($part['path'])) ? '/' : $part['path'];
+	$path .= (!isset($part['query'])) ? '' : '?'.$part['query'];
+
+	// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
+	fwrite($fs, sprintf("GET %s HTTP/1.0\r\n", $path));
+	fwrite($fs, sprintf("Host: %s\r\n", $part['host']));
+	fwrite($fs, sprintf("User-Agent: %s\r\n", sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION)));
+	fwrite($fs, "Accept: */*\r\n");
+
+	if (extension_loaded('zlib')) {
+		fwrite($fs, "Accept-Encoding: gzip\r\n");
 	}
-	
-	fputs($fs, "Connection: close\r\n\r\n");
-	
+
+	fwrite($fs, "Connection: close\r\n\r\n");
+
 	$isGzipped = false;
 	$datatype  = $charset = null;
 	$data = '';
 	$tmp  = fgets($fs, 1024);
-	
-	if( !preg_match('#^HTTP/(\d\.[x\d])\x20+(\d{3})\s#', $tmp, $match) || $match[2] != 200 )
-	{
+
+	if (!preg_match('#^HTTP/(\d\.[x\d])\x20+(\d{3})\s#', $tmp, $m) || $m[2] != 200) {
 		$errstr = $lang['Message']['Not_found_at_url'];
 		fclose($fs);
 		return false;
 	}
-	
-	// EntÍtes
-	while( !feof($fs) )
-	{
+
+	// Ent√™tes
+	while (!feof($fs)) {
 		$tmp = fgets($fs, 1024);
-		
-		if( !strpos($tmp, ':') ) {
+
+		if (!strpos($tmp, ':')) {
 			break;
 		}
-		
+
 		list($header, $value) = explode(':', $tmp);
 		$header = strtolower($header);
 		$value  = trim($value);
-		
-		if( $header == 'content-type' )
-		{
-			if( preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $match) )
-			{
-				$datatype = $match[1];
-				$charset  = !empty($match[3]) ? strtoupper($match[3]) : '';
+
+		if ($header == 'content-type') {
+			if (preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $m)) {
+				$datatype = $m[1];
+				$charset  = (!empty($m[3])) ? strtoupper($m[3]) : '';
 			}
 		}
-		else if( $header == 'content-encoding' && $value == 'gzip' )
-		{
+		else if ($header == 'content-encoding' && $value == 'gzip') {
 			$isGzipped = true;
 		}
 	}
-	
+
 	// Contenu
-	while( !feof($fs) )
-	{
+	while (!feof($fs)) {
 		$data .= fgets($fs, 1024);
 	}
-	
+
 	fclose($fs);
-	
-	if( $isGzipped && !preg_match('/\.t?gz$/i', $part['path']) )
-	{
+
+	if ($isGzipped && !preg_match('/\.t?gz$/i', $part['path'])) {
 		// RFC 1952 - Users note on http://www.php.net/manual/en/function.gzencode.php
-		if( strncmp($data, "\x1f\x8b", 2) != 0 )
-		{
+		if (strncmp($data, "\x1f\x8b", 2) != 0) {
 			trigger_error('data is not to GZIP format', E_USER_WARNING);
 			return false;
 		}
-		
+
 		$data = gzinflate(substr($data, 10));
 	}
-	
-	if( empty($charset) && preg_match('#(?:/|\+)xml$#', $datatype) && strncmp($data, '<?xml', 5) == 0 )
-	{
+
+	if (empty($charset) && preg_match('#(?:/|\+)xml$#', $datatype) && strncmp($data, '<?xml', 5) == 0) {
 		$prolog = substr($data, 0, strpos($data, "\n"));
-		
-		if( preg_match('/\s+encoding\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/i', $prolog, $match) )
-		{
-			$charset = $match[2];
+
+		if (preg_match('/\s+encoding\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/i', $prolog, $m)) {
+			$charset = $m[2];
 		}
 	}
-	
-	return array('type' => $datatype, 'charset' => $charset, 'data' => $data);
+
+	return ['type' => $datatype, 'charset' => $charset, 'data' => $data];
 }
 
 /**
- * wa_number_format()
- * 
- * Formate un nombre en fonction de paramËtres de langue (idem que number_format() mais on ne spÈcifie
- * que deux arguments max, les deux autres sont rÈcupÈrÈs dans $lang)
- * 
+ * Formate un nombre en fonction de param√®tres de langue (idem que number_format() mais on ne sp√©cifie
+ * que deux arguments max, les deux autres sont r√©cup√©r√©s dans $lang)
+ *
  * @param float   $number
  * @param integer $decimals
- * 
+ *
  * @return string
  */
 function wa_number_format($number, $decimals = 2)
 {
 	$number = number_format($number, $decimals, $GLOBALS['lang']['DEC_POINT'], $GLOBALS['lang']['THOUSANDS_SEP']);
-	if( substr($number, -2) == '00' )
-	{
-		$number = substr($number, 0, -3);
+	$number = rtrim($number, '0');
+	$dec_point_len = strlen($GLOBALS['lang']['DEC_POINT']);
+
+	if (substr($number, -$dec_point_len) === $GLOBALS['lang']['DEC_POINT']) {
+		$number = substr($number, 0, -$dec_point_len);
 	}
-	
+
 	return $number;
 }
 
 /**
- * hasCidReferences()
- * 
- * Retourne le nombre de rÈfÈrences 'cid' (appel d'objet dans un email)
- * 
- * @param string  $body
- * @param array   $refs
- * 
+ * Retourne le nombre de r√©f√©rences 'cid' (appel d'objet dans un email)
+ *
+ * @param string $body
+ * @param array  $refs
+ *
  * @return integer
  */
 function hasCidReferences($body, &$refs)
 {
 	$total = preg_match_all('/<[^>]+"cid:([^\\:*\/?<">|]+)"[^>]*>/', $body, $matches);
 	$refs  = $matches[1];
-	
+
 	return $total;
 }
 
 /**
- * formateSize()
- * 
- * Retourne une taille en octet formatÈe pour Ítre lisible par un humain
- * 
- * @param string  $size
- * 
+ * Retourne une taille en octet format√©e pour √™tre lisible par un humain
+ *
+ * @param string $size
+ *
  * @return string
  */
 function formateSize($size)
@@ -1354,162 +1297,321 @@ function formateSize($size)
 	$k = 1024;
 	$m = $k * $k;
 	$g = $m * $k;
-	
-	if( $size >= $g )
-	{
+
+	if ($size >= $g) {
 		$unit = $GLOBALS['lang']['GO'];
 		$size /= $g;
 	}
-	else if( $size >= $m )
-	{
+	else if ($size >= $m) {
 		$unit = $GLOBALS['lang']['MO'];
 		$size /= $m;
 	}
-	else if( $size >= $k )
-	{
+	else if ($size >= $k) {
 		$unit = $GLOBALS['lang']['KO'];
 		$size /= $k;
 	}
-	else
-	{
+	else {
 		$unit = $GLOBALS['lang']['Octets'];
 	}
-	
-	return sprintf("%s\xA0%s", wa_number_format($size), $unit);
-}
 
-$CONVMAP = array(
-	'cp1252_to_entity' => array(
-		"\x80" => "&#8364;",    # EURO SIGN
-		"\x82" => "&#8218;",    # SINGLE LOW-9 QUOTATION MARK
-		"\x83" => "&#402;",     # LATIN SMALL LETTER F WITH HOOK
-		"\x84" => "&#8222;",    # DOUBLE LOW-9 QUOTATION MARK
-		"\x85" => "&#8230;",    # HORIZONTAL ELLIPSIS
-		"\x86" => "&#8224;",    # DAGGER
-		"\x87" => "&#8225;",    # DOUBLE DAGGER
-		"\x88" => "&#710;",     # MODIFIER LETTER CIRCUMFLEX ACCENT
-		"\x89" => "&#8240;",    # PER MILLE SIGN */
-		"\x8a" => "&#352;",     # LATIN CAPITAL LETTER S WITH CARON
-		"\x8b" => "&#8249;",    # SINGLE LEFT-POINTING ANGLE QUOTATION
-		"\x8c" => "&#338;",     # LATIN CAPITAL LIGATURE OE
-		"\x8e" => "&#381;",     # LATIN CAPITAL LETTER Z WITH CARON
-		"\x91" => "&#8216;",    # LEFT SINGLE QUOTATION MARK
-		"\x92" => "&#8217;",    # RIGHT SINGLE QUOTATION MARK
-		"\x93" => "&#8220;",    # LEFT DOUBLE QUOTATION MARK
-		"\x94" => "&#8221;",    # RIGHT DOUBLE QUOTATION MARK
-		"\x95" => "&#8226;",    # BULLET
-		"\x96" => "&#8211;",    # EN DASH
-		"\x97" => "&#8212;",    # EM DASH
-		"\x98" => "&#732;",     # SMALL TILDE
-		"\x99" => "&#8482;",    # TRADE MARK SIGN
-		"\x9a" => "&#353;",     # LATIN SMALL LETTER S WITH CARON
-		"\x9b" => "&#8250;",    # SINGLE RIGHT-POINTING ANGLE QUOTATION
-		"\x9c" => "&#339;",     # LATIN SMALL LIGATURE OE
-		"\x9e" => "&#382;",     # LATIN SMALL LETTER Z WITH CARON
-		"\x9f" => "&#376;"      # LATIN CAPITAL LETTER Y WITH DIAERESIS
-	),
-	'utf8_to_entity' => array(
-		"\xe2\x82\xac" => "&#8364;",
-		"\xe2\x80\x9a" => "&#8218;",
-		"\xc6\x92"     => "&#402;",
-		"\xe2\x80\x9e" => "&#8222;",
-		"\xe2\x80\xa6" => "&#8230;",
-		"\xe2\x80\xa0" => "&#8224;",
-		"\xe2\x80\xa1" => "&#8225;",
-		"\xcb\x86"     => "&#710;",
-		"\xe2\x80\xb0" => "&#8240;",
-		"\xc5\xa0"     => "&#352;",
-		"\xe2\x80\xb9" => "&#8249;",
-		"\xc5\x92"     => "&#338;",
-		"\xc5\xbd"     => "&#381;",
-		"\xe2\x80\x98" => "&#8216;",
-		"\xe2\x80\x99" => "&#8217;",
-		"\xe2\x80\x9c" => "&#8220;",
-		"\xe2\x80\x9d" => "&#8221;",
-		"\xe2\x80\xa2" => "&#8226;",
-		"\xe2\x80\x93" => "&#8211;",
-		"\xe2\x80\x94" => "&#8212;",
-		"\xcb\x9c"     => "&#732;",
-		"\xe2\x84\xa2" => "&#8482;",
-		"\xc5\xa1"     => "&#353;",
-		"\xe2\x80\xba" => "&#8250;",
-		"\xc5\x93"     => "&#339;",
-		"\xc5\xbe"     => "&#382;",
-		"\xc5\xb8"     => "&#376;"
-	),
-	'translite_cp1252' => array(
-		"\x80" => "euro",
-		"\x82" => ",",
-		"\x83" => "f",
-		"\x84" => ",,",
-		"\x85" => "...",
-		"\x86" => "?",
-		"\x87" => "?",
-		"\x88" => "^",
-		"\x89" => "?",
-		"\x8a" => "S",
-		"\x8b" => "?",
-		"\x8c" => "OE",
-		"\x8e" => "Z",
-		"\x91" => "'",
-		"\x92" => "'",
-		"\x93" => "\"",
-		"\x94" => "\"",
-		"\x95" => "?",
-		"\x96" => "-",
-		"\x97" => "--",
-		"\x98" => "~",
-		"\x99" => "tm",
-		"\x9a" => "s",
-		"\x9b" => ">",
-		"\x9c" => "oe",
-		"\x9e" => "z",
-		"\x9f" => "Y"
-	)
-);
-
-/**
- * wan_htmlspecialchars()
- * 
- * Idem que la fonction htmlspecialchars() native, mais avec le jeu de
- * caractËre ISO-8859-1 par dÈfaut.
- * 
- * @param string $string
- * @param int    $flags
- * @param string $encoding
- * @param bool   $double_encode
- * 
- * @return string
- */
-function wan_htmlspecialchars($string, $flags = null, $encoding = 'ISO-8859-1', $double_encode = true)
-{
-	if( $flags == null ) {
-		$flags = ENT_COMPAT | ENT_HTML401;
-	}
-	
-	return htmlspecialchars($string, $flags, $encoding, $double_encode);
+	return sprintf("%s\xC2\xA0%s", wa_number_format($size), $unit);
 }
 
 /**
- * wan_html_entity_decode()
- * 
- * Idem que la fonction html_entity_decode() native, mais avec le jeu de
- * caractËre ISO-8859-1 par dÈfaut.
- * 
- * @param string $string
- * @param int    $flags
- * @param string $encoding
- * 
- * @return string
+ * V√©rifie si l'utilisateur concern√© est administrateur
+ *
+ * @param array $admin Tableau des donn√©es de l'utilisateur
+ *
+ * @return boolean
  */
-function wan_html_entity_decode($string, $flags = null, $encoding = 'ISO-8859-1')
+function wan_is_admin($admin)
 {
-	if( $flags == null ) {
-		$flags = ENT_COMPAT | ENT_HTML401;
-	}
-	
-	return html_entity_decode($string, $flags, $encoding);
+	return (isset($admin['admin_level']) && $admin['admin_level'] == ADMIN_LEVEL);
 }
 
+/**
+ * Retourne le niveau de d√©bogage, d√©pendant de la valeur de la constante DEBUG_MODE
+ * ainsi que de la cl√© de configuration 'debug_level'.
+ *
+ * @return integer
+ */
+function wan_get_debug_level()
+{
+	global $nl_config;
+
+	$debug_level = DEBUG_MODE;
+	if (isset($nl_config['debug_level']) && $nl_config['debug_level'] > DEBUG_MODE) {
+		$debug_level = min(DEBUG_LEVEL_ALL, $nl_config['debug_level']);
+	}
+
+	return $debug_level;
 }
-?>
+
+/**
+ * Forge l'url vers une entr√©e de la FAQ
+ *
+ * @param string $chapter
+ *
+ * @return string
+ */
+function wan_get_faq_url($chapter)
+{
+	global $nl_config, $lang;
+
+	return sprintf('%s/docs/faq.%s.html#%s',
+		rtrim($nl_config['path'], '/'),
+		$lang['CONTENT_LANG'],
+		$chapter
+	);
+}
+
+/**
+ * Envoi d'email
+ *
+ * @param Email   $email
+ * @param boolean $keepalive Maintient ouvert la connexion au serveur SMTP, le cas √©ch√©ant
+ *
+ * @return boolean
+ */
+function wan_sendmail(Email $email, $keepalive = false)
+{
+	global $nl_config;
+	static $smtp;
+
+	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+
+	if ($nl_config['use_smtp'] && is_null($smtp)) {
+		$server = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+		$options = [
+			'server'   => sprintf($server, $nl_config['smtp_host'], $nl_config['smtp_port']),
+			'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
+			'auth' => [
+				'username'  => $nl_config['smtp_user'],
+				'secretkey' => $nl_config['smtp_pass']
+			],
+			'keepalive' => $keepalive
+		];
+		$smtp = Mailer::setTransport('smtp', $options);
+	}
+
+	Mailer::send($email);
+}
+
+/**
+ * Retourne la liste des tags personnalis√©s (voir mod√®le tags.sample.inc.php)
+ *
+ * @return array
+ */
+function wan_get_tags()
+{
+	static $other_tags = [];
+
+	if (count($other_tags) > 0) {
+		return $other_tags;
+	}
+
+	$tags_file  = WA_ROOTDIR . '/data/tags.inc.php';
+
+	if (is_readable($tags_file)) {
+		include $tags_file;
+	}
+	else {
+		// compatibilit√© Wanewsletter < 3.0-beta1
+		$tags_file  = WA_ROOTDIR . '/includes/tags.inc.php';
+		if (is_readable($tags_file)) {
+			include $tags_file;
+			wanlog("Using ~/includes/tags.inc.php. You should move this file into data/ directory.");
+		}
+	}
+
+	return $other_tags;
+}
+
+/**
+ * Retourne la taille maximale possible des fichiers upload√©s par un formulaire
+ * HTML multipart/form-data, ou 0 si l‚Äôupload est d√©sactiv√© sur le serveur.
+ * La fonction tient compte des options PHP 'upload_max_filesize' et
+ * 'post_max_size' pour le calcul de la taille de fichier autoris√©e.
+ *
+ * @return integer
+ */
+function get_max_filesize()
+{
+	if (!ini_get_flag('file_uploads')) {
+		return 0;
+	}
+
+	$literal2integer = function ($size) {
+		if (preg_match('/^([0-9]+)([KMG])$/i', $size, $m)) {
+			switch (strtoupper($m[2])) {
+				case 'K':
+					$size = ($m[1] * 1024);
+					break;
+				case 'M':
+					$size = ($m[1] * 1024 * 1024);
+					break;
+				case 'G': // Since php 5.1.0
+					$size = ($m[1] * 1024 * 1024 * 1024);
+					break;
+			}
+		}
+		else {
+			$size = intval($size);
+		}
+
+		return $size;
+	};
+
+	if (!($filesize = ini_get('upload_max_filesize'))) {
+        $filesize = '2M'; // 2 M√©ga-Octets
+    }
+
+	$upload_max_size = $literal2integer($filesize);
+
+    if ($postsize = ini_get('post_max_size')) {
+        $postsize = $literal2integer($postsize);
+        if ($postsize < $upload_max_size) {
+            $upload_max_size = $postsize;
+        }
+    }
+
+    return $upload_max_size;
+}
+
+/**
+ * Indique si PHP supporte les connexion SSL/TLS.
+ *
+ * @return boolean
+ */
+function check_ssl_support()
+{
+	$transports = [];
+	if (function_exists('stream_get_transports')) {
+		$transports = stream_get_transports();
+	}
+
+	return (in_array('ssl', $transports) || in_array('tls', $transports));
+}
+
+/**
+ * V√©rifie si on est en ligne de commande.
+ *
+ * @return boolean
+ */
+function check_cli()
+{
+	if (PHP_SAPI != 'cli' && (PHP_SAPI != 'cgi-fcgi' || !empty($_SERVER['SERVER_ADDR']))) {
+		return false;
+	}
+
+	if (PHP_SAPI == 'cgi-fcgi' && !defined('STDIN')) {
+		define('STDIN',  fopen('php://stdin',  'r'));
+		define('STDOUT', fopen('php://stdout', 'w'));
+		define('STDERR', fopen('php://stderr', 'w'));
+	}
+
+	return true;
+}
+
+/**
+ * Indique si on se trouve dans l‚Äôadministration.
+ *
+ * @return boolean
+ */
+function check_in_admin()
+{
+	return defined(__NAMESPACE__.'\\IN_ADMIN');
+}
+
+/**
+ * Indique si le th√®me Wanewsletter est utilis√© pour afficher cette page.
+ *
+ * @return boolean
+ */
+function check_theme_is_used()
+{
+	return (!check_cli() && (check_in_admin() ||
+		defined(__NAMESPACE__.'\\IN_INSTALL') ||
+		defined(__NAMESPACE__.'\\IN_PROFILCP')
+	));
+}
+
+/**
+ * @param string $pseudo
+ *
+ * @return boolean
+ */
+function validate_pseudo($pseudo)
+{
+	return (mb_strlen($pseudo) >= 2 && mb_strlen($pseudo) <= 30);
+}
+
+/**
+ * @param string $passwd
+ *
+ * @return boolean
+ */
+function validate_pass($passwd)
+{
+	return (bool) preg_match('/^[\x20-\x7E]{6,1024}$/', $passwd);
+}
+
+/**
+ * @param string $language
+ *
+ * @return boolean
+ */
+function validate_lang($language)
+{
+	return (preg_match('/^[\w_]+$/', $language) &&
+		file_exists(WA_ROOTDIR . '/languages/' . $language . '/main.php')
+	);
+}
+
+/**
+ * Envoi d‚Äôun fichier au client.
+ * Sert les en-t√™tes n√©cessaires au t√©l√©chargement.
+ *
+ * @param string $filename
+ * @param string $mime_type
+ * @param mixed  $data      Soit directement les donn√©es √† envoyer, soit une
+ *                          ressource de flux.
+ */
+function sendfile($filename, $mime_type, $data)
+{
+	if (is_resource($data)) {
+		$meta = stream_get_meta_data($data);
+		$size = filesize($meta['uri']);
+	}
+	else {
+		$size = strlen($data);
+	}
+
+	//
+	// D√©sactivation de la compression de sortie de php au cas o√π
+	// et envoi des en-t√™tes appropri√©s au client.
+	//
+	@ini_set('zlib.output_compression', 'Off');
+	header(sprintf('Content-Length: %d', $size));
+	header(sprintf('Content-Disposition: attachment; filename="%s"', $filename));
+	header('Content-Transfer-Encoding: binary');
+	header(sprintf('Content-Type: %s; name="%s"', $mime_type, $filename));
+
+	// Repris de phpMyAdmin. √âvite la double compression (par exemple avec apache + mod_deflate)
+	if (strpos($mime_type, 'gzip') !== false) {
+		header('Content-Encoding: gzip');
+	}
+
+	if (is_resource($data)) {
+		while (!feof($data)) {
+			echo fgets($data, 1048576);
+		}
+
+		fclose($data);
+	}
+	else {
+		echo $data;
+	}
+
+	exit;
+}

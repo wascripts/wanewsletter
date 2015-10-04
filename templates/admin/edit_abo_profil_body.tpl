@@ -3,13 +3,13 @@
 function checkForm_editAboProfil()
 {
 	var inputEmail = document.forms[0].elements['email'];
-	
-	if( inputEmail.defaultValue.toLowerCase() != inputEmail.value.toLowerCase() ) {
-		if( !window.confirm('{L_WARNING_EMAIL_DIFF}') ) {
+
+	if (inputEmail.defaultValue.toLowerCase() != inputEmail.value.toLowerCase()) {
+		if (!window.confirm('{L_WARNING_EMAIL_DIFF}')) {
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 //-->
@@ -17,7 +17,9 @@ function checkForm_editAboProfil()
 
 <p id="explain">{L_EXPLAIN}</p>
 
-<form class="compact" method="post" action="./view.php?mode=abonnes" onsubmit="return checkForm_editAboProfil();">
+<form class="compact" method="post" action="./view.php?mode=abonnes&amp;action=edit&amp;id={S_ABO_ID}"
+	onsubmit="return checkForm_editAboProfil();"
+>
 <ul class="links">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
 	<li><a href="./view.php?mode=abonnes&amp;action=view&amp;id={S_ABO_ID}">{L_VIEW_ACCOUNT}</a></li>
@@ -26,7 +28,7 @@ function checkForm_editAboProfil()
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="pseudo">{L_PSEUDO}&nbsp;:</label></td>
@@ -36,10 +38,19 @@ function checkForm_editAboProfil()
 			<td><label for="email">{L_EMAIL}&nbsp;:</label></td>
 			<td><input type="text" id="email" name="email" value="{S_ABO_EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
+		<tr>
+			<td><label>{L_STATUS}&nbsp;:</label></td>
+			<td>
+				<input type="radio" id="status_active" name="status" value="1" {S_STATUS_ACTIVE}/>
+				<label for="status_active" class="notice">{L_ACTIVE}</label>
+				<input type="radio" id="status_inactive" name="status" value="0" {S_STATUS_INACTIVE}/>
+				<label for="status_inactive" class="notice">{L_INACTIVE}</label>
+			</td>
+		</tr>
 	</table>
-	
+
 	<div class="explain">{L_LISTE_TO_REGISTER}</div>
-	
+
 	<table class="dataset">
 		<!-- BEGIN listerow -->
 		<tr>
@@ -48,10 +59,10 @@ function checkForm_editAboProfil()
 		</tr>
 		<!-- END listerow -->
 	</table>
-	
+
 	<!-- BEGIN tags -->
 	<h2>{tags.L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<!-- BEGIN row -->
 		<tr>
@@ -61,7 +72,7 @@ function checkForm_editAboProfil()
 		<!-- END row -->
 	</table>
 	<!-- END tags -->
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>

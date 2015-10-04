@@ -1,9 +1,9 @@
 <form class="compact" method="post" action="./tools.php?mode=backup">
 <div class="block">
 	<h2>{L_TITLE_BACKUP}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_BACKUP}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label>{L_BACKUP_TYPE}&nbsp;:</label></td>
@@ -15,7 +15,7 @@
 				&nbsp; <input type="radio" id="backup_type_data" name="backup_type" value="2" />
 				<label for="backup_type_data" class="notice">{L_DATA}</label>
 			</td>
-		</tr>				
+		</tr>
 		<tr>
 			<td><label>{L_DROP_OPTION}&nbsp;:</label></td>
 			<td>
@@ -43,22 +43,22 @@
 		<!-- BEGIN compress_option -->
 		<tr>
 			<td><label>{compress_option.L_COMPRESS}&nbsp;:</label></td>
-			<td> 
-				<input type="radio" id="compress_none" name="compress" value="none" checked="checked" /> <label for="compress_none" class="notice">{L_NO}</label> &nbsp; 
+			<td>
+				<input type="radio" id="compress_none" name="compress" value="none" checked="checked" /> <label for="compress_none" class="notice">{L_NO}</label> &nbsp;
 				<!-- BEGIN zip_compress -->
-				<input type="radio" id="compress_zip" name="compress" value="zip" /> <label for="compress_zip" class="notice">Zip</label> &nbsp; 
+				<input type="radio" id="compress_zip" name="compress" value="zip" /> <label for="compress_zip" class="notice">Zip</label> &nbsp;
 				<!-- END zip_compress -->
 				<!-- BEGIN gzip_compress -->
-				<input type="radio" id="compress_gzip" name="compress" value="gzip" /> <label for="compress_gzip" class="notice">Gzip</label> &nbsp; 
+				<input type="radio" id="compress_gzip" name="compress" value="gzip" /> <label for="compress_gzip" class="notice">Gzip</label> &nbsp;
 				<!-- END gzip_compress -->
 				<!-- BEGIN bz2_compress -->
-				<input type="radio" id="compress_bz2" name="compress" value="bz2" /> <label for="compress_bz2" class="notice">Bz2</label> 
+				<input type="radio" id="compress_bz2" name="compress" value="bz2" /> <label for="compress_bz2" class="notice">Bz2</label>
 				<!-- END bz2_compress -->
 			</td>
 		</tr>
 		<!-- END compress_option -->
 	</table>
-	
+
 	<div class="bottom"> {S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="reset">{L_RESET_BUTTON}</button>

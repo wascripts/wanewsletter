@@ -1,6 +1,6 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<form id="abo" method="post" action="{U_FORM}">
+<form method="get" action="view.php">
 <div class="block">
 	<table class="dataset">
 		<tr>
@@ -9,8 +9,11 @@
 				<span class="notice">{L_SEARCH_NOTE}</span>
 			</td>
 			<td>
-				<input type="text" id="keyword" name="keyword" value="{KEYWORD}" size="35" maxlength="60" autocomplete="off" />
-				<button type="submit" name="search" class="primary">{L_SEARCH_BUTTON}</button>
+				<input type="hidden" name="mode" value="abonnes" />
+				<input type="text" id="keyword" name="keyword" value="{KEYWORD}"
+					size="35" maxlength="60" autocomplete="off"
+				/>
+				<button type="submit" class="primary">{L_SEARCH_BUTTON}</button>
 			</td>
 		</tr>
 		<tr>
@@ -18,8 +21,10 @@
 		</tr>
 	</table>
 </div>
+</form>
 
 <!-- BEGIN delete_option -->
+<form method="post" action="view.php?mode=abonnes">
 <div class="block">
 	<table class="dataset">
 		<tr>
@@ -34,12 +39,15 @@
 		</tr>
 	</table>
 </div>
+</form>
 <!-- END delete_option -->
 
+<form method="get" action="view.php">
 <div id="aside-top" class="aside">
 	<div>{PAGEOF} {NUM_SUBSCRIBERS}</div>
-	
-	<div>{S_HIDDEN_FIELDS}
+
+	<div>
+		<input type="hidden" name="mode" value="abonnes" />
 		<span>{L_CLASSEMENT}&nbsp;:</span>
 		<select name="type">
 			<option value="abo_email"{SELECTED_TYPE_EMAIL}>{L_BY_EMAIL}</option>
@@ -48,13 +56,15 @@
 		</select>&nbsp;&nbsp;<select name="order">
 			<option value="ASC"{SELECTED_ORDER_ASC}>{L_BY_ASC}</option>
 			<option value="DESC"{SELECTED_ORDER_DESC}>{L_BY_DESC}</option>
-		</select>&nbsp;&nbsp;<button type="submit" name="tri">{L_CLASSER_BUTTON}</button>
+		</select>&nbsp;&nbsp;<button type="submit">{L_CLASSER_BUTTON}</button>
 	</div>
 </div>
+</form>
 
+<form id="abo" method="post" action="view.php?mode=abonnes{PAGING}">
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="listing">
 		<tr>
 			<th>{L_EMAIL}</th>
@@ -88,7 +98,7 @@
 
 <div id="aside-bottom" class="aside">
 	<div>{PAGINATION}</div>
-	
+
 	<!-- BEGIN delete_option -->
 	<div><button type="submit" name="delete">{delete_option.L_DELETE_ABO_BUTTON}</button></div>
 	<!-- END delete_option -->

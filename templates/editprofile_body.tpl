@@ -1,11 +1,11 @@
 <p id="explain">{L_EXPLAIN}</p>
 
-<form method="post" action="./profil_cp.php">
+<form method="post" action="./profil_cp.php?mode=editprofile">
 <div class="block">
 	<h2>{TITLE}</h2>
-	
+
 	<div class="explain">{L_EXPLAIN_EMAIL}</div>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label>{L_EMAIL}&nbsp;:</label></td>
@@ -27,23 +27,21 @@
 			<td><label for="language">{L_LANG}&nbsp;:</label></td>
 			<td>{LANG_BOX}</td>
 		</tr>
-		<!-- BEGIN password -->
 		<tr>
-			<td><label for="current_pass">{password.L_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="current_pass" name="current_pass" size="30" /></td>
-		</tr>
-		<!-- END password -->
-		<tr>
-			<td><label for="new_pass">{L_NEW_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="new_pass" name="new_pass" size="30" autocomplete="off" /></td>
+			<td><label for="current_passwd">{L_PASSWD}&nbsp;:</label></td>
+			<td><input type="password" id="current_passwd" name="current_passwd" size="30" autocomplete="off" /></td>
 		</tr>
 		<tr>
-			<td><label for="confirm_pass">{L_CONFIRM_PASS}&nbsp;:</label></td>
-			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" autocomplete="off" /></td>
+			<td><label for="new_passwd">{L_NEW_PASSWD}&nbsp;:</label></td>
+			<td><input type="password" id="new_passwd" name="new_passwd" size="30" autocomplete="off" /></td>
+		</tr>
+		<tr>
+			<td><label for="confirm_pass">{L_CONFIRM_PASSWD}&nbsp;:</label></td>
+			<td><input type="password" id="confirm_passwd" name="confirm_passwd" size="30" autocomplete="off" /></td>
 		</tr>
 	</table>
-	
-	<div class="bottom"> <input type="hidden" name="mode" value="editprofile" />
+
+	<div class="bottom">
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>

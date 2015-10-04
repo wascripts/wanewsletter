@@ -1,0 +1,14 @@
+Hi,
+
+You are receiving this email because you (or someone using your email address) have made a request to unsubscribe from the "{LISTE}" distribution list of the {SITENAME} site.
+
+To unsubscribe, simply click on the following link :
+{LINK}
+
+See you soon on {URLSITE}.
+
+~~~~~~~~~~
+{SIG}
+
+~~~~~~~~~~~~~~~~~~~~
+Please ignore this message if you do not wish to unsubscribe.

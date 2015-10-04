@@ -3,13 +3,15 @@
 <div class="compact">
 <ul class="links">
 	<li><a href="{U_GOTO_LIST}">{L_GOTO_LIST}</a></li>
-	<li><a href="./view.php?mode=abonnes&amp;action=edit&amp;id={S_ABO_ID}">{L_EDIT_ACCOUNT}</a></li>
-	<li><a href="./view.php?mode=abonnes&amp;action=delete&amp;id={S_ABO_ID}">{L_DELETE_ACCOUNT}</a></li>
+	<!-- BEGIN actions -->
+	<li><a href="./view.php?mode=abonnes&amp;action=edit&amp;id={actions.S_ABO_ID}">{actions.L_EDIT_ACCOUNT}</a></li>
+	<li><a href="./view.php?mode=abonnes&amp;action=delete&amp;id={actions.S_ABO_ID}">{actions.L_DELETE_ACCOUNT}</a></li>
+	<!-- END actions -->
 </ul>
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td>{L_PSEUDO}&nbsp;:</td>
@@ -23,10 +25,14 @@
 			<td>{L_REGISTER_DATE}&nbsp;:</td>
 			<td>{S_REGISTER_DATE}</td>
 		</tr>
+		<tr>
+			<td>{L_STATUS}&nbsp;:</td>
+			<td>{S_STATUS}</td>
+		</tr>
 	</table>
-	
+
 	<div class="explain">{L_LISTE_TO_REGISTER}&nbsp;:</div>
-	
+
 	<table class="listing">
 		<!-- BEGIN listerow -->
 		<tr>
@@ -36,10 +42,10 @@
 		</tr>
 		<!-- END listerow -->
 	</table>
-	
+
 	<!-- BEGIN tags -->
 	<h2>{tags.L_CAPTION}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<th>{tags.L_NAME}</th>

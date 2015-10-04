@@ -3,262 +3,145 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 AurÈlien Maille
+ * @copyright 2002-2015 Aur√©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
+namespace Wanewsletter;
+
 //
 // Version correspondant au code source en place sur le serveur.
-// Remplace la constante obsolËte WA_VERSION, jadis dÈfinie dans le fichier de configuration.
+// Remplace la constante obsol√®te WA_VERSION, jadis d√©finie dans le fichier de configuration.
 //
-define('WANEWSLETTER_VERSION', '2.4-beta2');
+const WANEWSLETTER_VERSION = '3.0-beta1';
 
 //
 // identifiant de version des tables du script.
-// Doit correspondre ‡ l'entrÈe 'db_version' dans la configuration, sinon,
-// le script invite l'utilisateur ‡ lancer la procÈdure de mise ‡ jour des tables
+// Doit correspondre √† l'entr√©e 'db_version' dans la configuration, sinon,
+// le script invite l'utilisateur √† lancer la proc√©dure de mise √† jour des tables
 //
-define('WANEWSLETTER_DB_VERSION', 14);
+const WANEWSLETTER_DB_VERSION = 24;
 
 //
-// Modes de dÈbogage du script
+// Modes de d√©bogage du script
+// Sauf en mode silencieux, le script affiche aussi des informations
+// compl√©mentaires en bas de page (dur√©e d'ex√©cution, nbre de requ√®tes SQL,
+// m√©moire utilis√©e, ...)
 //
-// Le script annonce les erreurs critiques, sans donner de dÈtails
-define('DEBUG_LEVEL_QUIET',  1);
-// Le script affiche les erreurs PHP et SQL en donnant des dÈtails
-define('DEBUG_LEVEL_NORMAL', 2);
+// Le script annonce les erreurs critiques, sans donner de d√©tails
+const DEBUG_LEVEL_QUIET  = 1;
+// Le script affiche les erreurs PHP et SQL en donnant des d√©tails
+const DEBUG_LEVEL_NORMAL = 2;
 // Le script affiche aussi les erreurs non inclues dans le niveau d'erreurs PHP
-// configurÈ par error_reporting() ou masquÈes avec l'opÈrateur @
-define('DEBUG_LEVEL_ALL',    3);
+// configur√© par error_reporting() ou masqu√©es avec l'op√©rateur @
+const DEBUG_LEVEL_ALL    = 3;
 
 //
-// Configure le niveau de dÈbogage souhaitÈ
+// Configure le niveau de d√©bogage souhait√©
 //
-define('DEBUG_MODE', DEBUG_LEVEL_NORMAL);
+const DEBUG_MODE = DEBUG_LEVEL_NORMAL;
 
 //
-// Pour visualiser le temps d'exÈcution du script et le nombre de requËtes effectuÈes
+// Active/D√©sactive l'affichage des messages d'erreur en pied de page.
+// Si false, les erreurs sont affich√©es d√®s qu'elles sont trait√©es.
 //
-define('DEV_INFOS', TRUE);
-//define('DEV_INFOS', FALSE);
+const DISPLAY_ERRORS_IN_LOG = true;
 
 //
-// Active/DÈsactive l'affichage des messages d'erreur en pied de page.
-// Si false, les erreurs sont affichÈes dËs qu'elles sont traitÈes.
+// Active/D√©sactive l‚Äôenregistrement des erreurs dans un fichier de log.
 //
-define('DISPLAY_ERRORS_IN_LOG', true);
+// Le fichier de log sp√©cifi√© dans la configuration de PHP est utilis√© par
+// d√©faut par la fonction error_log().
+// Pour utiliser un autre fichier de log, indiquez son emplacement dans la
+// constante suivante (par exemple 'debug.log').
+// Si le chemin est relatif, il sera pr√©fix√© par la valeur de la constante
+// WA_LOGSDIR (voir load_config_file() dans includes/functions.php).
+//
+// Note : Toutes les erreurs sont stock√©es, sans tenir compte de DEBUG_MODE.
+// De plus, la taille du fichier de log n‚Äôest pas limit√©e !
+//
+const DEBUG_LOG_ENABLED = false;
+const DEBUG_LOG_FILE    = 'debug.log';
 
 //
-// Active/DÈsactive le passage automatique ‡ l'UTF-8 au moment de l'envoi en prÈsence de 
-// caractËres invalides provenant de Windows-1252 dans les newsletters.
+// Signature du script pour divers cas de figure (ent√™te X-Mailer dans les emails
+// envoy√©s, ent√™te User-Agent lors des requ√®tes HTTP, etc)
 //
-// Si cette constante est placÈe ‡ TRUE, les caractËres en cause subiront une transformation
-// vers un caractËre simple ou composÈ graphiquement proche (voir la fonction purge_latin1()
-// dans le fichier includes/functions.php).
-//
-define('TRANSLITE_INVALID_CHARS', FALSE);
+const USER_AGENT_SIG  = 'Wanewsletter/%s';// %s est remplac√© par la valeur de WANEWSLETTER_VERSION
+const X_MAILER_HEADER = USER_AGENT_SIG;
+
+// Format par d√©faut des dates
+const DEFAULT_DATE_FORMAT = 'd F Y H:i';
+
+##################################################################
+## Il est recommand√© de ne rien modifier au-del√† de cette ligne ##
+##################################################################
 
 //
-// Prise en compte de l'authentification HTTP pour la connexion automatique
+// Formats d'emails
 //
-define('ENABLE_HTTP_AUTHENTICATION', TRUE);
-
-
-//
-// Il est recommandÈ de ne rien modifier au-del‡ de cette ligne
-//
+const FORMAT_TEXTE    = 1;
+const FORMAT_HTML     = 2;
+const FORMAT_MULTIPLE = 3;
 
 //
-// Formats d'emails 
+// Statut des newsletter
 //
-define('FORMAT_TEXTE',    1);
-define('FORMAT_HTML',     2);
-define('FORMAT_MULTIPLE', 3);
+const STATUS_WRITING = 0;
+const STATUS_STANDBY = 1;
+const STATUS_SENT    = 2;
+const STATUS_MODEL   = 3;
 
 //
-// Statut des newsletter 
+// Statut des abonn√©s
 //
-define('STATUS_WRITING', 0);
-define('STATUS_STANDBY', 1);
-define('STATUS_SENT',    2);
-define('STATUS_MODEL',   3);
+const ABO_ACTIF   = 1;
+const ABO_INACTIF = 0;
+
+const SUBSCRIBE_CONFIRMED     = 1;
+const SUBSCRIBE_NOT_CONFIRMED = 0;
 
 //
-// Statut des abonnÈs 
+// Niveau des utilisateurs, ne pas modifier !!
 //
-define('ABO_ACTIF',   1);
-define('ABO_INACTIF', 0);
-
-define('SUBSCRIBE_CONFIRMED',     1);
-define('SUBSCRIBE_NOT_CONFIRMED', 0);
+const ADMIN_LEVEL = 2;
+const USER_LEVEL  = 1;
 
 //
-// Niveau des utilisateurs, ne pas modifier !! 
+// divers
 //
-define('ADMIN', 2);
-define('USER',  1);
+const SUBSCRIBE_NOTIFY_YES   = 1;
+const SUBSCRIBE_NOTIFY_NO    = 0;
+const UNSUBSCRIBE_NOTIFY_YES = 1;
+const UNSUBSCRIBE_NOTIFY_NO  = 0;
+const HTML_EDITOR_YES        = 1;
+const HTML_EDITOR_NO         = 0;
+
+const MAX_IMPORT = 10000;
+
+const ENGINE_BCC  = 1;
+const ENGINE_UNIQ = 2;
+
+const CONFIRM_ALWAYS = 2;
+const CONFIRM_ONCE   = 1;
+const CONFIRM_NONE   = 0;
 
 //
-// divers 
+// Utilis√©es dans le cadre de la classe de v√©rification de mise √† jour
 //
-define('SUBSCRIBE_NOTIFY_YES', 1);
-define('SUBSCRIBE_NOTIFY_NO',  0);
-define('UNSUBSCRIBE_NOTIFY_YES', 1);
-define('UNSUBSCRIBE_NOTIFY_NO',  0);
-
-define('MAX_IMPORT', 5000);
-
-define('ENGINE_BCC',  1);
-define('ENGINE_UNIQ', 2);
-
-define('CONFIRM_ALWAYS', 2);
-define('CONFIRM_ONCE',   1);
-define('CONFIRM_NONE',   0);
+const DOWNLOAD_PAGE      = 'http://phpcodeur.net/wascripts/wanewsletter/telecharger';
+// Le serveur renvoie le tag de la derni√®re version stable si WANEWSLETTER_VERSION
+// contient un num√©ro en x.y.z, ou le tag de la derni√®re version non stable, si
+// WANEWSLETTER_VERSION contient -dev, -alpha, -beta ou -rc.
+// Vous pouvez forcer l‚Äôune ou l‚Äôautre r√©ponse en ajoutant le param√®tre d‚Äôurl
+// 'channel' avec la valeur 'stable' ou 'unstable' dans l‚Äôurl suivante.
+const CHECK_UPDATE_URL   = 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version';
+const CHECK_UPDATE_CACHE = 'wa-check-update.cache';
+const CHECK_UPDATE_CACHE_TTL = 3600;
 
 //
-// Si nous avons un accÈs restreint ‡ cause de open_basedir, certains fichiers uploadÈs 
-// devront Ítre dÈplacÈs vers le dossier des fichiers temporaires du script pour Ítre 
-// accessible en lecture
+// S√©curit√© des connexions (SMTP, POP, ...)
 //
-$open_basedir = config_value('open_basedir');
-if( !empty($open_basedir) )
-{
-	define('OPEN_BASEDIR_RESTRICTION', TRUE);
-}
-else
-{
-	define('OPEN_BASEDIR_RESTRICTION', FALSE);
-}
-
-//
-// On vÈrifie si l'upload est autorisÈ sur le serveur
-//
-if( config_status('file_uploads') )
-{
-	function get_integer_byte_value($size)
-	{
-		if( preg_match('/^([0-9]+)([KMG])$/i', $size, $match) )
-		{
-			switch( strtoupper($match[2]) )
-			{
-				case 'K':
-					$size = ($match[1] * 1024);
-					break;
-				
-				case 'M':
-					$size = ($match[1] * 1024 * 1024);
-					break;
-				
-				case 'G': // Since php 5.1.0
-					$size = ($match[1] * 1024 * 1024 * 1024);
-					break;
-			}
-		}
-		else
-		{
-			$size = intval($size);
-		}
-		
-		return $size;
-	}
-	
-	if( !($filesize = config_value('upload_max_filesize')) )
-	{
-        $filesize = '2M'; // 2 MÈga-Octets
-    }
-	$upload_max_size = get_integer_byte_value($filesize);
-	
-    if( $postsize = config_value('post_max_size') )
-	{
-        $postsize = get_integer_byte_value($postsize);
-        if( $postsize < $upload_max_size )
-		{
-            $upload_max_size = $postsize;
-        }
-    }
-	
-	define('FILE_UPLOADS_ON', TRUE);
-	define('MAX_FILE_SIZE',   $upload_max_size);
-}
-else
-{
-	define('FILE_UPLOADS_ON', FALSE);
-	define('MAX_FILE_SIZE',   0);
-}
-
-//
-// Infos sur l'utilisateur 
-//
-$user_agent = server_info('HTTP_USER_AGENT');
-
-if( $user_agent != '' )
-{
-	if( stristr($user_agent, 'win') )
-	{
-		define('WA_USER_OS', 'win');
-	}
-	else if( stristr($user_agent, 'mac') )
-	{
-		define('WA_USER_OS', 'mac');
-	}
-	else if( stristr($user_agent, 'linux') )
-	{
-		define('WA_USER_OS', 'linux');
-	}
-	else
-	{
-		define('WA_USER_OS', 'other');
-	}
-	
-	if( stristr($user_agent, 'opera') )
-	{
-		define('WA_USER_BROWSER', 'opera');
-	}
-	else if( stristr($user_agent, 'msie') )
-	{
-		define('WA_USER_BROWSER', 'msie');
-	}
-	else if( stristr($user_agent, 'konqueror') )
-	{
-		define('WA_USER_BROWSER', 'konqueror');
-	}
-	else if( stristr($user_agent, 'mozilla') )
-	{
-		define('WA_USER_BROWSER', 'mozilla');
-	}
-	else
-	{
-		define('WA_USER_BROWSER', 'other');
-	}
-}
-else
-{
-	define('WA_USER_OS',      'other');
-	define('WA_USER_BROWSER', 'other');
-}
-
-//
-// Signature du script pour divers cas de figure (entÍte X-Mailer dans les emails
-// envoyÈs, entÍte User-Agent lors des requËtes HTTP, etc)
-//
-define('WA_SIGNATURE', sprintf('Wanewsletter/%s', WANEWSLETTER_VERSION));
-define('WA_X_MAILER', WA_SIGNATURE);
-
-//
-// UtilisÈes dans le cadre de la classe de vÈrification de mise ‡ jour
-//
-define('WA_DOWNLOAD_PAGE', 'http://phpcodeur.net/wascripts/wanewsletter/telecharger');
-define('WA_CHECK_UPDATE_URL', 'http://phpcodeur.net/wascripts/wanewsletter/releases/latest/version');
-define('WA_CHECK_UPDATE_CACHE', 'wa-check-update.cache');
-define('WA_CHECK_UPDATE_CACHE_TTL', 3600);
-
-//
-// DÈclaration des dossiers et fichiers spÈciaux utilisÈs par le script
-//
-define('WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
-define('WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
-define('WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
-
-define('WAMAILER_DIR', WA_ROOTDIR . '/includes/wamailer');
-define('WA_LOCKFILE',  WA_TMPDIR . '/liste-%d.lock');
-
+const SECURITY_NONE     = 0;
+const SECURITY_STARTTLS = 1;
+const SECURITY_FULL_TLS = 2;

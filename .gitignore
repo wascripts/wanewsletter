@@ -1,3 +1,2 @@
-/includes/config.inc.php
-/includes/sql/wanewsletter.sqlite
-/includes/sql/wanewsletter.sqlite3
+/data/config.inc.php
+/vendor

@@ -2,7 +2,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2015 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -66,7 +66,7 @@ pre {
 }
 
 /*
-	Couleurs du code php colorisé
+	Couleurs du code php colorisÃ©
 */
 span.hl-bg      { background-color: inherit; color: white; }
 span.hl-comment { background-color: inherit; color: #F90; }

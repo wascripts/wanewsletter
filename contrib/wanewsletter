@@ -4,117 +4,107 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2015 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
- * 
+ *
  * @status experimental
- * 
- * Ce module est marqué comme expérimental car son intégration dans Wanewsletter
- * n'est pas considérée comme étant satisfaisante, cependant, tous les tests
- * effectués ont été satisfaisant et la partie permettant les envois d'emails
- * notamment est considérée comme étant utilisable en "production".
+ *
+ * Ce module est marquÃ© comme expÃ©rimental car son intÃ©gration dans Wanewsletter
+ * n'est pas considÃ©rÃ©e comme Ã©tant satisfaisante, cependant, tous les tests
+ * effectuÃ©s ont Ã©tÃ© satisfaisant et la partie permettant les envois d'emails
+ * notamment est considÃ©rÃ©e comme Ã©tant utilisable en "production".
  */
 
-define('IN_NEWSLETTER',  true);
-define('IN_COMMANDLINE', true);
-define('ANSI_TERMINAL',  true);
-define('WA_ROOTDIR',     dirname(dirname(__FILE__)));
+namespace Wanewsletter;
 
-//
-// PHP CLI ne change pas le répertoire courant pour celui du script
-//
-if( php_sapi_name() != 'cli' )
-{
-	//
-	// PHP en mode CGI ne rend pas disponible directement les variables
-	// $argv et $argc si register_globals est sur Off
-	//
-	$argv = $_SERVER['argv'];
-	$argc = $_SERVER['argc'];
-}
+use Patchwork\Utf8 as u;
 
-if( preg_match('/\.UTF-?8/i', getenv('LANG')) ) // Au cas où le terminal utilise l'encodage utf-8
-{
-	function convert_output($data)
-	{
-		return wan_utf8_encode($data);
-	}
-	
-	ob_start('convert_output', 1);
-}
+define('WA_ROOTDIR', dirname(__DIR__));
 
 require WA_ROOTDIR . '/includes/common.inc.php';
+
+// Le script nâ€™est utilisable quâ€™en ligne de commande.
+if (!check_cli()) {
+	echo "This script must be called only in commande ligne.";
+	exit;
+}
+else if (!isset($argc)) {
+	echo "Please enable PHP option register_argc_argv.";
+	exit(1);
+}
+
+//
+// Initialisation de la connexion Ã  la base de donnÃ©es et rÃ©cupÃ©ration de la configuration
+//
+$db = WaDatabase($dsn);
+$nl_config = wa_get_config();
 
 load_settings();
 
 $argv[0]  = basename($argv[0]);
 $version  = WANEWSLETTER_VERSION;
-$emails   = array();
+$emails   = [];
 $format   = FORMAT_TEXTE;
 $liste_id = null;
 $message  = null;
+
 $process_send = $process_subscribe = $import_mail = false;
-$send_packet  = 400;
+$send_packet  = 30;
 $send_delay   = 10;
 
-if( $argc == 1 ) // Aucun argument fourni
-{
+if ($argc == 1) {
 	echo "Usage: $argv[0] [OPTION]...\n";
-	echo "Pour en savoir davantage, faites: « $argv[0] --help ».\n";
+	echo "Pour en savoir davantage, faites: Â« $argv[0] --help Â».\n";
 	exit(0);
 }
 
 //
-// En mode un email par abonné, on envoit tous les emails par défaut (avec une pause
-// à intervalle régulier (voir plus haut)).
+// En mode un email par abonnÃ©, on envoit tous les emails par dÃ©faut (avec une pause
+// Ã  intervalle rÃ©gulier (voir plus haut)).
 //
-if( $nl_config['engine_send'] == ENGINE_UNIQ )
-{
+if ($nl_config['engine_send'] == ENGINE_UNIQ) {
 	$nl_config['sending_limit'] = 0;
 }
 
-for( $i = 1; $i < $argc; $i++ )
-{
-	//
-	// Version du script et de PHP et SAPI utilisé
-	//
-	if( $argv[$i] == '--version' || $argv[$i] == '-v' )
-	{
-		echo "Wanewsletter $version with PHP " . phpversion() . " (" . php_sapi_name() . ")\n";
+$shortopts = 'p:l:k:d:vh';
+$longopts  = ['process-send:','limit:','packet:', 'delay:',
+	'process-subscribe:', 'import-mail:', 'format:', 'help', 'version', 'license'
+];
+$opts = getopt($shortopts, $longopts);
+
+foreach ($opts as $name => $value) {
+	if ($name == 'version' || $name == 'v') {
+		echo "Wanewsletter $version with PHP " . PHP_VERSION . " (" . PHP_SAPI . ")\n";
 		exit(0);
 	}
-	
 	//
 	// Licence de Wanewsletter
 	//
-	else if( $argv[$i] == '--license' )
-	{
+	else if ($name == 'license') {
 		echo "Wanewsletter $version\n";
-		echo "Copyright (c) 2002-2014 Aurélien Maille\n";
+		echo "Copyright (c) 2002-2015 AurÃ©lien Maille\n";
 		echo "\n";
-		
-		if( preg_match('/^fr[_-]/', getenv('LANG')) )
-		{
+
+		if (preg_match('/^fr[_-]/', getenv('LANG'))) {
 			echo <<<WANSHELL
 Wanewsletter est un logiciel libre; vous pouvez le redistribuer ou le
-modifier selon les termes de la License Publique Générale de GNU, publiée
+modifier selon les termes de la License Publique GÃ©nÃ©rale de GNU, publiÃ©e
 par la Free Software Foundation; soit la version 2 de la Licence ou,
-soit (selon vos préférences) toute version ultérieure.
+soit (selon vos prÃ©fÃ©rences) toute version ultÃ©rieure.
 
-Wanewsletter est distribué dans l'espoir qu'il soit utile,
-mais AUCUNE garantie n'est donnée tant pour des raisons COMMERCIALES que
-pour RÉPONDRE À UN BESOIN PARTICULIER.  Consultez la Licence
-Publique Générale de GNU pour plus de détails.
+Wanewsletter est distribuÃ© dans l'espoir qu'il soit utile,
+mais AUCUNE garantie n'est donnÃ©e tant pour des raisons COMMERCIALES que
+pour RÃ‰PONDRE Ã€ UN BESOIN PARTICULIER.  Consultez la Licence
+Publique GÃ©nÃ©rale de GNU pour plus de dÃ©tails.
 
-Vous devriez avoir reçu copie de la Licence Publique Générale de GNU
-avec Wanewsletter; sinon, écrivez à la Free Software Foundation, Inc.,
+Vous devriez avoir reÃ§u copie de la Licence Publique GÃ©nÃ©rale de GNU
+avec Wanewsletter; sinon, Ã©crivez Ã  la Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
 WANSHELL;
 		}
-		else
-		{
+		else {
 			echo <<<WANSHELL
 Wanewsletter is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -133,42 +123,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 WANSHELL;
 		}
-		
+
 		exit(0);
 	}
-	
+
 	//
 	// Aide succinte d'utilisation en ligne de commande
 	//
-	else if( $argv[$i] == '--help' || $argv[$i] == '-h' )
-	{
+	else if ($name == 'help' || $name == 'h') {
 		echo <<<WANSHELL
 Usage: $argv[0] [options]
 
 Envois:
   -pNUM, --process-send=NUM  Lance un envoi avec NUM un id de liste
-  -lNUM, --limit=NUM   Limite à NUM le nombre d'emails envoyés
-  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par défaut, 400)
-  -dNUM, --delay=NUM   Durée en secondes entre les flots d'envois
-                       (par défaut, 10).
+  -lNUM, --limit=NUM   Limite Ã  NUM le nombre d'emails envoyÃ©s
+  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par dÃ©faut, 400)
+  -dNUM, --delay=NUM   DurÃ©e en secondes entre les flots d'envois
+                       (par dÃ©faut, 10).
 
 Divers:
   --process-subscribe=NUM  Validation des inscriptions par email
   --import-mail=NUM        Importation d'emails avec NUM un id de liste
   --format=FORMAT          FORMAT peut prendre la valeur 'plain' ou 'html'
-                           'text' et 'texte' sont acceptés comme
-                           alternative à 'plain'.
+                           'text' et 'texte' sont acceptÃ©s comme
+                           alternative Ã  'plain'.
 
 Informations:
-  -h, --help     Affiche la présente aide
+  -h, --help     Affiche la prÃ©sente aide
   -v, --version  Affiche les informations de version
       --license  Affiche les informations de licence
 
 Exemple d'importation d'emails :
   $argv[0] --import-mail=1 -- address1@domain.tld address2@domain.tld
-  
-La liste d'adresses peut également être fournie en entrée, les adresses
-dans le fichier étant séparées par des caractères blancs (espace, tabulation
+
+La liste d'adresses peut Ã©galement Ãªtre fournie en entrÃ©e, les adresses
+dans le fichier Ã©tant sÃ©parÃ©es par des caractÃ¨res blancs (espace, tabulation
 ou saut de ligne) :
   $argv[0] --import-mail=1 < /path/to/address_list
 
@@ -176,123 +165,107 @@ ou saut de ligne) :
 WANSHELL;
 		exit(0);
 	}
-	
 	//
-	// Lancement d'un flôt d'envoi
+	// Lancement d'un flÃ´t d'envoi
 	//
-	else if( preg_match('/^-(?:-process-send=|p)(\d+)$/', $argv[$i], $match) )
-	{
+	else if ($name == 'process-send' || $name == 'p') {
 		$process_send = true;
-		$liste_id = $match[1];
+		$liste_id = intval($value);
 	}
-	
 	//
 	// Validation des inscriptions par email
 	//
-	else if( preg_match('/^--process-subscribe=(\d+)$/', $argv[$i], $match) )
-	{
+	else if ($name == 'process-subscribe') {
 		$process_subscribe = true;
-		$liste_id = $match[1];
+		$liste_id = intval($value);
 	}
-	
 	//
 	// Limitation du nombre d'envois
 	//
-	else if( preg_match('/^-(?:-limit=|l)(\d+)$/', $argv[$i], $match) )
-	{
-		$nl_config['sending_limit'] = $match[1];
+	else if ($name == 'limit' || $name == 'l') {
+		$nl_config['sending_limit'] = intval($value);
 	}
-	
 	//
-	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
+	// Nombre d'envois maximum Ã  effectuer lors d'un flot d'envois
 	//
-	else if( preg_match('/^-(?:-packet=|k)(\d+)$/', $argv[$i], $match) )
-	{
-		$send_packet = $match[1];
+	else if ($name == 'packet' || $name == 'k') {
+		$send_packet = intval($value);
 	}
-	
 	//
-	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
+	// Nombre d'envois maximum Ã  effectuer lors d'un flot d'envois
 	//
-	else if( preg_match('/^-(?:-delay=|d)(\d+)$/', $argv[$i], $match) )
-	{
-		$send_delay = $match[1];
+	else if ($name == 'delay' || $name == 'd') {
+		$send_delay = intval($value);
 	}
-	
-	else if( preg_match('/^--import-mail=(\d+)$/', $argv[$i], $match) )
-	{
+	//
+	// Importation d'emails
+	//
+	else if ($name == 'import-mail') {
 		$import_mail = true;
-		$liste_id = $match[1];
+		$liste_id = intval($value);
 	}
-	
 	//
-	// Format choisi pour les comptes des adresses emails importées
+	// Format choisi pour les comptes des adresses emails importÃ©es
 	//
-	else if( preg_match('/^--format=/', $argv[$i], $match) )
-	{
-		$format = substr($argv[$i], 9);
-		
-		if( in_array($format, array('plain', 'text', 'texte')) )
-		{
+	else if ($name == 'format') {
+		$format = $value;
+
+		if (in_array($format, ['plain', 'text', 'texte'])) {
 			$format = FORMAT_TEXTE;
 		}
-		else if( $format == 'html' )
-		{
+		else if ($format == 'html') {
 			$format = FORMAT_HTML;
 		}
-		else
-		{
+		else {
 			trigger_error("Bad format. Possible values are 'plain', 'text', 'texte' or 'html'", E_USER_ERROR);
-		}
-	}
-	
-	//
-	// Récupération des adresses email passées dans la ligne de commande
-	//
-	else if( $argv[$i] == '--' )
-	{
-		if( isset($argv[++$i]) )
-		{
-			$emails = array_slice($argv, $i);
 		}
 	}
 }
 
-if( !is_null($liste_id) )
-{
+//
+// RÃ©cupÃ©ration des adresses email passÃ©es directement dans la ligne de commande
+//
+for ($i = 1; $i < $argc; $i++) {
+	if ($argv[$i] == '--') {
+		if (isset($argv[++$i])) {
+			$emails = array_slice($argv, $i);
+		}
+
+		break;
+	}
+}
+
+if (!is_null($liste_id)) {
 	$sql = 'SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
 			liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe,
-			pop_host, pop_port, pop_user, pop_pass
-		FROM ' . LISTE_TABLE . ' 
+			pop_host, pop_port, pop_user, pop_pass, pop_tls
+		FROM ' . LISTE_TABLE . '
 		WHERE liste_id = ' . $liste_id;
 	$result = $db->query($sql);
-	
-	if( !($listdata = $result->fetch()) )
-	{
+
+	if (!($listdata = $result->fetch())) {
 		trigger_error('Unknown_list', E_USER_ERROR);
 	}
 }
 
-if( $process_send == true )
-{
+if ($process_send) {
 	define('SEND_PACKET', $send_packet);
 	define('SEND_DELAY',  $send_delay);
-	
+
 	require WA_ROOTDIR . '/includes/engine_send.php';
-	
+
 	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 		FROM " . LOG_TABLE . "
 		WHERE liste_id = $listdata[liste_id]
 			AND log_status = " . STATUS_STANDBY . "
 		LIMIT 1 OFFSET 0";
-	$result = $db->query($sql);// on récupère le dernier log en statut d'envoi
-	
-	if( !($logdata = $result->fetch()) )
-	{
+	$result = $db->query($sql);// on rÃ©cupÃ¨re le dernier log en statut d'envoi
+
+	if (!($logdata = $result->fetch())) {
 		echo $lang['Message']['No_log_to_send'] . "\n";
 		exit(0);
 	}
-	
+
 	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 		FROM " . JOINED_FILES_TABLE . " AS jf
 			INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
@@ -301,237 +274,226 @@ if( $process_send == true )
 				AND l.log_id   = $logdata[log_id]
 		ORDER BY jf.file_real_name ASC";
 	$result = $db->query($sql);
-	
+
 	$logdata['joined_files'] = $result->fetchAll();
-	
+
 	//
 	// On lance l'envoi
 	//
 	$message = launch_sending($listdata, $logdata);
-	
+
 	echo "\n";
 }
-else if( $process_subscribe )
-{
-	require WAMAILER_DIR . '/class.pop.php';
-	require WA_ROOTDIR . '/includes/class.form.php';
-	require WA_ROOTDIR . '/includes/functions.validate.php';
+else if ($process_subscribe) {
 	require WA_ROOTDIR . '/includes/functions.stats.php';
-	
-	$wan = new Wanewsletter($listdata);
-	$pop = new Pop();
-	$pop->connect($listdata['pop_host'], $listdata['pop_port'], $listdata['pop_user'], $listdata['pop_pass']);
-	
+
+	$sub = new Subscription($listdata);
+	$pop = new PopClient();
+	$pop->options([
+		'starttls' => ($pop_tls == SECURITY_STARTTLS)
+	]);
+
+	try {
+		$server = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
+		$server = sprintf($server, $listdata['pop_host'], $listdata['pop_port']);
+
+		if (!$pop->connect($server, $listdata['pop_user'], $listdata['pop_pass'])) {
+			throw new Exception(sprintf(
+				"Failed to connect to POP server (%s)",
+				$pop->responseData
+			));
+		}
+	}
+	catch (Exception $e) {
+		trigger_error(sprintf($lang['Message']['bad_pop_param'], $e->getMessage()), E_USER_ERROR);
+	}
+
 	$total    = $pop->stat_box();
 	$mail_box = $pop->list_mail();
-	
-	foreach( $mail_box as $mail_id => $mail_size )
-	{
+
+	foreach ($mail_box as $mail_id => $mail_size) {
 		$headers = $pop->parse_headers($mail_id);
-		
-		if( !isset($headers['from']) || !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $match) )
-		{
+
+		if (!isset($headers['from']) || !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $m)) {
 			continue;
 		}
-		
-		$pseudo = ( isset($match[1]) ) ? strip_tags(trim($match[1])) : '';
-		$email  = trim($match[2]);
-		
-		if( !isset($headers['to']) || !stristr($headers['to'], $wan->liste_email) )
-		{
+
+		$pseudo = (isset($m[1])) ? trim(strip_tags(u::filter($m[1]))) : '';
+		$email  = trim($m[2]);
+
+		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
 			continue;
 		}
-		
-		if( !isset($headers['subject']) )
-		{
+
+		if (!isset($headers['subject'])) {
 			continue;
 		}
-		
-		$action = strtolower(trim($headers['subject']));
-		
-		switch( $action )
-		{
-			case 'desinscription':
-			case 'désinscription':
+
+		$action = mb_strtolower(trim(u::filter($headers['subject'])));
+
+		switch ($action) {
+			case 'dÃ©sinscription':
 			case 'unsubscribe':
 				$action = 'desinscription';
 				break;
-			
-			case 'inscription':
 			case 'subscribe':
 				$action = 'inscription';
 				break;
-			
 			case 'confirmation':
 			case 'setformat':
 				break;
 		}
-		
+
 		$code = $pop->contents[$mail_id]['message'];
-		if( strlen($code) == 32 ) // Compatibilité avec versions < 2.3
-		{
-			$code = substr($code, 0, 20);
-		}
-		
-		if( !empty($code) && ($action =='confirmation' || $action == 'desinscription') )
-		{
-			if( empty($headers['date']) || intval($time = strtotime($headers['date'])) > 0 )
-			{
+
+		if (!empty($code) && ($action =='confirmation' || $action == 'desinscription')) {
+			if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
 				$time = time();
 			}
-			
-			$wan->check_code($code, $time);
+
+			$sub->check_code($code, $time);
 		}
-		else if( in_array($action, array('inscription','setformat','desinscription')) )
-		{
-			$wan->do_action($action, $email);
+		else if (in_array($action, ['inscription','setformat','desinscription'])) {
+			$sub->do_action($action, $email, null, $pseudo);
 		}
-		
+
 		//
 		// On supprime l'email maintenant devenu inutile
 		//
 		$pop->delete_mail($mail_id);
 	}//end for
-	
+
 	$pop->quit();
-	
+
 	$message = $lang['Message']['Success_operation'];
 }
-else if( $import_mail == true )
-{
-	require WAMAILER_DIR . '/class.mailer.php';
-	
-	if( count($emails) == 0 )
-	{
+else if ($import_mail) {
+	if (count($emails) == 0) {
 		$emails = '';
-		while( !feof(STDIN) )
-		{
-			$emails .= fgets(STDIN);
+		while (!feof(STDIN)) {
+			$data = fgets(STDIN);
+			if ($data == ".\n") {
+				break;
+			}
+			$emails .= $data;
 		}
-		
-		$emails = preg_split('/\s+/', trim($emails));
+
+		$emails = trim($emails);
+		$emails = ($emails != '') ? preg_split('/\s+/', $emails) : [];
 	}
-	
+
 	$emails = array_unique($emails);
 	$current_time = time();
-	$emails_ok    = array();
-	
-	if( $listdata['liste_format'] != FORMAT_MULTIPLE )
-	{
+	$emails_ok    = [];
+
+	if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
 		$format = $listdata['liste_format'];
 	}
-	
+
 	//
-	// Vérification syntaxique des emails
+	// VÃ©rification syntaxique des emails
 	//
-	$emails = array_filter($emails, create_function('$email',
-		'global $lang;
-		
-		if( Mailer::validate_email($email) ) {
-			return true;
-		} else {
-			printf("%s : %s\n", $email, $lang[\'Message\'][\'Invalid_email2\']);
-			return false;
-		}'
-	));
-	
-	if( count($emails) > 0 )
-	{
+	$emails = array_filter($emails,
+		function ($email) use (&$lang) {
+			if (\Wamailer\Mailer::checkMailSyntax($email)) {
+				return true;
+			}
+			else {
+				printf("%s : %s\n", $email, $lang['Message']['Invalid_email2']);
+				return false;
+			}
+		}
+	);
+
+	if (count($emails) > 0) {
 		$counter = 0;
-		$sql_emails = array_map(create_function('$email',
-			'return $GLOBALS["db"]->escape(strtolower($email));'), $emails);
-		
+
+		$sql_emails = array_map('strtolower', $emails);
+		$sql_emails = array_map([$db, 'escape'], $sql_emails);
+
 		$sql = "SELECT a.abo_id, a.abo_email, a.abo_status, al.confirmed
 			FROM " . ABONNES_TABLE . " AS a
 				LEFT JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
 					AND al.liste_id = $listdata[liste_id]
 			WHERE LOWER(a.abo_email) IN('" . implode("', '", $sql_emails) . "')";
 		$result = $db->query($sql);
-		
+
 		//
-		// Traitement des adresses email déjà présentes dans la base de données
+		// Traitement des adresses email dÃ©jÃ  prÃ©sentes dans la base de donnÃ©es
 		//
-		while( $abodata = $result->fetch() )
-		{
-			if( !isset($abodata['confirmed']) ) // N'est pas inscrit à cette liste
-			{
-				$sql_data = array();
+		while ($abodata = $result->fetch()) {
+			if (!isset($abodata['confirmed'])) {
+				$sql_data = [];
 				$sql_data['abo_id']        = $abodata['abo_id'];
 				$sql_data['liste_id']      = $listdata['liste_id'];
 				$sql_data['format']        = $format;
 				$sql_data['register_key']  = generate_key(20, false);
 				$sql_data['register_date'] = $current_time;
-				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF) ? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
-				
-				$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
-				
+				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF)
+					? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
+
+				$db->insert(ABO_LISTE_TABLE, $sql_data);
+
 				$counter++;
 			}
-			else
-			{
+			else {
 				printf("%s : %s\n", $abodata['abo_email'], $lang['Message']['Allready_reg']);
 			}
-			
-			array_push($emails_ok, $abodata['abo_email']);
+
+			$emails_ok[] = $abodata['abo_email'];
 		}
-		
+
 		//
 		// Traitement des adresses email inconnues
 		//
 		$emails = array_udiff($emails, $emails_ok, 'strcasecmp');
-		
-		
-		foreach( $emails as $email )
-		{
+
+
+		foreach ($emails as $email) {
 			$db->beginTransaction();
-			
-			$sql_data = array();
+
+			$sql_data = [];
 			$sql_data['abo_email']  = $email;
 			$sql_data['abo_status'] = ABO_ACTIF;
-			
+
 			try {
-				$db->build(SQL_INSERT, ABONNES_TABLE, $sql_data);
+				$db->insert(ABONNES_TABLE, $sql_data);
 			}
-			catch( SQLException $e ) {
-				fputs(STDERR, sprintf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error));
+			catch (Dblayer\Exception $e) {
+				fwrite(STDERR, sprintf("%s : SQL error (#%d: %s)\n", $email, $db->errno, $db->error));
 				$db->rollBack();
 				continue;
 			}
-			
-			$sql_data = array();
+
+			$sql_data = [];
 			$sql_data['abo_id']        = $db->lastInsertId();
 			$sql_data['liste_id']      = $listdata['liste_id'];
 			$sql_data['format']        = $format;
 			$sql_data['register_key']  = generate_key(20, false);
 			$sql_data['register_date'] = $current_time;
 			$sql_data['confirmed']     = SUBSCRIBE_CONFIRMED;
-			
-			$db->build(SQL_INSERT, ABO_LISTE_TABLE, $sql_data);
-			
+
+			$db->insert(ABO_LISTE_TABLE, $sql_data);
+
 			$counter++;
 			$db->commit();
 		}
-		
-		if( $counter > 1 )
-		{
+
+		if ($counter > 1) {
 			$message = sprintf($lang['Message']['Success_import4_n'], $counter);
 		}
-		else if( $counter == 1 )
-		{
+		else if ($counter == 1) {
 			$message = sprintf($lang['Message']['Success_import4_1'], $counter);
 		}
-		else
-		{
+		else {
 			$message = $lang['Message']['Success_import4_0'];
 		}
 	}
 }
 
-if( !is_null($message) )
-{
+if (!is_null($message)) {
 	echo strip_tags($message), "\n";
 }
 
 exit(0);
-
 

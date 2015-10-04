@@ -3,169 +3,248 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2015 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('CLASS_AUTH_INC') ) {
-
-define('CLASS_AUTH_INC', true);
-
-//
-// permissions 
-//
-define('AUTH_VIEW',   1);
-define('AUTH_EDIT',   2);
-define('AUTH_DEL',    3);
-define('AUTH_SEND',   4);
-define('AUTH_IMPORT', 5);
-define('AUTH_EXPORT', 6);
-define('AUTH_BAN',    7);
-define('AUTH_ATTACH', 8);
+namespace Wanewsletter;
 
 /**
  * Class Auth
- * 
+ *
  * Gestion des permissions des utilisateurs
- */ 
-class Auth {
-	
-	var $listdata  = array();
-	var $rowset    = array();
-	
-	var $auth_ary  = array(
-			AUTH_VIEW   => 'auth_view',
-			AUTH_EDIT   => 'auth_edit',
-			AUTH_DEL    => 'auth_del',
-			AUTH_SEND   => 'auth_send',
-			AUTH_IMPORT => 'auth_import',
-			AUTH_EXPORT => 'auth_export',
-			AUTH_BAN    => 'auth_ban',
-			AUTH_ATTACH => 'auth_attach'
-		);
-	
+ */
+class Auth
+{
+	const VIEW   = 1;
+	const EDIT   = 2;
+	const DEL    = 3;
+	const SEND   = 4;
+	const IMPORT = 5;
+	const EXPORT = 6;
+	const BAN    = 7;
+	const ATTACH = 8;
+
+	public $listdata = [];
+
+	public $auth_ary = [
+		self::VIEW   => 'auth_view',
+		self::EDIT   => 'auth_edit',
+		self::DEL    => 'auth_del',
+		self::SEND   => 'auth_send',
+		self::IMPORT => 'auth_import',
+		self::EXPORT => 'auth_export',
+		self::BAN    => 'auth_ban',
+		self::ATTACH => 'auth_attach'
+	];
+
 	/**
-	 * Auth::Auth()
-	 * 
-	 * Initialisation de la classe, et récupération des permissions de l'utilisateur courant
-	 * 
-	 * @return void
+	 * VÃ©rifie si l'utilisateur s'est authentifiÃ©
 	 */
-	function Auth()
+	public function isLoggedIn()
 	{
-		global $admindata;
-		
-		$this->read_data($admindata['admin_id']);
+		return (!empty($_SESSION['is_logged_in']) &&
+			check_in_admin() == $_SESSION['is_admin_session']);
 	}
-	
+
 	/**
-	 * Auth::read_data()
-	 * 
-	 * Récupèration des permissions pour l'utilisateur demandé
-	 * 
-	 * @param integer $admin_id    Identifiant de l'utilisateur concerné
-	 * 
-	 * @return void
+	 * VÃ©rification des identifiants de connexion
+	 *
+	 * @param mixed  $id     Identifiant (peut Ãªtre un nom d'utilisateur ou une adresse email)
+	 * @param string $passwd Mot de passe de l'utilisateur
+	 *
+	 * @return boolean|array
 	 */
-	function read_data($admin_id)
+	public function checkCredentials($id, $passwd)
+	{
+		global $nl_config;
+
+		$login = false;
+
+		$userdata = $this->getUserData($id);
+
+		if ($userdata && $userdata['passwd'] != '') {
+			// Ugly old md5 hash prior Wanewsletter 2.4-beta2
+			if ($userdata['passwd'][0] != '$') {
+				if (hash_equals($userdata['passwd'], md5($passwd))) {
+					$login = true;
+				}
+			}
+			// New password hash using password API
+			else if (password_verify($passwd, $userdata['passwd'])) {
+				$login = true;
+			}
+		}
+
+		if ($login) {
+			// Avant la version 9 des tables, les colonnes stockant les mots
+			// de passe Ã©taient limitÃ©es Ã  32 caractÃ¨res.
+			if (isset($nl_config['db_version']) && $nl_config['db_version'] > 8) {
+				$this->updatePassword($userdata['uid'], $passwd);
+			}
+
+			return $userdata;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param integer $uid    Identifiant de l'utilisateur
+	 * @param string  $passwd Nouveau mot de passe Ã  hasher et stocker
+	 */
+	public function updatePassword($uid, $passwd)
+	{
+		global $db;
+
+		list($tablename, $columns) = $this->getUserTableInfos();
+
+		if (!($passwd_hash = password_hash($passwd, PASSWORD_DEFAULT))) {
+			trigger_error("Unexpected error returned by password API", E_USER_ERROR);
+		}
+
+		$data = [$columns['passwd'] => $passwd_hash];
+		$cond = [$columns['uid'] => $uid];
+		$db->update($tablename, $data, $cond);
+	}
+
+	/**
+	 * RÃ©cupÃ©ration des donnÃ©es utilisateur
+	 *
+	 * @param mixed $id Identifiant de l'utilisateur (username, email ou ID numÃ©rique)
+	 *
+	 * @return boolean|array
+	 */
+	public function getUserData($id)
+	{
+		global $db;
+
+		list($tablename, $columns) = $this->getUserTableInfos();
+
+		if (!is_int($id) && $id != '') {
+			$sql_where = sprintf("%s = '%s'",
+				(strpos($id, '@') ? $columns['email'] : $columns['username']),
+				$db->escape($id)
+			);
+		}
+		else {
+			$sql_where = sprintf("%s = %d", $columns['uid'], $id);
+		}
+
+		$sql = "SELECT *
+			FROM $tablename
+			WHERE " . $sql_where;
+		$result = $db->query($sql);
+
+		if ($row = $result->fetch()) {
+			$row['uid']      = intval($row[$columns['uid']]);
+			$row['username'] = $row[$columns['username']];
+			$row['email']    = $row[$columns['email']];
+			$row['passwd']   = $row[$columns['passwd']];
+
+			return $row;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Renvoie les noms de table et de colonnes de la table utilisateur active
+	 *
+	 * @return array [string $tablename, array $columns]
+	 */
+	public function getUserTableInfos()
+	{
+		if (check_in_admin() || defined(__NAMESPACE__.'\\IN_INSTALL')) {
+			$tablename = ADMIN_TABLE;
+			$columns   = [];
+
+			$columns['uid']      = 'admin_id';
+			$columns['passwd']   = 'admin_pwd';
+			$columns['username'] = 'admin_login';
+			$columns['email']    = 'admin_email';
+		}
+		else {
+			$tablename = ABONNES_TABLE;
+			$columns   = [];
+
+			$columns['uid']      = 'abo_id';
+			$columns['passwd']   = 'abo_pwd';
+			$columns['username'] = 'abo_pseudo';
+			$columns['email']    = 'abo_email';
+		}
+
+		return [$tablename, $columns];
+	}
+
+	/**
+	 * RÃ©cupÃ¨ration des permissions pour l'utilisateur demandÃ©
+	 *
+	 * @param integer $admin_id Identifiant de l'utilisateur concernÃ©
+	 *
+	 * @return array
+	 */
+	public function read_data($admin_id)
 	{
 		global $db, $admindata;
-		
+
 		$sql = "SELECT li.liste_id, li.liste_name, li.liste_format, li.sender_email, li.return_email,
 				li.confirm_subscribe, li.liste_public, li.limitevalidate, li.form_url, li.liste_sig,
 				li.auto_purge, li.purge_freq, li.purge_next, li.liste_startdate, li.use_cron, li.pop_host,
-				li.pop_port, li.pop_user, li.pop_pass, li.liste_alias, li.liste_numlogs, aa.auth_view, aa.auth_edit,
+				li.pop_port, li.pop_user, li.pop_pass, li.pop_tls, li.liste_alias, li.liste_numlogs, aa.auth_view, aa.auth_edit,
 				aa.auth_del, aa.auth_send, aa.auth_import, aa.auth_export, aa.auth_ban, aa.auth_attach, aa.cc_admin
 			FROM " . LISTE_TABLE . " AS li
 				LEFT JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = $admin_id
 					AND aa.liste_id = li.liste_id
 			ORDER BY li.liste_name ASC";
 		$result = $db->query($sql);
-		
-		$tmp_ary = array();
-		while( $row = $result->fetch() )
-		{
+
+		$tmp_ary = [];
+		while ($row = $result->fetch()) {
 			$tmp_ary[$row['liste_id']] = $row;
 		}
-		
-		if( $admindata['admin_id'] != $admin_id )
-		{
-			return $tmp_ary;
+
+		if ($admindata['admin_id'] == $admin_id) {
+			$this->listdata = $tmp_ary;
 		}
-		
-		$this->listdata = $tmp_ary;
+
+		return $tmp_ary;
 	}
-	
+
 	/**
-	 * Auth::check_auth()
-	 * 
-	 * Fonction de vérification des permissions, selon la permission concernée et la liste concernée
-	 * Si vérification pour une liste particulière, retourne un booléen, sinon retourne un tableau d'identifiant 
-	 * des listes pour lesquelles la permission est accordée
-	 * 
-	 * @param integer $auth_type    Code de la permission concernée
-	 * @param integer $liste_id     Identifiant de la liste concernée
-	 * 
-	 * @return array/boolean
+	 * Fonction de vÃ©rification des permissions, selon la permission concernÃ©e et la liste concernÃ©e
+	 * Si vÃ©rification pour une liste particuliÃ¨re, retourne un boolÃ©en, sinon retourne un tableau d'identifiant
+	 * des listes pour lesquelles la permission est accordÃ©e
+	 *
+	 * @param integer $auth_type Code de la permission concernÃ©e
+	 * @param integer $liste_id  Identifiant de la liste concernÃ©e
+	 *
+	 * @return array|boolean
 	 */
-	function check_auth($auth_type, $liste_id = null)
+	public function check_auth($auth_type, $liste_id = null)
 	{
 		global $admindata;
-		
+
 		$auth_name = $this->auth_ary[$auth_type];
-		
-		if( $liste_id == null )
-		{
-			$liste_id_ary = array();
-			foreach( $this->listdata as $liste_id => $auth_list )
-			{
-				if( $admindata['admin_level'] == ADMIN || !empty($auth_list[$auth_name]) )
-				{
+
+		if ($liste_id == null) {
+			$liste_id_ary = [];
+			foreach ($this->listdata as $liste_id => $auth_list) {
+				if (wan_is_admin($admindata) || !empty($auth_list[$auth_name])) {
 					$liste_id_ary[] = $liste_id;
 				}
 			}
-			
+
 			return $liste_id_ary;
 		}
-		else
-		{
-			if( isset($this->listdata[$liste_id])
-				&& ($admindata['admin_level'] == ADMIN || !empty($this->listdata[$liste_id][$auth_name])) )
-			{
+		else {
+			if (isset($this->listdata[$liste_id]) &&
+				(wan_is_admin($admindata) || !empty($this->listdata[$liste_id][$auth_name]))
+			) {
 				return true;
 			}
-			
+
 			return false;
 		}
 	}
-	
-	/**
-	 * Auth::box_auth()
-	 * 
-	 * Construction de la liste déroulante oui/non pour la permission concernée et la liste concernée
-	 * 
-	 * @param integer $auth_type    Code de la permission
-	 * @param array   $listdata     Tableau des permissions pour la liste en cours
-	 * 
-	 * @return string
-	 */
-	function box_auth($auth_type, $listdata)
-	{
-		global $lang;
-		
-		$auth_name = $this->auth_ary[$auth_type];
-		
-		$selected_yes = ( !empty($listdata[$auth_name]) ) ? ' selected="selected"' : '';
-		$selected_no  = ( empty($listdata[$auth_name]) ) ? ' selected="selected"' : '';
-		
-		$box_auth  = '<select name="' . $auth_name . '[]">';
-		$box_auth .= '<option value="1"' . $selected_yes . '> ' . $lang['Yes'] . ' </option>';
-		$box_auth .= '<option value="0"' . $selected_no . '> ' . $lang['No'] . ' </option>';
-		$box_auth .= '</select>';
-		
-		return $box_auth;
-	}
 }
-
-}
-?>

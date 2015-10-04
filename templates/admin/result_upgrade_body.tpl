@@ -1,13 +1,15 @@
-<div class="block compact">
+<form class="compact" method="post" action="upgrade.php">
+<div class="block">
 	<h2>{L_TITLE_UPGRADE}</h2>
 
-	<div class="message">
 	<p>{MESSAGE}</p>
-	<!-- BEGIN update_config_file -->
-	<div class="textinput"><textarea cols="90" rows="10" readonly>{update_config_file.CONTENT}</textarea></div>
-	<!-- END update_config_file -->
 	<!-- BEGIN moved_dirs -->
 	<p>{moved_dirs.MOVED_DIRS_NOTICE}</p>
 	<!-- END moved_dirs -->
+	<!-- BEGIN download_file -->
+	<div class="bottom">
+		<button type="submit" name="sendfile" class="primary">{download_file.L_DL_BUTTON}</button>
 	</div>
+	<!-- END download_file -->
 </div>
+</form>

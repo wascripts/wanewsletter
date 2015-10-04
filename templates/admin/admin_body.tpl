@@ -1,3 +1,12 @@
+<script>
+<!--
+var lang = [];
+lang['restore-default'] = '{L_RESTORE_DEFAULT}';
+// Vite fait mal fait. On fera un truc propre plus tard.
+var basedir = '{BASEDIR}';
+//-->
+</script>
+
 <p id="explain">{L_EXPLAIN}</p>
 
 <form method="post" action="./admin.php">
@@ -9,7 +18,7 @@
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="language">{L_DEFAULT_LANG}&nbsp;:</label></td>
@@ -20,8 +29,10 @@
 			<td><input type="text" id="email" name="email" value="{EMAIL}" size="30" maxlength="254" /></td>
 		</tr>
 		<tr>
-			<td><label for="dateformat">{L_DATEFORMAT}&nbsp;:</label><br /><span class="notice">{L_NOTE_DATE}</span></td>
-			<td><input type="text" id="dateformat" name="dateformat" value="{DATEFORMAT}" size="15" maxlength="20" /></td>
+			<td><label for="date_format">{L_DATE_FORMAT}&nbsp;:</label><br /><span class="notice">{L_NOTE_DATE}</span></td>
+			<td><input type="text" id="date_format" name="date_format"
+				value="{DATE_FORMAT}" size="15" maxlength="20" data-default="{DEFAULT_DATE_FORMAT}"
+			/></td>
 		</tr>
 		<tr>
 			<td><label>{L_EMAIL_NEW_SUBSCRIBE}&nbsp;:</label></td>
@@ -41,60 +52,69 @@
 				<label for="email_unsubscribe_no" class="notice">{L_NO}</label>
 			</td>
 		</tr>
+		<tr>
+			<td><label>{L_HTML_EDITOR}&nbsp;:</label></td>
+			<td>
+				<input type="radio" id="html_editor_yes" name="html_editor" value="1" {HTML_EDITOR_YES}/>
+				<label for="html_editor_yes" class="notice">{L_YES}</label>
+				<input type="radio" id="html_editor_no" name="html_editor" value="0" {HTML_EDITOR_NO}/>
+				<label for="html_editor_no" class="notice">{L_NO}</label>
+			</td>
+		</tr>
 		<!-- BEGIN owner_profil -->
 		<tr>
-			<td><label for="current_pass">{L_PASS}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASS}</span></td>
-			<td><input type="password" id="current_pass" name="current_pass" size="30" /></td>
+			<td><label for="current_passwd">{L_PASSWD}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASSWD}</span></td>
+			<td><input type="password" id="current_passwd" name="current_passwd" size="30" autocomplete="off" /></td>
 		</tr>
 		<!-- END owner_profil -->
 		<tr>
-			<td><label for="new_pass">{L_NEW_PASS}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASS}</span></td>
-			<td><input type="password" id="new_pass" name="new_pass" size="30" autocomplete="off" /></td>
+			<td><label for="new_passwd">{L_NEW_PASSWD}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASSWD}</span></td>
+			<td><input type="password" id="new_passwd" name="new_passwd" size="30" autocomplete="off" /></td>
 		</tr>
 		<tr>
-			<td><label for="confirm_pass">{L_CONFIRM_PASS}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASS}</span></td>
-			<td><input type="password" id="confirm_pass" name="confirm_pass" size="30" autocomplete="off" /></td>
+			<td><label for="confirm_passwd">{L_CONFIRM_PASSWD}&nbsp;:</label><br /><span class="notice">{L_NOTE_PASSWD}</span></td>
+			<td><input type="password" id="confirm_passwd" name="confirm_passwd" size="30" autocomplete="off" /></td>
 		</tr>
 	</table>
-	
+
 	<!-- BEGIN admin_options -->
 	<h2>{admin_options.L_TITLE_MANAGE}</h2>
-	
+
 	<script>
 	<!--
 	function switch_selectbox(evt)
 	{
 		var node = evt.target.parentNode.parentNode;
-		
+
 		var boxList = node.getElementsByTagName('select');
 		var val = boxList[0].value;
-		
-		for( var i = 0, m = boxList.length; i < m; i++ ) {
+
+		for (var i = 0, m = boxList.length; i < m; i++) {
 			boxList[i].options[val].selected = true;
 		}
-		
+
 		evt.preventDefault();
 	}
-	
+
 	document.addEventListener('DOMContentLoaded', function() {
- 		var rows = document.getElementById('admin_authlist').rows;
- 		var switchLink = null;
- 		
- 		for( var i = 1, m = rows.length; i < m; i++ ) {
- 			switchLink = document.createElement('a');
- 			switchLink.appendChild(document.createTextNode('switch'));
- 			switchLink.setAttribute('href', '#switch/selectbox');
- 			switchLink.setAttribute('class', 'notice');
+		var rows = document.getElementById('admin_authlist').rows;
+		var switchLink = null;
+
+		for (var i = 1, m = rows.length; i < m; i++) {
+			switchLink = document.createElement('a');
+			switchLink.appendChild(document.createTextNode('switch'));
+			switchLink.setAttribute('href', '#switch/selectbox');
+			switchLink.setAttribute('class', 'notice');
 			switchLink.style.cssFloat = 'right';
 			switchLink.style.marginTop = '0.18em';
 			switchLink.addEventListener('click', switch_selectbox, false);
- 			
- 			rows[i].cells[0].appendChild(switchLink);
- 		}
+
+			rows[i].cells[0].appendChild(switchLink);
+		}
 	}, false);
 	//-->
 	</script>
-	
+
 	<table id="admin_authlist" class="dataset">
 		<tr>
 			<th>{admin_options.L_LISTE_NAME}</th>
@@ -121,9 +141,9 @@
 		</tr>
 		<!-- END auth -->
 	</table>
-	
+
 	<h2>{admin_options.L_TITLE_OPTIONS}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td><label for="admin_level">{admin_options.L_ADMIN_LEVEL}&nbsp;:</label></td>
@@ -135,7 +155,7 @@
 		</tr>
 	</table>
 	<!-- END admin_options -->
-	
+
 	<div class="bottom">{S_HIDDEN_FIELDS}
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="reset">{L_RESET_BUTTON}</button>
@@ -144,9 +164,9 @@
 </form>
 
 <!-- BEGIN admin_box -->
-<form id="smallbox" method="post" action="./admin.php">
+<form id="smallbox" method="get" action="./admin.php">
 <div>
-	<label for="admin_id">{admin_box.L_VIEW_PROFILE}&nbsp;:</label>
+	<label for="uid">{admin_box.L_VIEW_PROFILE}&nbsp;:</label>
 	{admin_box.ADMIN_BOX} <button type="submit">{admin_box.L_BUTTON_GO}</button>
 </div>
 </form>

@@ -17,7 +17,7 @@
 
 <div class="block">
 	<h2>{L_TITLE}</h2>
-	
+
 	<table class="dataset">
 		<tr>
 			<td>{L_LISTE_ID}&nbsp;:</td>
@@ -82,7 +82,7 @@
 			<td>{STARTDATE}</td>
 		</tr>
 	</table>
-	
+
 	<!-- BEGIN purge_option -->
 	<div class="bottom">{purge_option.S_HIDDEN_FIELDS}
 		<button type="submit" name="purge" class="primary">{purge_option.L_PURGE_BUTTON}</button>

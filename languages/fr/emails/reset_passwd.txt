@@ -1,0 +1,8 @@
+Bonjour {PSEUDO},
+
+Vous avez souhaité réinitialiser votre mot de passe.
+Pour ce faire, veuillez suivre le lien suivant :
+{RESET_URL}
+
+Si vous n'avez pas émis de demande de réinitialisation, ignorez simplement ce message.
+

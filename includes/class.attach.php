@@ -3,894 +3,384 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2014 Aurélien Maille
+ * @copyright 2002-2015 AurÃ©lien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-if( !defined('CLASS_ATTACH_INC') ) {
-
-define('CLASS_ATTACH_INC', true);
+namespace Wanewsletter;
 
 /**
  * Class Attach
- * 
+ *
  * Gestion des fichiers joints des newsletters
- */ 
-class Attach {
-	
+ */
+class Attach
+{
 	/**
 	 * Chemin vers le dossier de stockage des fichiers
-	 * 
+	 *
 	 * @var string
 	 */
-	var $upload_path = '';
-	
-	/**
-	 * Utilisation ou non de l'option ftp
-	 * 
-	 * @var boolean
-	 */
-	var $use_ftp     = FALSE;
-	
-	/**
-	 * Chemin vers le dossier de stockage des fichiers sur le ftp
-	 * 
-	 * @var string
-	 */
-	var $ftp_path    = '';
-	
-	/**
-	 * Identifiant de ressource au serveur ftp
-	 * 
-	 * @var resource
-	 */
-	var $connect_id  = NULL;
-	
+	private $upload_path;
+
 	/**
 	 * Initialisation des variables de la classe
-	 * Initialisation de la connexion au serveur ftp le cas échéant
-	 * 
-	 * @return void
-	 * @access public
 	 */
-	function Attach()
+	public function __construct()
 	{
 		global $nl_config;
-		
+
 		$this->upload_path = WA_ROOTDIR . '/' . $nl_config['upload_path'];
-		$this->use_ftp     = $nl_config['use_ftp'];
-		
-		if( $this->use_ftp )
-		{
-			$result = $this->connect_to_ftp(
-				$nl_config['ftp_server'],
-				$nl_config['ftp_port'],
-				$nl_config['ftp_user'],
-				$nl_config['ftp_pass'],
-				$nl_config['ftp_pasv'],
-				$nl_config['ftp_path']
-			);
-			
-			if( $result['error'] )
-			{
-				trigger_error($result['message'], E_USER_ERROR);
-			}
-			
-			$this->connect_id = $result['connect_id'];
-			$this->ftp_path   = $nl_config['ftp_path'];
-		}
 	}
-	
+
 	/**
-	 * Fonction de connexion au serveur ftp
-	 * La fonction a été affranchi de façon à être utilisable sans créer 
-	 * une instance de la classe. (pour tester la connexion dans la config. générale)
-	 * 
-	 * @param string  $ftp_server  Nom du serveur ftp
-	 * @param integer $ftp_port    Port de connexion
-	 * @param string  $ftp_user    Nom d'utilisateur si besoin
-	 * @param string  $ftp_pass    Mot de passe si besoin
-	 * @param integer $ftp_pasv    Mode actif ou passif
-	 * @param string  $ftp_path    Chemin vers le dossier des fichiers joints
-	 * 
-	 * @return array
-	 * @access public
+	 * Effectue les vÃ©rifications nÃ©cessaires et ajoute une entrÃ©e dans
+	 * les tables de gestion des fichiers joints.
+	 *
+	 * Le fichier peut Ãªtre uploadÃ© via le formulaire adÃ©quat, Ãªtre sur
+	 * un serveur distant, ou avoir Ã©tÃ© uploadÃ© manuellement sur le serveur.
+	 *
+	 * @param integer $log_id Identifiant du log
+	 * @param mixed   $file   Nom ou URL du fichier, ou tableau dâ€™un fichier uploadÃ©
+	 *
+	 * @throws Exception
 	 */
-	function connect_to_ftp($ftp_server, $ftp_port, $ftp_user, $ftp_pass, $ftp_pasv, $ftp_path)
+	public function addFile($log_id, $file)
 	{
-		if( !($connect_id = @ftp_connect($ftp_server, $ftp_port)) )
-		{
-			return array('error' => true, 'message' => 'Ftp_unable_connect');
-		}
-		
-		if( $ftp_user != '' && $ftp_pass != '' )
-		{
-			if( !@ftp_login($connect_id, $ftp_user, $ftp_pass) )
-			{
-				return array('error' => true, 'message' => 'Ftp_error_login');
-			}
-		}
-		
-		if( !@ftp_pasv($connect_id, $ftp_pasv) )
-		{
-			return array('error' => true, 'message' => 'Ftp_error_mode');
-		}
-		
-		if( !@ftp_chdir($connect_id, $ftp_path) )
-		{
-			return array('error' => true, 'message' => 'Ftp_error_path');
-		}
-		
-		return array('error' => false, 'connect_id' => $connect_id);
-	}
-		
-	/**
-	 * Verifie la présence du fichier demandé dans le dossier des fichier joints ou sur le ftp
-	 * 
-	 * @param string  $filename   Nom du fichier
-	 * @param boolean $error      True si une erreur s'est produite
-	 * @param array   $msg_error  Tableau des erreurs
-	 * 
-	 * @return integer
-	 * @access public
-	 */
-	function joined_file_exists($filename, &$error, &$msg_error)
-	{
-		global $lang;
-		
-		$file_exists = false;
-		$filesize    = 0;
-		
-		if( $this->use_ftp )
-		{
-			$listing = @ftp_rawlist($this->connect_id, $this->ftp_path);
-			
-			if( is_array($listing) && count($listing) )
-			{
-				//
-				// On vérifie chaque entrée du listing pour retrouver le fichier spécifié
-				//
-				foreach( $listing as $line_info )
-				{
-					if( preg_match('/^\s*([d-])[rwxst-]{9} .+ ([0-9]*) [a-zA-Z]+ [0-9:\s]+ (.+)$/i', $line_info, $matches) )
-					{
-						if( $matches[1] != 'd' && $matches[3] == $filename )
-						{
-							$file_exists = true;
-							$filesize    = $matches[2];
-							
-							break;
-						}
-					}
+		global $db, $lang, $nl_config, $listdata;
+
+		if (!is_array($file)) {
+			$url = parse_url($file);
+
+			if (isset($url['scheme'])) {
+				if ($url['scheme'] != 'http') {
+					throw new Exception($lang['Message']['Invalid_url']);
 				}
+
+				if (!isset($url['path']) || substr($url['path'], -1) == '/') {
+					$filename = 'index';
+				}
+				else {
+					$filename = basename($url['path']);
+				}
+
+				$mode = 'remote';
+				$url  = $file;
+			}
+			else {
+				$mode = 'local';
+				$filename = $file;
 			}
 		}
-		else if( file_exists(wa_realpath($this->upload_path . $filename)) )
-		{
-			$file_exists = true;
-			$filesize    = filesize(wa_realpath($this->upload_path . $filename));
+		else {
+			$mode = 'upload';
+			$filename = $file['name'];
 		}
-		
-		if( !$file_exists )
-		{
-			$error = TRUE;
-			$msg_error[] = sprintf($lang['Message']['File_not_exists'], '');
+
+		//
+		// VÃ©rification de lâ€™accÃ¨s en Ã©criture au rÃ©pertoire de stockage
+		//
+		if ($mode != 'local' && !is_writable($this->upload_path)) {
+			throw new Exception($lang['Message']['Uploaddir_not_writable']);
 		}
-		
-		return $filesize;
-	}
-		
-	/**
-	 * Génération d'un nom de fichier unique
-	 * Fonction récursive
-	 * 
-	 * @param string $prev_filename  Nom du fichier temporaire précédemment généré et refusé
-	 * 
-	 * @return string
-	 * @access public
-	 */
-	function make_filename($prev_filename = '')
-	{
-		global $db;
-		
-		$physical_filename = md5(microtime()) . '.dl';
-		
-		if( $physical_filename != $prev_filename )
-		{
-			$sql = "SELECT COUNT(file_id) AS test_name
-				FROM " . JOINED_FILES_TABLE . "
-				WHERE file_physical_name = '" . $db->escape($physical_filename) . "'";
-			$result = $db->query($sql);
-			
-			$test_name = $result->column('test_name');
-		}
-		else
-		{
-			$test_name = true;
-		}
-		
-		return ( $test_name ) ? $this->make_filename($physical_filename) : $physical_filename;
-	}
-	
-	/**
-	 * Effectue les vérifications nécessaires et ajoute une entrée dans les tables de 
-	 * gestion des fichiers joints
-	 * 
-	 * Le fichier peut être uploadé via le formulaire adéquat, être sur un serveur distant, 
-	 * ou avoir été uploadé manuellement sur le serveur
-	 * 
-	 * @param string  $upload_mode   Mode d'upload du fichier (upload http, à distance, fichier local)
-	 * @param integer $log_id        Identifiant du log
-	 * @param string  $filename      Nom du fichier
-	 * @param string  $tmp_filename  Nom temporaire du fichier/nom du fichier local/url du fichier distant
-	 * @param integer $filesize      Taille du fichier
-	 * @param string  $filetype      Type mime du fichier
-	 * @param string  $errno_code    Code erreur éventuel de l'upload http
-	 * @param boolean $error         True si une erreur survient
-	 * @param array   $msg_error     Tableau des messages d'erreur
-	 * 
-	 * @return void
-	 * @access public
-	 */
-	function upload_file($upload_mode, $log_id, $filename, $tmp_filename, $filesize, $filetype, $errno_code, &$error, &$msg_error)
-	{
-		global $db, $lang, $nl_config;
-		
-		$extension = substr($filename, (strrpos($filename, '.') + 1));
-		
-		if( $extension == '' )
-		{
+
+		//
+		// VÃ©rification de lâ€™extension du fichier
+		//
+		if (!($extension = pathinfo($filename, PATHINFO_EXTENSION))) {
 			$extension = 'x-wa';
 		}
-		
-		//
-		// Vérification de l'accès en écriture au répertoire de stockage
-		//
-		if( $upload_mode != 'local' && !$this->use_ftp && !is_writable($this->upload_path) )
-		{
-			$error = TRUE;
-			$msg_error[] = $lang['Message']['Uploaddir_not_writable'];
-			return;
+
+		$sql = sprintf("SELECT COUNT(fe_id) AS test_extension
+			FROM %s
+			WHERE LOWER(fe_ext) = '%s' AND liste_id = %d",
+			FORBIDDEN_EXT_TABLE,
+			$db->escape(strtolower($extension)),
+			$listdata['liste_id']
+		);
+		$result = $db->query($sql);
+
+		if ($result->column('test_extension') > 0) {
+			throw new Exception($lang['Message']['Invalid_ext']);
 		}
-		
+
 		//
-		// Vérification de la validité du nom du fichier
+		// VÃ©rification de la validitÃ© du nom du fichier
 		//
-		if( !$this->check_filename($filename) )
-		{
-			$error = TRUE;
-			$msg_error[] = $lang['Message']['Invalid_filename'];
+		if (preg_match('/[\\:*\/?<">|\x00-\x1F\x7F-\x9F]/', $filename)) {
+			throw new Exception($lang['Message']['Invalid_filename']);
 		}
-		
-		//
-		// Vérification de l'extension du fichier
-		//
-		if( !$this->check_extension($extension) )
-		{
-			$error = TRUE;
-			$msg_error[] = $lang['Message']['Invalid_ext'];
-		}
-		
-		if( !$error )
-		{
-			//
-			// Si l'upload a échoué, on récupère le message correspondant à l'erreur survenue
-			// Voir fichier constantes.php pour les codes d'erreur
-			//
-			if( $upload_mode == 'upload' && $errno_code != UPLOAD_ERR_OK )
-			{
-				$error = TRUE;
-				
-				switch( $errno_code )
-				{
-					case UPLOAD_ERR_INI_SIZE:
-						$msg_error[] = $lang['Message']['Upload_error_1'];
-						break;
-					
-					case UPLOAD_ERR_FORM_SIZE:
-						$msg_error[] = $lang['Message']['Upload_error_2'];
-						break;
-					
-					case UPLOAD_ERR_PARTIAL:
-						$msg_error[] = $lang['Message']['Upload_error_3'];
-						break;
-					
-					case UPLOAD_ERR_NO_FILE:
-						$msg_error[] = $lang['Message']['Upload_error_4'];
-						break;
-					
-					case UPLOAD_ERR_NO_TMP_DIR:
-						$msg_error[] = $lang['Message']['Upload_error_6'];
-						break;
-					
-					case UPLOAD_ERR_CANT_WRITE:
-						$msg_error[] = $lang['Message']['Upload_error_7'];
-						break;
-					
-					default:
-						$msg_error[] = $lang['Message']['Upload_error_5'];
-						break;
+
+		if ($mode == 'upload') {
+			// Si lâ€™upload a Ã©chouÃ©, on rÃ©cupÃ¨re le message correspondant Ã  lâ€™erreur survenue
+			if ($file['error'] != UPLOAD_ERR_OK) {
+				$errstr = $lang['Message']['Upload_error_5'];
+				if (isset($lang['Message']['Upload_error_'.$file['error']])) {
+					$errstr = $lang['Message']['Upload_error_'.$file['error']];
 				}
-				
-				return;
+
+				throw new Exception($errstr);
 			}
-			
-			//
-			// Récupération d'un fichier distant
-			//
-			else if( $upload_mode == 'remote' )
-			{
-				$URL  = $tmp_filename;
-				$part = @parse_url($URL);
-				
-				if( !is_array($part) || !isset($part['scheme'])
-					|| ($part['scheme'] != 'http' && ($part['scheme'] != 'ftp' || !extension_loaded('ftp'))) )
-				{
-					$error = TRUE;
-					$msg_error[] = $lang['Message']['Invalid_url'];
-					
-					return;
-				}
-				
-				$tmp_path = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : sys_get_temp_dir();
-				$tmp_filename = tempnam($tmp_path, 'wa0');
-				
-				if( !($fw = @fopen($tmp_filename, 'wb')) )
-				{
-					$error = TRUE;
-					$msg_error[] = $lang['Message']['Upload_error_5'];
-					
-					return;
-				}
-				
-				if( $part['scheme'] == 'http' )
-				{
-					$result = http_get_contents($URL, $errstr);
-					
-					if( $result == false )
-					{
-						$error = TRUE;
-						$msg_error[] = $errstr;
-						
-						return;
-					}
-					
-					fwrite($fw, $result['data']);
-					$filesize = strlen($result['data']);
-					$filetype = $result['type'];
-				}
-				else
-				{
-					if( !isset($part['user']) )
-					{
-						$part['user'] = 'anonymous';
-					}
-					if( !isset($part['pass']) )
-					{
-						$part['pass'] = 'anonymous';
-					}
-					
-					$port = !isset($part['port']) ? 21 : $part['port'];
-					
-					if( !($cid = @ftp_connect($part['host'], $port)) || !@ftp_login($cid, $part['user'], $part['pass']) )
-					{
-						$error = TRUE;
-						$msg_error[] = sprintf($lang['Message']['Unaccess_host'], wan_htmlspecialchars($part['host']));
-						
-						return;
-					}
-					
-					$path  = !isset($part['path']) ? '/' : $part['path'];
-					$path .= !isset($part['query']) ? '' : '?'.$part['query'];
-					
-					$filesize = ftp_size($cid, $path);
-					
-					if( !ftp_fget($cid, $fw, $path, FTP_BINARY) )
-					{
-						$error = TRUE;
-						$msg_error[] = $lang['Message']['Not_found_at_url'];
-						
-						return;
-					}
-					ftp_close($cid);
-					
-					require WAMAILER_DIR . '/class.mailer.php';
-					
-					$filetype = Mailer::mime_type(substr($filename, (strrpos($filename, '.') + 1)));
-				}
-				
+
+			$filesize = $file['size'];
+			$filetype = $file['type'];
+			$tmp_filename = $file['tmp_name'];
+		}
+		else if ($mode == 'remote') {
+			$tmp_path = (ini_get('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
+			$tmp_filename = tempnam($tmp_path, 'wa0');
+
+			if (!($fw = fopen($tmp_filename, 'wb'))) {
+				throw new Exception($lang['Message']['Upload_error_5']);
+			}
+
+			$result = http_get_contents($url, $errstr);
+
+			if (!$result) {
 				fclose($fw);
+				unlink($tmp_filename);
+				throw new Exception($errstr);
 			}
-			
-			//
-			// Fichier uploadé manuellement sur le serveur
-			//
-			else if( $upload_mode == 'local' )
-			{
-				require WAMAILER_DIR . '/class.mailer.php';
-				
-				$filetype = Mailer::mime_type($extension);
-				
-				//
-				// On verifie si le fichier est bien présent sur le serveur
-				//
-				$filesize = $this->joined_file_exists($tmp_filename, $error, $msg_error);
+
+			fwrite($fw, $result['data']);
+			fclose($fw);
+			$filesize = strlen($result['data']);
+			$filetype = $result['type'];
+		}
+		else if ($mode == 'local') {
+			if (!file_exists($this->upload_path . $filename)) {
+				throw new Exception(sprintf($lang['Message']['File_not_exists'], $filename));
 			}
+
+			$filesize = filesize($this->upload_path . $filename);
+			$filetype = \Wamailer\Mime::getType($this->upload_path . $filename);
+			$tmp_filename = $file;
 		}
-		else
-		{
-			return; 
+
+		if (!$this->checkFileSize($log_id, $filesize, $total_size)) {
+			if ($mode == 'remote') {
+				// Suppression du fichier temporaire crÃ©Ã© par nos soins
+				unlink($tmp_filename);
+			}
+
+			throw new Exception(sprintf($lang['Message']['weight_too_big'],
+				formateSize($nl_config['max_filesize'] - $total_size)
+			));
 		}
-		
+
 		//
-		// Vérification de la taille du fichier par rapport à la taille maximale autorisée
+		// Si fichier uploadÃ© ou fichier distant, on dÃ©place le fichier Ã  son emplacement final
 		//
-		$total_size = 0;
-		if( !$this->check_maxsize($log_id, $filesize, $total_size) )
-		{
-			$error = TRUE;
-			$msg_error[] = sprintf($lang['Message']['weight_too_big'],
-				formateSize($nl_config['max_filesize'] - $total_size));
-		}
-		
-		//
-		// Si fichier uploadé ou fichier distant, on déplace le fichier à son emplacement final
-		//
-		if( !$error && $upload_mode != 'local' )
-		{
-			$physical_filename = $this->make_filename();
-			
-			if( $this->use_ftp )
-			{
-				$mode = $this->get_mode($filetype);
-				
-				if( !@ftp_put($this->connect_id, $physical_filename, $tmp_filename, $mode) )
-				{
-					$error = TRUE;
-					$msg_error[] = $lang['Message']['Ftp_error_put'];
-				}
-				else
-				{
-					@ftp_site($this->connect_id, 'CHMOD 0644 ' . $physical_filename);
+		if ($mode != 'local') {
+			while (true) {
+				$physical_filename = md5($log_id . $filename . microtime()) . '.dl';
+
+				if (!file_exists($this->upload_path . $physical_filename)) {
+					break;
 				}
 			}
-			else
-			{
-				if( $upload_mode == 'remote' )
-				{
-					$result_upload = @copy($tmp_filename, $this->upload_path . $physical_filename);
-				}
-				else
-				{
-					$result_upload = @move_uploaded_file($tmp_filename, $this->upload_path . $physical_filename);
-				}
-				
-				if( !$result_upload )
-				{
-					$error = TRUE;
-					$msg_error[] = $lang['Message']['Upload_error_5'];
-				}
-				
-				if( !$error )
-				{
-					@chmod($this->upload_path . $physical_filename, 0644);
+
+			if ($mode == 'remote') {
+				$result = copy($tmp_filename, $this->upload_path . $physical_filename);
+
+				// Suppression du fichier temporaire crÃ©Ã© par nos soins
+				unlink($tmp_filename);
+			}
+			else {
+				$result = move_uploaded_file($tmp_filename, $this->upload_path . $physical_filename);
+
+				if ($result) {
+					$filetype = \Wamailer\Mime::getType($this->upload_path . $physical_filename);
 				}
 			}
-			
-			//
-			// Suppression du fichier temporaire créé par nos soins
-			//
-			$this->remove_file($tmp_filename);
+
+			if (!$result) {
+				throw new Exception($lang['Message']['Upload_error_5']);
+			}
 		}
-		
-		if( !$error )
-		{
-			//
-			// Tout s'est bien passé, on entre les nouvelles données dans la base de données
-			//
-			$db->beginTransaction();
-			
-			$filedata = array(
-				'file_real_name'     => $filename,
-				'file_physical_name' => ( $upload_mode == 'local' ) ? $tmp_filename : $physical_filename,
-				'file_size'          => $filesize,
-				'file_mimetype'      => $filetype
-			);
-			
-			$db->build(SQL_INSERT, JOINED_FILES_TABLE, $filedata);
-			
-			$file_id = $db->lastInsertId();
-			
-			$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id) 
-				VALUES($log_id, $file_id)";
-			$db->query($sql);
-			
-			$db->commit();
+		else {
+			$physical_filename = $filename;
 		}
-		
-		$this->quit();
+
+		//
+		// Tout sâ€™est bien passÃ©, on entre les nouvelles donnÃ©es dans la base de donnÃ©es
+		//
+		$db->beginTransaction();
+
+		$sql_data = [
+			'file_real_name'     => $filename,
+			'file_physical_name' => $physical_filename,
+			'file_size'          => $filesize,
+			'file_mimetype'      => $filetype
+		];
+
+		$db->insert(JOINED_FILES_TABLE, $sql_data);
+
+		$sql_data = [
+			'log_id'  => $log_id,
+			'file_id' => $db->lastInsertId()
+		];
+		$db->insert(LOG_FILES_TABLE, $sql_data);
+
+		$db->commit();
 	}
-	
+
 	/**
-	 * Ajoute une entrée pour le log courant avec l'identifiant d'un fichier existant
-	 * 
-	 * @param integer $file_id    Identifiant du fichier
-	 * @param integer $log_id     Identifiant du log
-	 * @param boolean $error      True si erreur
-	 * @param array	  $msg_error  Tableau des messages d'erreur
-	 * 
-	 * @access public
-	 * 
-	 * @return void
-	 * @access public
+	 * Ajoute une entrÃ©e pour le log courant avec l'identifiant d'un fichier existant
+	 *
+	 * @param integer $log_id  Identifiant du log
+	 * @param integer $file_id Identifiant du fichier
+	 *
+	 * @throws Exception
 	 */
-	function use_file_exists($file_id, $log_id, &$error, &$msg_error)
+	public function useFile($log_id, $file_id)
 	{
 		global $db, $nl_config, $lang, $listdata;
-		
-		$sql = "SELECT jf.file_physical_name
+
+		$sql = "SELECT jf.file_physical_name, jf.file_size
 			FROM " . JOINED_FILES_TABLE . " AS jf
 				INNER JOIN " . LOG_TABLE . " AS l ON l.liste_id = $listdata[liste_id]
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = l.log_id
 			WHERE jf.file_id = " . $file_id;
 		$result = $db->query($sql);
-		
-		$physical_name = $result->column('file_physical_name');
-		
-		if( !$physical_name )
-		{
-			$error = TRUE;
-			$msg_error[] = sprintf($lang['Message']['File_not_exists'], '');
+
+		if (!($row = $result->fetch())) {
+			throw new Exception("Invalid File ID");
 		}
-		
-		if( !$error )
-		{
-			//
-			// On verifie si le fichier est bien présent sur le serveur
-			//
-			$filesize = $this->joined_file_exists($physical_name, $error, $msg_error);
+
+		if (!file_exists($this->upload_path . $row['file_physical_name'])) {
+			throw new Exception(sprintf($lang['Message']['File_not_exists'], $row['file_physical_name']));
 		}
-		
-		$total_size = 0;
-		if( !$error && !$this->check_maxsize($log_id, $filesize, $total_size) )
-		{
-			$error = TRUE;
-			$msg_error[] = sprintf($lang['Message']['weight_too_big'],
-				formateSize($nl_config['max_filesize'] - $total_size));
+
+		if (!$this->checkFileSize($log_id, $row['file_size'], $total_size)) {
+			throw new Exception(sprintf($lang['Message']['weight_too_big'],
+				formateSize($nl_config['max_filesize'] - $total_size)
+			));
 		}
-		
-		//
-		// Insertion des données
-		//
-		if( !$error )
-		{
-			$sql = "INSERT INTO " . LOG_FILES_TABLE . " (log_id, file_id) 
-				VALUES($log_id, $file_id)";
-			$db->query($sql);
-		}
-		
-		$this->quit();
+
+		$sql = sprintf("INSERT INTO %s (log_id, file_id) VALUES (%d, %d)",
+			LOG_FILES_TABLE,
+			$log_id,
+			$file_id
+		);
+		$db->query($sql);
 	}
-	
+
 	/**
-	 * Vérification de la validité du nom de fichier
-	 * 
-	 * @param string $filename
-	 * 
+	 * VÃ©rification de la taille du fichier par rapport Ã  la taille du log et la taille maximale
+	 *
+	 * @param integer $log_id     Identifiant du log
+	 * @param integer $filesize   Taille du fichier
+	 * @param integer $total_size Taille totale du log
+	 *
 	 * @return boolean
-	 * @access public
 	 */
-	function check_filename($filename)
-	{
-		return ( preg_match('/[\\:*\/?<">|\x00-\x1F\x7F-\x9F]/', $filename) ) ? false : true;
-	}
-	
-	/**
-	 * Vérification de la validité de l'extension du fichier
-	 * 
-	 * @param string $extension
-	 * 
-	 * @return integer
-	 * @access public
-	 */
-	function check_extension($extension)
-	{
-		global $db, $listdata;
-		
-		$sql = "SELECT COUNT(fe_id) AS test_extension
-			FROM " . FORBIDDEN_EXT_TABLE . "
-			WHERE LOWER(fe_ext) = '" . $db->escape(strtolower($extension)) . "'
-				AND liste_id = " . $listdata['liste_id'];
-		$result = $db->query($sql);
-		
-		return ( $result->column('test_extension') > 0 ) ? false : true;
-	}
-	
-	/**
-	 * Vérification de la taille du fichier par rapport à la taille du log et la taille maximale
-	 * 
-	 * @param integer $log_id      Identifiant du log
-	 * @param integer $filesize    Taille du fichier
-	 * @param integer $total_size  Taille totale du log
-	 * 
-	 * @return boolean
-	 * @access public
-	 */
-	function check_maxsize($log_id, $filesize, &$total_size)
+	private function checkFileSize($log_id, $filesize, &$total_size)
 	{
 		global $db, $nl_config;
-		
+
 		$sql = "SELECT SUM(jf.file_size) AS total_size
 			FROM " . JOINED_FILES_TABLE . " AS jf
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = " . $log_id;
 		$result = $db->query($sql);
-		
-		return ( ($result->column('total_size') + $filesize) > $nl_config['max_filesize'] ) ? false : true;
+		$total_size = $result->column('total_size');
+
+		return (($total_size + $filesize) <= $nl_config['max_filesize']);
 	}
-	
+
 	/**
-	 * Récupère les infos sur le fichier joint à télécharger (envoyer au client)
-	 * 
-	 * @param integer $file_id  Identifiant du fichier joint
-	 * 
-	 * @return void
-	 * @access public
+	 * RÃ©cupÃ¨re les infos sur le fichier joint
+	 *
+	 * @param mixed $file Peut Ãªtre lâ€™identifiant ou le nom du fichier joint
+	 *
+	 * @return boolean|array
 	 */
-	function download_file($file_id)
+	public function getFile($file)
 	{
-		global $db, $listdata, $lang, $output;
-		
+		global $db, $listdata;
+
+		if (!is_numeric($file)) {
+			$sql_where = 'jf.file_real_name = \'' . $db->escape($file) . '\'';
+		}
+		else {
+			$sql_where = 'jf.file_id = ' . intval($file);
+		}
+
 		$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 			FROM " . JOINED_FILES_TABLE . " AS jf
 				INNER JOIN " . LOG_TABLE . " AS l ON l.liste_id = $listdata[liste_id]
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 					AND lf.log_id = l.log_id
-			WHERE jf.file_id = " . $file_id;
+			WHERE " . $sql_where;
 		$result = $db->query($sql);
-		
-		if( $row = $result->fetch() )
-		{
-			if( $this->use_ftp )
-			{
-				$tmp_filename = $this->ftp_to_tmp($row);
-			}
-			else
-			{
-				$tmp_filename = wa_realpath($this->upload_path . $row['file_physical_name']);
-			}
-			
-			if( !($fp = @fopen($tmp_filename, 'rb')) )
-			{
-				trigger_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)', E_USER_ERROR);
-			}
-			
-			$data = fread($fp, filesize($tmp_filename));
-			fclose($fp);
-			
-			if( $this->use_ftp )
-			{
-				$this->remove_file($tmp_filename);
-			}
-			
-			$this->quit();
-			$this->send_file($row['file_real_name'], $row['file_mimetype'], $data, $row['file_size']);
+
+		if ($row = $result->fetch()) {
+			$file = [];
+			$file['name'] = $row['file_real_name'];
+			$file['path'] = $this->upload_path . $row['file_physical_name'];
+			$file['size'] = $row['file_size'];
+			$file['type'] = $row['file_mimetype'];
+
+			return $file;
 		}
-		
-		$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
-	}
-	
-	/**
-	 * Déplacement du fichier demandé du serveur ftp vers le dossier temporaire
-	 * Retourne le nom du fichier temporaire
-	 * 
-	 * @param array $data  Données du fichier joint
-	 * 
-	 * @return string
-	 * @access public
-	 */
-	function ftp_to_tmp($data)
-	{
-		$mode         = $this->get_mode($data['file_mimetype']);
-		$tmp_path     = ( OPEN_BASEDIR_RESTRICTION ) ? WA_TMPDIR : sys_get_temp_dir();
-		$tmp_filename = tempnam($tmp_path, 'wa1');
-		
-		if( !@ftp_get($this->connect_id, $tmp_filename, $data['file_physical_name'], $mode) )
-		{
-			trigger_error('Ftp_error_get', E_USER_ERROR);
-		}
-		
-		return $tmp_filename;
-	}
-	
-	/**
-	 * Mode à utiliser pour le ftp, ascii ou binaire
-	 * 
-	 * @param string $mime_type  Type mime du fichier concerné
-	 * 
-	 * @return integer
-	 * @access public
-	 */
-	function get_mode($mime_type)
-	{
-		return ( preg_match('/text|html|xml/i', $mime_type) ) ? FTP_ASCII : FTP_BINARY;
-	}
-	
-	/**
-	 * Fonction de suppression de fichiers joints
-	 * Retourne le nombre des fichiers supprimés, en cas de succés
-	 * 
-	 * @param boolean $massive_delete  Si true, suppression des fichiers joints du ou des logs concernés
-	 * @param mixed   $log_id_ary      id ou tableau des id des logs concernés
-	 * @param mixed   $file_id_ary     id ou tableau des id des fichiers joints concernés (si $massive_delete à false)
-	 * 
-	 * @return mixed
-	 * @access public
-	 */
-	function delete_joined_files($massive_delete, $log_ids, $file_ids = array())
-	{
-		global $db;
-		
-		if( !is_array($log_ids) )
-		{
-			$log_ids = array($log_ids);
-		}
-		
-		if( !is_array($file_ids) )
-		{
-			$file_ids = array($file_ids);
-		}
-		
-		if( count($log_ids) > 0 )
-		{
-			if( $massive_delete == true )
-			{
-				$sql = "SELECT file_id 
-					FROM " . LOG_FILES_TABLE . " 
-					WHERE log_id IN(" . implode(', ', $log_ids) . ") 
-					GROUP BY file_id";
-				$result = $db->query($sql);
-				
-				$file_ids = array();
-				while( $file_id = $result->column('file_id') )
-				{
-					array_push($file_ids, $file_id);
-				}
-			}
-			
-			if( count($file_ids) > 0 )
-			{
-				$filename_ary = array();
-				
-				$sql = "SELECT lf.file_id, jf.file_physical_name
-					FROM " . LOG_FILES_TABLE . " AS lf
-						INNER JOIN " . JOINED_FILES_TABLE . " AS jf ON jf.file_id = lf.file_id
-					WHERE lf.file_id IN(" . implode(', ', $file_ids) . ")
-					GROUP BY lf.file_id, jf.file_physical_name
-					HAVING COUNT(lf.file_id) = 1";
-				$result = $db->query($sql);
-				
-				$ids = array();
-				while( $row = $result->fetch() )
-				{
-					array_push($ids,          $row['file_id']);
-					array_push($filename_ary, $row['file_physical_name']);
-				}
-				
-				if( count($ids) > 0 )
-				{
-					$sql = "DELETE FROM " . JOINED_FILES_TABLE . " 
-						WHERE file_id IN(" . implode(', ', $ids) . ")";
-					$db->query($sql);
-				}
-				
-				$sql = "DELETE FROM " . LOG_FILES_TABLE . " 
-					WHERE log_id IN(" . implode(', ', $log_ids) . ") 
-						AND file_id IN(" . implode(', ', $file_ids) . ")";
-				$db->query($sql);
-				
-				//
-				// Suppression physique des fichiers joints devenus inutiles
-				//
-				foreach( $filename_ary as $filename )
-				{
-					if( $this->use_ftp )
-					{
-						if( !@ftp_delete($this->connect_id, $filename) )
-						{
-							trigger_error('Ftp_error_del', E_USER_ERROR);
-						}
-					}
-					else
-					{
-						$this->remove_file(wa_realpath($this->upload_path . $filename));
-					}
-				}
-				
-				return count($filename_ary);
-			}// end count file_id_ary
-		}// end count log_id_ary
-		
+
 		return false;
 	}
-	
-	/**
-	 * Suppression d'un fichier du serveur
-	 * 
-	 * @param string $filename  Nom du fichier sur le serveur
-	 * 
-	 * @return void
-	 * @access public
-	 */
-	function remove_file($filename)
-	{
-		if( file_exists($filename) )
-		{
-			unlink($filename);
-		}
-	}
-	
-	/**
-	 * Fonction d'envois des entêtes nécessaires au téléchargement et 
-	 * des données du fichier à télécharger
-	 * 
-	 * @param string $filename   Nom réel du fichier
-	 * @param string $mime_type  Mime type du fichier
-	 * @param string $filedata   Contenu du fichier
-	 * 
-	 * @return void
-	 * @access public
-	 */
-	function send_file($filename, $mime_type, $data)
-	{
-		//
-		// Si aucun type de média n'est indiqué, on utilisera par défaut 
-		// le type application/octet-stream (application/octetstream pour IE et Opera).
-		// Si le type application/octet-stream	ou application/octetstream est indiqué, on fait 
-		// éventuellement le changement si le type n'est pas bon pour l'agent utilisateur.
-		// Si on a à faire à Opera, on utilise application/octetstream car toute autre type peut poser 
-		// d'éventuels problèmes.
-		//
-		if( empty($mime_type) || preg_match('#application/octet-?stream#i', $mime_type) || WA_USER_BROWSER == 'opera' )
-		{
-			if( WA_USER_BROWSER == 'msie' || WA_USER_BROWSER == 'opera' )
-			{
-				$mime_type = 'application/octetstream';
-			}
-			else
-			{
-				$mime_type = 'application/octet-stream';
-			}
-		}
-		
-		//
-		// Désactivation de la compression de sortie de php au cas où 
-		// et envoi des en-têtes appropriés au client.
-		//
-		@ini_set('zlib.output_compression', 'Off');
-		header('Content-Length: ' . strlen($data));
-		header('Content-Disposition: attachment; filename="' . $filename . '"');
-		header('Content-Type: ' . $mime_type . '; name="' . $filename . '"');
-		
-		echo $data;
-		exit;
-	}
-	
-	/**
-	 * Fermeture de la connexion au serveur ftp
-	 * 
-	 * @return void
-	 * @access public
-	 */
-	function quit()
-	{
-		if( $this->use_ftp )
-		{
-			@ftp_close($this->connect_id);
-		}
-	}
-}
 
+	/**
+	 * Suppression des fichiers joints aux logs concernÃ©s.
+	 *
+	 * @param mixed $log_ids  id ou tableau des id des logs concernÃ©s
+	 * @param mixed $file_ids id ou tableau des id des fichiers joints concernÃ©s
+	 *                        (par dÃ©faut, tous les fichiers liÃ©s aux logs
+	 *                        spÃ©cifiÃ©s sont supprimÃ©s)
+	 */
+	public function deleteFiles($log_ids, $file_ids = [])
+	{
+		global $db;
+
+		$log_ids  = (array) $log_ids;
+		$file_ids = (array) $file_ids;
+
+		if (count($log_ids) == 0) {
+			return null;
+		}
+
+		$db->beginTransaction();
+
+		$sql = "DELETE FROM " . LOG_FILES_TABLE . "
+			WHERE log_id IN(" . implode(', ', $log_ids) . ")";
+		if (count($file_ids) > 0) {
+			$sql .= " AND file_id IN(" . implode(', ', $file_ids) . ")";
+		}
+
+		$db->query($sql);
+
+		$sql = "SELECT jf.file_id, jf.file_physical_name
+			FROM " . JOINED_FILES_TABLE . " AS jf
+			LEFT JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+			WHERE lf.log_id IS NULL";
+		$result = $db->query($sql);
+
+		if ($row = $result->fetch()) {
+			$file_ids = [];
+			do {
+				$file_ids[] = $row['file_id'];
+
+				if (file_exists($this->upload_path . $row['file_physical_name'])) {
+					unlink($this->upload_path . $row['file_physical_name']);
+				}
+			}
+			while ($row = $result->fetch());
+
+			$sql = "DELETE FROM " . JOINED_FILES_TABLE . "
+				WHERE file_id IN(" . implode(', ', $file_ids) . ")";
+			$db->query($sql);
+		}
+
+		$db->commit();
+		$db->vacuum([LOG_FILES_TABLE, JOINED_FILES_TABLE]);
+	}
 }
-?>

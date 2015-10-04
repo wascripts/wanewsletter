@@ -1,10 +1,10 @@
 <form method="get" action="view.php#view">
 <div class="block">
 	<h2 id="view">{L_SUBJECT}&nbsp;: <q>{SUBJECT}</q></h2>
-	
+
 	<div class="textinput">
 		<object id="iframe" data="view.php?mode=iframe&amp;id={LOG_ID}&amp;format={FORMAT}"
-			type="text/html" width="600" height="400"><p>Unknown error</p></object>
+			type="text/html" width="600" height="500"><p>Unknown error</p></object>
 	</div>
 	<div id="log-details">
 		<span><em>{L_NUMDEST}&nbsp;:</em> {NUMDEST}</span>
@@ -19,9 +19,9 @@
 		</span>
 		<!-- END export -->
 	</div>
-	
+
 	{JOINED_FILES_BOX}
-	
+
 	<!-- BEGIN format_box -->
 	<div class="bottom"> {format_box.S_HIDDEN_FIELDS}
 		<span class="notice">{format_box.L_FORMAT}&nbsp;:</span> {format_box.FORMAT_BOX}
