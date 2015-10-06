@@ -210,6 +210,11 @@ function WaDatabase($dsn)
 	$infos['username'] = (isset($infos['user'])) ? $infos['user'] : null;
 	$infos['passwd']   = (isset($infos['pass'])) ? $infos['pass'] : null;
 
+	// Timeout de connexion
+	if (empty($options['timeout'])) {
+		$options['timeout'] = 5;
+	}
+
 	$db = new $dbclass();
 	$db->connect($infos, $options);
 

@@ -82,6 +82,10 @@ class Postgres extends Wadb
 			$connect = 'pg_pconnect';
 		}
 
+		if (!empty($this->options['timeout']) && is_int($this->options['timeout'])) {
+			$connectString .= sprintf('connect_timeout=%d ', $this->options['timeout']);
+		}
+
 		//
 		// Options relatives aux protocoles SSL/TLS
 		//

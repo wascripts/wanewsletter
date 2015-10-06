@@ -65,6 +65,10 @@ class Mysqli extends Wadb
 		$this->link = mysqli_init();
 		$flags = null;
 
+		if (!empty($this->options['timeout']) && is_int($this->options['timeout'])) {
+			mysqli_options($this->link, MYSQLI_OPT_CONNECT_TIMEOUT, $this->options['timeout']);
+		}
+
 		//
 		// Options relatives aux protocoles SSL/TLS
 		//
