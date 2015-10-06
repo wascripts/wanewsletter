@@ -62,7 +62,21 @@ class Mysqli extends Wadb
 			$host = "p:$host";
 		}
 
-		if (!($this->link = mysqli_connect($host, $username, $passwd, $dbname, $port))) {
+		$this->link = mysqli_init();
+		$flags = null;
+
+		//
+		// Options relatives aux protocoles SSL/TLS
+		//
+		if (!empty($this->options['ssl'])) {
+			$flags = MYSQLI_CLIENT_SSL;
+			$args = ['ssl-key', 'ssl-cert', 'ssl-ca', 'ssl-capath', 'ssl-cipher'];
+			$args = array_fill_keys($args, null);
+			$args = array_intersect_key(array_replace($args, $this->options), $args);
+			call_user_func_array(array($this->link, 'ssl_set'), $args);
+		}
+
+		if (!mysqli_real_connect($this->link, $host, $username, $passwd, $dbname, $port, null, $flags)) {
 			$this->errno = mysqli_connect_errno();
 			$this->error = mysqli_connect_error();
 			$this->link  = null;

@@ -82,6 +82,15 @@ class Postgres extends Wadb
 			$connect = 'pg_pconnect';
 		}
 
+		//
+		// Options relatives aux protocoles SSL/TLS
+		//
+		foreach (['sslmode', 'sslcert', 'sslkey', 'sslrootcert'] as $key) {
+			if (!empty($this->options[$key])) {
+				$connectString .= sprintf("%s='%s' ", $key, $this->options[$key]);
+			}
+		}
+
 		set_error_handler(function ($errno, $errstr) {
 			$this->error = $errstr;
 		});

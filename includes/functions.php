@@ -136,6 +136,20 @@ function load_config_file()
 		}
 	}
 
+	//
+	// Options supplémentaires transmises par commodité sous forme de tableau
+	//
+	if (isset($dsn_opts)) {
+		$args = http_build_query($dsn_opts, '', '&');
+
+		if (strpos($dsn, '?')) {
+			$dsn .= '&'.$args;
+		}
+		else {
+			$dsn .= '?'.$args;
+		}
+	}
+
 	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 
 	//
