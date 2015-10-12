@@ -17,6 +17,8 @@ if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', str_replace('\\', '/', dirname(__DIR__)));
 }
 
+set_include_path('.'.PATH_SEPARATOR.WA_ROOTDIR);
+
 // $default_error_reporting est utilisé ultérieurement dans le gestionnaire d'erreurs
 define(__NAMESPACE__.'\\DEFAULT_ERROR_REPORTING', (E_ALL & ~(E_STRICT|E_DEPRECATED)));
 error_reporting(DEFAULT_ERROR_REPORTING);
@@ -34,11 +36,11 @@ if (!file_exists(WA_ROOTDIR . '/vendor/autoload.php')) {
 	exit;
 }
 
-require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/includes/compat.inc.php';
-require WA_ROOTDIR . '/includes/functions.php';
-require WA_ROOTDIR . '/includes/functions.wrapper.php';
-require WA_ROOTDIR . '/vendor/autoload.php';
+require 'includes/constantes.php';
+require 'includes/compat.inc.php';
+require 'includes/functions.php';
+require 'includes/functions.wrapper.php';
+require 'vendor/autoload.php';
 
 //
 // Configuration des gestionnaires d'erreurs et d'exceptions
@@ -80,7 +82,7 @@ if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
 }
 
 // Doit être placé après load_config_file()
-require WA_ROOTDIR . '/includes/wadb_init.php';
+require 'includes/wadb_init.php';
 
 //
 // Initialisation du système de templates

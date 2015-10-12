@@ -252,7 +252,7 @@ if ($process_send) {
 	define('SEND_PACKET', $send_packet);
 	define('SEND_DELAY',  $send_delay);
 
-	require WA_ROOTDIR . '/includes/engine_send.php';
+	require 'includes/engine_send.php';
 
 	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 		FROM " . LOG_TABLE . "
@@ -285,7 +285,7 @@ if ($process_send) {
 	echo "\n";
 }
 else if ($process_subscribe) {
-	require WA_ROOTDIR . '/includes/functions.stats.php';
+	require 'includes/functions.stats.php';
 
 	$sub = new Subscription($listdata);
 	$pop = new PopClient();

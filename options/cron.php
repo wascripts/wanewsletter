@@ -47,7 +47,7 @@ if ($listdata = $result->fetch()) {
 	@set_time_limit(3600);
 
 	if ($mode == 'send') {
-		require WA_ROOTDIR . '/includes/engine_send.php';
+		require 'includes/engine_send.php';
 
 		 // on récupère le dernier log en statut d'envoi
 		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
@@ -80,7 +80,7 @@ if ($listdata = $result->fetch()) {
 		$output->displayMessage($message);
 	}
 	else if ($mode == 'validate') {
-		require WA_ROOTDIR . '/includes/functions.stats.php';
+		require 'includes/functions.stats.php';
 
 		$limit_security = 100; // nombre maximal d'emails dont le script doit s'occuper à chaque appel
 

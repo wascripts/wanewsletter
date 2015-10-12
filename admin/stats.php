@@ -12,7 +12,7 @@ namespace Wanewsletter;
 const FONT_FILE = '~/languages/DejaVuSans.ttf';
 
 require './start.inc.php';
-require WA_ROOTDIR . '/includes/functions.stats.php';
+require 'includes/functions.stats.php';
 
 //
 // Si le module de statistiques est désactivé ou que la librairie GD n'est pas installé,
@@ -440,7 +440,7 @@ if ($img == 'camembert') {
 
 $output->build_listbox(Auth::VIEW, false);
 
-require WA_ROOTDIR . '/includes/functions.box.php';
+require 'includes/functions.box.php';
 
 $output->page_header();
 

@@ -173,7 +173,7 @@ if (isset($_POST['start'])) {
 		//
 		@set_time_limit(3600);
 
-		require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
+		require 'includes/dblayer/sqlparser.php';
 
 		$sql_create = Dblayer\parseSQL(file_get_contents($sql_create), $prefixe);
 		$sql_data   = Dblayer\parseSQL(file_get_contents($sql_data), $prefixe);

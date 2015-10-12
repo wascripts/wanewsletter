@@ -870,7 +870,7 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 		$output->displayMessage('Not_auth_send');
 	}
 
-	require WA_ROOTDIR . '/includes/engine_send.php';
+	require 'includes/engine_send.php';
 
 	//
 	// On règle le script pour ignorer une déconnexion du client et

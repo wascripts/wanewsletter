@@ -638,7 +638,7 @@ class Subscription
 
 	private function update_stats()
 	{
-		require WA_ROOTDIR . '/includes/functions.stats.php';
+		require 'includes/functions.stats.php';
 
 		update_stats($this->listdata);
 	}

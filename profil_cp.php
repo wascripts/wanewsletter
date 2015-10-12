@@ -172,7 +172,7 @@ switch ($mode) {
 			}
 		}
 
-		require WA_ROOTDIR . '/includes/functions.box.php';
+		require 'includes/functions.box.php';
 
 		$output->page_header();
 

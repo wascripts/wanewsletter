@@ -148,7 +148,7 @@ if (isset($_POST['submit'])) {
 	}
 
 	if (!$new_config['disable_stats'] && extension_loaded('gd')) {
-		require WA_ROOTDIR . '/includes/functions.stats.php';
+		require 'includes/functions.stats.php';
 
 		if (!is_writable(WA_STATSDIR)) {
 			$error = true;
@@ -188,7 +188,7 @@ else {
 	$new_config = $old_config;
 }
 
-require WA_ROOTDIR . '/includes/functions.box.php';
+require 'includes/functions.box.php';
 
 $debug_box  = '<select name="debug_level">';
 foreach ([DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL] as $debug_level) {

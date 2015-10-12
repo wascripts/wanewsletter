@@ -347,7 +347,7 @@ else {
 	$admin_box = '';
 }
 
-require WA_ROOTDIR . '/includes/functions.box.php';
+require 'includes/functions.box.php';
 
 $output->addHiddenField('uid', $current_admin['admin_id']);
 

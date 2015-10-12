@@ -247,7 +247,7 @@ switch ($mode) {
 		wan_print_row('upload dir',         wan_subdir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
 
 		if (!$nl_config['disable_stats']) {
-			require WA_ROOTDIR . '/includes/functions.stats.php';
+			require 'includes/functions.stats.php';
 			wan_print_row('stats dir', wan_subdir_status(WA_STATSDIR));
 		}
 		wan_print_row('max_filesize',  $nl_config['max_filesize']);
@@ -476,7 +476,7 @@ switch ($mode) {
 		}
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-			require WA_ROOTDIR . '/includes/functions.box.php';
+			require 'includes/functions.box.php';
 
 			$output->assign_block_vars('format_box', [
 				'L_FORMAT'   => $lang['Format_to_export'],
@@ -791,7 +791,7 @@ switch ($mode) {
 		]);
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-			require WA_ROOTDIR . '/includes/functions.box.php';
+			require 'includes/functions.box.php';
 
 			$output->assign_block_vars('format_box', [
 				'L_FORMAT'   => $lang['Format_to_import'],
@@ -1116,7 +1116,7 @@ switch ($mode) {
 
 	case 'restore':
 		if (isset($_POST['submit'])) {
-			require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
+			require 'includes/dblayer/sqlparser.php';
 
 			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : null;
 			$local_file  = trim(filter_input(INPUT_POST, 'local_file'));

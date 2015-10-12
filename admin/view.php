@@ -521,7 +521,7 @@ else if ($mode == 'abonnes') {
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
-			require WA_ROOTDIR . '/includes/functions.box.php';
+			require 'includes/functions.box.php';
 
 			$output->page_header();
 
@@ -1022,7 +1022,7 @@ else if ($mode == 'liste') {
 			}
 		}
 
-		require WA_ROOTDIR . '/includes/functions.box.php';
+		require 'includes/functions.box.php';
 
 		$output->page_header();
 
@@ -1171,7 +1171,7 @@ else if ($mode == 'liste') {
 					WHERE liste_id = " . $listdata['liste_id'];
 				$db->query($sql);
 
-				include WA_ROOTDIR . '/includes/functions.stats.php';
+				require 'includes/functions.stats.php';
 				remove_stats($listdata['liste_id']);
 
 				$message = $lang['Message']['Liste_del_all'];
@@ -1240,7 +1240,7 @@ else if ($mode == 'liste') {
 					WHERE liste_id = " . $listdata['liste_id'];
 				$db->query($sql);
 
-				include WA_ROOTDIR . '/includes/functions.stats.php';
+				require 'includes/functions.stats.php';
 				remove_stats($listdata['liste_id'], $liste_id);
 
 				$message = $lang['Message']['Liste_del_move'];
@@ -1727,7 +1727,7 @@ else if ($mode == 'log') {
 			}
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-				require WA_ROOTDIR . '/includes/functions.box.php';
+				require 'includes/functions.box.php';
 
 				// Par champ caché, car ce formulaire est en méthode GET.
 				$output->addHiddenField('mode', 'log');

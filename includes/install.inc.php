@@ -260,7 +260,7 @@ if ($start) {
 	}
 
 	if (!$error) {
-		require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
+		require 'includes/dblayer/sqlparser.php';
 
 		if (!($passwd_hash = password_hash($admin_pass, PASSWORD_DEFAULT))) {
 			trigger_error("Unexpected error returned by password API", E_USER_ERROR);
@@ -388,7 +388,7 @@ if ($start) {
 $output->send_headers();
 
 if (!$reinstall) {
-	require WA_ROOTDIR . '/includes/functions.box.php';
+	require 'includes/functions.box.php';
 
 	$db_box = '';
 	foreach ($supported_db as $name => $data) {
