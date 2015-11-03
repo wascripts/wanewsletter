@@ -131,7 +131,7 @@ class Subscription
 			$this->account['abo_id'] = 0;
 			$this->account['email']  = $email;
 			$this->account['pseudo'] = (is_string($pseudo)) ? trim($pseudo) : '';
-			$this->account['status'] = ($this->listdata['confirm_subscribe'] == CONFIRM_NONE) ? ABO_ACTIF : ABO_INACTIF;
+			$this->account['status'] = ($this->listdata['confirm_subscribe'] == CONFIRM_NONE) ? ABO_ACTIVE : ABO_INACTIVE;
 		}
 
 		if ($this->isRegistered) {
@@ -266,7 +266,7 @@ class Subscription
 				$confirmed = SUBSCRIBE_CONFIRMED;
 			}
 
-			if ($this->hasAccount && $this->account['status'] == ABO_ACTIF &&
+			if ($this->hasAccount && $this->account['status'] == ABO_ACTIVE &&
 				$this->listdata['confirm_subscribe'] != CONFIRM_ALWAYS
 			) {
 				$confirmed = SUBSCRIBE_CONFIRMED;
@@ -385,9 +385,9 @@ class Subscription
 		if ($this->account['date'] > $time_limit) {
 			$db->beginTransaction();
 
-			if ($this->account['status'] == ABO_INACTIF) {
+			if ($this->account['status'] == ABO_INACTIVE) {
 				$sql = "UPDATE " . ABONNES_TABLE . "
-					SET abo_status = " . ABO_ACTIF . "
+					SET abo_status = " . ABO_ACTIVE . "
 					WHERE abo_id = " . $this->account['abo_id'];
 				$db->query($sql);
 			}

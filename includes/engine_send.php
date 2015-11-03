@@ -162,7 +162,7 @@ function launch_sending($listdata, $logdata, array $supp_address = [])
 					AND al.liste_id  = $listdata[liste_id]
 					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 					AND al.send      = 0
-			WHERE a.abo_status = " . ABO_ACTIF;
+			WHERE a.abo_status = " . ABO_ACTIVE;
 		$result = $db->query($sql);
 
 		$total_abo = $result->column('total');
@@ -176,7 +176,7 @@ function launch_sending($listdata, $logdata, array $supp_address = [])
 					AND al.liste_id  = $listdata[liste_id]
 					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 					AND al.send      = 0
-			WHERE a.abo_status = " . ABO_ACTIF;
+			WHERE a.abo_status = " . ABO_ACTIVE;
 		if ($nl_config['sending_limit'] > 0) {
 			$sql .= " LIMIT $nl_config[sending_limit] OFFSET 0";
 		}
@@ -463,7 +463,7 @@ function launch_sending($listdata, $logdata, array $supp_address = [])
 	$sql = "SELECT COUNT(*) AS num_dest, al.send
 		FROM " . ABO_LISTE_TABLE . " AS al
 			INNER JOIN " . ABONNES_TABLE . " AS a ON a.abo_id = al.abo_id
-				AND a.abo_status = " . ABO_ACTIF . "
+				AND a.abo_status = " . ABO_ACTIVE . "
 		WHERE al.liste_id    = $listdata[liste_id]
 			AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 		GROUP BY al.send";

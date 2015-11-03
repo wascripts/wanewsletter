@@ -31,7 +31,7 @@ if (count($liste_ids) > 0) {
 				WHERE al.liste_id IN(" . implode(', ', $liste_ids) . ")
 					AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 			)
-			AND a.abo_status = " . ABO_ACTIF;
+			AND a.abo_status = " . ABO_ACTIVE;
 	$result = $db->query($sql);
 	$data   = $result->column('num_subscribe');
 }

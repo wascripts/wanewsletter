@@ -384,7 +384,7 @@ switch ($mode) {
 						AND al.liste_id  = $listdata[liste_id]
 						AND al.format    = $format
 						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-				WHERE a.abo_status = " . ABO_ACTIF;
+				WHERE a.abo_status = " . ABO_ACTIVE;
 			$result = $db->query($sql);
 
 			$contents = '';
@@ -693,7 +693,7 @@ switch ($mode) {
 						$sql_data['format']        = $format;
 						$sql_data['register_key']  = generate_key(20, false);
 						$sql_data['register_date'] = $current_time;
-						$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF)
+						$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIVE)
 							? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 
 						$db->insert(ABO_LISTE_TABLE, $sql_data);
@@ -719,7 +719,7 @@ switch ($mode) {
 
 					$sql_data = [];
 					$sql_data['abo_email']  = $email;
-					$sql_data['abo_status'] = ABO_ACTIF;
+					$sql_data['abo_status'] = ABO_ACTIVE;
 
 					try {
 						$db->insert(ABONNES_TABLE, $sql_data);

@@ -95,8 +95,8 @@ const STATUS_MODEL   = 3;
 //
 // Statut des abonnés
 //
-const ABO_ACTIF   = 1;
-const ABO_INACTIF = 0;
+const ABO_ACTIVE   = 1;
+const ABO_INACTIVE = 0;
 
 const SUBSCRIBE_CONFIRMED     = 1;
 const SUBSCRIBE_NOT_CONFIRMED = 0;

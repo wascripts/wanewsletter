@@ -32,7 +32,7 @@ if (count($liste_ids) > 0) {
 	$result = $db->query($sql);
 
 	while ($row = $result->fetch()) {
-		if ($row['abo_status'] == ABO_ACTIF) {
+		if ($row['abo_status'] == ABO_ACTIVE) {
 			$num_inscrits = $row['num_abo'];
 		}
 		else {

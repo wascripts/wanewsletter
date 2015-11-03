@@ -429,7 +429,7 @@ else if ($import_mail) {
 				$sql_data['format']        = $format;
 				$sql_data['register_key']  = generate_key(20, false);
 				$sql_data['register_date'] = $current_time;
-				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF)
+				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIVE)
 					? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 
 				$db->insert(ABO_LISTE_TABLE, $sql_data);
@@ -454,7 +454,7 @@ else if ($import_mail) {
 
 			$sql_data = [];
 			$sql_data['abo_email']  = $email;
-			$sql_data['abo_status'] = ABO_ACTIF;
+			$sql_data['abo_status'] = ABO_ACTIVE;
 
 			try {
 				$db->insert(ABONNES_TABLE, $sql_data);

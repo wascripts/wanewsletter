@@ -333,7 +333,7 @@ else if ($mode == 'abonnes') {
 				'S_ABO_PSEUDO'        => (!empty($row['abo_pseudo']))
 					? htmlspecialchars($row['abo_pseudo']) : '<b>' . $lang['No_data'] . '</b>',
 				'S_ABO_EMAIL'         => htmlspecialchars($row['abo_email']),
-				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIF) ? $lang['Active'] : $lang['Inactive']
+				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIVE) ? $lang['Active'] : $lang['Inactive']
 			]);
 
 			//
@@ -448,7 +448,7 @@ else if ($mode == 'abonnes') {
 				$sql_data = [
 					'abo_email'  => $email,
 					'abo_pseudo' => strip_tags(trim(u::filter_input(INPUT_POST, 'pseudo'))),
-					'abo_status' => (filter_input(INPUT_POST, 'status') == ABO_ACTIF) ? ABO_ACTIF : ABO_INACTIF
+					'abo_status' => (filter_input(INPUT_POST, 'status') == ABO_ACTIVE) ? ABO_ACTIVE : ABO_INACTIVE
 				];
 
 				//
@@ -548,8 +548,8 @@ else if ($mode == 'abonnes') {
 				'S_ABO_PSEUDO'         => htmlspecialchars($row['abo_pseudo']),
 				'S_ABO_EMAIL'          => htmlspecialchars($row['abo_email']),
 				'S_ABO_ID'             => $row['abo_id'],
-				'S_STATUS_ACTIVE'      => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_ACTIF)),
-				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIF))
+				'S_STATUS_ACTIVE'      => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_ACTIVE)),
+				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIVE))
 			]);
 
 			//

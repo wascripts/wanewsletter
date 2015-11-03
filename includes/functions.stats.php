@@ -95,7 +95,7 @@ function create_stats($listdata, $month, $year)
 						AND al.liste_id  = $listdata[liste_id]
 						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
 						AND ( al.register_date BETWEEN $min_time AND $max_time )
-				WHERE a.abo_status = " . ABO_ACTIF;
+				WHERE a.abo_status = " . ABO_ACTIVE;
 			$result = $db->query($sql);
 			$stats[$i] = $result->column('num_abo');
 		}

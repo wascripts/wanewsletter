@@ -314,7 +314,7 @@ if (isset($_POST['start'])) {
 				$sql = "UPDATE " . ABO_LISTE_TABLE . "
 					SET register_date = $row[abo_register_date],
 						confirmed     = $row[abo_status]";
-				if ($row['abo_status'] == ABO_INACTIF) {
+				if ($row['abo_status'] == ABO_INACTIVE) {
 					$sql .= ", register_key = '" . substr($row['abo_register_key'], 0, 20) . "'";
 				}
 				$db->query($sql . " WHERE abo_id = " . $row['abo_id']);
