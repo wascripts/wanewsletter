@@ -57,8 +57,16 @@ class Session implements \SessionHandlerInterface
 			}
 		}
 
-		ini_set('session.use_only_cookies', true);
-		ini_set('session.use_trans_sid', false);
+		$session_opts = [
+			'use_trans_sid'    => false,
+			'use_only_cookies' => true
+		];
+
+		if (PHP_VERSION_ID < 70000) {
+			foreach ($session_opts as $opt => $value) {
+				ini_set('session.'.$opt, $value);
+			}
+		}
 
 		session_set_save_handler($this);
 
@@ -71,7 +79,8 @@ class Session implements \SessionHandlerInterface
 		);
 
 		session_name($this->cfg_cookie['name'].'_sessid');
-		session_start();
+
+		session_start($session_opts);
 
 		if (!isset($_SESSION['is_logged_in'])) {
 			$this->reset();
