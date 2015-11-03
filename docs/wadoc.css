@@ -17,7 +17,7 @@ div#smallheader, div#global, address#footer {
 }
 
 div#global { counter-reset: item; }
-div#global div.block[id] h2:before {/* div.bloc[id] pour ne pas cibler le h2 "sommaire" */
+div#global div.block[id] h2::before {/* div.bloc[id] pour ne pas cibler le h2 "sommaire" */
 	content: counter(item, decimal) ".\00A0";
 	counter-increment: item;
 }

@@ -252,8 +252,8 @@ div.bottom {
 ul.links    { margin: 1em 0 -1em; padding: 0; text-align: left; }
 ul.links li { display: inline; font-size: .85em; }
 
-ul.links li:before { content: "["; }
-ul.links li:after  { content: "]"; }
+ul.links li::before { content: "["; }
+ul.links li::after  { content: "]"; }
 
 /* tables */
 

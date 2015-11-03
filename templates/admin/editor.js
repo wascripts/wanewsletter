@@ -8,57 +8,32 @@
 
 function make_editor()
 {
-	var make_button = function(bloc) {
-		var format = bloc.id.substr((bloc.id.length - 1), 1);
+	['textarea1','textarea2'].forEach(function(name) {
+		if (document.getElementById(name) != null) {
+			var bloc   = document.getElementById(name);
+			var format = bloc.id.substr((bloc.id.length - 1), 1);
 
-		var conteneur = document.createElement('div');
-		conteneur.setAttribute('class', 'bottom');
+			var conteneur = document.createElement('div');
+			conteneur.setAttribute('class', 'bottom');
 
-		var button = document.createElement('button');
-		button.setAttribute('id', 'preview' + format);
-		button.setAttribute('type', 'button');
-		button.appendChild(document.createTextNode(lang['preview']));
-		conteneur.appendChild(button);
-		button.onclick = preview;
+			var button = document.createElement('button');
+			button.setAttribute('id', 'preview' + format);
+			button.setAttribute('type', 'button');
+			button.appendChild(document.createTextNode(lang['preview']));
+			conteneur.appendChild(button);
+			button.onclick = preview;
 
-		conteneur.appendChild(document.createTextNode('\u00A0'));
+			conteneur.appendChild(document.createTextNode('\u00A0'));
 
-		button = button.cloneNode(false);
-		button.setAttribute('id', 'addLinks' + format);
-		button.appendChild(document.createTextNode(lang['addlink']));
-		conteneur.appendChild(button);
-		button.onclick = addLinks;
+			button = button.cloneNode(false);
+			button.setAttribute('id', 'addLinks' + format);
+			button.appendChild(document.createTextNode(lang['addlink']));
+			conteneur.appendChild(button);
+			button.onclick = addLinks;
 
-		bloc.appendChild(conteneur);
-	};
-
-	var editForm = document.forms['send-form'];
-	var DOMRangeIE = (typeof(editForm.elements['subject'].selectionStart) == 'undefined' &&
-		typeof(editForm.elements['subject'].createTextRange) != 'undefined');
-
-	if (document.getElementById('textarea1') != null) {
-		if (DOMRangeIE) {
-			var bloc_text = editForm.elements['body_text'];
-
-			bloc_text.onclick  = storeCaret;
-			bloc_text.onselect = storeCaret;
-			bloc_text.onkeyup  = storeCaret;
+			bloc.appendChild(conteneur);
 		}
-
-		make_button(document.getElementById('textarea1'));
-	}
-
-	if (document.getElementById('textarea2') != null) {
-		if (DOMRangeIE) {
-			var bloc_html = editForm.elements['body_html'];
-
-			bloc_html.onclick  = storeCaret;
-			bloc_html.onselect = storeCaret;
-			bloc_html.onkeyup  = storeCaret;
-		}
-
-		make_button(document.getElementById('textarea2'));
-	}
+	});
 }
 
 /*
@@ -170,20 +145,12 @@ function addLinks()
 		scrollTop = texte.scrollTop;
 	}
 
-	if (typeof(texte.selectionStart) != 'undefined') {
-		var caretPos = (texte.selectionEnd + 7);// 7 = longueur de la chaîne {LINKS}
-		var before   = (texte.value).substring(0, texte.selectionStart);
-		var after    = (texte.value).substring(texte.selectionStart, texte.textLength);
-		texte.value  = before + '{LINKS}' + after;
-		texte.selectionStart = caretPos;
-		texte.selectionEnd   = caretPos;
-	}
-	else if (typeof(texte.createTextRange) != 'undefined' && texte.caretPos) {
-		texte.caretPos.text = '{LINKS}';
-	}
-	else {
-		texte.value += '{LINKS}\n';
-	}
+	var caretPos = (texte.selectionEnd + 7);// 7 = longueur de la chaîne {LINKS}
+	var before   = (texte.value).substring(0, texte.selectionStart);
+	var after    = (texte.value).substring(texte.selectionStart, texte.textLength);
+	texte.value  = before + '{LINKS}' + after;
+	texte.selectionStart = caretPos;
+	texte.selectionEnd   = caretPos;
 
 	if( scrollTop > 0 ) {
 		texte.scrollTop = scrollTop;
@@ -192,13 +159,5 @@ function addLinks()
 	texte.focus();
 }
 
-function storeCaret()
-{
-	if (typeof(this.createTextRange) != 'undefined') {
-		this.caretPos = document.selection.createRange().duplicate();
-	}
-}
-
-// Need to work in IE < 9, so we don't use W3C DOM Events model here.
-window.onload = function() { make_editor(); };
+document.addEventListener('DOMContentLoaded', make_editor, false);
 
