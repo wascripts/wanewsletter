@@ -134,18 +134,19 @@ class Attach
 				throw new Exception($lang['Message']['Upload_error_5']);
 			}
 
-			$result = http_get_contents($url, $errstr);
-
-			if (!$result) {
+			try {
+				$result = http_get_contents($url);
+			}
+			catch (Exception $e) {
 				fclose($fw);
 				unlink($tmp_filename);
-				throw new Exception($errstr);
+				throw $e;
 			}
 
 			fwrite($fw, $result['data']);
 			fclose($fw);
 			$filesize = strlen($result['data']);
-			$filetype = $result['type'];
+			$filetype = $result['mime'];
 		}
 		else if ($mode == 'local') {
 			if (!file_exists($this->upload_path . $filename)) {

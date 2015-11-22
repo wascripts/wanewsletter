@@ -295,6 +295,7 @@ switch ($mode) {
 		wan_print_head('PHP');
 		wan_print_row('Version & SAPI', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
 		wan_print_row('Extension Bz2', extension_loaded('zlib'));
+		wan_print_row('Extension Curl', extension_loaded('curl'));
 
 		if (extension_loaded('gd')) {
 			$tmp = gd_info();

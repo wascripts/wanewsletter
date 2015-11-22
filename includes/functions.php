@@ -193,7 +193,7 @@ function wa_check_update($complete = false)
 		$data = file_get_contents($cache_file);
 	}
 	else if ($complete) {
-		$result = http_get_contents(CHECK_UPDATE_URL, $errstr);
+		$result = http_get_contents(CHECK_UPDATE_URL);
 		$data = $result['data'];
 
 		if (preg_match('#^[A-Za-z0-9.-]+$#', $data)) {
@@ -1120,38 +1120,42 @@ function convert_encoding($data, $charset = null, $check_bom = true)
 
 /**
  * Récupère un contenu local ou via HTTP et le retourne, ainsi que le jeu de
- * caractère et le type de média de la chaîne, si disponible.
+ * caractères et le type de média de la chaîne, si disponible.
  *
- * @param string $URL    L'URL à appeller
- * @param string $errstr Conteneur pour un éventuel message d'erreur
+ * @param string $url L’URL à appeller
  *
- * @return boolean|array
+ * @throws Exception
+ * @return array
  */
-function wan_get_contents($URL, &$errstr)
+function wan_get_contents($url)
 {
 	global $lang;
 
-	if (strncmp($URL, 'http://', 7) == 0) {
-		$result = http_get_contents($URL, $errstr);
-		if (!$result) {
-			$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($URL), $errstr);
+	if (preg_match('#^https?://#', $url)) {
+		try {
+			$result = http_get_contents($url);
+		}
+		catch (Exception $e) {
+			throw new Exception(sprintf(
+				$lang['Message']['Error_load_url'],
+				htmlspecialchars($url),
+				$e->getMessage()
+			));
 		}
 	}
 	else {
-		if ($URL[0] == '~') {
-			$URL = $_SERVER['DOCUMENT_ROOT'] . substr($URL, 1);
+		if ($url[0] == '~') {
+			$url = $_SERVER['DOCUMENT_ROOT'] . substr($url, 1);
 		}
-		else if ($URL[0] != '/') {
-			$URL = WA_ROOTDIR . '/' . $URL;
+		else if ($url[0] != '/') {
+			$url = WA_ROOTDIR . '/' . $url;
 		}
 
-		if (is_readable($URL)) {
-			$result = ['data' => file_get_contents($URL), 'charset' => null];
+		if (!is_readable($url)) {
+			throw new Exception(sprintf($lang['Message']['File_not_exists'], htmlspecialchars($url)));
 		}
-		else {
-			$result = false;
-			$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($URL));
-		}
+
+		$result = ['data' => file_get_contents($url), 'charset' => null];
 	}
 
 	return $result;
@@ -1159,106 +1163,102 @@ function wan_get_contents($URL, &$errstr)
 
 /**
  * Récupère un contenu via HTTP et le retourne, ainsi que le jeu de
- * caractère et le type de média de la chaîne, si disponible.
+ * caractères et le type de média de la chaîne, si disponible.
  *
- * @param string $URL    L'URL à appeller
- * @param string $errstr Conteneur pour un éventuel message d'erreur
+ * @param string $url L’URL à appeller
  *
- * @return boolean|array
+ * @throws Exception
+ * @return array
  */
-function http_get_contents($URL, &$errstr)
+function http_get_contents($url)
 {
 	global $lang;
 
-	if (!($part = parse_url($URL)) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http') {
-		$errstr = $lang['Message']['Invalid_url'];
-		return false;
+	if (!preg_match('#^https?://#', $url)) {
+		throw new Exception($lang['Message']['Invalid_url']);
 	}
 
-	$port = (!isset($part['port'])) ? 80 : $part['port'];
+	$data = $mime = $charset = '';
 
-	if (!($fs = fsockopen($part['host'], $port, $null, $null, 5))) {
-		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
-		return false;
-	}
+	$connect_timeout = 10;
+	$user_agent = sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION);
 
-	stream_set_timeout($fs, 5);
+	if (function_exists('curl_init')) {
+		$ch = curl_init();
 
-	$path  = (!isset($part['path'])) ? '/' : $part['path'];
-	$path .= (!isset($part['query'])) ? '' : '?'.$part['query'];
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_COOKIESESSION,  true);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
+		curl_setopt($ch, CURLOPT_USERAGENT,      $user_agent);
 
-	// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
-	fwrite($fs, sprintf("GET %s HTTP/1.0\r\n", $path));
-	fwrite($fs, sprintf("Host: %s\r\n", $part['host']));
-	fwrite($fs, sprintf("User-Agent: %s\r\n", sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION)));
-	fwrite($fs, "Accept: */*\r\n");
+		$data = curl_exec($ch);
 
-	if (extension_loaded('zlib')) {
-		fwrite($fs, "Accept-Encoding: gzip\r\n");
-	}
-
-	fwrite($fs, "Connection: close\r\n\r\n");
-
-	$isGzipped = false;
-	$datatype  = $charset = null;
-	$data = '';
-	$tmp  = fgets($fs, 1024);
-
-	if (!preg_match('#^HTTP/(\d\.[x\d])\x20+(\d{3})\s#', $tmp, $m) || $m[2] != 200) {
-		$errstr = $lang['Message']['Not_found_at_url'];
-		fclose($fs);
-		return false;
-	}
-
-	// Entêtes
-	while (!feof($fs)) {
-		$tmp = fgets($fs, 1024);
-
-		if (!strpos($tmp, ':')) {
-			break;
+		if (curl_errno($ch)) {
+			throw new Exception(curl_error($ch));
 		}
 
-		list($header, $value) = explode(':', $tmp);
-		$header = strtolower($header);
-		$value  = trim($value);
+		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
+			throw new Exception($lang['Message']['Not_found_at_url']);
+		}
 
-		if ($header == 'content-type') {
-			if (preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $m)) {
-				$datatype = $m[1];
-				$charset  = (!empty($m[3])) ? strtoupper($m[3]) : '';
+		if (!($mime = curl_getinfo($ch, CURLINFO_CONTENT_TYPE))) {
+			$mime = 'application/octet-stream';
+		}
+
+		curl_close($ch);
+	}
+	else {
+		if (!ini_get_flag('allow_url_fopen')) {
+			throw new Exception($lang['Message']['Config_loading_url']);
+		}
+
+		$ctx = stream_context_create([
+			'http' => [
+				'timeout' => $connect_timeout,
+				'user_agent' => $user_agent
+			]
+		]);
+
+		if (!($fp = fopen($url, 'r', false, $ctx))) {
+			throw new Exception($lang['Message']['Not_found_at_url']);
+		}
+
+		$meta = stream_get_meta_data($fp);
+		$headers = $meta['wrapper_data'];
+
+		foreach ($headers as $header) {
+			if (preg_match('#^content-type:(.+)#i', $header, $m)) {
+				$mime = $m[2];
+				break;
 			}
 		}
-		else if ($header == 'content-encoding' && $value == 'gzip') {
-			$isGzipped = true;
+
+		while (!feof($fp)) {
+			$data .= fgets($fp);
+		}
+
+		fclose($fp);
+	}
+
+	if (strpos($mime, ';')) {
+		$tmp = explode(';', $mime, 2);
+		$mime = $tmp[0];
+
+		if (preg_match('/\W*charset\s*=\s*(")?([a-z][a-z0-9._-]*)(?(1)")/i', $tmp[1], $m)) {
+			$charset = strtoupper($m[2]);
 		}
 	}
 
-	// Contenu
-	while (!feof($fs)) {
-		$data .= fgets($fs, 1024);
-	}
+	if (!$charset && preg_match('#(?:/|\+)xml$#', $mime) && strncmp($data, '<?xml', 5) == 0) {
+		$pr = substr($data, 0, strpos($data, "\n"));
 
-	fclose($fs);
-
-	if ($isGzipped && !preg_match('/\.t?gz$/i', $part['path'])) {
-		// RFC 1952 - Users note on http://www.php.net/manual/en/function.gzencode.php
-		if (strncmp($data, "\x1f\x8b", 2) != 0) {
-			trigger_error('data is not to GZIP format', E_USER_WARNING);
-			return false;
-		}
-
-		$data = gzinflate(substr($data, 10));
-	}
-
-	if (empty($charset) && preg_match('#(?:/|\+)xml$#', $datatype) && strncmp($data, '<?xml', 5) == 0) {
-		$prolog = substr($data, 0, strpos($data, "\n"));
-
-		if (preg_match('/\s+encoding\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/i', $prolog, $m)) {
+		if (preg_match('/\s+encoding\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/i', $pr, $m)) {
 			$charset = $m[2];
 		}
 	}
 
-	return ['type' => $datatype, 'charset' => $charset, 'data' => $data];
+	return ['data' => $data, 'mime' => $mime, 'charset' => $charset];
 }
 
 /**

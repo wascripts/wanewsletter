@@ -296,10 +296,11 @@ switch ($mode) {
 		if (isset($_POST['submit']) || $logdata['log_id']) {
 			if ($body_text_url || $body_html_url) {
 				if ($body_text_url) {
-					$result = wan_get_contents($body_text_url, $errstr);
-
-					if (!$result) {
-						$output->addLine($errstr);
+					try {
+						$result = wan_get_contents($body_text_url);
+					}
+					catch (Exception $e) {
+						$output->addLine($e->getMessage());
 						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
 						$output->displayMessage();
 					}
@@ -308,10 +309,11 @@ switch ($mode) {
 				}
 
 				if ($body_html_url) {
-					$result = wan_get_contents($body_html_url, $errstr);
-
-					if (!$result) {
-						$output->addLine($errstr);
+					try {
+						$result = wan_get_contents($body_html_url);
+					}
+					catch (Exception $e) {
+						$output->addLine($e->getMessage());
 						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
 						$output->displayMessage();
 					}
@@ -568,16 +570,16 @@ switch ($mode) {
 					return $m[0];
 				}
 
-				$result = wan_get_contents($resource, $errstr);
-
-				if (!$result) {
+				try {
+					$result = wan_get_contents($resource);
+				}
+				catch (Exception $e) {
 					$error = true;
-					$msg_error[] = $errstr;
+					$msg_error[] = $e->getMessage();
 					return $m[0];
 				}
-				else {
-					return convert_encoding($result['data'], $result['charset']);
-				}
+
+				return convert_encoding($result['data'], $result['charset']);
 			};
 
 			$regexp = '/<\\?inclu[dr]e(\\s+[^>]+)\\?>/i';
