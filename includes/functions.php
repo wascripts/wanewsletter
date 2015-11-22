@@ -982,16 +982,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  */
 function strip_magic_quotes(&$data)
 {
-	static $doStrip = null;
-
-	if (is_null($doStrip)) {
-		$doStrip = false;
-		if (ini_get('filter.default') == 'magic_quotes') {
-			$doStrip = true;
-		}
-	}
-
-	if ($doStrip) {
+	if (ini_get('filter.default') == 'magic_quotes') {
 		if (is_array($data)) {
 			array_walk($data, function (&$data, $key) {
 				strip_magic_quotes($data);
