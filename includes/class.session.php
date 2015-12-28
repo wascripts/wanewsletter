@@ -92,14 +92,14 @@ class Session implements \SessionHandlerInterface
 	 */
 	public function reset()
 	{
+		if (!$this->new_session) {
+			session_regenerate_id(true);
+			$this->new_session = true;
+		}
+
 		$_SESSION['is_admin_session'] = check_in_admin();
 		$_SESSION['is_logged_in'] = false;
 		$_SESSION['uid']   = null;
-
-		if (!$this->new_session) {
-			session_regenerate_id();
-			$this->new_session = true;
-		}
 	}
 
 	/**
