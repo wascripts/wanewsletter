@@ -1617,3 +1617,184 @@ function sendfile($filename, $mime_type, $data)
 
 	exit;
 }
+
+/**
+ * Affichage des informations de débogage
+ */
+function print_debug_infos()
+{
+	global $lang, $db, $nl_config;
+
+	$dir_status = function ($dir) {
+		if (file_exists($dir)) {
+			if (!is_readable($dir)) {
+				$str = "non [pas d'accès en lecture]";
+			}
+			else if (!is_writable($dir)) {
+				$str = "non [pas d'accès en écriture]";
+			}
+			else {
+				$str = "ok";
+			}
+		}
+		else {
+			$str = "non [n'existe pas]";
+		}
+
+		return $str;
+	};
+
+	$print_head = function ($str) {
+		echo "<u><b>", htmlspecialchars($str), "</b></u>\n";
+	};
+
+	$print_row  = function ($name, $value = null) {
+		global $lang;
+
+		echo '- ';
+		echo htmlspecialchars(u::str_pad($name, 30));
+
+		if (!is_null($value)) {
+			echo ' : ';
+
+			if (is_bool($value)) {
+				echo ($value) ? $lang['Yes'] : $lang['No'];
+			}
+			else if (is_int($value) || $value != '') {
+				echo htmlspecialchars($value);
+			}
+			else {
+				echo '<i style="color:hsl(0, 0%, 60%)">no value</i>';
+			}
+		}
+
+		echo "\n";
+	};
+
+	printf("<h2>%s</h2>\n", $lang['Title']['debug']);
+	echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;line-height:1.3em;'>";
+
+	$print_head('Wanewsletter');
+	$print_row('Version/db_version', WANEWSLETTER_VERSION.'/'.$nl_config['db_version']);
+	$print_row('session_length',     $nl_config['session_length']);
+	$print_row('language',           $nl_config['language']);
+	$print_row('upload dir',         $dir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
+
+	if (!$nl_config['disable_stats']) {
+		require 'includes/functions.stats.php';
+		$print_row('stats dir', $dir_status(WA_STATSDIR));
+	}
+	$print_row('max_filesize',  $nl_config['max_filesize']);
+	$print_row('engine_send',   $nl_config['engine_send']);
+	$print_row('sending_limit', $nl_config['sending_limit']);
+	$print_row('use_smtp',      (bool) $nl_config['use_smtp']);
+
+	$print_head('Librairies tierces');
+
+	$composer_file = WA_ROOTDIR . '/composer.lock';
+	if (!function_exists('json_decode')) {
+		$print_row('Cannot read the composer.lock file! (JSON extension needed)');
+	}
+	else if (is_readable($composer_file)) {
+		$composer = json_decode(file_get_contents($composer_file), true);
+
+		foreach ($composer['packages'] as $package) {
+			$ver = $package['version'];
+
+			if (strpos($ver, 'dev-') === 0) {
+				if (isset($package['dist'])) {
+					$ref = $package['dist']['reference'];
+				}
+				else {
+					$ref = $package['source']['reference'];
+				}
+
+				if (isset($package['extra']['branch-alias'][$ver])) {
+					$ver = $package['extra']['branch-alias'][$ver];
+				}
+
+				$ver .= ' ('.$ref.')';
+			}
+			else {
+				$ver = ltrim($ver, 'v');// eg: v2.3.4 => 2.3.4
+			}
+
+			$print_row($package['name'], $ver);
+		}
+	}
+	else {
+		$print_row('Cannot read the composer.lock file!');
+	}
+
+	$print_head('PHP');
+	$print_row('Version & SAPI', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
+	$print_row('Extension Bz2', extension_loaded('zlib'));
+	$print_row('Extension Curl', extension_loaded('curl'));
+
+	if (extension_loaded('gd')) {
+		$tmp = gd_info();
+		$format = (imagetypes() & IMG_GIF) ? 'GIF' : 'Unavailable';
+		$format = (imagetypes() & IMG_PNG) ? 'PNG' : $format;
+		$str = sprintf('oui - Version %s - Format %s', $tmp['GD Version'], $format);
+	}
+	else {
+		$str = 'non';
+	}
+
+	$print_row('Extension GD', $str);
+	$print_row('Extension Iconv',
+		extension_loaded('iconv') ?
+			sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
+	);
+	$print_row('Extension JSON', extension_loaded('json'));
+	$print_row('Extension Mbstring', extension_loaded('mbstring'));
+	$print_row('Extension OpenSSL',
+		extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
+	);
+	$print_row('Extension SimpleXML', extension_loaded('simplexml'));
+	$print_row('Extension XML', extension_loaded('xml'));
+	$print_row('Extension Zip', extension_loaded('zip'));
+	$print_row('Extension Zlib', extension_loaded('zlib'));
+
+	$print_row('open_basedir',  ini_get('open_basedir'));
+	$print_row('sys_temp_dir', sys_get_temp_dir());
+	$print_row('filter.default', ini_get('filter.default'));
+	$print_row('allow_url_fopen', ini_get_flag('allow_url_fopen'));
+	$print_row('allow_url_include', ini_get_flag('allow_url_include'));
+	$print_row('file_uploads', ini_get_flag('file_uploads'));
+	$print_row('upload_tmp_dir', ini_get('upload_tmp_dir'));
+	$print_row('upload_max_filesize', ini_get('upload_max_filesize'));
+	$print_row('post_max_size', ini_get('post_max_size'));
+	$print_row('max_input_time', ini_get('max_input_time'));
+	$print_row('memory_limit', ini_get('memory_limit'));
+	$print_row('mail.add_x_header', ini_get_flag('mail.add_x_header'));
+	$print_row('mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
+	$print_row('sendmail_from', ini_get('sendmail_from'));
+	$print_row('sendmail_path', ini_get('sendmail_path'));
+
+	if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
+		$print_row('SMTP Server', ini_get('SMTP').':'.ini_get('smtp_port'));
+	}
+
+	$print_head('Base de données');
+
+	$print_row('Nom/Version', sprintf('%s %s',
+		$db->infos['label'],
+		($db::ENGINE == 'sqlite') ? $db->libVersion : $db->serverVersion
+	));
+
+	if ($db::ENGINE != 'sqlite') {
+		$print_row('Librairie cliente', $db->clientVersion);
+		$print_row('Jeu de caractères', $db->encoding());
+	}
+
+	$print_row('Driver', $db->infos['driver']);
+
+	$print_head('Divers');
+
+	$print_row('Serveur HTTP/OS', $_SERVER['SERVER_SOFTWARE'] . ' on ' . PHP_OS);
+	$print_row('Agent utilisateur',   filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS));
+	$print_row('Connexion sécurisée', wan_ssl_connection());
+
+	echo "</pre>";
+}
