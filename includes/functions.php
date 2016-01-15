@@ -317,11 +317,10 @@ function wan_ssl_connection()
  *
  * @param string  $url     Url à compléter
  * @param array   $params  Paramètres à ajouter en fin d'url
- * @param boolean $session Ajout de l'ID de session PHP s'il y a lieu
  *
  * @return string
  */
-function wan_build_url($url, array $params = [], $session = false)
+function wan_build_url($url, array $params = [])
 {
 	$parts = parse_url($url);
 
@@ -367,11 +366,6 @@ function wan_build_url($url, array $params = [], $session = false)
 		parse_str($query, $cur_params);
 	}
 
-	if ($session && defined('SID') && SID != '') {
-		list($name, $value) = explode('=', SID);
-		$params[$name] = $value;
-	}
-
 	$params = array_merge($cur_params, $params);
 	$query  = http_build_query($params);
 
@@ -381,14 +375,13 @@ function wan_build_url($url, array $params = [], $session = false)
 }
 
 /**
- * Version adaptée de la fonction http_redirect() de pecl_http
+ * Version adaptée de la fonction http_redirect() de pecl_http < 2.0
  *
  * @param string  $url     Url de redirection
  * @param array   $params  Paramètres à ajouter en fin d'url
  * @param boolean $session Ajout de l'ID de session PHP s'il y a lieu
  * @param integer $status  Code de redirection HTTP
  */
-if (!function_exists('http_redirect')) {
 function http_redirect($url, array $params = [], $session = false, $status = 0)
 {
 	$status = intval($status);
@@ -396,7 +389,12 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 		$status = 302;
 	}
 
-	$url = wan_build_url($url, $params, $session);
+	if ($session && defined('SID') && SID != '') {
+		list($name, $value) = explode('=', SID);
+		$params[$name] = $value;
+	}
+
+	$url = wan_build_url($url, $params);
 	http_response_code($status);
 	header(sprintf('Location: %s', $url));
 
@@ -406,7 +404,6 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 	printf('<p>If your browser doesn\'t support meta redirect, click
 		<a href="%s">here</a> to go on next page.</p>', htmlspecialchars($url));
 	exit;
-}
 }
 
 /**
