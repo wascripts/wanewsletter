@@ -90,7 +90,7 @@ if ($mode == 'adduser') {
 			$email->setTextBody($message);
 
 			try {
-				wan_sendmail($email);
+				wamailer()->send($email);
 			}
 			catch (\Exception $e) {
 				trigger_error(sprintf($lang['Message']['Failed_sending'],

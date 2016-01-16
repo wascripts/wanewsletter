@@ -193,6 +193,10 @@ function launch_sending($listdata, $logdata, array $supp_address = [])
 		$tpl->loadFromString('textbody', $body[FORMAT_TEXTE]);
 		$tpl->loadFromString('htmlbody', $body[FORMAT_HTML]);
 
+		// Initialisation du module d'envoi d'emails
+		// Option 'keepalive' en cas d'utilisation du transport SMTP
+		$transport = wamailer(['keepalive' => true]);
+
 		if ($nl_config['engine_send'] == ENGINE_BCC) {
 			$abonnes = [FORMAT_TEXTE => [], FORMAT_HTML => []];
 			$abo_ids = [FORMAT_TEXTE => [], FORMAT_HTML => []];
@@ -248,7 +252,7 @@ function launch_sending($listdata, $logdata, array $supp_address = [])
 					}
 
 					try {
-						wan_sendmail($email, true);
+						$transport->send($email);
 					}
 					catch (\Exception $e) {
 						trigger_error(sprintf($lang['Message']['Failed_sending'],
@@ -382,7 +386,7 @@ function launch_sending($listdata, $logdata, array $supp_address = [])
 				}
 
 				try {
-					wan_sendmail($email, true);
+					$transport->send($email);
 				}
 				catch (\Exception $e) {
 					$sendError++;

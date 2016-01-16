@@ -364,7 +364,7 @@ class Subscription
 		}
 
 		try {
-			wan_sendmail($email);
+			wamailer()->send($email);
 		}
 		catch (\Exception $e) {
 			$message = sprintf($lang['Message']['Failed_sending'], htmlspecialchars($e->getMessage()));
@@ -507,7 +507,7 @@ class Subscription
 			}
 
 			try {
-				wan_sendmail($email);
+				wamailer()->send($email);
 			}
 			catch (\Exception $e) {
 				$this->message = sprintf($lang['Message']['Failed_sending'],
@@ -627,7 +627,7 @@ class Subscription
 					$email->setTextBody($body);
 
 					try {
-						wan_sendmail($email);
+						wamailer()->send($email);
 					}
 					catch (\Exception $e) { }
 				}

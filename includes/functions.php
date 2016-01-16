@@ -11,7 +11,6 @@ namespace Wanewsletter;
 
 use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
-use Wamailer\Email;
 use Wanewsletter\Dblayer\Wadb;
 use Wanewsletter\Dblayer\WadbResult;
 
@@ -1368,35 +1367,32 @@ function wan_get_faq_url($chapter)
 }
 
 /**
- * Envoi d'email
+ * Initialisation du module d’envoi des mails
  *
- * @param Email   $email
- * @param boolean $keepalive Maintient ouvert la connexion au serveur SMTP, le cas échéant
- *
- * @return boolean
+ * @return \Wamailer\Transport\Transport
  */
-function wan_sendmail(Email $email, $keepalive = false)
+function wamailer(array $opts = [])
 {
 	global $nl_config;
-	static $smtp;
 
-	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+	$name = 'mail';
 
-	if ($nl_config['use_smtp'] && is_null($smtp)) {
-		$server = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
-		$options = [
-			'server'   => sprintf($server, $nl_config['smtp_host'], $nl_config['smtp_port']),
+	if ($nl_config['use_smtp']) {
+		$name  = 'smtp';
+		$proto = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls' : 'tcp';
+		$opts  = array_replace_recursive([
+			'server'   => sprintf('%s://%s:%d', $proto, $nl_config['smtp_host'], $nl_config['smtp_port']),
 			'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
 			'auth' => [
 				'username'  => $nl_config['smtp_user'],
 				'secretkey' => $nl_config['smtp_pass']
-			],
-			'keepalive' => $keepalive
-		];
-		$smtp = Mailer::setTransport('smtp', $options);
+			]
+		], $opts);
 	}
 
-	Mailer::send($email);
+	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+
+	return Mailer::setTransport($name, $opts);
 }
 
 /**
