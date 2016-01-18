@@ -1216,7 +1216,7 @@ function http_get_contents($url)
 
 		foreach ($headers as $header) {
 			if (preg_match('#^content-type:(.+)#i', $header, $m)) {
-				$mime = $m[2];
+				$mime = $m[1];
 				break;
 			}
 		}
