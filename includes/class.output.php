@@ -391,7 +391,7 @@ class Output extends Template
 		$wanlog_box = '';
 
 		foreach ($entries as $entry) {
-			if ($entry instanceof \Exception) {
+			if ($entry instanceof \Throwable || $entry instanceof \Exception) {
 				// Les exceptions sont affichées via wan_exception_handler().
 				// Les erreurs fatales sont affichées via wan_error_handler().
 				if (!($entry instanceof Error) || $entry->isFatal() || $entry->ignore()) {

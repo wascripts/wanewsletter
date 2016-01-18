@@ -519,7 +519,7 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 /**
  * Gestionnaire d'erreur personnalisé du script
  *
- * @param Exception $e Exception "attrapée" par le gestionnaire
+ * @param Throwable $e Exception "attrapée" par le gestionnaire
  */
 function wan_exception_handler($e)
 {
@@ -530,7 +530,7 @@ function wan_exception_handler($e)
 /**
  * Formatage du message d'erreurs
  *
- * @param Exception $error Exception décrivant l'erreur
+ * @param Throwable $error Exception décrivant l’erreur
  *
  * @return string
  */
@@ -630,13 +630,13 @@ function wan_format_error($error)
 /**
  * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
  *
- * @param Exception $error Exception décrivant l'erreur
+ * @param Throwable $error Exception décrivant l’erreur
  */
 function wan_display_error($error)
 {
 	global $output;
 
-	if ($error instanceof \Exception) {
+	if ($error instanceof \Throwable || $error instanceof \Exception) {
 		$exit = true;
 
 		if ($error instanceof Error) {
@@ -692,7 +692,7 @@ BASIC;
  * Si elle est appelée avec un argument, ajoute l'entrée dans le journal,
  * sinon, renvoie le journal.
  *
- * @param mixed $entry Peut être un objet Exception, ou n'importe quelle autre valeur
+ * @param mixed $entry Peut être un objet Throwable, ou n'importe quelle autre valeur
  *
  * @return array
  */
@@ -704,7 +704,7 @@ function wanlog($entry = null)
 		return $entries;
 	}
 
-	if ($entry instanceof Exception) {
+	if ($entry instanceof \Throwable || $entry instanceof \Exception) {
 		$hash = md5(
 			$entry->getCode() .
 			$entry->getMessage() .
@@ -734,7 +734,7 @@ function wan_error_get_last()
 	$error  = null;
 
 	while ($e = array_pop($errors)) {
-		if ($e instanceof Exception) {
+		if ($e instanceof \Throwable || $e instanceof \Exception) {
 			$error = [
 				'type'    => $e->getCode(),
 				'message' => $e->getMessage(),
