@@ -13,7 +13,7 @@
 		}
 	],
 	"support": {
-		"forum": "http://forum.phpcodeur.net/",
+		"forum": "https://forum.phpcodeur.net/",
 		"source": "https://github.com/wascripts/wanewsletter"
 	},
 	"require": {
