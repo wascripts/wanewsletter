@@ -196,16 +196,16 @@ class Session implements \SessionHandlerInterface
 		];
 
 		if ($result->column(0) == 1) {
-			$db->update(SESSION_TABLE, $sql_data, ['session_id' => $sid]);
+			$result = $db->update(SESSION_TABLE, $sql_data, ['session_id' => $sid]);
 		}
 		else {
 			$sql_data['session_id']     = $sid;
 			$sql_data['session_start']  = time();
 			$sql_data['session_expire'] = (time() + $this->maxlifetime);
-			$db->insert(SESSION_TABLE, $sql_data);
+			$result = $db->insert(SESSION_TABLE, $sql_data);
 		}
 
-		return ($db->affectedRows() == 1);
+		return $result;
 	}
 
 	/**
