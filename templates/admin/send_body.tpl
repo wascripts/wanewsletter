@@ -16,7 +16,7 @@ if (typeof(tinyMCE) != 'undefined') {
 			"paste textcolor colorpicker textpattern"
 		],
 		toolbar1: "bold italic underline strikethrough bullist numlist blockquote hr alignleft aligncenter alignright link unlink image spellchecker",
-		toolbar2: "forecolor pastetext removeformat charmap outdent indent code undo redo",
+		toolbar2: "formatselect forecolor pastetext removeformat charmap outdent indent code undo redo",
 
 		entity_encoding: "raw",
 		relative_urls: false,
