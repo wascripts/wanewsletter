@@ -1052,23 +1052,16 @@ function ini_get_flag($name)
  * Fonctions à utiliser lors des longues boucles (backup, envois)
  * qui peuvent provoquer un time out du navigateur client
  * Inspiré d'un code équivalent dans phpMyAdmin 2.5.0 (libraries/build_dump.lib.php précisément)
- *
- * @param boolean $in_loop True si on est dans la boucle, false pour initialiser $time
  */
-function fake_header($in_loop)
+function fake_header()
 {
-	static $time;
+	static $ts;
 
-	if ($in_loop) {
-		$new_time = time();
+	$new_ts = time();
 
-		if (($new_time - $time) >= 30) {
-			$time = $new_time;
-			header('X-WaPing: Pong');
-		}
-	}
-	else {
-		$time = time();
+	if (!$ts || ($new_ts - $ts) >= 30) {
+		header('X-WaPing: Pong');
+		$ts = $new_ts;
 	}
 }
 

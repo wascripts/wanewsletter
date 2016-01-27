@@ -280,9 +280,6 @@ function launch_sending($listdata, $logdata, array $supp_address = [])
 					['ansi_terminal' => function_exists('posix_isatty') && posix_isatty(STDOUT)]
 				);
 			}
-			else {
-				fake_header(false);
-			}
 
 			if (!$listdata['use_cron']) {
 				$body[FORMAT_TEXTE] = str_replace('{LINKS}', $link[FORMAT_TEXTE], $body[FORMAT_TEXTE]);
@@ -406,7 +403,7 @@ function launch_sending($listdata, $logdata, array $supp_address = [])
 					}
 				}
 				else {
-					fake_header(true);
+					fake_header();
 				}
 			}
 

@@ -497,8 +497,6 @@ switch ($mode) {
 				$current_time = time();
 				$emails_ok    = [];
 
-				fake_header(false);
-
 				$sql_emails = array_map('strtolower', $emails);
 				$sql_emails = array_map([$db, 'escape'], $sql_emails);
 
@@ -569,7 +567,7 @@ switch ($mode) {
 
 					$db->commit();
 
-					fake_header(true);
+					fake_header();
 				}
 			}
 
@@ -839,8 +837,6 @@ switch ($mode) {
 			$contents  = $backup->header(sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION));
 			$contents .= $backup->get_other_queries($drop_option);
 
-			fake_header(false);
-
 			foreach ($tables as $tabledata) {
 				if ($backup_type != 2) {// save complète ou structure uniquement
 					$contents .= $backup->get_table_structure($tabledata, $drop_option);
@@ -852,7 +848,7 @@ switch ($mode) {
 
 				$contents .= $EOL . $EOL;
 
-				fake_header(true);
+				fake_header();
 			}
 
 			$filename  = 'wanewsletter_backup.sql';
@@ -1030,11 +1026,9 @@ switch ($mode) {
 
 			$db->beginTransaction();
 
-			fake_header(false);
-
 			foreach ($queries as $query) {
 				$db->query($query);
-				fake_header(true);
+				fake_header();
 			}
 
 			$db->commit();
