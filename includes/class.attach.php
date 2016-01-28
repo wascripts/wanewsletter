@@ -53,7 +53,7 @@ class Attach
 			$url = parse_url($file);
 
 			if (isset($url['scheme'])) {
-				if ($url['scheme'] != 'http') {
+				if (!preg_match('#^https?$#', $url['scheme'])) {
 					throw new Exception($lang['Message']['Invalid_url']);
 				}
 
