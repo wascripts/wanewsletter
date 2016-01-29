@@ -607,21 +607,24 @@ function wan_format_error($error)
 			E_RECOVERABLE_ERROR => 'PHP Error'
 		];
 
-		$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
-		$errfile = str_replace(dirname(__DIR__), '~', $errfile);
-
+		$message = $errstr;
 		if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
-			$errstr = $lang['Message'][$errstr];
+			$message = $lang['Message'][$errstr];
 		}
 
-		$message = sprintf(
-			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
-			($error instanceof Error) ? $label : get_class($error),
-			$errstr,
-			$errfile,
-			$errline
-		);
-		$message .= $backtrace;
+		if (!($error instanceof Error) || !in_array($errno, [E_USER_ERROR, E_USER_WARNING, E_USER_NOTICE])) {
+			$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
+			$errfile = str_replace(dirname(__DIR__), '~', $errfile);
+
+			$message = sprintf(
+				"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
+				($error instanceof Error) ? $label : get_class($error),
+				$errstr,
+				$errfile,
+				$errline
+			);
+			$message .= $backtrace;
+		}
 	}
 
 	return $message;
