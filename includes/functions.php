@@ -15,42 +15,6 @@ use Wanewsletter\Dblayer\Wadb;
 use Wanewsletter\Dblayer\WadbResult;
 
 /**
- * Fonction de chargement automatique de classes.
- * Implémentation à la barbare. On verra plus tard pour
- * faire quelque chose de plus propre...
- *
- * @param string $classname Nom de la classe
- */
-function wan_autoloader($classname)
-{
-	$rootdir = dirname(__DIR__);
-	$prefix  = '';
-
-	if (strpos($classname, '\\')) {
-		list($prefix, $classname) = explode('\\', $classname, 2);
-	}
-
-	if ($prefix != 'Wanewsletter') {
-		return null;
-	}
-
-	$classname = strtolower($classname);
-
-	if (strpos($classname, '\\')) {
-		// Chemin includes/<namespace>/<classname>.php
-		$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
-	}
-	else {
-		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
-		$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
-	}
-
-	if (is_readable($filename)) {
-		require $filename;
-	}
-}
-
-/**
  * Chargement du fichier de configuration initial, et redirection vers
  * install.php si le fichier n’existe pas.
  */

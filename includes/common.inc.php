@@ -51,7 +51,33 @@ set_exception_handler(__NAMESPACE__.'\\wan_exception_handler');
 //
 // Chargement automatique des classes
 //
-spl_autoload_register(__NAMESPACE__.'\\wan_autoloader');
+spl_autoload_register(function ($classname) {
+	$rootdir = dirname(__DIR__);
+	$prefix  = '';
+
+	if (strpos($classname, '\\')) {
+		list($prefix, $classname) = explode('\\', $classname, 2);
+	}
+
+	if ($prefix != 'Wanewsletter') {
+		return null;
+	}
+
+	$classname = strtolower($classname);
+
+	if (strpos($classname, '\\')) {
+		// Chemin includes/<namespace>/<classname>.php
+		$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
+	}
+	else {
+		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
+		$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
+	}
+
+	if (is_readable($filename)) {
+		require $filename;
+	}
+});
 
 //
 // Intialisation des variables pour éviter toute injection malveillante de code
