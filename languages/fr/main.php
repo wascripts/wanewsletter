@@ -133,7 +133,7 @@ $lang['Message']['Inactive_format']         = "Impossible de changer de format";
 $lang['Message']['Invalid_date']            = "Désolé, la date de confirmation est dépassée";
 $lang['Message']['Invalid_code']            = "Code invalide !";
 $lang['Message']['Invalid_email2']          = "Adresse email invalide !";
-$lang['Message']['Failed_sending']          = "L’email n’a pu être envoyé ! %s";
+$lang['Message']['Failed_sending']          = "L’email n’a pu être envoyé ! (%s)";
 
 $lang['Message']['Success_export']          = "L’exportation des emails a été effectuée avec succès. \nVous trouverez le fichier de sauvegarde dans le répertoire des fichiers temporaires du script (Pensez à le supprimer après l’avoir récupéré !)";
 $lang['Message']['Success_import']          = "Les emails ont été importés avec succès";
@@ -200,7 +200,6 @@ $lang['Message']['No_data_received']        = "Aucune donnée valide n’a été
 $lang['Message']['Stats_disabled']          = "Le module de statistiques a été désactivé";
 $lang['Message']['No_gd_lib']               = "Ce module requiert la librairie GD, or celle-ci ne semble pas présente sur le serveur";
 $lang['Message']['No_subscribers']          = "Vous ne pouvez pas envoyer de newsletter à cette liste car elle ne compte pas encore d’abonné";
-$lang['Message']['Unknown_engine']          = "Aucun moteur d’envoi spécifié !";
 $lang['Message']['No_log_found']            = "Aucune newsletter prête à être envoyée n’a été trouvée";
 $lang['Message']['Invalid_url']             = "L’url donnée n’est pas valide";
 $lang['Message']['Unaccess_host']           = "L’hôte %s semble inaccessible actuellement";

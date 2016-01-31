@@ -848,7 +848,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 }
 
 //
-// Envois des emails
+// Envoi des emails
 //
 $supp_address = trim(filter_input(INPUT_POST, 'test_address'));
 if ($mode == 'test' && $supp_address) {
@@ -872,8 +872,6 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 		$output->displayMessage('Not_auth_send');
 	}
 
-	require 'includes/engine_send.php';
-
 	//
 	// On règle le script pour ignorer une déconnexion du client et
 	// poursuivre l'envoi du flot d'emails jusqu'à son terme.
@@ -895,7 +893,52 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 		$logdata['log_subject'] = '[test] '.$logdata['log_subject'];
 	}
 
-	$message = launch_sending($listdata, $logdata, $supp_address);
+	$sender = new Sender($listdata, $logdata);
+	$sender->registerHook('post-send', function () { fake_header(); });
+
+	if ($mode == 'progress') {
+		$sender->lock();
+	}
+
+	$result = $sender->process($supp_address);
+
+	if ($mode == 'test') {
+		$message  = $lang['Test_send_finish'];
+		$message .= '<br /><br />';
+		$message .= sprintf($lang['Click_return_back'],
+			sprintf('<a href="envoi.php?mode=load&amp;id=%d">', $logdata['log_id']),
+			'</a>'
+		);
+	}
+	else if ($result['total_to_send'] > 0) {
+		$message = sprintf($lang['Message']['Success_send'],
+			$nl_config['sending_limit'],
+			$result['total_sent'],
+			($result['total_sent'] + $result['total_to_send'])
+		);
+
+		$progress_url = sprintf('envoi.php?mode=progress&id=%d', $this->logdata['log_id']);
+
+		if (filter_input(INPUT_GET, 'step') == 'auto') {
+			http_redirect($progress_url . '&step=auto');
+		}
+
+		$progress_url = htmlspecialchars($progress_url);
+
+		$message .= '<br /><br />';
+		$message .= sprintf($lang['Click_resend_auto'],
+			sprintf('<a href="%s&amp;step=auto">', $progress_url),
+			'</a>'
+		);
+		$message .= '<br /><br />';
+		$message .= sprintf($lang['Click_resend_manuel'],
+			sprintf('<a href="%s">', $progress_url),
+			'</a>'
+		);
+	}
+	else {
+		$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
+	}
 
 	$output->displayMessage($message);
 }

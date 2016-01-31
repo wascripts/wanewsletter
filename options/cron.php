@@ -47,8 +47,6 @@ if ($listdata = $result->fetch()) {
 	@set_time_limit(3600);
 
 	if ($mode == 'send') {
-		require 'includes/engine_send.php';
-
 		 // on récupère le dernier log en statut d'envoi
 		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 			FROM " . LOG_TABLE . "
@@ -75,7 +73,22 @@ if ($listdata = $result->fetch()) {
 		//
 		// On lance l'envoi
 		//
-		$message = launch_sending($listdata, $logdata);
+		$sender = new Sender($listdata, $logdata);
+		$sender->lock();
+		$sender->registerHook('post-send', function () { fake_header(); });
+
+		$result = $sender->process();
+
+		if ($result['total_to_send'] > 0) {
+			$message = sprintf($lang['Message']['Success_send'],
+				$nl_config['sending_limit'],
+				$result['total_sent'],
+				($result['total_sent'] + $result['total_to_send'])
+			);
+		}
+		else {
+			$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
+		}
 
 		$output->displayMessage($message);
 	}

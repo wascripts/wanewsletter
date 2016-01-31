@@ -74,12 +74,12 @@ includes/class.exception.php
 includes/class.subscription.php
 includes/class.output.php
 includes/class.popclient.php
+includes/class.sender.php
 includes/class.session.php
 includes/class.template.php
 includes/common.inc.php
 includes/compat.inc.php
 includes/constantes.php
-includes/engine_send.php
 includes/functions.box.php
 includes/functions.php
 includes/functions.stats.php

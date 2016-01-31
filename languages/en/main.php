@@ -133,7 +133,7 @@ $lang['Message']['Inactive_format']         = "Impossible to change the format";
 $lang['Message']['Invalid_date']            = "Sorry, the confirm date has exceeded";
 $lang['Message']['Invalid_code']            = "Invalid code!";
 $lang['Message']['Invalid_email2']          = "Invalid email address!";
-$lang['Message']['Failed_sending']          = "The email could not be sent! %s";
+$lang['Message']['Failed_sending']          = "The email could not be sent! (%s)";
 
 $lang['Message']['Success_export']          = "The emails export operation has been successfully carried out. \nYou will find the the backup file in the script's temporary files folder (Do not forget to delete it after saving it!)";
 $lang['Message']['Success_import']          = "The import operation has been successfully carried out.";
@@ -200,7 +200,6 @@ $lang['Message']['No_data_received']        = "No valid data has been received";
 $lang['Message']['Stats_disabled']          = "The statistics module has been deactivated";
 $lang['Message']['No_gd_lib']               = "This module requires the GD library. Apparently it is not present on the server";
 $lang['Message']['No_subscribers']          = "You cannot send any newsletter to this list because it does not have any subscriber yet.";
-$lang['Message']['Unknown_engine']          = "No send engine specyfied";
 $lang['Message']['No_log_found']            = "No newsletter ready to be sent has been found";
 $lang['Message']['Invalid_url']             = "Given URL is not valid";
 $lang['Message']['Unaccess_host']           = "The host %s seems actually unreachable";

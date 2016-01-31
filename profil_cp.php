@@ -239,142 +239,27 @@ switch ($mode) {
 				$files[$row['log_id']][] = $row;
 			}
 
-			$sql = "SELECT liste_id, log_id, log_subject, log_body_text, log_body_html
+			$sql = "SELECT liste_id, log_id, log_subject, log_body_text, log_body_html, log_status
 				FROM " . LOG_TABLE . "
 				WHERE log_id IN(" . implode(', ', $sql_log_id) . ")
 					AND log_status = " . STATUS_SENT;
 			$result = $db->query($sql);
 
-			while ($row = $result->fetch()) {
-				$listdata = $abodata['listes'][$row['liste_id']];
-				$format   = $abodata['listes'][$row['liste_id']]['format'];// = format choisi par l'abonné
+			while ($logdata = $result->fetch()) {
+				$listdata = $abodata['listes'][$logdata['liste_id']];
+				$logdata['joined_files'] = [];
+				$abodata['register_key'] = $listdata['register_key'];
+				$abodata['format']       = $listdata['format'];// À ne pas confondre avec liste_format
+				$abodata['name']         = $abodata['abo_pseudo'];
 
-				if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
-					$format = $listdata['liste_format'];
+				if (isset($files[$logdata['log_id']])) {
+					$logdata['joined_files'] = $files[$logdata['log_id']];
 				}
 
-				$email = new Email();
-				$email->setFrom($listdata['sender_email'], $listdata['liste_name']);
-				$email->setSubject($row['log_subject']);
-
-				if ($abodata['username'] != '') {
-					$email->addRecipient($abodata['email'], $abodata['username']);
-				}
-				else {
-					$email->addRecipient($abodata['email']);
-				}
-
-				if ($listdata['return_email'] != '') {
-					$email->setReturnPath($listdata['return_email']);
-				}
-
-				if ($format == FORMAT_TEXTE) {
-					$body = $row['log_body_text'];
-				}
-				else {
-					$body = $row['log_body_html'];
-				}
-
-				//
-				// Ajout du lien de désinscription, selon le format utilisé
-				//
-				if ($listdata['use_cron']) {
-					$liste_email = (!empty($listdata['liste_alias']))
-						? $listdata['liste_alias'] : $listdata['sender_email'];
-
-					if ($format == FORMAT_TEXTE) {
-						$link = $liste_email;
-					}
-					else {
-						$link = '<a href="mailto:' . $liste_email . '?subject=unsubscribe">' . $lang['Label_link'] . '</a>';
-					}
-				}
-				else {
-					$tmp_link  = $listdata['form_url'] . ((strstr($listdata['form_url'], '?')) ? '&' : '?') . '{CODE}';
-
-					if ($format == FORMAT_TEXTE) {
-						$link = $tmp_link;
-					}
-					else {
-						$link = '<a href="' . htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>';
-					}
-				}
-
-				$body = str_replace('{LINKS}', $link, $body);
-
-				//
-				// On s’occupe maintenant des fichiers joints ou incorporés.
-				//
-				if (isset($files[$row['log_id']]) && count($files[$row['log_id']]) > 0) {
-					$total_files = count($files[$row['log_id']]);
-
-					for ($i = 0; $i < $total_files; $i++) {
-						$real_name     = $files[$row['log_id']][$i]['file_real_name'];
-						$physical_name = $files[$row['log_id']][$i]['file_physical_name'];
-						$mime_type     = $files[$row['log_id']][$i]['file_mimetype'];
-
-						$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
-						if (!file_exists($file_path)) {
-							continue;
-						}
-
-						$email->attach($file_path, $real_name, $mime_type);
-					}
-				}
-
-				//
-				// Traitement des tags et tags personnalisés
-				//
-				$tags_replace = [];
-
-				if ($abodata['username'] != '') {
-					$tags_replace['NAME'] = $abodata['username'];
-					if ($format == FORMAT_HTML) {
-						$tags_replace['NAME'] = htmlspecialchars($abodata['username']);
-					}
-				}
-				else {
-					$tags_replace['NAME'] = '';
-				}
-
-				if (count($other_tags) > 0) {
-					foreach ($other_tags as $tag) {
-						if ($abodata[$tag['column_name']] != '') {
-							if (!is_numeric($abodata[$tag['column_name']]) && $format == FORMAT_HTML) {
-								$tags_replace[$tag['tag_name']] = htmlspecialchars($abodata[$tag['column_name']]);
-							}
-							else {
-								$tags_replace[$tag['tag_name']] = $abodata[$tag['column_name']];
-							}
-
-							continue;
-						}
-
-						$tags_replace[$tag['tag_name']] = '';
-					}
-				}
-
-				if (!$listdata['use_cron']) {
-					$tags_replace = array_merge($tags_replace, [
-						'CODE'  => $listdata['register_key'],
-						'EMAIL' => rawurlencode($abodata['email'])
-					]);
-				}
-
-				$tpl = new Template();
-				$tpl->loadFromString('mail', $body);
-				$tpl->assign_vars($tags_replace);
-				$body = $tpl->pparse('mail', true);
-
-				if ($format == FORMAT_TEXTE) {
-					$email->setTextBody($body);
-				}
-				else {
-					$email->setHTMLBody($body);
-				}
+				$sender = new Sender($listdata, $logdata);
 
 				try {
-					wamailer()->send($email);
+					$sender->send($abodata);
 				}
 				catch (\Exception $e) {
 					trigger_error(sprintf($lang['Message']['Failed_sending'],

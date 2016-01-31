@@ -17,6 +17,7 @@
 
 namespace Wanewsletter;
 
+use Elkuku\Console\Helper\ConsoleProgressBar;
 use Patchwork\Utf8 as u;
 
 define('WA_ROOTDIR', dirname(__DIR__));
@@ -252,8 +253,6 @@ if ($process_send) {
 	define('SEND_PACKET', $send_packet);
 	define('SEND_DELAY',  $send_delay);
 
-	require 'includes/engine_send.php';
-
 	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 		FROM " . LOG_TABLE . "
 		WHERE liste_id = $listdata[liste_id]
@@ -277,10 +276,45 @@ if ($process_send) {
 
 	$logdata['joined_files'] = $result->fetchAll();
 
-	//
-	// On lance l'envoi
-	//
-	$message = launch_sending($listdata, $logdata);
+	$sender = new Sender($listdata, $logdata);
+	$sender->lock();
+
+	if ($nl_config['engine_send'] != ENGINE_BCC) {
+		$progressbar = null;
+
+		$sender->registerHook('start-send', function ($abodata_list) use (&$progressbar) {
+			$progressbar = new ConsoleProgressBar(
+				'Sending emails [%bar%] %current%/%max% %percent%',
+				'=>',
+				' ',
+				76,
+				count($abodata_list),
+				['ansi_terminal' => (function_exists('posix_isatty') && posix_isatty(STDOUT))]
+			);
+		});
+		$sender->registerHook('post-send', function () use (&$progressbar) {
+			static $counter = 0;
+
+			$progressbar->update(++$counter);
+
+			if (SEND_DELAY > 0 && ($counter % SEND_PACKET) == 0) {
+				sleep(SEND_DELAY);
+			}
+		});
+	}
+
+	$result = $sender->process();
+
+	if ($result['total_to_send'] > 0) {
+		$message = sprintf($lang['Message']['Success_send'],
+			$nl_config['sending_limit'],
+			$result['total_sent'],
+			($result['total_sent'] + $result['total_to_send'])
+		);
+	}
+	else {
+		$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
+	}
 
 	echo "\n";
 }
