@@ -1348,6 +1348,10 @@ function wamailer(array $opts = [])
 				'secretkey' => $nl_config['smtp_pass']
 			]
 		], $opts);
+
+#		$opts['debug'] = function ($str) {
+#			wanlog(htmlspecialchars($str));
+#		};
 	}
 
 	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
