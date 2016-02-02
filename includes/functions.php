@@ -1505,7 +1505,8 @@ function check_theme_is_used()
  */
 function validate_pseudo($pseudo)
 {
-	return (mb_strlen($pseudo) >= 2 && mb_strlen($pseudo) <= 30);
+	$len = mb_strlen($pseudo);
+	return ($len >= 2 && $len <= 30);
 }
 
 /**
@@ -1515,7 +1516,12 @@ function validate_pseudo($pseudo)
  */
 function validate_pass($passwd)
 {
-	return (bool) preg_match('/^[\x20-\x7E]{6,1024}$/', $passwd);
+	$len = mb_strlen($passwd);
+	if ($len >= 6 && $len <= 1024) {
+		return !preg_match('/[\x00-\x1F]|\xC2[\x80-\x9F]/', $passwd);
+	}
+
+	return false;
 }
 
 /**
