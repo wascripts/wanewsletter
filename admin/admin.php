@@ -397,6 +397,20 @@ $output->assign_vars([
 ]);
 
 if (wan_is_admin($admindata)) {
+	$build_authbox = function ($auth_type, $listdata) use ($output, $auth, $lang) {
+		$auth_name = $auth->auth_ary[$auth_type];
+
+		$selected_yes = $output->getBoolAttr('selected', !empty($listdata[$auth_name]));
+		$selected_no  = $output->getBoolAttr('selected', empty($listdata[$auth_name]));
+
+		$box_auth  = sprintf('<select name="%s[]">', $auth_name);
+		$box_auth .= sprintf('<option value="1"%s>%s</option>', $selected_yes, $lang['Yes']);
+		$box_auth .= sprintf('<option value="0"%s>%s</option>', $selected_no, $lang['No']);
+		$box_auth .= '</select>';
+
+		return $box_auth;
+	};
+
 	$output->assign_block_vars('admin_options', [
 		'L_ADD_ADMIN'     => $lang['Add_user'],
 		'L_TITLE_MANAGE'  => $lang['Title']['manage'],
@@ -425,14 +439,14 @@ if (wan_is_admin($admindata)) {
 			'LISTE_NAME'      => htmlspecialchars($listrow['liste_name']),
 			'LISTE_ID'        => $listrow['liste_id'],
 
-			'BOX_AUTH_VIEW'   => $output->build_authbox(Auth::VIEW,   $listrow),
-			'BOX_AUTH_EDIT'   => $output->build_authbox(Auth::EDIT,   $listrow),
-			'BOX_AUTH_DEL'    => $output->build_authbox(Auth::DEL,    $listrow),
-			'BOX_AUTH_SEND'   => $output->build_authbox(Auth::SEND,   $listrow),
-			'BOX_AUTH_IMPORT' => $output->build_authbox(Auth::IMPORT, $listrow),
-			'BOX_AUTH_EXPORT' => $output->build_authbox(Auth::EXPORT, $listrow),
-			'BOX_AUTH_BACKUP' => $output->build_authbox(Auth::BAN,    $listrow),
-			'BOX_AUTH_ATTACH' => $output->build_authbox(Auth::ATTACH, $listrow)
+			'BOX_AUTH_VIEW'   => $build_authbox(Auth::VIEW,   $listrow),
+			'BOX_AUTH_EDIT'   => $build_authbox(Auth::EDIT,   $listrow),
+			'BOX_AUTH_DEL'    => $build_authbox(Auth::DEL,    $listrow),
+			'BOX_AUTH_SEND'   => $build_authbox(Auth::SEND,   $listrow),
+			'BOX_AUTH_IMPORT' => $build_authbox(Auth::IMPORT, $listrow),
+			'BOX_AUTH_EXPORT' => $build_authbox(Auth::EXPORT, $listrow),
+			'BOX_AUTH_BACKUP' => $build_authbox(Auth::BAN,    $listrow),
+			'BOX_AUTH_ATTACH' => $build_authbox(Auth::ATTACH, $listrow)
 		]);
 	}
 
