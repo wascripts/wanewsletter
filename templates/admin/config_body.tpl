@@ -145,7 +145,7 @@ var basedir = '{BASEDIR}';
 			<td><input type="text" id="smtp_host" name="smtp_host" value="{SMTP_HOST}" size="30" maxlength="100"{DISABLED_SMTP} /></td>
 		</tr>
 		<tr>
-			<td><label for="smtp_port">{L_SMTP_PORT}&nbsp;:</label><br /><span class="notice">{L_SMTP_PORT_NOTE}</span></td>
+			<td><label for="smtp_port">{L_SMTP_PORT}&nbsp;:</label></td>
 			<td><input type="number" id="smtp_port" name="smtp_port"
 			value="{SMTP_PORT}" min="1" max="65535" size="5" {DISABLED_SMTP}
 			/></td>

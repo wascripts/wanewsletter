@@ -1455,8 +1455,7 @@ else if ($mode == 'liste') {
 
 		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
 			$output->assign_block_vars('purge_option', [
-				'L_PURGE_BUTTON'  => $lang['Button']['purge'],
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+				'L_PURGE_BUTTON'  => $lang['Button']['purge']
 			]);
 		}
 	}

@@ -292,11 +292,9 @@ switch ($mode) {
 		$output->set_filenames(['body' => 'archives_body.tpl']);
 
 		$output->assign_vars([
-			'TITLE'           => $lang['Title']['archives'],
-			'L_EXPLAIN'       => $lang['Explain']['archives'],
-			'L_VALID_BUTTON'  => $lang['Button']['valid'],
-
-			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+			'TITLE'          => $lang['Title']['archives'],
+			'L_EXPLAIN'      => $lang['Explain']['archives'],
+			'L_VALID_BUTTON' => $lang['Button']['valid']
 		]);
 
 		foreach ($abodata['listes'] as $liste_id => $listdata) {

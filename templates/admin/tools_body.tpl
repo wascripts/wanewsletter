@@ -11,7 +11,7 @@
 		</tr>
 	</table>
 
-	<div class="bottom"> {S_TOOLS_HIDDEN_FIELDS}
+	<div class="bottom">
 		<button type="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>

@@ -164,8 +164,7 @@ if (!isset($_POST['submit'])) {
 		'L_SELECT_TOOL'  => $lang['Select_tool'],
 		'L_VALID_BUTTON' => $lang['Button']['valid'],
 
-		'S_TOOLS_BOX'    => $tools_box,
-		'S_TOOLS_HIDDEN_FIELDS' => $output->getHiddenFields()
+		'S_TOOLS_BOX'    => $tools_box
 	]);
 }
 
@@ -278,9 +277,7 @@ switch ($mode) {
 			'L_DOWNLOAD'        => $lang['Download_action'],
 			'L_STORE_ON_SERVER' => $lang['Store_action'],
 			'L_VALID_BUTTON'    => $lang['Button']['valid'],
-			'L_RESET_BUTTON'    => $lang['Button']['reset'],
-
-			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
+			'L_RESET_BUTTON'    => $lang['Button']['reset']
 		]);
 
 		if (ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED) {
@@ -611,7 +608,6 @@ switch ($mode) {
 			'L_VALID_BUTTON'   => $lang['Button']['valid'],
 			'L_RESET_BUTTON'   => $lang['Button']['reset'],
 
-			'S_HIDDEN_FIELDS'  => $output->getHiddenFields(),
 			'S_ENCTYPE'        => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
 		]);
 
@@ -713,8 +709,7 @@ switch ($mode) {
 			'L_VALID_BUTTON'  => $lang['Button']['valid'],
 			'L_RESET_BUTTON'  => $lang['Button']['reset'],
 
-			'UNBAN_EMAIL_BOX' => $unban_email_box,
-			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+			'UNBAN_EMAIL_BOX' => $unban_email_box
 		]);
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
@@ -795,8 +790,7 @@ switch ($mode) {
 			'L_VALID_BUTTON'       => $lang['Button']['valid'],
 			'L_RESET_BUTTON'       => $lang['Button']['reset'],
 
-			'REALLOW_EXT_BOX'      => $reallow_ext_box,
-			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
+			'REALLOW_EXT_BOX'      => $reallow_ext_box
 		]);
 
 		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
@@ -891,9 +885,7 @@ switch ($mode) {
 			'L_YES'             => $lang['Yes'],
 			'L_NO'              => $lang['No'],
 			'L_VALID_BUTTON'    => $lang['Button']['valid'],
-			'L_RESET_BUTTON'    => $lang['Button']['reset'],
-
-			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
+			'L_RESET_BUTTON'    => $lang['Button']['reset']
 		]);
 
 		if ($total_tables = count($tables_plus)) {
@@ -1047,7 +1039,6 @@ switch ($mode) {
 			'L_VALID_BUTTON'    => $lang['Button']['valid'],
 			'L_RESET_BUTTON'    => $lang['Button']['reset'],
 
-			'S_HIDDEN_FIELDS'   => $output->getHiddenFields(),
 			'S_ENCTYPE'         => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
 		]);
 
@@ -1114,9 +1105,7 @@ switch ($mode) {
 				'L_TITLE_GENERATOR'   => $lang['Title']['generator'],
 				'L_EXPLAIN_GENERATOR' => nl2br($lang['Explain']['generator']),
 				'L_TARGET_FORM'       => $lang['Target_form'],
-				'L_VALID_BUTTON'      => $lang['Button']['valid'],
-
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+				'L_VALID_BUTTON'      => $lang['Button']['valid']
 			]);
 		}
 

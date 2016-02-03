@@ -73,7 +73,7 @@ function checkForm_editAboProfil()
 	</table>
 	<!-- END tags -->
 
-	<div class="bottom">{S_HIDDEN_FIELDS}
+	<div class="bottom">
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>
