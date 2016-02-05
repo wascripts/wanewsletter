@@ -26,7 +26,7 @@ require WA_ROOTDIR . '/includes/common.inc.php';
 
 // Le script n’est utilisable qu’en ligne de commande.
 if (!check_cli()) {
-	echo "This script must be called only in commande ligne.";
+	echo "This script must be called from command line only.";
 	exit;
 }
 else if (!isset($argc)) {
