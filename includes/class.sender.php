@@ -32,10 +32,16 @@ class Sender
 	private $email;
 
 	/**
-	 * Utilisé pour le formatage du message de l’email.
+	 * Utilisé pour le formatage texte du message de l’email.
 	 * @var Template
 	 */
-	private $template;
+	private $textTemplate;
+
+	/**
+	 * Utilisé pour le formatage HTML du message de l’email.
+	 * @var Template
+	 */
+	private $htmlTemplate;
 
 	/**
 	 * Données de la liste concernée par l’envoi.
@@ -448,22 +454,23 @@ class Sender
 			$tags_to_replace['WA_EMAIL'] = $data['email'];
 			$tags_to_replace['WA_CODE']  = $data['register_key'];
 
-			$this->template->assign_vars($tags_to_replace);
+			$this->textTemplate->assign($tags_to_replace);
+			$this->htmlTemplate->assign($tags_to_replace);
 		}
 
 		if ($this->listdata['liste_format'] != FORMAT_HTML) {
-			$this->email->setTextBody($this->template->pparse('textbody', true));
+			$this->email->setTextBody($this->textTemplate->pparse(true));
 		}
 
 		if ($this->listdata['liste_format'] != FORMAT_TEXTE && $data['format'] == FORMAT_HTML) {
-			$this->email->setHTMLBody($this->template->pparse('htmlbody', true));
+			$this->email->setHTMLBody($this->htmlTemplate->pparse(true));
 		}
 
 		$this->transport->send($this->email);
 	}
 
 	/**
-	 * Initialise les objets $this->email et $this->template
+	 * Initialise les objets $this->email, $this->textTemplate et $this->htmlTemplate
 	 */
 	private function createEmail()
 	{
@@ -520,9 +527,10 @@ class Sender
 		$message[FORMAT_TEXTE] = str_replace('{LINKS}', $link[FORMAT_TEXTE], $message[FORMAT_TEXTE]);
 		$message[FORMAT_HTML]  = str_replace('{LINKS}', $link[FORMAT_HTML],  $message[FORMAT_HTML]);
 
-		$template = new Template;
-		$template->loadFromString('textbody', $message[FORMAT_TEXTE]);
-		$template->loadFromString('htmlbody', $message[FORMAT_HTML]);
+		$text_template = new Template;
+		$text_template->loadFromString($message[FORMAT_TEXTE]);
+		$html_template = new Template;
+		$html_template->loadFromString($message[FORMAT_HTML]);
 
 		//
 		// On s’occupe maintenant des fichiers joints ou incorporés.
@@ -541,6 +549,7 @@ class Sender
 		}
 
 		$this->email    = $email;
-		$this->template = $template;
+		$this->textTemplate = $text_template;
+		$this->htmlTemplate = $html_template;
 	}
 }

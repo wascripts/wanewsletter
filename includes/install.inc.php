@@ -21,31 +21,30 @@ require './includes/common.inc.php';
 
 function message($message)
 {
-	global $lang, $output;
+	global $lang, $output, $template;
 
 	if (!empty($lang['Message'][$message])) {
 		$message = $lang['Message'][$message];
 	}
 
-	$output->send_headers();
+	$output->httpHeaders();
 
-	$output->assign_block_vars('result', [
+	$template->assignToBlock('result', [
 		'L_TITLE'    => $lang['Title']['install'],
 		'MSG_RESULT' => nl2br($message)
 	]);
 
-	$output->pparse('body');
-	$output->page_footer();
-	exit;
+	$template->pparse();
+	$output->footer();
 }
 
 $reinstall = !empty($dsn);
 
 // On prépare dès maintenant install.tpl. C'est nécessaire en cas d'appel
 // précoce à la fonction message()
-$output->set_filenames(['body' => 'install.tpl']);
+$template = new Template('install.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'PAGE_TITLE'   => ($reinstall) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR']
@@ -171,7 +170,7 @@ load_settings();
 //
 // Idem qu'au début, mais avec éventuellement un fichier de langue différent chargé
 //
-$output->assign_vars([
+$template->assign([
 	'PAGE_TITLE'   => ($reinstall) ? $lang['Title']['reinstall'] : $lang['Title']['install'],
 	'CONTENT_LANG' => $lang['CONTENT_LANG'],
 	'CONTENT_DIR'  => $lang['CONTENT_DIR']
@@ -186,7 +185,7 @@ if ($start) {
 				http_response_code(401);
 				$output->addLine($lang['Message']['Not_authorized']);
 				$output->addLine($lang['Click_return_index'], './index.php');
-				$output->displayMessage();
+				$output->message();
 			}
 
 			$admin_email  = $admindata['email'];
@@ -344,9 +343,9 @@ if ($start) {
 				$output->addHiddenField('dbname',  $infos['dbname']);
 				$output->addHiddenField('prefixe', $prefixe);
 
-				$output->send_headers();
+				$output->httpHeaders();
 
-				$output->assign_block_vars('download_file', [
+				$template->assignToBlock('download_file', [
 					'L_TITLE'         => $lang['Title']['install'],
 					'L_DL_BUTTON'     => $lang['Button']['dl'],
 
@@ -359,7 +358,7 @@ if ($start) {
 					'S_HIDDEN_FIELDS' => $output->getHiddenFields()
 				]);
 
-				$output->pparse('body');
+				$template->pparse();
 				exit;
 			}
 
@@ -385,7 +384,7 @@ if ($start) {
 	}
 }
 
-$output->send_headers();
+$output->httpHeaders();
 
 if (!$reinstall) {
 	require 'includes/functions.box.php';
@@ -411,7 +410,7 @@ if (!$reinstall) {
 		$infos['host'] .= ':'.$infos['port'];
 	}
 
-	$output->assign_block_vars('install', [
+	$template->assignToBlock('install', [
 		'L_EXPLAIN'         => $l_explain,
 		'TITLE_DATABASE'    => $lang['Title']['database'],
 		'TITLE_ADMIN'       => $lang['Title']['admin'],
@@ -443,7 +442,7 @@ if (!$reinstall) {
 	]);
 }
 else {
-	$output->assign_block_vars('reinstall', [
+	$template->assignToBlock('reinstall', [
 		'L_EXPLAIN'      => nl2br($lang['Warning_reinstall']),
 		'L_LOGIN'        => $lang['Login'],
 		'L_PASS'         => $lang['Password'],
@@ -453,11 +452,10 @@ else {
 	]);
 }
 
-$output->assign_var('S_PREV_LANGUAGE', $language);
+$template->assign([
+	'S_PREV_LANGUAGE' => $language,
+	'ERROR_BOX'       => $output->errorbox($msg_error)
+]);
 
-if ($error) {
-	$output->error_box($msg_error);
-}
-
-$output->pparse('body');
-$output->page_footer();
+$template->pparse();
+$output->footer();

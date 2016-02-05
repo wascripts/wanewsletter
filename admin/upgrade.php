@@ -36,7 +36,7 @@ if (!isset($nl_config['db_version'])) {
 
 	// Les versions des branches 2.0 et 2.1 ne sont plus prises en charge
 	if (!version_compare($currentVersion, '2.2.0', '>=' )) {
-		$output->displayMessage($lang['Unsupported_version']);
+		$output->message($lang['Unsupported_version']);
 	}
 
 	//
@@ -79,7 +79,7 @@ if (filter_input(INPUT_GET, 'mode') == 'check') {
 			$output->redirect('./index.php', 5);
 			$output->addLine($lang['Message']['Not_authorized']);
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 
 		exit;
@@ -111,7 +111,7 @@ if (filter_input(INPUT_GET, 'mode') == 'check') {
 			$output->addLine($lang['Site_unreachable']);
 		}
 
-		$output->displayMessage();
+		$output->message();
 	}
 
 	exit;
@@ -133,7 +133,7 @@ if ($auth->isLoggedIn() && wan_is_admin($admindata) && isset($_POST['sendfile'])
 }
 
 if (check_db_version($nl_config['db_version'])) {
-	$output->displayMessage($lang['Upgrade_not_required']);
+	$output->message($lang['Upgrade_not_required']);
 }
 
 if (isset($_POST['start'])) {
@@ -161,7 +161,7 @@ if (isset($_POST['start'])) {
 		$output->redirect('./index.php', 6);
 		$output->addLine($lang['Message']['Not_authorized']);
 		$output->addLine($lang['Click_return_index'], './index.php');
-		$output->displayMessage();
+		$output->message();
 	}
 
 	load_settings($admindata);
@@ -241,7 +241,7 @@ if (isset($_POST['start'])) {
 				}
 				while ($row = $result->fetch());
 
-				$output->displayMessage(sprintf("Des adresses email sont présentes en plusieurs
+				$output->message(sprintf("Des adresses email sont présentes en plusieurs
 					exemplaires dans la table %s, la mise à jour ne peut donc continuer.
 					Supprimez les doublons en cause puis relancez la mise à jour.
 					Adresses email présentes en plusieurs exemplaires : %s",
@@ -767,46 +767,45 @@ if (isset($_POST['start'])) {
 		// Affichage message de résultat
 		//
 		if (UPDATE_CONFIG_FILE || $moved_dirs) {
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'result_upgrade_body.tpl']);
+			$template = new Template('result_upgrade_body.tpl');
 
 			$message = $lang['Success_upgrade'];
 
 			if (UPDATE_CONFIG_FILE) {
-				$output->assign_block_vars('download_file', [
+				$template->assignToBlock('download_file', [
 					'L_DL_BUTTON' => $lang['Button']['dl']
 				]);
 
 				$message = $lang['Success_upgrade_no_config'];
 			}
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
 				'MESSAGE' => nl2br($message)
 			]);
 
 			if ($moved_dirs) {
-				$output->assign_block_vars('moved_dirs', [
+				$template->assignToBlock('moved_dirs', [
 					'MOVED_DIRS_NOTICE' => nl2br($lang['Moved_dirs_notice'])
 				]);
 			}
 
-			$output->pparse('body');
-
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 		else {
-			$output->displayMessage($lang['Success_upgrade']);
+			$output->message($lang['Success_upgrade']);
 		}
 	}
 }
 
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'upgrade_body.tpl']);
+$template = new Template('upgrade_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
 	'L_EXPLAIN'       => nl2br(sprintf($lang['Welcome_in_upgrade'], WANEWSLETTER_VERSION)),
 	'L_START_BUTTON'  => $lang['Start_upgrade']
@@ -814,13 +813,11 @@ $output->assign_vars([
 
 if (!$auth->isLoggedIn()) {
 	// ajouter formulaire de connexion
-	$output->assign_block_vars('login_form', [
+	$template->assignToBlock('login_form', [
 		'L_LOGIN'  => $lang['Login'],
 		'L_PASSWD' => $lang['Password']
 	]);
 }
 
-$output->pparse('body');
-
-$output->page_footer();
-
+$template->pparse();
+$output->footer();

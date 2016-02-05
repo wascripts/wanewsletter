@@ -46,11 +46,11 @@ else {
 
 $list_box .= '</select>';
 
-$output->send_headers();
+$output->httpHeaders();
 
-$output->set_filenames(['body' => 'subscribe_body.tpl']);
+$template = new Template('subscribe_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'PAGE_TITLE'      => $lang['Title']['form'],
 	'L_INVALID_EMAIL' => str_replace('\'', '\\\'', $lang['Message']['Invalid_email']),
 	'L_PAGE_LOADING'  => str_replace('\'', '\\\'', $lang['Page_loading']),
@@ -66,7 +66,7 @@ $output->assign_vars([
 	'MESSAGE'  => $message
 ]);
 
-$output->pparse('body');
+$template->pparse();
 
 //
 // On réactive le gestionnaire d'erreur précédent

@@ -24,14 +24,14 @@ class Subscription
 	private $isRegistered = false;
 	public  $message      = '';
 
-	private $tpl_dir;
+	private $tpldir;
 	private $other_tags;
 
 	public function __construct($listdata = null)
 	{
 		global $nl_config;
 
-		$this->tpl_dir = WA_ROOTDIR . '/languages/' . $nl_config['language'] . '/emails/';
+		$this->tpldir = sprintf('%s/languages/%s/emails/', WA_ROOTDIR, $nl_config['language']);
 
 		if (isset($listdata)) {
 			$this->listdata    = $listdata;
@@ -312,9 +312,8 @@ class Subscription
 			$email_tpl = ($this->listdata['use_cron']) ? 'welcome_cron2' : 'welcome_form2';
 		}
 
-		$tpl = new Template($this->tpl_dir);
-		$tpl->set_filenames(['mail' => $email_tpl.'.txt']);
-		$tpl->assign_vars([
+		$template = new Template(sprintf('%s/%s.txt', $this->tpldir, $email_tpl));
+		$template->assign([
 			'LISTE'    => $this->listdata['liste_name'],
 			'SITENAME' => $nl_config['sitename'],
 			'URLSITE'  => $nl_config['urlsite'],
@@ -323,14 +322,10 @@ class Subscription
 		]);
 
 		if ($this->listdata['use_cron']) {
-			$tpl->assign_vars([
-				'EMAIL_NEWSLETTER' => $this->liste_email
-			]);
+			$template->assign(['EMAIL_NEWSLETTER' => $this->liste_email]);
 		}
 		else {
-			$tpl->assign_vars([
-				'LINK' => $this->make_link()
-			]);
+			$template->assign(['LINK' => $this->make_link()]);
 		}
 
 		if (count($this->other_tags) > 0) {
@@ -341,17 +336,17 @@ class Subscription
 				}
 			}
 
-			$tpl->assign_vars($tags);
+			$template->assign($tags);
 		}
 
 		if ($nl_config['enable_profil_cp']) {
 			$link_profil_cp = $nl_config['urlsite'] . $nl_config['path'] . 'profil_cp.php';
-			$tpl->assign_block_vars('enable_profil_cp', [
+			$template->assignToBlock('enable_profil_cp', [
 				'LINK_PROFIL_CP' => $link_profil_cp
 			]);
 		}
 
-		$body = $tpl->pparse('mail', true);
+		$body = $template->pparse(true);
 
 		$email = new Email();
 		$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
@@ -461,9 +456,8 @@ class Subscription
 
 			$email_tpl = ($this->listdata['use_cron']) ? 'unsubscribe_cron' : 'unsubscribe_form';
 
-			$tpl = new Template($this->tpl_dir);
-			$tpl->set_filenames(['mail' => $email_tpl.'.txt']);
-			$tpl->assign_vars([
+			$template = new Template(sprintf('%s/%s.txt', $this->tpldir, $email_tpl));
+			$template->assign([
 				'LISTE'    => $this->listdata['liste_name'],
 				'SITENAME' => $nl_config['sitename'],
 				'URLSITE'  => $nl_config['urlsite'],
@@ -472,15 +466,13 @@ class Subscription
 			]);
 
 			if ($this->listdata['use_cron']) {
-				$tpl->assign_vars([
+				$template->assign([
 					'EMAIL_NEWSLETTER' => $this->liste_email,
 					'CODE'             => $this->account['code']
 				]);
 			}
 			else {
-				$tpl->assign_vars([
-					'LINK' => $this->make_link()
-				]);
+				$template->assign(['LINK' => $this->make_link()]);
 			}
 
 			if (count($this->other_tags) > 0) {
@@ -491,10 +483,10 @@ class Subscription
 					}
 				}
 
-				$tpl->assign_vars($tags);
+				$template->assign($tags);
 			}
 
-			$body = $tpl->pparse('mail', true);
+			$body = $template->pparse(true);
 
 			$email = new Email();
 			$email->setFrom($this->listdata['sender_email'], $this->listdata['liste_name']);
@@ -569,13 +561,13 @@ class Subscription
 			$fieldname  = 'email_new_subscribe';
 			$fieldvalue = SUBSCRIBE_NOTIFY_YES;
 			$subject    = $lang['Subject_email']['New_subscribe'];
-			$template   = 'admin_new_subscribe';
+			$email_tpl  = 'admin_new_subscribe';
 		}
 		else {
 			$fieldname  = 'email_unsubscribe';
 			$fieldvalue = UNSUBSCRIBE_NOTIFY_YES;
 			$subject    = $lang['Subject_email']['Unsubscribe_2'];
-			$template   = 'admin_unsubscribe';
+			$email_tpl  = 'admin_unsubscribe';
 		}
 
 		$sql = "SELECT a.admin_login, a.admin_email, a.admin_level, aa.auth_view
@@ -585,9 +577,8 @@ class Subscription
 			WHERE a.$fieldname = " . $fieldvalue;
 		if ($result = $db->query($sql)) {
 			if ($row = $result->fetch()) {
-				$tpl = new Template($this->tpl_dir);
-				$tpl->set_filenames(['mail' => $template.'.txt']);
-				$tpl->assign_vars([
+				$template = new Template(sprintf('%s/%s.txt', $this->tpldir, $email_tpl));
+				$template->assign([
 					'EMAIL'   => $this->account['email'],
 					'LISTE'   => $this->listdata['liste_name'],
 					'URLSITE' => $nl_config['urlsite'],
@@ -611,7 +602,7 @@ class Subscription
 						}
 					}
 
-					$tpl->assign_vars($tags);
+					$template->assign($tags);
 				}
 
 				do {
@@ -619,8 +610,8 @@ class Subscription
 						continue;
 					}
 
-					$tpl->assign_var('USER', $row['admin_login']);
-					$body = $tpl->pparse('mail', true);
+					$template->assign(['USER' => $row['admin_login']]);
+					$body = $template->pparse(true);
 
 					$email->clearRecipients();
 					$email->addRecipient($row['admin_email'], $row['admin_login']);

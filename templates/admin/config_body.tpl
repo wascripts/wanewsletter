@@ -19,11 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	configForm.elements['use_smtp'][0].addEventListener('change', toggleView, false);
 	configForm.elements['use_smtp'][1].addEventListener('change', toggleView, false);
 }, false);
-
-var lang = [];
-lang['restore-default'] = '{L_RESTORE_DEFAULT}';
-// Vite fait mal fait. On fera un truc propre plus tard.
-var basedir = '{BASEDIR}';
 //-->
 </script>
 

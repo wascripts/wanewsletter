@@ -34,7 +34,7 @@ if (($mode == 'adduser' || $mode == 'deluser') && !wan_is_admin($admindata)) {
 	$output->redirect('index.php', 4);
 	$output->addLine($lang['Message']['Not_authorized']);
 	$output->addLine($lang['Click_return_index'], './index.php');
-	$output->displayMessage();
+	$output->message();
 }
 
 if ($mode == 'adduser') {
@@ -74,14 +74,14 @@ if ($mode == 'adduser') {
 			$db->insert(ADMIN_TABLE, $sql_data);
 			$admin_id = $db->lastInsertId();
 
-			$tpl = new Template(WA_ROOTDIR . '/languages/' . $nl_config['language'] . '/emails/');
-			$tpl->set_filenames(['mail' => 'new_admin.txt']);
-			$tpl->assign_vars([
+			$template = '%s/languages/%s/emails/new_admin.txt';
+			$template = new Template(sprintf($template, WA_ROOTDIR, $nl_config['language']));
+			$template->assign([
 				'PSEUDO'        => $new_login,
 				'SITENAME'      => $nl_config['sitename'],
 				'INIT_PASS_URL' => wan_build_url('login.php?mode=cp')
 			]);
-			$message = $tpl->pparse('mail', true);
+			$message = $template->pparse(true);
 
 			$email = new Email();
 			$email->setFrom($admindata['admin_email'], $admindata['admin_login']);
@@ -102,15 +102,15 @@ if ($mode == 'adduser') {
 			$output->addLine($lang['Message']['Admin_added']);
 			$output->addLine($lang['Click_return_profile'], './admin.php?uid=' . $admin_id);
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 	}
 
-	$output->page_header();
+	$output->header();
 
-	$output->set_filenames(['body' => 'add_admin_body.tpl']);
+	$template = new Template('add_admin_body.tpl');
 
-	$output->assign_vars([
+	$template->assign([
 		'L_TITLE'         => $lang['Add_user'],
 		'L_EXPLAIN'       => nl2br($lang['Explain']['admin']),
 		'L_LOGIN'         => $lang['Login'],
@@ -122,13 +122,12 @@ if ($mode == 'adduser') {
 		'EMAIL' => htmlspecialchars($new_email)
 	]);
 
-	$output->pparse('body');
-
-	$output->page_footer();
+	$template->pparse();
+	$output->footer();
 }
 else if ($mode == 'deluser') {
 	if ($admindata['admin_id'] == $admin_id) {
-		$output->displayMessage('Owner_account');
+		$output->message('Owner_account');
 	}
 
 	if (isset($_POST['confirm'])) {
@@ -146,16 +145,16 @@ else if ($mode == 'deluser') {
 		$output->addLine($lang['Message']['Admin_deleted']);
 		$output->addLine($lang['Click_return_profile'], './admin.php');
 		$output->addLine($lang['Click_return_index'], './index.php');
-		$output->displayMessage();
+		$output->message();
 	}
 	else {
 		$output->addHiddenField('uid', $admin_id);
 
-		$output->page_header();
+		$output->header();
 
-		$output->set_filenames(['body' => 'confirm_body.tpl']);
+		$template = new Template('confirm_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_CONFIRM' => $lang['Title']['confirm'],
 
 			'TEXTE' => $lang['Confirm_del_user'],
@@ -166,9 +165,8 @@ else if ($mode == 'deluser') {
 			'U_FORM' => 'admin.php?mode=deluser'
 		]);
 
-		$output->pparse('body');
-
-		$output->page_footer();
+		$template->pparse();
+		$output->footer();
 	}
 }
 
@@ -178,7 +176,7 @@ if (isset($_POST['submit'])) {
 		$output->redirect('./index.php', 4);
 		$output->addLine($lang['Message']['Not_authorized']);
 		$output->addLine($lang['Click_return_index'], './index.php');
-		$output->displayMessage();
+		$output->message();
 	}
 
 	$vararray = ['current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'date_format', 'language'];
@@ -290,7 +288,7 @@ if (isset($_POST['submit'])) {
 		$output->addLine($lang['Message']['Profile_updated']);
 		$output->addLine($lang['Click_return_profile'], './admin.php?uid=' . $admin_id);
 		$output->addLine($lang['Click_return_index'], './index.php');
-		$output->displayMessage();
+		$output->message();
 	}
 }
 
@@ -355,11 +353,11 @@ if (wan_is_admin($admindata)) {
 	$output->addLink('subsection', './admin.php?mode=adduser', $lang['Add_user']);
 }
 
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'admin_body.tpl']);
+$template = new Template('admin_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'L_TITLE'               => sprintf($lang['Title']['profile'], htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
 	'L_EXPLAIN'             => nl2br($lang['Explain']['admin']),
 	'L_DEFAULT_LANG'        => $lang['Default_lang'],
@@ -377,7 +375,6 @@ $output->assign_vars([
 	'L_NO'                  => $lang['No'],
 	'L_VALID_BUTTON'        => $lang['Button']['valid'],
 	'L_RESET_BUTTON'        => $lang['Button']['reset'],
-	'L_RESTORE_DEFAULT'     => $lang['Restore_default'],
 
 	'LANG_BOX'              => lang_box($current_admin['admin_lang']),
 	'EMAIL'                 => $current_admin['admin_email'],
@@ -411,7 +408,7 @@ if (wan_is_admin($admindata)) {
 		return $box_auth;
 	};
 
-	$output->assign_block_vars('admin_options', [
+	$template->assignToBlock('admin_options', [
 		'L_ADD_ADMIN'     => $lang['Add_user'],
 		'L_TITLE_MANAGE'  => $lang['Title']['manage'],
 		'L_TITLE_OPTIONS' => $lang['Title']['other_options'],
@@ -435,7 +432,7 @@ if (wan_is_admin($admindata)) {
 	]);
 
 	foreach ($listdata as $listrow) {
-		$output->assign_block_vars('admin_options.auth', [
+		$template->assignToBlock('admin_options.auth', [
 			'LISTE_NAME'      => htmlspecialchars($listrow['liste_name']),
 			'LISTE_ID'        => $listrow['liste_id'],
 
@@ -451,7 +448,7 @@ if (wan_is_admin($admindata)) {
 	}
 
 	if ($admin_box != '') {
-		$output->assign_block_vars('admin_box', [
+		$template->assignToBlock('admin_box', [
 			'L_VIEW_PROFILE'  => $lang['View_profile'],
 			'L_BUTTON_GO'     => $lang['Button']['go'],
 
@@ -461,9 +458,8 @@ if (wan_is_admin($admindata)) {
 }
 
 if ($current_admin['admin_id'] == $admindata['admin_id']) {
-	$output->assign_block_vars('owner_profil', []);
+	$template->assignToBlock('owner_profil');
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

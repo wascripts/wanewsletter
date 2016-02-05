@@ -15,7 +15,7 @@ if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 	exit('<b>No hacking</b>');
 }
 
-$output->set_rootdir(sprintf('%s/templates/', WA_ROOTDIR));
+Template::setDir(sprintf('%s/templates/', WA_ROOTDIR));
 
 $mode      = filter_input(INPUT_GET, 'mode');
 $reset_key = filter_input(INPUT_GET, 'k');
@@ -71,7 +71,7 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 					}
 
 					$output->addLine($lang['Message'][$message_id], $_SERVER['SCRIPT_NAME']);
-					$output->displayMessage();
+					$output->message();
 				}
 			}
 
@@ -79,11 +79,11 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 				$_SESSION['reset_key_expire'] = strtotime('+15 min');
 			}
 
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'reset_passwd.tpl']);
+			$template = new Template('reset_passwd.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'TITLE'            => ($userdata['passwd'] == '')
 					? $lang['Title']['Create_passwd'] : $lang['Title']['Reset_passwd'],
 				'L_NEW_PASSWD'     => $lang['New_passwd'],
@@ -94,9 +94,8 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 				'S_RESETKEY'       => $reset_key
 			]);
 
-			$output->pparse('body');
-
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 	}
 
@@ -116,13 +115,13 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 				$_SESSION['reset_key'] = $reset_key = generate_key(12);
 				$_SESSION['reset_key_expire'] = strtotime('+15 min');
 
-				$tpl = new Template(WA_ROOTDIR . '/languages/' . $nl_config['language'] . '/emails/');
-				$tpl->set_filenames(['mail' => 'reset_passwd.txt']);
-				$tpl->assign_vars([
+				$template = '%s/languages/%s/emails/reset_passwd.txt';
+				$template = new Template(sprintf($template, WA_ROOTDIR, $nl_config['language']));
+				$template->assign([
 					'PSEUDO'    => $userdata['username'],
 					'RESET_URL' => wan_build_url($_SERVER['SCRIPT_NAME'].'?k='.$reset_key)
 				]);
-				$message = $tpl->pparse('mail', true);
+				$message = $template->pparse(true);
 
 				$hostname = parse_url($nl_config['urlsite'], PHP_URL_HOST);
 
@@ -146,15 +145,15 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 
 			$message_id = (strpos($login_or_email, '@'))
 				? 'Reset_using_email_ok' : 'Reset_using_username_ok';
-			$output->displayMessage($message_id);
+			$output->message($message_id);
 		}
 	}
 
-	$output->page_header();
+	$output->header();
 
-	$output->set_filenames(['body' => 'lost_passwd.tpl']);
+	$template = new Template('lost_passwd.tpl');
 
-	$output->assign_vars([
+	$template->assign([
 		'TITLE'            => ($mode == 'cp')
 			? $lang['Title']['Create_passwd'] : $lang['Title']['Reset_passwd'],
 		'L_EXPLAIN'        => $lang['Explain']['Reset_passwd'],
@@ -166,9 +165,8 @@ if ($mode == 'reset_passwd' || $mode == 'cp') {
 		'S_SCRIPT_NAME'    => $_SERVER['SCRIPT_NAME']
 	]);
 
-	$output->pparse('body');
-
-	$output->page_footer();
+	$template->pparse();
+	$output->footer();
 }
 //
 // Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
@@ -215,13 +213,13 @@ if ($auth->isLoggedIn()) {
 	http_redirect($redirect);
 }
 
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'login.tpl']);
+$template = new Template('login.tpl');
 
 $login_script = (check_in_admin()) ? 'login.php' : 'profil_cp.php';
 
-$output->assign_vars([
+$template->assign([
 	'TITLE'          => $lang['Module']['login'],
 	'L_EXPLAIN'      => sprintf($lang['Explain']['login'],
 		sprintf('<a href="%s?mode=cp">', $login_script),
@@ -237,10 +235,10 @@ $output->assign_vars([
 ]);
 
 if (!filter_input(INPUT_COOKIE, $session->getName())) {
-	$output->assign_block_vars('cookie_notice', ['L_TEXT' => $lang['Cookie_notice']]);
+	$template->assignToBlock('cookie_notice', [
+		'L_TEXT' => $lang['Cookie_notice']
+	]);
 }
 
-
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

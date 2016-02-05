@@ -9,7 +9,7 @@
 
 namespace Wanewsletter;
 
-class Output extends Template
+class Output
 {
 	/**
 	 * Liens relatifs au document
@@ -47,22 +47,11 @@ class Output extends Template
 	private $messageList   = [];
 
 	/**
-	 * Indique si la méthode page_header() a déjà été appelée.
+	 * Indique si la méthode self::header() a déjà été appelée.
 	 *
 	 * @var boolean
 	 */
 	private $header_displayed = false;
-
-	/**
-	 * @param string $template_root
-	 */
-	public function __construct($template_root)
-	{
-		//
-		// Réglage du dossier contenant les templates
-		//
-		$this->set_rootdir($template_root);
-	}
 
 	/**
 	 * Ajout d'un lien relatif au document
@@ -258,22 +247,24 @@ class Output extends Template
 	 *
 	 * @param string  $page_title
 	 */
-	public function page_header($page_title = '')
+	public function header($page_title = '')
 	{
 		global $nl_config, $lang, $admindata, $auth;
-		global $simple_header, $error, $msg_error;
+		global $simple_header, $msg_error;
 
 		if (!($auth instanceof Auth) || !$auth->isLoggedIn()) {
 			$simple_header = true;
 		}
 
+		if ($this->header_displayed) {
+			return null;
+		}
+
 		$this->header_displayed = true;
 
-		$this->send_headers();
+		$this->httpHeaders();
 
-		$this->set_filenames([
-			'header' => ($simple_header) ? 'simple_header.tpl' :'header.tpl'
-		]);
+		$template = new Template(($simple_header) ? 'simple_header.tpl' : 'header.tpl');
 
 		if (check_in_admin()) {
 			$this->addLink('home', './',              				$lang['Title']['accueil']);
@@ -328,7 +319,7 @@ class Output extends Template
 			$this->addLink('stylesheet', sprintf('%s/templates/wanewsletter.custom.css', $base_dir));
 		}
 
-		$this->assign_vars([
+		$template->assign([
 			'PAGE_TITLE'   => $page_title,
 			'META'         => $this->meta_redirect,
 			'CONTENT_LANG' => $lang['CONTENT_LANG'],
@@ -337,7 +328,8 @@ class Output extends Template
 			'BASEDIR'      => $base_dir,
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts(),
-			'SITENAME'     => htmlspecialchars($sitename, ENT_NOQUOTES)
+			'SITENAME'     => htmlspecialchars($sitename, ENT_NOQUOTES),
+			'ERROR_BOX'    => $this->errorbox($msg_error)
 		]);
 
 		// Si l'utilisateur est connecté, affichage du menu
@@ -348,7 +340,7 @@ class Output extends Template
 					htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
 				);
 
-				$this->assign_vars([
+				$template->assign([
 					'L_INDEX'       => $lang['Module']['accueil'],
 					'L_CONFIG'      => $lang['Module']['config'],
 					'L_SEND'        => $lang['Module']['send'],
@@ -362,28 +354,25 @@ class Output extends Template
 			else {
 				$l_logout = $lang['Module']['logout'];
 
-				$this->assign_vars([
+				$template->assign([
 					'L_EDITPROFILE' => $lang['Module']['editprofile']
 				]);
 			}
 
-			$this->assign_vars([
-				'L_LOG'    => $lang['Module']['log'],
-				'L_LOGOUT' => $l_logout,
+			$template->assign([
+				'L_RESTORE_DEFAULT' => $lang['Restore_default'],
+				'L_LOG'             => $lang['Module']['log'],
+				'L_LOGOUT'          => $l_logout
 			]);
 		}
 
-		if ($error) {
-			$this->error_box($msg_error);
-		}
-
-		$this->pparse('header');
+		$template->pparse();
 	}
 
 	/**
 	 * Envoi le pied de page et termine l'exécution du script
 	 */
-	public function page_footer()
+	public function footer()
 	{
 		global $db, $lang, $starttime;
 
@@ -407,16 +396,15 @@ class Output extends Template
 			$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
 		}
 
-		$this->set_filenames(['footer' => 'footer.tpl']);
-
-		$version = WANEWSLETTER_VERSION;
+		$template = new Template('footer.tpl');
+		$version  = WANEWSLETTER_VERSION;
 
 		if (wan_get_debug_level() > DEBUG_LEVEL_QUIET && $db instanceof Dblayer\Wadb) {
 			$version  .= sprintf(' (%s)', $db::ENGINE);
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);
 
-			$this->assign_block_vars('dev_infos', [
+			$template->assignToBlock('dev_infos', [
 				'TIME_TOTAL' => sprintf('%.8f', $totaltime),
 				'TIME_PHP'   => sprintf('%.3f', $totaltime - $db->sqltime),
 				'TIME_SQL'   => sprintf('%.3f', $db->sqltime),
@@ -426,13 +414,13 @@ class Output extends Template
 			]);
 		}
 
-		$this->assign_vars([
+		$template->assign([
 			'VERSION'   => $version,
 			'TRANSLATE' => (!empty($lang['TRANSLATE'])) ? ' | Translate by ' . $lang['TRANSLATE'] : ''
 		]);
 
 		if ($wanlog_box != '') {
-			$this->assign_vars([
+			$template->assign([
 				'WANLOG_BOX' => sprintf('<ul class="warning"
 					style="font-family:monospace;font-size:12px;">%s</ul>',
 					$wanlog_box
@@ -440,15 +428,14 @@ class Output extends Template
 			]);
 		}
 
-		$this->pparse('footer');
-
+		$template->pparse();
 		exit;
 	}
 
 	/**
-	 * Envoie des en-têtes HTTP
+	 * Envoi des en-têtes HTTP
 	 */
-	public function send_headers()
+	public function httpHeaders()
 	{
 		global $lang;
 
@@ -474,7 +461,7 @@ class Output extends Template
 		$lang_code = (!empty($lang['CONTENT_LANG'])) ? $lang['CONTENT_LANG'] : 'fr';
 		$direction = (!empty($lang['CONTENT_DIR'])) ? $lang['CONTENT_DIR'] : 'ltr';
 
-		$this->send_headers();
+		$this->httpHeaders();
 
 		echo <<<BASIC
 <!DOCTYPE html>
@@ -498,19 +485,6 @@ BASIC;
 	}
 
 	/**
-	 * Affiche de message d'information.
-	 * OBSOLÈTE. Voir méthode displayMessage() plus bas.
-	 *
-	 * @param string $str
-	 *
-	 * @deprecated since 2.4-beta2
-	 */
-	public function message($str)
-	{
-		$this->displayMessage($str);
-	}
-
-	/**
 	 * Ajoute une entrée à la pile des messages
 	 *
 	 * @param string $str  le message
@@ -526,13 +500,12 @@ BASIC;
 	}
 
 	/**
-	 * Affichage d'un message d'information
-	 * Si $str n'est pas fourni, la pile de messages $this->messageList est utilisée
+	 * Affichage d’un message d’information.
 	 *
 	 * @param string $str
 	 * @param string $title
 	 */
-	public function displayMessage($str = '', $title = '')
+	public function message($str = '', $title = '')
 	{
 		global $lang, $message;
 
@@ -563,55 +536,51 @@ BASIC;
 			$title = $lang['Title'][$title];
 		}
 
-		if (!$this->header_displayed) {
-			$this->page_header();
-		}
+		$this->header();
 
-		$this->set_filenames(['body' => 'message_body.tpl']);
+		$template = new Template('message_body.tpl');
 
-		$this->assign_vars([
+		$template->assign([
 			'MSG_TITLE' => $title,
 			'MSG_TEXT'  => $str,
 			'MSG_TYPE'  => $type
 		]);
 
-		$this->pparse('body');
+		$template->pparse();
 
-		$this->page_footer();
-
-		exit;
+		$this->footer();
 	}
 
 	/**
-	 * Génération et affichage de liste d'erreur
+	 * Génération de la liste des erreurs
 	 *
-	 * @param mixed $msg_errors
+	 * @param array $msg_errors
+	 *
+	 * @return string
 	 */
-	public function error_box($msg_errors)
+	public function errorbox(array $msg_errors)
 	{
-		if (!is_array($msg_errors)) {
-			$msg_errors = [$msg_errors];
-		}
-
 		$error_box = '';
 		foreach ($msg_errors as $msg_error) {
 			$error_box .= sprintf("<li>%s</li>\n", $msg_error);
 		}
 
-		$this->assign_vars([
-			'ERROR_BOX' => sprintf('<ul class="warning">%s</ul>', $error_box)
-		]);
+		if ($error_box) {
+			$error_box = sprintf('<ul class="warning">%s</ul>', $error_box);
+		}
+
+		return $error_box;
 	}
 
 	/**
-	 * Affichage des fichiers joints
+	 * Génération du template des fichiers joints
 	 *
 	 * @param array   $logdata Données du log concerné
 	 * @param integer $format  Format du log visualisé (si dans view.php)
 	 *
-	 * @return boolean
+	 * @return Template|string
 	 */
-	public function files_list($logdata, $format = 0)
+	public function filesList(array $logdata, $format = 0)
 	{
 		global $lang, $nl_config;
 
@@ -622,29 +591,26 @@ BASIC;
 		$num_files   = count($logdata['joined_files']);
 
 		if ($num_files == 0) {
-			return false;
+			return '';
 		}
 
-		$test_files = [];
 		for ($i = 0; $i < $num_files; $i++) {
 			$total_size  += $logdata['joined_files'][$i]['file_size'];
 			$test_files[] = $logdata['joined_files'][$i]['file_real_name'];
 		}
 
+		$embed_files = [];
 		if ($format == FORMAT_HTML && hasCidReferences($logdata['log_body_html'], $refs) > 0) {
 			$embed_files = array_intersect($test_files, $refs);
 
 			if (($num_files - count($embed_files)) == 0) {
-				return false;
+				return '';
 			}
 		}
-		else {
-			$embed_files = [];
-		}
 
-		$this->set_filenames(['files_box_body' => 'files_box.tpl']);
+		$template = new Template('files_box.tpl');
 
-		$this->assign_vars([
+		$template->assign([
 			'L_JOINED_FILES'   => $lang['Title']['joined_files'],
 			'L_FILENAME'       => $lang['Filename'],
 			'L_FILESIZE'       => $lang['Filesize'],
@@ -655,8 +621,8 @@ BASIC;
 		]);
 
 		if ($page_envoi) {
-			$this->assign_block_vars('del_column', []);
-			$this->assign_block_vars('joined_files.files_box', [ // dans send_body.tpl
+			$template->assignToBlock('del_column');
+			$template->assignToBlock('joined_files.files_box', [
 				'L_DEL_FILE_BUTTON' => $lang['Button']['del_file']
 			]);
 
@@ -701,7 +667,7 @@ BASIC;
 					$lang['Message']['File_not_found'], htmlspecialchars($filename));
 			}
 
-			$this->assign_block_vars('file_info', [
+			$template->assignToBlock('file_info', [
 				'OFFSET'   => ($i + 1),
 				'FILENAME' => $filename,
 				'FILESIZE' => formateSize($filesize),
@@ -709,30 +675,29 @@ BASIC;
 			]);
 
 			if ($page_envoi) {
-				$this->assign_block_vars('file_info.delete_options', [
+				$template->assignToBlock('file_info.delete_options', [
 					'FILE_ID' => $file_id
 				]);
 			}
 		}
 
-		$this->assign_var_from_handle('JOINED_FILES_BOX', 'files_box_body');
-
-		return true;
+		return $template;
 	}
 
 	/**
-	 * Affichage de la page de sélection de liste ou insertion du select de choix de liste dans
-	 * le coin inférieur gauche de l'administration
+	 * Génération de la page de sélection de liste, ou du bloc de selection
+	 * de liste à intégrer dans le coin inférieur droit de l’administration
 	 *
 	 * @param integer $auth_type
-	 * @param boolean $display
+	 * @param boolean $complete
 	 * @param string  $jump_to
+	 *
+	 * @return Template|string
 	 */
-	public function build_listbox($auth_type, $display = true, $jump_to = '')
+	public function listbox($auth_type, $complete = true, $jump_to = '')
 	{
-		global $output, $admindata, $auth, $lang;
+		global $admindata, $auth, $lang;
 
-		$tmp_box = '';
 		$liste_id_ary = $auth->check_auth($auth_type);
 
 		if (!$jump_to) {
@@ -744,67 +709,62 @@ BASIC;
 			}
 		}
 
+		$tmpbox = '';
 		foreach ($auth->listdata as $liste_id => $data) {
 			if (in_array($liste_id, $liste_id_ary)) {
-				$tmp_box .= sprintf(
+				$tmpbox .= sprintf(
 					"<option value=\"%d\"%s>%s</option>\n\t",
 					$liste_id,
-					$output->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id)),
+					$this->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id)),
 					htmlspecialchars(cut_str($data['liste_name'], 30))
 				);
 			}
 		}
 
-		if ($tmp_box == '') {
-			if ($display) {
+		if (!$tmpbox) {
+			if ($complete) {
 				$this->addLine($lang['Message']['No_liste_exists']);
 
 				if (wan_is_admin($admindata)) {
 					$this->addLine($lang['Click_create_liste'], './view.php?mode=liste&action=add');
 				}
 
-				$this->displayMessage();
+				$this->message();
 			}
 
-			return null;
+			return '';
 		}
 
-		$list_box = '<select id="liste" name="liste">';
-		if (!$display) {
-			$list_box .= '<option value="0">' . $lang['Choice_liste'] . '</option>';
+		$listbox = '<select id="liste" name="liste">';
+		if (!$complete) {
+			$listbox .= '<option value="0">' . $lang['Choice_liste'] . '</option>';
 		}
-		$list_box .= $tmp_box . '</select>';
+		$listbox .= $tmpbox . '</select>';
 
-		if ($display) {
-			$this->page_header();
+		if ($complete) {
+			$template = new Template('select_liste_body.tpl');
 
-			$this->set_filenames(['body' => 'select_liste_body.tpl']);
+			$template->assign([
+				'L_TITLE'        => $lang['Title']['select'],
+				'L_SELECT_LISTE' => $lang['Choice_liste'],
+				'L_VALID_BUTTON' => $lang['Button']['valid'],
 
-			$this->assign_vars([
-				'L_TITLE'         => $lang['Title']['select'],
-				'L_SELECT_LISTE'  => $lang['Choice_liste'],
-				'L_VALID_BUTTON'  => $lang['Button']['valid'],
-
-				'LISTE_BOX'       => $list_box,
-				'U_FORM'          => $jump_to
+				'LISTE_BOX'      => $listbox,
+				'U_FORM'         => $jump_to
 			]);
-
-			$this->pparse('body');
-
-			$this->page_footer();
 		}
 		else {
-			$this->set_filenames(['list_box_body' => 'list_box.tpl']);
+			$template = new Template('list_box.tpl');
 
-			$this->assign_vars([
+			$template->assign([
 				'L_VIEW_LIST' => $lang['View_liste'],
 				'L_BUTTON_GO' => $lang['Button']['go'],
 
-				'S_LISTBOX'   => $list_box,
+				'S_LISTBOX'   => $listbox,
 				'U_LISTBOX'   => $jump_to
 			]);
-
-			$this->assign_var_from_handle('LISTBOX', 'list_box_body');
 		}
+
+		return $template;
 	}
 }

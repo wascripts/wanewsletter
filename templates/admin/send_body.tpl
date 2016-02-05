@@ -7,7 +7,7 @@ if (typeof(tinyMCE) != 'undefined') {
 		skin: "lightgray",
 		menubar: false,
 		<!-- BEGIN tinymce_lang -->
-		language_url:"{BASEDIR}/languages/{tinymce_lang.CODE}/tinymce.js",
+		language_url: basedir + "/languages/{tinymce_lang.CODE}/tinymce.js",
 		<!-- END tinymce_lang -->
 		plugins: [
 			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
@@ -31,7 +31,6 @@ if (typeof(tinyMCE) != 'undefined') {
 	});
 }
 
-var lang = [];
 lang["preview"] = '{L_PREVIEW_BUTTON}';
 lang["addlink"] = '{L_ADDLINK_BUTTON}';
 //-->

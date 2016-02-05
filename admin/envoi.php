@@ -28,12 +28,14 @@ const DISABLE_CHECK_LINKS = false;
 require './start.inc.php';
 
 if (!$_SESSION['liste']) {
-	$output->build_listbox(Auth::VIEW);
+	$output->header();
+	$output->listbox(Auth::VIEW)->pparse();
+	$output->footer();
 }
 
 if (!$auth->check_auth(Auth::SEND, $_SESSION['liste'])) {
 	http_response_code(401);
-	$output->displayMessage('Not_auth_send');
+	$output->message('Not_auth_send');
 }
 
 $listdata = $auth->listdata[$_SESSION['liste']];
@@ -73,8 +75,6 @@ foreach (['test', 'send', 'save', 'delete', 'attach', 'unattach'] as $varname) {
 	}
 }
 
-$output->build_listbox(Auth::VIEW, false);
-
 switch ($mode) {
 	//
 	// Téléchargement d'un fichier joint
@@ -86,7 +86,7 @@ switch ($mode) {
 		$file   = $attach->getFile($file_id);
 
 		if (!$file || !($fp = fopen($file['path'], 'rb'))) {
-			$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
+			$output->message(sprintf($lang['Message']['File_not_exists'], ''));
 		}
 
 		sendfile($file['name'], $file['type'], $fp);
@@ -118,7 +118,7 @@ switch ($mode) {
 			$fp = fopen($lockfile, (file_exists($lockfile) ? 'r+' : 'w'));
 			if (!flock($fp, LOCK_EX|LOCK_NB)) {
 				fclose($fp);
-				$output->displayMessage('List_is_busy');
+				$output->message('List_is_busy');
 			}
 
 			$db->beginTransaction();
@@ -145,16 +145,16 @@ switch ($mode) {
 			fclose($fp);
 			unlink($lockfile);
 
-			$output->displayMessage('Send_canceled');
+			$output->message('Send_canceled');
 		}
 		else {
 			$output->addHiddenField('id', $logdata['log_id']);
 
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'confirm_body.tpl']);
+			$template = new Template('confirm_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $lang['Cancel_send_log'],
@@ -165,9 +165,8 @@ switch ($mode) {
 				'U_FORM' => 'envoi.php?mode=cancel'
 			]);
 
-			$output->pparse('body');
-
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 		break;
 
@@ -186,12 +185,12 @@ switch ($mode) {
 				$output->redirect('envoi.php?mode=progress', 4);
 				$output->addLine($lang['Message']['No_log_found']);
 				$output->addLine($lang['Click_return_back'], './envoi.php?mode=progress');
-				$output->displayMessage();
+				$output->message();
 			}
 
 			if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
 				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
-				$output->displayMessage();
+				$output->message();
 			}
 		}
 		else {
@@ -249,14 +248,14 @@ switch ($mode) {
 				$output->redirect('envoi.php', 4);
 				$output->addLine($lang['Message']['No_log_to_send']);
 				$output->addLine($lang['Click_return_form'], './envoi.php');
-				$output->displayMessage();
+				$output->message();
 			}
 
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'send_progress_body.tpl']);
+			$template = new Template('send_progress_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE'       => $lang['List_send'],
 				'L_SUBJECT'     => $lang['Log_subject'],
 				'L_DONE'        => $lang['Done'],
@@ -272,7 +271,7 @@ switch ($mode) {
 					$percent = wa_number_format(round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2));
 				}
 
-				$output->assign_block_vars('logrow', [
+				$template->assignToBlock('logrow', [
 					'LOG_ID'       => $row['log_id'],
 					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
 					'SEND_PERCENT' => $percent
@@ -280,9 +279,8 @@ switch ($mode) {
 			}
 			while ($row = $result->fetch());
 
-			$output->pparse('body');
-
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 		break;
 
@@ -302,7 +300,7 @@ switch ($mode) {
 					catch (Exception $e) {
 						$output->addLine($e->getMessage());
 						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
-						$output->displayMessage();
+						$output->message();
 					}
 
 					$logdata['log_body_text'] = convert_encoding($result['data'], $result['charset']);
@@ -315,7 +313,7 @@ switch ($mode) {
 					catch (Exception $e) {
 						$output->addLine($e->getMessage());
 						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
-						$output->displayMessage();
+						$output->message();
 					}
 
 					if (preg_match('/<head[^>]*>(.+?)<\/head>/is', $result['data'], $match_head)) {
@@ -362,7 +360,7 @@ switch ($mode) {
 					$output->redirect('envoi.php?mode=load', 4);
 					$output->addLine($lang['Message']['log_not_exists']);
 					$output->addLine($lang['Click_return_back'], './envoi.php?mode=load');
-					$output->displayMessage();
+					$output->message();
 				}
 
 				$prev_status = $logdata['log_status'];
@@ -376,9 +374,9 @@ switch ($mode) {
 				ORDER BY log_date DESC";
 			$result = $db->query($sql);
 
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'select_log_body.tpl']);
+			$template = new Template('select_log_body.tpl');
 
 			if ($row = $result->fetch()) {
 				$log_box = '<select name="id">';
@@ -406,17 +404,17 @@ switch ($mode) {
 
 				$log_box .= '</select>';
 
-				$output->assign_block_vars('load_draft', [
+				$template->assignToBlock('load_draft', [
 					'L_SELECT_LOG' => $lang['Select_log_to_load'],
 					'LOG_BOX'      => $log_box
 				]);
 
-				$output->assign_block_vars('script_load_by_url', [
+				$template->assignToBlock('script_load_by_url', [
 					'L_FROM_AN_URL' => str_replace('\'', '\\\'', $lang['From_an_URL'])
 				]);
 			}
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE'        => $lang['Title']['select'],
 				'L_VALID_BUTTON' => $lang['Button']['valid'],
 				'L_EXPLAIN_LOAD' => $lang['Explain']['load']
@@ -434,7 +432,7 @@ switch ($mode) {
 					break;
 			}
 
-			$output->assign_block_vars($bloc_name, [
+			$template->assignToBlock($bloc_name, [
 				'L_LOAD_BY_URL' => $lang['Load_by_URL'],
 				'L_FORMAT_TEXT' => $lang['Format_text'],
 				'L_FORMAT_HTML' => $lang['Format_html'],
@@ -443,9 +441,8 @@ switch ($mode) {
 				'BODY_HTML_URL' => htmlspecialchars($body_html_url)
 			]);
 
-			$output->pparse('body');
-
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 		break;
 
@@ -457,7 +454,7 @@ switch ($mode) {
 			$output->redirect('envoi.php', 4);
 			$output->addLine($lang['Message']['No_log_id']);
 			$output->addLine($lang['Click_return_back'], './envoi.php');
-			$output->displayMessage();
+			$output->message();
 		}
 
 		if (isset($_POST['confirm'])) {
@@ -480,16 +477,16 @@ switch ($mode) {
 			$output->redirect('envoi.php', 4);
 			$output->addLine($lang['Message']['log_deleted']);
 			$output->addLine($lang['Click_return_back'], './envoi.php');
-			$output->displayMessage();
+			$output->message();
 		}
 		else {
 			$output->addHiddenField('id',   $logdata['log_id']);
 
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'confirm_body.tpl']);
+			$template = new Template('confirm_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $lang['Delete_log'],
@@ -500,9 +497,8 @@ switch ($mode) {
 				'U_FORM' => 'envoi.php?mode=delete'
 			]);
 
-			$output->pparse('body');
-
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 		break;
 
@@ -739,7 +735,7 @@ switch ($mode) {
 						$output->addLine($lang['Click_start_send'], './envoi.php?mode=progress&id=' . $logdata['log_id']);
 					}
 
-					$output->displayMessage();
+					$output->message();
 				}
 			}
 		}
@@ -869,7 +865,7 @@ else {
 if (($mode == 'test' && !$error) || $mode == 'progress') {
 	if (!$auth->check_auth(Auth::SEND, $listdata['liste_id'])) {
 		http_response_code(401);
-		$output->displayMessage('Not_auth_send');
+		$output->message('Not_auth_send');
 	}
 
 	//
@@ -940,7 +936,7 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 		$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
 	}
 
-	$output->displayMessage($message);
+	$output->message($message);
 }
 
 $subject   = htmlspecialchars($logdata['log_subject']);
@@ -961,11 +957,11 @@ $output->addHiddenField('id',          $logdata['log_id']);
 $output->addHiddenField('prev_status', $prev_status);
 $output->addHiddenField('log_date',    $logdata['log_date']);
 
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'send_body.tpl']);
+$template = new Template('send_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'L_EXPLAIN'               => nl2br(sprintf($lang['Explain']['send'],
 		sprintf('<a href="%s">', wan_get_faq_url('external_data')),
 		'</a>'
@@ -997,11 +993,13 @@ $output->assign_vars([
 
 	'S_ENCTYPE'               => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
 	'S_DELETE_BUTTON_DISABLED' => $output->getBoolAttr('disabled', ($logdata['log_id'] == 0)),
-	'S_HIDDEN_FIELDS'         => $output->getHiddenFields()
+	'S_HIDDEN_FIELDS'         => $output->getHiddenFields(),
+
+	'LISTBOX'                 => $output->listbox(Auth::VIEW, false)
 ]);
 
 if ($logdata['log_date'] != -1) {
-	$output->assign_block_vars('last_modified', [
+	$template->assignToBlock('last_modified', [
 		'S_LAST_MODIFIED' => sprintf($lang['Last_modified'],
 			convert_time($admindata['admin_dateformat'], $logdata['log_date'])
 		)
@@ -1009,13 +1007,13 @@ if ($logdata['log_date'] != -1) {
 }
 
 if (is_readable(WA_ROOTDIR . '/languages/'.$admindata['admin_lang'].'/tinymce.js')) {
-	$output->assign_block_vars('tinymce_lang', [
+	$template->assignToBlock('tinymce_lang', [
 		'CODE' => $admindata['admin_lang']
 	]);
 }
 
 if ($listdata['liste_format'] != FORMAT_HTML) {
-	$output->assign_block_vars('nl_text_textarea', [
+	$template->assignToBlock('nl_text_textarea', [
 		'L_TITLE'    => $lang['Log_in_text'],
 		'L_EXPLAIN'  => nl2br($lang['Explain']['text']),
 
@@ -1024,7 +1022,7 @@ if ($listdata['liste_format'] != FORMAT_HTML) {
 }
 
 if ($listdata['liste_format'] != FORMAT_TEXTE) {
-	$output->assign_block_vars('nl_html_textarea', [
+	$template->assignToBlock('nl_html_textarea', [
 		'L_TITLE'    => $lang['Log_in_html'],
 		'L_EXPLAIN'  => nl2br($lang['Explain']['html']),
 
@@ -1033,7 +1031,7 @@ if ($listdata['liste_format'] != FORMAT_TEXTE) {
 }
 
 if ($auth->check_auth(Auth::SEND, $listdata['liste_id'])) {
-	$output->assign_block_vars('test_send', [
+	$template->assignToBlock('test_send', [
 		'L_TEST_SEND'      => $lang['Test_send'],
 		'L_TEST_SEND_NOTE' => $lang['Test_send_note'],
 		'L_SEND_BUTTON'    => $lang['Button']['send']
@@ -1050,7 +1048,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 		$rowspan++;
 	}
 
-	$output->assign_block_vars('joined_files', [
+	$template->assignToBlock('joined_files', [
 		'L_TITLE_ADD_FILE'   => $lang['Title']['join'],
 		'L_EXPLAIN_ADD_FILE' => nl2br($lang['Explain']['join']),
 		'L_ADD_FILE'         => $lang['Join_file_to_log'],
@@ -1063,7 +1061,7 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 	// Si l'upload est autorisé, on affiche le champs type file
 	//
 	if ($max_filesize) {
-		$output->assign_block_vars('joined_files.upload_input', [
+		$template->assignToBlock('joined_files.upload_input', [
 			'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 			'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
 			'MAX_FILE_SIZE'   => $max_filesize
@@ -1074,14 +1072,15 @@ if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
 	// Box de sélection de fichiers existants
 	//
 	if ($file_box != '') {
-		$output->assign_block_vars('joined_files.select_box', [
+		$template->assignToBlock('joined_files.select_box', [
 			'SELECT_BOX' => $file_box
 		]);
 	}
 
-	$output->files_list($logdata);
+	$template->assign([
+		'JOINED_FILES_BOX' => $output->filesList($logdata)
+	]);
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

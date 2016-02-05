@@ -16,7 +16,7 @@ if (!wan_is_admin($admindata)) {
 	$output->redirect('./index.php', 6);
 	$output->addLine($lang['Message']['Not_authorized']);
 	$output->addLine($lang['Click_return_index'], './index.php');
-	$output->displayMessage();
+	$output->message();
 }
 
 $old_config = $nl_config;
@@ -181,7 +181,7 @@ if (isset($_POST['submit'])) {
 			}
 		}
 
-		$output->displayMessage('Success_modif');
+		$output->message('Success_modif');
 	}
 }
 else {
@@ -200,11 +200,11 @@ foreach ([DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL] as $debug_leve
 }
 $debug_box .= '</select>';
 
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'config_body.tpl']);
+$template = new Template('config_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'TITLE_CONFIG_LANGUAGE'     => $lang['Title']['config_lang'],
 	'TITLE_CONFIG_PERSO'        => $lang['Title']['config_perso'],
 	'TITLE_CONFIG_COOKIES'      => $lang['Title']['config_cookies'],
@@ -255,7 +255,6 @@ $output->assign_vars([
 	'L_VALID_BUTTON'            => $lang['Button']['valid'],
 	'L_RESET_BUTTON'            => $lang['Button']['reset'],
 	'L_DEBUG_LEVEL'             => $lang['Debug_level'],
-	'L_RESTORE_DEFAULT'         => $lang['Restore_default'],
 
 	'LANG_BOX'                  => lang_box($new_config['language']),
 	'SITENAME'                  => htmlspecialchars($new_config['sitename']),
@@ -285,7 +284,7 @@ $output->assign_vars([
 ]);
 
 if (check_ssl_support()) {
-	$output->assign_block_vars('ssl_support', [
+	$template->assignToBlock('ssl_support', [
 		'L_SECURITY'        => $lang['Connection_security'],
 		'L_NONE'            => $lang['None'],
 		'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $new_config['smtp_tls'] == SECURITY_STARTTLS),
@@ -294,7 +293,7 @@ if (check_ssl_support()) {
 }
 
 if (extension_loaded('gd')) {
-	$output->assign_block_vars('extension_gd', [
+	$template->assignToBlock('extension_gd', [
 		'TITLE_CONFIG_STATS'        => $lang['Title']['config_stats'],
 		'L_EXPLAIN_STATS'           => nl2br($lang['Explain']['config_stats']),
 		'L_DISABLE_STATS'           => $lang['Disable_stats'],
@@ -307,8 +306,7 @@ else {
 	$output->addHiddenField('disable_stats', '1');
 }
 
-$output->assign_var('S_HIDDEN_FIELDS', $output->getHiddenFields());
+$template->assign(['S_HIDDEN_FIELDS' => $output->getHiddenFields()]);
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

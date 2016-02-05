@@ -56,7 +56,7 @@ if ($listdata = $result->fetch()) {
 		$result = $db->query($sql);
 
 		if (!($logdata = $result->fetch())) {
-			$output->displayMessage('No_log_to_send');
+			$output->message('No_log_to_send');
 		}
 
 		$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
@@ -90,7 +90,7 @@ if ($listdata = $result->fetch()) {
 			$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
 		}
 
-		$output->displayMessage($message);
+		$output->message($message);
 	}
 	else if ($mode == 'validate') {
 		require 'includes/functions.stats.php';
@@ -182,7 +182,7 @@ if ($listdata = $result->fetch()) {
 
 		$pop->quit();
 
-		$output->displayMessage('Success_operation');
+		$output->message('Success_operation');
 	}
 	else {
 		trigger_error('No valid mode specified', E_USER_ERROR);

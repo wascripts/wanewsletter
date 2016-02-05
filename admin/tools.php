@@ -60,7 +60,7 @@ function decompress_filedata($tmp_filename, $filename)
 		(!ZLIB_LOADED && $ext == 'gz') ||
 		(!BZIP2_LOADED && $ext == 'bz2')
 	) {
-		$output->displayMessage('Compress_unsupported');
+		$output->message('Compress_unsupported');
 	}
 
 	switch ($ext) {
@@ -103,7 +103,7 @@ switch ($mode) {
 			$output->redirect('./index.php', 4);
 			$output->addLine($lang['Message']['Not_authorized']);
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 		// no break
 	case 'generator':
@@ -119,11 +119,13 @@ $url_page  = './tools.php';
 $url_page .= ($mode != '') ? '?mode=' . $mode : '';
 
 if (!in_array($mode, ['backup','restore','debug', '']) && !$_SESSION['liste']) {
-	$output->build_listbox($auth_type, true, $url_page);
+	$output->header();
+	$output->listbox($auth_type, true, $url_page)->pparse();
+	$output->footer();
 }
 else if ($_SESSION['liste']) {
 	if (!$auth->check_auth($auth_type, $_SESSION['liste'])) {
-		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
+		$output->message('Not_' . $auth->auth_ary[$auth_type]);
 	}
 
 	$listdata = $auth->listdata[$_SESSION['liste']];
@@ -133,10 +135,6 @@ else if ($_SESSION['liste']) {
 // Affichage de la boîte de sélection des modules
 //
 if (!isset($_POST['submit'])) {
-	if ($mode != 'backup' && $mode != 'restore') {
-		$output->build_listbox($auth_type, false, $url_page);
-	}
-
 	$tools_ary = ['export', 'import', 'ban', 'generator'];
 
 	if (wan_is_admin($admindata)) {
@@ -154,11 +152,11 @@ if (!isset($_POST['submit'])) {
 	}
 	$tools_box .= '</select>';
 
-	$output->page_header();
+	$output->header();
 
-	$output->set_filenames(['body' => 'tools_body.tpl']);
+	$main = new Template('tools_body.tpl');
 
-	$output->assign_vars([
+	$main->assign([
 		'L_TITLE'        => $lang['Title']['tools'],
 		'L_EXPLAIN'      => nl2br($lang['Explain']['tools']),
 		'L_SELECT_TOOL'  => $lang['Select_tool'],
@@ -166,6 +164,12 @@ if (!isset($_POST['submit'])) {
 
 		'S_TOOLS_BOX'    => $tools_box
 	]);
+
+	if ($mode != 'backup' && $mode != 'restore') {
+		$main->assign([
+			'LISTBOX' => $output->listbox($auth_type, false, $url_page)
+		]);
+	}
 }
 
 //
@@ -188,8 +192,7 @@ $EOL = (stripos($user_agent, 'Win')) ? "\r\n" : "\n";
 switch ($mode) {
 	case 'debug':
 		print_debug_infos();
-		$output->page_footer();
-		exit;
+		$output->footer();
 		break;
 
 	case 'export':
@@ -261,13 +264,13 @@ switch ($mode) {
 				fwrite($fw, $contents);
 				fclose($fw);
 
-				$output->displayMessage('Success_export');
+				$output->message('Success_export');
 			}
 		}
 
-		$output->set_filenames(['tool_body' => 'export_body.tpl']);
+		$template = new Template('export_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_EXPORT'    => $lang['Title']['export'],
 			'L_EXPLAIN_EXPORT'  => nl2br($lang['Explain']['export']),
 			'L_EXPORT_FORMAT'   => $lang['Export_format'],
@@ -281,34 +284,34 @@ switch ($mode) {
 		]);
 
 		if (ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED) {
-			$output->assign_block_vars('compress_option', [
+			$template->assignToBlock('compress_option', [
 				'L_COMPRESS' => $lang['Compress'],
 				'L_NO'       => $lang['No']
 			]);
 
 			if (ZIPLIB_LOADED) {
-				$output->assign_block_vars('compress_option.zip_compress', []);
+				$template->assignToBlock('compress_option.zip_compress');
 			}
 
 			if (ZLIB_LOADED) {
-				$output->assign_block_vars('compress_option.gzip_compress', []);
+				$template->assignToBlock('compress_option.gzip_compress');
 			}
 
 			if (BZIP2_LOADED) {
-				$output->assign_block_vars('compress_option.bz2_compress', []);
+				$template->assignToBlock('compress_option.bz2_compress');
 			}
 		}
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
 			require 'includes/functions.box.php';
 
-			$output->assign_block_vars('format_box', [
+			$template->assignToBlock('format_box', [
 				'L_FORMAT'   => $lang['Format_to_export'],
 				'FORMAT_BOX' => format_box('format')
 			]);
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'import':
@@ -338,7 +341,7 @@ switch ($mode) {
 						$output->redirect('./tools.php?mode=import', 4);
 						$output->addLine(sprintf($lang['Message']['Error_local'], htmlspecialchars($filename)));
 						$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
-						$output->displayMessage();
+						$output->message();
 					}
 				}
 				else {
@@ -357,7 +360,7 @@ switch ($mode) {
 							$upload_error = 'Upload_error_5';
 						}
 
-						$output->displayMessage($upload_error);
+						$output->message($upload_error);
 					}
 
 					//
@@ -371,7 +374,7 @@ switch ($mode) {
 
 						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
-							$output->displayMessage('Upload_error_5');
+							$output->message('Upload_error_5');
 						}
 					}
 				}
@@ -426,7 +429,7 @@ switch ($mode) {
 					);
 
 					if (!xml_parse($parser, $list_tmp)) {
-						$output->displayMessage(sprintf(
+						$output->message(sprintf(
 							$lang['Message']['Invalid_xml_data'],
 							htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
 							xml_get_current_line_number($parser)
@@ -436,7 +439,7 @@ switch ($mode) {
 					xml_parser_free($parser);
 				}
 				else {
-					$output->displayMessage('Xml_ext_needed');
+					$output->message('Xml_ext_needed');
 				}
 			}
 			else {
@@ -456,7 +459,7 @@ switch ($mode) {
 				$output->redirect('./tools.php?mode=import', 4);
 				$output->addLine($lang['Message']['No_data_received']);
 				$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
-				$output->displayMessage();
+				$output->message();
 			}
 
 			$report = '';
@@ -589,14 +592,14 @@ switch ($mode) {
 				$output->addLine($lang['Message']['Success_import']);
 			}
 
-			$output->displayMessage();
+			$output->message();
 		}
 
 		$max_filesize = get_max_filesize();
 
-		$output->set_filenames(['tool_body' => 'import_body.tpl']);
+		$template = new Template('import_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_IMPORT'   => $lang['Title']['import'],
 			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'],
 				MAX_IMPORT,
@@ -614,7 +617,7 @@ switch ($mode) {
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
 			require 'includes/functions.box.php';
 
-			$output->assign_block_vars('format_box', [
+			$template->assignToBlock('format_box', [
 				'L_FORMAT'   => $lang['Format_to_import'],
 				'FORMAT_BOX' => format_box('format')
 			]);
@@ -625,7 +628,7 @@ switch ($mode) {
 			// L'upload est disponible sur le serveur
 			// Affichage du champ file pour importation
 			//
-			$output->assign_block_vars('upload_file', [
+			$template->assignToBlock('upload_file', [
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 				'L_UPLOAD_FILE'   => $lang['File_upload'],
 				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
@@ -633,7 +636,7 @@ switch ($mode) {
 			]);
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'ban':
@@ -678,7 +681,7 @@ switch ($mode) {
 			$output->addLine($lang['Message']['Success_modif']);
 			$output->addLine($lang['Click_return_back'], './tools.php?mode=ban');
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 
 		$sql = "SELECT ban_id, ban_email
@@ -698,9 +701,9 @@ switch ($mode) {
 		}
 		$unban_email_box .= '</select>';
 
-		$output->set_filenames(['tool_body' => 'ban_list_body.tpl']);
+		$template = new Template('ban_list_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_BAN'     => $lang['Title']['ban'],
 			'L_EXPLAIN_BAN'   => nl2br($lang['Explain']['ban']),
 			'L_EXPLAIN_UNBAN' => nl2br($lang['Explain']['unban']),
@@ -712,7 +715,7 @@ switch ($mode) {
 			'UNBAN_EMAIL_BOX' => $unban_email_box
 		]);
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'attach':
@@ -759,7 +762,7 @@ switch ($mode) {
 			$output->addLine($lang['Message']['Success_modif']);
 			$output->addLine($lang['Click_return_back'], './tools.php?mode=attach');
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 
 		$sql = "SELECT fe_id, fe_ext
@@ -779,9 +782,9 @@ switch ($mode) {
 		}
 		$reallow_ext_box .= '</select>';
 
-		$output->set_filenames(['tool_body' => 'forbidden_ext_body.tpl']);
+		$template = new Template('forbidden_ext_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_EXT'          => $lang['Title']['attach'],
 			'L_EXPLAIN_TO_FORBID'  => nl2br($lang['Explain']['forbid_ext']),
 			'L_EXPLAIN_TO_REALLOW' => nl2br($lang['Explain']['reallow_ext']),
@@ -793,7 +796,7 @@ switch ($mode) {
 			'REALLOW_EXT_BOX'      => $reallow_ext_box
 		]);
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'backup':
@@ -805,7 +808,7 @@ switch ($mode) {
 		$drop_option = filter_input(INPUT_POST, 'drop_option', FILTER_VALIDATE_BOOLEAN);
 
 		if (!($backup = $db->initBackup())) {
-			$output->displayMessage('Database_unsupported');
+			$output->message('Database_unsupported');
 		}
 
 		$tables_list = $backup->get_tables();
@@ -865,13 +868,13 @@ switch ($mode) {
 				fwrite($fw, $contents);
 				fclose($fw);
 
-				$output->displayMessage('Success_backup');
+				$output->message('Success_backup');
 			}
 		}
 
-		$output->set_filenames(['tool_body' => 'backup_body.tpl']);
+		$template = new Template('backup_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_BACKUP'    => $lang['Title']['backup'],
 			'L_EXPLAIN_BACKUP'  => nl2br($lang['Explain']['backup']),
 			'L_BACKUP_TYPE'     => $lang['Backup_type'],
@@ -902,31 +905,31 @@ switch ($mode) {
 			}
 			$tables_box .= '</select>';
 
-			$output->assign_block_vars('tables_box', [
+			$template->assignToBlock('tables_box', [
 				'L_ADDITIONAL_TABLES' => $lang['Additionnal_tables'],
 				'S_TABLES_BOX'        => $tables_box
 			]);
 		}
 
 		if (ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED) {
-			$output->assign_block_vars('compress_option', [
+			$template->assignToBlock('compress_option', [
 				'L_COMPRESS' => $lang['Compress']
 			]);
 
 			if (ZIPLIB_LOADED) {
-				$output->assign_block_vars('compress_option.zip_compress', []);
+				$template->assignToBlock('compress_option.zip_compress');
 			}
 
 			if (ZLIB_LOADED) {
-				$output->assign_block_vars('compress_option.gzip_compress', []);
+				$template->assignToBlock('compress_option.gzip_compress');
 			}
 
 			if (BZIP2_LOADED) {
-				$output->assign_block_vars('compress_option.bz2_compress', []);
+				$template->assignToBlock('compress_option.bz2_compress');
 			}
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'restore':
@@ -960,7 +963,7 @@ switch ($mode) {
 						$output->redirect('./tools.php?mode=restore', 4);
 						$output->addLine(sprintf($lang['Message']['Error_local'], htmlspecialchars($filename)));
 						$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
-						$output->displayMessage();
+						$output->message();
 					}
 				}
 				else {
@@ -979,7 +982,7 @@ switch ($mode) {
 							$upload_error = 'Upload_error_5';
 						}
 
-						$output->displayMessage($upload_error);
+						$output->message($upload_error);
 					}
 
 					//
@@ -993,7 +996,7 @@ switch ($mode) {
 
 						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
-							$output->displayMessage('Upload_error_5');
+							$output->message('Upload_error_5');
 						}
 					}
 				}
@@ -1011,7 +1014,7 @@ switch ($mode) {
 				$output->redirect('./tools.php?mode=restore', 4);
 				$output->addLine($lang['Message']['No_data_received']);
 				$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
-				$output->displayMessage();
+				$output->message();
 			}
 
 			$queries = Dblayer\parseSQL($data);
@@ -1025,14 +1028,14 @@ switch ($mode) {
 
 			$db->commit();
 
-			$output->displayMessage('Success_restore');
+			$output->message('Success_restore');
 		}
 
 		$max_filesize = get_max_filesize();
 
-		$output->set_filenames(['tool_body' => 'restore_body.tpl']);
+		$template = new Template('restore_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_RESTORE'   => $lang['Title']['restore'],
 			'L_EXPLAIN_RESTORE' => nl2br($lang['Explain']['restore']),
 			'L_LOCAL_FILE'      => $lang['File_local'],
@@ -1047,7 +1050,7 @@ switch ($mode) {
 			// L'upload est disponible sur le serveur
 			// Affichage du champ file pour importation
 			//
-			$output->assign_block_vars('upload_file', [
+			$template->assignToBlock('upload_file', [
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 				'L_UPLOAD_FILE'   => $lang['File_upload_restore'],
 				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
@@ -1055,7 +1058,7 @@ switch ($mode) {
 			]);
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'generator':
@@ -1087,9 +1090,9 @@ switch ($mode) {
 			$code_php .= sprintf("require '%s/newsletter.php';\n", WA_ROOTDIR);
 			$code_php .= '?' . ">\n";
 
-			$output->set_filenames(['tool_body' => 'result_generator_body.tpl']);
+			$template = new Template('result_generator_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE_GENERATOR'   => $lang['Title']['generator'],
 				'L_EXPLAIN_CODE_HTML' => nl2br($lang['Explain']['code_html']),
 				'L_EXPLAIN_CODE_PHP'  => nl2br($lang['Explain']['code_php']),
@@ -1099,9 +1102,9 @@ switch ($mode) {
 			]);
 		}
 		else {
-			$output->set_filenames(['tool_body' => 'generator_body.tpl']);
+			$template = new Template('generator_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE_GENERATOR'   => $lang['Title']['generator'],
 				'L_EXPLAIN_GENERATOR' => nl2br($lang['Explain']['generator']),
 				'L_TARGET_FORM'       => $lang['Target_form'],
@@ -1109,10 +1112,9 @@ switch ($mode) {
 			]);
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$main->pparse();
+$output->footer();

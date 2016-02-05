@@ -25,7 +25,7 @@ $nl_config = wa_get_config();
 
 if (!$nl_config['enable_profil_cp']) {
 	load_settings();
-	$output->displayMessage('Profil_cp_disabled');
+	$output->message('Profil_cp_disabled');
 }
 
 //
@@ -168,17 +168,17 @@ switch ($mode) {
 				$db->update(ABONNES_TABLE, $sql_data, ['abo_id' => $abodata['uid']]);
 
 				$output->redirect('profil_cp.php', 4);
-				$output->displayMessage('Profile_updated');
+				$output->message('Profile_updated');
 			}
 		}
 
 		require 'includes/functions.box.php';
 
-		$output->page_header();
+		$output->header();
 
-		$output->set_filenames(['body' => 'editprofile_body.tpl']);
+		$template = new Template('editprofile_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'TITLE'           => $lang['Module']['editprofile'],
 			'L_EXPLAIN'       => nl2br($lang['Explain']['editprofile']),
 			'L_EXPLAIN_EMAIL' => nl2br($lang['Explain']['change_email']),
@@ -199,13 +199,11 @@ switch ($mode) {
 
 		foreach ($other_tags as $tag) {
 			if (isset($abodata[$tag['column_name']])) {
-				$output->assign_var($tag['tag_name'],
-					htmlspecialchars($abodata[$tag['column_name']])
-				);
+				$template->assign([
+					$tag['tag_name'] => htmlspecialchars($abodata[$tag['column_name']])
+				]);
 			}
 		}
-
-		$output->pparse('body');
 		break;
 
 	case 'archives':
@@ -224,7 +222,7 @@ switch ($mode) {
 			}
 
 			if (count($sql_log_id) == 0) {
-				$output->displayMessage('No_log_id');
+				$output->message('No_log_id');
 			}
 
 			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name,
@@ -268,7 +266,7 @@ switch ($mode) {
 				}
 			}
 
-			$output->displayMessage(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
+			$output->message(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
 		}
 
 		$liste_ids = [];
@@ -287,14 +285,14 @@ switch ($mode) {
 			$abodata['listes'][$row['liste_id']]['archives'][] = $row;
 		}
 
-		$output->page_header();
+		$output->header();
 
-		$output->set_filenames(['body' => 'archives_body.tpl']);
+		$template = new Template('archives_body.tpl');
 
-		$output->assign_vars([
-			'TITLE'          => $lang['Title']['archives'],
-			'L_EXPLAIN'      => $lang['Explain']['archives'],
-			'L_VALID_BUTTON' => $lang['Button']['valid']
+		$template->assign([
+			'TITLE'           => $lang['Title']['archives'],
+			'L_EXPLAIN'       => $lang['Explain']['archives'],
+			'L_VALID_BUTTON'  => $lang['Button']['valid']
 		]);
 
 		foreach ($abodata['listes'] as $liste_id => $listdata) {
@@ -317,28 +315,25 @@ switch ($mode) {
 			}
 			$select_log .= '</select>'."\n";
 
-			$output->assign_block_vars('listerow', [
+			$template->assignToBlock('listerow', [
 				'LISTE_ID'   => $liste_id,
 				'LISTE_NAME' => htmlspecialchars($listdata['liste_name']),
 				'SELECT_LOG' => $select_log
 			]);
 		}
-
-		$output->pparse('body');
 		break;
 
 	default:
-		$output->page_header();
+		$output->header();
 
-		$output->set_filenames(['body' => 'index_body.tpl']);
+		$template = new Template('index_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'TITLE'     => $lang['Title']['profil_cp'],
 			'L_EXPLAIN' => nl2br($lang['Welcome_profil_cp'])
 		]);
-
-		$output->pparse('body');
 		break;
 }
 
-$output->page_footer();
+$template->pparse();
+$output->footer();

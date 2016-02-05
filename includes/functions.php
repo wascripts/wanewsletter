@@ -636,7 +636,7 @@ function wan_display_error($error)
 		http_response_code(500);
 
 		if (check_theme_is_used()) {
-			$output->displayMessage($message, 'error');
+			$output->message($message, 'error');
 		}
 		else {
 			$message = nl2br($message);

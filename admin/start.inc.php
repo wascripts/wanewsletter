@@ -29,7 +29,7 @@ $nl_config = wa_get_config();
 if (!check_db_version(@$nl_config['db_version'])) {
 	$output->addLine($lang['Need_upgrade_db']);
 	$output->addLine($lang['Need_upgrade_db_link'], 'upgrade.php');
-	$output->displayMessage();
+	$output->message();
 }
 
 //
@@ -61,7 +61,7 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 	$auth->read_data($_SESSION['uid']);// TODO : fix
 
 	if (!is_writable(WA_TMPDIR)) {
-		$output->displayMessage(sprintf(
+		$output->message(sprintf(
 			$lang['Message']['Dir_not_writable'],
 			htmlspecialchars(WA_TMPDIR)
 		));
@@ -84,7 +84,7 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 	unset($liste);
 
 	if (strtoupper(filter_input(INPUT_SERVER, 'REQUEST_METHOD')) == 'POST' && $session->new_session) {
-		$output->displayMessage('Invalid_session');
+		$output->message('Invalid_session');
 	}
 }
 

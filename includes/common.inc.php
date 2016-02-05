@@ -115,7 +115,8 @@ require 'includes/wadb_init.php';
 //
 $output = null;
 if (!check_cli()) {
-	$output = new Output(sprintf('%s/templates/%s',
+	$output = new Output;
+	Template::setDir(sprintf('%s/templates/%s',
 		WA_ROOTDIR,
 		(check_in_admin() ? 'admin/' : '')
 	));

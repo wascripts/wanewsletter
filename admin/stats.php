@@ -19,21 +19,23 @@ require 'includes/functions.stats.php';
 // on affiche le message d'information correspondant
 //
 if ($nl_config['disable_stats']) {
-	$output->displayMessage('Stats_disabled');
+	$output->message('Stats_disabled');
 }
 else if (!extension_loaded('gd')) {
-	$output->displayMessage('No_gd_lib');
+	$output->message('No_gd_lib');
 }
 
 $liste_ids = $auth->check_auth(Auth::VIEW);
 
 if (!$_SESSION['liste']) {
-	$output->build_listbox(Auth::VIEW);
+	$output->header();
+	$output->listbox(Auth::VIEW)->pparse();
+	$output->footer();
 }
 
 if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
-	$output->displayMessage('Not_auth_view');
+	$output->message('Not_auth_view');
 }
 
 $listdata = $auth->listdata[$_SESSION['liste']];
@@ -51,7 +53,7 @@ $img_type = (imagetypes() & IMG_PNG) ? 'png' : $img_type;
 
 if (is_null($img_type)) {
 	// WTF ?!
-	$output->displayMessage($lang['Message']['No_gd_img_support']);
+	$output->message($lang['Message']['No_gd_img_support']);
 }
 
 function send_image($name, $img, $lastModified = null)
@@ -438,16 +440,6 @@ if ($img == 'camembert') {
 	send_image('parts_by_liste', $im);
 }
 
-$output->build_listbox(Auth::VIEW, false);
-
-require 'includes/functions.box.php';
-
-$output->page_header();
-
-$output->set_filenames([
-	'body' => 'stats_body.tpl'
-]);
-
 $y_list = '';
 $m_list = '';
 
@@ -484,7 +476,11 @@ if ($next_m > 12) {
 
 $aTitle = sprintf('%s &ndash; %%s', $lang['Module']['stats']);
 
-$output->assign_vars([
+$output->header();
+
+$template = new Template('stats_body.tpl');
+
+$template->assign([
 	'L_TITLE'         => $lang['Title']['stats'],
 	'L_EXPLAIN_STATS' => nl2br($lang['Explain']['stats']),
 	'L_GO_BUTTON'     => $lang['Button']['go'],
@@ -499,7 +495,9 @@ $output->assign_vars([
 	'L_NEXT_TITLE'    => sprintf($aTitle, convert_time('F Y', mktime(0, 0, 0, $next_m, 1, $next_y))),
 	'U_PREV_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $prev_y, $prev_m),
 	'U_NEXT_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $next_y, $next_m),
-	'U_IMG_GRAPH'     => sprintf('stats.php?img=graph&amp;year=%d&amp;month=%d', $year, $month)
+	'U_IMG_GRAPH'     => sprintf('stats.php?img=graph&amp;year=%d&amp;month=%d', $year, $month),
+
+	'LISTBOX'         => $output->listbox(Auth::VIEW, false)
 ]);
 
 //
@@ -507,11 +505,10 @@ $output->assign_vars([
 // accessible en écriture.
 //
 if (!is_writable(WA_STATSDIR)) {
-	$output->assign_block_vars('statsdir_error', [
+	$template->assignToBlock('statsdir_error', [
 		'MESSAGE' => $lang['Stats_dir_not_writable']
 	]);
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();
