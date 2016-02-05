@@ -41,7 +41,7 @@ foreach ($vararray as $varname) {
 
 if (($mode != 'liste' || ($mode == 'liste' && $action != 'add')) && !$_SESSION['liste']) {
 	$output->header();
-	$output->listbox(Auth::VIEW);
+	$output->listbox(Auth::VIEW)->pparse();
 	$output->footer();
 }
 else if ($_SESSION['liste']) {
