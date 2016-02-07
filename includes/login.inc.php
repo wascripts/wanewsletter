@@ -19,6 +19,11 @@ Template::setDir(sprintf('%s/templates/', WA_ROOTDIR));
 
 $mode      = filter_input(INPUT_GET, 'mode');
 $reset_key = filter_input(INPUT_GET, 'k');
+$redirect  = (check_in_admin()) ? 'index.php' : 'profil_cp.php';
+
+if (!empty($_SESSION['redirect'])) {
+	$redirect = $_SESSION['redirect'];
+}
 
 //
 // Si la clé est fournie, on est forcément dans le mode 'reset_passwd'
@@ -202,14 +207,6 @@ else if ($mode == 'logout') {
 // Dans ce cas, on le redirige vers la page demandée
 //
 if ($auth->isLoggedIn()) {
-	if (isset($_SESSION['redirect'])) {
-		$redirect = $_SESSION['redirect'];
-		unset($_SESSION['redirect']);
-	}
-	else {
-		$redirect  = (check_in_admin()) ? 'index.php' : 'profil_cp.php';
-	}
-
 	http_redirect($redirect);
 }
 
