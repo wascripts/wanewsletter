@@ -33,12 +33,12 @@ if (!$_SESSION['liste']) {
 	$output->footer();
 }
 
-if (!$auth->check_auth(Auth::SEND, $_SESSION['liste'])) {
+if (!$auth->check(Auth::SEND, $_SESSION['liste'])) {
 	http_response_code(401);
 	$output->message('Not_auth_send');
 }
 
-$listdata = $auth->listdata[$_SESSION['liste']];
+$listdata = $auth->getLists(Auth::SEND)[$_SESSION['liste']];
 $logdata  = [];
 
 $logdata['log_id'] = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
@@ -171,7 +171,7 @@ switch ($mode) {
 		break;
 
 	case 'progress':
-		$liste_ids = $auth->check_auth(Auth::SEND);
+		$liste_ids = array_column($auth->getLists(Auth::SEND), 'liste_id');
 
 		if ($logdata['log_id']) {
 			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
@@ -744,7 +744,7 @@ switch ($mode) {
 		// Attachement de fichiers
 		//
 		if ($mode == 'attach' && $logdata['log_id'] &&
-			$auth->check_auth(Auth::ATTACH, $listdata['liste_id'])
+			$auth->check(Auth::ATTACH, $listdata['liste_id'])
 		) {
 			$attach  = new Attach();
 
@@ -778,7 +778,7 @@ switch ($mode) {
 		);
 		$file_ids = array_filter($file_ids);
 
-		if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id']) && count($file_ids) > 0) {
+		if ($auth->check(Auth::ATTACH, $listdata['liste_id']) && count($file_ids) > 0) {
 			//
 			// Suppression du fichier joint spécifié
 			//
@@ -799,7 +799,7 @@ $logdata['joined_files'] = [];
 //
 // Récupération des fichiers joints de la liste
 //
-if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
+if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
 	//
 	// On récupère tous les fichiers joints de la liste pour avoir les fichiers joints de la newsletter
 	// en cours, et construire le select box des fichiers existants
@@ -863,7 +863,7 @@ else {
 }
 
 if (($mode == 'test' && !$error) || $mode == 'progress') {
-	if (!$auth->check_auth(Auth::SEND, $listdata['liste_id'])) {
+	if (!$auth->check(Auth::SEND, $listdata['liste_id'])) {
 		http_response_code(401);
 		$output->message('Not_auth_send');
 	}
@@ -1030,7 +1030,7 @@ if ($listdata['liste_format'] != FORMAT_TEXTE) {
 	]);
 }
 
-if ($auth->check_auth(Auth::SEND, $listdata['liste_id'])) {
+if ($auth->check(Auth::SEND, $listdata['liste_id'])) {
 	$template->assignToBlock('test_send', [
 		'L_TEST_SEND'      => $lang['Test_send'],
 		'L_TEST_SEND_NOTE' => $lang['Test_send_note'],
@@ -1038,7 +1038,7 @@ if ($auth->check_auth(Auth::SEND, $listdata['liste_id'])) {
 	]);
 }
 
-if ($auth->check_auth(Auth::ATTACH, $listdata['liste_id'])) {
+if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
 	$rowspan = 2;
 	if ($max_filesize) {
 		$rowspan++;

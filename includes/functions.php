@@ -372,9 +372,9 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 /**
  * Initialisation des préférences et du moteur de templates
  *
- * @param array $admindata Données utilisateur
+ * @param array $userdata Données utilisateur
  */
-function load_settings(&$admindata = [])
+function load_settings(&$userdata = [])
 {
 	global $nl_config;
 
@@ -382,8 +382,8 @@ function load_settings(&$admindata = [])
 
 	$check_list = [];
 
-	if (!empty($admindata['admin_lang'])) {
-		$check_list[] = $admindata['admin_lang'];
+	if (!empty($userdata['language'])) {
+		$check_list[] = $userdata['language'];
 	}
 
 	if (!empty($nl_config['language'])) {
@@ -420,8 +420,8 @@ function load_settings(&$admindata = [])
 		plain_error('Les fichiers de localisation sont introuvables !');
 	}
 
-	if (is_array($admindata)) {
-		$admindata['admin_lang'] = $lang['CONTENT_LANG'];
+	if (is_array($userdata)) {
+		$userdata['language'] = $lang['CONTENT_LANG'];
 	}
 
 	$GLOBALS['lang'] =& $lang;

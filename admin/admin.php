@@ -248,30 +248,39 @@ if (isset($_POST['submit'])) {
 		$db->update(ADMIN_TABLE, $sql_data, ['admin_id' => $admin_id]);
 
 		if (wan_is_admin($admindata)) {
-			$auth_data = ($admindata['admin_id'] == $admin_id) ? $auth->listdata : $auth->read_data($admin_id);
 			$liste_ids = (array) filter_input(INPUT_POST, 'liste_id',
 				FILTER_VALIDATE_INT,
 				FILTER_REQUIRE_ARRAY
 			);
 			$liste_ids = array_filter($liste_ids);
 
+			$auth_list = [
+				Auth::VIEW, Auth::EDIT, Auth::DEL, Auth::SEND, Auth::IMPORT,
+				Auth::EXPORT, Auth::BAN, Auth::ATTACH
+			];
 			$auth_post = [];
-			foreach ($auth->auth_ary as $auth_name) {
-				$auth_post[$auth_name] = (array) filter_input(INPUT_POST, $auth_name,
+			foreach ($auth_list as $auth_type) {
+				$auth_post[$auth_type] = (array) filter_input(INPUT_POST, $auth_type,
 					FILTER_VALIDATE_BOOLEAN,
 					FILTER_REQUIRE_ARRAY
 				);
 			}
 
-			for ($i = 0, $total_liste = count($liste_ids); $i < $total_liste; $i++) {
-				$sql_data = [];
+			$current_admin = $auth->getUserData($admin_id);
 
-				foreach ($auth->auth_ary as $auth_name) {
-					$sql_data[$auth_name] = (isset($auth_post[$auth_name][$i]))
-						? $auth_post[$auth_name][$i] : false;
+			for ($i = 0, $total = count($liste_ids); $i < $total; $i++) {
+				if (!isset($current_admin['lists'][$liste_ids[$i]])) {
+					continue;
 				}
 
-				if (!isset($auth_data[$liste_ids[$i]]['auth_view'])) {
+				$sql_data = [];
+				foreach ($auth_list as $auth_type) {
+					if (isset($auth_post[$auth_type][$i])) {
+						$sql_data[$auth_type] = $auth_post[$auth_type][$i];
+					}
+				}
+
+				if (!isset($current_admin['lists'][$liste_ids[$i]]['auth_view'])) {
 					$sql_data['admin_id'] = $admin_id;
 					$sql_data['liste_id'] = $liste_ids[$i];
 
@@ -292,28 +301,25 @@ if (isset($_POST['submit'])) {
 	}
 }
 
-if (wan_is_admin($admindata)) {
-	$current_admin = null;
+$current_admin = $admindata;
+$admin_box = '';
 
+if (wan_is_admin($admindata)) {
+	//
+	// Récupération des données de l’utilisateur concerné.
+	//
 	$admin_id = filter_input(INPUT_GET, 'uid', FILTER_VALIDATE_INT);
 
-	if (is_int($admin_id) && $admin_id != $admindata['admin_id']) {
-		$sql = "SELECT  admin_id, admin_login, admin_pwd, admin_email,
-				admin_lang, admin_dateformat, admin_level, email_new_subscribe,
-				email_unsubscribe, html_editor
-			FROM " . ADMIN_TABLE . "
-			WHERE admin_id = " . $admin_id;
-		$result = $db->query($sql);
-
-		if (!($current_admin = $result->fetch())) {
-			trigger_error("Impossible de récupérer les données de l'utilisateur", E_USER_ERROR);
+	if (is_int($admin_id)) {
+		$current_admin = $auth->getUserData($admin_id);
+		if (!$current_admin) {
+			$current_admin = $admindata;
 		}
 	}
 
-	if (!is_array($current_admin)) {
-		$current_admin = $admindata;
-	}
-
+	//
+	// Boîte déroulante de sélection d’utilisateur.
+	//
 	$sql = "SELECT admin_id, admin_login
 		FROM " . ADMIN_TABLE . "
 		WHERE admin_id <> $current_admin[admin_id]
@@ -332,17 +338,6 @@ if (wan_is_admin($admindata)) {
 
 		$admin_box .= '</select>';
 	}
-
-	if ($current_admin['admin_id'] != $admindata['admin_id']) {
-		$listdata = $auth->read_data($current_admin['admin_id']);
-	}
-	else {
-		$listdata = $auth->listdata;
-	}
-}
-else {
-	$current_admin = $admindata;
-	$admin_box = '';
 }
 
 require 'includes/functions.box.php';
@@ -394,13 +389,11 @@ $template->assign([
 ]);
 
 if (wan_is_admin($admindata)) {
-	$build_authbox = function ($auth_type, $listdata) use ($output, $auth, $lang) {
-		$auth_name = $auth->auth_ary[$auth_type];
+	$build_authbox = function ($auth_type, $listdata) use ($output, $lang) {
+		$selected_yes = $output->getBoolAttr('selected', !empty($listdata[$auth_type]));
+		$selected_no  = $output->getBoolAttr('selected', empty($listdata[$auth_type]));
 
-		$selected_yes = $output->getBoolAttr('selected', !empty($listdata[$auth_name]));
-		$selected_no  = $output->getBoolAttr('selected', empty($listdata[$auth_name]));
-
-		$box_auth  = sprintf('<select name="%s[]">', $auth_name);
+		$box_auth  = sprintf('<select name="%s[]">', $auth_type);
 		$box_auth .= sprintf('<option value="1"%s>%s</option>', $selected_yes, $lang['Yes']);
 		$box_auth .= sprintf('<option value="0"%s>%s</option>', $selected_no, $lang['No']);
 		$box_auth .= '</select>';
@@ -431,28 +424,28 @@ if (wan_is_admin($admindata)) {
 		'SELECTED_USER'   => $output->getBoolAttr('selected', !wan_is_admin($current_admin))
 	]);
 
-	foreach ($listdata as $listrow) {
+	foreach ($current_admin['lists'] as $liste_id => $data) {
 		$template->assignToBlock('admin_options.auth', [
-			'LISTE_NAME'      => htmlspecialchars($listrow['liste_name']),
-			'LISTE_ID'        => $listrow['liste_id'],
+			'LISTE_NAME'      => htmlspecialchars($data['liste_name']),
+			'LISTE_ID'        => $liste_id,
 
-			'BOX_AUTH_VIEW'   => $build_authbox(Auth::VIEW,   $listrow),
-			'BOX_AUTH_EDIT'   => $build_authbox(Auth::EDIT,   $listrow),
-			'BOX_AUTH_DEL'    => $build_authbox(Auth::DEL,    $listrow),
-			'BOX_AUTH_SEND'   => $build_authbox(Auth::SEND,   $listrow),
-			'BOX_AUTH_IMPORT' => $build_authbox(Auth::IMPORT, $listrow),
-			'BOX_AUTH_EXPORT' => $build_authbox(Auth::EXPORT, $listrow),
-			'BOX_AUTH_BACKUP' => $build_authbox(Auth::BAN,    $listrow),
-			'BOX_AUTH_ATTACH' => $build_authbox(Auth::ATTACH, $listrow)
+			'BOX_AUTH_VIEW'   => $build_authbox(Auth::VIEW,   $data),
+			'BOX_AUTH_EDIT'   => $build_authbox(Auth::EDIT,   $data),
+			'BOX_AUTH_DEL'    => $build_authbox(Auth::DEL,    $data),
+			'BOX_AUTH_SEND'   => $build_authbox(Auth::SEND,   $data),
+			'BOX_AUTH_IMPORT' => $build_authbox(Auth::IMPORT, $data),
+			'BOX_AUTH_EXPORT' => $build_authbox(Auth::EXPORT, $data),
+			'BOX_AUTH_BACKUP' => $build_authbox(Auth::BAN,    $data),
+			'BOX_AUTH_ATTACH' => $build_authbox(Auth::ATTACH, $data)
 		]);
 	}
 
-	if ($admin_box != '') {
+	if ($admin_box) {
 		$template->assignToBlock('admin_box', [
-			'L_VIEW_PROFILE'  => $lang['View_profile'],
-			'L_BUTTON_GO'     => $lang['Button']['go'],
+			'L_VIEW_PROFILE' => $lang['View_profile'],
+			'L_BUTTON_GO'    => $lang['Button']['go'],
 
-			'ADMIN_BOX'       => $admin_box
+			'ADMIN_BOX'      => $admin_box
 		]);
 	}
 }

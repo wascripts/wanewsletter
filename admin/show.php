@@ -11,12 +11,12 @@ namespace Wanewsletter;
 
 require './start.inc.php';
 
-if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
+if (!$auth->check(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
 	plain_error($lang['Message']['Not_auth_view']);
 }
 
-$listdata = $auth->listdata[$_SESSION['liste']];
+$listdata = $auth->getLists(Auth::VIEW)[$_SESSION['liste']];
 
 $file_id  = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
 $filename = trim(filter_input(INPUT_GET, 'file'));

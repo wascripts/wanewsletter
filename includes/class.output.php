@@ -688,7 +688,7 @@ BASIC;
 	 * Génération de la page de sélection de liste, ou du bloc de selection
 	 * de liste à intégrer dans le coin inférieur droit de l’administration
 	 *
-	 * @param integer $auth_type
+	 * @param string  $auth_type
 	 * @param boolean $complete
 	 * @param string  $jump_to
 	 *
@@ -698,7 +698,7 @@ BASIC;
 	{
 		global $admindata, $auth, $lang;
 
-		$liste_id_ary = $auth->check_auth($auth_type);
+		$lists = $auth->getLists($auth_type);
 
 		if (!$jump_to) {
 			$jump_to = './' . htmlspecialchars(basename($_SERVER['SCRIPT_NAME']));
@@ -710,15 +710,13 @@ BASIC;
 		}
 
 		$tmpbox = '';
-		foreach ($auth->listdata as $liste_id => $data) {
-			if (in_array($liste_id, $liste_id_ary)) {
-				$tmpbox .= sprintf(
-					"<option value=\"%d\"%s>%s</option>\n\t",
-					$liste_id,
-					$this->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id)),
-					htmlspecialchars(cut_str($data['liste_name'], 30))
-				);
-			}
+		foreach ($lists as $liste_id => $data) {
+			$tmpbox .= sprintf(
+				"<option value=\"%d\"%s>%s</option>\n\t",
+				$liste_id,
+				$this->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id)),
+				htmlspecialchars(cut_str($data['liste_name'], 30))
+			);
 		}
 
 		if (!$tmpbox) {

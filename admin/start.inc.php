@@ -58,7 +58,6 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 	}
 
 	load_settings($admindata);
-	$auth->read_data($_SESSION['uid']);// TODO : fix
 
 	if (!is_writable(WA_TMPDIR)) {
 		$output->message(sprintf(
@@ -71,17 +70,17 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 	// Si la liste en session n'existe pas, on met à jour la session.
 	// On teste aussi un éventuel identifiant de liste donné en paramètre.
 	//
-	if (!isset($_SESSION['liste']) || !isset($auth->listdata[$_SESSION['liste']])) {
+	if (!isset($_SESSION['liste'])) {
 		$_SESSION['liste'] = 0;
 	}
 
-	$liste = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
-
-	if ($liste && isset($auth->listdata[$liste])) {
-		$_SESSION['liste'] = $liste;
+	if (!empty($_REQUEST['liste'])) {
+		$_SESSION['liste'] = intval($_REQUEST['liste']);
 	}
 
-	unset($liste);
+	if (!isset($auth->getLists(Auth::VIEW)[$_SESSION['liste']])) {
+		$_SESSION['liste'] = 0;
+	}
 
 	if (strtoupper(filter_input(INPUT_SERVER, 'REQUEST_METHOD')) == 'POST' && $session->new_session) {
 		$output->message('Invalid_session');

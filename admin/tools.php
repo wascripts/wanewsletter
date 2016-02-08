@@ -124,11 +124,12 @@ if (!in_array($mode, ['backup','restore','debug', '']) && !$_SESSION['liste']) {
 	$output->footer();
 }
 else if ($_SESSION['liste']) {
-	if (!$auth->check_auth($auth_type, $_SESSION['liste'])) {
-		$output->message('Not_' . $auth->auth_ary[$auth_type]);
+	if (!$auth->check($auth_type, $_SESSION['liste'])) {
+		http_response_code(401);
+		$output->message('Not_' . $auth_type);
 	}
 
-	$listdata = $auth->listdata[$_SESSION['liste']];
+	$listdata = $auth->getLists($auth_type)[$_SESSION['liste']];
 }
 
 //

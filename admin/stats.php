@@ -25,20 +25,18 @@ else if (!extension_loaded('gd')) {
 	$output->message('No_gd_lib');
 }
 
-$liste_ids = $auth->check_auth(Auth::VIEW);
-
 if (!$_SESSION['liste']) {
 	$output->header();
 	$output->listbox(Auth::VIEW)->pparse();
 	$output->footer();
 }
 
-if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
+if (!$auth->check(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
 	$output->message('Not_auth_view');
 }
 
-$listdata = $auth->listdata[$_SESSION['liste']];
+$listdata = $auth->getLists(Auth::VIEW)[$_SESSION['liste']];
 
 $img   = filter_input(INPUT_GET, 'img');
 $year  = filter_input(INPUT_GET, 'year', FILTER_VALIDATE_INT, [
@@ -273,29 +271,22 @@ if ($img == 'graph') {
 }
 
 if ($img == 'camembert') {
-	$sql = "SELECT COUNT(al.abo_id) AS num_inscrits, al.liste_id
+	$lists = $auth->getLists(Auth::VIEW);
+	$liste_ids = array_column($lists, 'liste_id');
+	$num_lists = count($lists);
+
+	$sql = "SELECT COUNT(al.abo_id) AS total, al.liste_id
 		FROM " . ABO_LISTE_TABLE . " AS al
 		WHERE al.liste_id IN(" . implode(', ', $liste_ids) . ")
 			AND confirmed = " . SUBSCRIBE_CONFIRMED . "
 		GROUP BY al.liste_id";
 	$result = $db->query($sql);
 
-	$tmpdata = [];
+	$total_subscribers = 0;
 	while ($row = $result->fetch()) {
-		$tmpdata[$row['liste_id']] = $row['num_inscrits'];
+		$lists[$row['liste_id']]['subscribers'] = $row['total'];
+		$total_subscribers += $row['total'];
 	}
-
-	$total_inscrits = 0;
-	$listes = [];
-	foreach ($liste_ids as $liste_id) {
-		$liste_name   = cut_str($auth->listdata[$liste_id]['liste_name'], 30);
-		$num_inscrits = (!empty($tmpdata[$liste_id])) ? $tmpdata[$liste_id] : 0;
-
-		$listes[] = ['name' => $liste_name, 'num' => $num_inscrits];
-		$total_inscrits += $num_inscrits;
-	}
-
-	$total_listes = count($listes);
 
 	//
 	// Taille de base de l'image (varie s'il y a beaucoup de listes) et tailles de texte
@@ -303,8 +294,8 @@ if ($img == 'camembert') {
 	$imageW = 560;
 	$imageH = 170;
 
-	if ($total_listes > 3) {
-		$imageH += (($total_listes - 3) * 20);
+	if ($num_lists > 3) {
+		$imageH += (($num_lists - 3) * 20);
 	}
 
 	$im = imagecreate($imageW, $imageH);
@@ -357,7 +348,7 @@ if ($img == 'camembert') {
 	$globalY = ($startY - (100 / 2));
 	$outer   = 5;
 	$rectX   = 145;
-	$rectH   = (30 + ($total_listes * 20));
+	$rectH   = (30 + ($num_lists * 20));
 	$shadowX = ($rectX - $outer);
 
 	if ($img_type == 'png') {
@@ -378,7 +369,7 @@ if ($img == 'camembert') {
 	//
 	$degre = 0;
 
-	for ($i = 0, $j = 0, $int = 20; $i < $total_listes; $i++, $j++, $int += 20) {
+	for ($i = 0, $j = 0, $int = 20; $i < $num_lists; $i++, $j++, $int += 20) {
 		if (!empty($color[$j])) {
 			$color_arc = $color[$j];
 		}
@@ -387,13 +378,15 @@ if ($img == 'camembert') {
 			$color_arc = $color[0];
 		}
 
+		$listdata = array_shift($lists);
+
 		//
 		// On vérifie si le nombre d'inscrits représente au moins un millième du total
 		// (Sans cela, il se produit un bug d'affichage)
 		//
 		$part = 0;
 
-		if ($total_inscrits > 0 && ($part = round($listes[$i]['num'] / $total_inscrits, 3)) > 0.001) {
+		if ($total_subscribers > 0 && ($part = round($listdata['subscribers'] / $total_subscribers, 3)) > 0.001) {
 			$deb_arc = round($degre);
 			$degre  += ($part * 360);
 			$end_arc = round($degre);
@@ -424,8 +417,8 @@ if ($img == 'camembert') {
 		$start  = (($imageW - $width) / 2);
 
 		$text = sprintf('%s [%d] [%s%%]',
-			$listes[$i]['name'],
-			$listes[$i]['num'],
+			cut_str($listdata['liste_name'], 30),
+			$listdata['subscribers'],
 			wa_number_format(($part > 0 ? round($part * 100, 2) : 0), 1)
 		);
 		imagettftext($im, $font_size, 0, 185, ($globalY + $int + 11), $black, $font_file, $text);

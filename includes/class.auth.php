@@ -16,30 +16,19 @@ namespace Wanewsletter;
  */
 class Auth
 {
-	const VIEW   = 1;
-	const EDIT   = 2;
-	const DEL    = 3;
-	const SEND   = 4;
-	const IMPORT = 5;
-	const EXPORT = 6;
-	const BAN    = 7;
-	const ATTACH = 8;
-
-	public $listdata = [];
-
-	public $auth_ary = [
-		self::VIEW   => 'auth_view',
-		self::EDIT   => 'auth_edit',
-		self::DEL    => 'auth_del',
-		self::SEND   => 'auth_send',
-		self::IMPORT => 'auth_import',
-		self::EXPORT => 'auth_export',
-		self::BAN    => 'auth_ban',
-		self::ATTACH => 'auth_attach'
-	];
+	const VIEW   = 'auth_view';
+	const EDIT   = 'auth_edit';
+	const DEL    = 'auth_del';
+	const SEND   = 'auth_send';
+	const IMPORT = 'auth_import';
+	const EXPORT = 'auth_export';
+	const BAN    = 'auth_ban';
+	const ATTACH = 'auth_attach';
 
 	/**
 	 * Vérifie si l'utilisateur s'est authentifié
+	 *
+	 * @return boolean
 	 */
 	public function isLoggedIn()
 	{
@@ -113,11 +102,15 @@ class Auth
 	 *
 	 * @param mixed $id Identifiant de l'utilisateur (username, email ou ID numérique)
 	 *
-	 * @return boolean|array
+	 * @return array
 	 */
 	public function getUserData($id)
 	{
-		global $db;
+		global $db, $admindata;
+
+		if ($_SESSION['uid'] && $_SESSION['uid'] == $id && !empty($admindata)) {
+			return $admindata;
+		}
 
 		list($tablename, $columns) = $this->getUserTableInfos();
 
@@ -136,16 +129,51 @@ class Auth
 			WHERE " . $sql_where;
 		$result = $db->query($sql);
 
-		if ($row = $result->fetch()) {
-			$row['uid']      = intval($row[$columns['uid']]);
-			$row['username'] = $row[$columns['username']];
-			$row['email']    = $row[$columns['email']];
-			$row['passwd']   = $row[$columns['passwd']];
+		if ($userdata = $result->fetch($result::FETCH_ASSOC)) {
+			$userdata['uid']      = intval($userdata[$columns['uid']]);
+			$userdata['username'] =& $userdata[$columns['username']];
+			$userdata['email']    =& $userdata[$columns['email']];
+			$userdata['passwd']   =& $userdata[$columns['passwd']];
+			$userdata['language'] =& $userdata[$columns['language']];
 
-			return $row;
+			if (check_in_admin()) {
+				$sql = "SELECT li.liste_id, li.liste_name, li.liste_format,
+						li.sender_email, li.return_email, li.confirm_subscribe,
+						li.liste_public, li.limitevalidate, li.form_url,
+						li.liste_sig, li.auto_purge, li.purge_freq,
+						li.purge_next, li.liste_startdate, li.use_cron,
+						li.pop_host, li.pop_port, li.pop_user, li.pop_pass,
+						li.pop_tls, li.liste_alias, li.liste_numlogs,
+						aa.auth_view, aa.auth_edit, aa.auth_del, aa.auth_send,
+						aa.auth_import, aa.auth_export, aa.auth_ban,
+						aa.auth_attach, aa.cc_admin
+					FROM %s AS li
+						LEFT JOIN %s AS aa ON aa.admin_id = %d
+							AND aa.liste_id = li.liste_id
+					ORDER BY li.liste_name ASC";
+				$sql = sprintf($sql, LISTE_TABLE, AUTH_ADMIN_TABLE, $userdata['uid']);
+			}
+			else {
+				$sql = "SELECT al.format, al.register_key, al.register_date,
+						l.liste_id, l.liste_name, l.sender_email, l.return_email,
+						l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url
+					FROM %s AS l
+						INNER JOIN %s AS al ON al.abo_id = %d
+							AND al.liste_id = l.liste_id
+					ORDER BY li.liste_name ASC";
+				$sql = sprintf($sql, LISTE_TABLE, ABO_LISTE_TABLE, $userdata['uid']);
+			}
+
+			$result = $db->query($sql);
+
+			while ($listdata = $result->fetch($result::FETCH_ASSOC)) {
+				$userdata['lists'][$listdata['liste_id']] = $listdata;
+			}
+
+			return $userdata;
 		}
 
-		return false;
+		return null;
 	}
 
 	/**
@@ -163,6 +191,7 @@ class Auth
 			$columns['passwd']   = 'admin_pwd';
 			$columns['username'] = 'admin_login';
 			$columns['email']    = 'admin_email';
+			$columns['language'] = 'admin_lang';
 		}
 		else {
 			$tablename = ABONNES_TABLE;
@@ -172,79 +201,46 @@ class Auth
 			$columns['passwd']   = 'abo_pwd';
 			$columns['username'] = 'abo_pseudo';
 			$columns['email']    = 'abo_email';
+			$columns['language'] = 'abo_lang';
 		}
 
 		return [$tablename, $columns];
 	}
 
 	/**
-	 * Récupèration des permissions pour l'utilisateur demandé
+	 * Vérification des permissions, selon la permission et la liste concernées.
 	 *
-	 * @param integer $admin_id Identifiant de l'utilisateur concerné
-	 *
-	 * @return array
-	 */
-	public function read_data($admin_id)
-	{
-		global $db, $admindata;
-
-		$sql = "SELECT li.liste_id, li.liste_name, li.liste_format, li.sender_email, li.return_email,
-				li.confirm_subscribe, li.liste_public, li.limitevalidate, li.form_url, li.liste_sig,
-				li.auto_purge, li.purge_freq, li.purge_next, li.liste_startdate, li.use_cron, li.pop_host,
-				li.pop_port, li.pop_user, li.pop_pass, li.pop_tls, li.liste_alias, li.liste_numlogs, aa.auth_view, aa.auth_edit,
-				aa.auth_del, aa.auth_send, aa.auth_import, aa.auth_export, aa.auth_ban, aa.auth_attach, aa.cc_admin
-			FROM " . LISTE_TABLE . " AS li
-				LEFT JOIN " . AUTH_ADMIN_TABLE . " AS aa ON aa.admin_id = $admin_id
-					AND aa.liste_id = li.liste_id
-			ORDER BY li.liste_name ASC";
-		$result = $db->query($sql);
-
-		$tmp_ary = [];
-		while ($row = $result->fetch()) {
-			$tmp_ary[$row['liste_id']] = $row;
-		}
-
-		if ($admindata['admin_id'] == $admin_id) {
-			$this->listdata = $tmp_ary;
-		}
-
-		return $tmp_ary;
-	}
-
-	/**
-	 * Fonction de vérification des permissions, selon la permission concernée et la liste concernée
-	 * Si vérification pour une liste particulière, retourne un booléen, sinon retourne un tableau d'identifiant
-	 * des listes pour lesquelles la permission est accordée
-	 *
-	 * @param integer $auth_type Code de la permission concernée
+	 * @param string  $auth_type Identifiant de la permission concernée
 	 * @param integer $liste_id  Identifiant de la liste concernée
 	 *
-	 * @return array|boolean
+	 * @return boolean
 	 */
-	public function check_auth($auth_type, $liste_id = null)
+	public function check($auth_type, $liste_id)
 	{
 		global $admindata;
 
-		$auth_name = $this->auth_ary[$auth_type];
+		return (wan_is_admin($admindata) || !empty($admindata['lists'][$liste_id][$auth_type]));
+	}
 
-		if ($liste_id == null) {
-			$liste_id_ary = [];
-			foreach ($this->listdata as $liste_id => $auth_list) {
-				if (wan_is_admin($admindata) || !empty($auth_list[$auth_name])) {
-					$liste_id_ary[] = $liste_id;
-				}
+	/**
+	 * Retourne un tableau d’identifiants des listes pour lesquelles
+	 * la permission est accordée.
+	 *
+	 * @param string $auth_type Identifiant de la permission concernée
+	 *
+	 * @return array
+	 */
+	public function getLists($auth_type)
+	{
+		global $admindata;
+
+		$lists = [];
+		foreach ($admindata['lists'] as $liste_id => $data) {
+			if (wan_is_admin($admindata) || !empty($data[$auth_type])) {
+				$lists[$liste_id] = $data;
 			}
-
-			return $liste_id_ary;
 		}
-		else {
-			if (isset($this->listdata[$liste_id]) &&
-				(wan_is_admin($admindata) || !empty($this->listdata[$liste_id][$auth_name]))
-			) {
-				return true;
-			}
 
-			return false;
-		}
+		return $lists;
 	}
 }

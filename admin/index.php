@@ -13,9 +13,10 @@ require './start.inc.php';
 
 $num_inscrits = $num_temp = $num_logs = $last_log = $filesize = 0;
 
-$liste_ids = $auth->check_auth(Auth::VIEW);
+$lists = $auth->getLists(Auth::VIEW);
 
-if (count($liste_ids) > 0) {
+if (count($lists) > 0) {
+	$liste_ids = array_column($lists, 'liste_id');
 	$sql_liste_ids = implode(', ', $liste_ids);
 
 	//

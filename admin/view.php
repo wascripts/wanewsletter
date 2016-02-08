@@ -45,7 +45,12 @@ if (($mode != 'liste' || ($mode == 'liste' && $action != 'add')) && !$_SESSION['
 	$output->footer();
 }
 else if ($_SESSION['liste']) {
-	$listdata = $auth->listdata[$_SESSION['liste']];
+	if (!$auth->check(Auth::VIEW, $_SESSION['liste'])) {
+		http_response_code(401);
+		$output->message('Not_auth_view');
+	}
+
+	$listdata = $auth->getLists(Auth::VIEW)[$_SESSION['liste']];
 }
 
 $listbox = $output->listbox(Auth::VIEW, false, './view.php?mode=' . $mode);
@@ -54,11 +59,6 @@ $listbox = $output->listbox(Auth::VIEW, false, './view.php?mode=' . $mode);
 // Mode download : téléchargement des fichiers joints à un log
 //
 if ($mode == 'download') {
-	if (!$auth->check_auth(Auth::VIEW, $listdata['liste_id'])) {
-		http_response_code(401);
-		$output->message('Not_auth_view');
-	}
-
 	$file_id = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
 
 	$attach = new Attach();
@@ -148,11 +148,6 @@ else if ($mode == 'export') {
 // Mode iframe pour visualisation des logs
 //
 else if ($mode == 'iframe') {
-	if (!$auth->check_auth(Auth::VIEW, $listdata['liste_id'])) {
-		http_response_code(401);
-		$output->basic($lang['Message']['Not_auth_view']);
-	}
-
 	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
@@ -214,24 +209,13 @@ else if ($mode == 'iframe') {
 // Mode gestion des abonnés
 //
 else if ($mode == 'abonnes') {
-	$other_tags = wan_get_tags();
-
-	switch ($action) {
-		case 'delete':
-			$auth_type = Auth::DEL;
-			break;
-		case 'view':
-		default:
-			$auth_type = Auth::VIEW;
-			break;
-	}
-
-	if (!$auth->check_auth($auth_type, $listdata['liste_id'])) {
-		$output->message('Not_' . $auth->auth_ary[$auth_type]);
+	if ($action == 'delete' && !$auth->check(Auth::DEL, $listdata['liste_id'])) {
+		$output->message('Not_auth_del');
 	}
 
 	$abo_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$get_string = '';
+	$other_tags = wan_get_tags();
 
 	//
 	// Si la fonction de recherche est sollicitée
@@ -292,7 +276,8 @@ else if ($mode == 'abonnes') {
 	// Visualisation du profil d'un abonné
 	//
 	if ($action == 'view') {
-		$liste_ids = $auth->check_auth(Auth::VIEW);
+		$lists = $auth->getLists(Auth::VIEW);
+		$liste_ids = array_column($lists, 'liste_id');
 
 		//
 		// Récupération des champs des tags personnalisés
@@ -362,7 +347,7 @@ else if ($mode == 'abonnes') {
 			}
 
 			// Actions possibles sur cette liste
-			if ($auth->check_auth(Auth::EDIT, $_SESSION['liste'])) {
+			if ($auth->check(Auth::EDIT, $_SESSION['liste'])) {
 				$template->assignToBlock('actions', [
 					'L_EDIT_ACCOUNT'   => $lang['Edit_account'],
 					'L_DELETE_ACCOUNT' => $lang['Button']['del_account'],
@@ -374,10 +359,13 @@ else if ($mode == 'abonnes') {
 			$register_date = time();
 
 			do {
-				$liste_name   = $auth->listdata[$row['liste_id']]['liste_name'];
-				$liste_format = $auth->listdata[$row['liste_id']]['liste_format'];
+				if (!isset($lists[$row['liste_id']])) {
+					continue;
+				}
 
-				if ($liste_format == FORMAT_MULTIPLE) {
+				$format = $lists[$row['liste_id']]['liste_format'];
+
+				if ($format == FORMAT_MULTIPLE) {
 					$format = sprintf(' (%s&nbsp;: %s)',
 						$lang['Choice_Format'],
 						($row['format'] == FORMAT_HTML ? 'html' : 'texte')
@@ -386,12 +374,12 @@ else if ($mode == 'abonnes') {
 				else {
 					$format = sprintf(' (%s&nbsp;: %s)',
 						$lang['Format'],
-						($liste_format == FORMAT_HTML ? 'html' : 'texte')
+						($format == FORMAT_HTML ? 'html' : 'texte')
 					);
 				}
 
 				$template->assignToBlock('listerow', [
-					'LISTE_NAME'    => htmlspecialchars($liste_name),
+					'LISTE_NAME'    => htmlspecialchars($lists[$row['liste_id']]['liste_name']),
 					'CHOICE_FORMAT' => $format,
 					'LISTE_ID'      => $row['liste_id']
 				]);
@@ -418,7 +406,8 @@ else if ($mode == 'abonnes') {
 	// Édition d'un profil d'abonné
 	//
 	else if ($action == 'edit') {
-		$liste_ids = $auth->check_auth(Auth::EDIT);
+		$lists = $auth->getLists(Auth::EDIT);
+		$liste_ids = array_column($lists, 'liste_id');
 
 		$sql = "SELECT liste_id
 			FROM " . ABO_LISTE_TABLE . "
@@ -483,7 +472,7 @@ else if ($mode == 'abonnes') {
 				$update = [FORMAT_TEXTE => [], FORMAT_HTML => []];
 
 				foreach ($formatList as $liste_id => $format) {
-					if (in_array($format, [FORMAT_TEXTE, FORMAT_HTML]) && $auth->check_auth(Auth::EDIT, $liste_id)) {
+					if (in_array($format, [FORMAT_TEXTE, FORMAT_HTML]) && $auth->check(Auth::EDIT, $liste_id)) {
 						$update[$format][] = $liste_id;
 					}
 				}
@@ -578,18 +567,23 @@ else if ($mode == 'abonnes') {
 			}
 
 			do {
-				if ($auth->listdata[$row['liste_id']]['liste_format'] == FORMAT_MULTIPLE) {
+				if (!isset($lists[$row['liste_id']])) {
+					continue;
+				}
+
+				$format = $lists[$row['liste_id']]['liste_format'];
+
+				if ($format == FORMAT_MULTIPLE) {
 					$format_box = format_box("format[$row[liste_id]]",
 						$row['format'], false, false, true
 					);
 				}
 				else {
-					$format = $auth->listdata[$row['liste_id']]['liste_format'];
 					$format_box = ($format == FORMAT_HTML) ? 'HTML' : 'texte';
 				}
 
 				$template->assignToBlock('listerow', [
-					'LISTE_NAME' => htmlspecialchars($auth->listdata[$row['liste_id']]['liste_name']),
+					'LISTE_NAME' => htmlspecialchars($lists[$row['liste_id']]['liste_name']),
 					'FORMAT_BOX' => $format_box,
 					'LISTE_ID'   => $row['liste_id']
 				]);
@@ -822,7 +816,7 @@ else if ($mode == 'abonnes') {
 
 	if ($num_abo = count($aborow)) {
 		$display_checkbox = false;
-		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
+		if ($auth->check(Auth::DEL, $listdata['liste_id'])) {
 			$template->assignToBlock('delete_option', [
 				'L_FAST_DELETION'      => $lang['Fast_deletion'],
 				'L_FAST_DELETION_NOTE' => $lang['Fast_deletion_note'],
@@ -877,7 +871,7 @@ else if ($mode == 'liste') {
 				$output->message();
 			}
 
-			$auth_type = false;
+			$auth_type = null;
 			break;
 		case 'purge':
 			$auth_type = Auth::DEL;
@@ -886,12 +880,12 @@ else if ($mode == 'liste') {
 			$auth_type = Auth::EDIT;
 			break;
 		default:
-			$auth_type = Auth::VIEW;
+			$auth_type = null;
 			break;
 	}
 
-	if ($auth_type && !$auth->check_auth($auth_type, $_SESSION['liste'])) {
-		$output->message('Not_' . $auth->auth_ary[$auth_type]);
+	if ($auth_type && !$auth->check($auth_type, $_SESSION['liste'])) {
+		$output->message('Not_' . $auth_type);
 	}
 
 	//
@@ -1188,7 +1182,7 @@ else if ($mode == 'liste') {
 			else {
 				$liste_id = (int) filter_input(INPUT_POST, 'liste_id', FILTER_VALIDATE_INT);
 
-				if (!isset($auth->listdata[$liste_id])) {
+				if (!isset($auth->getLists(Auth::DEL)[$liste_id])) {
 					trigger_error('No_liste_id', E_USER_ERROR);
 				}
 
@@ -1275,21 +1269,26 @@ else if ($mode == 'liste') {
 			$output->message();
 		}
 		else {
-			$list_box  = '';
-			$liste_ids = $auth->check_auth(Auth::VIEW);
+			$lists = $auth->getLists(Auth::VIEW);
 
-			foreach ($auth->listdata as $liste_id => $data) {
-				if (in_array($liste_id, $liste_ids) && $liste_id != $listdata['liste_id']) {
-					$selected  = $output->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id));
-					$list_box .= '<option value="' . $liste_id . '"' . $selected . '> - '
-						. htmlspecialchars(cut_str($data['liste_name'], 30)) . ' - </option>';
+			$list_box  = '';
+			foreach ($lists as $liste_id => $data) {
+				if ($liste_id != $listdata['liste_id']) {
+					$list_box .= sprintf('<option value="%d"> %s </option>',
+						$liste_id,
+						htmlspecialchars(cut_str($data['liste_name'], 30))
+					);
 				}
 			}
 
 			if ($list_box != '') {
 				$message  = $lang['Move_abo_logs'];
-				$message .= '<br /><br />' . $lang['Move_to_liste'] . ' <select id="liste_id" name="liste_id">' . $list_box . '</select>';
-				$message .= '<br /><br /><input type="checkbox" id="delete_all" name="delete_all" value="1" /> <label for="delete_all">' . $lang['Delete_abo_logs'] . '</label>';
+				$message .= '<br /><br />';
+				$message .= $lang['Move_to_liste'];
+				$message .= ' <select id="liste_id" name="liste_id">' . $list_box . '</select>';
+				$message .= '<br /><br />';
+				$message .= '<input type="checkbox" id="delete_all" name="delete_all" value="1" />';
+				$message .= ' <label for="delete_all">' . $lang['Delete_abo_logs'] . '</label>';
 			}
 			else {
 				$output->addHiddenField('delete_all', '1');
@@ -1445,7 +1444,7 @@ else if ($mode == 'liste') {
 		]);
 	}
 
-	if ($auth->check_auth(Auth::DEL, $listdata['liste_id']) || $auth->check_auth(Auth::EDIT, $listdata['liste_id'])) {
+	if ($auth->check(Auth::DEL, $listdata['liste_id']) || $auth->check(Auth::EDIT, $listdata['liste_id'])) {
 		$template->assignToBlock('admin_options', []);
 
 		if (wan_is_admin($admindata)) {
@@ -1458,13 +1457,13 @@ else if ($mode == 'liste') {
 			]);
 		}
 
-		if ($auth->check_auth(Auth::EDIT, $listdata['liste_id'])) {
+		if ($auth->check(Auth::EDIT, $listdata['liste_id'])) {
 			$template->assignToBlock('admin_options.auth_edit', [
 				'L_EDIT_LISTE' => $lang['Edit_liste']
 			]);
 		}
 
-		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
+		if ($auth->check(Auth::DEL, $listdata['liste_id'])) {
 			$template->assignToBlock('purge_option', [
 				'L_PURGE_BUTTON'  => $lang['Button']['purge']
 			]);
@@ -1476,10 +1475,8 @@ else if ($mode == 'liste') {
 // Mode Gestion des logs/archives
 //
 else if ($mode == 'log') {
-	$auth_type = ($action == 'delete') ? Auth::DEL : Auth::VIEW;
-
-	if (!$auth->check_auth($auth_type, $listdata['liste_id'])) {
-		$output->message('Not_' . $auth->auth_ary[$auth_type]);
+	if ($action == 'delete' && !$auth->check(Auth::DEL, $listdata['liste_id'])) {
+		$output->message('Not_auth_del');
 	}
 
 	//
@@ -1678,7 +1675,7 @@ else if ($mode == 'log') {
 
 	if ($num_logs = count($logrow)) {
 		$display_checkbox = false;
-		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
+		if ($auth->check(Auth::DEL, $listdata['liste_id'])) {
 			$template->assignToBlock('delete_option', [
 				'L_DELETE' => $lang['Button']['del_logs']
 			]);

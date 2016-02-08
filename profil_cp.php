@@ -37,24 +37,6 @@ $auth = new Auth();
 // End
 //
 
-function getAboDataList($abodata)
-{
-	global $db;
-
-	$sql = "SELECT al.format, al.register_key, al.register_date, l.liste_id, l.liste_name, l.sender_email,
-			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url
-		FROM " . ABO_LISTE_TABLE . " AS al
-			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
-		WHERE al.abo_id = " . $abodata['abo_id'];
-	$result = $db->query($sql);
-
-	while ($row = $result->fetch()) {
-		$abodata['listes'][$row['liste_id']] = $row;
-	}
-
-	return $abodata;
-}
-
 $mode = filter_input(INPUT_GET, 'mode');
 // Spécial. la présence du paramètre 'k' signifie qu'on est dans le mode reset_passwd
 $reset_key = filter_input(INPUT_GET, 'k');
@@ -73,14 +55,11 @@ if (!$auth->isLoggedIn()) {
 }
 
 $abodata = $auth->getUserData($_SESSION['uid']);
-$abodata = getAboDataList($abodata);
 
 if (empty($abodata['abo_lang'])) {
 	$abodata['abo_lang'] = $nl_config['language'];
 }
 
-// Crade, mais on fera avec pour l'instant.
-$abodata['admin_lang'] = $abodata['abo_lang'];
 load_settings($abodata);
 
 $other_tags = wan_get_tags();
@@ -216,7 +195,7 @@ switch ($mode) {
 
 			$sql_log_id = [];
 			foreach ($listlog as $liste_id => $logs) {
-				if (isset($abodata['listes'][$liste_id])) {
+				if (isset($abodata['lists'][$liste_id])) {
 					$sql_log_id = array_merge($sql_log_id, $logs);
 				}
 			}
@@ -244,7 +223,7 @@ switch ($mode) {
 			$result = $db->query($sql);
 
 			while ($logdata = $result->fetch()) {
-				$listdata = $abodata['listes'][$logdata['liste_id']];
+				$listdata = $abodata['lists'][$logdata['liste_id']];
 				$logdata['joined_files'] = [];
 				$abodata['register_key'] = $listdata['register_key'];
 				$abodata['format']       = $listdata['format'];// À ne pas confondre avec liste_format
@@ -270,7 +249,7 @@ switch ($mode) {
 		}
 
 		$liste_ids = [];
-		foreach ($abodata['listes'] as $liste_id => $listdata) {
+		foreach ($abodata['lists'] as $liste_id => $listdata) {
 			$liste_ids[] = $liste_id;
 		}
 
@@ -282,7 +261,7 @@ switch ($mode) {
 		$result = $db->query($sql);
 
 		while ($row = $result->fetch()) {
-			$abodata['listes'][$row['liste_id']]['archives'][] = $row;
+			$abodata['lists'][$row['liste_id']]['archives'][] = $row;
 		}
 
 		$output->header();
@@ -295,19 +274,19 @@ switch ($mode) {
 			'L_VALID_BUTTON'  => $lang['Button']['valid']
 		]);
 
-		foreach ($abodata['listes'] as $liste_id => $listdata) {
-			if (!isset($abodata['listes'][$liste_id]['archives'])) {
+		foreach ($abodata['lists'] as $liste_id => $listdata) {
+			if (!isset($abodata['lists'][$liste_id]['archives'])) {
 				continue;
 			}
 
-			$num_logs = count($abodata['listes'][$liste_id]['archives']);
+			$num_logs = count($abodata['lists'][$liste_id]['archives']);
 			$size     = ($num_logs > 8) ? 8 : $num_logs;
 
 			$select_log = '<select id="liste_' . $liste_id . '" name="log['
 				. $liste_id . '][]" class="logList" size="' . $size
 				. '" multiple="multiple" style="min-width: 200px;">';
 			for ($i = 0; $i < $num_logs; $i++) {
-				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
+				$logrow = $abodata['lists'][$liste_id]['archives'][$i];
 
 				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; '
 					. htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
