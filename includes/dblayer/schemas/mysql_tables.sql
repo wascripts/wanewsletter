@@ -73,7 +73,7 @@ CREATE TABLE wa_auth_admin (
 	auth_ban    TINYINT(1) NOT NULL DEFAULT 0,
 	auth_attach TINYINT(1) NOT NULL DEFAULT 0,
 	cc_admin    TINYINT(1) NOT NULL DEFAULT 0,
-	INDEX admin_id_idx (admin_id)
+	CONSTRAINT wa_auth_admin_pk PRIMARY KEY (admin_id, liste_id)
 )
 	ENGINE = MyISAM
 	DEFAULT CHARACTER SET = utf8;

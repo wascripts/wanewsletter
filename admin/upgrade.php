@@ -741,6 +741,19 @@ if (isset($_POST['start'])) {
 			}
 		}
 
+		//
+		// Clé primaire sur la table auth_admin
+		//
+		if ($nl_config['db_version'] < 25) {
+			if ($db::ENGINE != 'sqlite') {
+				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . " DROP INDEX admin_id_idx";
+				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . " ADD PRIMARY KEY(admin_id,liste_id)";
+			}
+			else {
+				wa_sqlite_recreate_table(AUTH_ADMIN_TABLE);
+			}
+		}
+
 		exec_queries($sql_update);
 
 		//

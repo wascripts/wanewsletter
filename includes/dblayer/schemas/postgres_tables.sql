@@ -67,9 +67,9 @@ CREATE TABLE wa_auth_admin (
 	auth_export SMALLINT NOT NULL DEFAULT 0,
 	auth_ban    SMALLINT NOT NULL DEFAULT 0,
 	auth_attach SMALLINT NOT NULL DEFAULT 0,
-	cc_admin    SMALLINT NOT NULL DEFAULT 0
+	cc_admin    SMALLINT NOT NULL DEFAULT 0,
+	CONSTRAINT wa_auth_admin_pk PRIMARY KEY (admin_id, liste_id)
 );
-CREATE INDEX admin_id_idx ON wa_auth_admin (admin_id);
 
 
 --
