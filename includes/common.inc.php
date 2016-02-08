@@ -82,12 +82,12 @@ spl_autoload_register(function ($classname) {
 //
 // Intialisation des variables pour éviter toute injection malveillante de code
 //
-$simple_header = $error = false;
-$nl_config     = $lang = $datetime = $admindata = $msg_error = [];
+$error     = false;
+$dsn       = '';
+$nl_config = $lang = $datetime = $admindata = $msg_error = [];
 
 // Chargement du fichier de configuration initial
 $prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
-$dsn     = '';
 
 load_config_file();
 

@@ -249,18 +249,18 @@ class Output
 	 */
 	public function header($page_title = '')
 	{
-		global $nl_config, $lang, $admindata, $auth;
-		global $simple_header, $msg_error;
-
-		if (!($auth instanceof Auth) || !$auth->isLoggedIn()) {
-			$simple_header = true;
-		}
+		global $nl_config, $lang, $admindata, $auth, $msg_error;
 
 		if ($this->header_displayed) {
 			return null;
 		}
 
 		$this->header_displayed = true;
+		$simple_header = false;
+
+		if (!($auth instanceof Auth) || !$auth->isLoggedIn()) {
+			$simple_header = true;
+		}
 
 		$this->httpHeaders();
 
