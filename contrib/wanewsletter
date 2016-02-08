@@ -48,10 +48,10 @@ $emails   = [];
 $format   = FORMAT_TEXTE;
 $liste_id = null;
 $message  = null;
+$packet   = 30;
+$delay    = 10;
 
 $process_send = $process_subscribe = $import_mail = false;
-$send_packet  = 30;
-$send_delay   = 10;
 
 if ($argc == 1) {
 	echo "Usage: $argv[0] [OPTION]...\n";
@@ -60,8 +60,8 @@ if ($argc == 1) {
 }
 
 //
-// En mode un email par abonné, on envoit tous les emails par défaut (avec une pause
-// à intervalle régulier (voir plus haut)).
+// En mode d’envoi personnalisé, on envoie tous les emails par défaut
+// (avec une pause à intervalle régulier (défini par $delay)).
 //
 if ($nl_config['engine_send'] == ENGINE_UNIQ) {
 	$nl_config['sending_limit'] = 0;
@@ -190,13 +190,13 @@ WANSHELL;
 	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
 	//
 	else if ($name == 'packet' || $name == 'k') {
-		$send_packet = intval($value);
+		$packet = intval($value);
 	}
 	//
 	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
 	//
 	else if ($name == 'delay' || $name == 'd') {
-		$send_delay = intval($value);
+		$delay = intval($value);
 	}
 	//
 	// Importation d'emails
@@ -250,9 +250,6 @@ if (!is_null($liste_id)) {
 }
 
 if ($process_send) {
-	define('SEND_PACKET', $send_packet);
-	define('SEND_DELAY',  $send_delay);
-
 	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
 		FROM " . LOG_TABLE . "
 		WHERE liste_id = $listdata[liste_id]
@@ -292,13 +289,13 @@ if ($process_send) {
 				['ansi_terminal' => (function_exists('posix_isatty') && posix_isatty(STDOUT))]
 			);
 		});
-		$sender->registerHook('post-send', function () use (&$progressbar) {
+		$sender->registerHook('post-send', function () use (&$progressbar, $packet, $delay) {
 			static $counter = 0;
 
 			$progressbar->update(++$counter);
 
-			if (SEND_DELAY > 0 && ($counter % SEND_PACKET) == 0) {
-				sleep(SEND_DELAY);
+			if ($delay > 0 && ($counter % $packet) == 0) {
+				sleep($delay);
 			}
 		});
 	}
