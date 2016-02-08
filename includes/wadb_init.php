@@ -260,15 +260,11 @@ ERR;
 /**
  * Exécute une ou plusieurs requètes SQL sur la base de données
  *
- * @param mixed $queries Une ou plusieurs requètes SQL à exécuter
+ * @param array $queries Une ou plusieurs requètes SQL à exécuter
  */
-function exec_queries(&$queries)
+function exec_queries(array &$queries)
 {
 	global $db;
-
-	if (!is_array($queries)) {
-		$queries = [$queries];
-	}
 
 	foreach ($queries as $query) {
 		if (!empty($query)) {
