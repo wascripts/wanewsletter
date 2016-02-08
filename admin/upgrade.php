@@ -15,6 +15,50 @@ const IN_ADMIN = true;
 
 require '../includes/common.inc.php';
 
+/**
+ * SQLite a un support très limité de la commande ALTER TABLE
+ * Impossible de modifier ou supprimer une colonne donnée
+ * On réécrit les tables dont la structure a changé
+ * /!\ Ne permet que d'altérer le type des colonnes.
+ * Ajouter/Renommer/Supprimer des colonnes ne fonctionnera pas avec $restore_data à true
+ *
+ * @param string  $tablename    Nom de la table à recréer
+ * @param boolean $restore_data true pour restaurer les données
+ */
+function wa_sqlite_recreate_table($tablename, $restore_data = true)
+{
+	global $db, $sql_create, $sql_schemas;
+
+	$schema = &$sql_schemas[$tablename];
+
+	if (!empty($schema['updated'])) {
+		return null;
+	}
+
+	$schema['updated'] = true;
+	$columns = [];
+
+	$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
+	while ($row = $result->fetch()) {
+		$columns[] = $row['name'];
+	}
+
+	$sql_update   = [];
+	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
+	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
+
+	if ($restore_data) {
+		$sql_update[] = sprintf('INSERT INTO %1$s (%2$s) SELECT %2$s FROM %1$s_tmp;',
+			$tablename,
+			implode(',', $columns)
+		);
+	}
+
+	$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
+
+	exec_queries($sql_update);
+}
+
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration
 //
