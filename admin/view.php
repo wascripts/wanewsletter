@@ -469,10 +469,10 @@ else if ($mode == 'abonnes') {
 					FILTER_REQUIRE_ARRAY
 				);
 
-				$update = [FORMAT_TEXTE => [], FORMAT_HTML => []];
+				$update = [FORMAT_TEXT => [], FORMAT_HTML => []];
 
 				foreach ($formatList as $liste_id => $format) {
-					if (in_array($format, [FORMAT_TEXTE, FORMAT_HTML]) && $auth->check(Auth::EDIT, $liste_id)) {
+					if (in_array($format, [FORMAT_TEXT, FORMAT_HTML]) && $auth->check(Auth::EDIT, $liste_id)) {
 						$update[$format][] = $liste_id;
 					}
 				}
@@ -901,7 +901,7 @@ else if ($mode == 'liste') {
 		}
 
 		$default_values = [
-			'liste_format'      => FORMAT_TEXTE,
+			'liste_format'      => FORMAT_TEXT,
 			'limitevalidate'    => 3,
 			'auto_purge'        => true,
 			'purge_freq'        => 7,
@@ -934,7 +934,7 @@ else if ($mode == 'liste') {
 				$msg_error[] = $lang['Invalid_liste_name'];
 			}
 
-			if (!in_array($liste_format, [FORMAT_TEXTE, FORMAT_HTML, FORMAT_MULTIPLE])) {
+			if (!in_array($liste_format, [FORMAT_TEXT, FORMAT_HTML, FORMAT_MULTIPLE])) {
 				$error = true;
 				$msg_error[] = $lang['Unknown_format'];
 			}
@@ -1365,7 +1365,7 @@ else if ($mode == 'liste') {
 	}
 
 	switch ($listdata['liste_format']) {
-		case FORMAT_TEXTE:
+		case FORMAT_TEXT:
 			$l_format = 'txt';
 			break;
 		case FORMAT_HTML:

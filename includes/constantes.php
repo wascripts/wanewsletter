@@ -80,7 +80,7 @@ const DEFAULT_DATE_FORMAT = 'd F Y H:i';
 //
 // Formats d'emails
 //
-const FORMAT_TEXTE    = 1;
+const FORMAT_TEXT     = 1;
 const FORMAT_HTML     = 2;
 const FORMAT_MULTIPLE = 3;
 

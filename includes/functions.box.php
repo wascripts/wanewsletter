@@ -80,7 +80,7 @@ function format_box($select_name, $default_format = 0, $option_submit = false, $
 		$format_box .= '>';
 	}
 
-	$format_box .= '<option value="1"' . $output->getBoolAttr('selected', ($default_format == FORMAT_TEXTE)) . '>texte</option>';
+	$format_box .= '<option value="1"' . $output->getBoolAttr('selected', ($default_format == FORMAT_TEXT)) . '>texte</option>';
 	$format_box .= '<option value="2"' . $output->getBoolAttr('selected', ($default_format == FORMAT_HTML)) . '>html</option>';
 
 	if ($multi_format) {

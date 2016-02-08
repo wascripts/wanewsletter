@@ -15,7 +15,7 @@ use Wamailer\Email;
 
 class Subscription
 {
-	private $format      = FORMAT_TEXTE;
+	private $format      = FORMAT_TEXT;
 	private $listdata    = [];
 	public  $liste_email = '';
 
@@ -38,7 +38,7 @@ class Subscription
 			$this->liste_email = (!empty($listdata['liste_alias']))
 				? $listdata['liste_alias'] : $listdata['sender_email'];
 
-			if ($listdata['liste_format'] == FORMAT_TEXTE || $listdata['liste_format'] == FORMAT_HTML) {
+			if ($listdata['liste_format'] == FORMAT_TEXT || $listdata['liste_format'] == FORMAT_HTML) {
 				$this->format = $listdata['liste_format'];
 			}
 		}
@@ -152,7 +152,7 @@ class Subscription
 	{
 		if ($this->listdata['liste_format'] == FORMAT_MULTIPLE &&
 			!is_null($format) &&
-			in_array($format, [FORMAT_TEXTE, FORMAT_HTML])
+			in_array($format, [FORMAT_TEXT, FORMAT_HTML])
 		) {
 			$this->format = $format;
 		}
@@ -519,11 +519,11 @@ class Subscription
 		global $db, $lang;
 
 		if ($this->listdata['liste_format'] == FORMAT_MULTIPLE) {
-			if ($this->account['format'] == FORMAT_TEXTE) {
+			if ($this->account['format'] == FORMAT_TEXT) {
 				$this->format = FORMAT_HTML;
 			}
 			else {
-				$this->format = FORMAT_TEXTE;
+				$this->format = FORMAT_TEXT;
 			}
 
 			$sql = "UPDATE " . ABO_LISTE_TABLE . "

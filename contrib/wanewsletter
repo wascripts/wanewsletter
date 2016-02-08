@@ -45,7 +45,7 @@ load_settings();
 $argv[0]  = basename($argv[0]);
 $version  = WANEWSLETTER_VERSION;
 $emails   = [];
-$format   = FORMAT_TEXTE;
+$format   = FORMAT_TEXT;
 $liste_id = null;
 $message  = null;
 $packet   = 30;
@@ -212,7 +212,7 @@ WANSHELL;
 		$format = $value;
 
 		if (in_array($format, ['plain', 'text', 'texte'])) {
-			$format = FORMAT_TEXTE;
+			$format = FORMAT_TEXT;
 		}
 		else if ($format == 'html') {
 			$format = FORMAT_HTML;

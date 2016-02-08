@@ -203,8 +203,8 @@ switch ($mode) {
 			}
 			else {
 				$format = filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
-				if (!in_array($format, [FORMAT_TEXTE, FORMAT_HTML])) {
-					$format = FORMAT_TEXTE;
+				if (!in_array($format, [FORMAT_TEXT, FORMAT_HTML])) {
+					$format = FORMAT_TEXT;
 				}
 			}
 
@@ -490,8 +490,8 @@ switch ($mode) {
 				}
 				else {
 					$format = filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
-					if (!in_array($format, [FORMAT_TEXTE, FORMAT_HTML])) {
-						$format = FORMAT_TEXTE;
+					if (!in_array($format, [FORMAT_TEXT, FORMAT_HTML])) {
+						$format = FORMAT_TEXT;
 					}
 				}
 
@@ -1071,7 +1071,7 @@ switch ($mode) {
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
 				$code_html .= $lang['Format'] . " : <select name=\"format\">\n";
-				$code_html .= "<option value=\"" . FORMAT_TEXTE . "\">TXT</option>\n";
+				$code_html .= "<option value=\"" . FORMAT_TEXT . "\">TXT</option>\n";
 				$code_html .= "<option value=\"" . FORMAT_HTML . "\">HTML</option>\n";
 				$code_html .= "</select>\n";
 			}

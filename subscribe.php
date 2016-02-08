@@ -22,7 +22,7 @@ $list_box = '<select id="liste" name="liste">';
 
 if ($row = $result->fetch()) {
 	do {
-		if ($row['liste_format'] == FORMAT_TEXTE) {
+		if ($row['liste_format'] == FORMAT_TEXT) {
 			$format = 'txt';
 		}
 		else if ($row['liste_format'] == FORMAT_HTML) {

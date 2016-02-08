@@ -421,7 +421,7 @@ switch ($mode) {
 			]);
 
 			switch ($listdata['liste_format']) {
-				case FORMAT_TEXTE:
+				case FORMAT_TEXT:
 					$bloc_name = 'load_text_by_url';
 					break;
 				case FORMAT_HTML:
@@ -535,7 +535,7 @@ switch ($mode) {
 			}
 
 			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_html'] == '' &&
-				$listdata['liste_format'] != FORMAT_TEXTE
+				$listdata['liste_format'] != FORMAT_TEXT
 			) {
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
@@ -591,7 +591,7 @@ switch ($mode) {
 					$msg_error[] = $lang['No_links_in_body'];
 				}
 
-				if ($listdata['liste_format'] != FORMAT_TEXTE) {
+				if ($listdata['liste_format'] != FORMAT_TEXT) {
 					if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
 						$error = true;
 						$msg_error[] = $lang['No_links_in_body'];
@@ -1021,7 +1021,7 @@ if ($listdata['liste_format'] != FORMAT_HTML) {
 	]);
 }
 
-if ($listdata['liste_format'] != FORMAT_TEXTE) {
+if ($listdata['liste_format'] != FORMAT_TEXT) {
 	$template->assignToBlock('nl_html_textarea', [
 		'L_TITLE'    => $lang['Log_in_html'],
 		'L_EXPLAIN'  => nl2br($lang['Explain']['html']),

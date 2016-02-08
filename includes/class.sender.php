@@ -275,11 +275,11 @@ class Sender
 			];
 
 			if ($this->listdata['liste_format'] != FORMAT_HTML) {
-				$data['format'] = FORMAT_TEXTE;
+				$data['format'] = FORMAT_TEXT;
 				$abodata_list[] = $data;
 			}
 
-			if ($this->listdata['liste_format'] != FORMAT_TEXTE) {
+			if ($this->listdata['liste_format'] != FORMAT_TEXT) {
 				$data['format'] = FORMAT_HTML;
 				$abodata_list[] = $data;
 			}
@@ -293,7 +293,7 @@ class Sender
 		$this->triggerHooks('start-send', $abodata_list);
 
 		if ($nl_config['engine_send'] == ENGINE_BCC) {
-			$address = [FORMAT_TEXTE => [], FORMAT_HTML => []];
+			$address = [FORMAT_TEXT => [], FORMAT_HTML => []];
 			$abo_ids = $address;
 
 			foreach ($abodata_list as $data) {
@@ -309,7 +309,7 @@ class Sender
 				'name'  => $this->listdata['liste_name']
 			];
 
-			foreach ([FORMAT_TEXTE, FORMAT_HTML] as $format) {
+			foreach ([FORMAT_TEXT, FORMAT_HTML] as $format) {
 				// Actions pré-envoi
 				$this->triggerHooks('pre-send');
 
@@ -330,7 +330,7 @@ class Sender
 				$this->triggerHooks('post-send', implode("\n", $abo_ids[$format]));
 			}
 
-			$abo_ids = array_merge($abo_ids[FORMAT_TEXTE], $abo_ids[FORMAT_HTML]);
+			$abo_ids = array_merge($abo_ids[FORMAT_TEXT], $abo_ids[FORMAT_HTML]);
 		}
 		else {
 			$abo_ids = [];
@@ -462,7 +462,7 @@ class Sender
 			$this->email->setTextBody($this->textTemplate->pparse(true));
 		}
 
-		if ($this->listdata['liste_format'] != FORMAT_TEXTE && $data['format'] == FORMAT_HTML) {
+		if ($this->listdata['liste_format'] != FORMAT_TEXT && $data['format'] == FORMAT_HTML) {
 			$this->email->setHTMLBody($this->htmlTemplate->pparse(true));
 		}
 
@@ -485,7 +485,7 @@ class Sender
 		}
 
 		$message = [
-			FORMAT_TEXTE => $this->logdata['log_body_text'],
+			FORMAT_TEXT => $this->logdata['log_body_text'],
 			FORMAT_HTML  => $this->logdata['log_body_html']
 		];
 
@@ -499,8 +499,8 @@ class Sender
 				? $this->listdata['liste_alias'] : $this->listdata['sender_email'];
 
 			$link = [
-				FORMAT_TEXTE => $liste_email,
-				FORMAT_HTML  => sprintf($link_template,
+				FORMAT_TEXT => $liste_email,
+				FORMAT_HTML => sprintf($link_template,
 					sprintf('mailto:%s?subject=unsubscribe', $liste_email)
 				)
 			];
@@ -508,8 +508,8 @@ class Sender
 		else {
 			if ($nl_config['engine_send'] == ENGINE_BCC) {
 				$link = [
-					FORMAT_TEXTE => $this->listdata['form_url'],
-					FORMAT_HTML  => sprintf($link_template, htmlspecialchars($this->listdata['form_url']))
+					FORMAT_TEXT => $this->listdata['form_url'],
+					FORMAT_HTML => sprintf($link_template, htmlspecialchars($this->listdata['form_url']))
 				];
 			}
 			else {
@@ -518,17 +518,17 @@ class Sender
 					. '{WA_CODE}';
 
 				$link = [
-					FORMAT_TEXTE => $tmp_link,
-					FORMAT_HTML  => sprintf($link_template, htmlspecialchars($tmp_link))
+					FORMAT_TEXT => $tmp_link,
+					FORMAT_HTML => sprintf($link_template, htmlspecialchars($tmp_link))
 				];
 			}
 		}
 
-		$message[FORMAT_TEXTE] = str_replace('{LINKS}', $link[FORMAT_TEXTE], $message[FORMAT_TEXTE]);
-		$message[FORMAT_HTML]  = str_replace('{LINKS}', $link[FORMAT_HTML],  $message[FORMAT_HTML]);
+		$message[FORMAT_TEXT] = str_replace('{LINKS}', $link[FORMAT_TEXT], $message[FORMAT_TEXT]);
+		$message[FORMAT_HTML] = str_replace('{LINKS}', $link[FORMAT_HTML],  $message[FORMAT_HTML]);
 
 		$text_template = new Template;
-		$text_template->loadFromString($message[FORMAT_TEXTE]);
+		$text_template->loadFromString($message[FORMAT_TEXT]);
 		$html_template = new Template;
 		$html_template->loadFromString($message[FORMAT_HTML]);
 
