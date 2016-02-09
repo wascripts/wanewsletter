@@ -321,7 +321,7 @@ else if ($process_subscribe) {
 	$sub = new Subscription($listdata);
 	$pop = new PopClient();
 	$pop->options([
-		'starttls' => ($pop_tls == SECURITY_STARTTLS)
+		'starttls' => ($listdata['pop_tls'] == SECURITY_STARTTLS)
 	]);
 
 	try {
