@@ -250,30 +250,7 @@ if (!is_null($liste_id)) {
 }
 
 if ($process_send) {
-	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
-		FROM " . LOG_TABLE . "
-		WHERE liste_id = $listdata[liste_id]
-			AND log_status = " . STATUS_STANDBY . "
-		LIMIT 1 OFFSET 0";
-	$result = $db->query($sql);// on récupère le dernier log en statut d'envoi
-
-	if (!($logdata = $result->fetch())) {
-		echo $lang['Message']['No_log_to_send'] . "\n";
-		exit(0);
-	}
-
-	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-		FROM " . JOINED_FILES_TABLE . " AS jf
-			INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
-			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-				AND l.liste_id = $listdata[liste_id]
-				AND l.log_id   = $logdata[log_id]
-		ORDER BY jf.file_real_name ASC";
-	$result = $db->query($sql);
-
-	$logdata['joined_files'] = $result->fetchAll();
-
-	$sender = new Sender($listdata, $logdata);
+	$sender = new Sender($listdata);
 	$sender->lock();
 
 	if ($nl_config['engine_send'] != ENGINE_BCC) {
@@ -318,85 +295,7 @@ if ($process_send) {
 else if ($process_subscribe) {
 	require 'includes/functions.stats.php';
 
-	$sub = new Subscription($listdata);
-	$pop = new PopClient();
-	$pop->options([
-		'starttls' => ($listdata['pop_tls'] == SECURITY_STARTTLS)
-	]);
-
-	try {
-		$server = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
-		$server = sprintf($server, $listdata['pop_host'], $listdata['pop_port']);
-
-		if (!$pop->connect($server, $listdata['pop_user'], $listdata['pop_pass'])) {
-			throw new Exception(sprintf(
-				"Failed to connect to POP server (%s)",
-				$pop->responseData
-			));
-		}
-	}
-	catch (Exception $e) {
-		trigger_error(sprintf($lang['Message']['bad_pop_param'], $e->getMessage()), E_USER_ERROR);
-	}
-
-	$total    = $pop->stat_box();
-	$mail_box = $pop->list_mail();
-
-	foreach ($mail_box as $mail_id => $mail_size) {
-		$headers = $pop->parse_headers($mail_id);
-
-		if (!isset($headers['from']) || !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $m)) {
-			continue;
-		}
-
-		$pseudo = (isset($m[1])) ? trim(strip_tags(u::filter($m[1]))) : '';
-		$email  = trim($m[2]);
-
-		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
-			continue;
-		}
-
-		if (!isset($headers['subject'])) {
-			continue;
-		}
-
-		$action = mb_strtolower(trim(u::filter($headers['subject'])));
-
-		switch ($action) {
-			case 'désinscription':
-			case 'unsubscribe':
-				$action = 'desinscription';
-				break;
-			case 'subscribe':
-				$action = 'inscription';
-				break;
-			case 'confirmation':
-			case 'setformat':
-				break;
-		}
-
-		$code = $pop->contents[$mail_id]['message'];
-
-		if (!empty($code) && ($action =='confirmation' || $action == 'desinscription')) {
-			if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
-				$time = time();
-			}
-
-			$sub->check_code($code, $time);
-		}
-		else if (in_array($action, ['inscription','setformat','desinscription'])) {
-			$sub->do_action($action, $email, null, $pseudo);
-		}
-
-		//
-		// On supprime l'email maintenant devenu inutile
-		//
-		$pop->delete_mail($mail_id);
-	}//end for
-
-	$pop->quit();
-
-	$message = $lang['Message']['Success_operation'];
+	$message = process_mail_action($listdata);
 }
 else if ($import_mail) {
 	if (count($emails) == 0) {

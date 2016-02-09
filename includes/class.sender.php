@@ -65,7 +65,7 @@ class Sender
 	 * @param array $listdata
 	 * @param array $logdata
 	 */
-	public function __construct(array $listdata, array $logdata)
+	public function __construct(array $listdata, array $logdata = [])
 	{
 		$this->listdata  = $listdata;
 		$this->logdata   = $logdata;
@@ -186,6 +186,36 @@ class Sender
 	{
 		global $nl_config, $db, $lang;
 
+		if (!$this->logdata) {
+			// on récupère la dernière newsletter en cours d’envoi
+			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
+				FROM %s
+				WHERE liste_id = %d
+					AND log_status = %d
+				LIMIT 1 OFFSET 0";
+			$sql = sprintf($sql, LOG_TABLE, $this->listdata['liste_id'], STATUS_STANDBY);
+			$result = $db->query($sql);
+
+			if (!($this->logdata = $result->fetch())) {
+				trigger_error('No_log_to_send', E_USER_ERROR);
+			}
+
+			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+				FROM %s AS jf
+					INNER JOIN %s AS lf ON lf.file_id = jf.file_id
+					INNER JOIN %s AS l ON l.log_id = lf.log_id
+						AND l.liste_id = %d
+						AND l.log_id   = %d
+				ORDER BY jf.file_real_name ASC";
+			$sql = sprintf($sql, JOINED_FILES_TABLE, LOG_FILES_TABLE, LOG_TABLE,
+				$this->listdata['liste_id'],
+				$this->logdata['log_id']
+			);
+			$result = $db->query($sql);
+
+			$this->logdata['joined_files'] = $result->fetchAll();
+		}
+
 		$abodata_list  = [];
 		$total_to_send = $total_sent = 0;
 
@@ -201,7 +231,9 @@ class Sender
 				WHERE a.abo_status = %d
 				GROUP BY al.send";
 			$sql = sprintf($sql, ABONNES_TABLE, ABO_LISTE_TABLE,
-				$this->listdata['liste_id'], SUBSCRIBE_CONFIRMED, ABO_ACTIVE
+				$this->listdata['liste_id'],
+				SUBSCRIBE_CONFIRMED,
+				ABO_ACTIVE
 			);
 			$result = $db->query($sql);
 
@@ -232,7 +264,9 @@ class Sender
 			}
 
 			$sql = sprintf($sql, $tags_fields, ABONNES_TABLE, ABO_LISTE_TABLE,
-				$this->listdata['liste_id'], SUBSCRIBE_CONFIRMED, ABO_ACTIVE
+				$this->listdata['liste_id'],
+				SUBSCRIBE_CONFIRMED,
+				ABO_ACTIVE
 			);
 			$result = $db->query($sql);
 

@@ -1764,3 +1764,92 @@ function print_debug_infos()
 
 	echo "</pre>";
 }
+
+/**
+ * Validation des actions faites par email
+ *
+ * @param array $listdata
+ *
+ * @return string
+ */
+function process_mail_action(array $listdata)
+{
+	global $lang;
+
+	$sub = new Subscription($listdata);
+	$pop = new PopClient();
+	$pop->options([
+		'starttls' => ($listdata['pop_tls'] == SECURITY_STARTTLS)
+	]);
+
+	try {
+		$proto = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls' : 'tcp';
+		$server = sprintf('%s://%s:%d', $proto, $listdata['pop_host'], $listdata['pop_port']);
+
+		if (!$pop->connect($server, $listdata['pop_user'], $listdata['pop_pass'])) {
+			throw new Exception(sprintf("Failed to connect to POP server (%s)", $pop->responseData));
+		}
+	}
+	catch (Exception $e) {
+		trigger_error(sprintf($lang['Message']['bad_pop_param'], $e->getMessage()), E_USER_ERROR);
+	}
+
+	$total    = $pop->stat_box();
+	$mail_box = $pop->list_mail();
+
+	foreach ($mail_box as $mail_id => $mail_size) {
+		$headers = $pop->parse_headers($mail_id);
+
+		if (!isset($headers['from']) || !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $m)) {
+			continue;
+		}
+
+		$pseudo = (isset($m[1])) ? trim(strip_tags(u::filter($m[1]))) : '';
+		$email  = trim($m[2]);
+
+		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
+			continue;
+		}
+
+		if (!isset($headers['subject'])) {
+			continue;
+		}
+
+		$action = mb_strtolower(trim(u::filter($headers['subject'])));
+
+		switch ($action) {
+			case 'désinscription':
+			case 'unsubscribe':
+				$action = 'desinscription';
+				break;
+			case 'subscribe':
+				$action = 'inscription';
+				break;
+			case 'confirmation':
+			case 'setformat':
+				break;
+		}
+
+		$code = $pop->contents[$mail_id]['message'];
+
+		if (!empty($code) && ($action =='confirmation' || $action == 'desinscription')) {
+			if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
+				$time = time();
+			}
+
+			$sub->check_code($code, $time);
+		}
+		else if (in_array($action, ['inscription','setformat','desinscription'])) {
+			$sub->do_action($action, $email, null, $pseudo);
+		}
+
+		//
+		// On supprime l'email maintenant devenu inutile
+		//
+		$pop->delete_mail($mail_id);
+	}//end for
+
+	$pop->quit();
+
+	return $lang['Message']['Success_operation'];
+}
