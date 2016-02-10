@@ -13,7 +13,7 @@ require './start.inc.php';
 
 if (!$auth->check(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
-	plain_error($lang['Message']['Not_auth_view']);
+	$output->basic($lang['Message']['Not_auth_view']);
 }
 
 $listdata = $auth->getLists(Auth::VIEW)[$_SESSION['liste']];
@@ -27,7 +27,7 @@ $file = $attach->getFile($filename ?: $file_id);
 if ($file) {
 	if (!is_readable($file['path'])) {
 		http_response_code(500);
-		plain_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
+		$output->basic('Impossible de récupérer le contenu du fichier');
 	}
 
 	$maxAge = 0;
@@ -68,5 +68,5 @@ if ($file) {
 }
 else {
 	http_response_code(404);
-	plain_error('Unknown file !');
+	$output->basic('Unknown file !');
 }

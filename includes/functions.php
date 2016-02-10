@@ -370,13 +370,13 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 }
 
 /**
- * Initialisation des préférences et du moteur de templates
+ * Chargement des chaînes de localisation
  *
  * @param array $userdata Données utilisateur
  */
-function load_settings(&$userdata = [])
+function load_settings(array &$userdata = [])
 {
-	global $nl_config;
+	global $nl_config, $output;
 
 	$file_pattern = WA_ROOTDIR . '/languages/%s/main.php';
 
@@ -417,12 +417,10 @@ function load_settings(&$userdata = [])
 	}
 
 	if (empty($lang)) {
-		plain_error('Les fichiers de localisation sont introuvables !');
+		$output->basic('Les fichiers de localisation sont introuvables !');
 	}
 
-	if (is_array($userdata)) {
-		$userdata['language'] = $lang['CONTENT_LANG'];
-	}
+	$userdata['language'] = $lang['CONTENT_LANG'];
 
 	$GLOBALS['lang'] =& $lang;
 	$GLOBALS['datetime'] =& $datetime;
@@ -717,34 +715,6 @@ function wan_error_get_last()
 	}
 
 	return $error;
-}
-
-/**
- * @param mixed   $var     Variable à afficher
- * @param boolean $exit    True pour terminer l'exécution du script
- * @param boolean $verbose True pour utiliser var_dump() (détails sur le contenu de la variable)
- */
-function plain_error($var, $exit = true, $verbose = false)
-{
-	if (!headers_sent()) {
-		header('Content-Type: text/plain; charset=UTF-8');
-	}
-
-	if ($verbose) {
-		var_dump($var);
-	}
-	else {
-		if (is_scalar($var)) {
-			echo $var;
-		}
-		else {
-			print_r($var);
-		}
-	}
-
-	if ($exit) {
-		exit;
-	}
 }
 
 /**
