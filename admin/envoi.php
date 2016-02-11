@@ -223,9 +223,11 @@ switch ($mode) {
 			}
 
 			$sql = "SELECT COUNT(send) AS num, send, liste_id
-				FROM " . ABO_LISTE_TABLE . "
-				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
+				FROM %s
+				WHERE liste_id IN(%s)
+					AND confirmed = %d
 				GROUP BY liste_id, send";
+			$sql = sprintf($sql, ABO_LISTE_TABLE, implode(', ', $liste_ids), SUBSCRIBE_CONFIRMED);
 			$result = $db->query($sql);
 
 			$data = [];
