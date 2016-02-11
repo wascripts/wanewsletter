@@ -913,7 +913,7 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 			($result['total_sent'] + $result['total_to_send'])
 		);
 
-		$progress_url = sprintf('envoi.php?mode=progress&id=%d', $this->logdata['log_id']);
+		$progress_url = sprintf('envoi.php?mode=progress&id=%d', $logdata['log_id']);
 
 		if (filter_input(INPUT_GET, 'step') == 'auto') {
 			http_redirect($progress_url . '&step=auto');
