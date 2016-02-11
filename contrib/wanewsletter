@@ -138,9 +138,9 @@ Usage: $argv[0] [options]
 Envois:
   -pNUM, --process-send=NUM  Lance un envoi avec NUM un id de liste
   -lNUM, --limit=NUM   Limite à NUM le nombre d'emails envoyés
-  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par défaut, 400)
+  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par défaut: 30)
   -dNUM, --delay=NUM   Durée en secondes entre les flots d'envois
-                       (par défaut, 10).
+                       (par défaut: 10).
 
 Divers:
   --process-subscribe=NUM  Validation des inscriptions par email
