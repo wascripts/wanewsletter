@@ -104,11 +104,11 @@ function createDSN($infos, $options = null)
 }
 
 /**
- * Décompose une chaîne DSN
+ * Décompose une chaîne Data Source Name
  *
  * @param string $dsn
  *
- * @return boolean|array
+ * @return array
  */
 function parseDSN($dsn)
 {
@@ -116,7 +116,6 @@ function parseDSN($dsn)
 
 	if (!($dsn_parts = parse_url($dsn)) || !isset($dsn_parts['scheme'])) {
 		trigger_error("Invalid DSN argument", E_USER_ERROR);
-		return false;
 	}
 
 	$infos = $options = [];
@@ -126,7 +125,6 @@ function parseDSN($dsn)
 			case 'scheme':
 				if (!isset($supported_db[$value])) {
 					trigger_error("Unsupported database", E_USER_ERROR);
-					return false;
 				}
 
 				$infos['label']  = $supported_db[$value]['label'];
@@ -196,15 +194,11 @@ function parseDSN($dsn)
  *
  * @param string $dsn
  *
- * @return boolean|Dblayer\Wadb
+ * @return Dblayer\Wadb
  */
 function WaDatabase($dsn)
 {
-	if (!($tmp = parseDSN($dsn))) {
-		return false;
-	}
-
-	list($infos, $options) = $tmp;
+	list($infos, $options) = parseDSN($dsn);
 	$dbclass = __NAMESPACE__ . '\\Dblayer\\' . ucfirst($infos['driver']);
 
 	$infos['username'] = (isset($infos['user'])) ? $infos['user'] : null;
