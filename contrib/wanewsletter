@@ -255,6 +255,7 @@ if ($process_send) {
 
 	if ($nl_config['engine_send'] != ENGINE_BCC) {
 		$progressbar = null;
+		$counter = 0;
 
 		$sender->registerHook('start-send', function ($abodata_list) use (&$progressbar) {
 			$progressbar = new ConsoleProgressBar(
@@ -266,14 +267,13 @@ if ($process_send) {
 				['ansi_terminal' => (function_exists('posix_isatty') && posix_isatty(STDOUT))]
 			);
 		});
-		$sender->registerHook('post-send', function () use (&$progressbar, $packet, $delay) {
-			static $counter = 0;
-
-			$progressbar->update(++$counter);
-
-			if ($delay > 0 && ($counter % $packet) == 0) {
+		$sender->registerHook('pre-send', function () use (&$counter, $packet, $delay) {
+			if ($counter > 0 && $delay > 0 && ($counter % $packet) == 0) {
 				sleep($delay);
 			}
+		});
+		$sender->registerHook('post-send', function () use (&$progressbar, &$counter) {
+			$progressbar->update(++$counter);
 		});
 	}
 
