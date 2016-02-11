@@ -383,7 +383,7 @@ class Output
 			if ($entry instanceof \Throwable || $entry instanceof \Exception) {
 				// Les exceptions sont affichées via wan_exception_handler().
 				// Les erreurs fatales sont affichées via wan_error_handler().
-				if (!($entry instanceof Error) || $entry->isFatal() || $entry->ignore()) {
+				if (!($entry instanceof Error) || $entry->isFatal() || $entry->ignore() || !DISPLAY_ERRORS_IN_LOG) {
 					continue;
 				}
 
@@ -393,7 +393,7 @@ class Output
 				$entry = print_r($entry, true);
 			}
 
-			$wanlog_box .= sprintf("<li>%s</li>\n", nl2br(trim($entry)));
+			$wanlog_box .= sprintf("<li>%s</li>\n", $entry);
 		}
 
 		$template = new Template('footer.tpl');
@@ -499,6 +499,15 @@ BASIC;
 		$this->messageList[] = $str;
 	}
 
+	public function useTheme()
+	{
+		$is_used_theme  = check_in_admin();
+		$is_used_theme |= defined(__NAMESPACE__.'\\IN_INSTALL');
+		$is_used_theme |= defined(__NAMESPACE__.'\\IN_PROFILCP');
+
+		return ($is_used_theme && !check_cli());
+	}
+
 	/**
 	 * Affichage d’un message d’information.
 	 *
@@ -507,7 +516,11 @@ BASIC;
 	 */
 	public function message($str = '', $title = '')
 	{
-		global $lang, $message;
+		global $lang;
+
+		if (empty($lang)) {
+			$this->basic($str);
+		}
 
 		if (!empty($str)) {
 			if (!empty($lang['Message'][$str])) {
@@ -519,9 +532,11 @@ BASIC;
 
 		$str = '';
 		foreach ($this->messageList as $message) {
-			$str .= '<br><br>'.str_replace("\n", "<br>\n", $message);
+			if ($str) {
+				$str .= '<br /><br />';
+			}
+			$str .= $message;
 		}
-		$str = substr($str, 8);
 
 		$type = '';
 
@@ -536,19 +551,33 @@ BASIC;
 			$title = $lang['Title'][$title];
 		}
 
-		$this->header();
+		if (check_cli()) {
+			$str = htmlspecialchars_decode(strip_tags($str));
 
-		$template = new Template('message_body.tpl');
+			fwrite(STDOUT, $str."\n");
+		}
+		else {
+			if ($this->useTheme()) {
+				$this->header();
 
-		$template->assign([
-			'MSG_TITLE' => $title,
-			'MSG_TEXT'  => $str,
-			'MSG_TYPE'  => $type
-		]);
+				$template = new Template('message_body.tpl');
 
-		$template->pparse();
+				$template->assign([
+					'MSG_TITLE' => $title,
+					'MSG_TEXT'  => $str,
+					'MSG_TYPE'  => $type
+				]);
 
-		$this->footer();
+				$template->pparse();
+
+				$this->footer();
+			}
+			else {
+				$this->basic($str);
+			}
+		}
+
+		exit(0);
 	}
 
 	/**

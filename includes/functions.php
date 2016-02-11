@@ -20,7 +20,7 @@ use Wanewsletter\Dblayer\WadbResult;
  */
 function load_config_file()
 {
-	global $dsn, $prefixe;// Sale mais bon...
+	global $output, $dsn, $prefixe;// Sale mais bon...
 
 	// Réglage par défaut des divers répertoires utilisés par le script.
 	// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
@@ -37,12 +37,14 @@ function load_config_file()
 	foreach ($test_files as $file) {
 		if (file_exists($file)) {
 			if (!is_readable($file)) {
-				echo "Cannot read the config file. Please fix this mistake and reload.";
-				exit;
+				$output->message("Cannot read the config file. Please fix this mistake and reload.");
 			}
 
 			include $file;
+			break;
 		}
+
+		$need_update = true;
 	}
 
 	//
@@ -57,8 +59,7 @@ function load_config_file()
 		$infos['dbname'] = $dbname;
 
 		if ($infos['engine'] == 'mssql') {
-			echo "Support for Microsoft SQL Server has been removed in Wanewsletter 2.3\n";
-			exit;
+			$output->message("Support for Microsoft SQL Server has been removed in Wanewsletter 2.3");
 		}
 		else if ($infos['engine'] == 'postgre') {
 			$infos['engine'] = 'postgres';
@@ -75,7 +76,7 @@ function load_config_file()
 	//
 	// Les constantes NL_INSTALLED et WA_VERSION sont obsolètes.
 	//
-	if (defined('NL_INSTALLED') || defined('WA_VERSION') || !file_exists($test_files[0])) {
+	if (defined('NL_INSTALLED') || defined('WA_VERSION')) {
 		$need_update = true;
 	}
 
@@ -93,9 +94,9 @@ function load_config_file()
 			http_redirect($install_script);
 		}
 		else {
-			echo "Wanewsletter seems not to be installed!\n";
-			echo "Call $install_script in your web browser.\n";
-			exit(1);
+			$error  = "Wanewsletter seems not to be installed!\n";
+			$error .= "Call $install_script in your web browser.";
+			$output->message($error);
 		}
 	}
 
@@ -456,24 +457,16 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	$debug  = ($debug_level == DEBUG_LEVEL_ALL);
 	$debug |= ($debug_level == DEBUG_LEVEL_NORMAL && ($error_reporting & $errno));
 
-	// Si l’affichage des erreurs peut être délégué à la classe Output.
-	$skip  = check_theme_is_used();
-	// Si l’affichage en bloc dans le bas de page est activé (défaut).
-	$skip &= DISPLAY_ERRORS_IN_LOG;
-
 	$error = new Error([
 		'type'    => $errno,
 		'message' => $errstr,
 		'file'    => $errfile,
 		'line'    => $errline,
-		'ignore'  => (!$debug || !$skip)
+		'ignore'  => !$debug
 	]);
 
 	wanlog($error);
-
-	if ($error->isFatal() || ($debug && !$skip)) {
-		wan_display_error($error);
-	}
+	wan_display_error($error);
 
 	return true;
 }
@@ -532,10 +525,10 @@ function wan_format_error($error)
 	if (wan_get_debug_level() == DEBUG_LEVEL_QUIET) {
 		// Si on est en mode de non-débogage, on a forcément attrapé une erreur
 		// critique pour arriver ici.
-		$message  = $lang['Message']['Critical_error'];
+		$message = $lang['Message']['Critical_error'];
 
 		if ($errno == E_USER_ERROR) {
-			if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
+			if (!empty($lang['Message'][$errstr])) {
 				$errstr = $lang['Message'][$errstr];
 			}
 
@@ -569,47 +562,22 @@ function wan_format_error($error)
 			E_RECOVERABLE_ERROR => 'PHP Error'
 		];
 
-		$message = $errstr;
-		if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
-			$message = $lang['Message'][$errstr];
+		if (!empty($lang['Message'][$errstr])) {
+			$errstr = $lang['Message'][$errstr];
 		}
 
-		if (!($error instanceof Error) || !in_array($errno, [E_USER_ERROR, E_USER_WARNING, E_USER_NOTICE])) {
-			$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
-			$errfile = str_replace(dirname(__DIR__), '~', $errfile);
+		$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
+		$errfile = str_replace(dirname(__DIR__), '~', $errfile);
 
-			$message = sprintf(
-				"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
-				($error instanceof Error) ? $label : get_class($error),
-				$errstr,
-				$errfile,
-				$errline
-			);
-			$message .= $backtrace;
-		}
+		$message = sprintf(
+			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
+			($error instanceof Error) ? $label : get_class($error),
+			$errstr,
+			$errfile,
+			$errline
+		);
+		$message .= $backtrace;
 	}
-
-	return $message;
-}
-
-/**
- * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
- *
- * @param Throwable $error Exception décrivant l’erreur
- */
-function wan_display_error($error)
-{
-	global $output;
-
-	if ($error instanceof \Throwable || $error instanceof \Exception) {
-		$exit = true;
-
-		if ($error instanceof Error) {
-			$exit = $error->isFatal();
-		}
-	}
-
-	$message = wan_format_error($error);
 
 	if (check_cli()) {
 		if (function_exists('posix_isatty') && posix_isatty(STDOUT)) {
@@ -624,28 +592,46 @@ function wan_display_error($error)
 		}
 
 		$message = htmlspecialchars_decode($message);
-
-		fwrite(STDERR, $message);
-	}
-	else if (!$exit) {
-		echo '<p>' . nl2br($message) . '</p>';
 	}
 	else {
-		http_response_code(500);
+		$message = nl2br($message);
+	}
 
-		if (check_theme_is_used()) {
-			$output->message($message, 'error');
-		}
-		else {
-			$message = nl2br($message);
-			echo <<<BASIC
-<div>
-	<h1>Erreur critique&nbsp;!</h1>
+	return $message;
+}
 
-	<p>$message</p>
-</div>
-BASIC;
+/**
+ * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
+ *
+ * @param Throwable $error Exception décrivant l’erreur
+ */
+function wan_display_error($error)
+{
+	global $output;
+
+	if ($error instanceof Error) {
+		$skip  = $error->ignore();
+		$skip |= ($output->useTheme() && DISPLAY_ERRORS_IN_LOG);
+		if (!$error->isFatal() && $skip) {
+			return null;
 		}
+
+		$exit = $error->isFatal();
+	}
+	else {
+		$exit = true;
+	}
+
+	$message = wan_format_error($error);
+
+	if (check_cli()) {
+		fwrite(STDERR, rtrim($message)."\n");
+	}
+	else if (!$exit) {
+		echo $message;
+	}
+	else {
+		$output->message($message, 'error');
 	}
 
 	if ($exit) {
@@ -1457,19 +1443,6 @@ function check_cli()
 function check_in_admin()
 {
 	return defined(__NAMESPACE__.'\\IN_ADMIN');
-}
-
-/**
- * Indique si le thème Wanewsletter est utilisé pour afficher cette page.
- *
- * @return boolean
- */
-function check_theme_is_used()
-{
-	return (!check_cli() && (check_in_admin() ||
-		defined(__NAMESPACE__.'\\IN_INSTALL') ||
-		defined(__NAMESPACE__.'\\IN_PROFILCP')
-	));
 }
 
 /**

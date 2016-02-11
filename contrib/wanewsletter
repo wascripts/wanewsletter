@@ -290,7 +290,7 @@ if ($process_send) {
 		$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
 	}
 
-	echo "\n";
+	echo "\n";// Permet de revenir à la ligne après la barre de progression !
 }
 else if ($process_subscribe) {
 	require 'includes/functions.stats.php';
@@ -422,7 +422,7 @@ else if ($import_mail) {
 }
 
 if (!is_null($message)) {
-	echo strip_tags($message), "\n";
+	$output->message($message);
 }
 
 exit(0);

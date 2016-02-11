@@ -110,6 +110,8 @@ class Sender
 	 */
 	public function lock()
 	{
+		global $output;
+
 		//
 		// On pose un verrou avec un fichier lock pour empêcher plusieurs
 		// envois simultanés sur une liste de diffusion.
@@ -124,7 +126,7 @@ class Sender
 
 		if (!flock($this->fp, LOCK_EX|LOCK_NB)) {
 			fclose($this->fp);
-			trigger_error('List_is_busy', E_USER_ERROR);
+			$output->message('List_is_busy');
 		}
 
 		chmod($lockfile, 0600);
@@ -184,7 +186,7 @@ class Sender
 	 */
 	public function process(array $supp_address = [])
 	{
-		global $nl_config, $db, $lang;
+		global $nl_config, $db, $output, $lang;
 
 		if (!$this->logdata) {
 			// on récupère la dernière newsletter en cours d’envoi
@@ -197,7 +199,7 @@ class Sender
 			$result = $db->query($sql);
 
 			if (!($this->logdata = $result->fetch())) {
-				trigger_error('No_log_to_send', E_USER_ERROR);
+				$output->message('No_log_to_send');
 			}
 
 			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
@@ -320,7 +322,7 @@ class Sender
 		}
 
 		if (count($abodata_list) == 0) {
-			trigger_error('No_subscribers', E_USER_ERROR);
+			$output->message('No_subscribers');
 		}
 
 		// Actions avant la boucle d’envoi
@@ -353,7 +355,6 @@ class Sender
 						$this->send($data, $address[$format]);
 					}
 					catch (\Exception $e) {
-						wanlog($e);
 						trigger_error(sprintf($lang['Message']['Failed_sending'],
 							htmlspecialchars($e->getMessage())
 						), E_USER_ERROR);
@@ -379,7 +380,6 @@ class Sender
 					$this->send($data);
 				}
 				catch (\Exception $e) {
-					wanlog($e);
 					trigger_error(sprintf($lang['Message']['Failed_sending'],
 						htmlspecialchars($e->getMessage())
 					), E_USER_ERROR);

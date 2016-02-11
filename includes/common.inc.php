@@ -85,10 +85,25 @@ spl_autoload_register(function ($classname) {
 $error     = false;
 $dsn       = '';
 $nl_config = $lang = $datetime = $admindata = $msg_error = [];
+$prefixe   = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
 
-// Chargement du fichier de configuration initial
-$prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
+//
+// Initialisation du système de templates
+//
+$output = new Output;
+Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
+	(check_in_admin() ? 'admin/' : '')
+));
 
+//
+// Initialisation de patchwork/utf8
+//
+\Patchwork\Utf8\Bootup::initAll();
+
+//
+// Configuration par défaut
+//
+load_settings();
 load_config_file();
 
 // Log éventuels des erreurs
@@ -109,25 +124,3 @@ if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
 
 // Doit être placé après load_config_file()
 require 'includes/wadb_init.php';
-
-//
-// Initialisation du système de templates
-//
-$output = null;
-if (!check_cli()) {
-	$output = new Output;
-	Template::setDir(sprintf('%s/templates/%s',
-		WA_ROOTDIR,
-		(check_in_admin() ? 'admin/' : '')
-	));
-}
-
-//
-// Initialisation de patchwork/utf8
-//
-\Patchwork\Utf8\Bootup::initAll();
-
-//
-// Configuration par défaut
-//
-load_settings();
