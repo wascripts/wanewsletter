@@ -556,6 +556,12 @@ BASIC;
 
 			fwrite(STDOUT, $str."\n");
 		}
+		else if (filter_input(INPUT_GET, 'output') == 'json') {
+			header('Content-Type: application/json; charset=UTF-8');
+			$json['error']   = ($type == 'error');
+			$json['message'] = strip_tags($str);
+			echo json_encode($json, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+		}
 		else {
 			if ($this->useTheme()) {
 				$this->header();

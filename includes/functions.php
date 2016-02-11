@@ -499,6 +499,10 @@ function wan_format_error($error)
 	$errline = $error->getLine();
 	$backtrace = $error->getTrace();
 
+	if (filter_input(INPUT_GET, 'output') == 'json') {
+		return $errstr;
+	}
+
 	if ($error instanceof Error) {
 		// Cas spécial. L'exception personnalisée a été créé dans wan_error_handler()
 		// et contient donc l'appel à wan_error_handler() elle-même. On corrige.
@@ -612,6 +616,7 @@ function wan_display_error($error)
 	if ($error instanceof Error) {
 		$skip  = $error->ignore();
 		$skip |= ($output->useTheme() && DISPLAY_ERRORS_IN_LOG);
+		$skip |= (filter_input(INPUT_GET, 'output') == 'json');
 		if (!$error->isFatal() && $skip) {
 			return null;
 		}
