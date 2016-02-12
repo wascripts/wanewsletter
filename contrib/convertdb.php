@@ -155,7 +155,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 	$result = $db_from->query(sprintf("SELECT %s FROM %s", $fields,
 		$db_from->quote(str_replace('wa_', $prefixe_from, $tablename))
 	));
-	$result->setFetchMode(WadbResult::FETCH_ASSOC);
+	$result->setFetchMode($result::FETCH_ASSOC);
 
 	$numrows = 0;
 
