@@ -198,7 +198,7 @@ class Sender
 			$sql = sprintf($sql, LOG_TABLE, $this->listdata['liste_id'], STATUS_STANDBY);
 			$result = $db->query($sql);
 
-			if (!($this->logdata = $result->fetch())) {
+			if (!($this->logdata = $result->fetch($result::FETCH_ASSOC))) {
 				$output->message('No_log_to_send');
 			}
 
@@ -215,7 +215,7 @@ class Sender
 			);
 			$result = $db->query($sql);
 
-			$this->logdata['joined_files'] = $result->fetchAll();
+			$this->logdata['joined_files'] = $result->fetchAll($result::FETCH_ASSOC);
 		}
 
 		$abodata_list  = [];
@@ -272,7 +272,7 @@ class Sender
 			);
 			$result = $db->query($sql);
 
-			while ($row = $result->fetch()) {
+			while ($row = $result->fetch($result::FETCH_ASSOC)) {
 				if ($this->listdata['liste_format'] != FORMAT_MULTIPLE) {
 					$row['format'] = $this->listdata['liste_format'];
 				}
