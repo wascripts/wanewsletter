@@ -137,20 +137,20 @@ class Auth
 			$userdata['language'] =& $userdata[$columns['language']];
 
 			if (check_in_admin()) {
-				$sql = "SELECT li.liste_id, li.liste_name, li.liste_format,
-						li.sender_email, li.return_email, li.confirm_subscribe,
-						li.liste_public, li.limitevalidate, li.form_url,
-						li.liste_sig, li.auto_purge, li.purge_freq,
-						li.purge_next, li.liste_startdate, li.use_cron,
-						li.pop_host, li.pop_port, li.pop_user, li.pop_pass,
-						li.pop_tls, li.liste_alias, li.liste_numlogs,
+				$sql = "SELECT l.liste_id, l.liste_name, l.liste_format,
+						l.sender_email, l.return_email, l.confirm_subscribe,
+						l.liste_public, l.limitevalidate, l.form_url,
+						l.liste_sig, l.auto_purge, l.purge_freq,
+						l.purge_next, l.liste_startdate, l.use_cron,
+						l.pop_host, l.pop_port, l.pop_user, l.pop_pass,
+						l.pop_tls, l.liste_alias, l.liste_numlogs,
 						aa.auth_view, aa.auth_edit, aa.auth_del, aa.auth_send,
 						aa.auth_import, aa.auth_export, aa.auth_ban,
 						aa.auth_attach, aa.cc_admin
-					FROM %s AS li
+					FROM %s AS l
 						LEFT JOIN %s AS aa ON aa.admin_id = %d
-							AND aa.liste_id = li.liste_id
-					ORDER BY li.liste_name ASC";
+							AND aa.liste_id = l.liste_id
+					ORDER BY l.liste_name ASC";
 				$sql = sprintf($sql, LISTE_TABLE, AUTH_ADMIN_TABLE, $userdata['uid']);
 			}
 			else {
@@ -160,7 +160,7 @@ class Auth
 					FROM %s AS l
 						INNER JOIN %s AS al ON al.abo_id = %d
 							AND al.liste_id = l.liste_id
-					ORDER BY li.liste_name ASC";
+					ORDER BY l.liste_name ASC";
 				$sql = sprintf($sql, LISTE_TABLE, ABO_LISTE_TABLE, $userdata['uid']);
 			}
 
