@@ -59,32 +59,35 @@ function lang_box($default_lang = '')
 /**
  * Construction de la liste déroulante des formats de newsletter
  *
- * @param string  $select_name    Nom de la liste déroulante
- * @param integer $default_format Format par défaut
- * @param boolean $option_submit  True si submit lors du changement de valeur de la liste
- * @param boolean $multi_format   True si on doit affiche également multi-format comme valeur
- * @param boolean $no_id          True pour ne pas mettre d'attribut id à la balise <select>
+ * @param string  $name     Nom de la liste déroulante
+ * @param integer $default  Format par défaut
+ * @param boolean $multiple True si on doit affiche également multi-format comme valeur
  *
  * @return string
  */
-function format_box($select_name, $default_format = 0, $option_submit = false, $multi_format = false, $no_id = false)
+function format_box($name, $default = 0, $multiple = false)
 {
 	global $output;
 
-	$format_box = '<select' . (!$no_id ? ' id="' . $select_name . '"' : '') . ' name="' . $select_name . '"';
+	$get_option = function ($format, $label) use ($output, $default) {
+		return sprintf('<option value="%d"%s>%s</option>',
+			$format,
+			$output->getBoolAttr('selected', ($default == $format)),
+			$label
+		);
+	};
 
-	if ($option_submit) {
-		$format_box .= '>';//' onchange="this.form.submit();">';
+	$id_attr = '';
+	if (preg_match('/^[a-z]([a-z0-9_-]*[a-z0-9])?$/', $name)) {
+		$id_attr = sprintf(' id="%s"', $name);
 	}
-	else {
-		$format_box .= '>';
-	}
 
-	$format_box .= '<option value="1"' . $output->getBoolAttr('selected', ($default_format == FORMAT_TEXT)) . '>texte</option>';
-	$format_box .= '<option value="2"' . $output->getBoolAttr('selected', ($default_format == FORMAT_HTML)) . '>html</option>';
+	$format_box  = sprintf('<select%s name="%s">', $id_attr, $name);
+	$format_box .= $get_option(FORMAT_TEXT, 'texte');
+	$format_box .= $get_option(FORMAT_HTML, 'html');
 
-	if ($multi_format) {
-		$format_box .= '<option value="3"' . $output->getBoolAttr('selected', ($default_format == FORMAT_MULTIPLE)) . '>texte &amp; html</option>';
+	if ($multiple) {
+		$format_box .= $get_option(FORMAT_MULTIPLE, 'texte &amp; html');
 	}
 
 	$format_box .= '</select>';

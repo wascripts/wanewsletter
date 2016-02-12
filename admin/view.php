@@ -574,9 +574,7 @@ else if ($mode == 'abonnes') {
 				$format = $lists[$row['liste_id']]['liste_format'];
 
 				if ($format == FORMAT_MULTIPLE) {
-					$format_box = format_box("format[$row[liste_id]]",
-						$row['format'], false, false, true
-					);
+					$format_box = format_box("format[$row[liste_id]]", $row['format']);
 				}
 				else {
 					$format_box = ($format == FORMAT_HTML) ? 'HTML' : 'texte';
@@ -1071,7 +1069,7 @@ else if ($mode == 'liste') {
 			'L_CANCEL_BUTTON'      => $lang['Button']['cancel'],
 
 			'LISTE_NAME'           => htmlspecialchars($liste_name),
-			'FORMAT_BOX'           => format_box('liste_format', $liste_format, false, true),
+			'FORMAT_BOX'           => format_box('liste_format', $liste_format, true),
 			'SENDER_EMAIL'         => htmlspecialchars($sender_email),
 			'RETURN_EMAIL'         => htmlspecialchars($return_email),
 			'FORM_URL'             => htmlspecialchars($form_url),
@@ -1750,7 +1748,7 @@ else if ($mode == 'log') {
 					'L_FORMAT'        => $lang['Format'],
 					'L_GO_BUTTON'     => $lang['Button']['go'],
 					'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-					'FORMAT_BOX'      => format_box('format', $format, true)
+					'FORMAT_BOX'      => format_box('format', $format)
 				]);
 			}
 
