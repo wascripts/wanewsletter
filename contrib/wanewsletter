@@ -133,33 +133,33 @@ WANSHELL;
 	//
 	else if ($name == 'help' || $name == 'h') {
 		echo <<<WANSHELL
-Usage: $argv[0] [options]
+Usage : $argv[0] [options]
 
-Envois:
-  -pNUM, --process-send=NUM  Lance un envoi avec NUM un id de liste
-  -lNUM, --limit=NUM   Limite à NUM le nombre d'emails envoyés
-  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par défaut: 30)
-  -dNUM, --delay=NUM   Durée en secondes entre les flots d'envois
-                       (par défaut: 10).
+Envois :
+  -pNUM, --process-send=NUM Lance un envoi avec NUM un ID de liste
+  -lNUM, --limit=NUM        Limite à NUM le nombre d’emails envoyés
+  -kNUM, --packet=NUM       Nombre d’envois maximum par flôt (par défaut : 30)
+  -dNUM, --delay=NUM        Durée en secondes entre les flôts d’envois
+                            (par défaut : 10).
 
-Divers:
-  --process-subscribe=NUM  Validation des inscriptions par email
-  --import-mail=NUM        Importation d'emails avec NUM un id de liste
-  --format=FORMAT          FORMAT peut prendre la valeur 'plain' ou 'html'
-                           'text' et 'texte' sont acceptés comme
-                           alternative à 'plain'.
+Divers :
+  --process-subscribe=NUM   Validation des inscriptions par email avec NUM
+                            un ID de liste
+  --import-mail=NUM         Importation d’emails avec NUM un ID de liste
+  --format=FORMAT           FORMAT peut prendre la valeur 'plain' ou 'html'
+                            'text' et 'texte' sont acceptés comme
+                            équivalents à 'plain'.
 
-Informations:
-  -h, --help     Affiche la présente aide
-  -v, --version  Affiche les informations de version
-      --license  Affiche les informations de licence
+Informations :
+  -h, --help                Affiche la présente aide
+  -v, --version             Affiche les informations de version
+      --license             Affiche les informations de licence
 
-Exemple d'importation d'emails :
+Exemple d’importation d'emails :
   $argv[0] --import-mail=1 -- address1@domain.tld address2@domain.tld
 
-La liste d'adresses peut également être fournie en entrée, les adresses
-dans le fichier étant séparées par des caractères blancs (espace, tabulation
-ou saut de ligne) :
+La liste d’adresses peut également être fournie en entrée, les adresses
+étant séparées par des caractères blancs :
   $argv[0] --import-mail=1 < /path/to/address_list
 
 
