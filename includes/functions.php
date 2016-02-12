@@ -1697,10 +1697,10 @@ function print_debug_infos()
 	$print_row('memory_limit', ini_get('memory_limit'));
 	$print_row('mail.add_x_header', ini_get_flag('mail.add_x_header'));
 	$print_row('mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
-	$print_row('sendmail_from', ini_get('sendmail_from'));
 	$print_row('sendmail_path', ini_get('sendmail_path'));
 
 	if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
+		$print_row('sendmail_from', ini_get('sendmail_from'));
 		$print_row('SMTP Server', ini_get('SMTP').':'.ini_get('smtp_port'));
 	}
 
