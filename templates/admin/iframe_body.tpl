@@ -1,4 +1,4 @@
-<form method="get" action="view.php#view">
+<form id="view-log" method="get" action="view.php#view">
 <div class="block">
 	<h2 id="view">{L_SUBJECT}&nbsp;: <q>{SUBJECT}</q></h2>
 
@@ -27,6 +27,15 @@
 		<label for="format" class="notice">{format_box.L_FORMAT}&nbsp;:</label> {format_box.FORMAT_BOX}
 		<button type="submit">{format_box.L_GO_BUTTON}</button>
 	</div>
+	<script>
+	<!--
+	document.addEventListener('DOMContentLoaded', function () {
+		document.forms['view-log'].elements['format'].addEventListener('change', function () {
+			this.form.submit();
+		}, false);
+	}, false);
+	//-->
+	</script>
 	<!-- END format_box -->
 </div>
 </form>
