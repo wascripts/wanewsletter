@@ -49,8 +49,8 @@ function lang_box($default_lang = '')
 	}
 	else {
 		$lang = array_pop($lang_list);
-		$lang_box = '<span class="notice">' . $lang
-			. '<input type="hidden" id="language" name="language" value="' . $lang . '" />';
+		$lang_box  = $lang_names[$lang];
+		$lang_box .= '<input type="hidden" id="language" name="language" value="' . $lang . '" />';
 	}
 
 	return $lang_box;
