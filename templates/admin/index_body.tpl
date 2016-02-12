@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					break;
 				case '1':
 					strong.textContent = '{check_update_js.L_UPDATE_AVAILABLE}';
-					strong.style.color = 'hsl(140, 70%, 40%)';
+					strong.className   = 'available';
 
 					mainBlock.appendChild(document.createTextNode(' \u2013 '));
 
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				case '2':
 				default:
 					strong.textContent = '{check_update_js.L_SITE_UNREACHABLE}';
-					strong.style.color = 'hsl(0, 70%, 40%)';
+					strong.className   = 'unavailable';
 					break;
 			}
 		};
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			<strong>{version_info.up_to_date.L_UP_TO_DATE}</strong>
 			<!-- END up_to_date -->
 			<!-- BEGIN update_available -->
-			<strong style="color: hsl(140, 70%, 40%);">{version_info.update_available.L_UPDATE_AVAILABLE}</strong>
+			<strong class="available">{version_info.update_available.L_UPDATE_AVAILABLE}</strong>
 			&ndash; <a href="{version_info.update_available.U_DOWNLOAD_PAGE}">{version_info.update_available.L_DOWNLOAD_PAGE}</a>
 			<!-- END update_available -->
 			<!-- BEGIN check_update -->

@@ -284,7 +284,7 @@ switch ($mode) {
 
 			$select_log = '<select id="liste_' . $liste_id . '" name="log['
 				. $liste_id . '][]" class="logList" size="' . $size
-				. '" multiple="multiple" style="min-width: 200px;">';
+				. '" multiple="multiple">';
 			for ($i = 0; $i < $num_logs; $i++) {
 				$logrow = $abodata['lists'][$liste_id]['archives'][$i];
 

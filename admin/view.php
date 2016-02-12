@@ -1088,7 +1088,7 @@ else if ($mode == 'liste') {
 			'CHECKED_USE_CRON_ON'  => $output->getBoolAttr('checked', $use_cron),
 			'CHECKED_USE_CRON_OFF' => $output->getBoolAttr('checked', !$use_cron),
 			'DISABLED_CRON'        => $output->getBoolAttr('disabled', !function_exists('stream_socket_client')),
-			'WARNING_CRON'         => (!function_exists('stream_socket_client')) ? ' <span style="color: red;">[not available]</span>' : '',
+			'WARNING_CRON'         => (!function_exists('stream_socket_client')) ? ' <span class="unavailable">[not available]</span>' : '',
 			'POP_HOST'             => htmlspecialchars($pop_host),
 			'POP_PORT'             => intval($pop_port),
 			'POP_USER'             => htmlspecialchars($pop_user),

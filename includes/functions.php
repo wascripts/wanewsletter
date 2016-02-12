@@ -1582,7 +1582,7 @@ function print_debug_infos()
 				echo htmlspecialchars($value);
 			}
 			else {
-				echo '<i style="color:hsl(0, 0%, 60%)">no value</i>';
+				echo '<i class="novalue">no value</i>';
 			}
 		}
 
@@ -1590,7 +1590,7 @@ function print_debug_infos()
 	};
 
 	printf("<h2>%s</h2>\n", $lang['Title']['debug']);
-	echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;line-height:1.3em;'>";
+	echo "<pre id='debug-infos'>";
 
 	$print_head('Wanewsletter');
 	$print_row('Version/db_version', WANEWSLETTER_VERSION.'/'.$nl_config['db_version']);

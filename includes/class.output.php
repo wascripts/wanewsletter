@@ -421,10 +421,7 @@ class Output
 
 		if ($wanlog_box != '') {
 			$template->assign([
-				'WANLOG_BOX' => sprintf('<ul class="warning"
-					style="font-family:monospace;font-size:12px;">%s</ul>',
-					$wanlog_box
-				)
+				'WANLOG_BOX' => sprintf('<ul id="wanlog" class="warning">%s</ul>', $wanlog_box)
 			]);
 		}
 

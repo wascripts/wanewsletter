@@ -21,7 +21,7 @@ hr    { display: none; }
 a, a:link, a:visited { background-color: transparent; color: #25F !important; text-decoration: none; }
 a:hover              { background-color: transparent; color: #F52 !important; text-decoration: none; }
 
-pre, kbd, code, samp, var {
+pre, kbd, code, samp, var, #wanlog {
 	font-family: "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Lucida Console", "Courier new", monospace;
 	font-size: 1em;
 }
@@ -148,6 +148,18 @@ p#explain {
 #aside-top { margin: 1em 0 -0.8em; }
 #aside-bottom { margin: -0.8em 0 1em; }
 
+#wanlog {
+	font-size: .923em;
+}
+
+#debug-infos {
+	font-size: .923em;
+	margin: 20px;
+	white-space: pre-wrap;
+	line-height: 1.3em;
+}
+#debug-infos i.novalue { color: hsl(0, 0%, 60%); }
+
 div.aside {
 	display: table;
 	width: 100%;
@@ -172,6 +184,9 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	color: #600;
 }
 .warning li { list-style-type: disc; }
+
+.unavailable { color: red; }
+.available   { color: hsl(140, 70%, 40%); }
 
 .block {
 	background-color: #FAFAFA;
@@ -501,6 +516,8 @@ input[type="number"][size="5"] { width: 5em; }
 input[type="number"][size="8"] { width: 8em; }
 
 select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil */
+
+option.model { color: #25F; }
 
 /* Lien de restauration des valeurs par défaut */
 a.restore-default {

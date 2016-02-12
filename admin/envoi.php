@@ -386,21 +386,22 @@ switch ($mode) {
 				do {
 					if ($row['log_status'] == STATUS_MODEL) {
 						$status = '[' . $lang['Model'] . ']';
-						$style  = 'color: #25F !important;';
+						$class  = 'class="model"';
 					}
 					else {
 						$status = '';
-						$style  = 'color: black !important;';
+						$class  = '';
 					}
 
 					$log_box .= sprintf(
-						"<option style=\"%s\" value=\"%d\">%s - %s %s</option>\n",
-						$style,
+						'<option value="%d" %s>%s - %s %s</option>',
 						$row['log_id'],
+						$class,
 						htmlspecialchars(cut_str($row['log_subject'], 40)),
 						convert_time('d F Y', $row['log_date']),
 						$status
 					);
+					$log_box .= "\n";
 				}
 				while ($row = $result->fetch());
 

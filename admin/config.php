@@ -276,7 +276,7 @@ $template->assign([
 	'CHECKED_USE_SMTP_ON'       => $output->getBoolAttr('checked', $new_config['use_smtp']),
 	'CHECKED_USE_SMTP_OFF'      => $output->getBoolAttr('checked', !$new_config['use_smtp']),
 	'DISABLED_SMTP'             => $output->getBoolAttr('disabled', !function_exists('stream_socket_client')),
-	'WARNING_SMTP'              => (!function_exists('stream_socket_client')) ? ' <span style="color: red;">[not available]</span>' : '',
+	'WARNING_SMTP'              => (!function_exists('stream_socket_client')) ? ' <span class="unavailable">[not available]</span>' : '',
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
 	'SMTP_USER'                 => $new_config['smtp_user'],
