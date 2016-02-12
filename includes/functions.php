@@ -15,12 +15,14 @@ use Wanewsletter\Dblayer\Wadb;
 use Wanewsletter\Dblayer\WadbResult;
 
 /**
- * Chargement du fichier de configuration initial, et redirection vers
- * install.php si le fichier n’existe pas.
+ * Chargement de la localisation, puis du fichier de configuration initial,
+ * avec redirection vers install.php si le fichier n’existe pas.
  */
-function load_config_file()
+function load_config()
 {
 	global $output, $dsn, $prefixe;// Sale mais bon...
+
+	load_settings();
 
 	// Réglage par défaut des divers répertoires utilisés par le script.
 	// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation

@@ -101,10 +101,9 @@ Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
 \Patchwork\Utf8\Bootup::initAll();
 
 //
-// Configuration par défaut
+// Chargement de la configuration de base
 //
-load_settings();
-load_config_file();
+load_config();
 
 // Log éventuels des erreurs
 if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
