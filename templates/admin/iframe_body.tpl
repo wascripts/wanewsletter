@@ -24,7 +24,7 @@
 
 	<!-- BEGIN format_box -->
 	<div class="bottom"> {format_box.S_HIDDEN_FIELDS}
-		<span class="notice">{format_box.L_FORMAT}&nbsp;:</span> {format_box.FORMAT_BOX}
+		<label for="format" class="notice">{format_box.L_FORMAT}&nbsp;:</label> {format_box.FORMAT_BOX}
 		<button type="submit">{format_box.L_GO_BUTTON}</button>
 	</div>
 	<!-- END format_box -->
