@@ -150,9 +150,9 @@ class Subscription
 
 	public function do_action($action, $email, $format = null, $pseudo = null)
 	{
-		if ($this->listdata['liste_format'] == FORMAT_MULTIPLE &&
-			!is_null($format) &&
-			in_array($format, [FORMAT_TEXT, FORMAT_HTML])
+		if ($this->listdata['liste_format'] == FORMAT_MULTIPLE
+			&& !is_null($format)
+			&& in_array($format, [FORMAT_TEXT, FORMAT_HTML])
 		) {
 			$this->format = $format;
 		}
@@ -266,8 +266,8 @@ class Subscription
 				$confirmed = SUBSCRIBE_CONFIRMED;
 			}
 
-			if ($this->hasAccount && $this->account['status'] == ABO_ACTIVE &&
-				$this->listdata['confirm_subscribe'] != CONFIRM_ALWAYS
+			if ($this->hasAccount && $this->account['status'] == ABO_ACTIVE
+				&& $this->listdata['confirm_subscribe'] != CONFIRM_ALWAYS
 			) {
 				$confirmed = SUBSCRIBE_CONFIRMED;
 			}

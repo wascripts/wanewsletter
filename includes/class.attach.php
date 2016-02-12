@@ -130,7 +130,7 @@ class Attach
 			$tmp_path = (ini_get('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
 			$tmp_filename = tempnam($tmp_path, 'wa0');
 
-			if (!($fw = fopen($tmp_filename, 'wb'))) {
+			if (!($fp = fopen($tmp_filename, 'wb'))) {
 				throw new Exception($lang['Message']['Upload_error_5']);
 			}
 
@@ -138,13 +138,13 @@ class Attach
 				$result = http_get_contents($url);
 			}
 			catch (Exception $e) {
-				fclose($fw);
+				fclose($fp);
 				unlink($tmp_filename);
 				throw $e;
 			}
 
-			fwrite($fw, $result['data']);
-			fclose($fw);
+			fwrite($fp, $result['data']);
+			fclose($fp);
 			$filesize = strlen($result['data']);
 			$filetype = $result['mime'];
 		}

@@ -47,11 +47,12 @@ function parseSQL($input, $prefixe = '')
 			$in_comments = true;
 		}
 
-		if ($between_quotes || (
-				!$in_comments &&
-				strlen($lines[$i]) > 0 &&
-				$lines[$i][0] != '#' &&
-				!preg_match('/^--(\s|$)/', $lines[$i])
+		if ($between_quotes
+			|| (
+				!$in_comments
+				&& strlen($lines[$i]) > 0
+				&& $lines[$i][0] != '#'
+				&& !preg_match('/^--(\s|$)/', $lines[$i])
 			)
 		) {
 			//
@@ -59,8 +60,8 @@ function parseSQL($input, $prefixe = '')
 			//
 			$unescaped_quotes = preg_match_all("/(?<!\\\\)(\\\\\\\\)*'/", $lines[$i]);
 
-			if ((!$between_quotes && !($unescaped_quotes % 2)) ||
-				($between_quotes && ($unescaped_quotes % 2))
+			if ((!$between_quotes && !($unescaped_quotes % 2))
+				|| ($between_quotes && ($unescaped_quotes % 2))
 			) {
 				if (preg_match('/;\s*$/i', $lines[$i])) {
 					$lines[$i] = ($tmp != '') ? rtrim($lines[$i]) : trim($lines[$i]);

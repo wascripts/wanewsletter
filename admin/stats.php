@@ -145,8 +145,8 @@ if ($img == 'graph') {
 		create_stats($listdata, $month, $year);
 	}
 
-	if (($filesize = filesize(WA_STATSDIR . '/' . $filename)) > 0 &&
-		($fp = fopen(WA_STATSDIR . '/' . $filename, 'r'))
+	if (($filesize = filesize(WA_STATSDIR . '/' . $filename)) > 0
+		&& ($fp = fopen(WA_STATSDIR . '/' . $filename, 'r'))
 	) {
 		$contents = fread($fp, $filesize);
 		$stats    = clean_stats($contents);

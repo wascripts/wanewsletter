@@ -323,8 +323,8 @@ switch ($mode) {
 							preg_match_all('/<meta[^>]+>/si', $match_head[1], $match_meta, PREG_SET_ORDER);
 
 							foreach ($match_meta as $meta) {
-								if (preg_match('/http-equiv\s*=\s*("|\')Content-Type\\1/si', $meta[0]) &&
-									preg_match('/content\s*=\s*("|\').+?;\s*charset\s*=\s*([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match)
+								if (preg_match('/http-equiv\s*=\s*("|\')Content-Type\\1/si', $meta[0])
+									&& preg_match('/content\s*=\s*("|\').+?;\s*charset\s*=\s*([a-z][a-z0-9._-]*)\\1/si', $meta[0], $match)
 								) {
 									$result['charset'] = $match[2];
 								}
@@ -530,15 +530,15 @@ switch ($mode) {
 				$msg_error[] = $lang['Subject_empty'];
 			}
 
-			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_text'] == '' &&
-				$listdata['liste_format'] != FORMAT_HTML
+			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_text'] == ''
+				&& $listdata['liste_format'] != FORMAT_HTML
 			) {
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
 			}
 
-			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_html'] == '' &&
-				$listdata['liste_format'] != FORMAT_TEXT
+			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_html'] == ''
+				&& $listdata['liste_format'] != FORMAT_TEXT
 			) {
 				$error = true;
 				$msg_error[] = $lang['Body_empty'];
@@ -587,8 +587,8 @@ switch ($mode) {
 			}
 
 			if ($mode == 'test' || $mode == 'send') {
-				if (!DISABLE_CHECK_LINKS && $listdata['liste_format'] != FORMAT_HTML &&
-					!strstr($logdata['log_body_text'], '{LINKS}')
+				if (!DISABLE_CHECK_LINKS && $listdata['liste_format'] != FORMAT_HTML
+					&& !strstr($logdata['log_body_text'], '{LINKS}')
 				) {
 					$error = true;
 					$msg_error[] = $lang['No_links_in_body'];
@@ -746,8 +746,8 @@ switch ($mode) {
 		//
 		// Attachement de fichiers
 		//
-		if ($mode == 'attach' && $logdata['log_id'] &&
-			$auth->check(Auth::ATTACH, $listdata['liste_id'])
+		if ($mode == 'attach' && $logdata['log_id']
+			&& $auth->check(Auth::ATTACH, $listdata['liste_id'])
 		) {
 			$attach  = new Attach();
 

@@ -32,8 +32,8 @@ class Auth
 	 */
 	public function isLoggedIn()
 	{
-		return (!empty($_SESSION['is_logged_in']) &&
-			check_in_admin() == $_SESSION['is_admin_session']);
+		return (!empty($_SESSION['is_logged_in'])
+			&& check_in_admin() == $_SESSION['is_admin_session']);
 	}
 
 	/**

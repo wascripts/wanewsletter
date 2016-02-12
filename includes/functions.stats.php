@@ -34,12 +34,12 @@ function convertToRGB($hexColor)
 		$repeat  = 2;
 	}
 
-	preg_match($pattern, $hexColor, $tmp);
+	preg_match($pattern, $hexColor, $m);
 
 	$parts = [];
-	$parts['red']   = str_repeat($tmp[1], $repeat);
-	$parts['green'] = str_repeat($tmp[2], $repeat);
-	$parts['blue']  = str_repeat($tmp[3], $repeat);
+	$parts['red']   = str_repeat($m[1], $repeat);
+	$parts['green'] = str_repeat($m[2], $repeat);
+	$parts['blue']  = str_repeat($m[3], $repeat);
 
 	return (object) array_map('hexdec', $parts);
 }
@@ -69,7 +69,7 @@ function xy_arc($degre, $diametre)
  *
  * @return boolean
  */
-function create_stats($listdata, $month, $year)
+function create_stats(array $listdata, $month, $year)
 {
 	global $db, $nl_config;
 
@@ -79,7 +79,7 @@ function create_stats($listdata, $month, $year)
 
 	$filename = filename_stats(date('Y_F', mktime(0, 0, 0, $month, 1, $year)), $listdata['liste_id']);
 
-	if ($fw = fopen(WA_STATSDIR . '/' . $filename, 'w')) {
+	if ($fp = fopen(WA_STATSDIR . '/' . $filename, 'w')) {
 		$stats    = [];
 		$max_days = date('t', mktime(0, 0, 0, $month, 15, $year));
 
@@ -90,18 +90,25 @@ function create_stats($listdata, $month, $year)
 			$max_time = mktime(23, 59, 59, $month, $day, $year);
 
 			$sql = "SELECT COUNT(a.abo_id) AS num_abo
-				FROM " . ABONNES_TABLE . " AS a
-					INNER JOIN " . ABO_LISTE_TABLE . " AS al ON al.abo_id = a.abo_id
-						AND al.liste_id  = $listdata[liste_id]
-						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-						AND ( al.register_date BETWEEN $min_time AND $max_time )
-				WHERE a.abo_status = " . ABO_ACTIVE;
+				FROM %s AS a
+					INNER JOIN %s AS al ON al.abo_id = a.abo_id
+						AND al.liste_id  = %d
+						AND al.confirmed = %d
+						AND ( al.register_date BETWEEN %d AND %d )
+				WHERE a.abo_status = %d";
+			$sql = sprintf($sql, ABONNES_TABLE, ABO_LISTE_TABLE,
+				$listdata['liste_id'],
+				SUBSCRIBE_CONFIRMED,
+				$min_time,
+				$max_time,
+				ABO_ACTIVE
+			);
 			$result = $db->query($sql);
 			$stats[$i] = $result->column('num_abo');
 		}
 
-		fwrite($fw, implode("\n", $stats));
-		fclose($fw);
+		fwrite($fp, implode("\n", $stats));
+		fclose($fp);
 
 		return true;
 	}
@@ -111,15 +118,13 @@ function create_stats($listdata, $month, $year)
 }
 
 /**
- * update_stats()
- *
  * Mise à jour des données pour les statistiques
  *
- * @param array $listdata  Données de la liste concernée
+ * @param array $listdata Données de la liste concernée
  *
  * @return boolean
  */
-function update_stats($listdata)
+function update_stats(array $listdata)
 {
 	global $nl_config;
 
@@ -219,7 +224,7 @@ function clean_stats($contents)
 }
 
 /**
- * Fonction centrale dédiée au formatage des noms de fichiers de statistiques de Wanewsletter
+ * Formatage des noms de fichiers de statistiques de Wanewsletter
  *
  * @param string  $date     Sous forme year_month (eg: 2005_April)
  * @param integer $liste_id

@@ -56,9 +56,9 @@ function decompress_filedata($tmp_filename, $filename)
 
 	$ext = pathinfo($filename, PATHINFO_EXTENSION);
 
-	if ((!ZIPLIB_LOADED && $ext == 'zip') ||
-		(!ZLIB_LOADED && $ext == 'gz') ||
-		(!BZIP2_LOADED && $ext == 'bz2')
+	if ((!ZIPLIB_LOADED && $ext == 'zip')
+		|| (!ZLIB_LOADED && $ext == 'gz')
+		|| (!BZIP2_LOADED && $ext == 'bz2')
 	) {
 		$output->message('Compress_unsupported');
 	}
@@ -258,12 +258,12 @@ switch ($mode) {
 				sendfile($filename, $mime_type, $contents);
 			}
 			else {
-				if (!($fw = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
+				if (!($fp = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
-				fwrite($fw, $contents);
-				fclose($fw);
+				fwrite($fp, $contents);
+				fclose($fp);
 
 				$output->message('Success_export');
 			}
@@ -862,12 +862,12 @@ switch ($mode) {
 				sendfile($filename, $mime_type, $contents);
 			}
 			else {
-				if (!($fw = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
+				if (!($fp = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
-				fwrite($fw, $contents);
-				fclose($fw);
+				fwrite($fp, $contents);
+				fclose($fp);
 
 				$output->message('Success_backup');
 			}

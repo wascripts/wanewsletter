@@ -232,8 +232,8 @@ if (isset($_POST['start'])) {
 							continue;
 						}
 					}
-					else if (!isset($schema[strtolower($m[1])]) ||
-						array_search($m[2], $schema[strtolower($m[1])]) === false
+					else if (!isset($schema[strtolower($m[1])])
+						|| array_search($m[2], $schema[strtolower($m[1])]) === false
 					) {
 						continue;
 					}

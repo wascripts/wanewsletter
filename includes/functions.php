@@ -12,7 +12,6 @@ namespace Wanewsletter;
 use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wanewsletter\Dblayer\Wadb;
-use Wanewsletter\Dblayer\WadbResult;
 
 /**
  * Chargement de la localisation, puis du fichier de configuration initial,
@@ -187,7 +186,7 @@ function wa_get_config()
 	global $db;
 
 	$result = $db->query("SELECT * FROM " . CONFIG_TABLE);
-	$result->setFetchMode(WadbResult::FETCH_ASSOC);
+	$result->setFetchMode($result::FETCH_ASSOC);
 	$row    = $result->fetch();
 	$config = [];
 
@@ -714,30 +713,29 @@ function wan_error_get_last()
  * Fonction d'affichage par page.
  *
  * @param string  $url           Adresse vers laquelle doivent pointer les liens de navigation
- * @param integer $total_item    Nombre total d'éléments
+ * @param integer $total_items   Nombre total d'éléments
  * @param integer $item_per_page Nombre d'éléments par page
  * @param integer $page_id       Identifiant de la page en cours
  *
  * @return string
  */
-function navigation($url, $total_item, $item_per_page, $page_id)
+function navigation($url, $total_items, $item_per_page, $page_id)
 {
 	global $lang;
 
-	$total_pages = ceil($total_item / $item_per_page);
+	$total_pages = ceil($total_items / $item_per_page);
 
-	// premier caractère de l'url au moins en position 1
-	// on place un espace à la position 0 de la chaîne
-	$url = ' ' . $url;
-
-	$url .= (strpos($url, '?')) ? '&amp;' : '?';
-
-	// suppression de l'espace précédemment ajouté
-	$url = substr($url, 1);
+	$url .= (strpos($url, '?') !== false) ? '&amp;' : '?';
 
 	if ($total_pages == 1) {
 		return '&nbsp;';
 	}
+
+	$get_page_url = function ($i) use ($url, $page_id) {
+		return ($i == $page_id)
+			? sprintf('<b>%d</b>', $i)
+			: sprintf('<a href="%1$spage=%2$d">%2$d</a>', $url, $i);
+	};
 
 	$nav_string = '';
 
@@ -749,8 +747,9 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 			}
 			while ($prev % 10);
 
-			$nav_string .= '<a href="' . $url . 'page=1">' . $lang['Start'] . '</a>&nbsp;&nbsp;';
-			$nav_string .= '<a href="' . $url . 'page=' . $prev . '">' . $lang['Prev'] . '</a>&nbsp;&nbsp;';
+			$template = '<a href="%spage=%d">%s</a>&nbsp;&nbsp;';
+			$nav_string .= sprintf($template, $url, 1, $lang['Start']);
+			$nav_string .= sprintf($template, $url, $prev, $lang['Prev']);
 		}
 
 		$current = $page_id;
@@ -767,7 +766,7 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 					$nav_string .= ', ';
 				}
 
-				$nav_string .= ($i == $page_id) ? '<b>' . $i . '</b>' : '<a href="' . $url . 'page=' . $i . '">' . $i . '</a>';
+				$nav_string .= $get_page_url($i);
 			}
 		}
 
@@ -778,8 +777,9 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 		$next++;
 
 		if ($total_pages >= $next) {
-			$nav_string .= '&nbsp;&nbsp;<a href="' . $url . 'page=' . $next . '">' . $lang['Next'] . '</a>';
-			$nav_string .= '&nbsp;&nbsp;<a href="' . $url . 'page=' . $total_pages . '">' . $lang['End'] . '</a>';
+			$template = '&nbsp;&nbsp;<a href="%spage=%d">%s</a>';
+			$nav_string .= sprintf($template, $url, $next, $lang['Next']);
+			$nav_string .= sprintf($template, $url, $total_pages, $lang['End']);
 		}
 	}
 	else {
@@ -788,7 +788,7 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 				$nav_string .= ', ';
 			}
 
-			$nav_string .= ($i == $page_id) ? '<b>' . $i . '</b>' : '<a href="' . $url . 'page=' . $i . '">' . $i . '</a>';
+			$nav_string .= $get_page_url($i);
 
 		}
 	}
@@ -827,27 +827,25 @@ function convert_time($dateformat, $timestamp)
  * Retourne le nombre d'entrées supprimées
  * Fonction récursive
  *
- * @param integer $liste_id       Liste concernée
- * @param integer $limitevalidate Limite de validité pour confirmer une inscription
- * @param integer $purge_freq     Fréquence des purges
+ * @param array $listdata Liste concernée
  *
  * @return integer
  */
-function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
+function purge_liste(array $listdata = [])
 {
 	global $db;
 
-	if (!$liste_id) {
+	if (!$listdata) {
 		$total_entries_deleted = 0;
 
 		$sql = "SELECT liste_id, limitevalidate, purge_freq
-			FROM " . LISTE_TABLE . "
-			WHERE purge_next < " . time() . "
-				AND auto_purge = 1";
+			FROM %s
+			WHERE purge_next < %d AND auto_purge = 1";
+		$sql = sprintf($sql, LISTE_TABLE, time());
 		$result = $db->query($sql);
 
-		while ($row = $result->fetch()) {
-			$total_entries_deleted += purge_liste($row['liste_id'], $row['limitevalidate'], $row['purge_freq']);
+		while ($listdata = $result->fetch()) {
+			$total_entries_deleted += purge_liste($listdata);
 		}
 
 		//
@@ -859,10 +857,12 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 	}
 	else {
 		$sql = "SELECT abo_id
-			FROM " . ABO_LISTE_TABLE . "
-			WHERE liste_id = $liste_id
-				AND confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
-				AND register_date < " . strtotime(sprintf('-%d days', $limitevalidate));
+			FROM %s
+			WHERE liste_id = %d AND confirmed = %d AND register_date < %d";
+		$sql = sprintf($sql, ABO_LISTE_TABLE, $listdata['liste_id'],
+			SUBSCRIBE_NOT_CONFIRMED,
+			strtotime(sprintf('-%d days', $listdata['limitevalidate']))
+		);
 		$result = $db->query($sql);
 
 		$abo_ids = [];
@@ -876,27 +876,30 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 
 			$db->beginTransaction();
 
-			$sql = "DELETE FROM " . ABONNES_TABLE . "
+			$sql = "DELETE FROM %s
 				WHERE abo_id IN(
 					SELECT abo_id
-					FROM " . ABO_LISTE_TABLE . "
-					WHERE abo_id IN($sql_abo_ids)
+					FROM %s
+					WHERE abo_id IN(%s)
 					GROUP BY abo_id
 					HAVING COUNT(abo_id) = 1
 				)";
+			$sql = sprintf($sql, ABONNES_TABLE, ABO_LISTE_TABLE, $sql_abo_ids);
 			$db->query($sql);
 
-			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
-				WHERE abo_id IN($sql_abo_ids)
-					AND liste_id = " . $liste_id;
+			$sql = "DELETE FROM %s
+				WHERE abo_id IN(%s) AND liste_id = %d";
+			$sql = sprintf($sql, ABO_LISTE_TABLE, $sql_abo_ids, $listdata['liste_id']);
 			$db->query($sql);
 
 			$db->commit();
 		}
 
-		$sql = "UPDATE " . LISTE_TABLE . "
-			SET purge_next = " . strtotime(sprintf('+%d days', $purge_freq)) . "
-			WHERE liste_id = " . $liste_id;
+		$sql = "UPDATE %s SET purge_next = %d WHERE liste_id = %d";
+		$sql = sprintf($sql, LISTE_TABLE,
+			strtotime(sprintf('+%d days', $listdata['purge_freq'])),
+			$listdata['liste_id']
+		);
 		$db->query($sql);
 
 		return $num_abo_deleted;
@@ -1010,7 +1013,7 @@ function fake_header()
  */
 function convert_encoding($data, $charset = null, $check_bom = true)
 {
-	if (empty($charset)) {
+	if (!$charset) {
 		if ($check_bom && strncmp($data, "\xEF\xBB\xBF", 3) == 0) {
 			$charset = 'UTF-8';
 			$data = substr($data, 3);
@@ -1020,7 +1023,7 @@ function convert_encoding($data, $charset = null, $check_bom = true)
 		}
 	}
 
-	if (empty($charset)) {
+	if (!$charset) {
 		$charset = 'windows-1252';
 		trigger_error("Cannot found valid charset. Using windows-1252 as fallback", E_USER_NOTICE);
 	}
@@ -1339,18 +1342,25 @@ function wan_get_tags()
 		return $other_tags;
 	}
 
-	$tags_file  = WA_ROOTDIR . '/data/tags.inc.php';
+	$tags_file[] = WA_ROOTDIR . '/data/tags.inc.php';
+	// compatibilité Wanewsletter < 3.0-beta1
+	$tags_file[] = WA_ROOTDIR . '/includes/tags.inc.php';
 
-	if (is_readable($tags_file)) {
-		include $tags_file;
-	}
-	else {
-		// compatibilité Wanewsletter < 3.0-beta1
-		$tags_file  = WA_ROOTDIR . '/includes/tags.inc.php';
-		if (is_readable($tags_file)) {
-			include $tags_file;
-			wanlog("Using ~/includes/tags.inc.php. You should move this file into data/ directory.");
+	$need_to_move = false;
+
+	foreach ($tags_file as $tag_file) {
+		if (file_exists($tag_file)) {
+			include $tag_file;
+			break;
 		}
+
+		$need_to_move = true;
+	}
+
+	if ($need_to_move) {
+		wanlog(sprintf("Using %s. You should move this file into data/ directory.",
+			str_replace(WA_ROOTDIR, '~', $tag_file)
+		));
 	}
 
 	return $other_tags;
@@ -1379,7 +1389,7 @@ function get_max_filesize()
 				case 'M':
 					$size = ($m[1] * 1024 * 1024);
 					break;
-				case 'G': // Since php 5.1.0
+				case 'G':
 					$size = ($m[1] * 1024 * 1024 * 1024);
 					break;
 			}
@@ -1392,16 +1402,14 @@ function get_max_filesize()
 	};
 
 	if (!($filesize = ini_get('upload_max_filesize'))) {
-        $filesize = '2M'; // 2 Méga-Octets
+        $filesize = '2M';
     }
 
 	$upload_max_size = $literal2integer($filesize);
 
     if ($postsize = ini_get('post_max_size')) {
         $postsize = $literal2integer($postsize);
-        if ($postsize < $upload_max_size) {
-            $upload_max_size = $postsize;
-        }
+        $upload_max_size = min($upload_max_size, $postsize);
     }
 
     return $upload_max_size;
@@ -1485,8 +1493,8 @@ function validate_pass($passwd)
  */
 function validate_lang($language)
 {
-	return (preg_match('/^[\w_]+$/', $language) &&
-		file_exists(WA_ROOTDIR . '/languages/' . $language . '/main.php')
+	return (preg_match('/^[\w_]+$/', $language)
+		&& file_exists(WA_ROOTDIR . '/languages/' . $language . '/main.php')
 	);
 }
 

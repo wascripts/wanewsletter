@@ -1320,7 +1320,7 @@ else if ($mode == 'liste') {
 	// Purge (suppression des inscriptions non confirmées et dont la date de validité est dépassée)
 	//
 	else if ($action == 'purge') {
-		$abo_deleted = purge_liste($listdata['liste_id'], $listdata['limitevalidate'], $listdata['purge_freq']);
+		$abo_deleted = purge_liste($listdata);
 
 		$target = './view.php?mode=liste';
 		$output->redirect($target, 4);

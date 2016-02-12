@@ -219,8 +219,8 @@ function WaDatabase($dsn)
 	//
 	// Charset non précisé dans le DSN. On tente une auto-configuration.
 	//
-	if ($db::ENGINE != 'sqlite' && ($encoding = $db->encoding()) &&
-		!preg_match('#^utf-?8$#i', $encoding)
+	if ($db::ENGINE != 'sqlite' && ($encoding = $db->encoding())
+		&& !preg_match('#^utf-?8$#i', $encoding)
 	) {
 		//
 		// Wanewsletter utilise l'UTF-8 comme codage de caractères.

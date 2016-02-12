@@ -84,8 +84,9 @@ if (count($lists) > 0) {
 		$listid = implode('', array_unique($liste_ids));
 		$browse = dir(WA_ROOTDIR . '/stats');
 		while (($entry = $browse->read()) !== false) {
-			if (is_file(WA_ROOTDIR . '/stats/' . $entry) && $entry != 'index.html' &&
-				preg_match('/list['.$listid.']\.txt$/', $entry)
+			if (is_file(WA_ROOTDIR . '/stats/' . $entry)
+				&& $entry != 'index.html'
+				&& preg_match('/list['.$listid.']\.txt$/', $entry)
 			) {
 				$filesize += filesize(WA_ROOTDIR . '/stats/' . $entry);
 			}

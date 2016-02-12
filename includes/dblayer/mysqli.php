@@ -52,8 +52,8 @@ class Mysqli extends Wadb
 		// libmysqlclient veut une ipv6 sans crochets (eg: ::1), mais
 		// mysqlnd veut une ipv6 délimitée par des crochets (eg: [::1])
 		// PHP bug 67563 <https://bugs.php.net/bug.php?id=67563>
-		if (stripos($this->clientVersion, 'mysqlnd') !== false &&
-			filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+		if (stripos($this->clientVersion, 'mysqlnd') !== false
+			&& filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
 		) {
 			$host = "[$host]";
 		}

@@ -51,8 +51,8 @@ function jump(evt)
 {
 	var selectbox = evt.target;
 
-	if (selectbox.options[selectbox.selectedIndex].value != 0 &&
-		!selectbox.options[selectbox.selectedIndex].defaultSelected
+	if (selectbox.options[selectbox.selectedIndex].value != 0
+		&& !selectbox.options[selectbox.selectedIndex].defaultSelected
 	) {
 		selectbox.form.submit();
 	}

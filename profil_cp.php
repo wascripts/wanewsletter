@@ -279,18 +279,18 @@ switch ($mode) {
 				continue;
 			}
 
-			$num_logs = count($abodata['lists'][$liste_id]['archives']);
-			$size     = ($num_logs > 8) ? 8 : $num_logs;
+			$num_logs   = count($abodata['lists'][$liste_id]['archives']);
+			$select_log = '<select id="liste_%1$d" name="log[%1$d][]" class="logList" size="%2$d" multiple>';
+			$select_log = sprintf($select_log, $liste_id, min(8, $num_logs));
 
-			$select_log = '<select id="liste_' . $liste_id . '" name="log['
-				. $liste_id . '][]" class="logList" size="' . $size
-				. '" multiple="multiple">';
 			for ($i = 0; $i < $num_logs; $i++) {
-				$logrow = $abodata['lists'][$liste_id]['archives'][$i];
+				$logdata = $abodata['lists'][$liste_id]['archives'][$i];
 
-				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; '
-					. htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
-				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
+				$select_log .= sprintf('<option value="%d">&#8211; %s [%s]</option>',
+					$logdata['log_id'],
+					htmlspecialchars(cut_str($logdata['log_subject'], 40), ENT_NOQUOTES),
+					convert_time('d/m/Y', $logdata['log_date'])
+				);
 			}
 			$select_log .= '</select>'."\n";
 

@@ -133,8 +133,8 @@ $config_file .= "\$prefixe = '$prefixe';\n";
 $config_file .= "\n";
 
 if (isset($_POST['sendfile'])) {
-	if (file_exists(WA_ROOTDIR . '/data/config.inc.php') ||
-		file_exists(WA_ROOTDIR . '/includes/config.inc.php')
+	if (file_exists(WA_ROOTDIR . '/data/config.inc.php')
+		|| file_exists(WA_ROOTDIR . '/includes/config.inc.php')
 	) {
 		echo "The config file is already installed on the server.";
 		exit;
@@ -335,7 +335,7 @@ if ($start) {
 		$db->close();
 
 		if (!$reinstall) {
-			if (!($fw = fopen(WA_ROOTDIR . '/data/config.inc.php', 'w'))) {
+			if (!($fp = fopen(WA_ROOTDIR . '/data/config.inc.php', 'w'))) {
 				$output->addHiddenField('engine',  $infos['engine']);
 				$output->addHiddenField('host',    $infos['host']);
 				$output->addHiddenField('user',    $infos['user']);
@@ -362,8 +362,8 @@ if ($start) {
 				exit;
 			}
 
-			fwrite($fw, $config_file);
-			fclose($fw);
+			fwrite($fp, $config_file);
+			fclose($fp);
 		}
 
 		$server = filter_input(INPUT_SERVER, 'SERVER_SOFTWARE');
