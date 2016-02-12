@@ -93,13 +93,12 @@ class Sender
 
 	/**
 	 * @param string $name
+	 * @param array  $params
 	 */
-	private function triggerHooks($name)
+	private function triggerHooks($name, array &$params)
 	{
 		foreach ($this->hooks[$name] as $hook) {
-			$args = func_get_args();
-			array_shift($args);
-			call_user_func_array($hook, $args);
+			call_user_func($hook, $params);
 		}
 	}
 
@@ -131,12 +130,15 @@ class Sender
 
 		chmod($lockfile, 0600);
 
-		$update_abo_list = function ($abo_ids) {
+		$update_abo_list = function ($params) {
 			global $db;
 
-			if (count($abo_ids) > 0) {
+			if (count($params['ids']) > 0) {
 				$sql = "UPDATE %s SET send = 1 WHERE abo_id IN(%s) AND liste_id = %d";
-				$sql = sprintf($sql, ABO_LISTE_TABLE, implode(', ', $abo_ids), $this->listdata['liste_id']);
+				$sql = sprintf($sql, ABO_LISTE_TABLE,
+					implode(', ', $params['ids']),
+					$this->listdata['liste_id']
+				);
 				$db->query($sql);
 			}
 
@@ -156,9 +158,9 @@ class Sender
 			$update_abo_list($abo_ids);
 		}
 
-		$this->registerHook('post-send', function ($data) {
-			if ($data) {
-				fwrite($this->fp, "$data\n");
+		$this->registerHook('post-send', function ($params) {
+			if ($params['ids']) {
+				fwrite($this->fp, implode("\n", $params['ids']) . "\n");
 			}
 		});
 
@@ -325,8 +327,21 @@ class Sender
 			$output->message('No_subscribers');
 		}
 
+		//
+		// Initialisation de l’objet Email
+		//
+		$this->createEmail();
+
+		//
+		// Paramètres transmis à chaque 'hook' sous forme de tableau.
+		// (voir méthode lock() pour des exemples)
+		//
+		$hook_params['list']  = $abodata_list;
+		$hook_params['ids']   = [];
+		$hook_params['email'] = $this->email;
+
 		// Actions avant la boucle d’envoi
-		$this->triggerHooks('start-send', $abodata_list);
+		$this->triggerHooks('start-send', $hook_params);
 
 		if ($nl_config['engine_send'] == ENGINE_BCC) {
 			$address = [FORMAT_TEXT => [], FORMAT_HTML => []];
@@ -347,7 +362,7 @@ class Sender
 
 			foreach ([FORMAT_TEXT, FORMAT_HTML] as $format) {
 				// Actions pré-envoi
-				$this->triggerHooks('pre-send');
+				$this->triggerHooks('pre-send', $hook_params);
 
 				if (count($address[$format]) > 0) {
 					try {
@@ -362,7 +377,8 @@ class Sender
 				}
 
 				// Actions post-envoi
-				$this->triggerHooks('post-send', implode("\n", $abo_ids[$format]));
+				$hook_params['ids'] = $abo_ids[$format];
+				$this->triggerHooks('post-send', $hook_params);
 			}
 
 			$abo_ids = array_merge($abo_ids[FORMAT_TEXT], $abo_ids[FORMAT_HTML]);
@@ -372,7 +388,7 @@ class Sender
 
 			while ($data = array_pop($abodata_list)) {
 				// Actions pré-envoi
-				$this->triggerHooks('pre-send');
+				$this->triggerHooks('pre-send', $hook_params);
 
 				try {
 					$data['email'] = $data['abo_email'];
@@ -385,12 +401,14 @@ class Sender
 					), E_USER_ERROR);
 				}
 
+				$hook_params['ids'] = [];
 				if ($data['abo_id']) {
 					$abo_ids[] = $data['abo_id'];
+					$hook_params['ids'] = [$data['abo_id']];
 				}
 
 				// Actions post-envoi
-				$this->triggerHooks('post-send', $data['abo_id']);
+				$this->triggerHooks('post-send', $hook_params);
 			}
 		}
 
@@ -414,7 +432,8 @@ class Sender
 		}
 
 		// Actions après la boucle d’envoi
-		$this->triggerHooks('end-send', $abo_ids);
+		$hook_params['ids'] = $abo_ids;
+		$this->triggerHooks('end-send', $hook_params);
 
 		if ($this->logdata['log_status'] == STATUS_STANDBY && $total_to_send == 0) {
 			$db->beginTransaction();
