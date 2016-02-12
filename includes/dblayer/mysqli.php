@@ -145,11 +145,15 @@ class Mysqli extends Wadb
 
 	public function vacuum($tables)
 	{
-		if (is_array($tables)) {
-			$tables = implode(', ', $tables);
+		if (!is_array($tables)) {
+			$tables = [$tables];
 		}
 
-		mysqli_query($this->link, 'OPTIMIZE TABLE ' . $tables);
+		array_walk($tables, function (&$value, $key) {
+			$value = $this->quote($value);
+		});
+
+		mysqli_query($this->link, 'OPTIMIZE TABLE ' . implode(', ', $tables));
 	}
 
 	public function beginTransaction()
@@ -270,29 +274,29 @@ class MysqliBackup extends WadbBackup
 		return $contents;
 	}
 
-	public function get_tables()
+	public function getTablesList()
 	{
 		$result = $this->db->query('SHOW TABLE STATUS FROM ' . $this->db->quote($this->db->dbname));
 		$tables = [];
 
 		while ($row = $result->fetch()) {
-			$tables[$row['Name']] = $row['Engine'];
+			$tables[] = $row['Name'];
 		}
 
 		return $tables;
 	}
 
-	public function get_table_structure($tabledata, $drop_option)
+	public function getStructure($tablename, $drop_option)
 	{
 		$contents  = '-- ' . $this->eol;
-		$contents .= '-- Structure de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= '-- Structure de la table ' . $tablename . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 
 		if ($drop_option) {
-			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
+			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tablename) . ';' . $this->eol;
 		}
 
-		$result = $this->db->query('SHOW CREATE TABLE ' . $this->db->quote($tabledata['name']));
+		$result = $this->db->query('SHOW CREATE TABLE ' . $this->db->quote($tablename));
 		$create_table = $result->column('Create Table');
 		$result->free();
 

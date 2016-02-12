@@ -812,36 +812,25 @@ switch ($mode) {
 			$output->message('Database_unsupported');
 		}
 
-		$tables_list = $backup->get_tables();
-		$tables      = [];
-
-		foreach ($tables_list as $tablename => $tabletype) {
-			if (!isset($_POST['submit'])) {
-				if (!isset($sql_schemas[$tablename])) {
-					$tables_plus[] = $tablename;
-				}
-			}
-			else {
-				if (isset($sql_schemas[$tablename]) || in_array($tablename, $tables_plus)) {
-					$tables[] = ['name' => $tablename, 'type' => $tabletype];
-				}
-			}
-		}
+		$tables = $backup->getTablesList();
 
 		if (isset($_POST['submit'])) {
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql
 			//
-			$contents  = $backup->header(sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION));
-			$contents .= $backup->get_other_queries($drop_option);
+			$contents = $backup->header(sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION));
 
-			foreach ($tables as $tabledata) {
+			foreach ($tables as $tablename) {
+				if (!isset($sql_schemas[$tablename]) && !in_array($tablename, $tables_plus)) {
+					continue;
+				}
+
 				if ($backup_type != 2) {// save complète ou structure uniquement
-					$contents .= $backup->get_table_structure($tabledata, $drop_option);
+					$contents .= $backup->getStructure($tablename, $drop_option);
 				}
 
 				if ($backup_type != 1) {// save complète ou données uniquement
-					$contents .= $backup->get_table_data($tabledata['name']);
+					$contents .= $backup->getData($tablename);
 				}
 
 				$contents .= $EOL . $EOL;
@@ -870,6 +859,12 @@ switch ($mode) {
 				fclose($fp);
 
 				$output->message('Success_backup');
+			}
+		}
+
+		foreach ($tables as $tablename) {
+			if (!isset($sql_schemas[$tablename])) {
+				$tables_plus[] = $tablename;
 			}
 		}
 

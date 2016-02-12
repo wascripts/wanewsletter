@@ -201,7 +201,7 @@ class Sqlitepdo extends Wadb
 		}
 
 		foreach ($tables as $tablename) {
-			$this->pdo->query('VACUUM ' . $tablename);
+			$this->pdo->query('VACUUM ' . $this->quote($tablename));
 		}
 	}
 
@@ -342,32 +342,33 @@ class SqlitepdoBackup extends WadbBackup
 		return $contents;
 	}
 
-	public function get_tables()
+	public function getTablesList()
 	{
 		$result = $this->db->query("SELECT tbl_name FROM sqlite_master WHERE type = 'table'");
 		$tables = [];
 
 		while ($row = $result->fetch()) {
-			$tables[$row['tbl_name']] = '';
+			$tables[] = $row['tbl_name'];
 		}
 
 		return $tables;
 	}
 
-	public function get_table_structure($tabledata, $drop_option)
+	public function getStructure($tablename, $drop_option)
 	{
 		$contents  = '-- ' . $this->eol;
-		$contents .= '-- Structure de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= '-- Structure de la table ' . $tablename . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 
 		if ($drop_option) {
-			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
+			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tablename) . ';' . $this->eol;
 		}
 
 		$sql = "SELECT sql, type
 			FROM sqlite_master
-			WHERE tbl_name = '$tabledata[name]'
+			WHERE tbl_name = '%s'
 				AND sql IS NOT NULL";
+		$sql = sprintf($sql, $this->db->escape($tablename));
 		$result = $this->db->query($sql);
 
 		$indexes = '';

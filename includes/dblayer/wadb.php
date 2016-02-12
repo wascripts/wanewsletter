@@ -530,38 +530,26 @@ abstract class WadbBackup
 	 *
 	 * @return array
 	 */
-	abstract public function get_tables();
-
-	/**
-	 * Utilisable pour l'ajout de requète supplémentaires (séquences, configurations diverses, etc)
-	 *
-	 * @param boolean $drop_option
-	 *
-	 * @return string
-	 */
-	public function get_other_queries($drop_option)
-	{
-		return '';
-	}
+	abstract public function getTablesList();
 
 	/**
 	 * Retourne la structure d'une table de la base de données sous forme de requète SQL de type DDL
 	 *
-	 * @param array   $tabledata   Informations sur la table (provenant de self::get_tables())
+	 * @param string  $tablename   Nom de la table
 	 * @param boolean $drop_option Ajouter une requète de suppression conditionnelle de table
 	 *
 	 * @return string
 	 */
-	abstract public function get_table_structure($tabledata, $drop_option);
+	abstract public function getStructure($tablename, $drop_option);
 
 	/**
 	 * Retourne les données d'une table de la base de données sous forme de requètes SQL de type DML
 	 *
-	 * @param string $tablename Nom de la table à considérer
+	 * @param string $tablename Nom de la table
 	 *
 	 * @return string
 	 */
-	public function get_table_data($tablename)
+	public function getData($tablename)
 	{
 		$contents = '';
 
