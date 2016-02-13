@@ -38,7 +38,7 @@ function load_config()
 	foreach ($test_files as $file) {
 		if (file_exists($file)) {
 			if (!is_readable($file)) {
-				$output->message("Cannot read the config file. Please fix this mistake and reload.");
+				$output->message('Unreadable_config_file');
 			}
 
 			include $file;
@@ -60,7 +60,7 @@ function load_config()
 		$infos['dbname'] = $dbname;
 
 		if ($infos['engine'] == 'mssql') {
-			$output->message("Support for Microsoft SQL Server has been removed in Wanewsletter 2.3");
+			$output->message('No_microsoft_sqlserver');
 		}
 		else if ($infos['engine'] == 'postgre') {
 			$infos['engine'] = 'postgres';
@@ -95,9 +95,7 @@ function load_config()
 			http_redirect($install_script);
 		}
 		else {
-			$error  = "Wanewsletter seems not to be installed!\n";
-			$error .= "Call $install_script in your web browser.";
-			$output->message($error);
+			$output->message('Not_installed');
 		}
 	}
 
@@ -1336,6 +1334,7 @@ function wamailer(array $opts = [])
  */
 function wan_get_tags()
 {
+	global $lang;
 	static $other_tags = [];
 
 	if (count($other_tags) > 0) {
@@ -1358,7 +1357,7 @@ function wan_get_tags()
 	}
 
 	if ($need_to_move) {
-		wanlog(sprintf("Using %s. You should move this file into data/ directory.",
+		wanlog(sprintf($lang['Message']['Move_to_data_dir'],
 			str_replace(WA_ROOTDIR, '~', $tag_file)
 		));
 	}
@@ -1553,20 +1552,20 @@ function print_debug_infos()
 {
 	global $lang, $db, $nl_config;
 
-	$dir_status = function ($dir) {
+	$dir_status = function ($dir) use (&$lang) {
 		if (file_exists($dir)) {
 			if (!is_readable($dir)) {
-				$str = "non [pas d'accès en lecture]";
+				$str = sprintf('%s [%s]', $lang['No'], $lang['Unreadable']);
 			}
 			else if (!is_writable($dir)) {
-				$str = "non [pas d'accès en écriture]";
+				$str = sprintf('%s [%s]', $lang['No'], $lang['Unwritable']);
 			}
 			else {
-				$str = "ok";
+				$str = $lang['Yes'];
 			}
 		}
 		else {
-			$str = "non [n'existe pas]";
+			$str = sprintf('%s [%s]', $lang['No'], $lang['Not_exists']);
 		}
 
 		return $str;
@@ -1579,7 +1578,7 @@ function print_debug_infos()
 	$print_row  = function ($name, $value = null) {
 		global $lang;
 
-		echo '- ';
+		echo '  ';// 2x NBSP
 		echo htmlspecialchars(u::str_pad($name, 30));
 
 		if (!is_null($value)) {
@@ -1617,11 +1616,11 @@ function print_debug_infos()
 	$print_row('sending_limit', $nl_config['sending_limit']);
 	$print_row('use_smtp',      (bool) $nl_config['use_smtp']);
 
-	$print_head('Librairies tierces');
+	$print_head($lang['Third_party_libraries']);
 
 	$composer_file = WA_ROOTDIR . '/composer.lock';
 	if (!function_exists('json_decode')) {
-		$print_row('Cannot read the composer.lock file! (JSON extension needed)');
+		$print_row($lang['Message']['No_json_extension']);
 	}
 	else if (is_readable($composer_file)) {
 		$composer = json_decode(file_get_contents($composer_file), true);
@@ -1651,11 +1650,11 @@ function print_debug_infos()
 		}
 	}
 	else {
-		$print_row('Cannot read the composer.lock file!');
+		$print_row($lang['Message']['Composer_lock_unreadable']);
 	}
 
 	$print_head('PHP');
-	$print_row('Version & SAPI', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
+	$print_row('Version/SAPI', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
 	$print_row('Extension Bz2', extension_loaded('zlib'));
 	$print_row('Extension Curl', extension_loaded('curl'));
 
@@ -1663,21 +1662,24 @@ function print_debug_infos()
 		$tmp = gd_info();
 		$format = (imagetypes() & IMG_GIF) ? 'GIF' : 'Unavailable';
 		$format = (imagetypes() & IMG_PNG) ? 'PNG' : $format;
-		$str = sprintf('oui - Version %s - Format %s', $tmp['GD Version'], $format);
+		$str = sprintf('%s – %s/%s', $lang['Yes'], $tmp['GD Version'], $format);
 	}
 	else {
-		$str = 'non';
+		$str = $lang['No'];
 	}
 
 	$print_row('Extension GD', $str);
 	$print_row('Extension Iconv',
-		extension_loaded('iconv') ?
-			sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
+		extension_loaded('iconv')
+			? sprintf('%s – %s/%s', $lang['Yes'], ICONV_VERSION, ICONV_IMPL)
+			: $lang['No']
 	);
 	$print_row('Extension JSON', extension_loaded('json'));
 	$print_row('Extension Mbstring', extension_loaded('mbstring'));
 	$print_row('Extension OpenSSL',
-		extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
+		extension_loaded('openssl')
+			? sprintf('%s – %s', $lang['Yes'], OPENSSL_VERSION_TEXT)
+			: $lang['No']
 	);
 	$print_row('Extension SimpleXML', extension_loaded('simplexml'));
 	$print_row('Extension XML', extension_loaded('xml'));
@@ -1704,25 +1706,27 @@ function print_debug_infos()
 		$print_row('SMTP Server', ini_get('SMTP').':'.ini_get('smtp_port'));
 	}
 
-	$print_head('Base de données');
+	$print_head($lang['Database']);
 
-	$print_row('Nom/Version', sprintf('%s %s',
+	$print_row('Type/Version', sprintf('%s %s',
 		$db->infos['label'],
 		($db::ENGINE == 'sqlite') ? $db->libVersion : $db->serverVersion
 	));
 
 	if ($db::ENGINE != 'sqlite') {
-		$print_row('Librairie cliente', $db->clientVersion);
-		$print_row('Jeu de caractères', $db->encoding());
+		$print_row($lang['Client_library'], $db->clientVersion);
+		$print_row($lang['Charset'], $db->encoding());
 	}
 
-	$print_row('Driver', $db->infos['driver']);
+	$print_row($lang['Driver'], $db->infos['driver']);
 
-	$print_head('Divers');
+	$print_head($lang['Misc']);
 
-	$print_row('Serveur HTTP/OS', $_SERVER['SERVER_SOFTWARE'] . ' on ' . PHP_OS);
-	$print_row('Agent utilisateur',   filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS));
-	$print_row('Connexion sécurisée', wan_ssl_connection());
+	$user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS);
+
+	$print_row($lang['Server_software'],   $_SERVER['SERVER_SOFTWARE'] . '/' . PHP_OS);
+	$print_row($lang['User_agent'],        $user_agent);
+	$print_row($lang['Secure_connection'], wan_ssl_connection());
 
 	echo "</pre>";
 }

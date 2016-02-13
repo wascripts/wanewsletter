@@ -250,6 +250,13 @@ $lang['Message']['Expired_token']           = "Ce jeton n’est plus valide ! \n
 $lang['Message']['Password_created']        = "Votre mot de passe a été créé avec succès.\n Vous pouvez désormais %svous connecter%s.";
 $lang['Message']['Password_modified']       = "Votre mot de passe a été modifié avec succès.\n Vous pouvez désormais %svous connecter%s.";
 
+$lang['Message']['Unreadable_config_file']  = "Impossible de lire le fichier de configuration. Corrigez cela puis rechargez la page.";
+$lang['Message']['No_microsoft_sqlserver']  = "Le support de Microsoft SQL Server a été retiré depuis Wanewsletter 2.3";
+$lang['Message']['Not_installed']           = "Wanewsletter ne semble pas installé !\nAppelez install.php dans votre navigateur.";
+$lang['Message']['Move_to_data_dir']        = "Utilisation de %s. Vous devriez déplacer ce fichier dans le répertoire data/.";
+$lang['Message']['No_json_extension']       = "L’extension JSON est nécessaire pour lire le contenu du fichier composer.lock !";
+$lang['Message']['Composer_lock_unreadable'] = "Impossible de lire le fichier composer.lock !";
+
 //
 // Divers
 //
@@ -328,6 +335,19 @@ $lang['Click_resend_manuel']        = "Cliquez %sici%s pour envoyer un autre flo
 
 $lang['Explain']['login']           = "Si votre compte ne possède pas encore de mot de passe, vous pouvez en créer un en suivant ce lien&nbsp;: %sCréer mon mot de passe%s.";
 $lang['Explain']['Reset_passwd']    = "Entrez votre nom d’utilisateur ou votre adresse email pour recevoir un email contenant les instructions à suivre pour créer un nouveau mot de passe.";
+
+$lang['Third_party_libraries']      = "Librairies tierces";
+$lang['Database']                   = "Base de données";
+$lang['Client_library']             = "Librairie cliente";
+$lang['Charset']                    = "Jeu de caractères";
+$lang['Server_software']            = "Serveur HTTP/OS";
+$lang['User_agent']                 = "Agent utilisateur";
+$lang['Secure_connection']          = "Connexion sécurisée";
+$lang['Driver']                     = "Pilote";
+$lang['Misc']                       = "Divers";
+$lang['Unreadable']                 = "pas d’accès en lecture";
+$lang['Unwritable']                 = "pas d’accès en écriture";
+$lang['Not_exists']                 = "n’existe pas";
 
 //
 // Sujets de divers emails envoyés

@@ -249,6 +249,13 @@ $lang['Message']['Expired_token']           = "This token is no more valid ! \nR
 $lang['Message']['Password_created']        = "Your password has been successfully created.\n You can now %slog in%s.";
 $lang['Message']['Password_modified']       = "Your password has been successfully modified.\n You can now %slog in%s.";
 
+$lang['Message']['Unreadable_config_file']  = "Cannot read the config file. Please fix this mistake and reload.";
+$lang['Message']['No_microsoft_sqlserver']  = "Support for Microsoft SQL Server has been removed since Wanewsletter 2.3";
+$lang['Message']['Not_installed']           = "Wanewsletter seems not to be installed!\nCall install.php in your web browser.";
+$lang['Message']['Move_to_data_dir']        = "Using %s. You should move this file into data/ directory.";
+$lang['Message']['No_json_extension']       = "JSON extension is needed for reading composer.lock file!";
+$lang['Message']['Composer_lock_unreadable'] = "Cannot read the composer.lock file!";
+
 //
 // Divers
 //
@@ -327,6 +334,19 @@ $lang['Click_resend_manuel']        = "Click %shere%s to send another packet of 
 
 $lang['Explain']['login']           = "If your account doesn't have a password, you can create one by following this link: %sCreate password%s.";
 $lang['Explain']['Reset_passwd']    = "Enter your username or your email address to receive a mail with instructions on how to create a new password.";
+
+$lang['Third_party_libraries']      = "Third party libraries";
+$lang['Database']                   = "Database";
+$lang['Client_library']             = "Client library";
+$lang['Charset']                    = "Character set";
+$lang['Server_software']            = "HTTP Server/OS";
+$lang['User_agent']                 = "User agent";
+$lang['Secure_connection']          = "Secure connection";
+$lang['Driver']                     = "Driver";
+$lang['Misc']                       = "Miscellaneous";
+$lang['Unreadable']                 = "not readable";
+$lang['Unwritable']                 = "not writable";
+$lang['Not_exists']                 = "not exists";
 
 //
 // Sujets de divers emails envoyés
