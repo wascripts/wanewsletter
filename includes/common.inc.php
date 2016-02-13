@@ -109,7 +109,7 @@ load_config();
 if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
 	$filename = DEBUG_LOG_FILE;
 	if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
-		if (!preg_match('#^[a-z]:[/\\]#i', $filename)) {
+		if (!preg_match('#^[a-z]:[/\\\\]#i', $filename)) {
 			$filename = WA_LOGSDIR . '/' . $filename;
 		}
 	}
