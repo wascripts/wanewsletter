@@ -252,26 +252,4 @@ class Session implements \SessionHandlerInterface
 
 		return true;
 	}
-
-	/**
-	 * Envoi des cookies
-	 *
-	 * @param string  $name     Nom du cookie
-	 * @param string  $value    Données à insérer dans le cookie
-	 * @param integer $lifetime Durée de validité du cookie
-	 *
-	 * @return boolean
-	 */
-	public function send_cookie($name, $value, $lifetime)
-	{
-		return setcookie(
-			$name,
-			$value,
-			$lifetime,
-			$this->cfg_cookie['path'],
-			$this->cfg_cookie['domain'],
-			$this->cfg_cookie['secure'],
-			$this->cfg_cookie['httponly']
-		);
-	}
 }
