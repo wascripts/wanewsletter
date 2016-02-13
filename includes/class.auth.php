@@ -166,6 +166,7 @@ class Auth
 
 			$result = $db->query($sql);
 
+			$userdata['lists'] = [];
 			while ($listdata = $result->fetch($result::FETCH_ASSOC)) {
 				$userdata['lists'][$listdata['liste_id']] = $listdata;
 			}
