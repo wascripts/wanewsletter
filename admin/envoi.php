@@ -76,22 +76,6 @@ foreach (['test', 'send', 'save', 'delete', 'attach', 'unattach'] as $varname) {
 }
 
 switch ($mode) {
-	//
-	// Téléchargement d'un fichier joint
-	//
-	case 'download':
-		$file_id = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
-
-		$attach = new Attach();
-		$file   = $attach->getFile($file_id);
-
-		if (!$file || !($fp = fopen($file['path'], 'rb'))) {
-			$output->message(sprintf($lang['Message']['File_not_exists'], ''));
-		}
-
-		sendfile($file['name'], $file['type'], $fp);
-		break;
-
 	case 'cancel':
 		if (isset($_POST['confirm'])) {
 			$sql = "SELECT log_id, liste_id, log_status

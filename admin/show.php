@@ -27,7 +27,7 @@ $file = $attach->getFile($filename ?: $file_id);
 if ($file) {
 	if (!is_readable($file['path'])) {
 		http_response_code(500);
-		$output->basic('Impossible de récupérer le contenu du fichier');
+		$output->basic(sprintf($lang['Message']['File_not_exists'], ''));
 	}
 
 	$maxAge = 0;
@@ -68,5 +68,5 @@ if ($file) {
 }
 else {
 	http_response_code(404);
-	$output->basic('Unknown file !');
+	$output->basic(sprintf($lang['Message']['File_not_exists'], ''));
 }

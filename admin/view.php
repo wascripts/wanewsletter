@@ -24,7 +24,7 @@ $page_id   = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
 	'options' => ['min_range' => 1, 'default' => 1]
 ]);
 
-if (!in_array($mode, ['liste', 'log', 'abonnes', 'download', 'iframe', 'export'])) {
+if (!in_array($mode, ['liste', 'log', 'abonnes', 'iframe', 'export'])) {
 	http_redirect('index.php');
 }
 
@@ -56,25 +56,9 @@ else if ($_SESSION['liste']) {
 $listbox = $output->listbox(Auth::VIEW, false, './view.php?mode=' . $mode);
 
 //
-// Mode download : téléchargement des fichiers joints à un log
-//
-if ($mode == 'download') {
-	$file_id = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
-
-	$attach = new Attach();
-	$file   = $attach->getFile($file_id);
-
-	if (!$file || !($fp = fopen($file['path'], 'rb'))) {
-		$output->message(sprintf($lang['Message']['File_not_exists'], ''));
-	}
-
-	sendfile($file['name'], $file['type'], $fp);
-}
-
-//
 // Mode export : Export d'une archive et de ses fichiers joints
 //
-else if ($mode == 'export') {
+if ($mode == 'export') {
 	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 	$sql = "SELECT log_subject, log_body_text, log_body_html, log_date

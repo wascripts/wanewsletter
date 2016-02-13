@@ -616,14 +616,15 @@ BASIC;
 	{
 		global $lang, $nl_config;
 
-		$page_envoi  = (strpos($_SERVER['SCRIPT_NAME'], 'envoi.php') !== false);
-		$body_size   = (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
-		$total_size  = 1024; // ~ 1024 correspond au poids de base d'un email (en-têtes)
-		$total_size += ($body_size > 0) ? ($body_size / 2) : 0;
-		$num_files   = count($logdata['joined_files']);
-
-		if ($num_files == 0) {
+		if (($num_files = count($logdata['joined_files'])) == 0) {
 			return '';
+		}
+
+		$total_size  = 1024; // ~ 1024 correspond au poids de base d'un email (en-têtes)
+		$total_size += (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
+
+		if ($format == FORMAT_TEXT) {
+			$total_size -= strlen($logdata['log_body_html']);
 		}
 
 		for ($i = 0; $i < $num_files; $i++) {
@@ -649,28 +650,30 @@ BASIC;
 			'L_TOTAL_LOG_SIZE' => $lang['Total_log_size'],
 
 			'TOTAL_LOG_SIZE'   => formateSize($total_size),
-			'S_ROWSPAN'        => ($page_envoi) ? '4' : '3'
+			'S_ROWSPAN'        => 3
 		]);
 
-		if ($page_envoi) {
+		// Si $format vaut false, cela signifie qu’on est sur la page envoi,
+		// et donc que les checkbox de suppression de fichiers peuvent
+		// être affichées.
+		if (!$format) {
 			$template->assignToBlock('del_column');
 			$template->assignToBlock('joined_files.files_box', [
 				'L_DEL_FILE_BUTTON' => $lang['Button']['del_file']
 			]);
-
-			$u_download = './envoi.php?mode=download&amp;fid=%d';
-		}
-		else {
-			$u_download = './view.php?mode=download&amp;fid=%d';
+			$template->assign(['S_ROWSPAN' => 4]);
 		}
 
-		for ($i = 0; $i < $num_files; $i++) {
+		for ($i = 0, $offset = 0; $i < $num_files; $i++) {
 			$filesize  = $logdata['joined_files'][$i]['file_size'];
 			$filename  = $logdata['joined_files'][$i]['file_real_name'];
 			$file_id   = $logdata['joined_files'][$i]['file_id'];
 			$mime_type = $logdata['joined_files'][$i]['file_mimetype'];
 
-			$tmp_filename = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $logdata['joined_files'][$i]['file_physical_name'];
+			$tmp_filename = WA_ROOTDIR . '/'
+				. $nl_config['upload_path']
+				. $logdata['joined_files'][$i]['file_physical_name'];
+
 			$s_show = '';
 
 			if (file_exists($tmp_filename)) {
@@ -682,13 +685,14 @@ BASIC;
 					continue;
 				}
 
+				$show_url = sprintf('./show.php?fid=%d', $file_id);
 				$filename = sprintf('<a href="%s">%s</a>',
-					sprintf($u_download, $file_id),
+					$show_url,
 					htmlspecialchars($filename)
 				);
 
 				if (preg_match('#^image/#', $mime_type)) {
-					$s_show  = sprintf('<a class="show" href="show.php?fid=%d" type="%s">', $file_id, $mime_type);
+					$s_show  = sprintf('<a class="show" href="%s" type="%s">', $show_url, $mime_type);
 					$s_show .= '<img src="../templates/images/icon_loupe.png" width="14"';
 					$s_show .= ' height="14" alt="voir" title="' . $lang['Show'] . '" />';
 					$s_show .= '</a>';
@@ -696,17 +700,19 @@ BASIC;
 			}
 			else {
 				$filename = sprintf('<del title="%s">%s</del>',
-					$lang['Message']['File_not_found'], htmlspecialchars($filename));
+					$lang['Message']['File_not_found'],
+					htmlspecialchars($filename)
+				);
 			}
 
 			$template->assignToBlock('file_info', [
-				'OFFSET'   => ($i + 1),
+				'OFFSET'   => ++$offset,
 				'FILENAME' => $filename,
 				'FILESIZE' => formateSize($filesize),
 				'S_SHOW'   => $s_show
 			]);
 
-			if ($page_envoi) {
+			if (!$format) {
 				$template->assignToBlock('file_info.delete_options', [
 					'FILE_ID' => $file_id
 				]);
