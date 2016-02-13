@@ -173,7 +173,7 @@ class Template {
 
 		if (is_null($this->uncompiled_code)) {
 			if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
-				if (!preg_match('#^[a-z]:[/\\]#i', $filename)) {
+				if (!preg_match('#^[a-z]:[/\\\\]#i', $filename)) {
 					$filename = static::$tpldir . '/' . $filename;
 				}
 			}
