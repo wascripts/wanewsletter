@@ -1760,13 +1760,15 @@ function process_mail_action(array $listdata)
 		trigger_error(sprintf($lang['Message']['bad_pop_param'], $e->getMessage()), E_USER_ERROR);
 	}
 
-	$total    = $pop->stat_box();
-	$mail_box = $pop->list_mail();
+	$mail_box = $pop->list();
 
 	foreach ($mail_box as $mail_id => $mail_size) {
-		$headers = $pop->parse_headers($mail_id);
+		$mail = $pop->read($mail_id);
+		$headers = parse_headers($mail['headers']);
 
-		if (!isset($headers['from']) || !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $m)) {
+		if (!isset($headers['from'])
+			|| !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $m)
+		) {
 			continue;
 		}
 
@@ -1796,7 +1798,7 @@ function process_mail_action(array $listdata)
 				break;
 		}
 
-		$code = $pop->contents[$mail_id]['message'];
+		$code = trim($mail['message']);
 
 		if (!empty($code) && ($action =='confirmation' || $action == 'desinscription')) {
 			if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
@@ -1810,12 +1812,66 @@ function process_mail_action(array $listdata)
 		}
 
 		//
-		// On supprime l'email maintenant devenu inutile
+		// On supprime l’email maintenant devenu inutile
 		//
-		$pop->delete_mail($mail_id);
+		$pop->delete($mail_id);
 	}//end for
 
 	$pop->quit();
 
 	return $lang['Message']['Success_operation'];
+}
+
+/**
+ * Parse les en-têtes et retourne un tableau avec le nom des
+ * en-têtes et leur valeur
+ *
+ * @param string $headers_str
+ *
+ * @return array
+ *
+ * @status experimental
+ *         /!\ TODO – Cette fonction a vocation à migrer à terme dans Wamailer
+ */
+function parse_headers($headers_str)
+{
+	$decode_word = function ($m) {
+		if ($m[2] == 'Q' || $m[2] == 'q') {
+			$str = preg_replace_callback('/=([A-F0-9]{2})/i',
+				function ($m2) { return chr(hexdec($m2[1])); },
+				$m[3]
+			);
+			$str = str_replace('_', ' ', $str);
+		}
+		else {
+			$str = base64_decode($m[3]);
+		}
+
+		return $str;
+	};
+
+	// On vérifie si la valeur de l’en-tête est codée en base64
+	// ou en quoted-printable, et on la décode si besoin est.
+	$headers_str = preg_replace_callback(
+		'/=\?([^?]+)\?(Q|B)\?([^?]+)\?\=/i',
+		$decode_word,
+		$headers_str
+	);
+	$headers_str = trim($headers_str);
+	// On normalise les fins de ligne.
+	$headers_str = preg_replace("/(\r\n?)|\n/", "\r\n", $headers_str);
+	// On supprime les 'pliures' (FWS) des en-têtes.
+	$headers_str = preg_replace("/\r\n[ \t]+/", ' ', $headers_str);
+
+	$headers = [];
+	$lines   = explode("\r\n", $headers_str);
+
+	foreach ($lines as $line) {
+		list($name, $value) = explode(':', $line, 2);
+
+		$name = strtolower($name);
+		$headers[$name] = trim($value);
+	}
+
+	return $headers;
 }
