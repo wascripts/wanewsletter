@@ -145,8 +145,7 @@ class Auth
 						l.pop_host, l.pop_port, l.pop_user, l.pop_pass,
 						l.pop_tls, l.liste_alias, l.liste_numlogs,
 						aa.auth_view, aa.auth_edit, aa.auth_del, aa.auth_send,
-						aa.auth_import, aa.auth_export, aa.auth_ban,
-						aa.auth_attach, aa.cc_admin
+						aa.auth_import, aa.auth_export, aa.auth_ban, aa.auth_attach
 					FROM %s AS l
 						LEFT JOIN %s AS aa ON aa.admin_id = %d
 							AND aa.liste_id = l.liste_id

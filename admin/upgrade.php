@@ -798,6 +798,19 @@ if (isset($_POST['start'])) {
 			}
 		}
 
+		//
+		// Suppression de la fonctionnalité d’envoi de copie des
+		// newsletters aux admins
+		//
+		if ($nl_config['db_version'] < 26) {
+			if ($db::ENGINE != 'sqlite') {
+				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . " DROP COLUMN cc_admin";
+			}
+			else {
+				wa_sqlite_recreate_table(AUTH_ADMIN_TABLE);
+			}
+		}
+
 		exec_queries($sql_update);
 
 		//

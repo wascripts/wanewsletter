@@ -283,25 +283,6 @@ class Sender
 			}
 
 			$result->free();
-
-			//
-			// On récupère les adresses email des admins ayant demandé une copie
-			//
-			$sql = "SELECT a.admin_email
-				FROM %s AS a
-					INNER JOIN %s AS aa ON aa.admin_id = a.admin_id
-						AND aa.liste_id = %d
-						AND aa.cc_admin = 1";
-			$sql = sprintf($sql, ADMIN_TABLE, AUTH_ADMIN_TABLE, $this->listdata['liste_id']);
-			$result = $db->query($sql);
-
-			while ($admin_email = $result->column('admin_email')) {
-				if (array_search($admin_email, $supp_address) === false) {
-					$supp_address[] = $admin_email;
-				}
-			}
-
-			$result->free();
 		}
 
 		foreach ($supp_address as $address) {

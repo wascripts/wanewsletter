@@ -493,21 +493,6 @@ switch ($mode) {
 	case 'send':
 	case 'save':
 	case 'test':
-		$cc_admin = filter_input(INPUT_POST, 'cc_admin', FILTER_VALIDATE_BOOLEAN);
-
-		if (($mode == 'save' || $mode == 'send') && $listdata['cc_admin'] != $cc_admin) {
-			$listdata['cc_admin'] = $cc_admin;
-
-			$sql_data  = ['cc_admin' => $cc_admin];
-			$sql_where = ['admin_id' => $admindata['admin_id'], 'liste_id' => $listdata['liste_id']];
-
-			$db->update(AUTH_ADMIN_TABLE, $sql_data, $sql_where);
-			if ($db->affectedRows() == 0) {
-				$sql_data = array_merge($sql_data, $sql_where);
-				$db->insert(AUTH_ADMIN_TABLE, $sql_data);
-			}
-		}
-
 		if ($mode != 'attach' || empty($logdata['log_id'])) {
 			if ($logdata['log_subject'] == '') {
 				$error = true;
@@ -960,8 +945,6 @@ $template->assign([
 	'L_STATUS'                => $lang['Status'],
 	'L_STATUS_WRITING'        => $lang['Status_writing'],
 	'L_STATUS_MODEL'          => $lang['Status_model'],
-	'L_CC_ADMIN'              => $lang['Receive_copy'],
-	'L_CC_ADMIN_TITLE'        => htmlspecialchars($lang['Receive_copy_title']),
 
 	'L_SEND_BUTTON'           => $lang['Button']['send'],
 	'L_SAVE_BUTTON'           => $lang['Button']['save'],
@@ -975,8 +958,6 @@ $template->assign([
 	'S_SUBJECT'               => $subject,
 	'SELECTED_STATUS_WRITING' => $output->getBoolAttr('selected', ($logdata['log_status'] == STATUS_WRITING)),
 	'SELECTED_STATUS_MODEL'   => $output->getBoolAttr('selected', ($logdata['log_status'] == STATUS_MODEL)),
-	'CHECKED_CC_ADMIN_ON'     => $output->getBoolAttr('checked', $listdata['cc_admin']),
-	'CHECKED_CC_ADMIN_OFF'    => $output->getBoolAttr('checked', !$listdata['cc_admin']),
 
 	'S_ENCTYPE'               => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
 	'S_DELETE_BUTTON_DISABLED' => $output->getBoolAttr('disabled', ($logdata['log_id'] == 0)),

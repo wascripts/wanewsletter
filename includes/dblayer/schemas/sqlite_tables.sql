@@ -66,7 +66,6 @@ CREATE TABLE wa_auth_admin (
 	auth_export INTEGER NOT NULL DEFAULT 0,
 	auth_ban    INTEGER NOT NULL DEFAULT 0,
 	auth_attach INTEGER NOT NULL DEFAULT 0,
-	cc_admin    INTEGER NOT NULL DEFAULT 0,
 	CONSTRAINT wa_auth_admin_pk PRIMARY KEY (admin_id, liste_id)
 );
 
