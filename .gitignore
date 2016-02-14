@@ -1,2 +1,5 @@
 /data/config.inc.php
+/docs/changelog.*
+/docs/faq.*
+/docs/readme.*
 /vendor
