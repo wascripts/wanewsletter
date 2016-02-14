@@ -69,7 +69,7 @@
 
 	<div class="bloc">
 		<label for="format">{L_FORMAT}&nbsp;:</label>
-		<select id="format" name="format"><option value="1">TXT</option><option value="2">HTML</option></select>
+		{FORMAT_BOX}
 	</div>
 
 	<div class="bloc">

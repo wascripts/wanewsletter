@@ -67,7 +67,7 @@ function lang_box($default_lang = '')
  */
 function format_box($name, $default = 0, $multiple = false)
 {
-	global $output;
+	global $lang, $output;
 
 	$get_option = function ($format, $label) use ($output, $default) {
 		return sprintf('<option value="%d"%s>%s</option>',
@@ -83,11 +83,11 @@ function format_box($name, $default = 0, $multiple = false)
 	}
 
 	$format_box  = sprintf('<select%s name="%s">', $id_attr, $name);
-	$format_box .= $get_option(FORMAT_TEXT, 'texte');
+	$format_box .= $get_option(FORMAT_TEXT, $lang['Text']);
 	$format_box .= $get_option(FORMAT_HTML, 'html');
 
 	if ($multiple) {
-		$format_box .= $get_option(FORMAT_MULTIPLE, 'texte &amp; html');
+		$format_box .= $get_option(FORMAT_MULTIPLE, sprintf('%s/html', $lang['Text']));
 	}
 
 	$format_box .= '</select>';

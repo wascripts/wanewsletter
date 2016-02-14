@@ -322,6 +322,7 @@ $lang['Account_status']             = "Statut de ce compte";
 $lang['Active']                     = "Actif";
 $lang['Inactive']                   = "Inactif";
 $lang['None']                       = "Aucune";
+$lang['Text']                       = "texte";
 $lang['Restore_default']            = "Restaurer la valeur par défaut";
 $lang['Connection_security']        = "Sécurité de la connexion";
 $lang['Server_password_note']       = "Si laissé vide, le mot de passe précédent est conservé, sauf si aucun nom d’utilisateur n’est fourni.";

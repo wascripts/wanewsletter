@@ -352,13 +352,13 @@ else if ($mode == 'abonnes') {
 				if ($format == FORMAT_MULTIPLE) {
 					$format = sprintf(' (%s&nbsp;: %s)',
 						$lang['Choice_Format'],
-						($row['format'] == FORMAT_HTML ? 'html' : 'texte')
+						($row['format'] == FORMAT_HTML ? 'html' : $lang['Text'])
 					);
 				}
 				else {
 					$format = sprintf(' (%s&nbsp;: %s)',
 						$lang['Format'],
-						($format == FORMAT_HTML ? 'html' : 'texte')
+						($format == FORMAT_HTML ? 'html' : $lang['Text'])
 					);
 				}
 
@@ -561,7 +561,7 @@ else if ($mode == 'abonnes') {
 					$format_box = format_box("format[$row[liste_id]]", $row['format']);
 				}
 				else {
-					$format_box = ($format == FORMAT_HTML) ? 'HTML' : 'texte';
+					$format_box = ($format == FORMAT_HTML) ? 'html' : $lang['Text'];
 				}
 
 				$template->assignToBlock('listerow', [
@@ -818,7 +818,7 @@ else if ($mode == 'abonnes') {
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
 				$template->assignToBlock('aborow.format', [
-					'ABO_FORMAT' => ($aborow[$i]['format'] == FORMAT_HTML) ? 'html' : 'texte'
+					'ABO_FORMAT' => ($aborow[$i]['format'] == FORMAT_HTML) ? 'html' : $lang['Text']
 				]);
 			}
 

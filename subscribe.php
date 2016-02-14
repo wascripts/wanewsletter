@@ -10,8 +10,10 @@
 namespace Wanewsletter;
 
 $return_message = true;
+$message = '';
 
 require './newsletter.php';
+require 'includes/functions.box.php';
 
 $sql = "SELECT liste_id, liste_name, liste_format
 	FROM " . LISTE_TABLE . "
@@ -23,13 +25,13 @@ $list_box = '<select id="liste" name="liste">';
 if ($row = $result->fetch()) {
 	do {
 		if ($row['liste_format'] == FORMAT_TEXT) {
-			$format = 'txt';
+			$format = $lang['Text'];
 		}
 		else if ($row['liste_format'] == FORMAT_HTML) {
 			$format = 'html';
 		}
 		else {
-			$format = 'txt &amp; html';
+			$format = sprintf('%s/html', $lang['Text']);
 		}
 
 		$list_box .= sprintf('<option value="%d"> %s (%s) </option>',
@@ -62,8 +64,9 @@ $template->assign([
 	'L_UNSUBSCRIBE'   => $lang['Unsubscribe'],
 	'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
-	'LIST_BOX' => $list_box,
-	'MESSAGE'  => $message
+	'FORMAT_BOX'      => format_box('format'),
+	'LIST_BOX'        => $list_box,
+	'MESSAGE'         => $message
 ]);
 
 $template->pparse();

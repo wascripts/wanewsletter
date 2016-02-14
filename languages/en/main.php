@@ -321,6 +321,7 @@ $lang['Account_status']             = "Account status";
 $lang['Active']                     = "Active";
 $lang['Inactive']                   = "Inactive";
 $lang['None']                       = "None";
+$lang['Text']                       = "text";
 $lang['Restore_default']            = "Restore default value";
 $lang['Connection_security']        = "Connection security";
 $lang['Server_password_note']       = "If left empty, the previous password is kept unless no username is provided.";
