@@ -1835,28 +1835,6 @@ function process_mail_action(array $listdata)
  */
 function parse_headers($headers_str)
 {
-	$decode_word = function ($m) {
-		if ($m[2] == 'Q' || $m[2] == 'q') {
-			$str = preg_replace_callback('/=([A-F0-9]{2})/i',
-				function ($m2) { return chr(hexdec($m2[1])); },
-				$m[3]
-			);
-			$str = str_replace('_', ' ', $str);
-		}
-		else {
-			$str = base64_decode($m[3]);
-		}
-
-		return $str;
-	};
-
-	// On vérifie si la valeur de l’en-tête est codée en base64
-	// ou en quoted-printable, et on la décode si besoin est.
-	$headers_str = preg_replace_callback(
-		'/=\?([^?]+)\?(Q|B)\?([^?]+)\?\=/i',
-		$decode_word,
-		$headers_str
-	);
 	$headers_str = trim($headers_str);
 	// On normalise les fins de ligne.
 	$headers_str = preg_replace("/(\r\n?)|\n/", "\r\n", $headers_str);
@@ -1867,10 +1845,45 @@ function parse_headers($headers_str)
 	$lines   = explode("\r\n", $headers_str);
 
 	foreach ($lines as $line) {
-		list($name, $value) = explode(':', $line, 2);
+		list($header_name, $header_value) = explode(': ', $line, 2);
 
-		$name = strtolower($name);
-		$headers[$name] = trim($value);
+		$atoms = explode(' ', $header_value);
+
+		$header_value = $prev_atom_type = '';
+
+		foreach ($atoms as &$atom) {
+			if (preg_match('/=\?([^?]+)\?(Q|B)\?([^?]+)\?\=/i', $atom, $m)) {
+				$atom_type = 'encoded-word';
+
+				if ($m[2] == 'Q' || $m[2] == 'q') {
+					$atom = preg_replace_callback('/=([A-F0-9]{2})/i',
+						function ($m2) { return chr(hexdec($m2[1])); },
+						$m[3]
+					);
+					$atom = str_replace('_', ' ', $atom);
+				}
+				else {
+					$atom = base64_decode($m[3]);
+				}
+			}
+			else {
+				$atom_type = 'text';
+			}
+
+			/**
+			 * Les espaces blancs (LWS) entre deux 'encoded-word' doivent
+			 * être ignorés lors du décodage de ceux-ci.
+			 * @see RFC 2047#6.2 – Display of 'encoded-word's
+			 */
+			if ($atom_type == 'text' || $prev_atom_type == 'text') {
+				$header_value .= ' ';
+			}
+
+			$header_value .= $atom;
+			$prev_atom_type = $atom_type;
+		}
+
+		$headers[strtolower($header_name)] = trim($header_value);
 	}
 
 	return $headers;
