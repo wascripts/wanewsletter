@@ -1575,9 +1575,7 @@ function print_debug_infos()
 		echo "<u><b>", htmlspecialchars($str), "</b></u>\n";
 	};
 
-	$print_row  = function ($name, $value = null) {
-		global $lang;
-
+	$print_row  = function ($name, $value = null) use (&$lang) {
 		echo '  ';// 2x NBSP
 		echo htmlspecialchars(u::str_pad($name, 30));
 
