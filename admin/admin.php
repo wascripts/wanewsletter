@@ -389,7 +389,7 @@ $template->assign([
 ]);
 
 if (wan_is_admin($admindata)) {
-	$build_authbox = function ($auth_type, $listdata) use ($output, $lang) {
+	$build_authbox = function ($auth_type, $listdata) use ($output, &$lang) {
 		$selected_yes = $output->getBoolAttr('selected', !empty($listdata[$auth_type]));
 		$selected_no  = $output->getBoolAttr('selected', empty($listdata[$auth_type]));
 
