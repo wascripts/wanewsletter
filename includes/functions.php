@@ -1349,17 +1349,17 @@ function wan_get_tags()
 
 	foreach ($tags_file as $tag_file) {
 		if (file_exists($tag_file)) {
+			if ($need_to_move) {
+				wanlog(sprintf($lang['Message']['Move_to_data_dir'],
+					str_replace(WA_ROOTDIR, '~', $tag_file)
+				));
+			}
+
 			include $tag_file;
 			break;
 		}
 
 		$need_to_move = true;
-	}
-
-	if ($need_to_move) {
-		wanlog(sprintf($lang['Message']['Move_to_data_dir'],
-			str_replace(WA_ROOTDIR, '~', $tag_file)
-		));
 	}
 
 	return $other_tags;
