@@ -84,7 +84,7 @@ spl_autoload_register(function ($classname) {
 //
 $error     = false;
 $dsn       = '';
-$nl_config = $lang = $datetime = $admindata = $msg_error = [];
+$nl_config = $lang = $datetime = $msg_error = [];
 $prefixe   = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
 
 //
