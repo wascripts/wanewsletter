@@ -1742,6 +1742,8 @@ function process_mail_action(array $listdata)
 {
 	global $lang;
 
+	require 'includes/functions.stats.php';
+
 	$sub = new Subscription($listdata);
 	$pop = new PopClient();
 	$pop->options([
@@ -1800,16 +1802,28 @@ function process_mail_action(array $listdata)
 
 		$code = trim($mail['message']);
 
-		if (!empty($code) && ($action =='confirmation' || $action == 'desinscription')) {
-			if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
-				$time = time();
+		try {
+			if ($action == 'inscription') {
+				$sub->subscribe($listdata, $email, $pseudo);
 			}
+			else if ($action == 'desinscription') {
+				$sub->unsubscribe($listdata, $email);
+			}
+			else if ($action == 'setformat') {
+				$sub->setFormat($listdata, $email);
+			}
+			else if ($action == 'confirmation') {
+				if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
+					$time = time();
+				}
 
-			$sub->check_code($code, $time);
+				$sub->checkCode($code, $time);
+			}
 		}
-		else if (in_array($action, ['inscription','setformat','desinscription'])) {
-			$sub->do_action($action, $email, null, $pseudo);
+		catch (Dblayer\Exception $e) {
+			throw $e;
 		}
+		catch (Exception $e) { }
 
 		//
 		// On supprime l’email maintenant devenu inutile

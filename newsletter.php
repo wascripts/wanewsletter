@@ -18,6 +18,7 @@ if (!defined('WA_ROOTDIR')) {
 define('WA_INITIAL_ERROR_REPORTING', error_reporting());
 
 require WA_ROOTDIR . '/includes/common.inc.php';
+require 'includes/functions.stats.php';
 
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration
@@ -38,44 +39,59 @@ $format = (int) filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
 $liste  = (int) filter_input(INPUT_POST, 'liste', FILTER_VALIDATE_INT);
 $code   = '';
 
-if (!$action && preg_match('/([a-z0-9]{20})(?:&|$)/i', $_SERVER['QUERY_STRING'], $m)) {
+if (preg_match('/([a-z0-9]{20})(?:&|$)/i', $_SERVER['QUERY_STRING'], $m)) {
 	$code = $m[1];
 }
 
 $message = '';
+$sub = new Subscription();
 
-if ($action || $code) {
-	//
-	// Purge des éventuelles inscriptions dépassées
-	// pour parer au cas d'une réinscription
-	//
-	purge_liste();
+if ($action) {
+	if (in_array($action, ['inscription', 'setformat', 'desinscription'])) {
+		$sql = "SELECT liste_id, liste_name, liste_format, form_url,
+				return_email, sender_email, liste_alias, liste_sig, use_cron,
+				limitevalidate, purge_freq, confirm_subscribe
+			FROM %s
+			WHERE liste_id = %d";
+		$sql = sprintf($sql, LISTE_TABLE, $liste);
+		$result = $db->query($sql);
 
-	if ($action) {
-		if (in_array($action, ['inscription', 'setformat', 'desinscription'])) {
-			$sql = "SELECT liste_id, liste_format, sender_email, liste_alias, limitevalidate,
-					liste_name, form_url, return_email, liste_sig, use_cron, confirm_subscribe
-				FROM " . LISTE_TABLE . "
-				WHERE liste_id = " .  $liste;
-			$result = $db->query($sql);
-
-			if ($listdata = $result->fetch()) {
-				$sub = new Subscription($listdata);
-				$sub->message =& $message;
-				$sub->do_action($action, $email, $format, $pseudo);
+		if ($listdata = $result->fetch()) {
+			try {
+				if ($action == 'inscription') {
+					$message = $sub->subscribe($listdata, $email, $pseudo, $format);
+				}
+				else if ($action == 'desinscription') {
+					$message = $sub->unsubscribe($listdata, $email);
+				}
+				else {
+					$message = $sub->setFormat($listdata, $email, $format);
+				}
 			}
-			else {
-				$message = $lang['Message']['Unknown_list'];
+			catch (Dblayer\Exception $e) {
+				throw $e;
+			}
+			catch (Exception $e) {
+				$message = $e->getMessage();
 			}
 		}
 		else {
-			$message = $lang['Message']['Invalid_action'];
+			$message = $lang['Message']['Unknown_list'];
 		}
 	}
 	else {
-		$sub = new Subscription();
-		$sub->message =& $message;
-		$sub->check_code($code);
+		$message = $lang['Message']['Invalid_action'];
+	}
+}
+else if ($code) {
+	try {
+		$message = $sub->checkCode($code);
+	}
+	catch (Dblayer\Exception $e) {
+		throw $e;
+	}
+	catch (Exception $e) {
+		$message = $e->getMessage();
 	}
 }
 
