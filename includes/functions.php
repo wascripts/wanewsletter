@@ -1335,11 +1335,13 @@ function wamailer(array $opts = [])
 function wan_get_tags()
 {
 	global $lang;
-	static $other_tags = [];
+	static $other_tags;
 
-	if (count($other_tags) > 0) {
+	if (is_array($other_tags)) {
 		return $other_tags;
 	}
+
+	$other_tags  = [];
 
 	$tags_file[] = WA_ROOTDIR . '/data/tags.inc.php';
 	// compatibilité Wanewsletter < 3.0-beta1
