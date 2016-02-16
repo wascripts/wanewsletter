@@ -380,15 +380,16 @@ if ($img == 'camembert') {
 
 		$listdata = array_shift($lists);
 
-		//
-		// On vérifie si le nombre d'inscrits représente au moins un millième du total
-		// (Sans cela, il se produit un bug d'affichage)
-		//
-		$part = 0;
+		$percent = 0;
+		if ($total_subscribers > 0) {
+			$percent = (round($listdata['subscribers'] / $total_subscribers, 3) * 100);
+		}
 
-		if ($total_subscribers > 0 && ($part = round($listdata['subscribers'] / $total_subscribers, 3)) > 0.001) {
+		// On vérifie si le nombre d’inscrits représente plus d’un millième
+		// du total (Sans cela, il se produit un bug d’affichage).
+		if ($percent > 0.1) {
 			$deb_arc = round($degre);
-			$degre  += ($part * 360);
+			$degre  += ($percent * 3.6);
 			$end_arc = round($degre);
 
 			imagearc($im, $startX, $startY, 100, 100, $deb_arc, $end_arc, $color_arc);
@@ -430,7 +431,7 @@ if ($img == 'camembert') {
 		$text = sprintf('%s [%d] [%s%%]',
 			$listdata['liste_name'],
 			$listdata['subscribers'],
-			wa_number_format(($part > 0 ? round($part * 100, 2) : 0), 1)
+			wa_number_format($percent, 1)
 		);
 		imagettftext($im, $font_size, 0, 185, ($globalY + $int + 11), $black, $font_file, $text);
 
