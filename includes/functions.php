@@ -1697,13 +1697,19 @@ function print_debug_infos()
 
 	$print_row($lang['Driver'], $db->infos['driver']);
 
-	$print_head($lang['Misc']);
+	if (isset($_SERVER['SERVER_SOFTWARE'])) {
+		$print_head($lang['Misc']);
 
-	$user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS);
+		$user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS);
 
-	$print_row($lang['Server_software'],   $_SERVER['SERVER_SOFTWARE'] . '/' . PHP_OS);
-	$print_row($lang['User_agent'],        $user_agent);
-	$print_row($lang['Secure_connection'], wan_ssl_connection());
+		$print_row($lang['User_agent'],      $user_agent);
+		$print_row($lang['Server_software'], sprintf('%s – %s – %s',
+			$_SERVER['SERVER_SOFTWARE'],
+			$_SERVER['SERVER_PROTOCOL'],
+			PHP_OS
+		));
+		$print_row($lang['Secure_connection'], wan_ssl_connection());
+	}
 
 	echo "</pre>";
 }
