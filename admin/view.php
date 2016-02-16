@@ -1697,6 +1697,10 @@ else if ($mode == 'log') {
 		if ($action == 'view' && is_array($logdata)) {
 			$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
+			if (!in_array($format, [FORMAT_TEXT, FORMAT_HTML])) {
+				$format = FORMAT_TEXT;
+			}
+
 			$iframe = new Template('iframe_body.tpl');
 
 			$iframe->assign([
