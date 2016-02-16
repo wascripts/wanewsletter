@@ -1258,7 +1258,7 @@ else if ($mode == 'liste') {
 				if ($liste_id != $listdata['liste_id']) {
 					$list_box .= sprintf('<option value="%d"> %s </option>',
 						$liste_id,
-						htmlspecialchars(cut_str($data['liste_name'], 30))
+						htmlspecialchars($data['liste_name'])
 					);
 				}
 			}
@@ -1682,7 +1682,7 @@ else if ($mode == 'log') {
 
 			$template->assignToBlock('logrow', [
 				'ITEM_CLIP'   => $s_clip,
-				'LOG_SUBJECT' => htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
+				'LOG_SUBJECT' => htmlspecialchars($logrow[$i]['log_subject'], ENT_NOQUOTES),
 				'LOG_DATE'    => convert_time($admindata['admin_dateformat'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sprintf('view.php?mode=log&amp;action=view&amp;id=%d%s', $logrow[$i]['log_id'], $get_string)
 			]);

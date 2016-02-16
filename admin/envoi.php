@@ -259,7 +259,7 @@ switch ($mode) {
 
 				$template->assignToBlock('logrow', [
 					'LOG_ID'       => $row['log_id'],
-					'LOG_SUBJECT'  => htmlspecialchars(cut_str($row['log_subject'], 40), ENT_NOQUOTES),
+					'LOG_SUBJECT'  => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
 					'SEND_PERCENT' => $percent
 				]);
 			}
@@ -365,7 +365,7 @@ switch ($mode) {
 			$template = new Template('select_log_body.tpl');
 
 			if ($row = $result->fetch()) {
-				$log_box = '<select name="id">';
+				$log_box = '<select name="id" class="logList">';
 
 				do {
 					if ($row['log_status'] == STATUS_MODEL) {
@@ -378,10 +378,10 @@ switch ($mode) {
 					}
 
 					$log_box .= sprintf(
-						'<option value="%d" %s>%s - %s %s</option>',
+						'<option value="%d" %s>%s – [%s] %s</option>',
 						$row['log_id'],
 						$class,
-						htmlspecialchars(cut_str($row['log_subject'], 40)),
+						htmlspecialchars($row['log_subject']),
 						convert_time('d F Y', $row['log_date']),
 						$status
 					);

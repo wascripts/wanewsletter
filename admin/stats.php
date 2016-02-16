@@ -416,8 +416,19 @@ if ($img == 'camembert') {
 		$height = ($coords[3] - $coords[5]);
 		$start  = (($imageW - $width) / 2);
 
+		// Limitation d’affichage du nom des listes
+		if (mb_strlen($listdata['liste_name']) > 40) {
+			$listdata['liste_name'] = mb_substr($listdata['liste_name'], 0, 40);
+
+			if ($space = mb_strrpos($listdata['liste_name'], ' ')) {
+				$listdata['liste_name'] = mb_substr($listdata['liste_name'], 0, $space);
+			}
+
+			$listdata['liste_name'] .= "\xe2\x80\xa6";// (U+2026) Horizontal ellipsis char
+		}
+
 		$text = sprintf('%s [%d] [%s%%]',
-			cut_str($listdata['liste_name'], 30),
+			$listdata['liste_name'],
 			$listdata['subscribers'],
 			wa_number_format(($part > 0 ? round($part * 100, 2) : 0), 1)
 		);

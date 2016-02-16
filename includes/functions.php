@@ -926,29 +926,6 @@ function strip_magic_quotes(&$data)
 }
 
 /**
- * Pour limiter la longueur d'une chaine de caractère à afficher
- *
- * @param string  $str
- * @param integer $len
- *
- * @return string
- */
-function cut_str($str, $len)
-{
-	if (mb_strlen($str) > $len) {
-		$str = mb_substr($str, 0, $len);
-
-		if ($space = mb_strrpos($str, ' ')) {
-			$str = mb_substr($str, 0, $space);
-		}
-
-		$str .= "\xe2\x80\xa6";// (U+2026) Horizontal ellipsis char
-	}
-
-	return $str;
-}
-
-/**
  * Convertit les liens dans un texte en lien html
  * Importé de WAgoldBook 2.0.x et précédemment importé de phpBB 2.0.x
  *

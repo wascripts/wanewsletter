@@ -201,8 +201,10 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	background-image: -webkit-linear-gradient(top, hsl(220, 45%, 35%) 15%, hsl(220, 25%, 60%));
 	background-image: linear-gradient(to bottom, hsl(220, 45%, 35%) 15%, hsl(220, 25%, 60%));
 	margin: 0;
-	padding: 5px;
+	padding: 5px 15px;
 	text-align: center;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	text-shadow: rgba(0, 0, 0, 0.8) 0 0 2px;
 	white-space: nowrap;
 	line-height: 1.31;
@@ -338,9 +340,15 @@ ul#home li {
 	line-height: 1.6;
 }
 
-div#log-details { margin: 1px; padding: .2em .5em; line-height: 1.5; }
-div#log-details { background-color: #E7E5E3; }
-div#log-details span + span:last-child { float: right; margin-top: 2px; }
+div#log-details {
+	background-color: #E7E5E3;
+	margin: 1px;
+	padding: .2em .5em;
+	line-height: 1.5;
+	position: relative;
+}
+
+div#log-details span + span:last-child { position: absolute; right: 8px; margin-top: 2px; }
 
 /* Boîte de visualisation des images jointes */
 div.image-box {
@@ -440,8 +448,15 @@ form#smallbox {
 }
 
 /* Boîte de sélection de liste/utilisateur */
-#liste option[value="0"]:first-child,
-#uid option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
+select#liste option[value="0"]:first-child,
+select#uid option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
+
+select#liste, select#liste_id, select.logList {
+	max-width: 25em;
+	text-overflow: ellipsis;
+}
+
+option.model { color: #25F; }
 
 input, select, button {
 	line-height: normal;/* Sur IE, les <button> héritent du line-height du parent */
@@ -514,10 +529,6 @@ textarea:focus { background-color: white; }
 
 input[type="number"][size="5"] { width: 5em; }
 input[type="number"][size="8"] { width: 8em; }
-
-select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil */
-
-option.model { color: #25F; }
 
 /* Lien de restauration des valeurs par défaut */
 a.restore-default {

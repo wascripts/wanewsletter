@@ -753,7 +753,7 @@ BASIC;
 				"<option value=\"%d\"%s>%s</option>\n\t",
 				$liste_id,
 				$this->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id)),
-				htmlspecialchars(cut_str($data['liste_name'], 30))
+				htmlspecialchars($data['liste_name'])
 			);
 		}
 

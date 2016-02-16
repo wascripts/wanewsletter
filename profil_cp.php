@@ -286,9 +286,9 @@ switch ($mode) {
 			for ($i = 0; $i < $num_logs; $i++) {
 				$logdata = $abodata['lists'][$liste_id]['archives'][$i];
 
-				$select_log .= sprintf('<option value="%d">&#8211; %s [%s]</option>',
+				$select_log .= sprintf('<option value="%d">%s – [%s]</option>',
 					$logdata['log_id'],
-					htmlspecialchars(cut_str($logdata['log_subject'], 40), ENT_NOQUOTES),
+					htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
 					convert_time('d/m/Y', $logdata['log_date'])
 				);
 			}
