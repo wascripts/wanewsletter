@@ -670,7 +670,8 @@ function wanlog($entry = null)
 		$entries[$hash] = $entry;
 
 		if (DEBUG_LOG_ENABLED) {
-			$entry = preg_replace('#</?b>#', '', trim(wan_format_error($entry)));
+			$entry = trim(wan_format_error($entry));
+			$entry = preg_replace(['#</?b>#', '#<br(\s?/)?>#'], '', $entry);
 		}
 	}
 	else {
