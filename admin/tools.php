@@ -930,7 +930,7 @@ switch ($mode) {
 
 	case 'restore':
 		if (isset($_POST['submit'])) {
-			require 'includes/dblayer/sqlparser.php';
+			require 'includes/Dblayer/sqlparser.php';
 
 			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : null;
 			$local_file  = trim(filter_input(INPUT_POST, 'local_file'));

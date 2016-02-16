@@ -129,12 +129,7 @@ function parseDSN($dsn)
 
 				$infos['label']  = $supported_db[$value]['label'];
 				$infos['engine'] = $value;
-
-				if ($value == 'mysql' && extension_loaded('mysqli')) {
-					$value = 'mysqli';
-				}
-
-				$infos['driver'] = $value;
+				$infos['driver'] = ucfirst($value);
 				break;
 
 			case 'host':
@@ -164,15 +159,18 @@ function parseDSN($dsn)
 		}
 	}
 
-	if ($infos['engine'] == 'sqlite') {
+	if ($infos['engine'] == 'mysql' && extension_loaded('mysqli')) {
+		$infos['driver'] = 'Mysqli';
+	}
+	else if ($infos['engine'] == 'sqlite') {
 		if (class_exists('SQLite3')) {
-			$infos['driver'] = 'sqlite3';
+			$infos['driver'] = 'Sqlite3';
 		}
 		else {
 			if (!extension_loaded('pdo') || !extension_loaded('pdo_sqlite')) {
 				trigger_error("No SQLite3 or PDO/SQLite extension loaded !", E_USER_ERROR);
 			}
-			$infos['driver'] = 'sqlitepdo';
+			$infos['driver'] = 'SqlitePdo';
 		}
 
 		if (is_readable($infos['path']) && filesize($infos['path']) > 0) {
@@ -199,7 +197,7 @@ function parseDSN($dsn)
 function WaDatabase($dsn)
 {
 	list($infos, $options) = parseDSN($dsn);
-	$dbclass = __NAMESPACE__ . '\\Dblayer\\' . ucfirst($infos['driver']);
+	$dbclass = sprintf('%s\\Dblayer\\%s', __NAMESPACE__, $infos['driver']);
 
 	$infos['username'] = (isset($infos['user'])) ? $infos['user'] : null;
 	$infos['passwd']   = (isset($infos['pass'])) ? $infos['pass'] : null;

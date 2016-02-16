@@ -12,7 +12,7 @@ namespace Wanewsletter\Dblayer;
 use PDO;
 use PDOException;
 
-class Sqlitepdo extends Wadb
+class SqlitePdo extends Wadb
 {
 	/**
 	 * Type de base de données

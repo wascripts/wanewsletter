@@ -63,15 +63,13 @@ spl_autoload_register(function ($classname) {
 		return null;
 	}
 
-	$classname = strtolower($classname);
-
 	if (strpos($classname, '\\')) {
 		// Chemin includes/<namespace>/<classname>.php
 		$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
 	}
 	else {
 		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
-		$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
+		$filename = sprintf('%s/includes/class.%s.php', $rootdir, strtolower($classname));
 	}
 
 	if (is_readable($filename)) {

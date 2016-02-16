@@ -12,7 +12,7 @@
  *
  * TODO : Les champs étrangers (champs personnalisés) ne sont pas pris en compte
  * La correction manuelle consiste à ajouter les descriptions des nouveaux champs dans
- * le fichier de schéma des tables correspondant dans ~/includes/dblayer/schemas
+ * le fichier de schéma des tables correspondant dans ~/includes/Dblayer/schemas
  */
 
 namespace Wanewsletter;
@@ -29,7 +29,7 @@ exit(0);
 //
 define('WA_ROOTDIR', dirname(__DIR__));
 
-$schemas_dir  = WA_ROOTDIR . '/includes/dblayer/schemas';
+$schemas_dir  = WA_ROOTDIR . '/includes/Dblayer/schemas';
 
 //$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
 $dsn_from     = 'mysql://username:password@localhost/dbname?charset=utf8';
@@ -42,7 +42,7 @@ $prefixe_to   = 'wa_';
 //
 
 require WA_ROOTDIR . '/includes/common.inc.php';
-require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
+require WA_ROOTDIR . '/includes/Dblayer/sqlparser.php';
 
 if (!check_cli()) {
 	set_time_limit(0);
