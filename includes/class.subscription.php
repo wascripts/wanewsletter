@@ -380,7 +380,7 @@ class Subscription
 	 * @param string $email_tpl
 	 * @param string $subject
 	 */
-	public function sendEmail(array $listdata, array $abodata, $email_tpl, $subject)
+	protected function sendEmail(array $listdata, array $abodata, $email_tpl, $subject)
 	{
 		global $lang, $nl_config;
 
@@ -458,7 +458,7 @@ class Subscription
 	 * @param array  $listdata
 	 * @param array  $abodata
 	 */
-	private function sendNotification($type, array $listdata, array $abodata)
+	protected function sendNotification($type, array $listdata, array $abodata)
 	{
 		global $db, $lang, $nl_config;
 
