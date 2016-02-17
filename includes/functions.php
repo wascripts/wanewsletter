@@ -492,9 +492,9 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 }
 
 /**
- * Gestionnaire d'erreur personnalisé du script
+ * Gestionnaire d’exception personnalisé du script
  *
- * @param Throwable $e Exception "attrapée" par le gestionnaire
+ * @param \Throwable $e Objet "attrapé" par le gestionnaire
  */
 function wan_exception_handler($e)
 {
@@ -506,9 +506,9 @@ function wan_exception_handler($e)
 
 /**
  * Si elle est appelée avec un argument, ajoute l'entrée dans le journal,
- * sinon, renvoie le journal.
+ * sinon, retourne le journal.
  *
- * @param mixed $entry Peut être un objet Throwable, ou n'importe quelle autre valeur
+ * @param mixed $entry Peut être un objet \Throwable, ou n’importe quelle autre valeur
  *
  * @return array
  */
