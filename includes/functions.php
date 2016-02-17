@@ -18,9 +18,12 @@ use Wamailer\Mailer;
  */
 function load_config()
 {
-	global $output, $dsn, $prefixe;// Sale mais bon...
+	global $output;
 
 	load_settings();
+
+	$dsn = '';
+	$prefixe = 'wa_';
 
 	// Réglage par défaut des divers répertoires utilisés par le script.
 	// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
@@ -111,6 +114,16 @@ function load_config()
 			$dsn .= '?'.$args;
 		}
 	}
+
+	// Cas spécifique au script d’installation.
+	if (defined(__NAMESPACE__.'\\IN_INSTALL')) {
+		$prefixe = filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
+			'options' => ['default' => $prefixe]
+		]);
+	}
+
+	$GLOBALS['dsn'] = $dsn;
+	$GLOBALS['prefixe'] = $prefixe;
 
 	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 

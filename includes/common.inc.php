@@ -91,12 +91,10 @@ else {
 }
 
 //
-// Intialisation des variables pour éviter toute injection malveillante de code
+// Initialisation des variables pour éviter toute injection malveillante de code
 //
 $error     = false;
-$dsn       = '';
 $nl_config = $lang = $datetime = $msg_error = [];
-$prefixe   = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
 
 //
 // Chargement de la configuration de base
