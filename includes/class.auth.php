@@ -219,7 +219,7 @@ class Auth
 	{
 		global $admindata;
 
-		return (wan_is_admin($admindata) || !empty($admindata['lists'][$liste_id][$auth_type]));
+		return (self::isAdmin($admindata) || !empty($admindata['lists'][$liste_id][$auth_type]));
 	}
 
 	/**
@@ -236,11 +236,23 @@ class Auth
 
 		$lists = [];
 		foreach ($admindata['lists'] as $liste_id => $data) {
-			if (wan_is_admin($admindata) || !empty($data[$auth_type])) {
+			if (self::isAdmin($admindata) || !empty($data[$auth_type])) {
 				$lists[$liste_id] = $data;
 			}
 		}
 
 		return $lists;
+	}
+
+	/**
+	 * Vérifie si l’utilisateur concerné est administrateur
+	 *
+	 * @param array $admindata Tableau des données de l’utilisateur
+	 *
+	 * @return boolean
+	 */
+	public static function isAdmin($admindata)
+	{
+		return (isset($admindata['admin_level']) && $admindata['admin_level'] == ADMIN_LEVEL);
 	}
 }

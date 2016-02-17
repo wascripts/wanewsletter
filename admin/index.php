@@ -212,7 +212,7 @@ $template->assign([
 	'LISTBOX'                => $output->listbox(Auth::VIEW, false, './view.php?mode=liste')
 ]);
 
-if (wan_is_admin($admindata)) {
+if (Auth::isAdmin($admindata)) {
 	$result = wa_check_update();
 
 	$template->assignToBlock('version_info', [

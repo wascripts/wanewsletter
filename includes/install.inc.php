@@ -181,7 +181,7 @@ if ($start) {
 		$auth = new Auth();
 
 		if ($admindata = $auth->checkCredentials($admin_login, $admin_pass)) {
-			if (!wan_is_admin($admindata)) {
+			if (!Auth::isAdmin($admindata)) {
 				http_response_code(401);
 				$output->addLine($lang['Message']['Not_authorized']);
 				$output->addLine($lang['Click_return_index'], './index.php');

@@ -112,7 +112,7 @@ if ($nl_config['db_version'] > 18) {
 // l’accueil, soit en AJAX quand c’est possible, soit directement.
 //
 if (filter_input(INPUT_GET, 'mode') == 'check') {
-	if (!$auth->isLoggedIn() || is_null($session) || !wan_is_admin($admindata)) {
+	if (!$auth->isLoggedIn() || is_null($session) || !Auth::isAdmin($admindata)) {
 		// Utilisateur non authentifié ou n'ayant pas le niveau d’administrateur
 		if (filter_input(INPUT_GET, 'output') == 'json') {
 			header('Content-Type: application/json');
@@ -172,7 +172,7 @@ $config_file .= "\$dsn = '$dsn';\n";
 $config_file .= "\$prefixe = '$prefixe';\n";
 $config_file .= "\n";
 
-if ($auth->isLoggedIn() && wan_is_admin($admindata) && isset($_POST['sendfile'])) {
+if ($auth->isLoggedIn() && Auth::isAdmin($admindata) && isset($_POST['sendfile'])) {
 	sendfile('config.inc.php', 'text/plain', $config_file);
 }
 
@@ -201,7 +201,7 @@ if (isset($_POST['start'])) {
 		}
 	}
 
-	if (!$error && !wan_is_admin($admindata)) {
+	if (!$error && !Auth::isAdmin($admindata)) {
 		http_response_code(401);
 		$output->redirect('./index.php', 6);
 		$output->addLine($lang['Message']['Not_authorized']);

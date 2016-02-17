@@ -29,7 +29,7 @@ if (isset($_POST['delete_user'])) {
 //
 // Seuls les administrateurs peuvent ajouter ou supprimer un utilisateur
 //
-if (($mode == 'adduser' || $mode == 'deluser') && !wan_is_admin($admindata)) {
+if (($mode == 'adduser' || $mode == 'deluser') && !Auth::isAdmin($admindata)) {
 	http_response_code(401);
 	$output->redirect('index.php', 4);
 	$output->addLine($lang['Message']['Not_authorized']);
@@ -171,7 +171,7 @@ else if ($mode == 'deluser') {
 }
 
 if (isset($_POST['submit'])) {
-	if (!wan_is_admin($admindata) && $admin_id != $admindata['admin_id']) {
+	if (!Auth::isAdmin($admindata) && $admin_id != $admindata['admin_id']) {
 		http_response_code(401);
 		$output->redirect('./index.php', 4);
 		$output->addLine($lang['Message']['Not_authorized']);
@@ -237,7 +237,7 @@ if (isset($_POST['submit'])) {
 			$sql_data['admin_pwd'] = $passwd_hash;
 		}
 
-		if (wan_is_admin($admindata) && $admin_id != $admindata['admin_id']) {
+		if (Auth::isAdmin($admindata) && $admin_id != $admindata['admin_id']) {
 			$admin_level = filter_input(INPUT_POST, 'admin_level', FILTER_VALIDATE_INT);
 
 			if (is_int($admin_level) && in_array($admin_level, [ADMIN_LEVEL, USER_LEVEL])) {
@@ -247,7 +247,7 @@ if (isset($_POST['submit'])) {
 
 		$db->update(ADMIN_TABLE, $sql_data, ['admin_id' => $admin_id]);
 
-		if (wan_is_admin($admindata)) {
+		if (Auth::isAdmin($admindata)) {
 			$liste_ids = (array) filter_input(INPUT_POST, 'liste_id',
 				FILTER_VALIDATE_INT,
 				FILTER_REQUIRE_ARRAY
@@ -304,7 +304,7 @@ if (isset($_POST['submit'])) {
 $current_admin = $admindata;
 $admin_box = '';
 
-if (wan_is_admin($admindata)) {
+if (Auth::isAdmin($admindata)) {
 	//
 	// Récupération des données de l’utilisateur concerné.
 	//
@@ -344,7 +344,7 @@ require 'includes/functions.box.php';
 
 $output->addHiddenField('uid', $current_admin['admin_id']);
 
-if (wan_is_admin($admindata)) {
+if (Auth::isAdmin($admindata)) {
 	$output->addLink('subsection', './admin.php?mode=adduser', $lang['Add_user']);
 }
 
@@ -388,7 +388,7 @@ $template->assign([
 	'S_HIDDEN_FIELDS'       => $output->getHiddenFields()
 ]);
 
-if (wan_is_admin($admindata)) {
+if (Auth::isAdmin($admindata)) {
 	$build_authbox = function ($auth_type, $listdata) use ($output, &$lang) {
 		$selected_yes = $output->getBoolAttr('selected', !empty($listdata[$auth_type]));
 		$selected_no  = $output->getBoolAttr('selected', empty($listdata[$auth_type]));
@@ -420,8 +420,8 @@ if (wan_is_admin($admindata)) {
 		'L_DELETE_ADMIN'  => $lang['Del_user'],
 		'L_NOTE_DELETE'   => nl2br($lang['Del_note']),
 
-		'SELECTED_ADMIN'  => $output->getBoolAttr('selected', wan_is_admin($current_admin)),
-		'SELECTED_USER'   => $output->getBoolAttr('selected', !wan_is_admin($current_admin))
+		'SELECTED_ADMIN'  => $output->getBoolAttr('selected', Auth::isAdmin($current_admin)),
+		'SELECTED_USER'   => $output->getBoolAttr('selected', !Auth::isAdmin($current_admin))
 	]);
 
 	foreach ($current_admin['lists'] as $liste_id => $data) {

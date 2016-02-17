@@ -278,7 +278,7 @@ class Output
 			$this->addLink('section', './tools.php?mode=ban',       $lang['Title']['ban']);
 			$this->addLink('section', './tools.php?mode=generator', $lang['Title']['generator']);
 
-			if (wan_is_admin($admindata)) {
+			if (Auth::isAdmin($admindata)) {
 				$this->addLink('section', './tools.php?mode=attach' , $lang['Title']['attach']);
 				$this->addLink('section', './tools.php?mode=backup' , $lang['Title']['backup']);
 				$this->addLink('section', './tools.php?mode=restore', $lang['Title']['restore']);
@@ -761,7 +761,7 @@ BASIC;
 			if ($complete) {
 				$this->addLine($lang['Message']['No_liste_exists']);
 
-				if (wan_is_admin($admindata)) {
+				if (Auth::isAdmin($admindata)) {
 					$this->addLine($lang['Click_create_liste'], './view.php?mode=liste&action=add');
 				}
 

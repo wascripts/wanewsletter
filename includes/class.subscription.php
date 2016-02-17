@@ -522,7 +522,7 @@ class Subscription
 		$template->assign($tags);
 
 		do {
-			if (!wan_is_admin($admindata) && !$admindata['auth_view']) {
+			if (!Auth::isAdmin($admindata) && !$admindata['auth_view']) {
 				continue;
 			}
 

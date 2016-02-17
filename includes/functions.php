@@ -1225,18 +1225,6 @@ function formateSize($size)
 }
 
 /**
- * Vérifie si l'utilisateur concerné est administrateur
- *
- * @param array $admin Tableau des données de l'utilisateur
- *
- * @return boolean
- */
-function wan_is_admin($admin)
-{
-	return (isset($admin['admin_level']) && $admin['admin_level'] == ADMIN_LEVEL);
-}
-
-/**
  * Retourne le niveau de débogage, dépendant de la valeur de la constante DEBUG_MODE
  * ainsi que de la clé de configuration 'debug_level'.
  *

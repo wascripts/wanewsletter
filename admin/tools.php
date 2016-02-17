@@ -98,7 +98,7 @@ switch ($mode) {
 	case 'restore':
 	case 'debug':
 	case 'attach':
-		if (!wan_is_admin($admindata)) {
+		if (!Auth::isAdmin($admindata)) {
 			http_response_code(401);
 			$output->redirect('./index.php', 4);
 			$output->addLine($lang['Message']['Not_authorized']);
@@ -138,7 +138,7 @@ else if ($_SESSION['liste']) {
 if (!isset($_POST['submit'])) {
 	$tools_ary = ['export', 'import', 'ban', 'generator'];
 
-	if (wan_is_admin($admindata)) {
+	if (Auth::isAdmin($admindata)) {
 		array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
 	}
 
