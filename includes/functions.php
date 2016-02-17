@@ -122,6 +122,26 @@ function load_config()
 	define(__NAMESPACE__.'\\WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
 	define(__NAMESPACE__.'\\WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
 	define(__NAMESPACE__.'\\WA_LOCKFILE', WA_TMPDIR . '/liste-%d.lock');
+
+	if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE) {
+		$add_prefix = false;
+		$filename = DEBUG_LOG_FILE;
+
+		if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
+			if (!preg_match('#^[a-z]:[/\\\\]#i', $filename)) {
+				$add_prefix = true;
+			}
+		}
+		else if ($filename[0] != '/') {
+			$add_prefix = true;
+		}
+
+		if ($add_prefix) {
+			$filename = WA_LOGSDIR . '/' . $filename;
+		}
+
+		ini_set('error_log', $filename);
+	}
 }
 
 /**

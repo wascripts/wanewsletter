@@ -94,30 +94,17 @@ Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
 ));
 
 //
+// Chargement de la configuration de base
+//
+load_config();
+
+//
 // Initialisation de patchwork/utf8
 //
 \Patchwork\Utf8\Bootup::initAll();
 
 //
-// Chargement de la configuration de base
+// Initialisation  des données sur les tables et de la connexion
+// à la base de données (doit être placé après load_config()).
 //
-load_config();
-
-// Log éventuels des erreurs
-if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
-	$filename = DEBUG_LOG_FILE;
-	if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
-		if (!preg_match('#^[a-z]:[/\\\\]#i', $filename)) {
-			$filename = WA_LOGSDIR . '/' . $filename;
-		}
-	}
-	else if ($filename[0] != '/') {
-		$filename = WA_LOGSDIR . '/' . $filename;
-	}
-
-	ini_set('error_log', $filename);
-	unset($filename);
-}
-
-// Doit être placé après load_config_file()
 require 'includes/wadb_init.php';
