@@ -72,7 +72,6 @@ includes/class.auth.php
 includes/class.error.php
 includes/class.exception.php
 includes/class.subscription.php
-includes/class.output.php
 includes/class.popclient.php
 includes/class.sender.php
 includes/class.session.php
@@ -100,6 +99,10 @@ includes/Dblayer/Sqlite3.php
 includes/Dblayer/SqlitePdo.php
 includes/Dblayer/sqlparser.php
 includes/Dblayer/Wadb.php
+includes/Output/CommandLine.php
+includes/Output/Html.php
+includes/Output/Json.php
+includes/Output/MessageInterface.php
 includes/wadb_init.php
 index.html
 install.php
