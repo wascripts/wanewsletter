@@ -7,9 +7,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
-namespace Wanewsletter;
+namespace Wanewsletter\Output;
 
-class Output
+use Wanewsletter\Auth;
+use Wanewsletter\Error;
+use Wanewsletter\Dblayer;
+use Wanewsletter\Template;
+
+class Html implements MessageInterface
 {
 	/**
 	 * Liens relatifs au document
@@ -52,6 +57,13 @@ class Output
 	 * @var boolean
 	 */
 	private $header_displayed = false;
+
+	public function __construct()
+	{
+		Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
+			(\Wanewsletter\check_in_admin() ? 'admin/' : '')
+		));
+	}
 
 	/**
 	 * Ajout d'un lien relatif au document
@@ -100,8 +112,8 @@ class Output
 	/**
 	 * Ajout d'un script client
 	 *
-	 * @param string $src    URL du script
-	 * @param string $type   Type MIME
+	 * @param string  $src   URL du script
+	 * @param string  $type  Type MIME
 	 * @param boolean $async Chargement asynchrone
 	 * @param boolean $defer Chargement après le chargement de la page elle-même
 	 */
@@ -218,7 +230,7 @@ class Output
 	 */
 	public function redirect($url, $timer)
 	{
-		if (wan_get_debug_level() == DEBUG_LEVEL_QUIET) {
+		if (!\Wanewsletter\wan_is_debug_enabled()) {
 			$this->meta_redirect = sprintf(
 				'<meta http-equiv="Refresh" content="%d; url=%s" />',
 				intval($timer),
@@ -240,6 +252,21 @@ class Output
 	public function getBoolAttr($name, $return = true)
 	{
 		return ($return) ? " $name " : '';
+	}
+
+	/**
+	 * Envoi des en-têtes HTTP
+	 */
+	public function httpHeaders()
+	{
+		global $lang;
+
+		header('Expires: ' . gmdate(DATE_RFC1123));// HTTP/1.0
+		header('Pragma: no-cache');// HTTP/1.0
+		header('Cache-Control: no-cache, must-revalidate, max-age=0');
+		header('Content-Language: ' . $lang['CONTENT_LANG']);
+		header('Content-Type: text/html; charset=UTF-8');
+		header('X-Frame-Options: sameorigin');
 	}
 
 	/**
@@ -266,43 +293,44 @@ class Output
 
 		$template = new Template(($simple_header) ? 'simple_header.tpl' : 'header.tpl');
 
-		if (check_in_admin()) {
-			$this->addLink('home', './',              				$lang['Title']['accueil']);
-			$this->addLink('section', './config.php',               $lang['Module']['config']);
-			$this->addLink('section', './envoi.php',                $lang['Title']['send']);
-			$this->addLink('section', './view.php?mode=abonnes',    $lang['Module']['subscribers']);
-			$this->addLink('section', './view.php?mode=liste',      $lang['Module']['list']);
-			$this->addLink('section', './view.php?mode=log',        $lang['Module']['log']);
-			$this->addLink('section', './tools.php?mode=export',    $lang['Title']['export']);
-			$this->addLink('section', './tools.php?mode=import',    $lang['Title']['import']);
-			$this->addLink('section', './tools.php?mode=ban',       $lang['Title']['ban']);
-			$this->addLink('section', './tools.php?mode=generator', $lang['Title']['generator']);
-
-			if (Auth::isAdmin($admindata)) {
-				$this->addLink('section', './tools.php?mode=attach' , $lang['Title']['attach']);
-				$this->addLink('section', './tools.php?mode=backup' , $lang['Title']['backup']);
-				$this->addLink('section', './tools.php?mode=restore', $lang['Title']['restore']);
-			}
-
-			$this->addLink('section',   './admin.php', $lang['Module']['users']);
-			$this->addLink('section',   './stats.php', $lang['Title']['stats']);
-			$this->addLink('help',      '../docs/faq.' . $lang['CONTENT_LANG'] . '.html'   , $lang['Faq']);
-			$this->addLink('author',    '../docs/readme.' . $lang['CONTENT_LANG'] . '.html', $lang['Author_note']);
+		if (\Wanewsletter\check_in_admin()) {
+			$this->addLink('home', './', $lang['Title']['accueil']);
+			$this->addLink('help', sprintf('../docs/faq.%s.html', $lang['CONTENT_LANG']), $lang['Faq']);
+			$this->addLink('author', sprintf('../docs/readme.%s.html', $lang['CONTENT_LANG']), $lang['Author_note']);
 			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
 
-			if ($page_title == '') {
-				$page_title = $lang['General_title'];
+			$sections[] = [$lang['Module']['config'],      './config.php'];
+			$sections[] = [$lang['Title']['send'],         './envoi.php'];
+			$sections[] = [$lang['Module']['subscribers'], './view.php?mode=abonnes'];
+			$sections[] = [$lang['Module']['list'],        './view.php?mode=liste'];
+			$sections[] = [$lang['Module']['log'],         './view.php?mode=log'];
+			$sections[] = [$lang['Title']['export'],       './tools.php?mode=export'];
+			$sections[] = [$lang['Title']['import'],       './tools.php?mode=import'];
+			$sections[] = [$lang['Title']['ban'],          './tools.php?mode=ban'];
+			$sections[] = [$lang['Title']['generator'],    './tools.php?mode=generator'];
+			$sections[] = [$lang['Module']['users'],       './admin.php'];
+			$sections[] = [$lang['Title']['stats'],        './stats.php'];
+
+			if (Auth::isAdmin($admindata)) {
+				$sections[] = [$lang['Title']['attach'],  './tools.php?mode=attach'];
+				$sections[] = [$lang['Title']['backup'],  './tools.php?mode=backup'];
+				$sections[] = [$lang['Title']['restore'], './tools.php?mode=restore'];
 			}
+
+			$page_title = $page_title ?: $lang['General_title'];
 		}
 		else {
-			$this->addLink('home', 		'./profil_cp.php',                  $lang['Title']['accueil']);
-			$this->addLink('section',   './profil_cp.php?mode=editprofile', $lang['Module']['editprofile']);
-			$this->addLink('section',   './profil_cp.php?mode=archives',    $lang['Module']['log']);
-			$this->addLink('section',   './profil_cp.php?mode=logout',      $lang['Module']['logout']);
+			$this->addLink('home', './profil_cp.php', $lang['Title']['accueil']);
 
-			if ($page_title == '') {
-				$page_title = $lang['Title']['profil_cp'];
-			}
+			$sections[] = [$lang['Module']['editprofile'], './profil_cp.php?mode=editprofile'];
+			$sections[] = [$lang['Module']['log'],         './profil_cp.php?mode=archives'];
+			$sections[] = [$lang['Module']['logout'],      './profil_cp.php?mode=logout'];
+
+			$page_title = $page_title ?: $lang['Title']['profil_cp'];
+		}
+
+		foreach ($sections as $section) {
+			$this->addLink('section', $section[1], $section[0]);
 		}
 
 		$sitename = (!empty($nl_config['sitename'])) ? $nl_config['sitename'] : 'Wanewsletter';
@@ -334,7 +362,7 @@ class Output
 
 		// Si l'utilisateur est connecté, affichage du menu
 		if (!$simple_header) {
-			if (check_in_admin()) {
+			if (\Wanewsletter\check_in_admin()) {
 				$l_logout = sprintf(
 					$lang['Module']['logout_2'],
 					htmlspecialchars($admindata['admin_login'], ENT_NOQUOTES)
@@ -376,18 +404,21 @@ class Output
 	{
 		global $db, $lang, $starttime;
 
-		$entries = wanlog();
 		$wanlog_box = '';
 
-		foreach ($entries as $entry) {
+		foreach (\Wanewsletter\wanlog() as $entry) {
 			if ($entry instanceof \Throwable || $entry instanceof \Exception) {
 				// Les exceptions sont affichées via wan_exception_handler().
 				// Les erreurs fatales sont affichées via wan_error_handler().
-				if (!($entry instanceof Error) || $entry->isFatal() || $entry->ignore() || !DISPLAY_ERRORS_IN_LOG) {
+				if (!($entry instanceof Error)
+					|| $entry->isFatal()
+					|| $entry->ignore()
+					|| !\Wanewsletter\DELAY_ERROR_DISPLAY
+				) {
 					continue;
 				}
 
-				$entry = wan_format_error($entry);
+				$entry = static::formatError($entry);
 			}
 			else if (!is_scalar($entry)) {
 				$entry = print_r($entry, true);
@@ -397,9 +428,9 @@ class Output
 		}
 
 		$template = new Template('footer.tpl');
-		$version  = WANEWSLETTER_VERSION;
+		$version  = \Wanewsletter\WANEWSLETTER_VERSION;
 
-		if (wan_get_debug_level() > DEBUG_LEVEL_QUIET && $db instanceof Dblayer\Wadb) {
+		if (\Wanewsletter\wan_is_debug_enabled() && $db instanceof Dblayer\Wadb) {
 			$version  .= sprintf(' (%s)', $db::ENGINE);
 			$endtime   = array_sum(explode(' ', microtime()));
 			$totaltime = ($endtime - $starttime);
@@ -409,7 +440,8 @@ class Output
 				'TIME_PHP'   => sprintf('%.3f', $totaltime - $db->sqltime),
 				'TIME_SQL'   => sprintf('%.3f', $db->sqltime),
 				'MEM_USAGE'  => (function_exists('memory_get_usage'))
-					? formateSize(memory_get_usage()) : 'Unavailable',
+					? \Wanewsletter\formateSize(memory_get_usage())
+					: 'Unavailable',
 				'QUERIES'    => $db->queries
 			]);
 		}
@@ -427,21 +459,6 @@ class Output
 
 		$template->pparse();
 		exit;
-	}
-
-	/**
-	 * Envoi des en-têtes HTTP
-	 */
-	public function httpHeaders()
-	{
-		global $lang;
-
-		header('Expires: ' . gmdate(DATE_RFC1123));// HTTP/1.0
-		header('Pragma: no-cache');// HTTP/1.0
-		header('Cache-Control: no-cache, must-revalidate, max-age=0');
-		header('Content-Language: ' . $lang['CONTENT_LANG']);
-		header('Content-Type: text/html; charset=UTF-8');
-		header('X-Frame-Options: sameorigin');
 	}
 
 	/**
@@ -465,7 +482,6 @@ class Output
 <html lang="$lang_code" dir="$direction">
 <head>
 	<meta charset="UTF-8" />
-	$this->meta_redirect
 	<title>$page_title</title>
 
 	<style>
@@ -496,22 +512,142 @@ BASIC;
 		$this->messageList[] = $str;
 	}
 
-	public function useTheme()
+	/**
+	 * Le thème Wanewsletter est utilisé dans l’administration,
+	 * ainsi que dans les scripts install.php et profil_cp.php.
+	 *
+	 * @return boolean
+	 */
+	protected function useTheme()
 	{
-		$is_used_theme  = check_in_admin();
+		$is_used_theme  = \Wanewsletter\check_in_admin();
 		$is_used_theme |= defined(__NAMESPACE__.'\\IN_INSTALL');
 		$is_used_theme |= defined(__NAMESPACE__.'\\IN_PROFILCP');
 
-		return ($is_used_theme && !check_cli());
+		return (bool)$is_used_theme;
 	}
 
-	/**
-	 * Affichage d’un message d’information.
-	 *
-	 * @param string $str
-	 * @param string $title
-	 */
-	public function message($str = '', $title = '')
+	public static function formatError($error)
+	{
+		global $db, $lang;
+
+		$errno   = $error->getCode();
+		$errstr  = $error->getMessage();
+		$errfile = $error->getFile();
+		$errline = $error->getLine();
+		$backtrace = $error->getTrace();
+
+		if ($error instanceof Error) {
+			// Cas spécial. L'exception personnalisée a été créé dans wan_error_handler()
+			// et contient donc l'appel à wan_error_handler() elle-même. On corrige.
+			array_shift($backtrace);
+		}
+
+		$rootdir = dirname(dirname(__DIR__));
+
+		foreach ($backtrace as $i => &$t) {
+			if (!isset($t['file'])) {
+				$t['file'] = 'unknown';
+				$t['line'] = 0;
+			}
+			$file = htmlspecialchars(str_replace($rootdir, '~', $t['file']));
+			$call = (isset($t['class']) ? $t['class'].$t['type'] : '') . $t['function'];
+			$t = sprintf('#%d  %s() called at [%s:%d]', $i, $call, $file, $t['line']);
+		}
+
+		if (count($backtrace) > 0) {
+			$backtrace = sprintf("<b>Backtrace:</b>\n%s\n", implode("\n", $backtrace));
+		}
+		else {
+			$backtrace = '';
+		}
+
+		if (!empty($lang['Message'][$errstr])) {
+			$errstr = $lang['Message'][$errstr];
+		}
+
+		if (!\Wanewsletter\wan_is_debug_enabled()) {
+			// Si on est en mode de non-débogage, on a forcément attrapé une erreur
+			// critique pour arriver ici.
+			$message = $lang['Message']['Critical_error'];
+
+			if ($errno == E_USER_ERROR) {
+				$message = $errstr;
+			}
+		}
+		else if ($error instanceof Dblayer\Exception) {
+			if ($db instanceof Dblayer\Wadb && $db->sqlstate != '') {
+				$errno = $db->sqlstate;
+			}
+
+			$message  = sprintf("<b>SQL errno:</b> %s\n", $errno);
+			$message .= sprintf("<b>SQL error:</b> %s\n", htmlspecialchars($errstr));
+
+			if ($db instanceof Dblayer\Wadb && $db->lastQuery != '') {
+				$message .= sprintf("<b>SQL query:</b> %s\n", htmlspecialchars($db->lastQuery));
+			}
+
+			$message .= $backtrace;
+		}
+		else {
+			$labels  = [
+				E_NOTICE => 'PHP Notice',
+				E_WARNING => 'PHP Warning',
+				E_USER_ERROR => 'Error',
+				E_USER_WARNING => 'Warning',
+				E_USER_NOTICE => 'Notice',
+				E_STRICT => 'PHP Strict',
+				E_DEPRECATED => 'PHP Deprecated',
+				E_USER_DEPRECATED => 'Deprecated',
+				E_RECOVERABLE_ERROR => 'PHP Error'
+			];
+
+			$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
+			$errfile = str_replace($rootdir, '~', $errfile);
+
+			$message = sprintf(
+				"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
+				($error instanceof Error) ? $label : get_class($error),
+				$errstr,
+				$errfile,
+				$errline
+			);
+			$message .= $backtrace;
+		}
+
+		return nl2br($message);
+	}
+
+	public function error($error)
+	{
+		$exit = true;
+		if ($error instanceof \Throwable || $error instanceof \Exception) {
+			if ($error instanceof Error) {
+				$skip  = $error->ignore();
+				$skip |= ($this->useTheme() && \Wanewsletter\DELAY_ERROR_DISPLAY);
+				if (!$error->isFatal() && $skip) {
+					return null;
+				}
+
+				$exit = $error->isFatal();
+			}
+
+			$error = static::formatError($error);
+		}
+
+		if (!$exit) {
+			echo $error;
+		}
+		else {
+			$this->message($error, true);
+		}
+
+		if ($exit) {
+			exit;
+		}
+	}
+
+	public function message($str = '', $is_error = false)
 	{
 		global $lang;
 
@@ -535,52 +671,37 @@ BASIC;
 			$str .= $message;
 		}
 
-		$type = '';
 
-		if (empty($title)) {
-			$title = $lang['Title']['info'];
-		}
-		else if (!empty($lang['Title'][$title])) {
-			if ($title == 'error') {
-				$type = 'error';
-			}
 
-			$title = $lang['Title'][$title];
-		}
-
-		if (check_cli()) {
-			$str = htmlspecialchars_decode(strip_tags($str));
-
-			fwrite(STDOUT, $str."\n");
-		}
-		else if (filter_input(INPUT_GET, 'output') == 'json') {
-			header('Content-Type: application/json; charset=UTF-8');
-			$json['error']   = ($type == 'error');
-			$json['message'] = strip_tags($str);
-			echo json_encode($json, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+		if ($is_error) {
+			$title = $lang['Title']['error'];
+			$type  = 'error';
 		}
 		else {
-			if ($this->useTheme()) {
-				$this->header();
-
-				$template = new Template('message_body.tpl');
-
-				$template->assign([
-					'MSG_TITLE' => $title,
-					'MSG_TEXT'  => $str,
-					'MSG_TYPE'  => $type
-				]);
-
-				$template->pparse();
-
-				$this->footer();
-			}
-			else {
-				$this->basic($str);
-			}
+			$title = $lang['Title']['info'];
+			$type  = 'info';
 		}
 
-		exit(0);
+		if ($this->useTheme()) {
+			$this->header();
+
+			$template = new Template('message_body.tpl');
+
+			$template->assign([
+				'MSG_TITLE' => $title,
+				'MSG_TEXT'  => $str,
+				'MSG_TYPE'  => $type
+			]);
+
+			$template->pparse();
+
+			$this->footer();
+		}
+		else {
+			$this->basic($str);
+		}
+
+		exit;
 	}
 
 	/**
@@ -623,7 +744,7 @@ BASIC;
 		$total_size  = 1024; // ~ 1024 correspond au poids de base d'un email (en-têtes)
 		$total_size += (strlen($logdata['log_body_text']) + strlen($logdata['log_body_html']));
 
-		if ($format == FORMAT_TEXT) {
+		if ($format == \Wanewsletter\FORMAT_TEXT) {
 			$total_size -= strlen($logdata['log_body_html']);
 		}
 
@@ -633,7 +754,9 @@ BASIC;
 		}
 
 		$embed_files = [];
-		if ($format == FORMAT_HTML && hasCidReferences($logdata['log_body_html'], $refs) > 0) {
+		if ($format == \Wanewsletter\FORMAT_HTML
+			&& \Wanewsletter\hasCidReferences($logdata['log_body_html'], $refs) > 0
+		) {
 			$embed_files = array_intersect($test_files, $refs);
 
 			if (($num_files - count($embed_files)) == 0) {
@@ -649,7 +772,7 @@ BASIC;
 			'L_FILESIZE'       => $lang['Filesize'],
 			'L_TOTAL_LOG_SIZE' => $lang['Total_log_size'],
 
-			'TOTAL_LOG_SIZE'   => formateSize($total_size),
+			'TOTAL_LOG_SIZE'   => \Wanewsletter\formateSize($total_size),
 			'S_ROWSPAN'        => 3
 		]);
 
@@ -681,7 +804,7 @@ BASIC;
 				// On affiche pas dans la liste les fichiers incorporés dans
 				// une newsletter au format HTML.
 				//
-				if ($format == FORMAT_HTML && in_array($filename, $embed_files)) {
+				if (in_array($filename, $embed_files)) {
 					continue;
 				}
 
@@ -708,7 +831,7 @@ BASIC;
 			$template->assignToBlock('file_info', [
 				'OFFSET'   => ++$offset,
 				'FILENAME' => $filename,
-				'FILESIZE' => formateSize($filesize),
+				'FILESIZE' => \Wanewsletter\formateSize($filesize),
 				'S_SHOW'   => $s_show
 			]);
 

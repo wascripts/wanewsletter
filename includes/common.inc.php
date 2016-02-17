@@ -78,20 +78,25 @@ spl_autoload_register(function ($classname) {
 });
 
 //
+// Initialisation du système d’affichage
+//
+if (filter_input(INPUT_GET, 'output') == 'json') {
+	$output = new Output\Json;
+}
+else if (check_cli()) {
+	$output = new Output\CommandLine;
+}
+else {
+	$output = new Output\Html;
+}
+
+//
 // Intialisation des variables pour éviter toute injection malveillante de code
 //
 $error     = false;
 $dsn       = '';
 $nl_config = $lang = $datetime = $msg_error = [];
 $prefixe   = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
-
-//
-// Initialisation du système de templates
-//
-$output = new Output;
-Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
-	(check_in_admin() ? 'admin/' : '')
-));
 
 //
 // Chargement de la configuration de base

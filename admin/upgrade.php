@@ -115,7 +115,7 @@ if (filter_input(INPUT_GET, 'mode') == 'check') {
 	if (!$auth->isLoggedIn() || is_null($session) || !Auth::isAdmin($admindata)) {
 		// Utilisateur non authentifié ou n'ayant pas le niveau d’administrateur
 		if (filter_input(INPUT_GET, 'output') == 'json') {
-			header('Content-Type: application/json');
+			$output->httpHeaders();
 			echo '{"code":"-1"}';
 		}
 		else {
@@ -132,7 +132,7 @@ if (filter_input(INPUT_GET, 'mode') == 'check') {
 	$result = wa_check_update(true);
 
 	if (filter_input(INPUT_GET, 'output') == 'json') {
-		header('Content-Type: application/json');
+		$output->httpHeaders();
 
 		if ($result !== false) {
 			printf('{"code":"%d"}', $result);

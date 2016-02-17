@@ -242,7 +242,7 @@ et définir le paramètre charset dans la variable \$dsn du fichier de configura
 (consultez le fichier config.sample.inc.php pour voir un exemple de DSN configuré
 de cette manière).
 ERR;
-			$output->message($message, 'error');
+			$output->error($message);
 		}
 	}
 

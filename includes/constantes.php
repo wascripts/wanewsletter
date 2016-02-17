@@ -45,7 +45,7 @@ const DEBUG_MODE = DEBUG_LEVEL_NORMAL;
 // Active/Désactive l'affichage des messages d'erreur en pied de page.
 // Si false, les erreurs sont affichées dès qu'elles sont traitées.
 //
-const DISPLAY_ERRORS_IN_LOG = true;
+const DELAY_ERROR_DISPLAY = true;
 
 //
 // Active/Désactive l’enregistrement des erreurs dans un fichier de log.

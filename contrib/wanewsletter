@@ -30,8 +30,7 @@ if (!check_cli()) {
 	exit;
 }
 else if (!isset($argc)) {
-	echo "Please enable PHP option register_argc_argv.";
-	exit(1);
+	$output->error("Please enable PHP option register_argc_argv.");
 }
 
 //

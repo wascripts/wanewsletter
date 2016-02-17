@@ -35,8 +35,9 @@ if (!check_db_version(@$nl_config['db_version'])) {
 //
 // Hors phase de développement ou beta, on affiche une alerte si
 // l'administrateur a activé le débogage.
+// (constante DEBUG_MODE à DEBUG_LEVEL_QUIET = version stable)
 //
-if (DEBUG_MODE == DEBUG_LEVEL_QUIET && wan_get_debug_level() > DEBUG_MODE) {
+if (wan_is_debug_enabled() && DEBUG_MODE == DEBUG_LEVEL_QUIET) {
 	wanlog($lang['Message']['Warning_debug_active']);
 }
 
