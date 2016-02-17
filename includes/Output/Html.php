@@ -58,13 +58,6 @@ class Html implements MessageInterface
 	 */
 	private $header_displayed = false;
 
-	public function __construct()
-	{
-		Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
-			(\Wanewsletter\check_in_admin() ? 'admin/' : '')
-		));
-	}
-
 	/**
 	 * Ajout d'un lien relatif au document
 	 *

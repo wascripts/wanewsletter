@@ -88,6 +88,9 @@ else if (check_cli()) {
 }
 else {
 	$output = new Output\Html;
+	Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
+		(check_in_admin() ? 'admin/' : '')
+	));
 }
 
 //
