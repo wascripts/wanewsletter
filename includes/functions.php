@@ -531,7 +531,7 @@ function wanlog($entry = null)
 		$entries[$hash] = $entry;
 
 		if (DEBUG_LOG_ENABLED) {
-			$entry = trim(Output\Cli::formatError($entry));
+			$entry = trim(Output\CommandLine::formatError($entry));
 		}
 	}
 	else {
