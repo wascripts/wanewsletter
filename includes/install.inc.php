@@ -88,11 +88,7 @@ if (strpos($infos['host'], ':')) {
 	}
 }
 
-foreach ($supported_db as $name => $data) {
-	if (!$data['extension']) {
-		unset($supported_db[$name]);
-	}
-}
+$supported_db = get_supported_db();
 
 if (count($supported_db) == 0) {
 	message(sprintf($lang['No_db_support'], WANEWSLETTER_VERSION));

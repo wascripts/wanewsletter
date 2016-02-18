@@ -9,23 +9,43 @@
 
 namespace Wanewsletter;
 
-$GLOBALS['supported_db'] = [
-	'mysql' => [
-		'label'     => 'MySQL',
-		'Name'      => 'MySQL &#8805; 5.0.7',
-		'extension' => (extension_loaded('mysql') || extension_loaded('mysqli'))
-	],
-	'postgres' => [
-		'label'     => 'PostgreSQL',
-		'Name'      => 'PostgreSQL &#8805; 8.3',
-		'extension' => extension_loaded('pgsql')
-	],
-	'sqlite' => [
-		'label'     => 'SQLite',
-		'Name'      => 'SQLite 3',
-		'extension' => (class_exists('SQLite3') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
-	]
-];
+/**
+ * Retourne la liste des types de base de données supportées par
+ * Wanewsletter et par cette installation de PHP.
+ *
+ * @return array
+ */
+function get_supported_db()
+{
+	static $supported_db;
+
+	if (is_null($supported_db)) {
+		$supported_db = [];
+
+		if (extension_loaded('mysql') || extension_loaded('mysqli')) {
+			$supported_db['mysql'] = [
+				'label' => 'MySQL',
+				'Name'  => 'MySQL ≥ 5.0.7'
+			];
+		}
+
+		if (extension_loaded('pgsql')) {
+			$supported_db['postgres'] = [
+				'label' => 'PostgreSQL',
+				'Name'  => 'PostgreSQL ≥ 8.3'
+			];
+		}
+
+		if (class_exists('SQLite3') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite'))) {
+			$supported_db['sqlite'] = [
+				'label' => 'SQLite',
+				'Name'  => 'SQLite 3'
+			];
+		}
+	}
+
+	return $supported_db;
+}
 
 /**
  * Génère une chaîne DSN
@@ -95,8 +115,6 @@ function createDSN($infos, $options = null)
  */
 function parseDSN($dsn)
 {
-	global $supported_db;
-
 	if (!($dsn_parts = parse_url($dsn)) || !isset($dsn_parts['scheme'])) {
 		trigger_error("Invalid DSN argument", E_USER_ERROR);
 	}
@@ -106,6 +124,7 @@ function parseDSN($dsn)
 	foreach ($dsn_parts as $key => $value) {
 		switch ($key) {
 			case 'scheme':
+				$supported_db = get_supported_db();
 				if (!isset($supported_db[$value])) {
 					trigger_error("Unsupported database", E_USER_ERROR);
 				}
