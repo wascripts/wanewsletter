@@ -80,6 +80,7 @@ includes/common.inc.php
 includes/compat.inc.php
 includes/constantes.php
 includes/functions.box.php
+includes/functions.db.php
 includes/functions.php
 includes/functions.stats.php
 includes/functions.wrapper.php
@@ -103,7 +104,6 @@ includes/Output/CommandLine.php
 includes/Output/Html.php
 includes/Output/Json.php
 includes/Output/MessageInterface.php
-includes/wadb_init.php
 index.html
 install.php
 languages/DejaVuSans.ttf

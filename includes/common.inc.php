@@ -39,8 +39,8 @@ if (!file_exists(WA_ROOTDIR . '/vendor/autoload.php')) {
 require 'includes/constantes.php';
 require 'includes/compat.inc.php';
 require 'includes/functions.php';
+require 'includes/functions.db.php';
 require 'includes/functions.wrapper.php';
-require 'includes/wadb_init.php';
 require 'vendor/autoload.php';
 
 //
