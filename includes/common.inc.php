@@ -40,6 +40,7 @@ require 'includes/constantes.php';
 require 'includes/compat.inc.php';
 require 'includes/functions.php';
 require 'includes/functions.wrapper.php';
+require 'includes/wadb_init.php';
 require 'vendor/autoload.php';
 
 //
@@ -109,8 +110,3 @@ load_config();
 //
 \Patchwork\Utf8\Bootup::initAll();
 
-//
-// Initialisation  des données sur les tables et de la connexion
-// à la base de données (doit être placé après load_config()).
-//
-require 'includes/wadb_init.php';

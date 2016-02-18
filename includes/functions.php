@@ -128,6 +128,21 @@ function load_config()
 	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 
 	//
+	// Déclaration des constantes de tables
+	//
+	$tables = [
+		'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
+		'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
+	];
+
+	foreach ($tables as $table) {
+		$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__, strtoupper($table));
+		$table = $prefixe . $table;
+		define($constant, $table);
+		$GLOBALS['sql_schemas'][$table] = [];
+	}
+
+	//
 	// Déclaration des dossiers et fichiers spéciaux utilisés par le script
 	//
 	define(__NAMESPACE__.'\\WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));

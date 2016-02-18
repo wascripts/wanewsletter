@@ -27,23 +27,6 @@ $GLOBALS['supported_db'] = [
 	]
 ];
 
-//
-// Tables du script
-//
-$tables = [
-	'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
-	'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
-];
-
-foreach ($tables as $table) {
-	$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__, strtoupper($table));
-	$table = $prefixe . $table;
-	define($constant, $table);
-	$GLOBALS['sql_schemas'][$table] = [];
-}
-
-unset($tables, $table);
-
 /**
  * Génère une chaîne DSN
  *
