@@ -98,7 +98,8 @@ else {
 // Initialisation des variables pour éviter toute injection malveillante de code
 //
 $error     = false;
-$nl_config = $lang = $datetime = $msg_error = [];
+$msg_error = [];
+$nl_config = [];
 
 //
 // Chargement de la configuration de base
