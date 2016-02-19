@@ -145,9 +145,17 @@ function load_config()
 	//
 	// Déclaration des dossiers et fichiers spéciaux utilisés par le script
 	//
-	define(__NAMESPACE__.'\\WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
-	define(__NAMESPACE__.'\\WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
-	define(__NAMESPACE__.'\\WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
+	$realpath = function ($path) {
+		if ($path && $path[0] == '~') {
+			$path = substr($path, 1);
+			$path = WA_ROOTDIR . $path;
+		}
+
+		return rtrim(str_replace('\\', '/', $path), '/');
+	};
+
+	define(__NAMESPACE__.'\\WA_STATSDIR', $realpath($stats_dir));
+	define(__NAMESPACE__.'\\WA_TMPDIR',   $realpath($tmp_dir));
 	define(__NAMESPACE__.'\\WA_LOCKFILE', WA_TMPDIR . '/liste-%d.lock');
 
 	if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE) {
@@ -164,7 +172,7 @@ function load_config()
 		}
 
 		if ($add_prefix) {
-			$filename = WA_LOGSDIR . '/' . $filename;
+			$filename = $realpath($logs_dir) . '/' . $filename;
 		}
 
 		ini_set('error_log', $filename);
