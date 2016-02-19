@@ -97,7 +97,7 @@ switch ($mode) {
 			// Suppression du fichier lock correspondant s'il existe
 			// et qu'aucun envoi n'est en cours.
 			//
-			$lockfile = sprintf(WA_LOCKFILE, $logdata['liste_id']);
+			$lockfile = sprintf('%s/liste-%d.lock', WA_TMPDIR, $logdata['liste_id']);
 
 			$fp = fopen($lockfile, (file_exists($lockfile) ? 'r+' : 'w'));
 			if (!flock($fp, LOCK_EX|LOCK_NB)) {
@@ -179,7 +179,7 @@ switch ($mode) {
 		}
 		else {
 			foreach ($liste_ids as $liste_id) {
-				$lockfile = sprintf(WA_LOCKFILE, $liste_id);
+				$lockfile = sprintf('%s/liste-%d.lock', WA_TMPDIR, $liste_id);
 
 				if (file_exists($lockfile) && filesize($lockfile) > 0) {
 					$fp = fopen($lockfile, 'r+');

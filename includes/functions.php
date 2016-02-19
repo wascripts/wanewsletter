@@ -156,7 +156,6 @@ function load_config()
 
 	define(__NAMESPACE__.'\\WA_STATSDIR', $realpath($stats_dir));
 	define(__NAMESPACE__.'\\WA_TMPDIR',   $realpath($tmp_dir));
-	define(__NAMESPACE__.'\\WA_LOCKFILE', WA_TMPDIR . '/liste-%d.lock');
 
 	if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE) {
 		$add_prefix = false;
