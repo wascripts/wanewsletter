@@ -1623,7 +1623,7 @@ function process_mail_action(array $listdata)
 
 	require 'includes/functions.stats.php';
 
-	$sub = new Subscription($listdata);
+	$sub = new Subscription();
 	$pop = new PopClient();
 	$pop->options([
 		'starttls' => ($listdata['pop_tls'] == SECURITY_STARTTLS)
