@@ -26,13 +26,13 @@ if (!empty($_SESSION['redirect'])) {
 }
 
 //
-// Si la clé est fournie, on est forcément dans le mode 'reset_passwd'
+// Si la clé est fournie, on est forcément dans le mode 'reset'
 //
 if ($reset_key) {
-	$mode = 'reset_passwd';
+	$mode = 'reset';
 }
 
-if ($mode == 'reset_passwd' || $mode == 'cp') {
+if ($mode == 'reset' || $mode == 'cp') {
 	if (!is_null($reset_key)) {
 		if (!isset($_SESSION['reset_key']) || !hash_equals($_SESSION['reset_key'], $reset_key)) {
 			$error = true;

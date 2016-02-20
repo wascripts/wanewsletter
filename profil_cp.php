@@ -38,14 +38,14 @@ $auth = new Auth();
 //
 
 $mode = filter_input(INPUT_GET, 'mode');
-// Spécial. la présence du paramètre 'k' signifie qu'on est dans le mode reset_passwd
+// Spécial. la présence du paramètre 'k' signifie qu'on est dans le mode 'reset'
 $reset_key = filter_input(INPUT_GET, 'k');
 
 if ($reset_key && !$mode) {
-	$mode = 'reset_passwd';
+	$mode = 'reset';
 }
 
-if ($mode == 'login' || $mode == 'logout' || $mode == 'reset_passwd' || $mode == 'cp') {
+if ($mode == 'login' || $mode == 'logout' || $mode == 'reset' || $mode == 'cp') {
 	require './includes/login.inc.php';
 }
 
