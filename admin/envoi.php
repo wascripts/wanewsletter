@@ -324,7 +324,7 @@ switch ($mode) {
 							$logdata['log_subject'] = html_entity_decode($logdata['log_subject']);
 						}
 
-						if (strncmp($body_html_url, 'http://', 7) == 0) {
+						if (preg_match('#^https?://#', $body_html_url)) {
 							$URL = substr($body_html_url, 0, strrpos($body_html_url, '/'));
 							$result['data'] = preg_replace('/<(head[^>]*)>/si',
 								"<\\1>\n<base href=\"" . htmlspecialchars($URL) . "/\">", $result['data']);
