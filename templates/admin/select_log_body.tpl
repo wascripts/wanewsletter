@@ -1,14 +1,15 @@
 <!-- BEGIN script_load_by_url -->
 <script>
 <!--
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+	document.getElementById('loadByURL').style.display = 'none';
 
-	document.styleSheets[0].insertRule('div#loadByURL { display: none; }', 0);
+	var selectLogBox = document.forms[0].elements['id'];
 
-	document.forms[0].elements['id'].addEventListener('change', function() {
+	selectLogBox.addEventListener('change', function () {
 		var displayVal = null;
 
-		if (this.selectedIndex == (this.options.length - 1)) {
+		if (this.value == -1) {
 			displayVal = 'block';
 		}
 		else {
@@ -18,10 +19,17 @@ document.addEventListener('DOMContentLoaded', function() {
 		document.getElementById('loadByURL').style.display = displayVal;
 	}, false);
 
-	var newOption = document.createElement('option');
-	newOption.appendChild(document.createTextNode('\u2013 {script_load_by_url.L_FROM_AN_URL}\u2026'));
+	document.forms[0].addEventListener('submit', function (evt) {
+		if (selectLogBox.value != -1) {
+			evt.preventDefault();
+			window.location.assign(this.action + '&id=' + selectLogBox.value);
+		}
+	}, false);
 
-	document.forms[0].elements['id'].appendChild(newOption);
+	var newOption = document.createElement('option');
+	newOption.value = -1;
+	newOption.appendChild(document.createTextNode('\u2013 {script_load_by_url.L_FROM_AN_URL}\u2026'));
+	selectLogBox.appendChild(newOption);
 }, false);
 //-->
 </script>
