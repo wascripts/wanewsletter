@@ -215,17 +215,19 @@ $template->assign([
 if (Auth::isAdmin($admindata)) {
 	$result = wa_check_update();
 
+	$template->assign([
+		'L_DOWNLOAD_PAGE' => str_replace('\'', '\\\'', $lang['Download_page']),
+		'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
+	]);
+
 	$template->assignToBlock('version_info', [
 		'VERSION' => sprintf($lang['Used_version'], WANEWSLETTER_VERSION)
 	]);
 
-	if ($result !== false) {
-		if ($result === 1) {
+	if ($result != -1) {
+		if ($result == 1) {
 			$template->assignToBlock('version_info.update_available', [
-				'L_UPDATE_AVAILABLE' => $lang['New_version_available'],
-				'L_DOWNLOAD_PAGE'    => $lang['Download_page'],
-
-				'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
+				'L_UPDATE_AVAILABLE' => $lang['New_version_available']
 			]);
 		}
 		else {
@@ -235,15 +237,7 @@ if (Auth::isAdmin($admindata)) {
 		}
 	}
 	else {
-		$template->assignToBlock('check_update_js', [
-			'L_UPDATE_AVAILABLE' => str_replace('\'', '\\\'', $lang['New_version_available']),
-			'L_UP_TO_DATE'       => str_replace('\'', '\\\'', $lang['Version_up_to_date']),
-			'L_SITE_UNREACHABLE' => str_replace('\'', '\\\'', $lang['Site_unreachable']),
-			'L_DOWNLOAD_PAGE'    => str_replace('\'', '\\\'', $lang['Download_page']),
-
-			'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
-		]);
-
+		$template->assignToBlock('check_update_js');
 		$template->assignToBlock('version_info.check_update', [
 			'L_CHECK_UPDATE' => $lang['Check_update']
 		]);

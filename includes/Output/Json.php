@@ -14,6 +14,13 @@ use Wanewsletter\Error;
 class Json implements MessageInterface
 {
 	/**
+	 * Paramètres additionnels pour la réponse JSON
+	 * @var array
+	 * @see self::addParams()
+	 */
+	protected $params = [];
+
+	/**
 	 * Envoi des en-têtes HTTP
 	 */
 	public function httpHeaders()
@@ -55,9 +62,21 @@ class Json implements MessageInterface
 
 		$this->httpHeaders();
 
+		$json = $this->params;
+
 		$json['error']   = (bool) $is_error;
 		$json['message'] = strip_tags($str);
 		echo json_encode($json, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
 		exit;
+	}
+
+	/**
+	 * Ajout d’entrées additionnelles à la réponse JSON
+	 *
+	 * @param array $params
+	 */
+	public function addParams($params)
+	{
+		$this->params = array_replace_recursive($this->params, $params);
 	}
 }

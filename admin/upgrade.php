@@ -114,51 +114,44 @@ if ($nl_config['db_version'] > 18) {
 if (filter_input(INPUT_GET, 'mode') == 'check') {
 	if (!$auth->isLoggedIn() || is_null($session) || !Auth::isAdmin($admindata)) {
 		// Utilisateur non authentifié ou n'ayant pas le niveau d’administrateur
-		if (filter_input(INPUT_GET, 'output') == 'json') {
-			$output->httpHeaders();
-			echo '{"code":"-1"}';
-		}
-		else {
+		if ($output instanceof Output\Html) {
 			http_response_code(401);
 			$output->redirect('./index.php', 5);
 			$output->addLine($lang['Message']['Not_authorized']);
 			$output->addLine($lang['Click_return_index'], './index.php');
 			$output->message();
 		}
+		else {
+			$output->error('Not_authorized');
+		}
 
 		exit;
 	}
 
-	$result = wa_check_update(true);
+	try {
+		$result = wa_check_update(true);
+	}
+	catch (Exception $e) {
+		$output->error($e->getMessage());
+	}
 
-	if (filter_input(INPUT_GET, 'output') == 'json') {
-		$output->httpHeaders();
-
-		if ($result !== false) {
-			printf('{"code":"%d"}', $result);
-		}
-		else {
-			echo '{"code":"2"}';
-		}
+	if ($result == 1) {
+		$message = $lang['New_version_available'];
 	}
 	else {
-		if ($result !== false) {
-			if ($result === 1) {
-				$output->addLine($lang['New_version_available']);
-				$output->addLine(sprintf('<a href="%s">%s</a>', DOWNLOAD_PAGE, $lang['Download_page']));
-			}
-			else {
-				$output->addLine($lang['Version_up_to_date']);
-			}
-		}
-		else {
-			$output->addLine($lang['Site_unreachable']);
-		}
-
-		$output->message();
+		$message = $lang['Version_up_to_date'];
 	}
 
-	exit;
+	if ($output instanceof Output\Html && $result == 1) {
+		$message .= '<br /><br />';
+		$message .= sprintf('<a href="%s">%s</a>', DOWNLOAD_PAGE, $lang['Download_page']);
+	}
+
+	if ($output instanceof Output\Json) {
+		$output->addParams(['code' => $result]);
+	}
+
+	$output->message($message);
 }
 
 //

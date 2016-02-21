@@ -196,33 +196,32 @@ function check_db_version($version)
  *
  * @param boolean $complete true pour vérifier aussi l'URL distante
  *
- * @return boolean|integer
+ * @return integer
  */
 function wa_check_update($complete = false)
 {
 	$cache_file = sprintf('%s/%s', WA_TMPDIR, CHECK_UPDATE_CACHE);
 	$cache_ttl  = CHECK_UPDATE_CACHE_TTL;
 
-	$result = false;
+	$result = -1;
 	$data   = '';
 
 	if (is_readable($cache_file) && filemtime($cache_file) > (time() - $cache_ttl)) {
-		$data = file_get_contents($cache_file);
+		$data = trim(file_get_contents($cache_file));
 	}
 	else if ($complete) {
 		$result = http_get_contents(CHECK_UPDATE_URL);
-		$data = $result['data'];
+		$data   = trim($result['data']);
 
-		if (preg_match('#^[A-Za-z0-9.-]+$#', $data)) {
-			file_put_contents($cache_file, $data);
+		if (!preg_match('#^[0-9]+\.[0-9]+(\.[0-9]+|-[A-Za-z0-9]+)$#', $data)) {
+			throw new Exception("Bad version identifier received!");
 		}
-		else {
-			$data = '';
-		}
+
+		file_put_contents($cache_file, $data);
 	}
 
 	if ($data) {
-		$result = intval(version_compare(WANEWSLETTER_VERSION, trim($data), '<'));
+		$result = intval(version_compare(WANEWSLETTER_VERSION, $data, '<'));
 	}
 
 	return $result;

@@ -591,7 +591,6 @@ $lang['Used_version']               = "You use <strong>Wanewsletter %s</strong>"
 $lang['New_version_available']      = "A new version is available";
 $lang['Download_page']              = "download page";
 $lang['Version_up_to_date']         = "Your version is up to date";
-$lang['Site_unreachable']           = "The website phpcodeur.net is currently unreachable";
 
 
 //
