@@ -104,7 +104,7 @@ function load_config()
 	//
 	// Options supplémentaires transmises par commodité sous forme de tableau
 	//
-	if (isset($dsn_opts)) {
+	if (!empty($dsn_opts)) {
 		$args = http_build_query($dsn_opts, '', '&');
 
 		if (strpos($dsn, '?')) {

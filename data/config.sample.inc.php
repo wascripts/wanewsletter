@@ -5,7 +5,8 @@
 //
 // Des variables $logs_dir, $stats_dir et $tmp_dir peuvent être ajoutées
 // pour faire pointer les répertoires correspondants vers d’autres emplacements
-// que ceux par défaut dans data/ (voir fichier common.inc.php pour les détails).
+// que ceux par défaut dans data/ (voir fonction load_config() dans
+// includes/functions.php pour les détails).
 //
 //$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
 // exemple de DSN pour MySQL
@@ -19,26 +20,23 @@ $prefixe = 'wa_';
 // cela s'avère plus pratique de cette manière plutôt qu'en les passant sous
 // forme de paramètres dans le DSN.
 //
-//$dsn_opts = [
-//];
+$dsn_opts = [];
 
 //
 // Exemples pour activer les protocoles SSL/TLS pour la base de données
 //
-/*
-$dsn_opts = [
-	# MySQL
-	# les options ssl-capath et ssl-cipher peuvent également être fournies.
-	# Elles correspondent, avec les autres options ssl-*, aux arguments de
-	# la méthode mysqli::ssl_set().
-	'ssl'      => true,
-	'ssl-ca'   => '/etc/mysql/ssl/ca-cert.pem',
-	'ssl-cert' => '/etc/mysql/ssl/server-cert.pem',
-	'ssl-key'  => '/etc/mysql/ssl/server-key.pem',
-	# PostgreSQL
-	'sslmode'  => 'require', # ou autre valeur acceptable par le paramètre sslmode de PostgreSQL
-	'sslrootcert' => '/etc/postgresql/ssl/ca-cert.pem',
-	'sslcert'  => '/etc/postgresql/ssl/server-cert.pem',
-	'sslkey'   => '/etc/postgresql/ssl/server-key.pem',
-];
-*/
+
+// MySQL
+// les options ssl-capath et ssl-cipher peuvent également être fournies.
+// Elles correspondent, avec les autres options ssl-*, aux arguments de
+// la méthode mysqli::ssl_set().
+#$dsn_opts['ssl']      = true;
+#$dsn_opts['ssl-ca']   = '/path/to/mysql-ca.crt';
+#$dsn_opts['ssl-cert'] = '/path/to/client.crt';
+#$dsn_opts['ssl-key']  = '/path/to/client.key';
+
+// PostgreSQL
+#$dsn_opts['sslmode']     = 'require'; # ou autre valeur acceptable par le paramètre sslmode de PostgreSQL
+#$dsn_opts['sslrootcert'] = '/path/to/postgres-ca.crt';
+#$dsn_opts['sslcert']     = '/path/to/client.crt';
+#$dsn_opts['sslkey']      = '/path/to/client.key';
