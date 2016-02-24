@@ -88,7 +88,13 @@ else if (check_cli()) {
 	$output = new Output\CommandLine;
 }
 else {
-	$output = new Output\Html;
+	// Utilisation du thème wanewsletter ?
+	$use_theme  = check_in_admin();
+	$use_theme |= defined(__NAMESPACE__.'\\IN_INSTALL');
+	$use_theme |= defined(__NAMESPACE__.'\\IN_PROFILCP');
+
+	$output = new Output\Html($use_theme);
+
 	Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
 		(check_in_admin() ? 'admin/' : '')
 	));

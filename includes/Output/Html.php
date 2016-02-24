@@ -59,6 +59,23 @@ class Html implements MessageInterface
 	private $header_displayed = false;
 
 	/**
+	 * Utilisation du thème wanewsletter ou affichage simplifié
+	 * (par exemple, pour cron.php, ou bien si les fichiers de
+	 * langue n’ont pas été trouvés).
+	 *
+	 * @var boolean
+	 */
+	private $use_theme        = false;
+
+	/**
+	 * @param boolean $use_theme
+	 */
+	public function __construct($use_theme)
+	{
+		$this->use_theme = (bool) $use_theme;
+	}
+
+	/**
 	 * Ajout d'un lien relatif au document
 	 *
 	 * @param string $rel   Relation qui lie le document cible au document courant
@@ -505,21 +522,6 @@ BASIC;
 		$this->messageList[] = $str;
 	}
 
-	/**
-	 * Le thème Wanewsletter est utilisé dans l’administration,
-	 * ainsi que dans les scripts install.php et profil_cp.php.
-	 *
-	 * @return boolean
-	 */
-	protected function useTheme()
-	{
-		$is_used_theme  = \Wanewsletter\check_in_admin();
-		$is_used_theme |= defined(__NAMESPACE__.'\\IN_INSTALL');
-		$is_used_theme |= defined(__NAMESPACE__.'\\IN_PROFILCP');
-
-		return (bool)$is_used_theme;
-	}
-
 	public static function formatError($error)
 	{
 		global $db, $lang;
@@ -617,7 +619,7 @@ BASIC;
 		if ($error instanceof \Throwable || $error instanceof \Exception) {
 			if ($error instanceof Error) {
 				$skip  = $error->ignore();
-				$skip |= ($this->useTheme() && \Wanewsletter\DELAY_ERROR_DISPLAY);
+				$skip |= ($this->use_theme && \Wanewsletter\DELAY_ERROR_DISPLAY);
 				if (!$error->isFatal() && $skip) {
 					return null;
 				}
@@ -675,7 +677,7 @@ BASIC;
 			$type  = 'info';
 		}
 
-		if ($this->useTheme()) {
+		if ($this->use_theme) {
 			$this->header();
 
 			$template = new Template('message_body.tpl');
