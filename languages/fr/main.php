@@ -32,7 +32,7 @@ $lang['Title']['confirm']           = "Confirmation";
 $lang['Title']['config_lang']       = "Choix de la langue";
 $lang['Title']['config_perso']      = "Personnalisation";
 $lang['Title']['config_cookies']    = "Cookies";
-$lang['Title']['config_email']      = "Envois des emails";
+$lang['Title']['config_email']      = "Envoi des emails";
 $lang['Title']['config_files']      = "Fichiers joints";
 $lang['Title']['config_stats']      = "Module de statistiques";
 $lang['Title']['config_debug']      = "Débogage";
@@ -105,7 +105,7 @@ $lang['Button']['add_file']         = "Joindre un fichier";
 $lang['Button']['del_file']         = "Supprimer les fichiers sélectionnés";
 
 $lang['Button']['del_abo']          = "Supprimer les abonnés sélectionnés";
-$lang['Button']['del_logs']         = "Supprimer les newsletters sélectionnés";
+$lang['Button']['del_logs']         = "Supprimer les newsletters sélectionnées";
 $lang['Button']['del_account']      = "Supprimer ce compte";
 $lang['Button']['links']            = "Placer le lien de désinscription";
 $lang['Button']['dl']               = "Télécharger";
@@ -502,7 +502,7 @@ $lang['Liste_alias']                = "Alias de la liste (si nécessaire)";
 //
 // Page : Gestion des logs/archives
 //
-$lang['Explain']['logs']            = "Ici, vous pouvez visualiser et supprimer les newsletter précédemment envoyées";
+$lang['Explain']['logs']            = "Ici, vous pouvez visualiser et supprimer les newsletters précédemment envoyées";
 $lang['Click_return_logs']          = "Cliquez %sici%s pour retourner à la liste des newsletters";
 $lang['Log_subject']                = "Sujet de la newsletter";
 $lang['Log_date']                   = "Date d’envoi";
