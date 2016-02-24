@@ -1045,6 +1045,12 @@ if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
 		]);
 	}
 
+	if ($logdata['joined_files']) {
+		$template->assignToBlock('joined_files.delete', [
+			'L_DEL_FILE_BUTTON' => $lang['Button']['del_file']
+		]);
+	}
+
 	$template->assign([
 		'JOINED_FILES_BOX' => $output->filesList($logdata)
 	]);

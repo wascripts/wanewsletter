@@ -774,9 +774,6 @@ BASIC;
 		// être affichées.
 		if (!$format) {
 			$template->assignToBlock('del_column');
-			$template->assignToBlock('joined_files.files_box', [
-				'L_DEL_FILE_BUTTON' => $lang['Button']['del_file']
-			]);
 			$template->assign(['S_ROWSPAN' => 4]);
 		}
 

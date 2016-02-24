@@ -140,12 +140,12 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 	{JOINED_FILES_BOX}
 </div>
 
-<!-- BEGIN files_box -->
+<!-- BEGIN delete -->
 <div id="aside-bottom" class="aside">
 	<div>&nbsp;</div>
-	<div><button type="submit" name="unattach">{joined_files.files_box.L_DEL_FILE_BUTTON}</button></div>
+	<div><button type="submit" name="unattach">{joined_files.delete.L_DEL_FILE_BUTTON}</button></div>
 </div>
-<!-- END files_box -->
+<!-- END delete -->
 <!-- END joined_files -->
 
 <div class="block">
