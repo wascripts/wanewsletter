@@ -67,7 +67,7 @@ $other_tags = wan_get_tags();
 switch ($mode) {
 	case 'editprofile':
 		if (isset($_POST['submit'])) {
-			$vararray = ['new_email', 'confirm_email', 'pseudo', 'language',
+			$vararray = ['new_email', 'confirm_email', 'username', 'language',
 				'current_passwd', 'new_passwd', 'confirm_passwd'
 			];
 			foreach ($vararray as $varname) {
@@ -120,7 +120,7 @@ switch ($mode) {
 
 			if (!$error) {
 				$sql_data = [
-					'abo_pseudo' => strip_tags($pseudo),
+					'abo_pseudo' => strip_tags($username),
 					'abo_lang'   => $language
 				];
 
@@ -164,16 +164,16 @@ switch ($mode) {
 			'L_EMAIL'         => $lang['Email_address'],
 			'L_NEW_EMAIL'     => $lang['New_Email'],
 			'L_CONFIRM_EMAIL' => $lang['Confirm_Email'],
-			'L_PSEUDO'        => $lang['Abo_pseudo'],
+			'L_USERNAME'      => $lang['Login'],
 			'L_LANG'          => $lang['Default_lang'],
 			'L_PASSWD'        => $lang['Password'],
 			'L_NEW_PASSWD'    => $lang['New_passwd'],
 			'L_CONFIRM_PASSWD'=> $lang['Confirm_passwd'],
 			'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
-			'EMAIL'    => htmlspecialchars($abodata['email']),
-			'PSEUDO'   => htmlspecialchars($abodata['username']),
-			'LANG_BOX' => lang_box($abodata['abo_lang'])
+			'EMAIL'           => htmlspecialchars($abodata['email']),
+			'USERNAME'        => htmlspecialchars($abodata['username']),
+			'LANG_BOX'        => lang_box($abodata['abo_lang'])
 		]);
 
 		foreach ($other_tags as $tag) {
