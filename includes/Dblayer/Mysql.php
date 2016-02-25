@@ -51,19 +51,45 @@ class Mysql extends Wadb
 
 		// PHP bug 67563 <https://bugs.php.net/bug.php?id=67563>
 		if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-			throw new Exception("The mysql extension doesn't have support for IPv6 address. Use mysqli instead.");
-		}
-
-		$connect = 'mysql_connect';
-		if (!empty($this->options['persistent'])) {
-			$connect = 'mysql_pconnect';
+			throw new Exception("Mysql extension doesn't have support for IPv6 address. Use mysqli instead.");
 		}
 
 		if (!is_null($port)) {
 			$host .= ':' . $port;
 		}
 
-		if (!($this->link = $connect($host, $username, $passwd))) {
+		$flags = null;
+
+		//
+		// Options relatives aux protocoles SSL/TLS
+		//
+		if (!empty($this->options['ssl'])) {
+			$args = ['ssl-key', 'ssl-cert', 'ssl-ca', 'ssl-capath', 'ssl-cipher'];
+			$args = array_fill_keys($args, null);
+
+			// Si des options ssl-* ont été fournies, mysqli doit être utilisé.
+			if (array_intersect_key($this->options, $args)) {
+				throw new Exception("Mysql extension doesn't have support for ssl-* options. Use mysqli instead.");
+			}
+
+			$flags = MYSQL_CLIENT_SSL;
+		}
+
+		$args = [];
+		$args['server']       = $host;
+		$args['username']     = $username;
+		$args['password']     = $passwd;
+		$args['new_link']     = false;
+		$args['client_flags'] = $flags;
+
+		$connect = 'mysql_connect';
+		if (!empty($this->options['persistent'])) {
+			$connect = 'mysql_pconnect';
+			// Pas d’argument new_link sur la fonction mysql_pconnect()
+			unset($args['new_link']);
+		}
+
+		if (!($this->link = call_user_func_array($connect, $args))) {
 			$this->errno = mysql_errno();
 			$this->error = mysql_error();
 			$this->link  = null;
