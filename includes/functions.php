@@ -347,7 +347,7 @@ function wan_build_url($url, array $params = [])
 		$proto = $parts['scheme'];
 	}
 
-	$server = (!empty($parts['host'])) ? $parts['host'] : $_SERVER['HTTP_HOST'];
+	$server = (!empty($parts['host'])) ? $parts['host'] : $_SERVER['SERVER_NAME'];
 
 	if (!empty($parts['port'])) {
 		$server .= ':'.$parts['port'];
