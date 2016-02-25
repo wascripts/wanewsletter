@@ -36,7 +36,8 @@ q::after    { content: close-quote; }
 
 abbr[title] {
 	background-color: transparent;
-	border-bottom: 1px dotted;
+	text-decoration: underline;
+	text-decoration-style: dotted;
 	text-transform: uppercase;
 	cursor: help;
 }
