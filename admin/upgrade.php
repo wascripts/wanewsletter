@@ -211,10 +211,8 @@ if (isset($_POST['start'])) {
 		//
 		@set_time_limit(3600);
 
-		require 'includes/Dblayer/sqlparser.php';
-
-		$sql_create = Dblayer\parseSQL(file_get_contents($sql_create), $prefixe);
-		$sql_data   = Dblayer\parseSQL(file_get_contents($sql_data), $prefixe);
+		$sql_create = parse_sql(file_get_contents($sql_create), $prefixe);
+		$sql_data   = parse_sql(file_get_contents($sql_data), $prefixe);
 
 		$sql_create_by_table = $sql_data_by_table = [];
 

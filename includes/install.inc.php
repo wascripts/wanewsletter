@@ -256,8 +256,6 @@ if ($start) {
 	}
 
 	if (!$error) {
-		require 'includes/Dblayer/sqlparser.php';
-
 		if (!($passwd_hash = password_hash($admin_pass, PASSWORD_DEFAULT))) {
 			trigger_error("Unexpected error returned by password API", E_USER_ERROR);
 		}
@@ -277,13 +275,13 @@ if ($start) {
 		//
 		// Création des tables du script
 		//
-		$sql_create = Dblayer\parseSQL(file_get_contents($sql_create), $prefixe);
+		$sql_create = parse_sql(file_get_contents($sql_create), $prefixe);
 		exec_queries($sql_create);
 
 		//
 		// Insertion des données de base
 		//
-		$sql_data = Dblayer\parseSQL(file_get_contents($sql_data), $prefixe);
+		$sql_data = parse_sql(file_get_contents($sql_data), $prefixe);
 
 		$urlsite  = (wan_ssl_connection()) ? 'https' : 'http';
 		$urlsite .= '://' . $_SERVER['HTTP_HOST'];

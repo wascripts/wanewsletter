@@ -930,8 +930,6 @@ switch ($mode) {
 
 	case 'restore':
 		if (isset($_POST['submit'])) {
-			require 'includes/Dblayer/sqlparser.php';
-
 			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : null;
 			$local_file  = trim(filter_input(INPUT_POST, 'local_file'));
 
@@ -1013,7 +1011,7 @@ switch ($mode) {
 				$output->message();
 			}
 
-			$queries = Dblayer\parseSQL($data);
+			$queries = parse_sql($data);
 
 			$db->beginTransaction();
 

@@ -98,7 +98,6 @@ includes/Dblayer/schemas/postgres_tables.sql
 includes/Dblayer/schemas/sqlite_tables.sql
 includes/Dblayer/Sqlite3.php
 includes/Dblayer/SqlitePdo.php
-includes/Dblayer/sqlparser.php
 includes/Dblayer/Wadb.php
 includes/Output/CommandLine.php
 includes/Output/Html.php

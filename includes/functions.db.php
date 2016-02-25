@@ -268,3 +268,87 @@ function exec_queries(array &$queries)
 
 	$queries = [];
 }
+
+/**
+ * Analyse un fichier contenant une liste de requètes SQL séparées par un ';'
+ * et retourne un tableau de requètes.
+ *
+ * @param string $input   Chaîne à analyser
+ * @param string $prefixe Préfixe des tables à mettre à la place du prefixe par défaut
+ *
+ * @return array
+ */
+function parse_sql($input, $prefixe = null)
+{
+	$tmp            = '';
+	$output         = [];
+	$in_comments    = false;
+	$between_quotes = false;
+
+	$lines       = preg_split("/(\r\n?|\n)/", $input, -1, PREG_SPLIT_DELIM_CAPTURE);
+	$total_lines = count($lines);
+
+	for ($i = 0; $i < $total_lines; $i++) {
+		if (preg_match("/^\r\n?|\n$/", $lines[$i])) {
+			if ($between_quotes) {
+				$tmp .= $lines[$i];
+			}
+			else {
+				$tmp .= ' ';
+			}
+
+			continue;
+		}
+
+		//
+		// Si on est pas dans des simples quotes, on vérifie si on entre ds des commentaires
+		//
+		if (!$between_quotes && !$in_comments && preg_match('/^\/\*/', $lines[$i])) {
+			$in_comments = true;
+		}
+
+		if ($between_quotes
+			|| (
+				!$in_comments
+				&& strlen($lines[$i]) > 0
+				&& $lines[$i][0] != '#'
+				&& !preg_match('/^--(\s|$)/', $lines[$i])
+			)
+		) {
+			//
+			// Nombre de simple quotes non échappés
+			//
+			$unescaped_quotes = preg_match_all("/(?<!\\\\)(\\\\\\\\)*'/", $lines[$i]);
+
+			if ((!$between_quotes && !($unescaped_quotes % 2))
+				|| ($between_quotes && ($unescaped_quotes % 2))
+			) {
+				if (preg_match('/;\s*$/i', $lines[$i])) {
+					$lines[$i] = ($tmp != '') ? rtrim($lines[$i]) : trim($lines[$i]);
+					$output[]  = $tmp . substr($lines[$i], 0, -1);
+
+					$tmp = '';
+				}
+				else {
+					$tmp .= ($tmp != '') ? $lines[$i] : ltrim($lines[$i]);
+				}
+
+				$between_quotes = false;
+			}
+			else {
+				$between_quotes = true;
+				$tmp .= ($tmp != '') ? $lines[$i] : ltrim($lines[$i]);
+			}
+		}
+
+		if (!$between_quotes && $in_comments && preg_match('/\*\/$/', rtrim($lines[$i]))) {
+			$in_comments = false;
+		}
+	}
+
+	if ($prefixe) {
+		$output = str_replace('wa_', $prefixe, $output);
+	}
+
+	return $output;
+}

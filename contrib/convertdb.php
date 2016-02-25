@@ -42,7 +42,6 @@ $prefixe_to   = 'wa_';
 //
 
 require WA_ROOTDIR . '/includes/common.inc.php';
-require WA_ROOTDIR . '/includes/Dblayer/sqlparser.php';
 
 if (!check_cli()) {
 	set_time_limit(0);
@@ -65,7 +64,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 
 // Create table
 $sql_create = file_get_contents(sprintf('%s/%s_tables.sql', $schemas_dir, $db_to::ENGINE));
-$sql_create = Dblayer\parseSQL($sql_create, $prefixe_to);
+$sql_create = parse_sql($sql_create, $prefixe_to);
 
 foreach ($sql_create as $query) {
 	$db_to->query($query);
