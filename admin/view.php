@@ -903,10 +903,6 @@ else if ($mode == 'liste') {
 			${$varname} = (is_int($value)) ? $value : $default_values[$varname];
 		}
 
-		if (!check_ssl_support()) {
-			$pop_tls = SECURITY_NONE;
-		}
-
 		if (isset($_POST['submit'])) {
 			$liste_name = strip_tags($liste_name);
 			$liste_sig  = strip_tags($liste_sig);
@@ -1078,8 +1074,8 @@ else if ($mode == 'liste') {
 			'ACTION'               => $action
 		]);
 
-		if (check_ssl_support()) {
-			$template->assignToBlock('ssl_support', [
+		if (in_array('tls', stream_get_transports())) {
+			$template->assignToBlock('tls_support', [
 				'L_SECURITY'        => $lang['Connection_security'],
 				'L_NONE'            => $lang['None'],
 				'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $pop_tls == SECURITY_STARTTLS),

@@ -1288,21 +1288,6 @@ function get_max_filesize()
 }
 
 /**
- * Indique si PHP supporte les connexion SSL/TLS.
- *
- * @return boolean
- */
-function check_ssl_support()
-{
-	$transports = [];
-	if (function_exists('stream_get_transports')) {
-		$transports = stream_get_transports();
-	}
-
-	return (in_array('ssl', $transports) || in_array('tls', $transports));
-}
-
-/**
  * Vérifie si on est en ligne de commande.
  *
  * @return boolean

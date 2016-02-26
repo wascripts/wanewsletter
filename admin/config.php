@@ -113,10 +113,6 @@ if (isset($_POST['submit'])) {
 		$new_config['smtp_pass'] = $old_config['smtp_pass'];
 	}
 
-	if (!check_ssl_support()) {
-		$new_config['smtp_tls'] = SECURITY_NONE;
-	}
-
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
 		$smtp = new \Wamailer\Transport\SmtpClient();
 		$smtp->options([
@@ -283,8 +279,8 @@ $template->assign([
 	'DEBUG_BOX'                 => $debug_box
 ]);
 
-if (check_ssl_support()) {
-	$template->assignToBlock('ssl_support', [
+if (in_array('tls', stream_get_transports())) {
+	$template->assignToBlock('tls_support', [
 		'L_SECURITY'        => $lang['Connection_security'],
 		'L_NONE'            => $lang['None'],
 		'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $new_config['smtp_tls'] == SECURITY_STARTTLS),
