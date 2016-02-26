@@ -60,7 +60,7 @@ class PopClient
 		/**
 		 * Utilisation de la commande STLS pour sécuriser la connexion.
 		 * Ignoré si la connexion est sécurisée en utilisant un des préfixes de
-		 * transport ssl ou tls supportés par PHP.
+		 * transport tls supportés par PHP.
 		 *
 		 * @var boolean
 		 */
@@ -106,7 +106,7 @@ class PopClient
 	protected $serverInfos = [
 		'host'      => '',
 		'port'      => 0,
-		// true si la connexion est chiffrée avec SSL/TLS
+		// true si la connexion est chiffrée avec TLS
 		'encrypted' => false,
 		// true si le certificat a été vérifié
 		'trusted'   => false,
@@ -179,13 +179,13 @@ class PopClient
 		}
 
 		$proto = substr($url['scheme'], 0, 3);
-		$useSSL   = ($proto == 'ssl' || $proto == 'tls');
-		$startTLS = (!$useSSL && $this->opts['starttls']);
+		$useTLS   = ($proto == 'tls');
+		$startTLS = (!$useTLS && $this->opts['starttls']);
 
 		// Attribution du port par défaut si besoin
 		if (empty($url['port'])) {
 			$url['port'] = 110;
-			if ($useSSL) {
+			if ($useTLS) {
 				$url['port'] = 995;// POP3S
 			}
 
@@ -193,8 +193,8 @@ class PopClient
 		}
 
 		// check de l’extension openssl si besoin
-		if (($useSSL || $startTLS) && !in_array('tls', stream_get_transports())) {
-			throw new Exception("Cannot use SSL/TLS because the openssl extension is not available!");
+		if (($useTLS || $startTLS) && !in_array('tls', stream_get_transports())) {
+			throw new Exception("Cannot use TLS because the openssl extension is not available!");
 		}
 
 		//
@@ -263,7 +263,7 @@ class PopClient
 		$infos = [];
 		$infos['host']      = $url['host'];
 		$infos['port']      = $url['port'];
-		$infos['encrypted'] = ($useSSL || $startTLS);
+		$infos['encrypted'] = ($useTLS || $startTLS);
 		$infos['trusted']   = ($infos['encrypted'] && PHP_VERSION_ID >= 50600);
 		$infos['context']   = $context;
 
