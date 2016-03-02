@@ -52,7 +52,8 @@ CREATE TABLE wa_admin (
 	email_new_subscribe TINYINT(1)   NOT NULL DEFAULT 0,
 	email_unsubscribe   TINYINT(1)   NOT NULL DEFAULT 0,
 	html_editor         TINYINT(1)   NOT NULL DEFAULT 1,
-	CONSTRAINT wa_admin_pk PRIMARY KEY (admin_id)
+	CONSTRAINT wa_admin_pk PRIMARY KEY (admin_id),
+	CONSTRAINT admin_login_idx UNIQUE (admin_login)
 )
 	ENGINE = MyISAM
 	DEFAULT CHARACTER SET = utf8;

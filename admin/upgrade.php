@@ -803,6 +803,20 @@ if (isset($_POST['start'])) {
 			}
 		}
 
+		//
+		// Ajout contrainte d’unicité sur admin_login (unicité déjà "garantie"
+		// au niveau du bloc de code créant un nouvel admin dans admin.php).
+		//
+		if ($nl_config['db_version'] < 27) {
+			if ($db::ENGINE != 'sqlite') {
+				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
+					ADD CONSTRAINT admin_login_idx UNIQUE (admin_login)";
+			}
+			else {
+				wa_sqlite_recreate_table(ADMIN_TABLE);
+			}
+		}
+
 		exec_queries($sql_update);
 
 		//

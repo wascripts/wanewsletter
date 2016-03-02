@@ -20,7 +20,7 @@ const WANEWSLETTER_VERSION = '3.0-beta2';
 // Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
 // le script invite l'utilisateur à lancer la procédure de mise à jour des tables
 //
-const WANEWSLETTER_DB_VERSION = 26;
+const WANEWSLETTER_DB_VERSION = 27;
 
 //
 // Modes de débogage du script
