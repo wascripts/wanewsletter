@@ -1464,7 +1464,6 @@ function print_debug_infos()
 	$print_row('upload dir',         $dir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
 
 	if (!$nl_config['disable_stats']) {
-		require 'includes/functions.stats.php';
 		$print_row('stats dir', $dir_status(WA_STATSDIR));
 	}
 	$print_row('max_filesize',  $nl_config['max_filesize']);
