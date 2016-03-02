@@ -115,10 +115,7 @@ class Auth
 		list($tablename, $columns) = $this->getUserTableInfos();
 
 		if (!is_int($id) && $id != '') {
-			$sql_where = sprintf("%s = '%s'",
-				(strpos($id, '@') ? $columns['email'] : $columns['username']),
-				$db->escape($id)
-			);
+			$sql_where = sprintf("%s = '%s'", $columns['login'], $db->escape($id));
 		}
 		else {
 			$sql_where = sprintf("%s = %d", $columns['uid'], $id);
@@ -192,6 +189,9 @@ class Auth
 			$columns['username'] = 'admin_login';
 			$columns['email']    = 'admin_email';
 			$columns['language'] = 'admin_lang';
+
+			// Les administrateurs se connectent à l'admin avec leur nom d'utilisateur.
+			$columns['login'] = $columns['username'];
 		}
 		else {
 			$tablename = ABONNES_TABLE;
@@ -202,6 +202,9 @@ class Auth
 			$columns['username'] = 'abo_pseudo';
 			$columns['email']    = 'abo_email';
 			$columns['language'] = 'abo_lang';
+
+			// Les abonnés se connectent au profil_cp avec leur adresse email.
+			$columns['login'] = $columns['email'];
 		}
 
 		return [$tablename, $columns];

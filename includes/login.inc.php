@@ -17,9 +17,10 @@ if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 
 Template::setDir(sprintf('%s/templates/', WA_ROOTDIR));
 
-$mode      = filter_input(INPUT_GET, 'mode');
-$reset_key = filter_input(INPUT_GET, 'k');
-$redirect  = (check_in_admin()) ? 'index.php' : 'profil_cp.php';
+$mode       = filter_input(INPUT_GET, 'mode');
+$reset_key  = filter_input(INPUT_GET, 'k');
+$redirect   = (check_in_admin()) ? 'index.php' : 'profil_cp.php';
+$login_page = (check_in_admin()) ? 'login.php' : 'profil_cp.php';
 
 if (!empty($_SESSION['redirect'])) {
 	$redirect = $_SESSION['redirect'];
@@ -75,7 +76,7 @@ if ($mode == 'reset' || $mode == 'cp') {
 						$message_id = 'Password_modified';
 					}
 
-					$output->addLine($lang['Message'][$message_id], $_SERVER['SCRIPT_NAME']);
+					$output->addLine($lang['Message'][$message_id], $login_page);
 					$output->message();
 				}
 			}
@@ -95,7 +96,7 @@ if ($mode == 'reset' || $mode == 'cp') {
 				'L_CONFIRM_PASSWD' => $lang['Confirm_passwd'],
 				'L_VALID_BUTTON'   => $lang['Button']['valid'],
 
-				'S_SCRIPT_NAME'    => $_SERVER['SCRIPT_NAME'],
+				'S_SCRIPT_NAME'    => $login_page,
 				'S_RESETKEY'       => $reset_key
 			]);
 
@@ -104,16 +105,16 @@ if ($mode == 'reset' || $mode == 'cp') {
 		}
 	}
 
-	$login_or_email = trim(u::filter_input(INPUT_POST, 'login_or_email'));
+	$login = trim(u::filter_input(INPUT_POST, 'login'));
 
 	if (!$error && isset($_POST['submit'])) {
-		if (empty($login_or_email)) {
+		if (!$login) {
 			$error = true;
 			$msg_error[] = $lang['Message']['fields_empty'];
 		}
 
 		if (!$error) {
-			$userdata = $auth->getUserData($login_or_email);
+			$userdata = $auth->getUserData($login);
 
 			if ($userdata) {
 				$_SESSION['uid'] = $userdata['uid'];
@@ -124,7 +125,7 @@ if ($mode == 'reset' || $mode == 'cp') {
 				$template = new Template(sprintf($template, WA_ROOTDIR, $nl_config['language']));
 				$template->assign([
 					'PSEUDO'    => $userdata['username'],
-					'RESET_URL' => wan_build_url($_SERVER['SCRIPT_NAME'].'?k='.$reset_key)
+					'RESET_URL' => wan_build_url($login_page.'?k='.$reset_key)
 				]);
 				$message = $template->pparse(true);
 
@@ -148,8 +149,8 @@ if ($mode == 'reset' || $mode == 'cp') {
 				}
 			}
 
-			$message_id = (strpos($login_or_email, '@'))
-				? 'Reset_using_email_ok' : 'Reset_using_username_ok';
+			$message_id = (check_in_admin())
+				? 'Reset_password_username' : 'Reset_password_email';
 			$output->message($message_id);
 		}
 	}
@@ -159,15 +160,15 @@ if ($mode == 'reset' || $mode == 'cp') {
 	$template = new Template('lost_passwd.tpl');
 
 	$template->assign([
-		'TITLE'            => ($mode == 'cp')
+		'TITLE'          => ($mode == 'cp')
 			? $lang['Title']['Create_passwd'] : $lang['Title']['Reset_passwd'],
-		'L_EXPLAIN'        => $lang['Explain']['Reset_passwd'],
-		'L_LOGIN_OR_EMAIL' => $lang['Login_or_email'],
-		'L_LOG_IN'         => $lang['Log_in'],
-		'L_VALID_BUTTON'   => $lang['Button']['valid'],
+		'L_EXPLAIN'      => $lang['Explain']['Reset_passwd'],
+		'L_LOGIN'        => (check_in_admin()) ? $lang['Login'] : $lang['Email_address'],
+		'L_LOG_IN'       => $lang['Log_in'],
+		'L_VALID_BUTTON' => $lang['Button']['valid'],
 
-		'S_MODE'           => $mode,
-		'S_SCRIPT_NAME'    => $_SERVER['SCRIPT_NAME']
+		'S_MODE'         => $mode,
+		'S_SCRIPT_NAME'  => $login_page
 	]);
 
 	$template->pparse();
@@ -214,21 +215,19 @@ $output->header();
 
 $template = new Template('login.tpl');
 
-$login_script = (check_in_admin()) ? 'login.php' : 'profil_cp.php';
-
 $template->assign([
 	'TITLE'          => $lang['Module']['login'],
 	'L_EXPLAIN'      => sprintf($lang['Explain']['login'],
-		sprintf('<a href="%s?mode=cp">', $login_script),
+		sprintf('<a href="%s?mode=cp">', $login_page),
 		'</a>'
 	),
-	'L_LOGIN'        => $lang['Login_or_email'],
+	'L_LOGIN'        => (check_in_admin()) ? $lang['Login'] : $lang['Email_address'],
 	'L_PASSWD'       => $lang['Password'],
 	'L_AUTOLOGIN'    => $lang['Autologin'],
 	'L_RESET_PASSWD' => $lang['Reset_passwd'],
 	'L_VALID_BUTTON' => $lang['Button']['valid'],
 
-	'S_SCRIPT_NAME'   => $login_script
+	'S_SCRIPT_NAME'   => $login_page
 ]);
 
 if (!filter_input(INPUT_COOKIE, $session->getName())) {
