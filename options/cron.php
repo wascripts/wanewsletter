@@ -73,8 +73,6 @@ if ($mode == 'send') {
 	$output->message($message);
 }
 else if ($mode == 'validate') {
-	require 'includes/functions.stats.php';
-
 	$message = process_mail_action($listdata);
 	$output->message($message);
 }

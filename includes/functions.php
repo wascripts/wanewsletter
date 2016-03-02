@@ -1603,8 +1603,6 @@ function process_mail_action(array $listdata)
 {
 	global $lang;
 
-	require 'includes/functions.stats.php';
-
 	$sub = new Subscription();
 	$pop = new PopClient();
 	$pop->options([

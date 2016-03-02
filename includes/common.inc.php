@@ -40,6 +40,7 @@ require 'includes/constantes.php';
 require 'includes/compat.inc.php';
 require 'includes/functions.php';
 require 'includes/functions.db.php';
+require 'includes/functions.stats.php';
 require 'includes/functions.wrapper.php';
 require 'vendor/autoload.php';
 

@@ -144,8 +144,6 @@ if (isset($_POST['submit'])) {
 	}
 
 	if (!$new_config['disable_stats'] && extension_loaded('gd')) {
-		require 'includes/functions.stats.php';
-
 		if (!is_writable(WA_STATSDIR)) {
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],

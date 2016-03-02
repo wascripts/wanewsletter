@@ -292,8 +292,6 @@ if ($process_send) {
 	echo "\n";// Permet de revenir à la ligne après la barre de progression !
 }
 else if ($process_subscribe) {
-	require 'includes/functions.stats.php';
-
 	$message = process_mail_action($listdata);
 }
 else if ($import_mail) {

@@ -1148,7 +1148,6 @@ else if ($mode == 'liste') {
 					WHERE liste_id = " . $listdata['liste_id'];
 				$db->query($sql);
 
-				require 'includes/functions.stats.php';
 				remove_stats($listdata['liste_id']);
 
 				$message = $lang['Message']['Liste_del_all'];
@@ -1217,7 +1216,6 @@ else if ($mode == 'liste') {
 					WHERE liste_id = " . $listdata['liste_id'];
 				$db->query($sql);
 
-				require 'includes/functions.stats.php';
 				remove_stats($listdata['liste_id'], $liste_id);
 
 				$message = $lang['Message']['Liste_del_move'];
