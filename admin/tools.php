@@ -304,8 +304,6 @@ switch ($mode) {
 		}
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-			require 'includes/functions.box.php';
-
 			$template->assignToBlock('format_box', [
 				'L_FORMAT'   => $lang['Format_to_export'],
 				'FORMAT_BOX' => format_box('format')
@@ -616,8 +614,6 @@ switch ($mode) {
 		]);
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-			require 'includes/functions.box.php';
-
 			$template->assignToBlock('format_box', [
 				'L_FORMAT'   => $lang['Format_to_import'],
 				'FORMAT_BOX' => format_box('format')

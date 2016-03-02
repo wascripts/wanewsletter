@@ -382,8 +382,6 @@ if ($start) {
 $output->httpHeaders();
 
 if (!$reinstall) {
-	require 'includes/functions.box.php';
-
 	$db_box = '';
 	foreach ($supported_db as $name => $data) {
 		$selected = $output->getBoolAttr('selected', ($infos['engine'] == $name));

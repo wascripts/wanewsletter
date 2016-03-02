@@ -13,7 +13,6 @@ $return_message = true;
 $message = '';
 
 require './newsletter.php';
-require 'includes/functions.box.php';
 
 $sql = "SELECT liste_id, liste_name, liste_format
 	FROM " . LISTE_TABLE . "

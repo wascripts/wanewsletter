@@ -184,8 +184,6 @@ else {
 	$new_config = $old_config;
 }
 
-require 'includes/functions.box.php';
-
 $debug_box  = '<select name="debug_level">';
 foreach ([DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL] as $debug_level) {
 	$debug_box .= sprintf('<option value="%d"%s>%s</option>',

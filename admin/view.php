@@ -500,8 +500,6 @@ else if ($mode == 'abonnes') {
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
-			require 'includes/functions.box.php';
-
 			$output->header();
 
 			$template = new Template('edit_abo_profil_body.tpl');
@@ -1002,8 +1000,6 @@ else if ($mode == 'liste') {
 				${$varname} = $listdata[$varname];
 			}
 		}
-
-		require 'includes/functions.box.php';
 
 		$output->header();
 
@@ -1717,8 +1713,6 @@ else if ($mode == 'log') {
 			}
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-				require 'includes/functions.box.php';
-
 				// Par champ caché, car ce formulaire est en méthode GET.
 				$output->addHiddenField('mode', 'log');
 				$output->addHiddenField('action', 'view');

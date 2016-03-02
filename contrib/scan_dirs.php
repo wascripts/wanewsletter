@@ -79,7 +79,6 @@ includes/class.template.php
 includes/common.inc.php
 includes/compat.inc.php
 includes/constantes.php
-includes/functions.box.php
 includes/functions.db.php
 includes/functions.php
 includes/functions.stats.php

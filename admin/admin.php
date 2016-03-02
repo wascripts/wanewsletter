@@ -340,8 +340,6 @@ if (Auth::isAdmin($admindata)) {
 	}
 }
 
-require 'includes/functions.box.php';
-
 $output->addHiddenField('uid', $current_admin['admin_id']);
 
 if (Auth::isAdmin($admindata)) {

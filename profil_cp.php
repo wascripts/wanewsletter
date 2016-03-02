@@ -151,8 +151,6 @@ switch ($mode) {
 			}
 		}
 
-		require 'includes/functions.box.php';
-
 		$output->header();
 
 		$template = new Template('editprofile_body.tpl');
