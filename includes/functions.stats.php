@@ -10,41 +10,6 @@
 namespace Wanewsletter;
 
 /**
- * @param string $hexColor
- *
- * @return object
- */
-function convertToRGB($hexColor)
-{
-	$pattern  = null;
-	$hexColor = strtoupper($hexColor);
-	$length   = strlen($hexColor);
-
-	if ($length != 3 && $length != 6) {
-		$hexColor = 'FFF';
-		$length   = 3;
-	}
-
-	if ($length == 6) {
-		$pattern = '/^#?([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})$/';
-		$repeat  = 1;
-	}
-	else {
-		$pattern = '/^#?([[:xdigit:]])([[:xdigit:]])([[:xdigit:]])$/';
-		$repeat  = 2;
-	}
-
-	preg_match($pattern, $hexColor, $m);
-
-	$parts = [];
-	$parts['red']   = str_repeat($m[1], $repeat);
-	$parts['green'] = str_repeat($m[2], $repeat);
-	$parts['blue']  = str_repeat($m[3], $repeat);
-
-	return (object) array_map('hexdec', $parts);
-}
-
-/**
  * Créé le fichier de statistiques pour le mois et l'année donnés
  *
  * @param array   $listdata Données de la liste concernée

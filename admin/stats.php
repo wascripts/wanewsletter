@@ -98,6 +98,8 @@ function send_image($name, $img, $lastModified = null)
 
 function display_img_error($str)
 {
+	global $convert2rgb;
+
 	$imageW = 560;
 	$imageH = 80;
 	$text_font = 3;
@@ -105,7 +107,7 @@ function display_img_error($str)
 	$im = imagecreate($imageW, $imageH);
 
 	$black = imagecolorallocate($im, 0, 0, 0);
-	$gray1 = convertToRGB('EAEAEA');
+	$gray1 = $convert2rgb('EAEAEA');
 	$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
 
 	//
@@ -124,6 +126,39 @@ function display_img_error($str)
 	http_response_code(500);
 	send_image('error', $im);
 }
+
+/**
+ * @param string $color Une couleur, en notation hexadécimale.
+ * @return object
+ */
+$convert2rgb = function ($color) {
+	$pattern = null;
+	$color   = strtoupper($color);
+	$length  = strlen($color);
+
+	if ($length != 3 && $length != 6) {
+		$color  = 'FFF';
+		$length = 3;
+	}
+
+	if ($length == 6) {
+		$pattern = '/^#?([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})$/';
+		$repeat  = 1;
+	}
+	else {
+		$pattern = '/^#?([[:xdigit:]])([[:xdigit:]])([[:xdigit:]])$/';
+		$repeat  = 2;
+	}
+
+	preg_match($pattern, $color, $m);
+
+	$parts = [];
+	$parts['red']   = str_repeat($m[1], $repeat);
+	$parts['green'] = str_repeat($m[2], $repeat);
+	$parts['blue']  = str_repeat($m[3], $repeat);
+
+	return (object) array_map('hexdec', $parts);
+};
 
 if ($img == 'graph') {
 	$ts = mktime(0, 0, 0, $month, 1, $year);
@@ -163,11 +198,11 @@ if ($img == 'graph') {
 	$gray	= imagecolorallocate($im, 200, 200, 200);
 	$back_2 = imagecolorallocate($im, 240, 240, 240);
 	$white	= imagecolorallocate($im, 255, 255, 255);
-	$back_1 = convertToRGB('036');
+	$back_1 = $convert2rgb('036');
 	$back_1 = imagecolorallocate($im, $back_1->red, $back_1->green, $back_1->blue);
-	$color1 = convertToRGB('F80');
+	$color1 = $convert2rgb('F80');
 	$color1 = imagecolorallocate($im, $color1->red, $color1->green, $color1->blue);
-	$color2 = convertToRGB('02F');
+	$color2 = $convert2rgb('02F');
 	$color2 = imagecolorallocate($im, $color2->red, $color2->green, $color2->blue);
 
 	//
@@ -304,15 +339,15 @@ if ($img == 'camembert') {
 	// Allocation des couleurs
 	//
 	$black = imagecolorallocate($im, 0, 0, 0);
-	$gray1 = convertToRGB('EAEAEA');
+	$gray1 = $convert2rgb('EAEAEA');
 	$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
-	$gray2 = convertToRGB('888');
+	$gray2 = $convert2rgb('888');
 	$gray2 = imagecolorallocate($im, $gray2->red, $gray2->green, $gray2->blue);
 
 	$color = [];
 	$colorList = ['F80', '0A0', '0BC', '30C', '608', 'C03'];
 	foreach ($colorList as $hexColor) {
-		$tmp = convertToRGB($hexColor);
+		$tmp = $convert2rgb($hexColor);
 		$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
 	}
 
