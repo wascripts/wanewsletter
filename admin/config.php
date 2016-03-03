@@ -118,7 +118,8 @@ if (isset($_POST['submit'])) {
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
 		$smtp = new \Wamailer\Transport\SmtpClient();
 		$smtp->options([
-			'starttls' => ($new_config['smtp_tls'] == SECURITY_STARTTLS)
+			'starttls' => ($new_config['smtp_tls'] == SECURITY_STARTTLS),
+			'timeout'  => 10
 		]);
 
 		$server = ($new_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
