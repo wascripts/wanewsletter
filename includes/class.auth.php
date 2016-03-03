@@ -133,30 +133,6 @@ class Auth
 			$userdata['passwd']   =& $userdata[$columns['passwd']];
 			$userdata['language'] =& $userdata[$columns['language']];
 
-			if (check_in_admin()) {
-				$sql = "SELECT l.liste_id, l.liste_name, l.liste_format,
-						l.sender_email, l.return_email, l.confirm_subscribe,
-						l.liste_public, l.limitevalidate, l.form_url,
-						l.liste_sig, l.auto_purge, l.purge_freq,
-						l.purge_next, l.liste_startdate, l.use_cron,
-						l.pop_host, l.pop_port, l.pop_user, l.pop_pass,
-						l.pop_tls, l.liste_alias, l.liste_numlogs,
-						aa.auth_view, aa.auth_edit, aa.auth_del, aa.auth_send,
-						aa.auth_import, aa.auth_export, aa.auth_ban, aa.auth_attach
-					FROM %s AS l
-						LEFT JOIN %s AS aa ON aa.admin_id = %d
-							AND aa.liste_id = l.liste_id
-					ORDER BY l.liste_name ASC";
-				$sql = sprintf($sql, LISTE_TABLE, AUTH_ADMIN_TABLE, $userdata['uid']);
-
-				$result = $db->query($sql);
-
-				$userdata['lists'] = [];
-				while ($listdata = $result->fetch($result::FETCH_ASSOC)) {
-					$userdata['lists'][$listdata['liste_id']] = $listdata;
-				}
-			}
-
 			return $userdata;
 		}
 
@@ -201,6 +177,44 @@ class Auth
 	}
 
 	/**
+	 * @param integer $id Identifiant de l'administrateur
+	 *
+	 * @return array
+	 */
+	public function getListData($id)
+	{
+		global $db, $admindata;
+
+		if (!empty($admindata['lists']) && $admindata['uid'] == $id) {
+			return $admindata['lists'];
+		}
+
+		$sql = "SELECT l.liste_id, l.liste_name, l.liste_format,
+				l.sender_email, l.return_email, l.confirm_subscribe,
+				l.liste_public, l.limitevalidate, l.form_url,
+				l.liste_sig, l.auto_purge, l.purge_freq,
+				l.purge_next, l.liste_startdate, l.use_cron,
+				l.pop_host, l.pop_port, l.pop_user, l.pop_pass,
+				l.pop_tls, l.liste_alias, l.liste_numlogs,
+				aa.auth_view, aa.auth_edit, aa.auth_del, aa.auth_send,
+				aa.auth_import, aa.auth_export, aa.auth_ban, aa.auth_attach
+			FROM %s AS l
+				LEFT JOIN %s AS aa ON aa.admin_id = %d
+					AND aa.liste_id = l.liste_id
+			ORDER BY l.liste_name ASC";
+		$sql = sprintf($sql, LISTE_TABLE, AUTH_ADMIN_TABLE, $id);
+
+		$result = $db->query($sql);
+
+		$lists = [];
+		while ($listdata = $result->fetch($result::FETCH_ASSOC)) {
+			$lists[$listdata['liste_id']] = $listdata;
+		}
+
+		return $lists;
+	}
+
+	/**
 	 * Vérification des permissions, selon la permission et la liste concernées.
 	 *
 	 * @param string  $auth_type Identifiant de la permission concernée
@@ -226,6 +240,10 @@ class Auth
 	public function getLists($auth_type)
 	{
 		global $admindata;
+
+		if (!isset($admindata['lists'])) {
+			$admindata['lists'] = $this->getListData($admindata['uid']);
+		}
 
 		$lists = [];
 		foreach ($admindata['lists'] as $liste_id => $data) {

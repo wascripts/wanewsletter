@@ -267,9 +267,10 @@ if (isset($_POST['submit'])) {
 			}
 
 			$current_admin = $auth->getUserData($admin_id);
+			$lists = $auth->getListData($admin_id);
 
 			for ($i = 0, $total = count($liste_ids); $i < $total; $i++) {
-				if (!isset($current_admin['lists'][$liste_ids[$i]])) {
+				if (!isset($lists[$liste_ids[$i]])) {
 					continue;
 				}
 
@@ -280,7 +281,7 @@ if (isset($_POST['submit'])) {
 					}
 				}
 
-				if (!isset($current_admin['lists'][$liste_ids[$i]]['auth_view'])) {
+				if (!isset($lists[$liste_ids[$i]]['auth_view'])) {
 					$sql_data['admin_id'] = $admin_id;
 					$sql_data['liste_id'] = $liste_ids[$i];
 
@@ -314,6 +315,9 @@ if (Auth::isAdmin($admindata)) {
 		$current_admin = $auth->getUserData($admin_id);
 		if (!$current_admin) {
 			$current_admin = $admindata;
+		}
+		else {
+			$current_admin['lists'] = $auth->getListData($admin_id);
 		}
 	}
 
