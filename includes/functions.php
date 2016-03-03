@@ -384,7 +384,7 @@ function http_build_url($url, array $params = [])
 		$path  = [];
 
 		foreach ($parts as $part) {
-			if ($part == '.' || $part == '') {
+			if ($part == '.') {
 				continue;
 			}
 			if ($part == '..') {
@@ -394,6 +394,7 @@ function http_build_url($url, array $params = [])
 				$path[] = $part;
 			}
 		}
+
 		$path = implode('/', $path);
 	}
 
