@@ -108,7 +108,7 @@ class Auth
 	{
 		global $db, $admindata;
 
-		if ($_SESSION['uid'] && $_SESSION['uid'] == $id && !empty($admindata)) {
+		if (!empty($_SESSION['uid']) && $_SESSION['uid'] == $id && !empty($admindata)) {
 			return $admindata;
 		}
 
