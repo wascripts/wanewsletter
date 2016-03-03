@@ -125,7 +125,7 @@ if ($mode == 'reset' || $mode == 'cp') {
 				$template = new Template(sprintf($template, WA_ROOTDIR, $nl_config['language']));
 				$template->assign([
 					'PSEUDO'    => $userdata['username'],
-					'RESET_URL' => wan_build_url($login_page.'?k='.$reset_key)
+					'RESET_URL' => http_build_url($login_page.'?k='.$reset_key)
 				]);
 				$message = $template->pparse(true);
 

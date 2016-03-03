@@ -356,7 +356,7 @@ function wan_ssl_connection()
  *
  * @return string
  */
-function wan_build_url($url, array $params = [])
+function http_build_url($url, array $params = [])
 {
 	$parts = parse_url($url);
 
@@ -430,7 +430,7 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 		$params[$name] = $value;
 	}
 
-	$url = wan_build_url($url, $params);
+	$url = http_build_url($url, $params);
 	http_response_code($status);
 	header(sprintf('Location: %s', $url));
 

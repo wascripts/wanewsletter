@@ -79,7 +79,7 @@ if ($mode == 'adduser') {
 			$template->assign([
 				'PSEUDO'        => $new_login,
 				'SITENAME'      => $nl_config['sitename'],
-				'INIT_PASS_URL' => wan_build_url('login.php?mode=cp')
+				'INIT_PASS_URL' => http_build_url('login.php?mode=cp')
 			]);
 			$message = $template->pparse(true);
 
