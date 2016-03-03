@@ -343,7 +343,7 @@ function generate_key($length = 32, $specialChars = false)
  *
  * @return boolean
  */
-function wan_ssl_connection()
+function is_secure_connection()
 {
 	return ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 443 == $_SERVER['SERVER_PORT']);
 }
@@ -361,7 +361,7 @@ function http_build_url($url, array $params = [])
 	$parts = parse_url($url);
 
 	if (empty($parts['scheme'])) {
-		$proto = (wan_ssl_connection()) ? 'https' : 'http';
+		$proto = (is_secure_connection()) ? 'https' : 'http';
 	}
 	else {
 		$proto = $parts['scheme'];
@@ -1606,7 +1606,7 @@ function print_debug_infos()
 			$_SERVER['SERVER_PROTOCOL'],
 			PHP_OS
 		));
-		$print_row($lang['Secure_connection'], wan_ssl_connection());
+		$print_row($lang['Secure_connection'], is_secure_connection());
 	}
 
 	echo "</pre>";

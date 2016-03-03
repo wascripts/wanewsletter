@@ -48,7 +48,7 @@ class Session implements \SessionHandlerInterface
 		$this->cfg_cookie['path']     = str_replace('//', '/', dirname($_SERVER['REQUEST_URI']).'/');
 		$this->cfg_cookie['lifetime'] = 0;
 		$this->cfg_cookie['domain']   = null;
-		$this->cfg_cookie['secure']   = wan_ssl_connection();
+		$this->cfg_cookie['secure']   = is_secure_connection();
 		$this->cfg_cookie['httponly'] = true;
 
 		foreach ($this->cfg_cookie as $key => $value) {
