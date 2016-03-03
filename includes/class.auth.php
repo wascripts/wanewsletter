@@ -148,23 +148,13 @@ class Auth
 							AND aa.liste_id = l.liste_id
 					ORDER BY l.liste_name ASC";
 				$sql = sprintf($sql, LISTE_TABLE, AUTH_ADMIN_TABLE, $userdata['uid']);
-			}
-			else {
-				$sql = "SELECT al.format, al.register_key, al.register_date,
-						l.liste_id, l.liste_name, l.sender_email, l.return_email,
-						l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url
-					FROM %s AS l
-						INNER JOIN %s AS al ON al.abo_id = %d
-							AND al.liste_id = l.liste_id
-					ORDER BY l.liste_name ASC";
-				$sql = sprintf($sql, LISTE_TABLE, ABO_LISTE_TABLE, $userdata['uid']);
-			}
 
-			$result = $db->query($sql);
+				$result = $db->query($sql);
 
-			$userdata['lists'] = [];
-			while ($listdata = $result->fetch($result::FETCH_ASSOC)) {
-				$userdata['lists'][$listdata['liste_id']] = $listdata;
+				$userdata['lists'] = [];
+				while ($listdata = $result->fetch($result::FETCH_ASSOC)) {
+					$userdata['lists'][$listdata['liste_id']] = $listdata;
+				}
 			}
 
 			return $userdata;

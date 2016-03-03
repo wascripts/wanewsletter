@@ -184,6 +184,22 @@ switch ($mode) {
 		break;
 
 	case 'archives':
+		// Données des listes
+		$sql = "SELECT al.format, al.register_key, al.register_date,
+				l.liste_id, l.liste_name, l.sender_email, l.return_email,
+				l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url
+			FROM %s AS l
+				INNER JOIN %s AS al ON al.abo_id = %d
+					AND al.liste_id = l.liste_id
+			ORDER BY l.liste_name ASC";
+		$sql = sprintf($sql, LISTE_TABLE, ABO_LISTE_TABLE, $abodata['uid']);
+		$result = $db->query($sql);
+
+		$abodata['lists'] = [];
+		while ($listdata = $result->fetch($result::FETCH_ASSOC)) {
+			$abodata['lists'][$listdata['liste_id']] = $listdata;
+		}
+
 		if (isset($_POST['submit'])) {
 			$listlog = (array) filter_input(INPUT_POST, 'log',
 				FILTER_VALIDATE_INT,
