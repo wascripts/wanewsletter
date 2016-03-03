@@ -230,7 +230,7 @@ $template->assign([
 	'L_SECONDS'                 => $lang['Seconds'],
 	'L_UPLOAD_PATH'             => $lang['Upload_path'],
 	'L_MAX_FILESIZE'            => $lang['Max_filesize'],
-	'L_KIB'                     => $lang['KO'],
+	'L_KIB'                     => $lang['KiB'],
 	'L_ENGINE_SEND'             => $lang['Choice_engine_send'],
 	'L_ENGINE_BCC'              => $lang['With_engine_bcc'],
 	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],

@@ -1100,19 +1100,19 @@ function formateSize($size)
 	$g = $m * $k;
 
 	if ($size >= $g) {
-		$unit = $GLOBALS['lang']['GO'];
+		$unit = $GLOBALS['lang']['GiB'];
 		$size /= $g;
 	}
 	else if ($size >= $m) {
-		$unit = $GLOBALS['lang']['MO'];
+		$unit = $GLOBALS['lang']['MiB'];
 		$size /= $m;
 	}
 	else if ($size >= $k) {
-		$unit = $GLOBALS['lang']['KO'];
+		$unit = $GLOBALS['lang']['KiB'];
 		$size /= $k;
 	}
 	else {
-		$unit = $GLOBALS['lang']['Octets'];
+		$unit = $GLOBALS['lang']['Bytes'];
 	}
 
 	return sprintf("%s\xC2\xA0%s", wa_number_format($size), $unit);
