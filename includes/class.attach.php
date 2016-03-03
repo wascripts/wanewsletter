@@ -127,7 +127,7 @@ class Attach
 			$tmp_filename = $file['tmp_name'];
 		}
 		else if ($mode == 'remote') {
-			$tmp_path = (ini_get('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
+			$tmp_path = (ini_get('open_basedir')) ? $nl_config['tmp_dir'] : sys_get_temp_dir();
 			$tmp_filename = tempnam($tmp_path, 'wa0');
 
 			if (!($fp = fopen($tmp_filename, 'wb'))) {

@@ -20,9 +20,11 @@ require './start.inc.php';
 //
 function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 {
+	global $nl_config;
+
 	switch ($compress) {
 		case 'zip':
-			$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
+			$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa-');
 			$mime_type = 'application/zip';
 			$zip = new ZipArchive();
 			$zip->open($tmp_filename, ZipArchive::CREATE);
@@ -258,7 +260,7 @@ switch ($mode) {
 				sendfile($filename, $mime_type, $contents);
 			}
 			else {
-				if (!($fp = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
+				if (!($fp = fopen($nl_config['tmp_dir'] . '/' . $filename, 'wb'))) {
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
@@ -369,7 +371,7 @@ switch ($mode) {
 					//
 					if (!is_readable($tmp_filename)) {
 						$unlink = true;
-						$tmp_filename = tempnam(WA_TMPDIR, 'wa');
+						$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa');
 
 						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
@@ -585,7 +587,7 @@ switch ($mode) {
 				$url = 'data:text/plain;base64,' . base64_encode($report_str);
 				$output->addLine($lang['Message']['Success_import3'], $url);
 
-				file_put_contents(WA_TMPDIR . '/wa_import_report.txt', $report_str);
+				file_put_contents($nl_config['tmp_dir'] . '/wa_import_report.txt', $report_str);
 			}
 			else {
 				$output->addLine($lang['Message']['Success_import']);
@@ -847,7 +849,7 @@ switch ($mode) {
 				sendfile($filename, $mime_type, $contents);
 			}
 			else {
-				if (!($fp = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
+				if (!($fp = fopen($nl_config['tmp_dir'] . '/' . $filename, 'wb'))) {
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
@@ -982,7 +984,7 @@ switch ($mode) {
 					//
 					if (!is_readable($tmp_filename)) {
 						$unlink = true;
-						$tmp_filename = tempnam(WA_TMPDIR, 'wa');
+						$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa');
 
 						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);

@@ -24,13 +24,7 @@ function load_config()
 
 	$dsn = '';
 	$prefixe = 'wa_';
-
-	// Réglage par défaut des divers répertoires utilisés par le script.
-	// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
-	// de Wanewsletter (voir plus bas).
-	$logs_dir  = '~/data/logs';
-	$stats_dir = '~/data/stats';
-	$tmp_dir   = '~/data/tmp';
+	$nl_config = [];
 
 	$need_update  = false;
 	$test_files[] = WA_ROOTDIR . '/data/config.inc.php';
@@ -49,6 +43,20 @@ function load_config()
 
 		$need_update = true;
 	}
+
+	if (!is_array($nl_config)) {
+		$nl_config = [];
+	}
+
+	$base_config = [];
+	// Ajout des répertoires par défaut utilisés par le script.
+	// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire
+	// d’installation de Wanewsletter (voir plus bas).
+	$base_config['logs_dir']  = '~/data/logs';
+	$base_config['stats_dir'] = '~/data/stats';
+	$base_config['tmp_dir']   = '~/data/tmp';
+
+	$nl_config = array_merge($base_config, $nl_config);
 
 	//
 	// Compatibilité avec Wanewsletter < 2.3-beta2
@@ -122,9 +130,6 @@ function load_config()
 		]);
 	}
 
-	$GLOBALS['dsn'] = $dsn;
-	$GLOBALS['prefixe'] = $prefixe;
-
 	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 
 	//
@@ -154,8 +159,16 @@ function load_config()
 		return rtrim(str_replace('\\', '/', $path), '/');
 	};
 
-	define(__NAMESPACE__.'\\WA_STATSDIR', $realpath($stats_dir));
-	define(__NAMESPACE__.'\\WA_TMPDIR',   $realpath($tmp_dir));
+	$nl_config['logs_dir']  = $realpath($nl_config['logs_dir']);
+	$nl_config['stats_dir'] = $realpath($nl_config['stats_dir']);
+	$nl_config['tmp_dir']   = $realpath($nl_config['tmp_dir']);
+
+	if (!is_writable($nl_config['tmp_dir'])) {
+		$output->message(sprintf(
+			$GLOBALS['lang']['Message']['Dir_not_writable'],
+			htmlspecialchars($nl_config['tmp_dir'])
+		));
+	}
 
 	if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE) {
 		$add_prefix = false;
@@ -171,11 +184,16 @@ function load_config()
 		}
 
 		if ($add_prefix) {
-			$filename = $realpath($logs_dir) . '/' . $filename;
+			$filename = $nl_config['logs_dir'] . '/' . $filename;
 		}
 
 		ini_set('error_log', $filename);
 	}
+
+	// Injection dans le scope global
+	$GLOBALS['dsn'] = $dsn;
+	$GLOBALS['prefixe'] = $prefixe;
+	$GLOBALS['nl_config'] = $nl_config;
 }
 
 /**
@@ -200,7 +218,9 @@ function check_db_version($version)
  */
 function wa_check_update($complete = false)
 {
-	$cache_file = sprintf('%s/%s', WA_TMPDIR, CHECK_UPDATE_CACHE);
+	global $nl_config;
+
+	$cache_file = sprintf('%s/%s', $nl_config['tmp_dir'], CHECK_UPDATE_CACHE);
 	$cache_ttl  = CHECK_UPDATE_CACHE_TTL;
 
 	$result = -1;
@@ -234,7 +254,7 @@ function wa_check_update($complete = false)
  */
 function wa_get_config()
 {
-	global $db;
+	global $db, $nl_config;
 
 	$result = $db->query("SELECT * FROM " . CONFIG_TABLE);
 	$result->setFetchMode($result::FETCH_ASSOC);
@@ -254,7 +274,7 @@ function wa_get_config()
 		$config = $row;
 	}
 
-	return $config;
+	return array_merge($nl_config, $config);
 }
 
 /**
@@ -1464,7 +1484,7 @@ function print_debug_infos()
 	$print_row('upload dir',         $dir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
 
 	if (!$nl_config['disable_stats']) {
-		$print_row('stats dir', $dir_status(WA_STATSDIR));
+		$print_row('stats dir', $dir_status($nl_config['stats_dir']));
 	}
 	$print_row('max_filesize',  $nl_config['max_filesize']);
 	$print_row('engine_send',   $nl_config['engine_send']);

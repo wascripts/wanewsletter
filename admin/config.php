@@ -147,10 +147,10 @@ if (isset($_POST['submit'])) {
 	}
 
 	if (!$new_config['disable_stats'] && extension_loaded('gd')) {
-		if (!is_writable(WA_STATSDIR)) {
+		if (!is_writable($nl_config['stats_dir'])) {
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-				htmlspecialchars(WA_STATSDIR)
+				htmlspecialchars($nl_config['stats_dir'])
 			);
 		}
 	}

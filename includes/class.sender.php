@@ -109,13 +109,13 @@ class Sender
 	 */
 	public function lock()
 	{
-		global $output;
+		global $nl_config, $output;
 
 		//
 		// On pose un verrou avec un fichier lock pour empêcher plusieurs
 		// envois simultanés sur une liste de diffusion.
 		//
-		$lockfile = sprintf('%s/liste-%d.lock', WA_TMPDIR, $this->listdata['liste_id']);
+		$lockfile = sprintf('%s/liste-%d.lock', $nl_config['tmp_dir'], $this->listdata['liste_id']);
 
 		if (file_exists($lockfile) && (!is_readable($lockfile) || !is_writable($lockfile))) {
 			throw new Exception("Lock file has wrong permissions. Must be readable and writable");

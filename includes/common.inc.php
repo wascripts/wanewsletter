@@ -100,7 +100,6 @@ else {
 //
 $error     = false;
 $msg_error = [];
-$nl_config = [];
 
 //
 // Chargement de la configuration de base

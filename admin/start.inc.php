@@ -60,13 +60,6 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 
 	load_settings($admindata);
 
-	if (!is_writable(WA_TMPDIR)) {
-		$output->message(sprintf(
-			$lang['Message']['Dir_not_writable'],
-			htmlspecialchars(WA_TMPDIR)
-		));
-	}
-
 	//
 	// Si la liste en session n'existe pas, on met à jour la session.
 	// On teste aussi un éventuel identifiant de liste donné en paramètre.

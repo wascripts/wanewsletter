@@ -79,7 +79,7 @@ function create_stats(array $listdata, $month, $year)
 
 	$filename = filename_stats(date('Y_F', mktime(0, 0, 0, $month, 1, $year)), $listdata['liste_id']);
 
-	if ($fp = fopen(WA_STATSDIR . '/' . $filename, 'w')) {
+	if ($fp = fopen($nl_config['stats_dir'] . '/' . $filename, 'w')) {
 		$stats    = [];
 		$max_days = date('t', mktime(0, 0, 0, $month, 15, $year));
 
@@ -133,10 +133,11 @@ function update_stats(array $listdata)
 	}
 
 	$filename = filename_stats(date('Y_F'), $listdata['liste_id']);
+	$filename = sprintf('%s/%s', $nl_config['stats_dir'], $filename);
 
-	if (file_exists(WA_STATSDIR . '/' . $filename)) {
-		if ($fp = fopen(WA_STATSDIR . '/' . $filename, 'r+')) {
-			$stats  = clean_stats(fread($fp, filesize(WA_STATSDIR . '/' . $filename)));
+	if (file_exists($filename)) {
+		if ($fp = fopen($filename, 'r+')) {
+			$stats  = clean_stats(fread($fp, filesize($filename)));
 			$offset = (date('j') - 1);
 			$stats[$offset] += 1;
 			fseek($fp, 0);
@@ -169,12 +170,12 @@ function remove_stats($liste_from, $liste_to = false)
 		return false;
 	}
 
-	if ($browse = dir(WA_STATSDIR . '/')) {
+	if ($browse = dir($nl_config['stats_dir'] . '/')) {
 		$old_stats = [];
 
 		while (($filename = $browse->read()) !== false) {
 			if (preg_match("/^([0-9]{4}_[a-zA-Z]+)_list$liste_from\.txt$/i", $filename, $m)) {
-				$filename = WA_STATSDIR . '/' . $filename;
+				$filename = $nl_config['stats_dir'] . '/' . $filename;
 				if ($liste_to && ($fp = fopen($filename, 'r'))) {
 					$old_stats[$m[1]] = clean_stats(fread($fp, filesize($filename)));
 					fclose($fp);
@@ -187,7 +188,8 @@ function remove_stats($liste_from, $liste_to = false)
 
 		if ($liste_to !== false) {
 			foreach ($old_stats as $date => $stats_from) {
-				$filename = WA_STATSDIR . '/' . filename_stats($date, $liste_to);
+				$filename = filename_stats($date, $liste_to);
+				$filename = sprintf('%s/%s', $nl_config['stats_dir'], $filename);
 
 				if ($fp = fopen($filename, 'r+')) {
 					$stats_to = clean_stats(fread($fp, filesize($filename)));

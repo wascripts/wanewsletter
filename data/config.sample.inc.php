@@ -3,11 +3,6 @@
 // Utilisez ce fichier si vous souhaitez (re)créer un fichier de configuration
 // valide sans utiliser le script d’installation de Wanewsletter.
 //
-// Des variables $logs_dir, $stats_dir et $tmp_dir peuvent être ajoutées
-// pour faire pointer les répertoires correspondants vers d’autres emplacements
-// que ceux par défaut dans data/ (voir fonction load_config() dans
-// includes/functions.php pour les détails).
-//
 //$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
 // exemple de DSN pour MySQL
 //$dsn = 'mysql://username:password@localhost/dbname?charset=utf8';
@@ -40,3 +35,17 @@ $dsn_opts = [];
 #$dsn_opts['sslrootcert'] = '/path/to/postgres-ca.crt';
 #$dsn_opts['sslcert']     = '/path/to/client.crt';
 #$dsn_opts['sslkey']      = '/path/to/client.key';
+
+//
+// Des paramètres de configuration additionnels peuvent être ajoutés ici.
+//
+$nl_config = [];
+
+// Des entrées 'logs_dir', 'stats_dir' ou 'tmp_dir' peuvent être paramètrées
+// afin d’utiliser d’autres répertoires que ceux par défaut dans data/.
+// Si un chemin commence par un tilde (~), celui-ci sera remplacé par
+// le chemin vers le répertoire d’installation de wanewsletter.
+// Voir fonction load_config() dans includes/functions.php
+#$nl_config['logs_dir']  = '/path/to/logs_dir';
+#$nl_config['stats_dir'] = '/path/to/stats_dir';
+#$nl_config['tmp_dir']   = '/path/to/tmp_dir';

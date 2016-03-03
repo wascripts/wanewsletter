@@ -139,13 +139,14 @@ if ($img == 'graph') {
 	// Récupération des statistiques
 	//
 	$filename = filename_stats($year . '_' . date('F', $ts), $listdata['liste_id']);
+	$filename = sprintf('%s/%s', $nl_config['stats_dir'], $filename);
 
-	if (!file_exists(WA_STATSDIR . '/' . $filename)) {
+	if (!file_exists($filename)) {
 		create_stats($listdata, $month, $year);
 	}
 
-	if (($filesize = filesize(WA_STATSDIR . '/' . $filename)) > 0
-		&& ($fp = fopen(WA_STATSDIR . '/' . $filename, 'r'))
+	if (($filesize = filesize($filename)) > 0
+		&& ($fp = fopen($filename, 'r'))
 	) {
 		$contents = fread($fp, $filesize);
 		$stats    = clean_stats($contents);
@@ -266,7 +267,7 @@ if ($img == 'graph') {
 		}
 	}
 
-	send_image('subscribers_per_day', $im, filemtime(WA_STATSDIR . '/' . $filename));
+	send_image('subscribers_per_day', $im, filemtime($filename));
 }
 
 if ($img == 'camembert') {
@@ -508,7 +509,7 @@ $template->assign([
 // Affichons un message d'alerte au cas où le répertoire de statistiques n'est pas
 // accessible en écriture.
 //
-if (!is_writable(WA_STATSDIR)) {
+if (!is_writable($nl_config['stats_dir'])) {
 	$template->assignToBlock('statsdir_error', [
 		'MESSAGE' => $lang['Stats_dir_not_writable']
 	]);

@@ -71,7 +71,7 @@ if ($mode == 'export') {
 	}
 
 	$filename = sprintf('newsletter-%s-%d.zip', date('Y.m.d', $logdata['log_date']), $log_id);
-	$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
+	$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa-');
 
 	$zip = new ZipArchive();
 	$zip->open($tmp_filename, ZipArchive::CREATE);
@@ -85,8 +85,8 @@ if ($mode == 'export') {
 	$result = $db->query($sql);
 
 	//
-	// Copie des fichiers joints dans le répertoire temporaire WA_TMPDIR/newsletter
-	// et remplacement éventuel des références cid: dans la newsletter HTML.
+	// Copie des fichiers joints et remplacement éventuel des
+	// références cid: dans la newsletter HTML.
 	//
 	while ($row = $result->fetch()) {
 		$zip->addFile(

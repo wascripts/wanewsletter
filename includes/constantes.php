@@ -53,8 +53,9 @@ const DELAY_ERROR_DISPLAY = true;
 // Pour utiliser un autre fichier de log, indiquez son emplacement dans la
 // constante suivante (par exemple 'debug.log'). Laissez vide pour utiliser
 // le journal d’erreurs par défaut de PHP.
-// Si le chemin est relatif, il sera préfixé par la valeur de $logs_dir
-// (voir load_config() dans includes/functions.php).
+// Si le chemin est relatif, il sera préfixé par la valeur de $nl_config['logs_dir']
+// La valeur par défaut de ce paramètre de configuration peut être altérée
+// (voir data/config.sample.inc.php pour plus de détails).
 //
 // Note : Toutes les erreurs sont stockées, sans tenir compte de DEBUG_MODE.
 // De plus, la taille du fichier de log n’est pas limitée !
