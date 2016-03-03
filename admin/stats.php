@@ -96,37 +96,6 @@ function send_image($name, $img, $lastModified = null)
 	exit;
 }
 
-function display_img_error($str)
-{
-	global $convert2rgb;
-
-	$imageW = 560;
-	$imageH = 80;
-	$text_font = 3;
-
-	$im = imagecreate($imageW, $imageH);
-
-	$black = imagecolorallocate($im, 0, 0, 0);
-	$gray1 = $convert2rgb('EAEAEA');
-	$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
-
-	//
-	// Création du contour noir
-	//
-	imagefill($im, 0, 0, $black);
-	imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $gray1);
-
-	//
-	// titre du graphe
-	//
-	$startW = (($imageW - (imagefontwidth($text_font) * strlen($str))) / 2);
-	$startH = (($imageH - imagefontheight($text_font)) / 2);
-	imagestring($im, $text_font, $startW, $startH, $str, $black);
-
-	http_response_code(500);
-	send_image('error', $im);
-}
-
 /**
  * @param string $color Une couleur, en notation hexadécimale.
  * @return object
@@ -170,6 +139,8 @@ if ($img == 'graph') {
 	$imageH = 260;
 	$text_font = 2;
 
+	$im = imagecreate($imageW, $imageH);
+
 	//
 	// Récupération des statistiques
 	//
@@ -180,20 +151,30 @@ if ($img == 'graph') {
 		create_stats($listdata, $month, $year);
 	}
 
-	if (($filesize = filesize($filename)) > 0
-		&& ($fp = fopen($filename, 'r'))
-	) {
-		$contents = fread($fp, $filesize);
-		$stats    = clean_stats($contents);
-		fclose($fp);
+	if (!($filesize = filesize($filename)) || !($fp = fopen($filename, 'r'))) {
+		$black = imagecolorallocate($im, 0, 0, 0);
+		$gray1 = $convert2rgb('EAEAEA');
+		$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
+
+		// Création du contour noir
+		imagefill($im, 0, 0, $black);
+		imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $gray1);
+
+		// Texte à afficher
+		$text_font = 3;
+		$text = "Cannot read stats file. Please check permissions.";
+		$startW = (($imageW - (imagefontwidth($text_font) * strlen($text))) / 2);
+		$startH = (($imageH - imagefontheight($text_font)) / 2);
+		imagestring($im, $text_font, $startW, $startH, $text, $black);
+
+		http_response_code(500);
+		send_image('error', $im);
 	}
-	else {
-		display_img_error('An error has occured while generating image!');
-	}
+
+	$stats = clean_stats(fread($fp, $filesize));
+	fclose($fp);
 
 	// C'est parti
-	$im = imagecreate($imageW, $imageH);
-
 	$black	= imagecolorallocate($im, 0, 0, 0);
 	$gray	= imagecolorallocate($im, 200, 200, 200);
 	$back_2 = imagecolorallocate($im, 240, 240, 240);
