@@ -45,22 +45,6 @@ function convertToRGB($hexColor)
 }
 
 /**
- * Calcule les coordonnées du rayon
- *
- * @param float   $degre    Degré
- * @param integer $diametre Diamètre du cercle
- *
- * @return array
- */
-function xy_arc($degre, $diametre)
-{
-	$x_arc = (cos($degre * (M_PI / 180.0)) * ($diametre / 2));
-	$y_arc = (sin($degre * (M_PI / 180.0)) * ($diametre / 2));
-
-	return [$x_arc, $y_arc];
-}
-
-/**
  * Créé le fichier de statistiques pour le mois et l'année donnés
  *
  * @param array   $listdata Données de la liste concernée

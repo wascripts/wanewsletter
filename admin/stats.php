@@ -369,6 +369,21 @@ if ($img == 'camembert') {
 	//
 	$degre = 0;
 
+	/**
+	 * Calcule les coordonnées du rayon
+	 *
+	 * @param float   $degre    Degré
+	 * @param integer $diametre Diamètre du cercle
+	 *
+	 * @return array
+	 */
+	$get_xy_arc = function ($degre, $diametre) {
+		$x_arc = (cos($degre * (M_PI / 180.0)) * ($diametre / 2));
+		$y_arc = (sin($degre * (M_PI / 180.0)) * ($diametre / 2));
+
+		return [$x_arc, $y_arc];
+	};
+
 	for ($i = 0, $j = 0, $int = 20; $i < $num_lists; $i++, $j++, $int += 20) {
 		if (!empty($color[$j])) {
 			$color_arc = $color[$j];
@@ -394,14 +409,14 @@ if ($img == 'camembert') {
 
 			imagearc($im, $startX, $startY, 100, 100, $deb_arc, $end_arc, $color_arc);
 
-			list($arcX, $arcY) = xy_arc($deb_arc, 100);
+			list($arcX, $arcY) = $get_xy_arc($deb_arc, 100);
 			imageline($im, $startX, $startY, floor($startX + $arcX), floor($startY + $arcY), $color_arc);
 
-			list($arcX, $arcY) = xy_arc($end_arc, 100);
+			list($arcX, $arcY) = $get_xy_arc($end_arc, 100);
 			imageline($im, $startX, $startY, ceil($startX + $arcX), ceil($startY + $arcY), $color_arc);
 
 			$mid_arc = round((($end_arc - $deb_arc) / 2) + $deb_arc);
-			list($arcX, $arcY) = xy_arc($mid_arc, 50);
+			list($arcX, $arcY) = $get_xy_arc($mid_arc, 50);
 			imagefilltoborder($im, floor($startX + $arcX), floor($startY + $arcY), $color_arc, $color_arc);
 		}
 
