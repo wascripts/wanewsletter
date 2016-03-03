@@ -202,9 +202,9 @@ if (isset($_POST['start'])) {
 		$output->message();
 	}
 
-	load_settings($admindata);
-
 	if (!$error) {
+		load_settings($admindata);
+
 		//
 		// Lancement de la mise à jour
 		// On allonge le temps maximum d'execution du script.
