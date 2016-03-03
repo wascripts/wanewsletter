@@ -415,7 +415,6 @@ $lang['Cookie_path']                = "Cookie path";
 $lang['Session_length']             = "Administration session lenght";
 $lang['Upload_path']                = "Attached files storage directory";
 $lang['Max_filesize']               = "Maximum total size of a newsletter's attached files";
-$lang['Max_filesize_note']          = "(sum of the size of all attached files, in bytes)";
 $lang['Choice_engine_send']         = "Email send method to use";
 $lang['With_engine_bcc']            = "One email with recipients in hidden copy";
 $lang['With_engine_uniq']           = "One email to each subscriber";

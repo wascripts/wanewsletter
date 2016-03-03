@@ -99,8 +99,10 @@ if (isset($_POST['submit'])) {
 
 	$new_config['max_filesize'] = intval($new_config['max_filesize']);
 	if ($new_config['max_filesize'] <= 0) {
-		$new_config['max_filesize'] = 100000;
+		$new_config['max_filesize'] = 100;
 	}
+
+	$new_config['max_filesize'] *= 1024;// KiB => Bytes
 
 	$new_config['sending_limit'] = intval($new_config['sending_limit']);
 
@@ -228,8 +230,7 @@ $template->assign([
 	'L_SECONDS'                 => $lang['Seconds'],
 	'L_UPLOAD_PATH'             => $lang['Upload_path'],
 	'L_MAX_FILESIZE'            => $lang['Max_filesize'],
-	'L_MAX_FILESIZE_NOTE'       => nl2br($lang['Max_filesize_note']),
-	'L_OCTETS'                  => $lang['Octets'],
+	'L_KIB'                     => $lang['KO'],
 	'L_ENGINE_SEND'             => $lang['Choice_engine_send'],
 	'L_ENGINE_BCC'              => $lang['With_engine_bcc'],
 	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],
@@ -260,7 +261,7 @@ $template->assign([
 	'COOKIE_PATH'               => $new_config['cookie_path'],
 	'LENGTH_SESSION'            => $new_config['session_length'],
 	'UPLOAD_PATH'               => $new_config['upload_path'],
-	'MAX_FILESIZE'              => $new_config['max_filesize'],
+	'MAX_FILESIZE'              => ($new_config['max_filesize']) ? round($new_config['max_filesize']/1024) : 0,
 	'CHECKED_ENGINE_BCC'        => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_BCC)),
 	'CHECKED_ENGINE_UNIQ'       => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_UNIQ)),
 	'SENDING_LIMIT'             => $new_config['sending_limit'],

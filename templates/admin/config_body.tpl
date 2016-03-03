@@ -99,10 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
 			<td><input type="text" id="upload_path" name="upload_path" value="{UPLOAD_PATH}" size="40" maxlength="100" /></td>
 		</tr>
 		<tr>
-			<td><label for="max_filesize">{L_MAX_FILESIZE}&nbsp;:</label><br /><span class="notice">{L_MAX_FILESIZE_NOTE}</span></td>
+			<td><label for="max_filesize">{L_MAX_FILESIZE}&nbsp;:</label></td>
 			<td><input type="number" id="max_filesize" name="max_filesize"
-				value="{MAX_FILESIZE}" size="8" maxlength="8"
-			/> <span class="notice">{L_OCTETS}</span></td>
+				value="{MAX_FILESIZE}" min="0" max="99999" size="5"
+			/> <span class="notice">{L_KIB}</span></td>
 		</tr>
 	</table>
 

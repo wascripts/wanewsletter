@@ -414,7 +414,6 @@ $lang['Cookie_path']                = "Chemin du cookie";
 $lang['Session_length']             = "Durée d’une session sur l’administration";
 $lang['Upload_path']                = "Répertoire de stockage des fichiers joints";
 $lang['Max_filesize']               = "Poids total des fichiers joints à une newsletter";
-$lang['Max_filesize_note']          = "(somme de la taille en octet des fichiers joints)";
 $lang['Choice_engine_send']         = "Méthode d’envoi à utiliser";
 $lang['With_engine_bcc']            = "Un envoi avec les destinataires en copie cachée";
 $lang['With_engine_uniq']           = "Un envoi pour chaque abonné";

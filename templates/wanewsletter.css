@@ -529,7 +529,6 @@ input[type="password"]:focus,
 textarea:focus { background-color: white; }
 
 input[type="number"][size="5"] { width: 5em; }
-input[type="number"][size="8"] { width: 8em; }
 
 /* Lien de restauration des valeurs par défaut */
 a.restore-default {
