@@ -36,27 +36,37 @@ function wa_sqlite_recreate_table($tablename, $restore_data = true)
 	}
 
 	$schema['updated'] = true;
-	$columns = [];
 
-	$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
-	while ($row = $result->fetch()) {
-		$columns[] = $row['name'];
-	}
+	$get_columns = function ($tablename) use ($db) {
+		$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
+		$columns = [];
+		while ($row = $result->fetch()) {
+			$columns[] = $row['name'];
+		}
 
-	$sql_update   = [];
-	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
-	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
+		return $columns;
+	};
+
+	$db->query(sprintf('ALTER TABLE %1$s RENAME TO %2$s;',
+		$db->quote($tablename),
+		$db->quote($tablename.'_tmp')
+	));
+
+	exec_queries($sql_create[$tablename]);
 
 	if ($restore_data) {
-		$sql_update[] = sprintf('INSERT INTO %1$s (%2$s) SELECT %2$s FROM %1$s_tmp;',
-			$tablename,
+		$old_columns = $get_columns($tablename.'_tmp');
+		$new_columns = $get_columns($tablename);
+		$columns = array_intersect($new_columns, $old_columns);
+
+		$db->query(sprintf('INSERT INTO %1$s (%3$s) SELECT %3$s FROM %2$s;',
+			$db->quote($tablename),
+			$db->quote($tablename.'_tmp'),
 			implode(',', $columns)
-		);
+		));
 	}
 
-	$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
-
-	exec_queries($sql_update);
+	$db->query(sprintf('DROP TABLE %s;', $db->quote($tablename.'_tmp')));
 }
 
 //
