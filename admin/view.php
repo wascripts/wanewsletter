@@ -1631,6 +1631,8 @@ else if ($mode == 'log') {
 		'L_CLASSER_BUTTON'      => $lang['Button']['classer'],
 		'L_SUBJECT'             => $lang['Log_subject'],
 		'L_DATE'                => $lang['Log_date'],
+		'L_NUMDEST'             => $lang['Log_numdest'],
+		'L_NUMDEST_SHORT'       => $lang['Log_numdest_short'],
 
 		'SELECTED_TYPE_SUBJECT' => $output->getBoolAttr('selected', ($sql_type == 'log_subject')),
 		'SELECTED_TYPE_DATE'    => $output->getBoolAttr('selected', ($sql_type == 'log_date')),
@@ -1672,6 +1674,7 @@ else if ($mode == 'log') {
 
 			$template->assignToBlock('logrow', [
 				'ITEM_CLIP'   => $s_clip,
+				'NUM_DEST'    => $logrow[$i]['log_numdest'],
 				'LOG_SUBJECT' => htmlspecialchars($logrow[$i]['log_subject'], ENT_NOQUOTES),
 				'LOG_DATE'    => convert_time($admindata['admin_dateformat'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sprintf('view.php?mode=log&amp;action=view&amp;id=%d%s', $logrow[$i]['log_id'], $get_string)

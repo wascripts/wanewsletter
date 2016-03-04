@@ -26,6 +26,7 @@
 		<tr>
 			<th>{L_SUBJECT}</th>
 			<th>{L_DATE}</th>
+			<th title="{L_NUMDEST}">{L_NUMDEST_SHORT}</th>
 			<!-- BEGIN delete_option -->
 			<th>&nbsp;</th>
 			<!-- END delete_option -->
@@ -34,6 +35,7 @@
 		<tr>
 			<td>{logrow.ITEM_CLIP}&nbsp;<a href="{logrow.U_VIEW}#view">{logrow.LOG_SUBJECT}</a></td>
 			<td>{logrow.LOG_DATE}</td>
+			<td>{logrow.NUM_DEST}</td>
 			<!-- BEGIN delete -->
 			<td><input type="checkbox" name="log_id[]" value="{logrow.delete.LOG_ID}" /></td>
 			<!-- END delete -->

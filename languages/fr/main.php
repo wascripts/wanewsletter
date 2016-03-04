@@ -505,6 +505,7 @@ $lang['Click_return_logs']          = "Cliquez %sici%s pour retourner à la list
 $lang['Log_subject']                = "Sujet de la newsletter";
 $lang['Log_date']                   = "Date d’envoi";
 $lang['Log_numdest']                = "Nombre de destinataires";
+$lang['Log_numdest_short']          = "Dest.";
 $lang['Delete_logs']                = "Êtes-vous sûr de vouloir supprimer les newsletters sélectionnés ?";
 $lang['Delete_log']                 = "Êtes-vous sûr de vouloir supprimer cette newsletter ?";
 $lang['No_log_sended']              = "Aucune newsletter n’a été envoyée à cette liste";
