@@ -25,21 +25,21 @@ function get_supported_db()
 		if (extension_loaded('mysql') || extension_loaded('mysqli')) {
 			$supported_db['mysql'] = [
 				'label' => 'MySQL',
-				'Name'  => 'MySQL ≥ 5.0.7'
+				'version' => '5.0.7'
 			];
 		}
 
 		if (extension_loaded('pgsql')) {
 			$supported_db['postgres'] = [
 				'label' => 'PostgreSQL',
-				'Name'  => 'PostgreSQL ≥ 8.3'
+				'version' => '8.3'
 			];
 		}
 
 		if (class_exists('SQLite3') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite'))) {
 			$supported_db['sqlite'] = [
 				'label' => 'SQLite',
-				'Name'  => 'SQLite 3'
+				'version' => '3'
 			];
 		}
 	}

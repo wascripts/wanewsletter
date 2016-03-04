@@ -384,8 +384,11 @@ $output->httpHeaders();
 if (!$reinstall) {
 	$db_box = '';
 	foreach ($supported_db as $name => $data) {
-		$selected = $output->getBoolAttr('selected', ($infos['engine'] == $name));
-		$db_box  .= '<option value="' . $name . '"' . $selected . '> ' . $data['Name'] . ' </option>';
+		$db_box .= sprintf('<option value="%s"%s> %s </option>',
+			$name,
+			$output->getBoolAttr('selected', ($infos['engine'] == $name)),
+			$data['label'] . ' ≥ ' . $data['version']
+		);
 	}
 
 	$l_explain = nl2br(sprintf(
