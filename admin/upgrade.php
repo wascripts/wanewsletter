@@ -91,10 +91,12 @@ if (!isset($nl_config['db_version'])) {
 	// antérieures à 2.2.0 qui apportaient des modifications, d'où
 	// le db_version commençant à 5.
 	//
-	$nl_config['db_version'] = 6;
+	$nl_config['db_version'] = 5;
 
-	if (version_compare($currentVersion, '2.2.13', '>')) {
-		$nl_config['db_version']++;
+	foreach (['2.2.12','2.2.13'] as $version) {
+		if (version_compare($currentVersion, $version, '>')) {
+			$nl_config['db_version']++;
+		}
 	}
 }
 
@@ -251,18 +253,12 @@ if (isset($_POST['start'])) {
 		$sql_data   = $sql_data_by_table;
 
 		//
-		// Début de la mise à jour
+		// Sur les versions antérieures à la 2.3.0, il n’y avait pas de
+		// contrainte d’unicité sur abo_email. Avant de commencer la mise
+		// à jour, il faut vérifier l’absence de doublons dans la table
+		// des abonnés.
 		//
-		$sql_update = [];
-
 		if ($nl_config['db_version'] < 7) {
-			//
-			// Vérification préalable de la présence de doublons dans la table
-			// des abonnés.
-			// La contrainte d'unicité sur abo_email a été ajoutée dans la
-			// version 2.3-beta1 (équivalent db_version = 7).
-			// Si des doublons sont présents, la mise à jour ne peut continuer.
-			//
 			$sql = "SELECT abo_email
 				FROM " . ABONNES_TABLE . "
 				GROUP BY abo_email
@@ -285,24 +281,14 @@ if (isset($_POST['start'])) {
 					implode(', ', $emails)
 				));
 			}
+		}
 
-			//
-			// La contrainte d'unicité sur abo_email peut avoir été perdue en cas
-			// de bug lors de l'importation via l'outil proposé par Wanewsletter.
-			// On essaie de recréer cette contrainte d'unicité.
-			//
-			if ($db::ENGINE == 'postgres') {
-				$db->query("ALTER TABLE " . ABONNES_TABLE . "
-					ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
-			}
-			else if ($db::ENGINE == 'sqlite') {
-				$db->query("CREATE UNIQUE INDEX abo_email_idx ON " . ABONNES_TABLE . "(abo_email)");
-			}
-			else if ($db::ENGINE == 'mysql') {
-				$db->query("ALTER TABLE " . ABONNES_TABLE . "
-					ADD UNIQUE abo_email_idx (abo_email)");
-			}
+		//
+		// Début de la mise à jour
+		//
+		$sql_update = [];
 
+		if ($nl_config['db_version'] < 6) {
 			unset($nl_config['hebergeur']);
 			unset($nl_config['version']);
 
@@ -401,6 +387,16 @@ if (isset($_POST['start'])) {
 					ADD INDEX liste_id_idx (liste_id),
 					ADD INDEX log_status_idx (log_status)";
 			}
+		}
+
+		//
+		// Ajout contrainte d’unicité sur abo_email
+		//
+		if ($nl_config['db_version'] < 7) {
+			$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
+				ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)";
+
+			exec_queries($sql_update);
 		}
 
 		//
