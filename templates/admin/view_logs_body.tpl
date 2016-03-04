@@ -43,7 +43,7 @@
 		<!-- END logrow -->
 		<!-- BEGIN empty -->
 		<tr>
-			<td colspan="3">{empty.L_EMPTY}</td>
+			<td colspan="4">{empty.L_EMPTY}</td>
 		</tr>
 		<!-- END empty -->
 	</table>
