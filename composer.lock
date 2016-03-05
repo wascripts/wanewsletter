@@ -154,16 +154,16 @@
         },
         {
             "name": "tinymce/tinymce",
-            "version": "4.3.3",
+            "version": "4.3.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tinymce/tinymce-dist.git",
-                "reference": "ea98451a2b7b7d64b5aa3c33509bd07406a6ab90"
+                "reference": "19611cd875c27eed9a96c7734952bc34a41ba397"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/ea98451a2b7b7d64b5aa3c33509bd07406a6ab90",
-                "reference": "ea98451a2b7b7d64b5aa3c33509bd07406a6ab90",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/19611cd875c27eed9a96c7734952bc34a41ba397",
+                "reference": "19611cd875c27eed9a96c7734952bc34a41ba397",
                 "shasum": ""
             },
             "type": "component",
@@ -196,7 +196,7 @@
                 "tinymce",
                 "wysiwyg"
             ],
-            "time": "2016-01-13 15:10:44"
+            "time": "2016-03-02 13:02:17"
         },
         {
             "name": "wascripts/wamailer",
@@ -204,12 +204,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wascripts/wamailer.git",
-                "reference": "f45ba70f117efd7915c9fd8a1e9b3d65b256c14d"
+                "reference": "1a0d1c7d70b2d67db859c3b20661f164c4e9ba30"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/edfc084ea36492fc1b62aa2b07c177db42ed8e60",
-                "reference": "f45ba70f117efd7915c9fd8a1e9b3d65b256c14d",
+                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/1a0d1c7d70b2d67db859c3b20661f164c4e9ba30",
+                "reference": "1a0d1c7d70b2d67db859c3b20661f164c4e9ba30",
                 "shasum": ""
             },
             "require": {
@@ -248,7 +248,7 @@
                 "source": "https://github.com/wascripts/wamailer/tree/master",
                 "issues": "https://github.com/wascripts/wamailer/issues"
             },
-            "time": "2016-01-17 22:35:24"
+            "time": "2016-02-26 14:26:38"
         }
     ],
     "packages-dev": [],
