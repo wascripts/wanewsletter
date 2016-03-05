@@ -91,13 +91,22 @@ function load_config()
 		$need_update = true;
 	}
 
-	//
-	// Pas installé ?
-	//
-	$install_script = 'install.php';
+	// Utilisé à la fin d’une mise à jour pour mettre à jour également un
+	// fichier de configuration obsolète.
+	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 
-	if (!$dsn && $install_script != basename($_SERVER['SCRIPT_FILENAME'])) {
+	// Si on est dans l’installeur, on récupère ici l’entrée 'prefixe' du
+	// formulaire, car on en a besoin pour créer les constantes *_TABLE.
+	if (defined(__NAMESPACE__.'\\IN_INSTALL')) {
+		$prefixe = filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
+			'options' => ['default' => $prefixe]
+		]);
+	}
+	// Si le script n’est pas installé, on redirige vers l’installeur, ou
+	// on affiche un message explicatif.
+	else if (!$dsn) {
 		if (!check_cli()) {
+			$install_script = 'install.php';
 			if (!file_exists($install_script)) {
 				$install_script = '../'.$install_script;
 			}
@@ -122,15 +131,6 @@ function load_config()
 			$dsn .= '?'.$args;
 		}
 	}
-
-	// Cas spécifique au script d’installation.
-	if (defined(__NAMESPACE__.'\\IN_INSTALL')) {
-		$prefixe = filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
-			'options' => ['default' => $prefixe]
-		]);
-	}
-
-	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 
 	//
 	// Déclaration des constantes de tables
