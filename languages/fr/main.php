@@ -663,7 +663,9 @@ $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['No_db_support']              = "Désolé mais Wanewsletter %s requiert une base de données MySQL, PostgreSQL ou SQLite";
 $lang['Connect_db_error']           = "Impossible de se connecter à la base de données (%s)";
 $lang['sqldir_perms_problem']       = "Pour utiliser Wanewsletter avec une base de données SQLite, vous devez rendre accessible en lecture et écriture le répertoire <samp>%s</samp> ciblé";
-$lang['DB_type_undefined']          = "Le type de base de données n’est pas défini !";
+$lang['Config_file_found']          = "Fichier de configuration trouvé et chargé.";
+$lang['Config_file_manual']         = "Vous pouvez également créer manuellement le fichier de configuration <samp>data/config.inc.php</samp> en partant d’une copie du fichier <samp>data/config.sample.inc.php</samp>.";
+$lang['Install_target']             = "L’installation sera effectuée sur %s.";
 
 $lang['Success_install']            = "L’installation s’est bien déroulée.\nVous pouvez maintenant accéder à %sl’administration%s";
 $lang['Success_install2']           = "L’installation s’est bien déroulée, mais vous devriez lire l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ. \nVous pouvez maintenant accéder à %sl’administration%s";

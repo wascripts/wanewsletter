@@ -663,7 +663,9 @@ $lang['Start_upgrade']              = "Launch upgrade";
 $lang['No_db_support']              = "Sorry but Wanewsletter %s requires a MySQL, PostgreSQL or SQLite database";
 $lang['Connect_db_error']           = "Unable to connect to database (%s)";
 $lang['sqldir_perms_problem']       = "To use Wanewsletter with a SQLite database, you have to give the right permissions (read and write) to the targeted <samp>%s</samp> directory";
-$lang['DB_type_undefined']          = "The database type isn't defined!";
+$lang['Config_file_found']          = "Configuration file found and loaded.";
+$lang['Config_file_manual']         = "You can manually create the configuration file <samp>data/config.inc.php</samp> by making a copy of the file <samp>data/config.sample.inc.php</samp>.";
+$lang['Install_target']             = "The installation will be processed on %s.";
 
 $lang['Success_install']            = "The installation was succesfully completed.\nYou can now access the %sadministration%s";
 $lang['Success_install2']           = "The installation was succesfully completed, but you should read the entry <q>%sprotect the <samp>data/</samp> repertory%s</q> in the FAQ. \nYou can now access the %sadministration%s.";
