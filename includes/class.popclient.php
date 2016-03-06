@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
  * @see RFC 1939 - Post Office Protocol - Version 3
@@ -34,13 +34,6 @@ class PopClient
 	protected $server   = 'localhost:110';
 
 	/**
-	 * Tableau contenant les données des emails lus
-	 *
-	 * @var array
-	 */
-	public $contents    = [];
-
-	/**
 	 * Durée maximale d’une tentative de connexion
 	 *
 	 * @var integer
@@ -67,7 +60,7 @@ class PopClient
 		/**
 		 * Utilisation de la commande STLS pour sécuriser la connexion.
 		 * Ignoré si la connexion est sécurisée en utilisant un des préfixes de
-		 * transport ssl ou tls supportés par PHP.
+		 * transport tls supportés par PHP.
 		 *
 		 * @var boolean
 		 */
@@ -113,7 +106,7 @@ class PopClient
 	protected $serverInfos = [
 		'host'      => '',
 		'port'      => 0,
-		// true si la connexion est chiffrée avec SSL/TLS
+		// true si la connexion est chiffrée avec TLS
 		'encrypted' => false,
 		// true si le certificat a été vérifié
 		'trusted'   => false,
@@ -171,7 +164,6 @@ class PopClient
 	{
 		// Reset des données relatives à l’éventuelle connexion précédente
 		$this->responseData = '';
-		$this->contents = [];
 
 		if (!$server) {
 			$server = $this->server;
@@ -187,13 +179,13 @@ class PopClient
 		}
 
 		$proto = substr($url['scheme'], 0, 3);
-		$useSSL   = ($proto == 'ssl' || $proto == 'tls');
-		$startTLS = (!$useSSL && $this->opts['starttls']);
+		$useTLS   = ($proto == 'tls');
+		$startTLS = (!$useTLS && $this->opts['starttls']);
 
 		// Attribution du port par défaut si besoin
 		if (empty($url['port'])) {
 			$url['port'] = 110;
-			if ($useSSL) {
+			if ($useTLS) {
 				$url['port'] = 995;// POP3S
 			}
 
@@ -201,8 +193,8 @@ class PopClient
 		}
 
 		// check de l’extension openssl si besoin
-		if (($useSSL || $startTLS) && !in_array('tls', stream_get_transports())) {
-			throw new Exception("Cannot use SSL/TLS because the openssl extension is not available!");
+		if (($useTLS || $startTLS) && !in_array('tls', stream_get_transports())) {
+			throw new Exception("Cannot use TLS because the openssl extension is not available!");
 		}
 
 		//
@@ -271,7 +263,7 @@ class PopClient
 		$infos = [];
 		$infos['host']      = $url['host'];
 		$infos['port']      = $url['port'];
-		$infos['encrypted'] = ($useSSL || $startTLS);
+		$infos['encrypted'] = ($useTLS || $startTLS);
 		$infos['trusted']   = ($infos['encrypted'] && PHP_VERSION_ID >= 50600);
 		$infos['context']   = $context;
 
@@ -463,13 +455,14 @@ class PopClient
 
 	/**
 	 * Envoie la commande STAT.
-	 * Renvoie le nombre de messages présent et la taille totale (en octets)
+	 * Retourne le nombre de messages présents, et le poids total en octets
 	 *
 	 * @return array
 	 */
-	public function stat_box()
+	public function stat()
 	{
 		$this->put('STAT');
+
 		if (!$this->checkResponse()) {
 			return false;
 		}
@@ -481,21 +474,28 @@ class PopClient
 
 	/**
 	 * Envoie la commande LIST.
-	 * Renvoie un tableau avec leur numéro en index et leur taille pour valeur.
-	 * Si un numéro de message est donné, sa taille sera renvoyée
+	 * Retourne un tableau avec l’ID des messages en index et leur poids
+	 * comme valeur.
+	 * Si un ID de message est donné, sa taille sera renvoyée
 	 *
-	 * @param integer $num Numéro du message
+	 * @param integer $num ID du message
 	 *
 	 * @return mixed
 	 */
-	public function list_mail($num = 0)
+	public function list($num = null)
 	{
-		$this->put('LIST' . ($num > 0 ? ' ' . $num : ''));
-		if (!$this->checkResponse($num == 0)) {
+		$cmd = 'LIST';
+		if ($num) {
+			$cmd = sprintf('%s %d', $cmd, $num);
+		}
+
+		$this->put($cmd);
+
+		if (!$this->checkResponse(!$num)) {
 			return false;
 		}
 
-		if ($num == 0) {
+		if (!$num) {
 			$list  = [];
 			$lines = explode("\r\n", trim($this->responseData));
 			array_shift($lines);// On zappe la réponse serveur +OK...
@@ -517,21 +517,21 @@ class PopClient
 	}
 
 	/**
-	 * Commande RETR/TOP
-	 * Renvoie un tableau avec leur numéro en index et leur taille pour valeur
+	 * Envoie la commande RETR/TOP.
+	 * Retourne un tableau contenant les en-têtes et le corps de l’email.
 	 *
-	 * @param integer $num      Numéro du message
-	 * @param integer $max_line Nombre maximal de ligne à renvoyer (par défaut, tout le message)
+	 * @param integer $num ID du message
+	 * @param integer $top Nombre de lignes à récupérer (par défaut, tout le message)
 	 *
-	 * @return boolean
+	 * @return array
 	 */
-	public function read_mail($num, $max_line = 0)
+	public function read($num, $top = null)
 	{
-		if (!$max_line) {
+		if (!$top) {
 			$cmd = sprintf('RETR %d', $num);
 		}
 		else {
-			$cmd = sprintf('TOP %d %d', $num, $max_line);
+			$cmd = sprintf('TOP %d %d', $num, $top);
 		}
 
 		$this->put($cmd);
@@ -541,174 +541,12 @@ class PopClient
 
 		$lines = explode("\r\n", $this->responseData);
 		array_shift($lines);// On zappe la réponse serveur +OK...
-		$output = implode("\r\n", $lines);
 
-		list($headers, $message) = explode("\r\n\r\n", $output, 2);
+		$sep = array_search('', $lines);
+		$headers = implode("\r\n", array_slice($lines, 0, $sep));
+		$message = implode("\r\n", array_slice($lines, $sep + 1));
 
-		$this->contents[$num]['headers'] = trim(preg_replace("/\r\n( |\t)+/", ' ', $headers));
-		$this->contents[$num]['message'] = trim($message);
-
-		return true;
-	}
-
-	/**
-	 * Récupère les entêtes de l’email spécifié par $num et renvoi un tableau
-	 * avec le nom des entêtes et leur valeur
-	 *
-	 * @param string $str
-	 *
-	 * @return mixed
-	 */
-	public function parse_headers($str)
-	{
-		if (is_numeric($str)) {
-			if (!isset($this->contents[$str]['headers'])) {
-				if (!$this->read_mail($str)) {
-					return false;
-				}
-			}
-
-			$str = $this->contents[$str]['headers'];
-		}
-
-		$headers = [];
-
-		$lines = explode("\r\n", $str);
-		for ($i = 0; $i < count($lines); $i++) {
-			list($name, $value) = explode(':', $lines[$i], 2);
-
-			$name = strtolower($name);
-			$headers[$name] = $this->decode_mime_header($value);
-		}
-
-		return $headers;
-	}
-
-	/**
-	 * @param string $str
-	 *
-	 * @return array
-	 */
-	public function infos_header($str)
-	{
-		$total = preg_match_all("/([^ =]+)=\"?([^\" ]+)/", $str, $matches);
-
-		$infos = [];
-		for ($i = 0; $i < $total; $i++) {
-			$infos[strtolower($matches[1][$i])] = $matches[2][$i];
-		}
-
-		return $infos;
-	}
-
-	/**
-	 * Décode l’entête donné s’il est encodé
-	 *
-	 * @param string $str
-	 *
-	 * @return string
-	 */
-	protected function decode_mime_header($str)
-	{
-		//
-		// On vérifie si l'entête est encodé en base64 ou en quoted-printable, et on
-		// le décode si besoin est.
-		//
-		$total = preg_match_all('/=\?([^?]+)\?(Q|q|B|b)\?([^?]+)\?\=/', $str, $matches);
-
-		for ($i = 0; $i < $total; $i++) {
-			if ($matches[2][$i] == 'Q' || $matches[2][$i] == 'q') {
-				$tmp = preg_replace_callback('/=([a-zA-Z0-9]{2})/',
-					function ($m) { return chr(hexdec($m[1])); },
-					$matches[3][$i]
-				);
-				$tmp = str_replace('_', ' ', $tmp);
-			}
-			else {
-				$tmp = base64_decode($matches[3][$i]);
-			}
-
-			$str = str_replace($matches[0][$i], $tmp, $str);
-		}
-
-		return $str;
-	}
-
-	/**
-	 * Parse l’email demandé et renvoie des informations sur les fichiers
-	 * joints éventuels.
-	 * Retourne un tableau contenant les données (nom, encodage, données du
-	 * fichier ..) sur les fichiers joints ou false si aucun fichier joint
-	 * n’est trouvé ou que l’email correspondant à $num n’existe pas.
-	 *
-	 * @param integer $num Numéro de l’email à parser
-	 *
-	 * @status experimental
-	 * @return mixed
-	 */
-	public function extract_files($num)
-	{
-		if (!isset($this->contents[$num])) {
-			if (!$this->read_mail($num)) {
-				return false;
-			}
-		}
-
-		$headers = $this->parse_headers($this->contents[$num]['headers']);
-		$message = $this->contents[$num]['message'];
-
-		//
-		// On vérifie si le message comporte plusieurs parties
-		//
-		if (!isset($headers['content-type']) || !stristr($headers['content-type'], 'multipart')) {
-			return false;
-		}
-
-		$infos = $this->infos_header($headers['content-type']);
-
-		$parts    = [];
-		$files    = [];
-		$lines    = explode("\r\n", $message);
-		$offset   = 0;
-
-		for ($i = 0; $i < count($lines); $i++) {
-			if (strstr($lines[$i], $infos['boundary'])) {
-				$offset         = count($parts);
-				$parts[$offset] = '';
-
-				if (isset($parts[$offset - 1])) {
-					preg_match("/^(.+?)\r\n\r\n(.*?)$/s", trim($parts[$offset - 1]), $match);
-
-					$local_headers = trim(preg_replace("/\r\n( |\t)+/", ' ', $match[1]));
-					$local_message = trim($match[2]);
-
-					$local_headers = $this->parse_headers($local_headers);
-
-					$content_type = $this->infos_header($local_headers['content-type']);
-					if (isset($local_headers['content-disposition'])) {
-						$content_disposition = $this->infos_header($local_headers['content-disposition']);
-					}
-
-					if (!empty($content_type['name']) || !empty($content_disposition['filename'])) {
-						$pos = count($files);
-
-						$files[$pos]['filename'] = ( !empty($content_type['name']) ) ? $content_type['name'] : $content_disposition['filename'];
-						$files[$pos]['encoding'] = $local_headers['content-transfer-encoding'];
-						$files[$pos]['data']     = base64_decode($local_message);
-						$files[$pos]['filesize'] = strlen($files[$pos]['data']);
-						$files[$pos]['filetype'] = substr($local_headers['content-type'], 0, strpos($local_headers['content-type'], ';'));
-					}
-				}
-
-				continue;
-			}
-
-			if (isset($parts[$offset])) {
-				$parts[$offset] .= $lines[$i] . "\r\n";
-			}
-		}
-
-		return $files;
+		return ['headers' => $headers, 'message' => $message];
 	}
 
 	/**
@@ -719,7 +557,7 @@ class PopClient
 	 *
 	 * @return boolean
 	 */
-	public function delete_mail($num)
+	public function delete($num)
 	{
 		$this->put(sprintf('DELE %d', $num));
 

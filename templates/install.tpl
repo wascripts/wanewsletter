@@ -58,39 +58,44 @@
 	<!-- BEGIN install -->
 	<div class="block"><p>{install.L_EXPLAIN}</p></div>
 
+	<div class="block"><p>{install.L_PRECONFIG}</p></div>
+
 	<div class="block">
-	<h2>{install.TITLE_DATABASE}</h2>
+	<!-- BEGIN db_infos -->
+	<h2>{install.db_infos.TITLE_DATABASE}</h2>
 
 	<table class="dataset compact">
 		<tr>
-			<td><label for="engine">{install.L_DBTYPE}&nbsp;:</label></td>
-			<td><select id="engine" name="engine" onchange="specialSQLite(this);">{install.DB_BOX}</select></td>
+			<td><label for="engine">{install.db_infos.L_DBTYPE}&nbsp;:</label></td>
+			<td><select id="engine" name="engine" onchange="specialSQLite(this);">{install.db_infos.DB_BOX}</select></td>
 		</tr>
 		<tr class="only-sqlite">
-			<td><label for="path">{install.L_DBPATH}&nbsp;:</label><br /><span class="notice">{install.L_DBPATH_NOTE}</span></td>
-			<td><input type="text" id="path" name="path" size="40" value="{install.DBPATH}" /></td>
+			<td><label for="path">{install.db_infos.L_DBPATH}&nbsp;:</label><br /><span class="notice">{install.db_infos.L_DBPATH_NOTE}</span></td>
+			<td><input type="text" id="path" name="path" size="40" value="{install.db_infos.DBPATH}" /></td>
 		</tr>
 		<tr class="only-server">
-			<td><label for="host">{install.L_DBHOST}&nbsp;:</label></td>
-			<td><input type="text" id="host" name="host" size="30" value="{install.DBHOST}" /> (ex&nbsp;: <em>localhost</em>, <em>myhost.tld:3306</em>, <em>[::1]:3306</em>)</td>
+			<td><label for="host">{install.db_infos.L_DBHOST}&nbsp;:</label></td>
+			<td><input type="text" id="host" name="host" size="30" value="{install.db_infos.DBHOST}" />
+				(ex&nbsp;: <em>localhost</em>, <em>myhost.tld:3306</em>, <em>[::1]:3306</em>)</td>
 		</tr>
 		<tr class="only-server">
-			<td><label for="dbname">{install.L_DBNAME}&nbsp;:</label></td>
-			<td><input type="text" id="dbname" name="dbname" size="30" value="{install.DBNAME}" /></td>
+			<td><label for="dbname">{install.db_infos.L_DBNAME}&nbsp;:</label></td>
+			<td><input type="text" id="dbname" name="dbname" size="30" value="{install.db_infos.DBNAME}" /></td>
 		</tr>
 		<tr class="only-server">
-			<td><label for="user">{install.L_DBUSER}&nbsp;:</label></td>
-			<td><input type="text" id="user" name="user" size="30" value="{install.DBUSER}" /></td>
+			<td><label for="user">{install.db_infos.L_DBUSER}&nbsp;:</label></td>
+			<td><input type="text" id="user" name="user" size="30" value="{install.db_infos.DBUSER}" /></td>
 		</tr>
 		<tr class="only-server">
-			<td><label for="pass">{install.L_DBPWD}&nbsp;:</label></td>
+			<td><label for="pass">{install.db_infos.L_DBPWD}&nbsp;:</label></td>
 			<td><input type="password" id="pass" name="pass" size="30" /></td>
 		</tr>
 		<tr>
-			<td><label for="prefixe">{install.L_PREFIXE}&nbsp;:</label></td>
-			<td><input type="text" id="prefixe" name="prefixe" size="10" value="{install.PREFIXE}" /></td>
+			<td><label for="prefixe">{install.db_infos.L_PREFIXE}&nbsp;:</label></td>
+			<td><input type="text" id="prefixe" name="prefixe" size="10" value="{install.db_infos.PREFIXE}" /></td>
 		</tr>
 	</table>
+	<!-- END db_infos -->
 
 	<h2>{install.TITLE_ADMIN}</h2>
 

@@ -4,7 +4,7 @@ Vous recevez cet email parce que vous (ou quelqu'un d'autre se faisant passer po
 
 Nous vous remercions de votre intérêt pour notre liste de diffusion.
 
-Pour confirmer votre inscription, envoyez un email à {EMAIL_NEWSLETTER} avec comme sujet "confirmation" et comme message le code de votre compte.
+Pour confirmer votre inscription, envoyez un email à {EMAIL_NEWSLETTER} avec comme sujet "confirmation" et comme message, le code suivant : {CODE}
 
 <!-- BEGIN enable_profil_cp -->
 Une fois votre inscription confirmée, vous pourez gérer votre compte en cliquant sur le lien ci-dessous :

@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -11,12 +11,12 @@ namespace Wanewsletter;
 
 require './start.inc.php';
 
-if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
+if (!$auth->check(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
-	plain_error($lang['Message']['Not_auth_view']);
+	$output->basic($lang['Message']['Not_auth_view']);
 }
 
-$listdata = $auth->listdata[$_SESSION['liste']];
+$listdata = $auth->getLists(Auth::VIEW)[$_SESSION['liste']];
 
 $file_id  = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
 $filename = trim(filter_input(INPUT_GET, 'file'));
@@ -27,7 +27,7 @@ $file = $attach->getFile($filename ?: $file_id);
 if ($file) {
 	if (!is_readable($file['path'])) {
 		http_response_code(500);
-		plain_error('Impossible de récupérer le contenu du fichier (fichier non accessible en lecture)');
+		$output->basic(sprintf($lang['Message']['File_not_exists'], ''));
 	}
 
 	$maxAge = 0;
@@ -68,5 +68,5 @@ if ($file) {
 }
 else {
 	http_response_code(404);
-	plain_error('Unknown file !');
+	$output->basic(sprintf($lang['Message']['File_not_exists'], ''));
 }

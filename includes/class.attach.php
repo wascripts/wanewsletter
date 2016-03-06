@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -53,7 +53,7 @@ class Attach
 			$url = parse_url($file);
 
 			if (isset($url['scheme'])) {
-				if ($url['scheme'] != 'http') {
+				if (!preg_match('#^https?$#', $url['scheme'])) {
 					throw new Exception($lang['Message']['Invalid_url']);
 				}
 
@@ -127,25 +127,26 @@ class Attach
 			$tmp_filename = $file['tmp_name'];
 		}
 		else if ($mode == 'remote') {
-			$tmp_path = (ini_get('open_basedir')) ? WA_TMPDIR : sys_get_temp_dir();
+			$tmp_path = (ini_get('open_basedir')) ? $nl_config['tmp_dir'] : sys_get_temp_dir();
 			$tmp_filename = tempnam($tmp_path, 'wa0');
 
-			if (!($fw = fopen($tmp_filename, 'wb'))) {
+			if (!($fp = fopen($tmp_filename, 'wb'))) {
 				throw new Exception($lang['Message']['Upload_error_5']);
 			}
 
-			$result = http_get_contents($url, $errstr);
-
-			if (!$result) {
-				fclose($fw);
+			try {
+				$result = http_get_contents($url);
+			}
+			catch (Exception $e) {
+				fclose($fp);
 				unlink($tmp_filename);
-				throw new Exception($errstr);
+				throw $e;
 			}
 
-			fwrite($fw, $result['data']);
-			fclose($fw);
+			fwrite($fp, $result['data']);
+			fclose($fp);
 			$filesize = strlen($result['data']);
-			$filetype = $result['type'];
+			$filetype = $result['mime'];
 		}
 		else if ($mode == 'local') {
 			if (!file_exists($this->upload_path . $filename)) {

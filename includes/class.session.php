@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -48,7 +48,7 @@ class Session implements \SessionHandlerInterface
 		$this->cfg_cookie['path']     = str_replace('//', '/', dirname($_SERVER['REQUEST_URI']).'/');
 		$this->cfg_cookie['lifetime'] = 0;
 		$this->cfg_cookie['domain']   = null;
-		$this->cfg_cookie['secure']   = wan_ssl_connection();
+		$this->cfg_cookie['secure']   = is_secure_connection();
 		$this->cfg_cookie['httponly'] = true;
 
 		foreach ($this->cfg_cookie as $key => $value) {
@@ -57,8 +57,16 @@ class Session implements \SessionHandlerInterface
 			}
 		}
 
-		ini_set('session.use_only_cookies', true);
-		ini_set('session.use_trans_sid', false);
+		$session_opts = [
+			'use_trans_sid'    => false,
+			'use_only_cookies' => true
+		];
+
+		if (PHP_VERSION_ID < 70000) {
+			foreach ($session_opts as $opt => $value) {
+				ini_set('session.'.$opt, $value);
+			}
+		}
 
 		session_set_save_handler($this);
 
@@ -71,7 +79,8 @@ class Session implements \SessionHandlerInterface
 		);
 
 		session_name($this->cfg_cookie['name'].'_sessid');
-		session_start();
+
+		session_start($session_opts);
 
 		if (!isset($_SESSION['is_logged_in'])) {
 			$this->reset();
@@ -83,14 +92,14 @@ class Session implements \SessionHandlerInterface
 	 */
 	public function reset()
 	{
+		if (!$this->new_session) {
+			session_regenerate_id(true);
+			$this->new_session = true;
+		}
+
 		$_SESSION['is_admin_session'] = check_in_admin();
 		$_SESSION['is_logged_in'] = false;
 		$_SESSION['uid']   = null;
-
-		if (!$this->new_session) {
-			session_regenerate_id();
-			$this->new_session = true;
-		}
 	}
 
 	/**
@@ -187,16 +196,16 @@ class Session implements \SessionHandlerInterface
 		];
 
 		if ($result->column(0) == 1) {
-			$db->update(SESSION_TABLE, $sql_data, ['session_id' => $sid]);
+			$result = $db->update(SESSION_TABLE, $sql_data, ['session_id' => $sid]);
 		}
 		else {
 			$sql_data['session_id']     = $sid;
 			$sql_data['session_start']  = time();
 			$sql_data['session_expire'] = (time() + $this->maxlifetime);
-			$db->insert(SESSION_TABLE, $sql_data);
+			$result = $db->insert(SESSION_TABLE, $sql_data);
 		}
 
-		return ($db->affectedRows() == 1);
+		return $result;
 	}
 
 	/**
@@ -242,27 +251,5 @@ class Session implements \SessionHandlerInterface
 		}
 
 		return true;
-	}
-
-	/**
-	 * Envoi des cookies
-	 *
-	 * @param string  $name     Nom du cookie
-	 * @param string  $value    Données à insérer dans le cookie
-	 * @param integer $lifetime Durée de validité du cookie
-	 *
-	 * @return boolean
-	 */
-	public function send_cookie($name, $value, $lifetime)
-	{
-		return setcookie(
-			$name,
-			$value,
-			$lifetime,
-			$this->cfg_cookie['path'],
-			$this->cfg_cookie['domain'],
-			$this->cfg_cookie['secure'],
-			$this->cfg_cookie['httponly']
-		);
 	}
 }

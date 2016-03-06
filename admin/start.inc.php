@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -29,14 +29,15 @@ $nl_config = wa_get_config();
 if (!check_db_version(@$nl_config['db_version'])) {
 	$output->addLine($lang['Need_upgrade_db']);
 	$output->addLine($lang['Need_upgrade_db_link'], 'upgrade.php');
-	$output->displayMessage();
+	$output->message();
 }
 
 //
 // Hors phase de développement ou beta, on affiche une alerte si
 // l'administrateur a activé le débogage.
+// (constante DEBUG_MODE à DEBUG_LEVEL_QUIET = version stable)
 //
-if (DEBUG_MODE == DEBUG_LEVEL_QUIET && wan_get_debug_level() > DEBUG_MODE) {
+if (wan_is_debug_enabled() && DEBUG_MODE == DEBUG_LEVEL_QUIET) {
 	wanlog($lang['Message']['Warning_debug_active']);
 }
 
@@ -58,33 +59,25 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 	}
 
 	load_settings($admindata);
-	$auth->read_data($_SESSION['uid']);// TODO : fix
-
-	if (!is_writable(WA_TMPDIR)) {
-		$output->displayMessage(sprintf(
-			$lang['Message']['Dir_not_writable'],
-			htmlspecialchars(WA_TMPDIR)
-		));
-	}
 
 	//
 	// Si la liste en session n'existe pas, on met à jour la session.
 	// On teste aussi un éventuel identifiant de liste donné en paramètre.
 	//
-	if (!isset($_SESSION['liste']) || !isset($auth->listdata[$_SESSION['liste']])) {
+	if (!isset($_SESSION['liste'])) {
 		$_SESSION['liste'] = 0;
 	}
 
-	$liste = (!empty($_REQUEST['liste'])) ? intval($_REQUEST['liste']) : 0;
-
-	if ($liste && isset($auth->listdata[$liste])) {
-		$_SESSION['liste'] = $liste;
+	if (!empty($_REQUEST['liste'])) {
+		$_SESSION['liste'] = intval($_REQUEST['liste']);
 	}
 
-	unset($liste);
+	if (!isset($auth->getLists(Auth::VIEW)[$_SESSION['liste']])) {
+		$_SESSION['liste'] = 0;
+	}
 
 	if (strtoupper(filter_input(INPUT_SERVER, 'REQUEST_METHOD')) == 'POST' && $session->new_session) {
-		$output->displayMessage('Invalid_session');
+		$output->message('Invalid_session');
 	}
 }
 

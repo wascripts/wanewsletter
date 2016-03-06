@@ -3,13 +3,13 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter\Dblayer;
 
-class Mysql extends Wadb
+class Mysqli extends Wadb
 {
 	/**
 	 * Type de base de données
@@ -47,39 +47,48 @@ class Mysql extends Wadb
 			$this->options = array_merge($this->options, $options);
 		}
 
-		$this->clientVersion = mysql_get_client_info();
+		$this->clientVersion = mysqli_get_client_info();
 
+		// libmysqlclient veut une ipv6 sans crochets (eg: ::1), mais
+		// mysqlnd veut une ipv6 délimitée par des crochets (eg: [::1])
 		// PHP bug 67563 <https://bugs.php.net/bug.php?id=67563>
-		if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-			throw new Exception("The mysql extension doesn't have support for IPv6 address. Use mysqli instead.");
+		if (stripos($this->clientVersion, 'mysqlnd') !== false
+			&& filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+		) {
+			$host = "[$host]";
 		}
 
-		$connect = 'mysql_connect';
 		if (!empty($this->options['persistent'])) {
-			$connect = 'mysql_pconnect';
+			$host = "p:$host";
 		}
 
-		if (!is_null($port)) {
-			$host .= ':' . $port;
+		$this->link = mysqli_init();
+		$flags = null;
+
+		if (!empty($this->options['timeout']) && is_int($this->options['timeout'])) {
+			mysqli_options($this->link, MYSQLI_OPT_CONNECT_TIMEOUT, $this->options['timeout']);
 		}
 
-		if (!($this->link = $connect($host, $username, $passwd))) {
-			$this->errno = mysql_errno();
-			$this->error = mysql_error();
-			$this->link  = null;
-
-			throw new Exception($this->error, $this->errno);
+		//
+		// Options relatives aux protocoles SSL/TLS
+		//
+		if (!empty($this->options['ssl'])) {
+			$flags = MYSQLI_CLIENT_SSL;
+			$args = ['ssl-key', 'ssl-cert', 'ssl-ca', 'ssl-capath', 'ssl-cipher'];
+			$args = array_fill_keys($args, null);
+			$args = array_intersect_key(array_replace($args, $this->options), $args);
+			call_user_func_array(array($this->link, 'ssl_set'), $args);
 		}
-		else if (!mysql_select_db($dbname)) {
-			$this->errno = mysql_errno($this->link);
-			$this->error = mysql_error($this->link);
-			mysql_close($this->link);
+
+		if (!mysqli_real_connect($this->link, $host, $username, $passwd, $dbname, $port, null, $flags)) {
+			$this->errno = mysqli_connect_errno();
+			$this->error = mysqli_connect_error();
 			$this->link  = null;
 
 			throw new Exception($this->error, $this->errno);
 		}
 		else {
-			$this->serverVersion = mysql_get_server_info($this->link);
+			$this->serverVersion = mysqli_get_server_info($this->link);
 
 			if (!empty($this->options['charset'])) {
 				$this->encoding($this->options['charset']);
@@ -89,10 +98,11 @@ class Mysql extends Wadb
 
 	public function encoding($encoding = null)
 	{
-		$curEncoding = mysql_client_encoding($this->link);
+		$o = mysqli_get_charset($this->link);
+		$curEncoding = $o->charset;
 
 		if (!is_null($encoding)) {
-			mysql_set_charset($encoding, $this->link);
+			mysqli_set_charset($this->link, $encoding);
 		}
 
 		return $curEncoding;
@@ -101,15 +111,15 @@ class Mysql extends Wadb
 	public function query($query)
 	{
 		$curtime = array_sum(explode(' ', microtime()));
-		$result  = mysql_query($query, $this->link);
+		$result  = mysqli_query($this->link, $query);
 		$endtime = array_sum(explode(' ', microtime()));
 
 		$this->sqltime += ($endtime - $curtime);
 		$this->queries++;
 
 		if (!$result) {
-			$this->errno = mysql_errno($this->link);
-			$this->error = mysql_error($this->link);
+			$this->errno = mysqli_errno($this->link);
+			$this->error = mysqli_error($this->link);
 			$this->lastQuery = $query;
 			$this->rollBack();
 
@@ -121,7 +131,7 @@ class Mysql extends Wadb
 			$this->lastQuery = '';
 
 			if (!is_bool($result)) {// on a réceptionné une ressource ou un objet
-				$result = new MysqlResult($result);
+				$result = new MysqliResult($result);
 			}
 		}
 
@@ -135,64 +145,66 @@ class Mysql extends Wadb
 
 	public function vacuum($tables)
 	{
-		if (is_array($tables)) {
-			$tables = implode(', ', $tables);
+		if (!is_array($tables)) {
+			$tables = [$tables];
 		}
 
-		mysql_query('OPTIMIZE TABLE ' . $tables, $this->link);
+		array_walk($tables, function (&$value, $key) {
+			$value = $this->quote($value);
+		});
+
+		mysqli_query($this->link, 'OPTIMIZE TABLE ' . implode(', ', $tables));
 	}
 
 	public function beginTransaction()
 	{
-		mysql_query('SET AUTOCOMMIT=0', $this->link);
-
-		return mysql_query('BEGIN', $this->link);
+		return mysqli_autocommit($this->link, false);
 	}
 
 	public function commit()
 	{
-		if (!($result = mysql_query('COMMIT', $this->link))) {
-			mysql_query('ROLLBACK', $this->link);
+		if (!($result = mysqli_commit($this->link))) {
+			mysqli_rollback($this->link);
 		}
 
-		mysql_query('SET AUTOCOMMIT=1', $this->link);
+		mysqli_autocommit($this->link, true);
 
 		return $result;
 	}
 
 	public function rollBack()
 	{
-		$result = mysql_query('ROLLBACK', $this->link);
-		mysql_query('SET AUTOCOMMIT=1', $this->link);
+		$result = mysqli_rollback($this->link);
+		mysqli_autocommit($this->link, true);
 
 		return $result;
 	}
 
 	public function affectedRows()
 	{
-		return mysql_affected_rows($this->link);
+		return mysqli_affected_rows($this->link);
 	}
 
 	public function lastInsertId()
 	{
-		return mysql_insert_id($this->link);
+		return mysqli_insert_id($this->link);
 	}
 
 	public function escape($string)
 	{
-		return mysql_real_escape_string($string, $this->link);
+		return mysqli_real_escape_string($this->link, $string);
 	}
 
 	public function ping()
 	{
-		return mysql_ping($this->link);
+		return mysqli_ping($this->link);
 	}
 
 	public function close()
 	{
 		if (!is_null($this->link)) {
 			@$this->rollBack();
-			$result = mysql_close($this->link);
+			$result = mysqli_close($this->link);
 			$this->link = null;
 
 			return $result;
@@ -204,31 +216,31 @@ class Mysql extends Wadb
 
 	public function initBackup()
 	{
-		return new MysqlBackup($this);
+		return new MysqliBackup($this);
 	}
 }
 
-class MysqlResult extends WadbResult
+class MysqliResult extends WadbResult
 {
 	public function fetch($mode = null)
 	{
 		$modes = [
-			self::FETCH_NUM   => MYSQL_NUM,
-			self::FETCH_ASSOC => MYSQL_ASSOC,
-			self::FETCH_BOTH  => MYSQL_BOTH
+			self::FETCH_NUM   => MYSQLI_NUM,
+			self::FETCH_ASSOC => MYSQLI_ASSOC,
+			self::FETCH_BOTH  => MYSQLI_BOTH
 		];
 
-		return mysql_fetch_array($this->result, $this->getFetchMode($modes, $mode));
+		return mysqli_fetch_array($this->result, $this->getFetchMode($modes, $mode));
 	}
 
 	public function fetchObject()
 	{
-		return mysql_fetch_object($this->result);
+		return mysqli_fetch_object($this->result);
 	}
 
 	public function column($column)
 	{
-		$row = mysql_fetch_array($this->result);
+		$row = mysqli_fetch_array($this->result);
 
 		return (is_array($row) && isset($row[$column])) ? $row[$column] : false;
 	}
@@ -236,13 +248,13 @@ class MysqlResult extends WadbResult
 	public function free()
 	{
 		if (!is_null($this->result)) {
-			mysql_free_result($this->result);
+			mysqli_free_result($this->result);
 			$this->result = null;
 		}
 	}
 }
 
-class MysqlBackup extends WadbBackup
+class MysqliBackup extends WadbBackup
 {
 	public function header($toolname = '')
 	{
@@ -262,29 +274,29 @@ class MysqlBackup extends WadbBackup
 		return $contents;
 	}
 
-	public function get_tables()
+	public function getTablesList()
 	{
 		$result = $this->db->query('SHOW TABLE STATUS FROM ' . $this->db->quote($this->db->dbname));
 		$tables = [];
 
 		while ($row = $result->fetch()) {
-			$tables[$row['Name']] = $row['Engine'];
+			$tables[] = $row['Name'];
 		}
 
 		return $tables;
 	}
 
-	public function get_table_structure($tabledata, $drop_option)
+	public function getStructure($tablename, $drop_option)
 	{
 		$contents  = '-- ' . $this->eol;
-		$contents .= '-- Structure de la table ' . $tabledata['name'] . ' ' . $this->eol;
+		$contents .= '-- Structure de la table ' . $tablename . ' ' . $this->eol;
 		$contents .= '-- ' . $this->eol;
 
 		if ($drop_option) {
-			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tabledata['name']) . ';' . $this->eol;
+			$contents .= 'DROP TABLE IF EXISTS ' . $this->db->quote($tablename) . ';' . $this->eol;
 		}
 
-		$result = $this->db->query('SHOW CREATE TABLE ' . $this->db->quote($tabledata['name']));
+		$result = $this->db->query('SHOW CREATE TABLE ' . $this->db->quote($tablename));
 		$create_table = $result->column('Create Table');
 		$result->free();
 

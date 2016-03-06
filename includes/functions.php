@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -11,60 +11,20 @@ namespace Wanewsletter;
 
 use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
-use Wamailer\Email;
-use Wanewsletter\Dblayer\Wadb;
-use Wanewsletter\Dblayer\WadbResult;
 
 /**
- * Fonction de chargement automatique de classes.
- * Implémentation à la barbare. On verra plus tard pour
- * faire quelque chose de plus propre...
- *
- * @param string $classname Nom de la classe
+ * Chargement de la localisation, puis du fichier de configuration initial,
+ * avec redirection vers install.php si le fichier n’existe pas.
  */
-function wan_autoloader($classname)
+function load_config()
 {
-	$rootdir = dirname(__DIR__);
-	$prefix  = '';
+	global $output;
 
-	if (strpos($classname, '\\')) {
-		list($prefix, $classname) = explode('\\', $classname, 2);
-	}
+	load_settings();
 
-	if ($prefix != 'Wanewsletter') {
-		return null;
-	}
-
-	$classname = strtolower($classname);
-
-	if (strpos($classname, '\\')) {
-		// Chemin includes/<namespace>/<classname>.php
-		$filename = sprintf('%s/includes/%s.php', $rootdir, str_replace('\\', '/', $classname));
-	}
-	else {
-		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
-		$filename = sprintf('%s/includes/class.%s.php', $rootdir, $classname);
-	}
-
-	if (is_readable($filename)) {
-		require $filename;
-	}
-}
-
-/**
- * Chargement du fichier de configuration initial, et redirection vers
- * install.php si le fichier n’existe pas.
- */
-function load_config_file()
-{
-	global $dsn, $prefixe;// Sale mais bon...
-
-	// Réglage par défaut des divers répertoires utilisés par le script.
-	// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire d'installation
-	// de Wanewsletter (voir plus bas).
-	$logs_dir  = '~/data/logs';
-	$stats_dir = '~/data/stats';
-	$tmp_dir   = '~/data/tmp';
+	$dsn = '';
+	$prefixe = 'wa_';
+	$nl_config = [];
 
 	$need_update  = false;
 	$test_files[] = WA_ROOTDIR . '/data/config.inc.php';
@@ -74,13 +34,29 @@ function load_config_file()
 	foreach ($test_files as $file) {
 		if (file_exists($file)) {
 			if (!is_readable($file)) {
-				echo "Cannot read the config file. Please fix this mistake and reload.";
-				exit;
+				$output->message('Unreadable_config_file');
 			}
 
 			include $file;
+			break;
 		}
+
+		$need_update = true;
 	}
+
+	if (!is_array($nl_config)) {
+		$nl_config = [];
+	}
+
+	$base_config = [];
+	// Ajout des répertoires par défaut utilisés par le script.
+	// Le tilde est remplacé par WA_ROOTDIR, qui mène au répertoire
+	// d’installation de Wanewsletter (voir plus bas).
+	$base_config['logs_dir']  = '~/data/logs';
+	$base_config['stats_dir'] = '~/data/stats';
+	$base_config['tmp_dir']   = '~/data/tmp';
+
+	$nl_config = array_merge($base_config, $nl_config);
 
 	//
 	// Compatibilité avec Wanewsletter < 2.3-beta2
@@ -94,8 +70,7 @@ function load_config_file()
 		$infos['dbname'] = $dbname;
 
 		if ($infos['engine'] == 'mssql') {
-			echo "Support for Microsoft SQL Server has been removed in Wanewsletter 2.3\n";
-			exit;
+			$output->message('No_microsoft_sqlserver');
 		}
 		else if ($infos['engine'] == 'postgre') {
 			$infos['engine'] = 'postgres';
@@ -112,17 +87,26 @@ function load_config_file()
 	//
 	// Les constantes NL_INSTALLED et WA_VERSION sont obsolètes.
 	//
-	if (defined('NL_INSTALLED') || defined('WA_VERSION') || !file_exists($test_files[0])) {
+	if (defined('NL_INSTALLED') || defined('WA_VERSION')) {
 		$need_update = true;
 	}
 
-	//
-	// Pas installé ?
-	//
-	$install_script = 'install.php';
+	// Utilisé à la fin d’une mise à jour pour mettre à jour également un
+	// fichier de configuration obsolète.
+	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 
-	if (!$dsn && $install_script != basename($_SERVER['SCRIPT_FILENAME'])) {
+	// Si on est dans l’installeur, on récupère ici l’entrée 'prefixe' du
+	// formulaire, car on en a besoin pour créer les constantes *_TABLE.
+	if (defined(__NAMESPACE__.'\\IN_INSTALL')) {
+		$prefixe = filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
+			'options' => ['default' => $prefixe]
+		]);
+	}
+	// Si le script n’est pas installé, on redirige vers l’installeur, ou
+	// on affiche un message explicatif.
+	else if (!$dsn) {
 		if (!check_cli()) {
+			$install_script = 'install.php';
 			if (!file_exists($install_script)) {
 				$install_script = '../'.$install_script;
 			}
@@ -130,21 +114,80 @@ function load_config_file()
 			http_redirect($install_script);
 		}
 		else {
-			echo "Wanewsletter seems not to be installed!\n";
-			echo "Call $install_script in your web browser.\n";
-			exit(1);
+			$output->message('Not_installed');
 		}
 	}
 
-	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
+	//
+	// Options supplémentaires transmises par commodité sous forme de tableau
+	//
+	if (!empty($nl_config['db'])) {
+		$args = http_build_query($nl_config['db'], '', '&');
+		$dsn .= (strpos($dsn, '?') ? '&' : '?') . $args;
+	}
+
+	//
+	// Déclaration des constantes de tables
+	//
+	$tables = [
+		'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
+		'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
+	];
+
+	foreach ($tables as $table) {
+		$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__, strtoupper($table));
+		$table = $prefixe . $table;
+		define($constant, $table);
+		$GLOBALS['sql_schemas'][$table] = [];
+	}
 
 	//
 	// Déclaration des dossiers et fichiers spéciaux utilisés par le script
 	//
-	define(__NAMESPACE__.'\\WA_LOGSDIR',  str_replace('~', WA_ROOTDIR, rtrim($logs_dir, '/')));
-	define(__NAMESPACE__.'\\WA_STATSDIR', str_replace('~', WA_ROOTDIR, rtrim($stats_dir, '/')));
-	define(__NAMESPACE__.'\\WA_TMPDIR',   str_replace('~', WA_ROOTDIR, rtrim($tmp_dir, '/')));
-	define(__NAMESPACE__.'\\WA_LOCKFILE', WA_TMPDIR . '/liste-%d.lock');
+	$realpath = function ($path) {
+		if ($path && $path[0] == '~') {
+			$path = substr($path, 1);
+			$path = WA_ROOTDIR . $path;
+		}
+
+		return rtrim(str_replace('\\', '/', $path), '/');
+	};
+
+	$nl_config['logs_dir']  = $realpath($nl_config['logs_dir']);
+	$nl_config['stats_dir'] = $realpath($nl_config['stats_dir']);
+	$nl_config['tmp_dir']   = $realpath($nl_config['tmp_dir']);
+
+	if (!is_writable($nl_config['tmp_dir'])) {
+		$output->message(sprintf(
+			$GLOBALS['lang']['Message']['Dir_not_writable'],
+			htmlspecialchars($nl_config['tmp_dir'])
+		));
+	}
+
+	if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE) {
+		$add_prefix = false;
+		$filename = DEBUG_LOG_FILE;
+
+		if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
+			if (!preg_match('#^[a-z]:[/\\\\]#i', $filename)) {
+				$add_prefix = true;
+			}
+		}
+		else if ($filename[0] != '/') {
+			$add_prefix = true;
+		}
+
+		if ($add_prefix) {
+			$filename = $nl_config['logs_dir'] . '/' . $filename;
+		}
+
+		ini_set('error_log', $filename);
+	}
+
+	// Injection dans le scope global
+	$GLOBALS['dsn'] = $dsn;
+	$GLOBALS['prefixe'] = $prefixe;
+	$GLOBALS['nl_config'] = $nl_config;
 }
 
 /**
@@ -165,33 +208,34 @@ function check_db_version($version)
  *
  * @param boolean $complete true pour vérifier aussi l'URL distante
  *
- * @return boolean|integer
+ * @return integer
  */
 function wa_check_update($complete = false)
 {
-	$cache_file = sprintf('%s/%s', WA_TMPDIR, CHECK_UPDATE_CACHE);
+	global $nl_config;
+
+	$cache_file = sprintf('%s/%s', $nl_config['tmp_dir'], CHECK_UPDATE_CACHE);
 	$cache_ttl  = CHECK_UPDATE_CACHE_TTL;
 
-	$result = false;
+	$result = -1;
 	$data   = '';
 
 	if (is_readable($cache_file) && filemtime($cache_file) > (time() - $cache_ttl)) {
-		$data = file_get_contents($cache_file);
+		$data = trim(file_get_contents($cache_file));
 	}
 	else if ($complete) {
-		$result = http_get_contents(CHECK_UPDATE_URL, $errstr);
-		$data = $result['data'];
+		$result = http_get_contents(CHECK_UPDATE_URL);
+		$data   = trim($result['data']);
 
-		if (preg_match('#^[A-Za-z0-9.-]+$#', $data)) {
-			file_put_contents($cache_file, $data);
+		if (!preg_match('#^[0-9]+\.[0-9]+(\.[0-9]+|-[A-Za-z0-9]+)$#', $data)) {
+			throw new Exception("Bad version identifier received!");
 		}
-		else {
-			$data = '';
-		}
+
+		file_put_contents($cache_file, $data);
 	}
 
 	if ($data) {
-		$result = intval(version_compare(WANEWSLETTER_VERSION, trim($data), '<'));
+		$result = intval(version_compare(WANEWSLETTER_VERSION, $data, '<'));
 	}
 
 	return $result;
@@ -204,10 +248,10 @@ function wa_check_update($complete = false)
  */
 function wa_get_config()
 {
-	global $db;
+	global $db, $nl_config;
 
 	$result = $db->query("SELECT * FROM " . CONFIG_TABLE);
-	$result->setFetchMode(WadbResult::FETCH_ASSOC);
+	$result->setFetchMode($result::FETCH_ASSOC);
 	$row    = $result->fetch();
 	$config = [];
 
@@ -224,7 +268,7 @@ function wa_get_config()
 		$config = $row;
 	}
 
-	return $config;
+	return array_merge($nl_config, $config);
 }
 
 /**
@@ -243,13 +287,23 @@ function wa_update_config($config, $value = null)
 		$config = [$config => $value];
 	}
 
-	foreach ($config as $name => $value) {
-		$db->query(sprintf(
+	$result = $db->query("SELECT config_name FROM " . CONFIG_TABLE);
+	$result->setFetchMode($result::FETCH_ASSOC);
+
+	$config_list = [];
+
+	while ($row = $result->fetch()) {
+		$config_list[] = $row['config_name'];
+	}
+
+	foreach ($config_list as $name) {
+		$sql = sprintf(
 			"UPDATE %s SET config_value = '%s' WHERE config_name = '%s'",
 			CONFIG_TABLE,
-			$db->escape($value),
+			$db->escape($config[$name]),
 			$db->escape($name)
-		));
+		);
+		$db->query($sql);
 	}
 }
 
@@ -293,7 +347,7 @@ function generate_key($length = 32, $specialChars = false)
  *
  * @return boolean
  */
-function wan_ssl_connection()
+function is_secure_connection()
 {
 	return ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 443 == $_SERVER['SERVER_PORT']);
 }
@@ -303,22 +357,21 @@ function wan_ssl_connection()
  *
  * @param string  $url     Url à compléter
  * @param array   $params  Paramètres à ajouter en fin d'url
- * @param boolean $session Ajout de l'ID de session PHP s'il y a lieu
  *
  * @return string
  */
-function wan_build_url($url, array $params = [], $session = false)
+function http_build_url($url, array $params = [])
 {
 	$parts = parse_url($url);
 
 	if (empty($parts['scheme'])) {
-		$proto = (wan_ssl_connection()) ? 'https' : 'http';
+		$proto = (is_secure_connection()) ? 'https' : 'http';
 	}
 	else {
 		$proto = $parts['scheme'];
 	}
 
-	$server = (!empty($parts['host'])) ? $parts['host'] : $_SERVER['HTTP_HOST'];
+	$server = (!empty($parts['host'])) ? $parts['host'] : $_SERVER['SERVER_NAME'];
 
 	if (!empty($parts['port'])) {
 		$server .= ':'.$parts['port'];
@@ -335,7 +388,7 @@ function wan_build_url($url, array $params = [], $session = false)
 		$path  = [];
 
 		foreach ($parts as $part) {
-			if ($part == '.' || $part == '') {
+			if ($part == '.') {
 				continue;
 			}
 			if ($part == '..') {
@@ -345,17 +398,13 @@ function wan_build_url($url, array $params = [], $session = false)
 				$path[] = $part;
 			}
 		}
+
 		$path = implode('/', $path);
 	}
 
 	$cur_params = [];
 	if ($query != '') {
 		parse_str($query, $cur_params);
-	}
-
-	if ($session && defined('SID') && SID != '') {
-		list($name, $value) = explode('=', SID);
-		$params[$name] = $value;
 	}
 
 	$params = array_merge($cur_params, $params);
@@ -367,14 +416,13 @@ function wan_build_url($url, array $params = [], $session = false)
 }
 
 /**
- * Version adaptée de la fonction http_redirect() de pecl_http
+ * Version adaptée de la fonction http_redirect() de pecl_http < 2.0
  *
  * @param string  $url     Url de redirection
  * @param array   $params  Paramètres à ajouter en fin d'url
  * @param boolean $session Ajout de l'ID de session PHP s'il y a lieu
  * @param integer $status  Code de redirection HTTP
  */
-if (!function_exists('http_redirect')) {
 function http_redirect($url, array $params = [], $session = false, $status = 0)
 {
 	$status = intval($status);
@@ -382,7 +430,12 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 		$status = 302;
 	}
 
-	$url = wan_build_url($url, $params, $session);
+	if ($session && defined('SID') && SID != '') {
+		list($name, $value) = explode('=', SID);
+		$params[$name] = $value;
+	}
+
+	$url = http_build_url($url, $params);
 	http_response_code($status);
 	header(sprintf('Location: %s', $url));
 
@@ -393,23 +446,22 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 		<a href="%s">here</a> to go on next page.</p>', htmlspecialchars($url));
 	exit;
 }
-}
 
 /**
- * Initialisation des préférences et du moteur de templates
+ * Chargement des chaînes de localisation
  *
- * @param array $admindata Données utilisateur
+ * @param array $userdata Données utilisateur
  */
-function load_settings(&$admindata = [])
+function load_settings(array &$userdata = [])
 {
-	global $nl_config;
+	global $nl_config, $output;
 
 	$file_pattern = WA_ROOTDIR . '/languages/%s/main.php';
 
 	$check_list = [];
 
-	if (!empty($admindata['admin_lang'])) {
-		$check_list[] = $admindata['admin_lang'];
+	if (!empty($userdata['language'])) {
+		$check_list[] = $userdata['language'];
 	}
 
 	if (!empty($nl_config['language'])) {
@@ -443,12 +495,10 @@ function load_settings(&$admindata = [])
 	}
 
 	if (empty($lang)) {
-		plain_error('Les fichiers de localisation sont introuvables !');
+		$output->basic('Les fichiers de localisation sont introuvables !');
 	}
 
-	if (is_array($admindata)) {
-		$admindata['admin_lang'] = $lang['CONTENT_LANG'];
-	}
+	$userdata['language'] = $lang['CONTENT_LANG'];
 
 	$GLOBALS['lang'] =& $lang;
 	$GLOBALS['datetime'] =& $datetime;
@@ -466,6 +516,8 @@ function load_settings(&$admindata = [])
  */
 function wan_error_handler($errno, $errstr, $errfile, $errline)
 {
+	global $output;
+
 	//
 	// On s'assure que si des erreurs surviennent au sein même du gestionnaire
 	// d'erreurs alors que l'opérateur @ a été utilisé en amont, elles seront
@@ -484,205 +536,38 @@ function wan_error_handler($errno, $errstr, $errfile, $errline)
 	$debug  = ($debug_level == DEBUG_LEVEL_ALL);
 	$debug |= ($debug_level == DEBUG_LEVEL_NORMAL && ($error_reporting & $errno));
 
-	// Si l’affichage des erreurs peut être délégué à la classe Output.
-	$skip  = check_theme_is_used();
-	// Si l’affichage en bloc dans le bas de page est activé (défaut).
-	$skip &= DISPLAY_ERRORS_IN_LOG;
-
 	$error = new Error([
 		'type'    => $errno,
 		'message' => $errstr,
 		'file'    => $errfile,
 		'line'    => $errline,
-		'ignore'  => (!$debug || !$skip)
+		'ignore'  => !$debug
 	]);
 
 	wanlog($error);
-
-	if ($error->isFatal() || ($debug && !$skip)) {
-		wan_display_error($error);
-	}
+	$output->error($error);
 
 	return true;
 }
 
 /**
- * Gestionnaire d'erreur personnalisé du script
+ * Gestionnaire d’exception personnalisé du script
  *
- * @param Exception $e Exception "attrapée" par le gestionnaire
+ * @param \Throwable $e Objet "attrapé" par le gestionnaire
  */
 function wan_exception_handler($e)
 {
-	wanlog($e);
-	wan_display_error($e);
-}
-
-/**
- * Formatage du message d'erreurs
- *
- * @param Exception $error Exception décrivant l'erreur
- *
- * @return string
- */
-function wan_format_error($error)
-{
-	global $db, $lang;
-
-	$errno   = $error->getCode();
-	$errstr  = $error->getMessage();
-	$errfile = $error->getFile();
-	$errline = $error->getLine();
-	$backtrace = $error->getTrace();
-
-	if ($error instanceof Error) {
-		// Cas spécial. L'exception personnalisée a été créé dans wan_error_handler()
-		// et contient donc l'appel à wan_error_handler() elle-même. On corrige.
-		array_shift($backtrace);
-	}
-
-	foreach ($backtrace as $i => &$t) {
-		if (!isset($t['file'])) {
-			$t['file'] = 'unknown';
-			$t['line'] = 0;
-		}
-		$file = htmlspecialchars(str_replace(dirname(__DIR__), '~', $t['file']));
-		$call = (isset($t['class']) ? $t['class'].$t['type'] : '') . $t['function'];
-		$t = sprintf('#%d  %s() called at [%s:%d]', $i, $call, $file, $t['line']);
-	}
-
-	if (count($backtrace) > 0) {
-		$backtrace = sprintf("<b>Backtrace:</b>\n%s\n", implode("\n", $backtrace));
-	}
-	else {
-		$backtrace = '';
-	}
-
-	if (wan_get_debug_level() == DEBUG_LEVEL_QUIET) {
-		// Si on est en mode de non-débogage, on a forcément attrapé une erreur
-		// critique pour arriver ici.
-		$message  = $lang['Message']['Critical_error'];
-
-		if ($errno == E_USER_ERROR) {
-			if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
-				$errstr = $lang['Message'][$errstr];
-			}
-
-			$message = $errstr;
-		}
-	}
-	else if ($error instanceof Dblayer\Exception) {
-		if ($db instanceof Wadb && $db->sqlstate != '') {
-			$errno = $db->sqlstate;
-		}
-
-		$message  = sprintf("<b>SQL errno:</b> %s\n", $errno);
-		$message .= sprintf("<b>SQL error:</b> %s\n", htmlspecialchars($errstr));
-
-		if ($db instanceof Wadb && $db->lastQuery != '') {
-			$message .= sprintf("<b>SQL query:</b> %s\n", htmlspecialchars($db->lastQuery));
-		}
-
-		$message .= $backtrace;
-	}
-	else {
-		$labels  = [
-			E_NOTICE => 'PHP Notice',
-			E_WARNING => 'PHP Warning',
-			E_USER_ERROR => 'Error',
-			E_USER_WARNING => 'Warning',
-			E_USER_NOTICE => 'Notice',
-			E_STRICT => 'PHP Strict',
-			E_DEPRECATED => 'PHP Deprecated',
-			E_USER_DEPRECATED => 'Deprecated',
-			E_RECOVERABLE_ERROR => 'PHP Error'
-		];
-
-		$label   = (isset($labels[$errno])) ? $labels[$errno] : 'Unknown Error';
-		$errfile = str_replace(dirname(__DIR__), '~', $errfile);
-
-		if (!empty($lang['Message']) && !empty($lang['Message'][$errstr])) {
-			$errstr = $lang['Message'][$errstr];
-		}
-
-		$message = sprintf(
-			"<b>%s:</b> %s in <b>%s</b> on line <b>%d</b>\n",
-			($error instanceof Error) ? $label : get_class($error),
-			$errstr,
-			$errfile,
-			$errline
-		);
-		$message .= $backtrace;
-	}
-
-	return $message;
-}
-
-/**
- * Affichage du message dans le contexte d'utilisation (page web ou ligne de commande)
- *
- * @param Exception $error Exception décrivant l'erreur
- */
-function wan_display_error($error)
-{
 	global $output;
 
-	if ($error instanceof \Exception) {
-		$exit = true;
-
-		if ($error instanceof Error) {
-			$exit = $error->isFatal();
-		}
-	}
-
-	$message = wan_format_error($error);
-
-	if (check_cli()) {
-		if (function_exists('posix_isatty') && posix_isatty(STDOUT)) {
-			$message = preg_replace("#<b>#",  "\033[1;31m", $message, 1);
-			$message = preg_replace("#</b>#", "\033[0m", $message, 1);
-
-			$message = preg_replace("#<b>#",  "\033[1;37m", $message);
-			$message = preg_replace("#</b>#", "\033[0m", $message);
-		}
-		else {
-			$message = preg_replace("#</?b>#", "", $message);
-		}
-
-		$message = htmlspecialchars_decode($message);
-
-		fwrite(STDERR, $message);
-	}
-	else if (!$exit) {
-		echo '<p>' . nl2br($message) . '</p>';
-	}
-	else {
-		http_response_code(500);
-
-		if (check_theme_is_used()) {
-			$output->displayMessage($message, 'error');
-		}
-		else {
-			$message = nl2br($message);
-			echo <<<BASIC
-<div>
-	<h1>Erreur critique&nbsp;!</h1>
-
-	<p>$message</p>
-</div>
-BASIC;
-		}
-	}
-
-	if ($exit) {
-		exit(1);
-	}
+	wanlog($e);
+	$output->error($e);
 }
 
 /**
  * Si elle est appelée avec un argument, ajoute l'entrée dans le journal,
- * sinon, renvoie le journal.
+ * sinon, retourne le journal.
  *
- * @param mixed $entry Peut être un objet Exception, ou n'importe quelle autre valeur
+ * @param mixed $entry Peut être un objet \Throwable, ou n’importe quelle autre valeur
  *
  * @return array
  */
@@ -694,7 +579,7 @@ function wanlog($entry = null)
 		return $entries;
 	}
 
-	if ($entry instanceof Exception) {
+	if ($entry instanceof \Throwable || $entry instanceof \Exception) {
 		$hash = md5(
 			$entry->getCode() .
 			$entry->getMessage() .
@@ -705,11 +590,15 @@ function wanlog($entry = null)
 		$entries[$hash] = $entry;
 
 		if (DEBUG_LOG_ENABLED) {
-			error_log(preg_replace('#</?b>#', '', trim(wan_format_error($entry))));
+			$entry = trim(Output\CommandLine::formatError($entry));
 		}
 	}
 	else {
 		$entries[] = $entry;
+	}
+
+	if (DEBUG_LOG_ENABLED) {
+		error_log($entry);
 	}
 }
 
@@ -724,7 +613,7 @@ function wan_error_get_last()
 	$error  = null;
 
 	while ($e = array_pop($errors)) {
-		if ($e instanceof Exception) {
+		if ($e instanceof \Throwable || $e instanceof \Exception) {
 			$error = [
 				'type'    => $e->getCode(),
 				'message' => $e->getMessage(),
@@ -739,61 +628,32 @@ function wan_error_get_last()
 }
 
 /**
- * @param mixed   $var     Variable à afficher
- * @param boolean $exit    True pour terminer l'exécution du script
- * @param boolean $verbose True pour utiliser var_dump() (détails sur le contenu de la variable)
- */
-function plain_error($var, $exit = true, $verbose = false)
-{
-	if (!headers_sent()) {
-		header('Content-Type: text/plain; charset=UTF-8');
-	}
-
-	if ($verbose) {
-		var_dump($var);
-	}
-	else {
-		if (is_scalar($var)) {
-			echo $var;
-		}
-		else {
-			print_r($var);
-		}
-	}
-
-	if ($exit) {
-		exit;
-	}
-}
-
-/**
  * Fonction d'affichage par page.
  *
  * @param string  $url           Adresse vers laquelle doivent pointer les liens de navigation
- * @param integer $total_item    Nombre total d'éléments
+ * @param integer $total_items   Nombre total d'éléments
  * @param integer $item_per_page Nombre d'éléments par page
  * @param integer $page_id       Identifiant de la page en cours
  *
  * @return string
  */
-function navigation($url, $total_item, $item_per_page, $page_id)
+function navigation($url, $total_items, $item_per_page, $page_id)
 {
 	global $lang;
 
-	$total_pages = ceil($total_item / $item_per_page);
+	$total_pages = ceil($total_items / $item_per_page);
 
-	// premier caractère de l'url au moins en position 1
-	// on place un espace à la position 0 de la chaîne
-	$url = ' ' . $url;
-
-	$url .= (strpos($url, '?')) ? '&amp;' : '?';
-
-	// suppression de l'espace précédemment ajouté
-	$url = substr($url, 1);
+	$url .= (strpos($url, '?') !== false) ? '&amp;' : '?';
 
 	if ($total_pages == 1) {
 		return '&nbsp;';
 	}
+
+	$get_page_url = function ($i) use ($url, $page_id) {
+		return ($i == $page_id)
+			? sprintf('<b>%d</b>', $i)
+			: sprintf('<a href="%1$spage=%2$d">%2$d</a>', $url, $i);
+	};
 
 	$nav_string = '';
 
@@ -805,8 +665,9 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 			}
 			while ($prev % 10);
 
-			$nav_string .= '<a href="' . $url . 'page=1">' . $lang['Start'] . '</a>&nbsp;&nbsp;';
-			$nav_string .= '<a href="' . $url . 'page=' . $prev . '">' . $lang['Prev'] . '</a>&nbsp;&nbsp;';
+			$template = '<a href="%spage=%d">%s</a>&nbsp;&nbsp;';
+			$nav_string .= sprintf($template, $url, 1, $lang['Start']);
+			$nav_string .= sprintf($template, $url, $prev, $lang['Prev']);
 		}
 
 		$current = $page_id;
@@ -823,7 +684,7 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 					$nav_string .= ', ';
 				}
 
-				$nav_string .= ($i == $page_id) ? '<b>' . $i . '</b>' : '<a href="' . $url . 'page=' . $i . '">' . $i . '</a>';
+				$nav_string .= $get_page_url($i);
 			}
 		}
 
@@ -834,8 +695,9 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 		$next++;
 
 		if ($total_pages >= $next) {
-			$nav_string .= '&nbsp;&nbsp;<a href="' . $url . 'page=' . $next . '">' . $lang['Next'] . '</a>';
-			$nav_string .= '&nbsp;&nbsp;<a href="' . $url . 'page=' . $total_pages . '">' . $lang['End'] . '</a>';
+			$template = '&nbsp;&nbsp;<a href="%spage=%d">%s</a>';
+			$nav_string .= sprintf($template, $url, $next, $lang['Next']);
+			$nav_string .= sprintf($template, $url, $total_pages, $lang['End']);
 		}
 	}
 	else {
@@ -844,7 +706,7 @@ function navigation($url, $total_item, $item_per_page, $page_id)
 				$nav_string .= ', ';
 			}
 
-			$nav_string .= ($i == $page_id) ? '<b>' . $i . '</b>' : '<a href="' . $url . 'page=' . $i . '">' . $i . '</a>';
+			$nav_string .= $get_page_url($i);
 
 		}
 	}
@@ -883,27 +745,25 @@ function convert_time($dateformat, $timestamp)
  * Retourne le nombre d'entrées supprimées
  * Fonction récursive
  *
- * @param integer $liste_id       Liste concernée
- * @param integer $limitevalidate Limite de validité pour confirmer une inscription
- * @param integer $purge_freq     Fréquence des purges
+ * @param array $listdata Liste concernée
  *
  * @return integer
  */
-function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
+function purge_liste(array $listdata = [])
 {
 	global $db;
 
-	if (!$liste_id) {
+	if (!$listdata) {
 		$total_entries_deleted = 0;
 
 		$sql = "SELECT liste_id, limitevalidate, purge_freq
-			FROM " . LISTE_TABLE . "
-			WHERE purge_next < " . time() . "
-				AND auto_purge = 1";
+			FROM %s
+			WHERE purge_next < %d AND auto_purge = 1";
+		$sql = sprintf($sql, LISTE_TABLE, time());
 		$result = $db->query($sql);
 
-		while ($row = $result->fetch()) {
-			$total_entries_deleted += purge_liste($row['liste_id'], $row['limitevalidate'], $row['purge_freq']);
+		while ($listdata = $result->fetch()) {
+			$total_entries_deleted += purge_liste($listdata);
 		}
 
 		//
@@ -915,10 +775,12 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 	}
 	else {
 		$sql = "SELECT abo_id
-			FROM " . ABO_LISTE_TABLE . "
-			WHERE liste_id = $liste_id
-				AND confirmed = " . SUBSCRIBE_NOT_CONFIRMED . "
-				AND register_date < " . strtotime(sprintf('-%d days', $limitevalidate));
+			FROM %s
+			WHERE liste_id = %d AND confirmed = %d AND register_date < %d";
+		$sql = sprintf($sql, ABO_LISTE_TABLE, $listdata['liste_id'],
+			SUBSCRIBE_NOT_CONFIRMED,
+			strtotime(sprintf('-%d days', $listdata['limitevalidate']))
+		);
 		$result = $db->query($sql);
 
 		$abo_ids = [];
@@ -932,27 +794,30 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
 
 			$db->beginTransaction();
 
-			$sql = "DELETE FROM " . ABONNES_TABLE . "
+			$sql = "DELETE FROM %s
 				WHERE abo_id IN(
 					SELECT abo_id
-					FROM " . ABO_LISTE_TABLE . "
-					WHERE abo_id IN($sql_abo_ids)
+					FROM %s
+					WHERE abo_id IN(%s)
 					GROUP BY abo_id
 					HAVING COUNT(abo_id) = 1
 				)";
+			$sql = sprintf($sql, ABONNES_TABLE, ABO_LISTE_TABLE, $sql_abo_ids);
 			$db->query($sql);
 
-			$sql = "DELETE FROM " . ABO_LISTE_TABLE . "
-				WHERE abo_id IN($sql_abo_ids)
-					AND liste_id = " . $liste_id;
+			$sql = "DELETE FROM %s
+				WHERE abo_id IN(%s) AND liste_id = %d";
+			$sql = sprintf($sql, ABO_LISTE_TABLE, $sql_abo_ids, $listdata['liste_id']);
 			$db->query($sql);
 
 			$db->commit();
 		}
 
-		$sql = "UPDATE " . LISTE_TABLE . "
-			SET purge_next = " . strtotime(sprintf('+%d days', $purge_freq)) . "
-			WHERE liste_id = " . $liste_id;
+		$sql = "UPDATE %s SET purge_next = %d WHERE liste_id = %d";
+		$sql = sprintf($sql, LISTE_TABLE,
+			strtotime(sprintf('+%d days', $listdata['purge_freq'])),
+			$listdata['liste_id']
+		);
 		$db->query($sql);
 
 		return $num_abo_deleted;
@@ -968,16 +833,7 @@ function purge_liste($liste_id = 0, $limitevalidate = 0, $purge_freq = 0)
  */
 function strip_magic_quotes(&$data)
 {
-	static $doStrip = null;
-
-	if (is_null($doStrip)) {
-		$doStrip = false;
-		if (ini_get('filter.default') == 'magic_quotes') {
-			$doStrip = true;
-		}
-	}
-
-	if ($doStrip) {
+	if (ini_get('filter.default') == 'magic_quotes') {
 		if (is_array($data)) {
 			array_walk($data, function (&$data, $key) {
 				strip_magic_quotes($data);
@@ -987,29 +843,6 @@ function strip_magic_quotes(&$data)
 			$data = stripslashes($data);
 		}
 	}
-}
-
-/**
- * Pour limiter la longueur d'une chaine de caractère à afficher
- *
- * @param string  $str
- * @param integer $len
- *
- * @return string
- */
-function cut_str($str, $len)
-{
-	if (mb_strlen($str) > $len) {
-		$str = mb_substr($str, 0, $len);
-
-		if ($space = mb_strrpos($str, ' ')) {
-			$str = mb_substr($str, 0, $space);
-		}
-
-		$str .= "\xe2\x80\xa6";// (U+2026) Horizontal ellipsis char
-	}
-
-	return $str;
 }
 
 /**
@@ -1051,23 +884,16 @@ function ini_get_flag($name)
  * Fonctions à utiliser lors des longues boucles (backup, envois)
  * qui peuvent provoquer un time out du navigateur client
  * Inspiré d'un code équivalent dans phpMyAdmin 2.5.0 (libraries/build_dump.lib.php précisément)
- *
- * @param boolean $in_loop True si on est dans la boucle, false pour initialiser $time
  */
-function fake_header($in_loop)
+function fake_header()
 {
-	static $time;
+	static $ts;
 
-	if ($in_loop) {
-		$new_time = time();
+	$new_ts = time();
 
-		if (($new_time - $time) >= 30) {
-			$time = $new_time;
-			header('X-WaPing: Pong');
-		}
-	}
-	else {
-		$time = time();
+	if (!$ts || ($new_ts - $ts) >= 30) {
+		header('X-WaPing: Pong');
+		$ts = $new_ts;
 	}
 }
 
@@ -1082,7 +908,7 @@ function fake_header($in_loop)
  */
 function convert_encoding($data, $charset = null, $check_bom = true)
 {
-	if (empty($charset)) {
+	if (!$charset) {
 		if ($check_bom && strncmp($data, "\xEF\xBB\xBF", 3) == 0) {
 			$charset = 'UTF-8';
 			$data = substr($data, 3);
@@ -1092,7 +918,7 @@ function convert_encoding($data, $charset = null, $check_bom = true)
 		}
 	}
 
-	if (empty($charset)) {
+	if (!$charset) {
 		$charset = 'windows-1252';
 		trigger_error("Cannot found valid charset. Using windows-1252 as fallback", E_USER_NOTICE);
 	}
@@ -1106,38 +932,42 @@ function convert_encoding($data, $charset = null, $check_bom = true)
 
 /**
  * Récupère un contenu local ou via HTTP et le retourne, ainsi que le jeu de
- * caractère et le type de média de la chaîne, si disponible.
+ * caractères et le type de média de la chaîne, si disponible.
  *
- * @param string $URL    L'URL à appeller
- * @param string $errstr Conteneur pour un éventuel message d'erreur
+ * @param string $url L’URL à appeller
  *
- * @return boolean|array
+ * @throws Exception
+ * @return array
  */
-function wan_get_contents($URL, &$errstr)
+function wan_get_contents($url)
 {
 	global $lang;
 
-	if (strncmp($URL, 'http://', 7) == 0) {
-		$result = http_get_contents($URL, $errstr);
-		if (!$result) {
-			$errstr = sprintf($lang['Message']['Error_load_url'], htmlspecialchars($URL), $errstr);
+	if (preg_match('#^https?://#', $url)) {
+		try {
+			$result = http_get_contents($url);
+		}
+		catch (Exception $e) {
+			throw new Exception(sprintf(
+				$lang['Message']['Error_load_url'],
+				htmlspecialchars($url),
+				$e->getMessage()
+			));
 		}
 	}
 	else {
-		if ($URL[0] == '~') {
-			$URL = $_SERVER['DOCUMENT_ROOT'] . substr($URL, 1);
+		if ($url[0] == '~') {
+			$url = $_SERVER['DOCUMENT_ROOT'] . substr($url, 1);
 		}
-		else if ($URL[0] != '/') {
-			$URL = WA_ROOTDIR . '/' . $URL;
+		else if ($url[0] != '/') {
+			$url = WA_ROOTDIR . '/' . $url;
 		}
 
-		if (is_readable($URL)) {
-			$result = ['data' => file_get_contents($URL), 'charset' => null];
+		if (!is_readable($url)) {
+			throw new Exception(sprintf($lang['Message']['File_not_exists'], htmlspecialchars($url)));
 		}
-		else {
-			$result = false;
-			$errstr = sprintf($lang['Message']['File_not_exists'], htmlspecialchars($URL));
-		}
+
+		$result = ['data' => file_get_contents($url), 'charset' => null];
 	}
 
 	return $result;
@@ -1145,106 +975,102 @@ function wan_get_contents($URL, &$errstr)
 
 /**
  * Récupère un contenu via HTTP et le retourne, ainsi que le jeu de
- * caractère et le type de média de la chaîne, si disponible.
+ * caractères et le type de média de la chaîne, si disponible.
  *
- * @param string $URL    L'URL à appeller
- * @param string $errstr Conteneur pour un éventuel message d'erreur
+ * @param string $url L’URL à appeller
  *
- * @return boolean|array
+ * @throws Exception
+ * @return array
  */
-function http_get_contents($URL, &$errstr)
+function http_get_contents($url)
 {
 	global $lang;
 
-	if (!($part = parse_url($URL)) || !isset($part['scheme']) || !isset($part['host']) || $part['scheme'] != 'http') {
-		$errstr = $lang['Message']['Invalid_url'];
-		return false;
+	if (!preg_match('#^https?://#', $url)) {
+		throw new Exception($lang['Message']['Invalid_url']);
 	}
 
-	$port = (!isset($part['port'])) ? 80 : $part['port'];
+	$data = $mime = $charset = '';
 
-	if (!($fs = fsockopen($part['host'], $port, $null, $null, 5))) {
-		$errstr = sprintf($lang['Message']['Unaccess_host'], htmlspecialchars($part['host']));
-		return false;
-	}
+	$connect_timeout = 10;
+	$user_agent = sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION);
 
-	stream_set_timeout($fs, 5);
+	if (function_exists('curl_init')) {
+		$ch = curl_init();
 
-	$path  = (!isset($part['path'])) ? '/' : $part['path'];
-	$path .= (!isset($part['query'])) ? '' : '?'.$part['query'];
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_COOKIESESSION,  true);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
+		curl_setopt($ch, CURLOPT_USERAGENT,      $user_agent);
 
-	// HTTP 1.0 pour ne pas recevoir en Transfer-Encoding: chunked
-	fwrite($fs, sprintf("GET %s HTTP/1.0\r\n", $path));
-	fwrite($fs, sprintf("Host: %s\r\n", $part['host']));
-	fwrite($fs, sprintf("User-Agent: %s\r\n", sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION)));
-	fwrite($fs, "Accept: */*\r\n");
+		$data = curl_exec($ch);
 
-	if (extension_loaded('zlib')) {
-		fwrite($fs, "Accept-Encoding: gzip\r\n");
-	}
-
-	fwrite($fs, "Connection: close\r\n\r\n");
-
-	$isGzipped = false;
-	$datatype  = $charset = null;
-	$data = '';
-	$tmp  = fgets($fs, 1024);
-
-	if (!preg_match('#^HTTP/(\d\.[x\d])\x20+(\d{3})\s#', $tmp, $m) || $m[2] != 200) {
-		$errstr = $lang['Message']['Not_found_at_url'];
-		fclose($fs);
-		return false;
-	}
-
-	// Entêtes
-	while (!feof($fs)) {
-		$tmp = fgets($fs, 1024);
-
-		if (!strpos($tmp, ':')) {
-			break;
+		if (curl_errno($ch)) {
+			throw new Exception(curl_error($ch));
 		}
 
-		list($header, $value) = explode(':', $tmp);
-		$header = strtolower($header);
-		$value  = trim($value);
+		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
+			throw new Exception($lang['Message']['Not_found_at_url']);
+		}
 
-		if ($header == 'content-type') {
-			if (preg_match('/^([a-z]+\/[a-z0-9+.-]+)\s*(?:;\s*charset=(")?([a-z][a-z0-9._-]*)(?(2)"))?/i', $value, $m)) {
-				$datatype = $m[1];
-				$charset  = (!empty($m[3])) ? strtoupper($m[3]) : '';
+		if (!($mime = curl_getinfo($ch, CURLINFO_CONTENT_TYPE))) {
+			$mime = 'application/octet-stream';
+		}
+
+		curl_close($ch);
+	}
+	else {
+		if (!ini_get_flag('allow_url_fopen')) {
+			throw new Exception($lang['Message']['Config_loading_url']);
+		}
+
+		$ctx = stream_context_create([
+			'http' => [
+				'timeout' => $connect_timeout,
+				'user_agent' => $user_agent
+			]
+		]);
+
+		if (!($fp = fopen($url, 'r', false, $ctx))) {
+			throw new Exception($lang['Message']['Not_found_at_url']);
+		}
+
+		$meta = stream_get_meta_data($fp);
+		$headers = $meta['wrapper_data'];
+
+		foreach ($headers as $header) {
+			if (preg_match('#^content-type:(.+)#i', $header, $m)) {
+				$mime = $m[1];
+				break;
 			}
 		}
-		else if ($header == 'content-encoding' && $value == 'gzip') {
-			$isGzipped = true;
+
+		while (!feof($fp)) {
+			$data .= fgets($fp);
+		}
+
+		fclose($fp);
+	}
+
+	if (strpos($mime, ';')) {
+		$tmp = explode(';', $mime, 2);
+		$mime = $tmp[0];
+
+		if (preg_match('/\W*charset\s*=\s*(")?([a-z][a-z0-9._-]*)(?(1)")/i', $tmp[1], $m)) {
+			$charset = strtoupper($m[2]);
 		}
 	}
 
-	// Contenu
-	while (!feof($fs)) {
-		$data .= fgets($fs, 1024);
-	}
+	if (!$charset && preg_match('#(?:/|\+)xml$#', $mime) && strncmp($data, '<?xml', 5) == 0) {
+		$pr = substr($data, 0, strpos($data, "\n"));
 
-	fclose($fs);
-
-	if ($isGzipped && !preg_match('/\.t?gz$/i', $part['path'])) {
-		// RFC 1952 - Users note on http://www.php.net/manual/en/function.gzencode.php
-		if (strncmp($data, "\x1f\x8b", 2) != 0) {
-			trigger_error('data is not to GZIP format', E_USER_WARNING);
-			return false;
-		}
-
-		$data = gzinflate(substr($data, 10));
-	}
-
-	if (empty($charset) && preg_match('#(?:/|\+)xml$#', $datatype) && strncmp($data, '<?xml', 5) == 0) {
-		$prolog = substr($data, 0, strpos($data, "\n"));
-
-		if (preg_match('/\s+encoding\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/i', $prolog, $m)) {
+		if (preg_match('/\s+encoding\s*=\s*("|\')([a-z][a-z0-9._-]*)\\1/i', $pr, $m)) {
 			$charset = $m[2];
 		}
 	}
 
-	return ['type' => $datatype, 'charset' => $charset, 'data' => $data];
+	return ['data' => $data, 'mime' => $mime, 'charset' => $charset];
 }
 
 /**
@@ -1299,39 +1125,28 @@ function formateSize($size)
 	$g = $m * $k;
 
 	if ($size >= $g) {
-		$unit = $GLOBALS['lang']['GO'];
+		$unit = $GLOBALS['lang']['GiB'];
 		$size /= $g;
 	}
 	else if ($size >= $m) {
-		$unit = $GLOBALS['lang']['MO'];
+		$unit = $GLOBALS['lang']['MiB'];
 		$size /= $m;
 	}
 	else if ($size >= $k) {
-		$unit = $GLOBALS['lang']['KO'];
+		$unit = $GLOBALS['lang']['KiB'];
 		$size /= $k;
 	}
 	else {
-		$unit = $GLOBALS['lang']['Octets'];
+		$unit = $GLOBALS['lang']['Bytes'];
 	}
 
 	return sprintf("%s\xC2\xA0%s", wa_number_format($size), $unit);
 }
 
 /**
- * Vérifie si l'utilisateur concerné est administrateur
- *
- * @param array $admin Tableau des données de l'utilisateur
- *
- * @return boolean
- */
-function wan_is_admin($admin)
-{
-	return (isset($admin['admin_level']) && $admin['admin_level'] == ADMIN_LEVEL);
-}
-
-/**
- * Retourne le niveau de débogage, dépendant de la valeur de la constante DEBUG_MODE
- * ainsi que de la clé de configuration 'debug_level'.
+ * Retourne le niveau de débogage.
+ * Dépendant de la valeur de la constante DEBUG_MODE ainsi que de
+ * la clé de configuration 'debug_level'.
  *
  * @return integer
  */
@@ -1345,6 +1160,16 @@ function wan_get_debug_level()
 	}
 
 	return $debug_level;
+}
+
+/**
+ * Indique si le débogage est activé.
+ *
+ * @return boolean
+ */
+function wan_is_debug_enabled()
+{
+	return (wan_get_debug_level() > DEBUG_LEVEL_QUIET);
 }
 
 /**
@@ -1366,35 +1191,36 @@ function wan_get_faq_url($chapter)
 }
 
 /**
- * Envoi d'email
+ * Initialisation du module d’envoi des mails
  *
- * @param Email   $email
- * @param boolean $keepalive Maintient ouvert la connexion au serveur SMTP, le cas échéant
- *
- * @return boolean
+ * @return \Wamailer\Transport\Transport
  */
-function wan_sendmail(Email $email, $keepalive = false)
+function wamailer(array $opts = [])
 {
 	global $nl_config;
-	static $smtp;
 
-	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+	$name = 'mail';
 
-	if ($nl_config['use_smtp'] && is_null($smtp)) {
-		$server = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
-		$options = [
-			'server'   => sprintf($server, $nl_config['smtp_host'], $nl_config['smtp_port']),
+	if ($nl_config['use_smtp']) {
+		$name  = 'smtp';
+		$proto = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls' : 'tcp';
+		$opts  = array_replace_recursive([
+			'server'   => sprintf('%s://%s:%d', $proto, $nl_config['smtp_host'], $nl_config['smtp_port']),
 			'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
 			'auth' => [
 				'username'  => $nl_config['smtp_user'],
 				'secretkey' => $nl_config['smtp_pass']
-			],
-			'keepalive' => $keepalive
-		];
-		$smtp = Mailer::setTransport('smtp', $options);
+			]
+		], $opts);
+
+#		$opts['debug'] = function ($str) {
+#			wanlog(htmlspecialchars($str));
+#		};
 	}
 
-	Mailer::send($email);
+	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+
+	return Mailer::setTransport($name, $opts);
 }
 
 /**
@@ -1404,24 +1230,34 @@ function wan_sendmail(Email $email, $keepalive = false)
  */
 function wan_get_tags()
 {
-	static $other_tags = [];
+	global $lang;
+	static $other_tags;
 
-	if (count($other_tags) > 0) {
+	if (is_array($other_tags)) {
 		return $other_tags;
 	}
 
-	$tags_file  = WA_ROOTDIR . '/data/tags.inc.php';
+	$other_tags  = [];
 
-	if (is_readable($tags_file)) {
-		include $tags_file;
-	}
-	else {
-		// compatibilité Wanewsletter < 3.0-beta1
-		$tags_file  = WA_ROOTDIR . '/includes/tags.inc.php';
-		if (is_readable($tags_file)) {
-			include $tags_file;
-			wanlog("Using ~/includes/tags.inc.php. You should move this file into data/ directory.");
+	$tags_file[] = WA_ROOTDIR . '/data/tags.inc.php';
+	// compatibilité Wanewsletter < 3.0-beta1
+	$tags_file[] = WA_ROOTDIR . '/includes/tags.inc.php';
+
+	$need_to_move = false;
+
+	foreach ($tags_file as $tag_file) {
+		if (file_exists($tag_file)) {
+			if ($need_to_move) {
+				wanlog(sprintf($lang['Message']['Move_to_data_dir'],
+					str_replace(WA_ROOTDIR, '~', $tag_file)
+				));
+			}
+
+			include $tag_file;
+			break;
 		}
+
+		$need_to_move = true;
 	}
 
 	return $other_tags;
@@ -1450,7 +1286,7 @@ function get_max_filesize()
 				case 'M':
 					$size = ($m[1] * 1024 * 1024);
 					break;
-				case 'G': // Since php 5.1.0
+				case 'G':
 					$size = ($m[1] * 1024 * 1024 * 1024);
 					break;
 			}
@@ -1463,34 +1299,17 @@ function get_max_filesize()
 	};
 
 	if (!($filesize = ini_get('upload_max_filesize'))) {
-        $filesize = '2M'; // 2 Méga-Octets
+        $filesize = '2M';
     }
 
 	$upload_max_size = $literal2integer($filesize);
 
     if ($postsize = ini_get('post_max_size')) {
         $postsize = $literal2integer($postsize);
-        if ($postsize < $upload_max_size) {
-            $upload_max_size = $postsize;
-        }
+        $upload_max_size = min($upload_max_size, $postsize);
     }
 
     return $upload_max_size;
-}
-
-/**
- * Indique si PHP supporte les connexion SSL/TLS.
- *
- * @return boolean
- */
-function check_ssl_support()
-{
-	$transports = [];
-	if (function_exists('stream_get_transports')) {
-		$transports = stream_get_transports();
-	}
-
-	return (in_array('ssl', $transports) || in_array('tls', $transports));
 }
 
 /**
@@ -1524,26 +1343,14 @@ function check_in_admin()
 }
 
 /**
- * Indique si le thème Wanewsletter est utilisé pour afficher cette page.
- *
- * @return boolean
- */
-function check_theme_is_used()
-{
-	return (!check_cli() && (check_in_admin() ||
-		defined(__NAMESPACE__.'\\IN_INSTALL') ||
-		defined(__NAMESPACE__.'\\IN_PROFILCP')
-	));
-}
-
-/**
  * @param string $pseudo
  *
  * @return boolean
  */
 function validate_pseudo($pseudo)
 {
-	return (mb_strlen($pseudo) >= 2 && mb_strlen($pseudo) <= 30);
+	$len = mb_strlen($pseudo);
+	return ($len >= 2 && $len <= 30);
 }
 
 /**
@@ -1553,7 +1360,12 @@ function validate_pseudo($pseudo)
  */
 function validate_pass($passwd)
 {
-	return (bool) preg_match('/^[\x20-\x7E]{6,1024}$/', $passwd);
+	$len = mb_strlen($passwd);
+	if ($len >= 6 && $len <= 1024) {
+		return !preg_match('/[\x00-\x1F]|\xC2[\x80-\x9F]/', $passwd);
+	}
+
+	return false;
 }
 
 /**
@@ -1563,8 +1375,8 @@ function validate_pass($passwd)
  */
 function validate_lang($language)
 {
-	return (preg_match('/^[\w_]+$/', $language) &&
-		file_exists(WA_ROOTDIR . '/languages/' . $language . '/main.php')
+	return (preg_match('/^[\w_]+$/', $language)
+		&& file_exists(WA_ROOTDIR . '/languages/' . $language . '/main.php')
 	);
 }
 
@@ -1614,4 +1426,449 @@ function sendfile($filename, $mime_type, $data)
 	}
 
 	exit;
+}
+
+/**
+ * Affichage des informations de débogage
+ */
+function print_debug_infos()
+{
+	global $lang, $db, $nl_config;
+
+	$dir_status = function ($dir) use (&$lang) {
+		if (file_exists($dir)) {
+			if (!is_readable($dir)) {
+				$str = sprintf('%s [%s]', $lang['No'], $lang['Unreadable']);
+			}
+			else if (!is_writable($dir)) {
+				$str = sprintf('%s [%s]', $lang['No'], $lang['Unwritable']);
+			}
+			else {
+				$str = $lang['Yes'];
+			}
+		}
+		else {
+			$str = sprintf('%s [%s]', $lang['No'], $lang['Not_exists']);
+		}
+
+		return $str;
+	};
+
+	$print_head = function ($str) {
+		echo "<u><b>", htmlspecialchars($str), "</b></u>\n";
+	};
+
+	$print_row  = function ($name, $value = null) use (&$lang) {
+		echo '  ';// 2x NBSP
+		echo htmlspecialchars(u::str_pad($name, 30));
+
+		if (!is_null($value)) {
+			echo ' : ';
+
+			if (is_bool($value)) {
+				echo ($value) ? $lang['Yes'] : $lang['No'];
+			}
+			else if (is_int($value) || $value != '') {
+				echo htmlspecialchars($value);
+			}
+			else {
+				echo '<i class="novalue">no value</i>';
+			}
+		}
+
+		echo "\n";
+	};
+
+	printf("<h2>%s</h2>\n", $lang['Title']['debug']);
+	echo "<pre id='debug-infos'>";
+
+	$print_head('Wanewsletter');
+	$print_row('Version/db_version', WANEWSLETTER_VERSION.'/'.$nl_config['db_version']);
+	$print_row('session_length',     $nl_config['session_length']);
+	$print_row('language',           $nl_config['language']);
+	$print_row('upload dir',         $dir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
+
+	if (!$nl_config['disable_stats']) {
+		$print_row('stats dir', $dir_status($nl_config['stats_dir']));
+	}
+	$print_row('max_filesize',  $nl_config['max_filesize']);
+	$print_row('engine_send',   $nl_config['engine_send']);
+	$print_row('sending_limit', $nl_config['sending_limit']);
+	$print_row('use_smtp',      (bool) $nl_config['use_smtp']);
+
+	$print_head($lang['Third_party_libraries']);
+
+	$composer_file = WA_ROOTDIR . '/composer.lock';
+	if (!function_exists('json_decode')) {
+		$print_row($lang['Message']['No_json_extension']);
+	}
+	else if (is_readable($composer_file)) {
+		$composer = json_decode(file_get_contents($composer_file), true);
+
+		foreach ($composer['packages'] as $package) {
+			$ver = $package['version'];
+
+			if (strpos($ver, 'dev-') === 0) {
+				if (isset($package['dist'])) {
+					$ref = $package['dist']['reference'];
+				}
+				else {
+					$ref = $package['source']['reference'];
+				}
+
+				if (isset($package['extra']['branch-alias'][$ver])) {
+					$ver = $package['extra']['branch-alias'][$ver];
+				}
+
+				$ver .= ' ('.$ref.')';
+			}
+			else {
+				$ver = ltrim($ver, 'v');// eg: v2.3.4 => 2.3.4
+			}
+
+			$print_row($package['name'], $ver);
+		}
+	}
+	else {
+		$print_row($lang['Message']['Composer_lock_unreadable']);
+	}
+
+	$print_head('PHP');
+	$print_row('Version/SAPI', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
+	$print_row('Extension Bz2', extension_loaded('zlib'));
+	$print_row('Extension Curl', extension_loaded('curl'));
+
+	if (extension_loaded('gd')) {
+		$tmp = gd_info();
+		$format = (imagetypes() & IMG_GIF) ? 'GIF' : 'Unavailable';
+		$format = (imagetypes() & IMG_PNG) ? 'PNG' : $format;
+		$str = sprintf('%s – %s/%s', $lang['Yes'], $tmp['GD Version'], $format);
+	}
+	else {
+		$str = $lang['No'];
+	}
+
+	$print_row('Extension GD', $str);
+	$print_row('Extension Iconv',
+		extension_loaded('iconv')
+			? sprintf('%s – %s/%s', $lang['Yes'], ICONV_VERSION, ICONV_IMPL)
+			: $lang['No']
+	);
+	$print_row('Extension JSON', extension_loaded('json'));
+	$print_row('Extension Mbstring', extension_loaded('mbstring'));
+	$print_row('Extension OpenSSL',
+		extension_loaded('openssl')
+			? sprintf('%s – %s', $lang['Yes'], OPENSSL_VERSION_TEXT)
+			: $lang['No']
+	);
+	$print_row('Extension SimpleXML', extension_loaded('simplexml'));
+	$print_row('Extension XML', extension_loaded('xml'));
+	$print_row('Extension Zip', extension_loaded('zip'));
+	$print_row('Extension Zlib', extension_loaded('zlib'));
+
+	$print_row('open_basedir',  ini_get('open_basedir'));
+	$print_row('sys_temp_dir', sys_get_temp_dir());
+	$print_row('filter.default', ini_get('filter.default'));
+	$print_row('allow_url_fopen', ini_get_flag('allow_url_fopen'));
+	$print_row('allow_url_include', ini_get_flag('allow_url_include'));
+	$print_row('file_uploads', ini_get_flag('file_uploads'));
+	$print_row('upload_tmp_dir', ini_get('upload_tmp_dir'));
+	$print_row('upload_max_filesize', ini_get('upload_max_filesize'));
+	$print_row('post_max_size', ini_get('post_max_size'));
+	$print_row('max_input_time', ini_get('max_input_time'));
+	$print_row('memory_limit', ini_get('memory_limit'));
+	$print_row('mail.add_x_header', ini_get_flag('mail.add_x_header'));
+	$print_row('mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
+	$print_row('sendmail_path', ini_get('sendmail_path'));
+
+	if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
+		$print_row('sendmail_from', ini_get('sendmail_from'));
+		$print_row('SMTP Server', ini_get('SMTP').':'.ini_get('smtp_port'));
+	}
+
+	$print_head($lang['Database']);
+
+	$print_row('Type/Version', sprintf('%s %s',
+		$db->infos['label'],
+		($db::ENGINE == 'sqlite') ? $db->libVersion : $db->serverVersion
+	));
+
+	if ($db::ENGINE != 'sqlite') {
+		$print_row($lang['Client_library'], $db->clientVersion);
+		$print_row($lang['Charset'], $db->encoding());
+	}
+
+	$print_row($lang['Driver'], $db->infos['driver']);
+
+	if (isset($_SERVER['SERVER_SOFTWARE'])) {
+		$print_head($lang['Misc']);
+
+		$user_agent = filter_input(INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_SPECIAL_CHARS);
+
+		$print_row($lang['User_agent'],      $user_agent);
+		$print_row($lang['Server_software'], sprintf('%s – %s – %s',
+			$_SERVER['SERVER_SOFTWARE'],
+			$_SERVER['SERVER_PROTOCOL'],
+			PHP_OS
+		));
+		$print_row($lang['Secure_connection'], is_secure_connection());
+	}
+
+	echo "</pre>";
+}
+
+/**
+ * Validation des actions faites par email
+ *
+ * @param array $listdata
+ *
+ * @return string
+ */
+function process_mail_action(array $listdata)
+{
+	global $lang;
+
+	$sub = new Subscription();
+	$pop = new PopClient();
+	$pop->options([
+		'starttls' => ($listdata['pop_tls'] == SECURITY_STARTTLS)
+	]);
+
+	try {
+		$proto = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls' : 'tcp';
+		$server = sprintf('%s://%s:%d', $proto, $listdata['pop_host'], $listdata['pop_port']);
+
+		if (!$pop->connect($server, $listdata['pop_user'], $listdata['pop_pass'])) {
+			throw new Exception(sprintf("Failed to connect to POP server (%s)", $pop->responseData));
+		}
+	}
+	catch (Exception $e) {
+		trigger_error(sprintf($lang['Message']['bad_pop_param'], $e->getMessage()), E_USER_ERROR);
+	}
+
+	$mail_box = $pop->list();
+
+	foreach ($mail_box as $mail_id => $mail_size) {
+		$mail = $pop->read($mail_id);
+		$headers = parse_headers($mail['headers']);
+
+		if (!isset($headers['from'])
+			|| !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $m)
+		) {
+			continue;
+		}
+
+		$pseudo = (isset($m[1])) ? trim(strip_tags(u::filter($m[1]))) : '';
+		$email  = trim($m[2]);
+
+		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
+			continue;
+		}
+
+		if (!isset($headers['subject'])) {
+			continue;
+		}
+
+		$action = mb_strtolower(trim(u::filter($headers['subject'])));
+
+		switch ($action) {
+			case 'désinscription':
+			case 'unsubscribe':
+				$action = 'desinscription';
+				break;
+			case 'subscribe':
+				$action = 'inscription';
+				break;
+			case 'confirmation':
+			case 'setformat':
+				break;
+		}
+
+		$code = trim($mail['message']);
+
+		try {
+			if ($action == 'inscription') {
+				$sub->subscribe($listdata, $email, $pseudo);
+			}
+			else if ($action == 'desinscription') {
+				$sub->unsubscribe($listdata, $email);
+			}
+			else if ($action == 'setformat') {
+				$sub->setFormat($listdata, $email);
+			}
+			else if ($action == 'confirmation') {
+				if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
+					$time = time();
+				}
+
+				$sub->checkCode($code, $time);
+			}
+		}
+		catch (Dblayer\Exception $e) {
+			throw $e;
+		}
+		catch (Exception $e) { }
+
+		//
+		// On supprime l’email maintenant devenu inutile
+		//
+		$pop->delete($mail_id);
+	}//end for
+
+	$pop->quit();
+
+	return $lang['Message']['Success_operation'];
+}
+
+/**
+ * Parse les en-têtes et retourne un tableau avec le nom des
+ * en-têtes et leur valeur
+ *
+ * @param string $headers_str
+ *
+ * @return array
+ *
+ * @status experimental
+ *         /!\ TODO – Cette fonction a vocation à migrer à terme dans Wamailer
+ */
+function parse_headers($headers_str)
+{
+	$headers_str = trim($headers_str);
+	// On normalise les fins de ligne.
+	$headers_str = preg_replace("/(\r\n?)|\n/", "\r\n", $headers_str);
+	// On supprime les 'pliures' (FWS) des en-têtes.
+	$headers_str = preg_replace("/\r\n[ \t]+/", ' ', $headers_str);
+
+	$headers = [];
+	$lines   = explode("\r\n", $headers_str);
+
+	foreach ($lines as $line) {
+		list($header_name, $header_value) = explode(': ', $line, 2);
+
+		$atoms = explode(' ', $header_value);
+
+		$header_value = $prev_atom_type = '';
+
+		foreach ($atoms as &$atom) {
+			if (preg_match('/=\?([^?]+)\?(Q|B)\?([^?]+)\?\=/i', $atom, $m)) {
+				$atom_type = 'encoded-word';
+
+				if ($m[2] == 'Q' || $m[2] == 'q') {
+					$atom = preg_replace_callback('/=([A-F0-9]{2})/i',
+						function ($m2) { return chr(hexdec($m2[1])); },
+						$m[3]
+					);
+					$atom = str_replace('_', ' ', $atom);
+				}
+				else {
+					$atom = base64_decode($m[3]);
+				}
+			}
+			else {
+				$atom_type = 'text';
+			}
+
+			/**
+			 * Les espaces blancs (LWS) entre deux 'encoded-word' doivent
+			 * être ignorés lors du décodage de ceux-ci.
+			 * @see RFC 2047#6.2 – Display of 'encoded-word's
+			 */
+			if ($atom_type == 'text' || $prev_atom_type == 'text') {
+				$header_value .= ' ';
+			}
+
+			$header_value .= $atom;
+			$prev_atom_type = $atom_type;
+		}
+
+		$headers[strtolower($header_name)] = trim($header_value);
+	}
+
+	return $headers;
+}
+
+/**
+ * Construction de la liste déroulante des langues disponibles pour le script
+ *
+ * @param string $default_lang Langue actuellement utilisée
+ *
+ * @return string
+ */
+function lang_box($default_lang = '')
+{
+	global $output;
+
+	$lang_names = [
+		'fr' => 'francais',
+		'en' => 'english'
+	];
+
+	$lang_list = [];
+	$browse    = dir(WA_ROOTDIR . '/languages');
+
+	while (($entry = $browse->read()) !== false) {
+		if (is_dir(WA_ROOTDIR . '/languages/' . $entry) && preg_match('/^\w+(_\w+)?$/', $entry, $m)) {
+			$lang_list[] = $m[0];
+		}
+	}
+	$browse->close();
+
+	if (count($lang_list) > 1) {
+		$lang_box = '<select id="language" name="language">';
+		foreach ($lang_list as $lang) {
+			$selected  = $output->getBoolAttr('selected', ($default_lang == $lang));
+			$lang_box .= sprintf('<option value="%1$s"%2$s>%3$s</option>',
+				$lang,
+				$selected,
+				(isset($lang_names[$lang])) ? $lang_names[$lang] : $lang
+			);
+		}
+		$lang_box .= '</select>';
+	}
+	else {
+		$lang = array_pop($lang_list);
+		$lang_box  = $lang_names[$lang];
+		$lang_box .= '<input type="hidden" id="language" name="language" value="' . $lang . '" />';
+	}
+
+	return $lang_box;
+}
+
+/**
+ * Construction de la liste déroulante des formats de newsletter
+ *
+ * @param string  $name     Nom de la liste déroulante
+ * @param integer $default  Format par défaut
+ * @param boolean $multiple True si on doit affiche également multi-format comme valeur
+ *
+ * @return string
+ */
+function format_box($name, $default = 0, $multiple = false)
+{
+	global $lang, $output;
+
+	$get_option = function ($format, $label) use ($output, $default) {
+		return sprintf('<option value="%d"%s>%s</option>',
+			$format,
+			$output->getBoolAttr('selected', ($default == $format)),
+			$label
+		);
+	};
+
+	$id_attr = '';
+	if (preg_match('/^[a-z]([a-z0-9_-]*[a-z0-9])?$/', $name)) {
+		$id_attr = sprintf(' id="%s"', $name);
+	}
+
+	$format_box  = sprintf('<select%s name="%s">', $id_attr, $name);
+	$format_box .= $get_option(FORMAT_TEXT, $lang['Text']);
+	$format_box .= $get_option(FORMAT_HTML, 'html');
+
+	if ($multiple) {
+		$format_box .= $get_option(FORMAT_MULTIPLE, sprintf('%s/html', $lang['Text']));
+	}
+
+	$format_box .= '</select>';
+
+	return $format_box;
 }

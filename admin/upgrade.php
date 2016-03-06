@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -14,6 +14,60 @@ use Patchwork\Utf8 as u;
 const IN_ADMIN = true;
 
 require '../includes/common.inc.php';
+
+/**
+ * SQLite a un support très limité de la commande ALTER TABLE
+ * Impossible de modifier ou supprimer une colonne donnée
+ * On réécrit les tables dont la structure a changé
+ * /!\ Ne permet que d'altérer le type des colonnes.
+ * Ajouter/Renommer/Supprimer des colonnes ne fonctionnera pas avec $restore_data à true
+ *
+ * @param string  $tablename    Nom de la table à recréer
+ * @param boolean $restore_data true pour restaurer les données
+ */
+function wa_sqlite_recreate_table($tablename, $restore_data = true)
+{
+	global $db, $sql_create, $sql_schemas;
+
+	$schema = &$sql_schemas[$tablename];
+
+	if (!empty($schema['updated'])) {
+		return null;
+	}
+
+	$schema['updated'] = true;
+
+	$get_columns = function ($tablename) use ($db) {
+		$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
+		$columns = [];
+		while ($row = $result->fetch()) {
+			$columns[] = $row['name'];
+		}
+
+		return $columns;
+	};
+
+	$db->query(sprintf('ALTER TABLE %1$s RENAME TO %2$s;',
+		$db->quote($tablename),
+		$db->quote($tablename.'_tmp')
+	));
+
+	exec_queries($sql_create[$tablename]);
+
+	if ($restore_data) {
+		$old_columns = $get_columns($tablename.'_tmp');
+		$new_columns = $get_columns($tablename);
+		$columns = array_intersect($new_columns, $old_columns);
+
+		$db->query(sprintf('INSERT INTO %1$s (%3$s) SELECT %3$s FROM %2$s;',
+			$db->quote($tablename),
+			$db->quote($tablename.'_tmp'),
+			implode(',', $columns)
+		));
+	}
+
+	$db->query(sprintf('DROP TABLE %s;', $db->quote($tablename.'_tmp')));
+}
 
 //
 // Initialisation de la connexion à la base de données et récupération de la configuration
@@ -36,7 +90,7 @@ if (!isset($nl_config['db_version'])) {
 
 	// Les versions des branches 2.0 et 2.1 ne sont plus prises en charge
 	if (!version_compare($currentVersion, '2.2.0', '>=' )) {
-		$output->displayMessage($lang['Unsupported_version']);
+		$output->message($lang['Unsupported_version']);
 	}
 
 	//
@@ -47,10 +101,12 @@ if (!isset($nl_config['db_version'])) {
 	// antérieures à 2.2.0 qui apportaient des modifications, d'où
 	// le db_version commençant à 5.
 	//
-	$nl_config['db_version'] = 6;
+	$nl_config['db_version'] = 5;
 
-	if (version_compare($currentVersion, '2.2.13', '>')) {
-		$nl_config['db_version']++;
+	foreach (['2.2.12','2.2.13'] as $version) {
+		if (version_compare($currentVersion, $version, '>')) {
+			$nl_config['db_version']++;
+		}
 	}
 }
 
@@ -68,53 +124,46 @@ if ($nl_config['db_version'] > 18) {
 // l’accueil, soit en AJAX quand c’est possible, soit directement.
 //
 if (filter_input(INPUT_GET, 'mode') == 'check') {
-	if (!$auth->isLoggedIn() || is_null($session) || !wan_is_admin($admindata)) {
+	if (!$auth->isLoggedIn() || is_null($session) || !Auth::isAdmin($admindata)) {
 		// Utilisateur non authentifié ou n'ayant pas le niveau d’administrateur
-		if (filter_input(INPUT_GET, 'output') == 'json') {
-			header('Content-Type: application/json');
-			echo '{"code":"-1"}';
-		}
-		else {
+		if ($output instanceof Output\Html) {
 			http_response_code(401);
 			$output->redirect('./index.php', 5);
 			$output->addLine($lang['Message']['Not_authorized']);
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
+		}
+		else {
+			$output->error('Not_authorized');
 		}
 
 		exit;
 	}
 
-	$result = wa_check_update(true);
+	try {
+		$result = wa_check_update(true);
+	}
+	catch (Exception $e) {
+		$output->error($e->getMessage());
+	}
 
-	if (filter_input(INPUT_GET, 'output') == 'json') {
-		header('Content-Type: application/json');
-
-		if ($result !== false) {
-			printf('{"code":"%d"}', $result);
-		}
-		else {
-			echo '{"code":"2"}';
-		}
+	if ($result == 1) {
+		$message = $lang['New_version_available'];
 	}
 	else {
-		if ($result !== false) {
-			if ($result === 1) {
-				$output->addLine($lang['New_version_available']);
-				$output->addLine(sprintf('<a href="%s">%s</a>', DOWNLOAD_PAGE, $lang['Download_page']));
-			}
-			else {
-				$output->addLine($lang['Version_up_to_date']);
-			}
-		}
-		else {
-			$output->addLine($lang['Site_unreachable']);
-		}
-
-		$output->displayMessage();
+		$message = $lang['Version_up_to_date'];
 	}
 
-	exit;
+	if ($output instanceof Output\Html && $result == 1) {
+		$message .= '<br /><br />';
+		$message .= sprintf('<a href="%s">%s</a>', DOWNLOAD_PAGE, $lang['Download_page']);
+	}
+
+	if ($output instanceof Output\Json) {
+		$output->addParams(['code' => $result]);
+	}
+
+	$output->message($message);
 }
 
 //
@@ -128,17 +177,18 @@ $config_file .= "\$dsn = '$dsn';\n";
 $config_file .= "\$prefixe = '$prefixe';\n";
 $config_file .= "\n";
 
-if ($auth->isLoggedIn() && wan_is_admin($admindata) && isset($_POST['sendfile'])) {
+if ($auth->isLoggedIn() && Auth::isAdmin($admindata) && isset($_POST['sendfile'])) {
 	sendfile('config.inc.php', 'text/plain', $config_file);
 }
 
 if (check_db_version($nl_config['db_version'])) {
-	$output->displayMessage($lang['Upgrade_not_required']);
+	$output->message($lang['Upgrade_not_required']);
 }
 
 if (isset($_POST['start'])) {
-	$sql_create = WA_ROOTDIR . '/includes/dblayer/schemas/' . $db::ENGINE . '_tables.sql';
-	$sql_data   = WA_ROOTDIR . '/includes/dblayer/schemas/data.sql';
+	$schemas_dir = WA_ROOTDIR . '/includes/Dblayer/schemas';
+	$sql_create  = sprintf('%s/%s_tables.sql', $schemas_dir, $db::ENGINE);
+	$sql_data    = sprintf('%s/data.sql', $schemas_dir);
 
 	if (!is_readable($sql_create) || !is_readable($sql_data)) {
 		$error = true;
@@ -156,27 +206,25 @@ if (isset($_POST['start'])) {
 		}
 	}
 
-	if (!$error && !wan_is_admin($admindata)) {
+	if (!$error && !Auth::isAdmin($admindata)) {
 		http_response_code(401);
 		$output->redirect('./index.php', 6);
 		$output->addLine($lang['Message']['Not_authorized']);
 		$output->addLine($lang['Click_return_index'], './index.php');
-		$output->displayMessage();
+		$output->message();
 	}
 
-	load_settings($admindata);
-
 	if (!$error) {
+		load_settings($admindata);
+
 		//
 		// Lancement de la mise à jour
 		// On allonge le temps maximum d'execution du script.
 		//
 		@set_time_limit(3600);
 
-		require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
-
-		$sql_create = Dblayer\parseSQL(file_get_contents($sql_create), $prefixe);
-		$sql_data   = Dblayer\parseSQL(file_get_contents($sql_data), $prefixe);
+		$sql_create = parse_sql(file_get_contents($sql_create), $prefixe);
+		$sql_data   = parse_sql(file_get_contents($sql_data), $prefixe);
 
 		$sql_create_by_table = $sql_data_by_table = [];
 
@@ -188,8 +236,8 @@ if (isset($_POST['start'])) {
 							continue;
 						}
 					}
-					else if (!isset($schema[strtolower($m[1])]) ||
-						array_search($m[2], $schema[strtolower($m[1])]) === false
+					else if (!isset($schema[strtolower($m[1])])
+						|| array_search($m[2], $schema[strtolower($m[1])]) === false
 					) {
 						continue;
 					}
@@ -215,18 +263,12 @@ if (isset($_POST['start'])) {
 		$sql_data   = $sql_data_by_table;
 
 		//
-		// Début de la mise à jour
+		// Sur les versions antérieures à la 2.3.0, il n’y avait pas de
+		// contrainte d’unicité sur abo_email. Avant de commencer la mise
+		// à jour, il faut vérifier l’absence de doublons dans la table
+		// des abonnés.
 		//
-		$sql_update = [];
-
 		if ($nl_config['db_version'] < 7) {
-			//
-			// Vérification préalable de la présence de doublons dans la table
-			// des abonnés.
-			// La contrainte d'unicité sur abo_email a été ajoutée dans la
-			// version 2.3-beta1 (équivalent db_version = 7).
-			// Si des doublons sont présents, la mise à jour ne peut continuer.
-			//
 			$sql = "SELECT abo_email
 				FROM " . ABONNES_TABLE . "
 				GROUP BY abo_email
@@ -241,7 +283,7 @@ if (isset($_POST['start'])) {
 				}
 				while ($row = $result->fetch());
 
-				$output->displayMessage(sprintf("Des adresses email sont présentes en plusieurs
+				$output->message(sprintf("Des adresses email sont présentes en plusieurs
 					exemplaires dans la table %s, la mise à jour ne peut donc continuer.
 					Supprimez les doublons en cause puis relancez la mise à jour.
 					Adresses email présentes en plusieurs exemplaires : %s",
@@ -249,24 +291,14 @@ if (isset($_POST['start'])) {
 					implode(', ', $emails)
 				));
 			}
+		}
 
-			//
-			// La contrainte d'unicité sur abo_email peut avoir été perdue en cas
-			// de bug lors de l'importation via l'outil proposé par Wanewsletter.
-			// On essaie de recréer cette contrainte d'unicité.
-			//
-			if ($db::ENGINE == 'postgres') {
-				$db->query("ALTER TABLE " . ABONNES_TABLE . "
-					ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)");
-			}
-			else if ($db::ENGINE == 'sqlite') {
-				$db->query("CREATE UNIQUE INDEX abo_email_idx ON " . ABONNES_TABLE . "(abo_email)");
-			}
-			else if ($db::ENGINE == 'mysql') {
-				$db->query("ALTER TABLE " . ABONNES_TABLE . "
-					ADD UNIQUE abo_email_idx (abo_email)");
-			}
+		//
+		// Début de la mise à jour
+		//
+		$sql_update = [];
 
+		if ($nl_config['db_version'] < 6) {
 			unset($nl_config['hebergeur']);
 			unset($nl_config['version']);
 
@@ -314,7 +346,7 @@ if (isset($_POST['start'])) {
 				$sql = "UPDATE " . ABO_LISTE_TABLE . "
 					SET register_date = $row[abo_register_date],
 						confirmed     = $row[abo_status]";
-				if ($row['abo_status'] == ABO_INACTIF) {
+				if ($row['abo_status'] == ABO_INACTIVE) {
 					$sql .= ", register_key = '" . substr($row['abo_register_key'], 0, 20) . "'";
 				}
 				$db->query($sql . " WHERE abo_id = " . $row['abo_id']);
@@ -365,6 +397,16 @@ if (isset($_POST['start'])) {
 					ADD INDEX liste_id_idx (liste_id),
 					ADD INDEX log_status_idx (log_status)";
 			}
+		}
+
+		//
+		// Ajout contrainte d’unicité sur abo_email
+		//
+		if ($nl_config['db_version'] < 7) {
+			$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
+				ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)";
+
+			exec_queries($sql_update);
 		}
 
 		//
@@ -511,7 +553,7 @@ if (isset($_POST['start'])) {
 		if ($nl_config['db_version'] < 13) {
 			// fake. Permet simplement de savoir que les répertoires stats, tmp, ...
 			// ont changé de place et le notifier à l'administrateur
-			$moved_dirs = !is_writable(WA_TMPDIR);
+			$moved_dirs = !is_writable($nl_config['tmp_dir']);
 		}
 
 		//
@@ -741,6 +783,46 @@ if (isset($_POST['start'])) {
 			}
 		}
 
+		//
+		// Clé primaire sur la table auth_admin
+		//
+		if ($nl_config['db_version'] < 25) {
+			if ($db::ENGINE != 'sqlite') {
+				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . " DROP INDEX admin_id_idx";
+				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . " ADD PRIMARY KEY(admin_id,liste_id)";
+			}
+			else {
+				wa_sqlite_recreate_table(AUTH_ADMIN_TABLE);
+			}
+		}
+
+		//
+		// Suppression de la fonctionnalité d’envoi de copie des
+		// newsletters aux admins
+		//
+		if ($nl_config['db_version'] < 26) {
+			if ($db::ENGINE != 'sqlite') {
+				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . " DROP COLUMN cc_admin";
+			}
+			else {
+				wa_sqlite_recreate_table(AUTH_ADMIN_TABLE);
+			}
+		}
+
+		//
+		// Ajout contrainte d’unicité sur admin_login (unicité déjà "garantie"
+		// au niveau du bloc de code créant un nouvel admin dans admin.php).
+		//
+		if ($nl_config['db_version'] < 27) {
+			if ($db::ENGINE != 'sqlite') {
+				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
+					ADD CONSTRAINT admin_login_idx UNIQUE (admin_login)";
+			}
+			else {
+				wa_sqlite_recreate_table(ADMIN_TABLE);
+			}
+		}
+
 		exec_queries($sql_update);
 
 		//
@@ -767,46 +849,45 @@ if (isset($_POST['start'])) {
 		// Affichage message de résultat
 		//
 		if (UPDATE_CONFIG_FILE || $moved_dirs) {
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'result_upgrade_body.tpl']);
+			$template = new Template('result_upgrade_body.tpl');
 
 			$message = $lang['Success_upgrade'];
 
 			if (UPDATE_CONFIG_FILE) {
-				$output->assign_block_vars('download_file', [
+				$template->assignToBlock('download_file', [
 					'L_DL_BUTTON' => $lang['Button']['dl']
 				]);
 
 				$message = $lang['Success_upgrade_no_config'];
 			}
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
 				'MESSAGE' => nl2br($message)
 			]);
 
 			if ($moved_dirs) {
-				$output->assign_block_vars('moved_dirs', [
+				$template->assignToBlock('moved_dirs', [
 					'MOVED_DIRS_NOTICE' => nl2br($lang['Moved_dirs_notice'])
 				]);
 			}
 
-			$output->pparse('body');
-
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 		else {
-			$output->displayMessage($lang['Success_upgrade']);
+			$output->message($lang['Success_upgrade']);
 		}
 	}
 }
 
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'upgrade_body.tpl']);
+$template = new Template('upgrade_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
 	'L_EXPLAIN'       => nl2br(sprintf($lang['Welcome_in_upgrade'], WANEWSLETTER_VERSION)),
 	'L_START_BUTTON'  => $lang['Start_upgrade']
@@ -814,13 +895,11 @@ $output->assign_vars([
 
 if (!$auth->isLoggedIn()) {
 	// ajouter formulaire de connexion
-	$output->assign_block_vars('login_form', [
+	$template->assignToBlock('login_form', [
 		'L_LOGIN'  => $lang['Login'],
 		'L_PASSWD' => $lang['Password']
 	]);
 }
 
-$output->pparse('body');
-
-$output->page_footer();
-
+$template->pparse();
+$output->footer();

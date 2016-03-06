@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -25,7 +25,7 @@ $nl_config = wa_get_config();
 
 if (!$nl_config['enable_profil_cp']) {
 	load_settings();
-	$output->displayMessage('Profil_cp_disabled');
+	$output->message('Profil_cp_disabled');
 }
 
 //
@@ -37,33 +37,15 @@ $auth = new Auth();
 // End
 //
 
-function getAboDataList($abodata)
-{
-	global $db;
-
-	$sql = "SELECT al.format, al.register_key, al.register_date, l.liste_id, l.liste_name, l.sender_email,
-			l.return_email, l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url
-		FROM " . ABO_LISTE_TABLE . " AS al
-			INNER JOIN " . LISTE_TABLE . " AS l ON l.liste_id = al.liste_id
-		WHERE al.abo_id = " . $abodata['abo_id'];
-	$result = $db->query($sql);
-
-	while ($row = $result->fetch()) {
-		$abodata['listes'][$row['liste_id']] = $row;
-	}
-
-	return $abodata;
-}
-
 $mode = filter_input(INPUT_GET, 'mode');
-// Spécial. la présence du paramètre 'k' signifie qu'on est dans le mode reset_passwd
+// Spécial. la présence du paramètre 'k' signifie qu'on est dans le mode 'reset'
 $reset_key = filter_input(INPUT_GET, 'k');
 
 if ($reset_key && !$mode) {
-	$mode = 'reset_passwd';
+	$mode = 'reset';
 }
 
-if ($mode == 'login' || $mode == 'logout' || $mode == 'reset_passwd' || $mode == 'cp') {
+if ($mode == 'login' || $mode == 'logout' || $mode == 'reset' || $mode == 'cp') {
 	require './includes/login.inc.php';
 }
 
@@ -73,14 +55,11 @@ if (!$auth->isLoggedIn()) {
 }
 
 $abodata = $auth->getUserData($_SESSION['uid']);
-$abodata = getAboDataList($abodata);
 
 if (empty($abodata['abo_lang'])) {
 	$abodata['abo_lang'] = $nl_config['language'];
 }
 
-// Crade, mais on fera avec pour l'instant.
-$abodata['admin_lang'] = $abodata['abo_lang'];
 load_settings($abodata);
 
 $other_tags = wan_get_tags();
@@ -88,7 +67,7 @@ $other_tags = wan_get_tags();
 switch ($mode) {
 	case 'editprofile':
 		if (isset($_POST['submit'])) {
-			$vararray = ['new_email', 'confirm_email', 'pseudo', 'language',
+			$vararray = ['new_email', 'confirm_email', 'username', 'language',
 				'current_passwd', 'new_passwd', 'confirm_passwd'
 			];
 			foreach ($vararray as $varname) {
@@ -141,7 +120,7 @@ switch ($mode) {
 
 			if (!$error) {
 				$sql_data = [
-					'abo_pseudo' => strip_tags($pseudo),
+					'abo_pseudo' => strip_tags($username),
 					'abo_lang'   => $language
 				];
 
@@ -168,47 +147,59 @@ switch ($mode) {
 				$db->update(ABONNES_TABLE, $sql_data, ['abo_id' => $abodata['uid']]);
 
 				$output->redirect('profil_cp.php', 4);
-				$output->displayMessage('Profile_updated');
+				$output->message('Profile_updated');
 			}
 		}
 
-		require WA_ROOTDIR . '/includes/functions.box.php';
+		$output->header();
 
-		$output->page_header();
+		$template = new Template('editprofile_body.tpl');
 
-		$output->set_filenames(['body' => 'editprofile_body.tpl']);
-
-		$output->assign_vars([
+		$template->assign([
 			'TITLE'           => $lang['Module']['editprofile'],
 			'L_EXPLAIN'       => nl2br($lang['Explain']['editprofile']),
 			'L_EXPLAIN_EMAIL' => nl2br($lang['Explain']['change_email']),
 			'L_EMAIL'         => $lang['Email_address'],
 			'L_NEW_EMAIL'     => $lang['New_Email'],
 			'L_CONFIRM_EMAIL' => $lang['Confirm_Email'],
-			'L_PSEUDO'        => $lang['Abo_pseudo'],
+			'L_USERNAME'      => $lang['Login'],
 			'L_LANG'          => $lang['Default_lang'],
 			'L_PASSWD'        => $lang['Password'],
 			'L_NEW_PASSWD'    => $lang['New_passwd'],
 			'L_CONFIRM_PASSWD'=> $lang['Confirm_passwd'],
 			'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
-			'EMAIL'    => htmlspecialchars($abodata['email']),
-			'PSEUDO'   => htmlspecialchars($abodata['username']),
-			'LANG_BOX' => lang_box($abodata['abo_lang'])
+			'EMAIL'           => htmlspecialchars($abodata['email']),
+			'USERNAME'        => htmlspecialchars($abodata['username']),
+			'LANG_BOX'        => lang_box($abodata['abo_lang'])
 		]);
 
 		foreach ($other_tags as $tag) {
 			if (isset($abodata[$tag['column_name']])) {
-				$output->assign_var($tag['tag_name'],
-					htmlspecialchars($abodata[$tag['column_name']])
-				);
+				$template->assign([
+					$tag['tag_name'] => htmlspecialchars($abodata[$tag['column_name']])
+				]);
 			}
 		}
-
-		$output->pparse('body');
 		break;
 
 	case 'archives':
+		// Données des listes
+		$sql = "SELECT al.format, al.register_key, al.register_date,
+				l.liste_id, l.liste_name, l.sender_email, l.return_email,
+				l.liste_sig, l.liste_format, l.use_cron, l.liste_alias, l.form_url
+			FROM %s AS l
+				INNER JOIN %s AS al ON al.abo_id = %d
+					AND al.liste_id = l.liste_id
+			ORDER BY l.liste_name ASC";
+		$sql = sprintf($sql, LISTE_TABLE, ABO_LISTE_TABLE, $abodata['uid']);
+		$result = $db->query($sql);
+
+		$abodata['lists'] = [];
+		while ($listdata = $result->fetch($result::FETCH_ASSOC)) {
+			$abodata['lists'][$listdata['liste_id']] = $listdata;
+		}
+
 		if (isset($_POST['submit'])) {
 			$listlog = (array) filter_input(INPUT_POST, 'log',
 				FILTER_VALIDATE_INT,
@@ -218,13 +209,13 @@ switch ($mode) {
 
 			$sql_log_id = [];
 			foreach ($listlog as $liste_id => $logs) {
-				if (isset($abodata['listes'][$liste_id])) {
+				if (isset($abodata['lists'][$liste_id])) {
 					$sql_log_id = array_merge($sql_log_id, $logs);
 				}
 			}
 
 			if (count($sql_log_id) == 0) {
-				$output->displayMessage('No_log_id');
+				$output->message('No_log_id');
 			}
 
 			$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name,
@@ -239,142 +230,27 @@ switch ($mode) {
 				$files[$row['log_id']][] = $row;
 			}
 
-			$sql = "SELECT liste_id, log_id, log_subject, log_body_text, log_body_html
+			$sql = "SELECT liste_id, log_id, log_subject, log_body_text, log_body_html, log_status
 				FROM " . LOG_TABLE . "
 				WHERE log_id IN(" . implode(', ', $sql_log_id) . ")
 					AND log_status = " . STATUS_SENT;
 			$result = $db->query($sql);
 
-			while ($row = $result->fetch()) {
-				$listdata = $abodata['listes'][$row['liste_id']];
-				$format   = $abodata['listes'][$row['liste_id']]['format'];// = format choisi par l'abonné
+			while ($logdata = $result->fetch()) {
+				$listdata = $abodata['lists'][$logdata['liste_id']];
+				$logdata['joined_files'] = [];
+				$abodata['register_key'] = $listdata['register_key'];
+				$abodata['format']       = $listdata['format'];// À ne pas confondre avec liste_format
+				$abodata['name']         = $abodata['abo_pseudo'];
 
-				if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
-					$format = $listdata['liste_format'];
+				if (isset($files[$logdata['log_id']])) {
+					$logdata['joined_files'] = $files[$logdata['log_id']];
 				}
 
-				$email = new Email();
-				$email->setFrom($listdata['sender_email'], $listdata['liste_name']);
-				$email->setSubject($row['log_subject']);
-
-				if ($abodata['username'] != '') {
-					$email->addRecipient($abodata['email'], $abodata['username']);
-				}
-				else {
-					$email->addRecipient($abodata['email']);
-				}
-
-				if ($listdata['return_email'] != '') {
-					$email->setReturnPath($listdata['return_email']);
-				}
-
-				if ($format == FORMAT_TEXTE) {
-					$body = $row['log_body_text'];
-				}
-				else {
-					$body = $row['log_body_html'];
-				}
-
-				//
-				// Ajout du lien de désinscription, selon le format utilisé
-				//
-				if ($listdata['use_cron']) {
-					$liste_email = (!empty($listdata['liste_alias']))
-						? $listdata['liste_alias'] : $listdata['sender_email'];
-
-					if ($format == FORMAT_TEXTE) {
-						$link = $liste_email;
-					}
-					else {
-						$link = '<a href="mailto:' . $liste_email . '?subject=unsubscribe">' . $lang['Label_link'] . '</a>';
-					}
-				}
-				else {
-					$tmp_link  = $listdata['form_url'] . ((strstr($listdata['form_url'], '?')) ? '&' : '?') . '{CODE}';
-
-					if ($format == FORMAT_TEXTE) {
-						$link = $tmp_link;
-					}
-					else {
-						$link = '<a href="' . htmlspecialchars($tmp_link) . '">' . $lang['Label_link'] . '</a>';
-					}
-				}
-
-				$body = str_replace('{LINKS}', $link, $body);
-
-				//
-				// On s’occupe maintenant des fichiers joints ou incorporés.
-				//
-				if (isset($files[$row['log_id']]) && count($files[$row['log_id']]) > 0) {
-					$total_files = count($files[$row['log_id']]);
-
-					for ($i = 0; $i < $total_files; $i++) {
-						$real_name     = $files[$row['log_id']][$i]['file_real_name'];
-						$physical_name = $files[$row['log_id']][$i]['file_physical_name'];
-						$mime_type     = $files[$row['log_id']][$i]['file_mimetype'];
-
-						$file_path = WA_ROOTDIR . '/' . $nl_config['upload_path'] . $physical_name;
-						if (!file_exists($file_path)) {
-							continue;
-						}
-
-						$email->attach($file_path, $real_name, $mime_type);
-					}
-				}
-
-				//
-				// Traitement des tags et tags personnalisés
-				//
-				$tags_replace = [];
-
-				if ($abodata['username'] != '') {
-					$tags_replace['NAME'] = $abodata['username'];
-					if ($format == FORMAT_HTML) {
-						$tags_replace['NAME'] = htmlspecialchars($abodata['username']);
-					}
-				}
-				else {
-					$tags_replace['NAME'] = '';
-				}
-
-				if (count($other_tags) > 0) {
-					foreach ($other_tags as $tag) {
-						if ($abodata[$tag['column_name']] != '') {
-							if (!is_numeric($abodata[$tag['column_name']]) && $format == FORMAT_HTML) {
-								$tags_replace[$tag['tag_name']] = htmlspecialchars($abodata[$tag['column_name']]);
-							}
-							else {
-								$tags_replace[$tag['tag_name']] = $abodata[$tag['column_name']];
-							}
-
-							continue;
-						}
-
-						$tags_replace[$tag['tag_name']] = '';
-					}
-				}
-
-				if (!$listdata['use_cron']) {
-					$tags_replace = array_merge($tags_replace, [
-						'CODE'  => $listdata['register_key'],
-						'EMAIL' => rawurlencode($abodata['email'])
-					]);
-				}
-
-				$tpl = new Template();
-				$tpl->loadFromString('mail', $body);
-				$tpl->assign_vars($tags_replace);
-				$body = $tpl->pparse('mail', true);
-
-				if ($format == FORMAT_TEXTE) {
-					$email->setTextBody($body);
-				}
-				else {
-					$email->setHTMLBody($body);
-				}
+				$sender = new Sender($listdata, $logdata);
 
 				try {
-					wan_sendmail($email);
+					$sender->send($abodata);
 				}
 				catch (\Exception $e) {
 					trigger_error(sprintf($lang['Message']['Failed_sending'],
@@ -383,11 +259,11 @@ switch ($mode) {
 				}
 			}
 
-			$output->displayMessage(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
+			$output->message(sprintf($lang['Message']['Logs_sent'], $abodata['email']));
 		}
 
 		$liste_ids = [];
-		foreach ($abodata['listes'] as $liste_id => $listdata) {
+		foreach ($abodata['lists'] as $liste_id => $listdata) {
 			$liste_ids[] = $liste_id;
 		}
 
@@ -399,63 +275,58 @@ switch ($mode) {
 		$result = $db->query($sql);
 
 		while ($row = $result->fetch()) {
-			$abodata['listes'][$row['liste_id']]['archives'][] = $row;
+			$abodata['lists'][$row['liste_id']]['archives'][] = $row;
 		}
 
-		$output->page_header();
+		$output->header();
 
-		$output->set_filenames(['body' => 'archives_body.tpl']);
+		$template = new Template('archives_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'TITLE'           => $lang['Title']['archives'],
 			'L_EXPLAIN'       => $lang['Explain']['archives'],
-			'L_VALID_BUTTON'  => $lang['Button']['valid'],
-
-			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+			'L_VALID_BUTTON'  => $lang['Button']['valid']
 		]);
 
-		foreach ($abodata['listes'] as $liste_id => $listdata) {
-			if (!isset($abodata['listes'][$liste_id]['archives'])) {
+		foreach ($abodata['lists'] as $liste_id => $listdata) {
+			if (!isset($abodata['lists'][$liste_id]['archives'])) {
 				continue;
 			}
 
-			$num_logs = count($abodata['listes'][$liste_id]['archives']);
-			$size     = ($num_logs > 8) ? 8 : $num_logs;
+			$num_logs   = count($abodata['lists'][$liste_id]['archives']);
+			$select_log = '<select id="liste_%1$d" name="log[%1$d][]" class="logList" size="%2$d" multiple>';
+			$select_log = sprintf($select_log, $liste_id, min(8, $num_logs));
 
-			$select_log = '<select id="liste_' . $liste_id . '" name="log['
-				. $liste_id . '][]" class="logList" size="' . $size
-				. '" multiple="multiple" style="min-width: 200px;">';
 			for ($i = 0; $i < $num_logs; $i++) {
-				$logrow = $abodata['listes'][$liste_id]['archives'][$i];
+				$logdata = $abodata['lists'][$liste_id]['archives'][$i];
 
-				$select_log .= '<option value="' . $logrow['log_id'] . '"> &#8211; '
-					. htmlspecialchars(cut_str($logrow['log_subject'], 40), ENT_NOQUOTES);
-				$select_log .= ' [' . convert_time('d/m/Y', $logrow['log_date']) . ']</option>';
+				$select_log .= sprintf('<option value="%d">%s – [%s]</option>',
+					$logdata['log_id'],
+					htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
+					convert_time('d/m/Y', $logdata['log_date'])
+				);
 			}
 			$select_log .= '</select>'."\n";
 
-			$output->assign_block_vars('listerow', [
+			$template->assignToBlock('listerow', [
 				'LISTE_ID'   => $liste_id,
 				'LISTE_NAME' => htmlspecialchars($listdata['liste_name']),
 				'SELECT_LOG' => $select_log
 			]);
 		}
-
-		$output->pparse('body');
 		break;
 
 	default:
-		$output->page_header();
+		$output->header();
 
-		$output->set_filenames(['body' => 'index_body.tpl']);
+		$template = new Template('index_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'TITLE'     => $lang['Title']['profil_cp'],
 			'L_EXPLAIN' => nl2br($lang['Welcome_profil_cp'])
 		]);
-
-		$output->pparse('body');
 		break;
 }
 
-$output->page_footer();
+$template->pparse();
+$output->footer();

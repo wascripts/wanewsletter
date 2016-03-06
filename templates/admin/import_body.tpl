@@ -36,7 +36,7 @@
 		</tr>
 	</table>
 
-	<div class="bottom"> {S_HIDDEN_FIELDS}
+	<div class="bottom">
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 		<button type="reset">{L_RESET_BUTTON}</button>
 	</div>

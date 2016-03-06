@@ -7,7 +7,7 @@ if (typeof(tinyMCE) != 'undefined') {
 		skin: "lightgray",
 		menubar: false,
 		<!-- BEGIN tinymce_lang -->
-		language_url:"{BASEDIR}/languages/{tinymce_lang.CODE}/tinymce.js",
+		language_url: basedir + "/languages/{tinymce_lang.CODE}/tinymce.js",
 		<!-- END tinymce_lang -->
 		plugins: [
 			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
@@ -16,7 +16,7 @@ if (typeof(tinyMCE) != 'undefined') {
 			"paste textcolor colorpicker textpattern"
 		],
 		toolbar1: "bold italic underline strikethrough bullist numlist blockquote hr alignleft aligncenter alignright link unlink image spellchecker",
-		toolbar2: "forecolor pastetext removeformat charmap outdent indent code undo redo",
+		toolbar2: "formatselect forecolor pastetext removeformat charmap outdent indent code undo redo",
 
 		entity_encoding: "raw",
 		relative_urls: false,
@@ -31,7 +31,6 @@ if (typeof(tinyMCE) != 'undefined') {
 	});
 }
 
-var lang = [];
 lang["preview"] = '{L_PREVIEW_BUTTON}';
 lang["addlink"] = '{L_ADDLINK_BUTTON}';
 //-->
@@ -62,15 +61,6 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 					<option value="0"{SELECTED_STATUS_WRITING}>{L_STATUS_WRITING}</option>
 					<option value="3"{SELECTED_STATUS_MODEL}>{L_STATUS_MODEL}</option>
 				</select>
-			</td>
-		</tr>
-		<tr title="{L_CC_ADMIN_TITLE}">
-			<td><label>{L_CC_ADMIN}&nbsp;:</label></td>
-			<td>
-				<input type="radio" id="cc_admin_yes" name="cc_admin" value="1" {CHECKED_CC_ADMIN_ON}/>
-				<label for="cc_admin_yes" class="notice">{L_YES}</label>
-				<input type="radio" id="cc_admin_no" name="cc_admin" value="0" {CHECKED_CC_ADMIN_OFF}/>
-				<label for="cc_admin_no" class="notice">{L_NO}</label>
 			</td>
 		</tr>
 	</table>
@@ -150,12 +140,12 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 	{JOINED_FILES_BOX}
 </div>
 
-<!-- BEGIN files_box -->
+<!-- BEGIN delete -->
 <div id="aside-bottom" class="aside">
 	<div>&nbsp;</div>
-	<div><button type="submit" name="unattach">{joined_files.files_box.L_DEL_FILE_BUTTON}</button></div>
+	<div><button type="submit" name="unattach">{joined_files.delete.L_DEL_FILE_BUTTON}</button></div>
 </div>
-<!-- END files_box -->
+<!-- END delete -->
 <!-- END joined_files -->
 
 <div class="block">

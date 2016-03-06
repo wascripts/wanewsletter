@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
  * Affiche la liste des fichiers et dossier inconnus/obsolètes présents dans
@@ -72,35 +72,36 @@ includes/class.auth.php
 includes/class.error.php
 includes/class.exception.php
 includes/class.subscription.php
-includes/class.output.php
 includes/class.popclient.php
+includes/class.sender.php
 includes/class.session.php
 includes/class.template.php
 includes/common.inc.php
 includes/compat.inc.php
 includes/constantes.php
-includes/engine_send.php
-includes/functions.box.php
+includes/functions.db.php
 includes/functions.php
 includes/functions.stats.php
 includes/functions.wrapper.php
 includes/index.html
 includes/install.inc.php
 includes/login.inc.php
-includes/dblayer/index.html
-includes/dblayer/mysql.php
-includes/dblayer/mysqli.php
-includes/dblayer/postgres.php
-includes/dblayer/schemas/data.sql
-includes/dblayer/schemas/index.html
-includes/dblayer/schemas/mysql_tables.sql
-includes/dblayer/schemas/postgres_tables.sql
-includes/dblayer/schemas/sqlite_tables.sql
-includes/dblayer/sqlite3.php
-includes/dblayer/sqlitepdo.php
-includes/dblayer/sqlparser.php
-includes/dblayer/wadb.php
-includes/wadb_init.php
+includes/Dblayer/index.html
+includes/Dblayer/Mysql.php
+includes/Dblayer/Mysqli.php
+includes/Dblayer/Postgres.php
+includes/Dblayer/schemas/data.sql
+includes/Dblayer/schemas/index.html
+includes/Dblayer/schemas/mysql_tables.sql
+includes/Dblayer/schemas/postgres_tables.sql
+includes/Dblayer/schemas/sqlite_tables.sql
+includes/Dblayer/Sqlite3.php
+includes/Dblayer/SqlitePdo.php
+includes/Dblayer/Wadb.php
+includes/Output/CommandLine.php
+includes/Output/Html.php
+includes/Output/Json.php
+includes/Output/MessageInterface.php
 index.html
 install.php
 languages/DejaVuSans.ttf

@@ -19,11 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	configForm.elements['use_smtp'][0].addEventListener('change', toggleView, false);
 	configForm.elements['use_smtp'][1].addEventListener('change', toggleView, false);
 }, false);
-
-var lang = [];
-lang['restore-default'] = '{L_RESTORE_DEFAULT}';
-// Vite fait mal fait. On fera un truc propre plus tard.
-var basedir = '{BASEDIR}';
 //-->
 </script>
 
@@ -104,10 +99,10 @@ var basedir = '{BASEDIR}';
 			<td><input type="text" id="upload_path" name="upload_path" value="{UPLOAD_PATH}" size="40" maxlength="100" /></td>
 		</tr>
 		<tr>
-			<td><label for="max_filesize">{L_MAX_FILESIZE}&nbsp;:</label><br /><span class="notice">{L_MAX_FILESIZE_NOTE}</span></td>
+			<td><label for="max_filesize">{L_MAX_FILESIZE}&nbsp;:</label></td>
 			<td><input type="number" id="max_filesize" name="max_filesize"
-				value="{MAX_FILESIZE}" size="8" maxlength="8"
-			/> <span class="notice">{L_OCTETS}</span></td>
+				value="{MAX_FILESIZE}" min="0" max="99999" size="5"
+			/> <span class="notice">{L_KIB}</span></td>
 		</tr>
 	</table>
 
@@ -145,7 +140,7 @@ var basedir = '{BASEDIR}';
 			<td><input type="text" id="smtp_host" name="smtp_host" value="{SMTP_HOST}" size="30" maxlength="100"{DISABLED_SMTP} /></td>
 		</tr>
 		<tr>
-			<td><label for="smtp_port">{L_SMTP_PORT}&nbsp;:</label><br /><span class="notice">{L_SMTP_PORT_NOTE}</span></td>
+			<td><label for="smtp_port">{L_SMTP_PORT}&nbsp;:</label></td>
 			<td><input type="number" id="smtp_port" name="smtp_port"
 			value="{SMTP_PORT}" min="1" max="65535" size="5" {DISABLED_SMTP}
 			/></td>
@@ -158,16 +153,16 @@ var basedir = '{BASEDIR}';
 			<td><label for="smtp_pass">{L_SMTP_PASS}&nbsp;:</label><br /><span class="notice">{L_SMTP_PASS_NOTE}</span></td>
 			<td><input type="password" id="smtp_pass" name="smtp_pass" size="30" maxlength="100"{DISABLED_SMTP} autocomplete="off" /></td>
 		</tr>
-		<!-- BEGIN ssl_support -->
+		<!-- BEGIN tls_support -->
 		<tr>
-			<td><label for="smtp_tls">{ssl_support.L_SECURITY}&nbsp;:</label></td>
+			<td><label for="smtp_tls">{tls_support.L_SECURITY}&nbsp;:</label></td>
 			<td><select name="smtp_tls">
-				<option value="0">{ssl_support.L_NONE}</option>
-				<option value="1"{ssl_support.STARTTLS_SELECTED}>STARTTLS</option>
-				<option value="2"{ssl_support.SSL_TLS_SELECTED}>SSL/TLS</option>
+				<option value="0">{tls_support.L_NONE}</option>
+				<option value="1"{tls_support.STARTTLS_SELECTED}>STARTTLS</option>
+				<option value="2"{tls_support.SSL_TLS_SELECTED}>SSL/TLS</option>
 			</select></td>
 		</tr>
-		<!-- END ssl_support -->
+		<!-- END tls_support -->
 	</table>
 
 	<!-- BEGIN extension_gd -->

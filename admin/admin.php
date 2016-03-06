@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -29,12 +29,12 @@ if (isset($_POST['delete_user'])) {
 //
 // Seuls les administrateurs peuvent ajouter ou supprimer un utilisateur
 //
-if (($mode == 'adduser' || $mode == 'deluser') && !wan_is_admin($admindata)) {
+if (($mode == 'adduser' || $mode == 'deluser') && !Auth::isAdmin($admindata)) {
 	http_response_code(401);
 	$output->redirect('index.php', 4);
 	$output->addLine($lang['Message']['Not_authorized']);
 	$output->addLine($lang['Click_return_index'], './index.php');
-	$output->displayMessage();
+	$output->message();
 }
 
 if ($mode == 'adduser') {
@@ -74,14 +74,14 @@ if ($mode == 'adduser') {
 			$db->insert(ADMIN_TABLE, $sql_data);
 			$admin_id = $db->lastInsertId();
 
-			$tpl = new Template(WA_ROOTDIR . '/languages/' . $nl_config['language'] . '/emails/');
-			$tpl->set_filenames(['mail' => 'new_admin.txt']);
-			$tpl->assign_vars([
+			$template = '%s/languages/%s/emails/new_admin.txt';
+			$template = new Template(sprintf($template, WA_ROOTDIR, $nl_config['language']));
+			$template->assign([
 				'PSEUDO'        => $new_login,
 				'SITENAME'      => $nl_config['sitename'],
-				'INIT_PASS_URL' => wan_build_url('login.php?mode=cp')
+				'INIT_PASS_URL' => http_build_url('login.php?mode=cp')
 			]);
-			$message = $tpl->pparse('mail', true);
+			$message = $template->pparse(true);
 
 			$email = new Email();
 			$email->setFrom($admindata['admin_email'], $admindata['admin_login']);
@@ -90,7 +90,7 @@ if ($mode == 'adduser') {
 			$email->setTextBody($message);
 
 			try {
-				wan_sendmail($email);
+				wamailer()->send($email);
 			}
 			catch (\Exception $e) {
 				trigger_error(sprintf($lang['Message']['Failed_sending'],
@@ -102,15 +102,15 @@ if ($mode == 'adduser') {
 			$output->addLine($lang['Message']['Admin_added']);
 			$output->addLine($lang['Click_return_profile'], './admin.php?uid=' . $admin_id);
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 	}
 
-	$output->page_header();
+	$output->header();
 
-	$output->set_filenames(['body' => 'add_admin_body.tpl']);
+	$template = new Template('add_admin_body.tpl');
 
-	$output->assign_vars([
+	$template->assign([
 		'L_TITLE'         => $lang['Add_user'],
 		'L_EXPLAIN'       => nl2br($lang['Explain']['admin']),
 		'L_LOGIN'         => $lang['Login'],
@@ -122,13 +122,12 @@ if ($mode == 'adduser') {
 		'EMAIL' => htmlspecialchars($new_email)
 	]);
 
-	$output->pparse('body');
-
-	$output->page_footer();
+	$template->pparse();
+	$output->footer();
 }
 else if ($mode == 'deluser') {
 	if ($admindata['admin_id'] == $admin_id) {
-		$output->displayMessage('Owner_account');
+		$output->message('Owner_account');
 	}
 
 	if (isset($_POST['confirm'])) {
@@ -146,16 +145,16 @@ else if ($mode == 'deluser') {
 		$output->addLine($lang['Message']['Admin_deleted']);
 		$output->addLine($lang['Click_return_profile'], './admin.php');
 		$output->addLine($lang['Click_return_index'], './index.php');
-		$output->displayMessage();
+		$output->message();
 	}
 	else {
 		$output->addHiddenField('uid', $admin_id);
 
-		$output->page_header();
+		$output->header();
 
-		$output->set_filenames(['body' => 'confirm_body.tpl']);
+		$template = new Template('confirm_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_CONFIRM' => $lang['Title']['confirm'],
 
 			'TEXTE' => $lang['Confirm_del_user'],
@@ -166,19 +165,18 @@ else if ($mode == 'deluser') {
 			'U_FORM' => 'admin.php?mode=deluser'
 		]);
 
-		$output->pparse('body');
-
-		$output->page_footer();
+		$template->pparse();
+		$output->footer();
 	}
 }
 
 if (isset($_POST['submit'])) {
-	if (!wan_is_admin($admindata) && $admin_id != $admindata['admin_id']) {
+	if (!Auth::isAdmin($admindata) && $admin_id != $admindata['admin_id']) {
 		http_response_code(401);
 		$output->redirect('./index.php', 4);
 		$output->addLine($lang['Message']['Not_authorized']);
 		$output->addLine($lang['Click_return_index'], './index.php');
-		$output->displayMessage();
+		$output->message();
 	}
 
 	$vararray = ['current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'date_format', 'language'];
@@ -239,7 +237,7 @@ if (isset($_POST['submit'])) {
 			$sql_data['admin_pwd'] = $passwd_hash;
 		}
 
-		if (wan_is_admin($admindata) && $admin_id != $admindata['admin_id']) {
+		if (Auth::isAdmin($admindata) && $admin_id != $admindata['admin_id']) {
 			$admin_level = filter_input(INPUT_POST, 'admin_level', FILTER_VALIDATE_INT);
 
 			if (is_int($admin_level) && in_array($admin_level, [ADMIN_LEVEL, USER_LEVEL])) {
@@ -249,31 +247,41 @@ if (isset($_POST['submit'])) {
 
 		$db->update(ADMIN_TABLE, $sql_data, ['admin_id' => $admin_id]);
 
-		if (wan_is_admin($admindata)) {
-			$auth_data = ($admindata['admin_id'] == $admin_id) ? $auth->listdata : $auth->read_data($admin_id);
+		if (Auth::isAdmin($admindata)) {
 			$liste_ids = (array) filter_input(INPUT_POST, 'liste_id',
 				FILTER_VALIDATE_INT,
 				FILTER_REQUIRE_ARRAY
 			);
 			$liste_ids = array_filter($liste_ids);
 
+			$auth_list = [
+				Auth::VIEW, Auth::EDIT, Auth::DEL, Auth::SEND, Auth::IMPORT,
+				Auth::EXPORT, Auth::BAN, Auth::ATTACH
+			];
 			$auth_post = [];
-			foreach ($auth->auth_ary as $auth_name) {
-				$auth_post[$auth_name] = (array) filter_input(INPUT_POST, $auth_name,
+			foreach ($auth_list as $auth_type) {
+				$auth_post[$auth_type] = (array) filter_input(INPUT_POST, $auth_type,
 					FILTER_VALIDATE_BOOLEAN,
 					FILTER_REQUIRE_ARRAY
 				);
 			}
 
-			for ($i = 0, $total_liste = count($liste_ids); $i < $total_liste; $i++) {
-				$sql_data = [];
+			$current_admin = $auth->getUserData($admin_id);
+			$lists = $auth->getListData($admin_id);
 
-				foreach ($auth->auth_ary as $auth_name) {
-					$sql_data[$auth_name] = (isset($auth_post[$auth_name][$i]))
-						? $auth_post[$auth_name][$i] : false;
+			for ($i = 0, $total = count($liste_ids); $i < $total; $i++) {
+				if (!isset($lists[$liste_ids[$i]])) {
+					continue;
 				}
 
-				if (!isset($auth_data[$liste_ids[$i]]['auth_view'])) {
+				$sql_data = [];
+				foreach ($auth_list as $auth_type) {
+					if (isset($auth_post[$auth_type][$i])) {
+						$sql_data[$auth_type] = $auth_post[$auth_type][$i];
+					}
+				}
+
+				if (!isset($lists[$liste_ids[$i]]['auth_view'])) {
 					$sql_data['admin_id'] = $admin_id;
 					$sql_data['liste_id'] = $liste_ids[$i];
 
@@ -290,32 +298,32 @@ if (isset($_POST['submit'])) {
 		$output->addLine($lang['Message']['Profile_updated']);
 		$output->addLine($lang['Click_return_profile'], './admin.php?uid=' . $admin_id);
 		$output->addLine($lang['Click_return_index'], './index.php');
-		$output->displayMessage();
+		$output->message();
 	}
 }
 
-if (wan_is_admin($admindata)) {
-	$current_admin = null;
+$current_admin = $admindata;
+$admin_box = '';
 
+if (Auth::isAdmin($admindata)) {
+	//
+	// Récupération des données de l’utilisateur concerné.
+	//
 	$admin_id = filter_input(INPUT_GET, 'uid', FILTER_VALIDATE_INT);
 
-	if (is_int($admin_id) && $admin_id != $admindata['admin_id']) {
-		$sql = "SELECT  admin_id, admin_login, admin_pwd, admin_email,
-				admin_lang, admin_dateformat, admin_level, email_new_subscribe,
-				email_unsubscribe, html_editor
-			FROM " . ADMIN_TABLE . "
-			WHERE admin_id = " . $admin_id;
-		$result = $db->query($sql);
-
-		if (!($current_admin = $result->fetch())) {
-			trigger_error("Impossible de récupérer les données de l'utilisateur", E_USER_ERROR);
+	if (is_int($admin_id)) {
+		$current_admin = $auth->getUserData($admin_id);
+		if (!$current_admin) {
+			$current_admin = $admindata;
+		}
+		else {
+			$current_admin['lists'] = $auth->getListData($admin_id);
 		}
 	}
 
-	if (!is_array($current_admin)) {
-		$current_admin = $admindata;
-	}
-
+	//
+	// Boîte déroulante de sélection d’utilisateur.
+	//
 	$sql = "SELECT admin_id, admin_login
 		FROM " . ADMIN_TABLE . "
 		WHERE admin_id <> $current_admin[admin_id]
@@ -334,32 +342,19 @@ if (wan_is_admin($admindata)) {
 
 		$admin_box .= '</select>';
 	}
-
-	if ($current_admin['admin_id'] != $admindata['admin_id']) {
-		$listdata = $auth->read_data($current_admin['admin_id']);
-	}
-	else {
-		$listdata = $auth->listdata;
-	}
 }
-else {
-	$current_admin = $admindata;
-	$admin_box = '';
-}
-
-require WA_ROOTDIR . '/includes/functions.box.php';
 
 $output->addHiddenField('uid', $current_admin['admin_id']);
 
-if (wan_is_admin($admindata)) {
+if (Auth::isAdmin($admindata)) {
 	$output->addLink('subsection', './admin.php?mode=adduser', $lang['Add_user']);
 }
 
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'admin_body.tpl']);
+$template = new Template('admin_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'L_TITLE'               => sprintf($lang['Title']['profile'], htmlspecialchars($current_admin['admin_login'], ENT_NOQUOTES)),
 	'L_EXPLAIN'             => nl2br($lang['Explain']['admin']),
 	'L_DEFAULT_LANG'        => $lang['Default_lang'],
@@ -377,7 +372,6 @@ $output->assign_vars([
 	'L_NO'                  => $lang['No'],
 	'L_VALID_BUTTON'        => $lang['Button']['valid'],
 	'L_RESET_BUTTON'        => $lang['Button']['reset'],
-	'L_RESTORE_DEFAULT'     => $lang['Restore_default'],
 
 	'LANG_BOX'              => lang_box($current_admin['admin_lang']),
 	'EMAIL'                 => $current_admin['admin_email'],
@@ -396,8 +390,20 @@ $output->assign_vars([
 	'S_HIDDEN_FIELDS'       => $output->getHiddenFields()
 ]);
 
-if (wan_is_admin($admindata)) {
-	$output->assign_block_vars('admin_options', [
+if (Auth::isAdmin($admindata)) {
+	$build_authbox = function ($auth_type, $listdata) use ($output, &$lang) {
+		$selected_yes = $output->getBoolAttr('selected', !empty($listdata[$auth_type]));
+		$selected_no  = $output->getBoolAttr('selected', empty($listdata[$auth_type]));
+
+		$box_auth  = sprintf('<select name="%s[]">', $auth_type);
+		$box_auth .= sprintf('<option value="1"%s>%s</option>', $selected_yes, $lang['Yes']);
+		$box_auth .= sprintf('<option value="0"%s>%s</option>', $selected_no, $lang['No']);
+		$box_auth .= '</select>';
+
+		return $box_auth;
+	};
+
+	$template->assignToBlock('admin_options', [
 		'L_ADD_ADMIN'     => $lang['Add_user'],
 		'L_TITLE_MANAGE'  => $lang['Title']['manage'],
 		'L_TITLE_OPTIONS' => $lang['Title']['other_options'],
@@ -416,40 +422,39 @@ if (wan_is_admin($admindata)) {
 		'L_DELETE_ADMIN'  => $lang['Del_user'],
 		'L_NOTE_DELETE'   => nl2br($lang['Del_note']),
 
-		'SELECTED_ADMIN'  => $output->getBoolAttr('selected', wan_is_admin($current_admin)),
-		'SELECTED_USER'   => $output->getBoolAttr('selected', !wan_is_admin($current_admin))
+		'SELECTED_ADMIN'  => $output->getBoolAttr('selected', Auth::isAdmin($current_admin)),
+		'SELECTED_USER'   => $output->getBoolAttr('selected', !Auth::isAdmin($current_admin))
 	]);
 
-	foreach ($listdata as $listrow) {
-		$output->assign_block_vars('admin_options.auth', [
-			'LISTE_NAME'      => htmlspecialchars($listrow['liste_name']),
-			'LISTE_ID'        => $listrow['liste_id'],
+	foreach ($current_admin['lists'] as $liste_id => $data) {
+		$template->assignToBlock('admin_options.auth', [
+			'LISTE_NAME'      => htmlspecialchars($data['liste_name']),
+			'LISTE_ID'        => $liste_id,
 
-			'BOX_AUTH_VIEW'   => $output->build_authbox(Auth::VIEW,   $listrow),
-			'BOX_AUTH_EDIT'   => $output->build_authbox(Auth::EDIT,   $listrow),
-			'BOX_AUTH_DEL'    => $output->build_authbox(Auth::DEL,    $listrow),
-			'BOX_AUTH_SEND'   => $output->build_authbox(Auth::SEND,   $listrow),
-			'BOX_AUTH_IMPORT' => $output->build_authbox(Auth::IMPORT, $listrow),
-			'BOX_AUTH_EXPORT' => $output->build_authbox(Auth::EXPORT, $listrow),
-			'BOX_AUTH_BACKUP' => $output->build_authbox(Auth::BAN,    $listrow),
-			'BOX_AUTH_ATTACH' => $output->build_authbox(Auth::ATTACH, $listrow)
+			'BOX_AUTH_VIEW'   => $build_authbox(Auth::VIEW,   $data),
+			'BOX_AUTH_EDIT'   => $build_authbox(Auth::EDIT,   $data),
+			'BOX_AUTH_DEL'    => $build_authbox(Auth::DEL,    $data),
+			'BOX_AUTH_SEND'   => $build_authbox(Auth::SEND,   $data),
+			'BOX_AUTH_IMPORT' => $build_authbox(Auth::IMPORT, $data),
+			'BOX_AUTH_EXPORT' => $build_authbox(Auth::EXPORT, $data),
+			'BOX_AUTH_BACKUP' => $build_authbox(Auth::BAN,    $data),
+			'BOX_AUTH_ATTACH' => $build_authbox(Auth::ATTACH, $data)
 		]);
 	}
 
-	if ($admin_box != '') {
-		$output->assign_block_vars('admin_box', [
-			'L_VIEW_PROFILE'  => $lang['View_profile'],
-			'L_BUTTON_GO'     => $lang['Button']['go'],
+	if ($admin_box) {
+		$template->assignToBlock('admin_box', [
+			'L_VIEW_PROFILE' => $lang['View_profile'],
+			'L_BUTTON_GO'    => $lang['Button']['go'],
 
-			'ADMIN_BOX'       => $admin_box
+			'ADMIN_BOX'      => $admin_box
 		]);
 	}
 }
 
 if ($current_admin['admin_id'] == $admindata['admin_id']) {
-	$output->assign_block_vars('owner_profil', []);
+	$template->assignToBlock('owner_profil');
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

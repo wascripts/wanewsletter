@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -12,31 +12,30 @@ namespace Wanewsletter;
 const FONT_FILE = '~/languages/DejaVuSans.ttf';
 
 require './start.inc.php';
-require WA_ROOTDIR . '/includes/functions.stats.php';
 
 //
 // Si le module de statistiques est désactivé ou que la librairie GD n'est pas installé,
 // on affiche le message d'information correspondant
 //
 if ($nl_config['disable_stats']) {
-	$output->displayMessage('Stats_disabled');
+	$output->message('Stats_disabled');
 }
 else if (!extension_loaded('gd')) {
-	$output->displayMessage('No_gd_lib');
+	$output->message('No_gd_lib');
 }
-
-$liste_ids = $auth->check_auth(Auth::VIEW);
 
 if (!$_SESSION['liste']) {
-	$output->build_listbox(Auth::VIEW);
+	$output->header();
+	$output->listbox(Auth::VIEW)->pparse();
+	$output->footer();
 }
 
-if (!$auth->check_auth(Auth::VIEW, $_SESSION['liste'])) {
+if (!$auth->check(Auth::VIEW, $_SESSION['liste'])) {
 	http_response_code(401);
-	$output->displayMessage('Not_auth_view');
+	$output->message('Not_auth_view');
 }
 
-$listdata = $auth->listdata[$_SESSION['liste']];
+$listdata = $auth->getLists(Auth::VIEW)[$_SESSION['liste']];
 
 $img   = filter_input(INPUT_GET, 'img');
 $year  = filter_input(INPUT_GET, 'year', FILTER_VALIDATE_INT, [
@@ -51,7 +50,7 @@ $img_type = (imagetypes() & IMG_PNG) ? 'png' : $img_type;
 
 if (is_null($img_type)) {
 	// WTF ?!
-	$output->displayMessage($lang['Message']['No_gd_img_support']);
+	$output->message($lang['Message']['No_gd_img_support']);
 }
 
 function send_image($name, $img, $lastModified = null)
@@ -97,34 +96,38 @@ function send_image($name, $img, $lastModified = null)
 	exit;
 }
 
-function display_img_error($str)
-{
-	$imageW = 560;
-	$imageH = 80;
-	$text_font = 3;
+/**
+ * @param string $color Une couleur, en notation hexadécimale.
+ * @return object
+ */
+$convert2rgb = function ($color) {
+	$pattern = null;
+	$color   = strtoupper($color);
+	$length  = strlen($color);
 
-	$im = imagecreate($imageW, $imageH);
+	if ($length != 3 && $length != 6) {
+		$color  = 'FFF';
+		$length = 3;
+	}
 
-	$black = imagecolorallocate($im, 0, 0, 0);
-	$gray1 = convertToRGB('EAEAEA');
-	$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
+	if ($length == 6) {
+		$pattern = '/^#?([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})$/';
+		$repeat  = 1;
+	}
+	else {
+		$pattern = '/^#?([[:xdigit:]])([[:xdigit:]])([[:xdigit:]])$/';
+		$repeat  = 2;
+	}
 
-	//
-	// Création du contour noir
-	//
-	imagefill($im, 0, 0, $black);
-	imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $gray1);
+	preg_match($pattern, $color, $m);
 
-	//
-	// titre du graphe
-	//
-	$startW = (($imageW - (imagefontwidth($text_font) * strlen($str))) / 2);
-	$startH = (($imageH - imagefontheight($text_font)) / 2);
-	imagestring($im, $text_font, $startW, $startH, $str, $black);
+	$parts = [];
+	$parts['red']   = str_repeat($m[1], $repeat);
+	$parts['green'] = str_repeat($m[2], $repeat);
+	$parts['blue']  = str_repeat($m[3], $repeat);
 
-	http_response_code(500);
-	send_image('error', $im);
-}
+	return (object) array_map('hexdec', $parts);
+};
 
 if ($img == 'graph') {
 	$ts = mktime(0, 0, 0, $month, 1, $year);
@@ -136,38 +139,51 @@ if ($img == 'graph') {
 	$imageH = 260;
 	$text_font = 2;
 
+	$im = imagecreate($imageW, $imageH);
+
 	//
 	// Récupération des statistiques
 	//
 	$filename = filename_stats($year . '_' . date('F', $ts), $listdata['liste_id']);
+	$filename = sprintf('%s/%s', $nl_config['stats_dir'], $filename);
 
-	if (!file_exists(WA_STATSDIR . '/' . $filename)) {
+	if (!file_exists($filename)) {
 		create_stats($listdata, $month, $year);
 	}
 
-	if (($filesize = filesize(WA_STATSDIR . '/' . $filename)) > 0 &&
-		($fp = fopen(WA_STATSDIR . '/' . $filename, 'r'))
-	) {
-		$contents = fread($fp, $filesize);
-		$stats    = clean_stats($contents);
-		fclose($fp);
+	if (!($filesize = filesize($filename)) || !($fp = fopen($filename, 'r'))) {
+		$black = imagecolorallocate($im, 0, 0, 0);
+		$gray1 = $convert2rgb('EAEAEA');
+		$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
+
+		// Création du contour noir
+		imagefill($im, 0, 0, $black);
+		imagefilledrectangle($im, 1, 1, ($imageW - 2), ($imageH - 2), $gray1);
+
+		// Texte à afficher
+		$text_font = 3;
+		$text = "Cannot read stats file. Please check permissions.";
+		$startW = (($imageW - (imagefontwidth($text_font) * strlen($text))) / 2);
+		$startH = (($imageH - imagefontheight($text_font)) / 2);
+		imagestring($im, $text_font, $startW, $startH, $text, $black);
+
+		http_response_code(500);
+		send_image('error', $im);
 	}
-	else {
-		display_img_error('An error has occured while generating image!');
-	}
+
+	$stats = clean_stats(fread($fp, $filesize));
+	fclose($fp);
 
 	// C'est parti
-	$im = imagecreate($imageW, $imageH);
-
 	$black	= imagecolorallocate($im, 0, 0, 0);
 	$gray	= imagecolorallocate($im, 200, 200, 200);
 	$back_2 = imagecolorallocate($im, 240, 240, 240);
 	$white	= imagecolorallocate($im, 255, 255, 255);
-	$back_1 = convertToRGB('036');
+	$back_1 = $convert2rgb('036');
 	$back_1 = imagecolorallocate($im, $back_1->red, $back_1->green, $back_1->blue);
-	$color1 = convertToRGB('F80');
+	$color1 = $convert2rgb('F80');
 	$color1 = imagecolorallocate($im, $color1->red, $color1->green, $color1->blue);
-	$color2 = convertToRGB('02F');
+	$color2 = $convert2rgb('02F');
 	$color2 = imagecolorallocate($im, $color2->red, $color2->green, $color2->blue);
 
 	//
@@ -267,33 +283,26 @@ if ($img == 'graph') {
 		}
 	}
 
-	send_image('subscribers_per_day', $im, filemtime(WA_STATSDIR . '/' . $filename));
+	send_image('subscribers_per_day', $im, filemtime($filename));
 }
 
 if ($img == 'camembert') {
-	$sql = "SELECT COUNT(al.abo_id) AS num_inscrits, al.liste_id
+	$lists = $auth->getLists(Auth::VIEW);
+	$liste_ids = array_column($lists, 'liste_id');
+	$num_lists = count($lists);
+
+	$sql = "SELECT COUNT(al.abo_id) AS total, al.liste_id
 		FROM " . ABO_LISTE_TABLE . " AS al
 		WHERE al.liste_id IN(" . implode(', ', $liste_ids) . ")
 			AND confirmed = " . SUBSCRIBE_CONFIRMED . "
 		GROUP BY al.liste_id";
 	$result = $db->query($sql);
 
-	$tmpdata = [];
+	$total_subscribers = 0;
 	while ($row = $result->fetch()) {
-		$tmpdata[$row['liste_id']] = $row['num_inscrits'];
+		$lists[$row['liste_id']]['subscribers'] = $row['total'];
+		$total_subscribers += $row['total'];
 	}
-
-	$total_inscrits = 0;
-	$listes = [];
-	foreach ($liste_ids as $liste_id) {
-		$liste_name   = cut_str($auth->listdata[$liste_id]['liste_name'], 30);
-		$num_inscrits = (!empty($tmpdata[$liste_id])) ? $tmpdata[$liste_id] : 0;
-
-		$listes[] = ['name' => $liste_name, 'num' => $num_inscrits];
-		$total_inscrits += $num_inscrits;
-	}
-
-	$total_listes = count($listes);
 
 	//
 	// Taille de base de l'image (varie s'il y a beaucoup de listes) et tailles de texte
@@ -301,8 +310,8 @@ if ($img == 'camembert') {
 	$imageW = 560;
 	$imageH = 170;
 
-	if ($total_listes > 3) {
-		$imageH += (($total_listes - 3) * 20);
+	if ($num_lists > 3) {
+		$imageH += (($num_lists - 3) * 20);
 	}
 
 	$im = imagecreate($imageW, $imageH);
@@ -311,15 +320,15 @@ if ($img == 'camembert') {
 	// Allocation des couleurs
 	//
 	$black = imagecolorallocate($im, 0, 0, 0);
-	$gray1 = convertToRGB('EAEAEA');
+	$gray1 = $convert2rgb('EAEAEA');
 	$gray1 = imagecolorallocate($im, $gray1->red, $gray1->green, $gray1->blue);
-	$gray2 = convertToRGB('888');
+	$gray2 = $convert2rgb('888');
 	$gray2 = imagecolorallocate($im, $gray2->red, $gray2->green, $gray2->blue);
 
 	$color = [];
 	$colorList = ['F80', '0A0', '0BC', '30C', '608', 'C03'];
 	foreach ($colorList as $hexColor) {
-		$tmp = convertToRGB($hexColor);
+		$tmp = $convert2rgb($hexColor);
 		$color[] = imagecolorallocate($im, $tmp->red, $tmp->green, $tmp->blue);
 	}
 
@@ -355,7 +364,7 @@ if ($img == 'camembert') {
 	$globalY = ($startY - (100 / 2));
 	$outer   = 5;
 	$rectX   = 145;
-	$rectH   = (30 + ($total_listes * 20));
+	$rectH   = (30 + ($num_lists * 20));
 	$shadowX = ($rectX - $outer);
 
 	if ($img_type == 'png') {
@@ -376,7 +385,22 @@ if ($img == 'camembert') {
 	//
 	$degre = 0;
 
-	for ($i = 0, $j = 0, $int = 20; $i < $total_listes; $i++, $j++, $int += 20) {
+	/**
+	 * Calcule les coordonnées du rayon
+	 *
+	 * @param float   $degre    Degré
+	 * @param integer $diametre Diamètre du cercle
+	 *
+	 * @return array
+	 */
+	$get_xy_arc = function ($degre, $diametre) {
+		$x_arc = (cos($degre * (M_PI / 180.0)) * ($diametre / 2));
+		$y_arc = (sin($degre * (M_PI / 180.0)) * ($diametre / 2));
+
+		return [$x_arc, $y_arc];
+	};
+
+	for ($i = 0, $j = 0, $int = 20; $i < $num_lists; $i++, $j++, $int += 20) {
 		if (!empty($color[$j])) {
 			$color_arc = $color[$j];
 		}
@@ -385,27 +409,30 @@ if ($img == 'camembert') {
 			$color_arc = $color[0];
 		}
 
-		//
-		// On vérifie si le nombre d'inscrits représente au moins un millième du total
-		// (Sans cela, il se produit un bug d'affichage)
-		//
-		$part = 0;
+		$listdata = array_shift($lists);
 
-		if ($total_inscrits > 0 && ($part = round($listes[$i]['num'] / $total_inscrits, 3)) > 0.001) {
+		$percent = 0;
+		if ($total_subscribers > 0) {
+			$percent = (round($listdata['subscribers'] / $total_subscribers, 3) * 100);
+		}
+
+		// On vérifie si le nombre d’inscrits représente plus d’un millième
+		// du total (Sans cela, il se produit un bug d’affichage).
+		if ($percent > 0.1) {
 			$deb_arc = round($degre);
-			$degre  += ($part * 360);
+			$degre  += ($percent * 3.6);
 			$end_arc = round($degre);
 
 			imagearc($im, $startX, $startY, 100, 100, $deb_arc, $end_arc, $color_arc);
 
-			list($arcX, $arcY) = xy_arc($deb_arc, 100);
+			list($arcX, $arcY) = $get_xy_arc($deb_arc, 100);
 			imageline($im, $startX, $startY, floor($startX + $arcX), floor($startY + $arcY), $color_arc);
 
-			list($arcX, $arcY) = xy_arc($end_arc, 100);
+			list($arcX, $arcY) = $get_xy_arc($end_arc, 100);
 			imageline($im, $startX, $startY, ceil($startX + $arcX), ceil($startY + $arcY), $color_arc);
 
 			$mid_arc = round((($end_arc - $deb_arc) / 2) + $deb_arc);
-			list($arcX, $arcY) = xy_arc($mid_arc, 50);
+			list($arcX, $arcY) = $get_xy_arc($mid_arc, 50);
 			imagefilltoborder($im, floor($startX + $arcX), floor($startY + $arcY), $color_arc, $color_arc);
 		}
 
@@ -421,10 +448,21 @@ if ($img == 'camembert') {
 		$height = ($coords[3] - $coords[5]);
 		$start  = (($imageW - $width) / 2);
 
+		// Limitation d’affichage du nom des listes
+		if (mb_strlen($listdata['liste_name']) > 40) {
+			$listdata['liste_name'] = mb_substr($listdata['liste_name'], 0, 40);
+
+			if ($space = mb_strrpos($listdata['liste_name'], ' ')) {
+				$listdata['liste_name'] = mb_substr($listdata['liste_name'], 0, $space);
+			}
+
+			$listdata['liste_name'] .= "\xe2\x80\xa6";// (U+2026) Horizontal ellipsis char
+		}
+
 		$text = sprintf('%s [%d] [%s%%]',
-			$listes[$i]['name'],
-			$listes[$i]['num'],
-			wa_number_format(($part > 0 ? round($part * 100, 2) : 0), 1)
+			$listdata['liste_name'],
+			$listdata['subscribers'],
+			wa_number_format($percent, 1)
 		);
 		imagettftext($im, $font_size, 0, 185, ($globalY + $int + 11), $black, $font_file, $text);
 
@@ -437,16 +475,6 @@ if ($img == 'camembert') {
 
 	send_image('parts_by_liste', $im);
 }
-
-$output->build_listbox(Auth::VIEW, false);
-
-require WA_ROOTDIR . '/includes/functions.box.php';
-
-$output->page_header();
-
-$output->set_filenames([
-	'body' => 'stats_body.tpl'
-]);
 
 $y_list = '';
 $m_list = '';
@@ -484,7 +512,11 @@ if ($next_m > 12) {
 
 $aTitle = sprintf('%s &ndash; %%s', $lang['Module']['stats']);
 
-$output->assign_vars([
+$output->header();
+
+$template = new Template('stats_body.tpl');
+
+$template->assign([
 	'L_TITLE'         => $lang['Title']['stats'],
 	'L_EXPLAIN_STATS' => nl2br($lang['Explain']['stats']),
 	'L_GO_BUTTON'     => $lang['Button']['go'],
@@ -499,19 +531,20 @@ $output->assign_vars([
 	'L_NEXT_TITLE'    => sprintf($aTitle, convert_time('F Y', mktime(0, 0, 0, $next_m, 1, $next_y))),
 	'U_PREV_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $prev_y, $prev_m),
 	'U_NEXT_PERIOD'   => sprintf('stats.php?year=%d&amp;month=%d', $next_y, $next_m),
-	'U_IMG_GRAPH'     => sprintf('stats.php?img=graph&amp;year=%d&amp;month=%d', $year, $month)
+	'U_IMG_GRAPH'     => sprintf('stats.php?img=graph&amp;year=%d&amp;month=%d', $year, $month),
+
+	'LISTBOX'         => $output->listbox(Auth::VIEW, false)
 ]);
 
 //
 // Affichons un message d'alerte au cas où le répertoire de statistiques n'est pas
 // accessible en écriture.
 //
-if (!is_writable(WA_STATSDIR)) {
-	$output->assign_block_vars('statsdir_error', [
+if (!is_writable($nl_config['stats_dir'])) {
+	$template->assignToBlock('statsdir_error', [
 		'MESSAGE' => $lang['Stats_dir_not_writable']
 	]);
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

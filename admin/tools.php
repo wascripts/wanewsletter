@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -20,9 +20,11 @@ require './start.inc.php';
 //
 function compress_filedata(&$filename, &$mime_type, $contents, $compress)
 {
+	global $nl_config;
+
 	switch ($compress) {
 		case 'zip':
-			$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
+			$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa-');
 			$mime_type = 'application/zip';
 			$zip = new ZipArchive();
 			$zip->open($tmp_filename, ZipArchive::CREATE);
@@ -56,11 +58,11 @@ function decompress_filedata($tmp_filename, $filename)
 
 	$ext = pathinfo($filename, PATHINFO_EXTENSION);
 
-	if ((!ZIPLIB_LOADED && $ext == 'zip') ||
-		(!ZLIB_LOADED && $ext == 'gz') ||
-		(!BZIP2_LOADED && $ext == 'bz2')
+	if ((!ZIPLIB_LOADED && $ext == 'zip')
+		|| (!ZLIB_LOADED && $ext == 'gz')
+		|| (!BZIP2_LOADED && $ext == 'bz2')
 	) {
-		$output->displayMessage('Compress_unsupported');
+		$output->message('Compress_unsupported');
 	}
 
 	switch ($ext) {
@@ -98,12 +100,12 @@ switch ($mode) {
 	case 'restore':
 	case 'debug':
 	case 'attach':
-		if (!wan_is_admin($admindata)) {
+		if (!Auth::isAdmin($admindata)) {
 			http_response_code(401);
 			$output->redirect('./index.php', 4);
 			$output->addLine($lang['Message']['Not_authorized']);
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 		// no break
 	case 'generator':
@@ -119,27 +121,26 @@ $url_page  = './tools.php';
 $url_page .= ($mode != '') ? '?mode=' . $mode : '';
 
 if (!in_array($mode, ['backup','restore','debug', '']) && !$_SESSION['liste']) {
-	$output->build_listbox($auth_type, true, $url_page);
+	$output->header();
+	$output->listbox($auth_type, true, $url_page)->pparse();
+	$output->footer();
 }
 else if ($_SESSION['liste']) {
-	if (!$auth->check_auth($auth_type, $_SESSION['liste'])) {
-		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
+	if (!$auth->check($auth_type, $_SESSION['liste'])) {
+		http_response_code(401);
+		$output->message('Not_' . $auth_type);
 	}
 
-	$listdata = $auth->listdata[$_SESSION['liste']];
+	$listdata = $auth->getLists($auth_type)[$_SESSION['liste']];
 }
 
 //
 // Affichage de la boîte de sélection des modules
 //
 if (!isset($_POST['submit'])) {
-	if ($mode != 'backup' && $mode != 'restore') {
-		$output->build_listbox($auth_type, false, $url_page);
-	}
-
 	$tools_ary = ['export', 'import', 'ban', 'generator'];
 
-	if (wan_is_admin($admindata)) {
+	if (Auth::isAdmin($admindata)) {
 		array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
 	}
 
@@ -154,19 +155,24 @@ if (!isset($_POST['submit'])) {
 	}
 	$tools_box .= '</select>';
 
-	$output->page_header();
+	$output->header();
 
-	$output->set_filenames(['body' => 'tools_body.tpl']);
+	$main = new Template('tools_body.tpl');
 
-	$output->assign_vars([
+	$main->assign([
 		'L_TITLE'        => $lang['Title']['tools'],
 		'L_EXPLAIN'      => nl2br($lang['Explain']['tools']),
 		'L_SELECT_TOOL'  => $lang['Select_tool'],
 		'L_VALID_BUTTON' => $lang['Button']['valid'],
 
-		'S_TOOLS_BOX'    => $tools_box,
-		'S_TOOLS_HIDDEN_FIELDS' => $output->getHiddenFields()
+		'S_TOOLS_BOX'    => $tools_box
 	]);
+
+	if ($mode != 'backup' && $mode != 'restore') {
+		$main->assign([
+			'LISTBOX' => $output->listbox($auth_type, false, $url_page)
+		]);
+	}
 }
 
 //
@@ -186,184 +192,10 @@ $EOL = (stripos($user_agent, 'Win')) ? "\r\n" : "\n";
 //
 @set_time_limit(3600);
 
-function wan_subdir_status($dir)
-{
-	if (file_exists($dir)) {
-		if (!is_readable($dir)) {
-			$str = "non [pas d'accès en lecture]";
-		}
-		else if (!is_writable($dir)) {
-			$str = "non [pas d'accès en écriture]";
-		}
-		else {
-			$str = "ok";
-		}
-	}
-	else {
-		$str = "non [n'existe pas]";
-	}
-
-	return $str;
-}
-
-function wan_print_head($name)
-{
-	echo "<u><b>", htmlspecialchars($name), "</b></u>\n";
-}
-
-function wan_print_row($name, $value = null)
-{
-	global $lang;
-
-	echo '- ';
-	echo htmlspecialchars(u::str_pad($name, 30));
-
-	if (!is_null($value)) {
-		echo ' : ';
-
-		if (is_bool($value)) {
-			echo ($value) ? $lang['Yes'] : $lang['No'];
-		}
-		else if (is_int($value) || $value != '') {
-			echo htmlspecialchars($value);
-		}
-		else {
-			echo '<i style="color:hsl(0, 0%, 60%)">no value</i>';
-		}
-	}
-
-	echo "\n";
-}
-
 switch ($mode) {
 	case 'debug':
-		printf("<h2>%s</h2>\n", $lang['Title']['debug']);
-		echo "<pre style='font-size:12px;margin: 20px;white-space:pre-wrap;line-height:1.3em;'>";
-
-		wan_print_head('Wanewsletter');
-		wan_print_row('Version/db_version', WANEWSLETTER_VERSION.'/'.$nl_config['db_version']);
-		wan_print_row('session_length',     $nl_config['session_length']);
-		wan_print_row('language',           $nl_config['language']);
-		wan_print_row('upload dir',         wan_subdir_status(WA_ROOTDIR.'/'.$nl_config['upload_path']));
-
-		if (!$nl_config['disable_stats']) {
-			require WA_ROOTDIR . '/includes/functions.stats.php';
-			wan_print_row('stats dir', wan_subdir_status(WA_STATSDIR));
-		}
-		wan_print_row('max_filesize',  $nl_config['max_filesize']);
-		wan_print_row('engine_send',   $nl_config['engine_send']);
-		wan_print_row('sending_limit', $nl_config['sending_limit']);
-		wan_print_row('use_smtp',      (bool) $nl_config['use_smtp']);
-
-		wan_print_head('Librairies tierces');
-
-		$composer_file = WA_ROOTDIR . '/composer.lock';
-		if (!function_exists('json_decode')) {
-			wan_print_row('Cannot read the composer.lock file! (JSON extension needed)');
-		}
-		else if (is_readable($composer_file)) {
-			$composer = json_decode(file_get_contents($composer_file), true);
-
-			foreach ($composer['packages'] as $package) {
-				$ver = $package['version'];
-
-				if (strpos($ver, 'dev-') === 0) {
-					if (isset($package['dist'])) {
-						$ref = $package['dist']['reference'];
-					}
-					else {
-						$ref = $package['source']['reference'];
-					}
-
-					if (isset($package['extra']['branch-alias'][$ver])) {
-						$ver = $package['extra']['branch-alias'][$ver];
-					}
-
-					$ver .= ' ('.$ref.')';
-				}
-				else {
-					$ver = ltrim($ver, 'v');// eg: v2.3.4 => 2.3.4
-				}
-
-				wan_print_row($package['name'], $ver);
-			}
-		}
-		else {
-			wan_print_row('Cannot read the composer.lock file!');
-		}
-
-		wan_print_head('PHP');
-		wan_print_row('Version & SAPI', sprintf('%s (%s)', PHP_VERSION, PHP_SAPI));
-		wan_print_row('Extension Bz2', extension_loaded('zlib'));
-
-		if (extension_loaded('gd')) {
-			$tmp = gd_info();
-			$format = (imagetypes() & IMG_GIF) ? 'GIF' : 'Unavailable';
-			$format = (imagetypes() & IMG_PNG) ? 'PNG' : $format;
-			$str = sprintf('oui - Version %s - Format %s', $tmp['GD Version'], $format);
-		}
-		else {
-			$str = 'non';
-		}
-		wan_print_row('Extension GD', $str);
-		wan_print_row('Extension Iconv',
-			extension_loaded('iconv') ?
-				sprintf('oui - Version %s - Implémentation %s', ICONV_VERSION, ICONV_IMPL) : 'non'
-		);
-		wan_print_row('Extension JSON', extension_loaded('json'));
-		wan_print_row('Extension Mbstring', extension_loaded('mbstring'));
-		wan_print_row('Extension OpenSSL',
-			extension_loaded('openssl') ? sprintf('oui - %s', OPENSSL_VERSION_TEXT) : 'non'
-		);
-		wan_print_row('Extension SimpleXML', extension_loaded('simplexml'));
-		wan_print_row('Extension XML', extension_loaded('xml'));
-		wan_print_row('Extension Zip', extension_loaded('zip'));
-		wan_print_row('Extension Zlib', extension_loaded('zlib'));
-
-		wan_print_row('open_basedir',  ini_get('open_basedir'));
-		wan_print_row('sys_temp_dir', sys_get_temp_dir());
-		wan_print_row('filter.default', ini_get('filter.default'));
-		wan_print_row('allow_url_fopen', ini_get_flag('allow_url_fopen'));
-		wan_print_row('allow_url_include', ini_get_flag('allow_url_include'));
-		wan_print_row('file_uploads', ini_get_flag('file_uploads'));
-		wan_print_row('upload_tmp_dir', ini_get('upload_tmp_dir'));
-		wan_print_row('upload_max_filesize', ini_get('upload_max_filesize'));
-		wan_print_row('post_max_size', ini_get('post_max_size'));
-		wan_print_row('max_input_time', ini_get('max_input_time'));
-		wan_print_row('memory_limit', ini_get('memory_limit'));
-		wan_print_row('mail.add_x_header', ini_get_flag('mail.add_x_header'));
-		wan_print_row('mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
-		wan_print_row('sendmail_from', ini_get('sendmail_from'));
-		wan_print_row('sendmail_path', ini_get('sendmail_path'));
-
-		if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
-			wan_print_row('SMTP Server', ini_get('SMTP').':'.ini_get('smtp_port'));
-		}
-
-		wan_print_head('Base de données');
-
-		wan_print_row('Nom/Version', sprintf('%s %s',
-			$db->infos['label'],
-			($db::ENGINE == 'sqlite') ? $db->libVersion : $db->serverVersion
-		));
-
-		if ($db::ENGINE != 'sqlite') {
-			wan_print_row('Librairie cliente', $db->clientVersion);
-			wan_print_row('Jeu de caractères', $db->encoding());
-		}
-
-		wan_print_row('Driver', $db->infos['driver']);
-
-		wan_print_head('Divers');
-
-		wan_print_row('Serveur HTTP/OS', $_SERVER['SERVER_SOFTWARE'] . ' on ' . PHP_OS);
-		wan_print_row('Agent utilisateur',   $user_agent);
-		wan_print_row('Connexion sécurisée', wan_ssl_connection());
-
-		echo "</pre>";
-
-		$output->page_footer();
-		exit;
+		print_debug_infos();
+		$output->footer();
 		break;
 
 	case 'export':
@@ -373,8 +205,8 @@ switch ($mode) {
 			}
 			else {
 				$format = filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
-				if (!in_array($format, [FORMAT_TEXTE, FORMAT_HTML])) {
-					$format = FORMAT_TEXTE;
+				if (!in_array($format, [FORMAT_TEXT, FORMAT_HTML])) {
+					$format = FORMAT_TEXT;
 				}
 			}
 
@@ -384,7 +216,7 @@ switch ($mode) {
 						AND al.liste_id  = $listdata[liste_id]
 						AND al.format    = $format
 						AND al.confirmed = " . SUBSCRIBE_CONFIRMED . "
-				WHERE a.abo_status = " . ABO_ACTIF;
+				WHERE a.abo_status = " . ABO_ACTIVE;
 			$result = $db->query($sql);
 
 			$contents = '';
@@ -428,20 +260,20 @@ switch ($mode) {
 				sendfile($filename, $mime_type, $contents);
 			}
 			else {
-				if (!($fw = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
+				if (!($fp = fopen($nl_config['tmp_dir'] . '/' . $filename, 'wb'))) {
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
-				fwrite($fw, $contents);
-				fclose($fw);
+				fwrite($fp, $contents);
+				fclose($fp);
 
-				$output->displayMessage('Success_export');
+				$output->message('Success_export');
 			}
 		}
 
-		$output->set_filenames(['tool_body' => 'export_body.tpl']);
+		$template = new Template('export_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_EXPORT'    => $lang['Title']['export'],
 			'L_EXPLAIN_EXPORT'  => nl2br($lang['Explain']['export']),
 			'L_EXPORT_FORMAT'   => $lang['Export_format'],
@@ -451,40 +283,36 @@ switch ($mode) {
 			'L_DOWNLOAD'        => $lang['Download_action'],
 			'L_STORE_ON_SERVER' => $lang['Store_action'],
 			'L_VALID_BUTTON'    => $lang['Button']['valid'],
-			'L_RESET_BUTTON'    => $lang['Button']['reset'],
-
-			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
+			'L_RESET_BUTTON'    => $lang['Button']['reset']
 		]);
 
 		if (ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED) {
-			$output->assign_block_vars('compress_option', [
+			$template->assignToBlock('compress_option', [
 				'L_COMPRESS' => $lang['Compress'],
 				'L_NO'       => $lang['No']
 			]);
 
 			if (ZIPLIB_LOADED) {
-				$output->assign_block_vars('compress_option.zip_compress', []);
+				$template->assignToBlock('compress_option.zip_compress');
 			}
 
 			if (ZLIB_LOADED) {
-				$output->assign_block_vars('compress_option.gzip_compress', []);
+				$template->assignToBlock('compress_option.gzip_compress');
 			}
 
 			if (BZIP2_LOADED) {
-				$output->assign_block_vars('compress_option.bz2_compress', []);
+				$template->assignToBlock('compress_option.bz2_compress');
 			}
 		}
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-			require WA_ROOTDIR . '/includes/functions.box.php';
-
-			$output->assign_block_vars('format_box', [
+			$template->assignToBlock('format_box', [
 				'L_FORMAT'   => $lang['Format_to_export'],
 				'FORMAT_BOX' => format_box('format')
 			]);
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'import':
@@ -514,7 +342,7 @@ switch ($mode) {
 						$output->redirect('./tools.php?mode=import', 4);
 						$output->addLine(sprintf($lang['Message']['Error_local'], htmlspecialchars($filename)));
 						$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
-						$output->displayMessage();
+						$output->message();
 					}
 				}
 				else {
@@ -533,7 +361,7 @@ switch ($mode) {
 							$upload_error = 'Upload_error_5';
 						}
 
-						$output->displayMessage($upload_error);
+						$output->message($upload_error);
 					}
 
 					//
@@ -543,11 +371,11 @@ switch ($mode) {
 					//
 					if (!is_readable($tmp_filename)) {
 						$unlink = true;
-						$tmp_filename = tempnam(WA_TMPDIR, 'wa');
+						$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa');
 
 						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
-							$output->displayMessage('Upload_error_5');
+							$output->message('Upload_error_5');
 						}
 					}
 				}
@@ -602,7 +430,7 @@ switch ($mode) {
 					);
 
 					if (!xml_parse($parser, $list_tmp)) {
-						$output->displayMessage(sprintf(
+						$output->message(sprintf(
 							$lang['Message']['Invalid_xml_data'],
 							htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
 							xml_get_current_line_number($parser)
@@ -612,7 +440,7 @@ switch ($mode) {
 					xml_parser_free($parser);
 				}
 				else {
-					$output->displayMessage('Xml_ext_needed');
+					$output->message('Xml_ext_needed');
 				}
 			}
 			else {
@@ -632,7 +460,7 @@ switch ($mode) {
 				$output->redirect('./tools.php?mode=import', 4);
 				$output->addLine($lang['Message']['No_data_received']);
 				$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
-				$output->displayMessage();
+				$output->message();
 			}
 
 			$report = '';
@@ -662,15 +490,13 @@ switch ($mode) {
 				}
 				else {
 					$format = filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
-					if (!in_array($format, [FORMAT_TEXTE, FORMAT_HTML])) {
-						$format = FORMAT_TEXTE;
+					if (!in_array($format, [FORMAT_TEXT, FORMAT_HTML])) {
+						$format = FORMAT_TEXT;
 					}
 				}
 
 				$current_time = time();
 				$emails_ok    = [];
-
-				fake_header(false);
 
 				$sql_emails = array_map('strtolower', $emails);
 				$sql_emails = array_map([$db, 'escape'], $sql_emails);
@@ -693,7 +519,7 @@ switch ($mode) {
 						$sql_data['format']        = $format;
 						$sql_data['register_key']  = generate_key(20, false);
 						$sql_data['register_date'] = $current_time;
-						$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF)
+						$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIVE)
 							? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 
 						$db->insert(ABO_LISTE_TABLE, $sql_data);
@@ -719,7 +545,7 @@ switch ($mode) {
 
 					$sql_data = [];
 					$sql_data['abo_email']  = $email;
-					$sql_data['abo_status'] = ABO_ACTIF;
+					$sql_data['abo_status'] = ABO_ACTIVE;
 
 					try {
 						$db->insert(ABONNES_TABLE, $sql_data);
@@ -742,7 +568,7 @@ switch ($mode) {
 
 					$db->commit();
 
-					fake_header(true);
+					fake_header();
 				}
 			}
 
@@ -761,20 +587,20 @@ switch ($mode) {
 				$url = 'data:text/plain;base64,' . base64_encode($report_str);
 				$output->addLine($lang['Message']['Success_import3'], $url);
 
-				file_put_contents(WA_TMPDIR . '/wa_import_report.txt', $report_str);
+				file_put_contents($nl_config['tmp_dir'] . '/wa_import_report.txt', $report_str);
 			}
 			else {
 				$output->addLine($lang['Message']['Success_import']);
 			}
 
-			$output->displayMessage();
+			$output->message();
 		}
 
 		$max_filesize = get_max_filesize();
 
-		$output->set_filenames(['tool_body' => 'import_body.tpl']);
+		$template = new Template('import_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_IMPORT'   => $lang['Title']['import'],
 			'L_EXPLAIN_IMPORT' => nl2br(sprintf($lang['Explain']['import'],
 				MAX_IMPORT,
@@ -786,14 +612,11 @@ switch ($mode) {
 			'L_VALID_BUTTON'   => $lang['Button']['valid'],
 			'L_RESET_BUTTON'   => $lang['Button']['reset'],
 
-			'S_HIDDEN_FIELDS'  => $output->getHiddenFields(),
 			'S_ENCTYPE'        => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
 		]);
 
 		if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-			require WA_ROOTDIR . '/includes/functions.box.php';
-
-			$output->assign_block_vars('format_box', [
+			$template->assignToBlock('format_box', [
 				'L_FORMAT'   => $lang['Format_to_import'],
 				'FORMAT_BOX' => format_box('format')
 			]);
@@ -804,7 +627,7 @@ switch ($mode) {
 			// L'upload est disponible sur le serveur
 			// Affichage du champ file pour importation
 			//
-			$output->assign_block_vars('upload_file', [
+			$template->assignToBlock('upload_file', [
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 				'L_UPLOAD_FILE'   => $lang['File_upload'],
 				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
@@ -812,7 +635,7 @@ switch ($mode) {
 			]);
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'ban':
@@ -857,7 +680,7 @@ switch ($mode) {
 			$output->addLine($lang['Message']['Success_modif']);
 			$output->addLine($lang['Click_return_back'], './tools.php?mode=ban');
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 
 		$sql = "SELECT ban_id, ban_email
@@ -877,9 +700,9 @@ switch ($mode) {
 		}
 		$unban_email_box .= '</select>';
 
-		$output->set_filenames(['tool_body' => 'ban_list_body.tpl']);
+		$template = new Template('ban_list_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_BAN'     => $lang['Title']['ban'],
 			'L_EXPLAIN_BAN'   => nl2br($lang['Explain']['ban']),
 			'L_EXPLAIN_UNBAN' => nl2br($lang['Explain']['unban']),
@@ -888,11 +711,10 @@ switch ($mode) {
 			'L_VALID_BUTTON'  => $lang['Button']['valid'],
 			'L_RESET_BUTTON'  => $lang['Button']['reset'],
 
-			'UNBAN_EMAIL_BOX' => $unban_email_box,
-			'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+			'UNBAN_EMAIL_BOX' => $unban_email_box
 		]);
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'attach':
@@ -939,7 +761,7 @@ switch ($mode) {
 			$output->addLine($lang['Message']['Success_modif']);
 			$output->addLine($lang['Click_return_back'], './tools.php?mode=attach');
 			$output->addLine($lang['Click_return_index'], './index.php');
-			$output->displayMessage();
+			$output->message();
 		}
 
 		$sql = "SELECT fe_id, fe_ext
@@ -959,9 +781,9 @@ switch ($mode) {
 		}
 		$reallow_ext_box .= '</select>';
 
-		$output->set_filenames(['tool_body' => 'forbidden_ext_body.tpl']);
+		$template = new Template('forbidden_ext_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_EXT'          => $lang['Title']['attach'],
 			'L_EXPLAIN_TO_FORBID'  => nl2br($lang['Explain']['forbid_ext']),
 			'L_EXPLAIN_TO_REALLOW' => nl2br($lang['Explain']['reallow_ext']),
@@ -970,11 +792,10 @@ switch ($mode) {
 			'L_VALID_BUTTON'       => $lang['Button']['valid'],
 			'L_RESET_BUTTON'       => $lang['Button']['reset'],
 
-			'REALLOW_EXT_BOX'      => $reallow_ext_box,
-			'S_HIDDEN_FIELDS'      => $output->getHiddenFields()
+			'REALLOW_EXT_BOX'      => $reallow_ext_box
 		]);
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'backup':
@@ -986,46 +807,33 @@ switch ($mode) {
 		$drop_option = filter_input(INPUT_POST, 'drop_option', FILTER_VALIDATE_BOOLEAN);
 
 		if (!($backup = $db->initBackup())) {
-			$output->displayMessage('Database_unsupported');
+			$output->message('Database_unsupported');
 		}
 
-		$tables_list = $backup->get_tables();
-		$tables      = [];
-
-		foreach ($tables_list as $tablename => $tabletype) {
-			if (!isset($_POST['submit'])) {
-				if (!isset($sql_schemas[$tablename])) {
-					$tables_plus[] = $tablename;
-				}
-			}
-			else {
-				if (isset($sql_schemas[$tablename]) || in_array($tablename, $tables_plus)) {
-					$tables[] = ['name' => $tablename, 'type' => $tabletype];
-				}
-			}
-		}
+		$tables = $backup->getTablesList();
 
 		if (isset($_POST['submit'])) {
 			//
 			// Lancement de la sauvegarde. Pour commencer, l'entête du fichier sql
 			//
-			$contents  = $backup->header(sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION));
-			$contents .= $backup->get_other_queries($drop_option);
+			$contents = $backup->header(sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION));
 
-			fake_header(false);
+			foreach ($tables as $tablename) {
+				if (!isset($sql_schemas[$tablename]) && !in_array($tablename, $tables_plus)) {
+					continue;
+				}
 
-			foreach ($tables as $tabledata) {
 				if ($backup_type != 2) {// save complète ou structure uniquement
-					$contents .= $backup->get_table_structure($tabledata, $drop_option);
+					$contents .= $backup->getStructure($tablename, $drop_option);
 				}
 
 				if ($backup_type != 1) {// save complète ou données uniquement
-					$contents .= $backup->get_table_data($tabledata['name']);
+					$contents .= $backup->getData($tablename);
 				}
 
 				$contents .= $EOL . $EOL;
 
-				fake_header(true);
+				fake_header();
 			}
 
 			$filename  = 'wanewsletter_backup.sql';
@@ -1041,20 +849,26 @@ switch ($mode) {
 				sendfile($filename, $mime_type, $contents);
 			}
 			else {
-				if (!($fw = fopen(WA_TMPDIR . '/' . $filename, 'wb'))) {
+				if (!($fp = fopen($nl_config['tmp_dir'] . '/' . $filename, 'wb'))) {
 					trigger_error('Impossible d\'écrire le fichier de sauvegarde', E_USER_ERROR);
 				}
 
-				fwrite($fw, $contents);
-				fclose($fw);
+				fwrite($fp, $contents);
+				fclose($fp);
 
-				$output->displayMessage('Success_backup');
+				$output->message('Success_backup');
 			}
 		}
 
-		$output->set_filenames(['tool_body' => 'backup_body.tpl']);
+		foreach ($tables as $tablename) {
+			if (!isset($sql_schemas[$tablename])) {
+				$tables_plus[] = $tablename;
+			}
+		}
 
-		$output->assign_vars([
+		$template = new Template('backup_body.tpl');
+
+		$template->assign([
 			'L_TITLE_BACKUP'    => $lang['Title']['backup'],
 			'L_EXPLAIN_BACKUP'  => nl2br($lang['Explain']['backup']),
 			'L_BACKUP_TYPE'     => $lang['Backup_type'],
@@ -1068,9 +882,7 @@ switch ($mode) {
 			'L_YES'             => $lang['Yes'],
 			'L_NO'              => $lang['No'],
 			'L_VALID_BUTTON'    => $lang['Button']['valid'],
-			'L_RESET_BUTTON'    => $lang['Button']['reset'],
-
-			'S_HIDDEN_FIELDS'   => $output->getHiddenFields()
+			'L_RESET_BUTTON'    => $lang['Button']['reset']
 		]);
 
 		if ($total_tables = count($tables_plus)) {
@@ -1087,37 +899,35 @@ switch ($mode) {
 			}
 			$tables_box .= '</select>';
 
-			$output->assign_block_vars('tables_box', [
+			$template->assignToBlock('tables_box', [
 				'L_ADDITIONAL_TABLES' => $lang['Additionnal_tables'],
 				'S_TABLES_BOX'        => $tables_box
 			]);
 		}
 
 		if (ZIPLIB_LOADED || ZLIB_LOADED || BZIP2_LOADED) {
-			$output->assign_block_vars('compress_option', [
+			$template->assignToBlock('compress_option', [
 				'L_COMPRESS' => $lang['Compress']
 			]);
 
 			if (ZIPLIB_LOADED) {
-				$output->assign_block_vars('compress_option.zip_compress', []);
+				$template->assignToBlock('compress_option.zip_compress');
 			}
 
 			if (ZLIB_LOADED) {
-				$output->assign_block_vars('compress_option.gzip_compress', []);
+				$template->assignToBlock('compress_option.gzip_compress');
 			}
 
 			if (BZIP2_LOADED) {
-				$output->assign_block_vars('compress_option.bz2_compress', []);
+				$template->assignToBlock('compress_option.bz2_compress');
 			}
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'restore':
 		if (isset($_POST['submit'])) {
-			require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
-
 			$upload_file = (!empty($_FILES['upload_file'])) ? $_FILES['upload_file'] : null;
 			$local_file  = trim(filter_input(INPUT_POST, 'local_file'));
 
@@ -1145,7 +955,7 @@ switch ($mode) {
 						$output->redirect('./tools.php?mode=restore', 4);
 						$output->addLine(sprintf($lang['Message']['Error_local'], htmlspecialchars($filename)));
 						$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
-						$output->displayMessage();
+						$output->message();
 					}
 				}
 				else {
@@ -1164,7 +974,7 @@ switch ($mode) {
 							$upload_error = 'Upload_error_5';
 						}
 
-						$output->displayMessage($upload_error);
+						$output->message($upload_error);
 					}
 
 					//
@@ -1174,11 +984,11 @@ switch ($mode) {
 					//
 					if (!is_readable($tmp_filename)) {
 						$unlink = true;
-						$tmp_filename = tempnam(WA_TMPDIR, 'wa');
+						$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa');
 
 						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
-							$output->displayMessage('Upload_error_5');
+							$output->message('Upload_error_5');
 						}
 					}
 				}
@@ -1196,37 +1006,34 @@ switch ($mode) {
 				$output->redirect('./tools.php?mode=restore', 4);
 				$output->addLine($lang['Message']['No_data_received']);
 				$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
-				$output->displayMessage();
+				$output->message();
 			}
 
-			$queries = Dblayer\parseSQL($data);
+			$queries = parse_sql($data);
 
 			$db->beginTransaction();
 
-			fake_header(false);
-
 			foreach ($queries as $query) {
 				$db->query($query);
-				fake_header(true);
+				fake_header();
 			}
 
 			$db->commit();
 
-			$output->displayMessage('Success_restore');
+			$output->message('Success_restore');
 		}
 
 		$max_filesize = get_max_filesize();
 
-		$output->set_filenames(['tool_body' => 'restore_body.tpl']);
+		$template = new Template('restore_body.tpl');
 
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE_RESTORE'   => $lang['Title']['restore'],
 			'L_EXPLAIN_RESTORE' => nl2br($lang['Explain']['restore']),
 			'L_LOCAL_FILE'      => $lang['File_local'],
 			'L_VALID_BUTTON'    => $lang['Button']['valid'],
 			'L_RESET_BUTTON'    => $lang['Button']['reset'],
 
-			'S_HIDDEN_FIELDS'   => $output->getHiddenFields(),
 			'S_ENCTYPE'         => ($max_filesize) ? 'multipart/form-data' : 'application/x-www-form-urlencoded'
 		]);
 
@@ -1235,7 +1042,7 @@ switch ($mode) {
 			// L'upload est disponible sur le serveur
 			// Affichage du champ file pour importation
 			//
-			$output->assign_block_vars('upload_file', [
+			$template->assignToBlock('upload_file', [
 				'L_BROWSE_BUTTON' => $lang['Button']['browse'],
 				'L_UPLOAD_FILE'   => $lang['File_upload_restore'],
 				'L_MAXIMUM_SIZE'  => sprintf($lang['Maximum_size'], formateSize($max_filesize)),
@@ -1243,7 +1050,7 @@ switch ($mode) {
 			]);
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 
 	case 'generator':
@@ -1255,7 +1062,7 @@ switch ($mode) {
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
 				$code_html .= $lang['Format'] . " : <select name=\"format\">\n";
-				$code_html .= "<option value=\"" . FORMAT_TEXTE . "\">TXT</option>\n";
+				$code_html .= "<option value=\"" . FORMAT_TEXT . "\">TXT</option>\n";
 				$code_html .= "<option value=\"" . FORMAT_HTML . "\">HTML</option>\n";
 				$code_html .= "</select>\n";
 			}
@@ -1275,9 +1082,9 @@ switch ($mode) {
 			$code_php .= sprintf("require '%s/newsletter.php';\n", WA_ROOTDIR);
 			$code_php .= '?' . ">\n";
 
-			$output->set_filenames(['tool_body' => 'result_generator_body.tpl']);
+			$template = new Template('result_generator_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE_GENERATOR'   => $lang['Title']['generator'],
 				'L_EXPLAIN_CODE_HTML' => nl2br($lang['Explain']['code_html']),
 				'L_EXPLAIN_CODE_PHP'  => nl2br($lang['Explain']['code_php']),
@@ -1287,22 +1094,19 @@ switch ($mode) {
 			]);
 		}
 		else {
-			$output->set_filenames(['tool_body' => 'generator_body.tpl']);
+			$template = new Template('generator_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE_GENERATOR'   => $lang['Title']['generator'],
 				'L_EXPLAIN_GENERATOR' => nl2br($lang['Explain']['generator']),
 				'L_TARGET_FORM'       => $lang['Target_form'],
-				'L_VALID_BUTTON'      => $lang['Button']['valid'],
-
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+				'L_VALID_BUTTON'      => $lang['Button']['valid']
 			]);
 		}
 
-		$output->assign_var_from_handle('TOOL_BODY', 'tool_body');
+		$main->assign(['TOOL_BODY' => $template]);
 		break;
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$main->pparse();
+$output->footer();

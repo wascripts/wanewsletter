@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -34,11 +34,13 @@ if (!file_exists(WA_ROOTDIR . '/vendor/autoload.php')) {
 	exit;
 }
 
-require WA_ROOTDIR . '/includes/constantes.php';
-require WA_ROOTDIR . '/includes/compat.inc.php';
-require WA_ROOTDIR . '/includes/functions.php';
-require WA_ROOTDIR . '/includes/functions.wrapper.php';
-require WA_ROOTDIR . '/vendor/autoload.php';
+require WA_ROOTDIR.'/includes/constantes.php';
+require WA_ROOTDIR.'/includes/compat.inc.php';
+require WA_ROOTDIR.'/includes/functions.php';
+require WA_ROOTDIR.'/includes/functions.db.php';
+require WA_ROOTDIR.'/includes/functions.stats.php';
+require WA_ROOTDIR.'/includes/functions.wrapper.php';
+require WA_ROOTDIR.'/vendor/autoload.php';
 
 //
 // Configuration des gestionnaires d'erreurs et d'exceptions
@@ -49,56 +51,63 @@ set_exception_handler(__NAMESPACE__.'\\wan_exception_handler');
 //
 // Chargement automatique des classes
 //
-spl_autoload_register(__NAMESPACE__.'\\wan_autoloader');
-
-//
-// Intialisation des variables pour éviter toute injection malveillante de code
-//
-$simple_header = $error = false;
-$nl_config     = $lang = $datetime = $admindata = $msg_error = [];
-
-// Chargement du fichier de configuration initial
-$prefixe = (isset($_POST['prefixe'])) ? $_POST['prefixe'] : 'wa_';
-$dsn     = '';
-
-load_config_file();
-
-// Log éventuels des erreurs
-if (DEBUG_LOG_ENABLED && DEBUG_LOG_FILE != '') {
-	$filename = DEBUG_LOG_FILE;
-	if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
-		if (!preg_match('#^[a-z]:[/\\]#i', $filename)) {
-			$filename = WA_LOGSDIR . '/' . $filename;
+spl_autoload_register(function ($classname) {
+	if (strpos($classname, '\\')) {
+		list($prefix, $classname) = explode('\\', $classname, 2);
+		if ($prefix != 'Wanewsletter') {
+			return null;
 		}
 	}
-	else if ($filename[0] != '/') {
-		$filename = WA_LOGSDIR . '/' . $filename;
+
+	if (strpos($classname, '\\')) {
+		// Chemin includes/<namespace>/<classname>.php
+		$filename = sprintf('%s/includes/%s.php', WA_ROOTDIR, str_replace('\\', '/', $classname));
+	}
+	else {
+		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
+		$filename = sprintf('%s/includes/class.%s.php', WA_ROOTDIR, strtolower($classname));
 	}
 
-	ini_set('error_log', $filename);
-	unset($filename);
+	if (is_readable($filename)) {
+		require $filename;
+	}
+});
+
+//
+// Initialisation du système d’affichage
+//
+if (filter_input(INPUT_GET, 'output') == 'json') {
+	$output = new Output\Json;
 }
+else if (check_cli()) {
+	$output = new Output\CommandLine;
+}
+else {
+	// Utilisation du thème wanewsletter ?
+	$use_theme  = check_in_admin();
+	$use_theme |= defined(__NAMESPACE__.'\\IN_INSTALL');
+	$use_theme |= defined(__NAMESPACE__.'\\IN_PROFILCP');
 
-// Doit être placé après load_config_file()
-require WA_ROOTDIR . '/includes/wadb_init.php';
+	$output = new Output\Html($use_theme);
 
-//
-// Initialisation du système de templates
-//
-$output = null;
-if (!check_cli()) {
-	$output = new Output(sprintf('%s/templates/%s',
-		WA_ROOTDIR,
+	Template::setDir(sprintf('%s/templates/%s', WA_ROOTDIR,
 		(check_in_admin() ? 'admin/' : '')
 	));
 }
+
+//
+// Initialisation des variables pour éviter toute injection malveillante de code
+//
+$error     = false;
+$msg_error = [];
+
+//
+// Chargement de la configuration de base
+//
+load_config();
 
 //
 // Initialisation de patchwork/utf8
 //
 \Patchwork\Utf8\Bootup::initAll();
 
-//
-// Configuration par défaut
-//
-load_settings();

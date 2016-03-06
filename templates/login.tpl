@@ -1,6 +1,6 @@
 <form class="compact" id="login-form" method="post" action="{S_SCRIPT_NAME}?mode=login">
 <ul class="links">
-	<li><a href="{S_SCRIPT_NAME}?mode=reset_passwd">{L_RESET_PASSWD}</a></li>
+	<li><a href="{S_SCRIPT_NAME}?mode=reset">{L_RESET_PASSWD}</a></li>
 </ul>
 
 <div class="block">
@@ -25,7 +25,7 @@
 		</tr -->
 	</table>
 
-	<div class="bottom">{S_HIDDEN_FIELDS}
+	<div class="bottom">
 		<button type="submit" name="submit" class="primary">{L_VALID_BUTTON}</button>
 	</div>
 </div>

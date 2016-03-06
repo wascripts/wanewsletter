@@ -4,7 +4,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
  * @status experimental
@@ -17,6 +17,7 @@
 
 namespace Wanewsletter;
 
+use Elkuku\Console\Helper\ConsoleProgressBar;
 use Patchwork\Utf8 as u;
 
 define('WA_ROOTDIR', dirname(__DIR__));
@@ -25,12 +26,11 @@ require WA_ROOTDIR . '/includes/common.inc.php';
 
 // Le script n’est utilisable qu’en ligne de commande.
 if (!check_cli()) {
-	echo "This script must be called only in commande ligne.";
+	echo "This script must be called from command line only.";
 	exit;
 }
 else if (!isset($argc)) {
-	echo "Please enable PHP option register_argc_argv.";
-	exit(1);
+	$output->error("Please enable PHP option register_argc_argv.");
 }
 
 //
@@ -44,13 +44,13 @@ load_settings();
 $argv[0]  = basename($argv[0]);
 $version  = WANEWSLETTER_VERSION;
 $emails   = [];
-$format   = FORMAT_TEXTE;
+$format   = FORMAT_TEXT;
 $liste_id = null;
 $message  = null;
+$packet   = 30;
+$delay    = 10;
 
 $process_send = $process_subscribe = $import_mail = false;
-$send_packet  = 30;
-$send_delay   = 10;
 
 if ($argc == 1) {
 	echo "Usage: $argv[0] [OPTION]...\n";
@@ -59,8 +59,8 @@ if ($argc == 1) {
 }
 
 //
-// En mode un email par abonné, on envoit tous les emails par défaut (avec une pause
-// à intervalle régulier (voir plus haut)).
+// En mode d’envoi personnalisé, on envoie tous les emails par défaut
+// (avec une pause à intervalle régulier (défini par $delay)).
 //
 if ($nl_config['engine_send'] == ENGINE_UNIQ) {
 	$nl_config['sending_limit'] = 0;
@@ -82,7 +82,7 @@ foreach ($opts as $name => $value) {
 	//
 	else if ($name == 'license') {
 		echo "Wanewsletter $version\n";
-		echo "Copyright (c) 2002-2015 Aurélien Maille\n";
+		echo "Copyright (c) 2002-2016 Aurélien Maille\n";
 		echo "\n";
 
 		if (preg_match('/^fr[_-]/', getenv('LANG'))) {
@@ -132,33 +132,33 @@ WANSHELL;
 	//
 	else if ($name == 'help' || $name == 'h') {
 		echo <<<WANSHELL
-Usage: $argv[0] [options]
+Usage : $argv[0] [options]
 
-Envois:
-  -pNUM, --process-send=NUM  Lance un envoi avec NUM un id de liste
-  -lNUM, --limit=NUM   Limite à NUM le nombre d'emails envoyés
-  -kNUM, --packet=NUM  Nombre d'envois maximum par flot (par défaut, 400)
-  -dNUM, --delay=NUM   Durée en secondes entre les flots d'envois
-                       (par défaut, 10).
+Envois :
+  -pNUM, --process-send=NUM Lance un envoi avec NUM un ID de liste
+  -lNUM, --limit=NUM        Limite à NUM le nombre d’emails envoyés
+  -kNUM, --packet=NUM       Nombre d’envois maximum par flôt (par défaut : 30)
+  -dNUM, --delay=NUM        Durée en secondes entre les flôts d’envois
+                            (par défaut : 10).
 
-Divers:
-  --process-subscribe=NUM  Validation des inscriptions par email
-  --import-mail=NUM        Importation d'emails avec NUM un id de liste
-  --format=FORMAT          FORMAT peut prendre la valeur 'plain' ou 'html'
-                           'text' et 'texte' sont acceptés comme
-                           alternative à 'plain'.
+Divers :
+  --process-subscribe=NUM   Validation des inscriptions par email avec NUM
+                            un ID de liste
+  --import-mail=NUM         Importation d’emails avec NUM un ID de liste
+  --format=FORMAT           FORMAT peut prendre la valeur 'plain' ou 'html'
+                            'text' et 'texte' sont acceptés comme
+                            équivalents à 'plain'.
 
-Informations:
-  -h, --help     Affiche la présente aide
-  -v, --version  Affiche les informations de version
-      --license  Affiche les informations de licence
+Informations :
+  -h, --help                Affiche la présente aide
+  -v, --version             Affiche les informations de version
+      --license             Affiche les informations de licence
 
-Exemple d'importation d'emails :
+Exemple d’importation d'emails :
   $argv[0] --import-mail=1 -- address1@domain.tld address2@domain.tld
 
-La liste d'adresses peut également être fournie en entrée, les adresses
-dans le fichier étant séparées par des caractères blancs (espace, tabulation
-ou saut de ligne) :
+La liste d’adresses peut également être fournie en entrée, les adresses
+étant séparées par des caractères blancs :
   $argv[0] --import-mail=1 < /path/to/address_list
 
 
@@ -189,13 +189,13 @@ WANSHELL;
 	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
 	//
 	else if ($name == 'packet' || $name == 'k') {
-		$send_packet = intval($value);
+		$packet = intval($value);
 	}
 	//
 	// Nombre d'envois maximum à effectuer lors d'un flot d'envois
 	//
 	else if ($name == 'delay' || $name == 'd') {
-		$send_delay = intval($value);
+		$delay = intval($value);
 	}
 	//
 	// Importation d'emails
@@ -211,7 +211,7 @@ WANSHELL;
 		$format = $value;
 
 		if (in_array($format, ['plain', 'text', 'texte'])) {
-			$format = FORMAT_TEXTE;
+			$format = FORMAT_TEXT;
 		}
 		else if ($format == 'html') {
 			$format = FORMAT_HTML;
@@ -249,123 +249,50 @@ if (!is_null($liste_id)) {
 }
 
 if ($process_send) {
-	define('SEND_PACKET', $send_packet);
-	define('SEND_DELAY',  $send_delay);
+	$sender = new Sender($listdata);
+	$sender->lock();
 
-	require WA_ROOTDIR . '/includes/engine_send.php';
+	if ($nl_config['engine_send'] != ENGINE_BCC) {
+		$progressbar = null;
+		$counter = 0;
 
-	$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
-		FROM " . LOG_TABLE . "
-		WHERE liste_id = $listdata[liste_id]
-			AND log_status = " . STATUS_STANDBY . "
-		LIMIT 1 OFFSET 0";
-	$result = $db->query($sql);// on récupère le dernier log en statut d'envoi
-
-	if (!($logdata = $result->fetch())) {
-		echo $lang['Message']['No_log_to_send'] . "\n";
-		exit(0);
+		$sender->registerHook('start-send', function ($params) use (&$progressbar) {
+			$progressbar = new ConsoleProgressBar(
+				'Sending emails [%bar%] %current%/%max% %percent%',
+				'=>',
+				' ',
+				76,
+				count($params['list']),
+				['ansi_terminal' => (function_exists('posix_isatty') && posix_isatty(STDOUT))]
+			);
+		});
+		$sender->registerHook('pre-send', function () use (&$counter, $packet, $delay) {
+			if ($counter > 0 && $delay > 0 && ($counter % $packet) == 0) {
+				sleep($delay);
+			}
+		});
+		$sender->registerHook('post-send', function () use (&$progressbar, &$counter) {
+			$progressbar->update(++$counter);
+		});
 	}
 
-	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-		FROM " . JOINED_FILES_TABLE . " AS jf
-			INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
-			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-				AND l.liste_id = $listdata[liste_id]
-				AND l.log_id   = $logdata[log_id]
-		ORDER BY jf.file_real_name ASC";
-	$result = $db->query($sql);
+	$result = $sender->process();
 
-	$logdata['joined_files'] = $result->fetchAll();
+	if ($result['total_to_send'] > 0) {
+		$message = sprintf($lang['Message']['Success_send'],
+			$nl_config['sending_limit'],
+			$result['total_sent'],
+			($result['total_sent'] + $result['total_to_send'])
+		);
+	}
+	else {
+		$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
+	}
 
-	//
-	// On lance l'envoi
-	//
-	$message = launch_sending($listdata, $logdata);
-
-	echo "\n";
+	echo "\n";// Permet de revenir à la ligne après la barre de progression !
 }
 else if ($process_subscribe) {
-	require WA_ROOTDIR . '/includes/functions.stats.php';
-
-	$sub = new Subscription($listdata);
-	$pop = new PopClient();
-	$pop->options([
-		'starttls' => ($pop_tls == SECURITY_STARTTLS)
-	]);
-
-	try {
-		$server = ($listdata['pop_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
-		$server = sprintf($server, $listdata['pop_host'], $listdata['pop_port']);
-
-		if (!$pop->connect($server, $listdata['pop_user'], $listdata['pop_pass'])) {
-			throw new Exception(sprintf(
-				"Failed to connect to POP server (%s)",
-				$pop->responseData
-			));
-		}
-	}
-	catch (Exception $e) {
-		trigger_error(sprintf($lang['Message']['bad_pop_param'], $e->getMessage()), E_USER_ERROR);
-	}
-
-	$total    = $pop->stat_box();
-	$mail_box = $pop->list_mail();
-
-	foreach ($mail_box as $mail_id => $mail_size) {
-		$headers = $pop->parse_headers($mail_id);
-
-		if (!isset($headers['from']) || !preg_match('/^(?:"?([^"]*?)"?)?[ ]*(?:<)?([^> ]+)(?:>)?$/i', $headers['from'], $m)) {
-			continue;
-		}
-
-		$pseudo = (isset($m[1])) ? trim(strip_tags(u::filter($m[1]))) : '';
-		$email  = trim($m[2]);
-
-		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
-			continue;
-		}
-
-		if (!isset($headers['subject'])) {
-			continue;
-		}
-
-		$action = mb_strtolower(trim(u::filter($headers['subject'])));
-
-		switch ($action) {
-			case 'désinscription':
-			case 'unsubscribe':
-				$action = 'desinscription';
-				break;
-			case 'subscribe':
-				$action = 'inscription';
-				break;
-			case 'confirmation':
-			case 'setformat':
-				break;
-		}
-
-		$code = $pop->contents[$mail_id]['message'];
-
-		if (!empty($code) && ($action =='confirmation' || $action == 'desinscription')) {
-			if (empty($headers['date']) || !($time = strtotime($headers['date']))) {
-				$time = time();
-			}
-
-			$sub->check_code($code, $time);
-		}
-		else if (in_array($action, ['inscription','setformat','desinscription'])) {
-			$sub->do_action($action, $email, null, $pseudo);
-		}
-
-		//
-		// On supprime l'email maintenant devenu inutile
-		//
-		$pop->delete_mail($mail_id);
-	}//end for
-
-	$pop->quit();
-
-	$message = $lang['Message']['Success_operation'];
+	$message = process_mail_action($listdata);
 }
 else if ($import_mail) {
 	if (count($emails) == 0) {
@@ -429,7 +356,7 @@ else if ($import_mail) {
 				$sql_data['format']        = $format;
 				$sql_data['register_key']  = generate_key(20, false);
 				$sql_data['register_date'] = $current_time;
-				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIF)
+				$sql_data['confirmed']     = ($abodata['abo_status'] == ABO_ACTIVE)
 					? SUBSCRIBE_CONFIRMED : SUBSCRIBE_NOT_CONFIRMED;
 
 				$db->insert(ABO_LISTE_TABLE, $sql_data);
@@ -454,7 +381,7 @@ else if ($import_mail) {
 
 			$sql_data = [];
 			$sql_data['abo_email']  = $email;
-			$sql_data['abo_status'] = ABO_ACTIF;
+			$sql_data['abo_status'] = ABO_ACTIVE;
 
 			try {
 				$db->insert(ABONNES_TABLE, $sql_data);
@@ -492,7 +419,7 @@ else if ($import_mail) {
 }
 
 if (!is_null($message)) {
-	echo strip_tags($message), "\n";
+	$output->message($message);
 }
 
 exit(0);

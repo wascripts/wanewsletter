@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -24,7 +24,7 @@ $page_id   = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
 	'options' => ['min_range' => 1, 'default' => 1]
 ]);
 
-if (!in_array($mode, ['liste', 'log', 'abonnes', 'download', 'iframe', 'export'])) {
+if (!in_array($mode, ['liste', 'log', 'abonnes', 'iframe', 'export'])) {
 	http_redirect('index.php');
 }
 
@@ -40,39 +40,25 @@ foreach ($vararray as $varname) {
 }
 
 if (($mode != 'liste' || ($mode == 'liste' && $action != 'add')) && !$_SESSION['liste']) {
-	$output->build_listbox(Auth::VIEW);
+	$output->header();
+	$output->listbox(Auth::VIEW)->pparse();
+	$output->footer();
 }
 else if ($_SESSION['liste']) {
-	$listdata = $auth->listdata[$_SESSION['liste']];
-}
-
-$output->build_listbox(Auth::VIEW, false, './view.php?mode=' . $mode);
-
-//
-// Mode download : téléchargement des fichiers joints à un log
-//
-if ($mode == 'download') {
-	if (!$auth->check_auth(Auth::VIEW, $listdata['liste_id'])) {
+	if (!$auth->check(Auth::VIEW, $_SESSION['liste'])) {
 		http_response_code(401);
-		$output->displayMessage('Not_auth_view');
+		$output->message('Not_auth_view');
 	}
 
-	$file_id = (int) filter_input(INPUT_GET, 'fid', FILTER_VALIDATE_INT);
-
-	$attach = new Attach();
-	$file   = $attach->getFile($file_id);
-
-	if (!$file || !($fp = fopen($file['path'], 'rb'))) {
-		$output->displayMessage(sprintf($lang['Message']['File_not_exists'], ''));
-	}
-
-	sendfile($file['name'], $file['type'], $fp);
+	$listdata = $auth->getLists(Auth::VIEW)[$_SESSION['liste']];
 }
+
+$listbox = $output->listbox(Auth::VIEW, false, './view.php?mode=' . $mode);
 
 //
 // Mode export : Export d'une archive et de ses fichiers joints
 //
-else if ($mode == 'export') {
+if ($mode == 'export') {
 	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 	$sql = "SELECT log_subject, log_body_text, log_body_html, log_date
@@ -85,7 +71,7 @@ else if ($mode == 'export') {
 	}
 
 	$filename = sprintf('newsletter-%s-%d.zip', date('Y.m.d', $logdata['log_date']), $log_id);
-	$tmp_filename = tempnam(WA_TMPDIR, 'wa-');
+	$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa-');
 
 	$zip = new ZipArchive();
 	$zip->open($tmp_filename, ZipArchive::CREATE);
@@ -99,8 +85,8 @@ else if ($mode == 'export') {
 	$result = $db->query($sql);
 
 	//
-	// Copie des fichiers joints dans le répertoire temporaire WA_TMPDIR/newsletter
-	// et remplacement éventuel des références cid: dans la newsletter HTML.
+	// Copie des fichiers joints et remplacement éventuel des
+	// références cid: dans la newsletter HTML.
 	//
 	while ($row = $result->fetch()) {
 		$zip->addFile(
@@ -146,11 +132,6 @@ else if ($mode == 'export') {
 // Mode iframe pour visualisation des logs
 //
 else if ($mode == 'iframe') {
-	if (!$auth->check_auth(Auth::VIEW, $listdata['liste_id'])) {
-		http_response_code(401);
-		$output->basic($lang['Message']['Not_auth_view']);
-	}
-
 	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
@@ -176,7 +157,7 @@ else if ($mode == 'iframe') {
 					$body
 				);
 
-				$output->send_headers();
+				$output->httpHeaders();
 
 				echo str_replace(
 					'{LINKS}',
@@ -212,24 +193,13 @@ else if ($mode == 'iframe') {
 // Mode gestion des abonnés
 //
 else if ($mode == 'abonnes') {
-	$other_tags = wan_get_tags();
-
-	switch ($action) {
-		case 'delete':
-			$auth_type = Auth::DEL;
-			break;
-		case 'view':
-		default:
-			$auth_type = Auth::VIEW;
-			break;
-	}
-
-	if (!$auth->check_auth($auth_type, $listdata['liste_id'])) {
-		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
+	if ($action == 'delete' && !$auth->check(Auth::DEL, $listdata['liste_id'])) {
+		$output->message('Not_auth_del');
 	}
 
 	$abo_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$get_string = '';
+	$other_tags = wan_get_tags();
 
 	//
 	// Si la fonction de recherche est sollicitée
@@ -283,14 +253,15 @@ else if ($mode == 'abonnes') {
 
 	if (($action == 'view' || $action == 'edit') && !$abo_id) {
 		$output->redirect('./view.php?mode=abonnes', 4);
-		$output->displayMessage('No_abo_id');
+		$output->message('No_abo_id');
 	}
 
 	//
 	// Visualisation du profil d'un abonné
 	//
 	if ($action == 'view') {
-		$liste_ids = $auth->check_auth(Auth::VIEW);
+		$lists = $auth->getLists(Auth::VIEW);
+		$liste_ids = array_column($lists, 'liste_id');
 
 		//
 		// Récupération des champs des tags personnalisés
@@ -313,11 +284,11 @@ else if ($mode == 'abonnes') {
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'view_abo_profil_body.tpl']);
+			$template = new Template('view_abo_profil_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE'             => sprintf($lang['Title']['profile'],
 					htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
 				),
@@ -333,14 +304,16 @@ else if ($mode == 'abonnes') {
 				'S_ABO_PSEUDO'        => (!empty($row['abo_pseudo']))
 					? htmlspecialchars($row['abo_pseudo']) : '<b>' . $lang['No_data'] . '</b>',
 				'S_ABO_EMAIL'         => htmlspecialchars($row['abo_email']),
-				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIF) ? $lang['Active'] : $lang['Inactive']
+				'S_STATUS'            => ($row['abo_status'] == ABO_ACTIVE) ? $lang['Active'] : $lang['Inactive'],
+
+				'LISTBOX'             => $listbox
 			]);
 
 			//
 			// Affichage des valeurs des tags enregistrés
 			//
 			if (count($other_tags) > 0) {
-				$output->assign_block_vars('tags', [
+				$template->assignToBlock('tags', [
 					'L_CAPTION' => $lang['TagsList'],
 					'L_NAME'    => $lang['Name'],
 					'L_VALUE'   => $lang['Value']
@@ -350,7 +323,7 @@ else if ($mode == 'abonnes') {
 					$value = $row[$tag['column_name']];
 					$value = (!is_null($value)) ? nl2br(htmlspecialchars($value)) : '<i>NULL</i>';
 
-					$output->assign_block_vars('tags.row', [
+					$template->assignToBlock('tags.row', [
 						'NAME'  => $tag['tag_name'],
 						'VALUE' => $value,
 					]);
@@ -358,8 +331,8 @@ else if ($mode == 'abonnes') {
 			}
 
 			// Actions possibles sur cette liste
-			if ($auth->check_auth(Auth::EDIT, $_SESSION['liste'])) {
-				$output->assign_block_vars('actions', [
+			if ($auth->check(Auth::EDIT, $_SESSION['liste'])) {
+				$template->assignToBlock('actions', [
 					'L_EDIT_ACCOUNT'   => $lang['Edit_account'],
 					'L_DELETE_ACCOUNT' => $lang['Button']['del_account'],
 					'S_ABO_ID'         => $row['abo_id']
@@ -370,24 +343,27 @@ else if ($mode == 'abonnes') {
 			$register_date = time();
 
 			do {
-				$liste_name   = $auth->listdata[$row['liste_id']]['liste_name'];
-				$liste_format = $auth->listdata[$row['liste_id']]['liste_format'];
+				if (!isset($lists[$row['liste_id']])) {
+					continue;
+				}
 
-				if ($liste_format == FORMAT_MULTIPLE) {
+				$format = $lists[$row['liste_id']]['liste_format'];
+
+				if ($format == FORMAT_MULTIPLE) {
 					$format = sprintf(' (%s&nbsp;: %s)',
 						$lang['Choice_Format'],
-						($row['format'] == FORMAT_HTML ? 'html' : 'texte')
+						($row['format'] == FORMAT_HTML ? 'html' : $lang['Text'])
 					);
 				}
 				else {
 					$format = sprintf(' (%s&nbsp;: %s)',
 						$lang['Format'],
-						($liste_format == FORMAT_HTML ? 'html' : 'texte')
+						($format == FORMAT_HTML ? 'html' : $lang['Text'])
 					);
 				}
 
-				$output->assign_block_vars('listerow', [
-					'LISTE_NAME'    => htmlspecialchars($liste_name),
+				$template->assignToBlock('listerow', [
+					'LISTE_NAME'    => htmlspecialchars($lists[$row['liste_id']]['liste_name']),
 					'CHOICE_FORMAT' => $format,
 					'LISTE_ID'      => $row['liste_id']
 				]);
@@ -398,13 +374,15 @@ else if ($mode == 'abonnes') {
 			}
 			while ($row = $result->fetch());
 
-			$output->assign_var('S_REGISTER_DATE', convert_time($admindata['admin_dateformat'], $register_date));
+			$template->assign([
+				'S_REGISTER_DATE' => convert_time($admindata['admin_dateformat'], $register_date)
+			]);
 
-			$output->pparse('body');
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 		else {
-			$output->displayMessage('abo_not_exists');
+			$output->message('abo_not_exists');
 		}
 	}
 
@@ -412,7 +390,8 @@ else if ($mode == 'abonnes') {
 	// Édition d'un profil d'abonné
 	//
 	else if ($action == 'edit') {
-		$liste_ids = $auth->check_auth(Auth::EDIT);
+		$lists = $auth->getLists(Auth::EDIT);
+		$liste_ids = array_column($lists, 'liste_id');
 
 		$sql = "SELECT liste_id
 			FROM " . ABO_LISTE_TABLE . "
@@ -431,7 +410,7 @@ else if ($mode == 'abonnes') {
 		//
 		if (count($tmp_ids) == 0) {
 			http_response_code(401);
-			$output->displayMessage('Not_auth_edit');
+			$output->message('Not_auth_edit');
 		}
 
 		unset($tmp_ids);
@@ -448,7 +427,7 @@ else if ($mode == 'abonnes') {
 				$sql_data = [
 					'abo_email'  => $email,
 					'abo_pseudo' => strip_tags(trim(u::filter_input(INPUT_POST, 'pseudo'))),
-					'abo_status' => (filter_input(INPUT_POST, 'status') == ABO_ACTIF) ? ABO_ACTIF : ABO_INACTIF
+					'abo_status' => (filter_input(INPUT_POST, 'status') == ABO_ACTIVE) ? ABO_ACTIVE : ABO_INACTIVE
 				];
 
 				//
@@ -474,10 +453,10 @@ else if ($mode == 'abonnes') {
 					FILTER_REQUIRE_ARRAY
 				);
 
-				$update = [FORMAT_TEXTE => [], FORMAT_HTML => []];
+				$update = [FORMAT_TEXT => [], FORMAT_HTML => []];
 
 				foreach ($formatList as $liste_id => $format) {
-					if (in_array($format, [FORMAT_TEXTE, FORMAT_HTML]) && $auth->check_auth(Auth::EDIT, $liste_id)) {
+					if (in_array($format, [FORMAT_TEXT, FORMAT_HTML]) && $auth->check(Auth::EDIT, $liste_id)) {
 						$update[$format][] = $liste_id;
 					}
 				}
@@ -496,7 +475,7 @@ else if ($mode == 'abonnes') {
 				$output->redirect($target, 4);
 				$output->addLine($lang['Message']['Profile_updated']);
 				$output->addLine($lang['Click_return_abo_profile'], $target);
-				$output->displayMessage();
+				$output->message();
 			}
 		}
 
@@ -521,13 +500,11 @@ else if ($mode == 'abonnes') {
 		$result = $db->query($sql);
 
 		if ($row = $result->fetch()) {
-			require WA_ROOTDIR . '/includes/functions.box.php';
+			$output->header();
 
-			$output->page_header();
+			$template = new Template('edit_abo_profil_body.tpl');
 
-			$output->set_filenames(['body' => 'edit_abo_profil_body.tpl']);
-
-			$output->assign_vars([
+			$template->assign([
 				'L_TITLE'              => sprintf($lang['Title']['mod_profile'],
 					htmlspecialchars((!empty($row['abo_pseudo'])) ? $row['abo_pseudo'] : $row['abo_email'])
 				),
@@ -548,20 +525,22 @@ else if ($mode == 'abonnes') {
 				'S_ABO_PSEUDO'         => htmlspecialchars($row['abo_pseudo']),
 				'S_ABO_EMAIL'          => htmlspecialchars($row['abo_email']),
 				'S_ABO_ID'             => $row['abo_id'],
-				'S_STATUS_ACTIVE'      => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_ACTIF)),
-				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIF))
+				'S_STATUS_ACTIVE'      => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_ACTIVE)),
+				'S_STATUS_INACTIVE'    => $output->getBoolAttr('checked', ($row['abo_status'] == ABO_INACTIVE)),
+
+				'LISTBOX'              => $listbox
 			]);
 
 			//
 			// Affichage des valeurs des tags enregistrés
 			//
 			if (count($other_tags) > 0) {
-				$output->assign_block_vars('tags', [
+				$template->assignToBlock('tags', [
 					'L_TITLE' => $lang['TagsEdit']
 				]);
 
 				foreach ($other_tags as $tag) {
-					$output->assign_block_vars('tags.row', [
+					$template->assignToBlock('tags.row', [
 						'NAME'      => $tag['tag_name'],
 						'FIELDNAME' => $tag['column_name'],
 						'VALUE'     => htmlspecialchars($row[$tag['column_name']])
@@ -570,29 +549,32 @@ else if ($mode == 'abonnes') {
 			}
 
 			do {
-				if ($auth->listdata[$row['liste_id']]['liste_format'] == FORMAT_MULTIPLE) {
-					$format_box = format_box("format[$row[liste_id]]",
-						$row['format'], false, false, true
-					);
-				}
-				else {
-					$format = $auth->listdata[$row['liste_id']]['liste_format'];
-					$format_box = ($format == FORMAT_HTML) ? 'HTML' : 'texte';
+				if (!isset($lists[$row['liste_id']])) {
+					continue;
 				}
 
-				$output->assign_block_vars('listerow', [
-					'LISTE_NAME' => htmlspecialchars($auth->listdata[$row['liste_id']]['liste_name']),
+				$format = $lists[$row['liste_id']]['liste_format'];
+
+				if ($format == FORMAT_MULTIPLE) {
+					$format_box = format_box("format[$row[liste_id]]", $row['format']);
+				}
+				else {
+					$format_box = ($format == FORMAT_HTML) ? 'html' : $lang['Text'];
+				}
+
+				$template->assignToBlock('listerow', [
+					'LISTE_NAME' => htmlspecialchars($lists[$row['liste_id']]['liste_name']),
 					'FORMAT_BOX' => $format_box,
 					'LISTE_ID'   => $row['liste_id']
 				]);
 			}
 			while ($row = $result->fetch());
 
-			$output->pparse('body');
-			$output->page_footer();
+			$template->pparse();
+			$output->footer();
 		}
 		else {
-			$output->displayMessage('abo_not_exists');
+			$output->message('abo_not_exists');
 		}
 	}
 
@@ -615,7 +597,7 @@ else if ($mode == 'abonnes') {
 
 		if ($email_list == '' && count($abo_ids) == 0) {
 			$output->redirect('./view.php?mode=abonnes', 4);
-			$output->displayMessage('No_abo_id');
+			$output->message('No_abo_id');
 		}
 
 		if (isset($_POST['confirm'])) {
@@ -647,7 +629,7 @@ else if ($mode == 'abonnes') {
 			$output->redirect($target, 4);
 			$output->addLine($lang['Message']['abo_deleted']);
 			$output->addLine($lang['Click_return_abo'], $target);
-			$output->displayMessage();
+			$output->message();
 		}
 		else {
 			if ($email_list != '') {
@@ -664,7 +646,7 @@ else if ($mode == 'abonnes') {
 
 				if ($sql_list == '') {
 					$output->redirect('./view.php?mode=abonnes', 4);
-					$output->displayMessage('No_abo_id');
+					$output->message('No_abo_id');
 				}
 
 				$sql = "SELECT a.abo_id
@@ -682,7 +664,7 @@ else if ($mode == 'abonnes') {
 				}
 				else {
 					$output->redirect('./view.php?mode=abonnes', 4);
-					$output->displayMessage('No_abo_email');
+					$output->message('No_abo_email');
 				}
 			}
 			else {
@@ -691,11 +673,11 @@ else if ($mode == 'abonnes') {
 				}
 			}
 
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'confirm_body.tpl']);
+			$template = new Template('confirm_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $lang['Delete_abo'],
@@ -706,9 +688,9 @@ else if ($mode == 'abonnes') {
 				'U_FORM' => 'view.php?mode=abonnes&amp;action=delete'
 			]);
 
-			$output->pparse('body');
+			$template->pparse();
 
-			$output->page_footer();
+			$output->footer();
 		}
 	}
 
@@ -770,11 +752,11 @@ else if ($mode == 'abonnes') {
 
 	$navigation = navigation('view.php?mode=abonnes' . $get_string, $total_abo, $abo_per_page, $page_id);
 
-	$output->page_header();
+	$output->header();
 
-	$output->set_filenames(['body' => 'view_abo_list_body.tpl']);
+	$template = new Template('view_abo_list_body.tpl');
 
-	$output->assign_vars([
+	$template->assign([
 		'L_EXPLAIN'            => nl2br($lang['Explain']['abo']),
 		'L_TITLE'              => sprintf($lang['Title']['abo'], htmlspecialchars($listdata['liste_name'])),
 		'L_SEARCH'             => $lang['Search_abo'],
@@ -802,19 +784,20 @@ else if ($mode == 'abonnes') {
 		'PAGEOF'               => ($total_abo > 0) ? sprintf($lang['Page_of'], $page_id, ceil($total_abo / $abo_per_page)) : '',
 		'NUM_SUBSCRIBERS'      => ($total_abo > 0) ? '[ <b>' . $total_abo . '</b> ' . $lang['Module']['subscribers'] . ' ]' : '',
 
-		'PAGING'               => $get_page
+		'PAGING'               => $get_page,
+		'LISTBOX'              => $listbox
 	]);
 
 	if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-		$output->assign_block_vars('view_format', [
+		$template->assignToBlock('view_format', [
 			'L_FORMAT' => $lang['Format']
 		]);
 	}
 
 	if ($num_abo = count($aborow)) {
 		$display_checkbox = false;
-		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
-			$output->assign_block_vars('delete_option', [
+		if ($auth->check(Auth::DEL, $listdata['liste_id'])) {
+			$template->assignToBlock('delete_option', [
 				'L_FAST_DELETION'      => $lang['Fast_deletion'],
 				'L_FAST_DELETION_NOTE' => $lang['Fast_deletion_note'],
 				'L_DELETE_BUTTON'      => $lang['Button']['delete'],
@@ -825,27 +808,27 @@ else if ($mode == 'abonnes') {
 		}
 
 		for ($i = 0; $i < $num_abo; $i++) {
-			$output->assign_block_vars('aborow', [
+			$template->assignToBlock('aborow', [
 				'ABO_EMAIL'         => htmlspecialchars($aborow[$i]['abo_email']),
 				'ABO_REGISTER_DATE' => convert_time($admindata['admin_dateformat'], $aborow[$i]['register_date']),
 				'U_VIEW'            => sprintf('view.php?mode=abonnes&amp;action=view&amp;id=%d%s%s', $aborow[$i]['abo_id'], $get_string, $get_page)
 			]);
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-				$output->assign_block_vars('aborow.format', [
-					'ABO_FORMAT' => ($aborow[$i]['format'] == FORMAT_HTML) ? 'html' : 'texte'
+				$template->assignToBlock('aborow.format', [
+					'ABO_FORMAT' => ($aborow[$i]['format'] == FORMAT_HTML) ? 'html' : $lang['Text']
 				]);
 			}
 
 			if ($display_checkbox) {
-				$output->assign_block_vars('aborow.delete', [
+				$template->assignToBlock('aborow.delete', [
 					'ABO_ID' => $aborow[$i]['abo_id']
 				]);
 			}
 		}
 	}
 	else {
-		$output->assign_block_vars('empty', [
+		$template->assignToBlock('empty', [
 			'L_EMPTY' => ($search_keyword || $search_date)
 				? $lang['No_search_result'] : $lang['No_abo_in_list']
 		]);
@@ -859,16 +842,16 @@ else if ($mode == 'liste') {
 	switch ($action) {
 		case 'add':
 		case 'delete':
-			if (!wan_is_admin($admindata)) {
+			if (!Auth::isAdmin($admindata)) {
 				http_response_code(401);
 				$target = './view.php?mode=liste';
 				$output->redirect($target, 4);
 				$output->addLine($lang['Message']['Not_authorized']);
 				$output->addLine($lang['Click_return_liste'], $target);
-				$output->displayMessage();
+				$output->message();
 			}
 
-			$auth_type = false;
+			$auth_type = null;
 			break;
 		case 'purge':
 			$auth_type = Auth::DEL;
@@ -877,12 +860,12 @@ else if ($mode == 'liste') {
 			$auth_type = Auth::EDIT;
 			break;
 		default:
-			$auth_type = Auth::VIEW;
+			$auth_type = null;
 			break;
 	}
 
-	if ($auth_type && !$auth->check_auth($auth_type, $_SESSION['liste'])) {
-		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
+	if ($auth_type && !$auth->check($auth_type, $_SESSION['liste'])) {
+		$output->message('Not_' . $auth_type);
 	}
 
 	//
@@ -898,7 +881,7 @@ else if ($mode == 'liste') {
 		}
 
 		$default_values = [
-			'liste_format'      => FORMAT_TEXTE,
+			'liste_format'      => FORMAT_TEXT,
 			'limitevalidate'    => 3,
 			'auto_purge'        => true,
 			'purge_freq'        => 7,
@@ -918,10 +901,6 @@ else if ($mode == 'liste') {
 			${$varname} = (is_int($value)) ? $value : $default_values[$varname];
 		}
 
-		if (!check_ssl_support()) {
-			$pop_tls = SECURITY_NONE;
-		}
-
 		if (isset($_POST['submit'])) {
 			$liste_name = strip_tags($liste_name);
 			$liste_sig  = strip_tags($liste_sig);
@@ -931,7 +910,7 @@ else if ($mode == 'liste') {
 				$msg_error[] = $lang['Invalid_liste_name'];
 			}
 
-			if (!in_array($liste_format, [FORMAT_TEXTE, FORMAT_HTML, FORMAT_MULTIPLE])) {
+			if (!in_array($liste_format, [FORMAT_TEXT, FORMAT_HTML, FORMAT_MULTIPLE])) {
 				$error = true;
 				$msg_error[] = $lang['Unknown_format'];
 			}
@@ -1011,7 +990,7 @@ else if ($mode == 'liste') {
 					$action == 'add' ? $lang['Message']['liste_created'] : $lang['Message']['liste_edited']
 				);
 				$output->addLine($lang['Click_return_liste'], $target);
-				$output->displayMessage();
+				$output->message();
 			}
 		}
 		else if ($action == 'edit') {
@@ -1022,13 +1001,11 @@ else if ($mode == 'liste') {
 			}
 		}
 
-		require WA_ROOTDIR . '/includes/functions.box.php';
+		$output->header();
 
-		$output->page_header();
+		$template = new Template('edit_liste_body.tpl');
 
-		$output->set_filenames(['body' => 'edit_liste_body.tpl']);
-
-		$output->assign_vars([
+		$template->assign([
 			'L_TITLE'              => ($action == 'add') ? $lang['Title']['add_liste'] : $lang['Title']['edit_liste'],
 			'L_TITLE_PURGE'        => $lang['Title']['purge_sys'],
 			'L_TITLE_CRON'         => $lang['Title']['cron'],
@@ -1068,7 +1045,7 @@ else if ($mode == 'liste') {
 			'L_CANCEL_BUTTON'      => $lang['Button']['cancel'],
 
 			'LISTE_NAME'           => htmlspecialchars($liste_name),
-			'FORMAT_BOX'           => format_box('liste_format', $liste_format, false, true),
+			'FORMAT_BOX'           => format_box('liste_format', $liste_format, true),
 			'SENDER_EMAIL'         => htmlspecialchars($sender_email),
 			'RETURN_EMAIL'         => htmlspecialchars($return_email),
 			'FORM_URL'             => htmlspecialchars($form_url),
@@ -1085,7 +1062,7 @@ else if ($mode == 'liste') {
 			'CHECKED_USE_CRON_ON'  => $output->getBoolAttr('checked', $use_cron),
 			'CHECKED_USE_CRON_OFF' => $output->getBoolAttr('checked', !$use_cron),
 			'DISABLED_CRON'        => $output->getBoolAttr('disabled', !function_exists('stream_socket_client')),
-			'WARNING_CRON'         => (!function_exists('stream_socket_client')) ? ' <span style="color: red;">[not available]</span>' : '',
+			'WARNING_CRON'         => (!function_exists('stream_socket_client')) ? ' <span class="unavailable">[not available]</span>' : '',
 			'POP_HOST'             => htmlspecialchars($pop_host),
 			'POP_PORT'             => intval($pop_port),
 			'POP_USER'             => htmlspecialchars($pop_user),
@@ -1093,8 +1070,8 @@ else if ($mode == 'liste') {
 			'ACTION'               => $action
 		]);
 
-		if (check_ssl_support()) {
-			$output->assign_block_vars('ssl_support', [
+		if (in_array('tls', stream_get_transports())) {
+			$template->assignToBlock('tls_support', [
 				'L_SECURITY'        => $lang['Connection_security'],
 				'L_NONE'            => $lang['None'],
 				'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $pop_tls == SECURITY_STARTTLS),
@@ -1102,9 +1079,9 @@ else if ($mode == 'liste') {
 			]);
 		}
 
-		$output->pparse('body');
+		$template->pparse();
 
-		$output->page_footer();
+		$output->footer();
 	}
 
 	//
@@ -1171,7 +1148,6 @@ else if ($mode == 'liste') {
 					WHERE liste_id = " . $listdata['liste_id'];
 				$db->query($sql);
 
-				include WA_ROOTDIR . '/includes/functions.stats.php';
 				remove_stats($listdata['liste_id']);
 
 				$message = $lang['Message']['Liste_del_all'];
@@ -1179,7 +1155,7 @@ else if ($mode == 'liste') {
 			else {
 				$liste_id = (int) filter_input(INPUT_POST, 'liste_id', FILTER_VALIDATE_INT);
 
-				if (!isset($auth->listdata[$liste_id])) {
+				if (!isset($auth->getLists(Auth::DEL)[$liste_id])) {
 					trigger_error('No_liste_id', E_USER_ERROR);
 				}
 
@@ -1240,7 +1216,6 @@ else if ($mode == 'liste') {
 					WHERE liste_id = " . $listdata['liste_id'];
 				$db->query($sql);
 
-				include WA_ROOTDIR . '/includes/functions.stats.php';
 				remove_stats($listdata['liste_id'], $liste_id);
 
 				$message = $lang['Message']['Liste_del_move'];
@@ -1263,35 +1238,40 @@ else if ($mode == 'liste') {
 			$output->redirect($target, 4);
 			$output->addLine($message);
 			$output->addLine($lang['Click_return_index'], $target);
-			$output->displayMessage();
+			$output->message();
 		}
 		else {
-			$list_box  = '';
-			$liste_ids = $auth->check_auth(Auth::VIEW);
+			$lists = $auth->getLists(Auth::VIEW);
 
-			foreach ($auth->listdata as $liste_id => $data) {
-				if (in_array($liste_id, $liste_ids) && $liste_id != $listdata['liste_id']) {
-					$selected  = $output->getBoolAttr('selected', ($_SESSION['liste'] == $liste_id));
-					$list_box .= '<option value="' . $liste_id . '"' . $selected . '> - '
-						. htmlspecialchars(cut_str($data['liste_name'], 30)) . ' - </option>';
+			$list_box  = '';
+			foreach ($lists as $liste_id => $data) {
+				if ($liste_id != $listdata['liste_id']) {
+					$list_box .= sprintf('<option value="%d"> %s </option>',
+						$liste_id,
+						htmlspecialchars($data['liste_name'])
+					);
 				}
 			}
 
 			if ($list_box != '') {
 				$message  = $lang['Move_abo_logs'];
-				$message .= '<br /><br />' . $lang['Move_to_liste'] . ' <select id="liste_id" name="liste_id">' . $list_box . '</select>';
-				$message .= '<br /><br /><input type="checkbox" id="delete_all" name="delete_all" value="1" /> <label for="delete_all">' . $lang['Delete_abo_logs'] . '</label>';
+				$message .= '<br /><br />';
+				$message .= $lang['Move_to_liste'];
+				$message .= ' <select id="liste_id" name="liste_id">' . $list_box . '</select>';
+				$message .= '<br /><br />';
+				$message .= '<input type="checkbox" id="delete_all" name="delete_all" value="1" />';
+				$message .= ' <label for="delete_all">' . $lang['Delete_abo_logs'] . '</label>';
 			}
 			else {
 				$output->addHiddenField('delete_all', '1');
 				$message = $lang['Delete_all'];
 			}
 
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'confirm_body.tpl']);
+			$template = new Template('confirm_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $message,
@@ -1302,9 +1282,9 @@ else if ($mode == 'liste') {
 				'U_FORM' => 'view.php?mode=liste&amp;action=delete'
 			]);
 
-			$output->pparse('body');
+			$template->pparse();
 
-			$output->page_footer();
+			$output->footer();
 		}
 	}
 
@@ -1312,13 +1292,13 @@ else if ($mode == 'liste') {
 	// Purge (suppression des inscriptions non confirmées et dont la date de validité est dépassée)
 	//
 	else if ($action == 'purge') {
-		$abo_deleted = purge_liste($listdata['liste_id'], $listdata['limitevalidate'], $listdata['purge_freq']);
+		$abo_deleted = purge_liste($listdata);
 
 		$target = './view.php?mode=liste';
 		$output->redirect($target, 4);
 		$output->addLine(sprintf($lang['Message']['Success_purge'], $abo_deleted));
 		$output->addLine($lang['Click_return_liste'], $target);
-		$output->displayMessage();
+		$output->message();
 	}
 
 	//
@@ -1357,7 +1337,7 @@ else if ($mode == 'liste') {
 	}
 
 	switch ($listdata['liste_format']) {
-		case FORMAT_TEXTE:
+		case FORMAT_TEXT:
 			$l_format = 'txt';
 			break;
 		case FORMAT_HTML:
@@ -1371,9 +1351,9 @@ else if ($mode == 'liste') {
 			break;
 	}
 
-	$output->page_header();
+	$output->header();
 
-	$output->set_filenames(['body' => 'view_liste_body.tpl']);
+	$template = new Template('view_liste_body.tpl');
 
 	switch ($listdata['confirm_subscribe']) {
 		case CONFIRM_ALWAYS:
@@ -1388,7 +1368,7 @@ else if ($mode == 'liste') {
 			break;
 	}
 
-	$output->assign_vars([
+	$template->assign([
 		'L_TITLE'             => $lang['Title']['info_liste'],
 		'L_EXPLAIN'           => nl2br($lang['Explain']['liste']),
 		'L_LISTE_ID'          => $lang['ID_list'],
@@ -1413,11 +1393,13 @@ else if ($mode == 'liste') {
 		'NUM_SUBSCRIBERS'     => $num_inscrits,
 		'NUM_LOGS'            => $listdata['liste_numlogs'],
 		'FORM_URL'            => htmlspecialchars($listdata['form_url']),
-		'STARTDATE'           => convert_time($admindata['admin_dateformat'], $listdata['liste_startdate'])
+		'STARTDATE'           => convert_time($admindata['admin_dateformat'], $listdata['liste_startdate']),
+
+		'LISTBOX'             => $listbox
 	]);
 
 	if ($listdata['confirm_subscribe']) {
-		$output->assign_block_vars('liste_confirm', [
+		$template->assignToBlock('liste_confirm', [
 			'L_LIMITEVALIDATE' => $lang['Limite_validate'],
 			'L_NUM_TEMP'       => $lang['Tmp_subscribers_list'],
 			'L_DAYS'           => $lang['Days'],
@@ -1428,35 +1410,34 @@ else if ($mode == 'liste') {
 	}
 
 	if ($listdata['liste_numlogs'] > 0) {
-		$output->assign_block_vars('date_last_log', [
+		$template->assignToBlock('date_last_log', [
 			'L_LAST_LOG' => $lang['Last_newsletter2'],
 			'LAST_LOG'   => convert_time($admindata['admin_dateformat'], $last_log)
 		]);
 	}
 
-	if ($auth->check_auth(Auth::DEL, $listdata['liste_id']) || $auth->check_auth(Auth::EDIT, $listdata['liste_id'])) {
-		$output->assign_block_vars('admin_options', []);
+	if ($auth->check(Auth::DEL, $listdata['liste_id']) || $auth->check(Auth::EDIT, $listdata['liste_id'])) {
+		$template->assignToBlock('admin_options', []);
 
-		if (wan_is_admin($admindata)) {
-			$output->assign_block_vars('admin_options.auth_add', [
+		if (Auth::isAdmin($admindata)) {
+			$template->assignToBlock('admin_options.auth_add', [
 				'L_ADD_LISTE' => $lang['Create_liste']
 			]);
 
-			$output->assign_block_vars('admin_options.auth_del', [
+			$template->assignToBlock('admin_options.auth_del', [
 				'L_DELETE_LISTE' => $lang['Delete_liste']
 			]);
 		}
 
-		if ($auth->check_auth(Auth::EDIT, $listdata['liste_id'])) {
-			$output->assign_block_vars('admin_options.auth_edit', [
+		if ($auth->check(Auth::EDIT, $listdata['liste_id'])) {
+			$template->assignToBlock('admin_options.auth_edit', [
 				'L_EDIT_LISTE' => $lang['Edit_liste']
 			]);
 		}
 
-		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
-			$output->assign_block_vars('purge_option', [
-				'L_PURGE_BUTTON'  => $lang['Button']['purge'],
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields()
+		if ($auth->check(Auth::DEL, $listdata['liste_id'])) {
+			$template->assignToBlock('purge_option', [
+				'L_PURGE_BUTTON'  => $lang['Button']['purge']
 			]);
 		}
 	}
@@ -1466,10 +1447,8 @@ else if ($mode == 'liste') {
 // Mode Gestion des logs/archives
 //
 else if ($mode == 'log') {
-	$auth_type = ($action == 'delete') ? Auth::DEL : Auth::VIEW;
-
-	if (!$auth->check_auth($auth_type, $listdata['liste_id'])) {
-		$output->displayMessage('Not_' . $auth->auth_ary[$auth_type]);
+	if ($action == 'delete' && !$auth->check(Auth::DEL, $listdata['liste_id'])) {
+		$output->message('Not_auth_del');
 	}
 
 	//
@@ -1484,7 +1463,7 @@ else if ($mode == 'log') {
 
 		if (count($log_ids) == 0) {
 			$output->redirect('./view.php?mode=log', 4);
-			$output->displayMessage('No_log_id');
+			$output->message('No_log_id');
 		}
 
 		if (isset($_POST['confirm'])) {
@@ -1508,18 +1487,18 @@ else if ($mode == 'log') {
 			$output->redirect($target, 4);
 			$output->addLine($lang['Message']['logs_deleted']);
 			$output->addLine($lang['Click_return_logs'], $target);
-			$output->displayMessage();
+			$output->message();
 		}
 		else {
 			foreach ($log_ids as $log_id) {
 				$output->addHiddenField('log_id[]', $log_id);
 			}
 
-			$output->page_header();
+			$output->header();
 
-			$output->set_filenames(['body' => 'confirm_body.tpl']);
+			$template = new Template('confirm_body.tpl');
 
-			$output->assign_vars([
+			$template->assign([
 				'L_CONFIRM' => $lang['Title']['confirm'],
 
 				'TEXTE' => $lang['Delete_logs'],
@@ -1530,9 +1509,9 @@ else if ($mode == 'log') {
 				'U_FORM' => 'view.php?mode=log&amp;action=delete'
 			]);
 
-			$output->pparse('body');
+			$template->pparse();
 
-			$output->page_footer();
+			$output->footer();
 		}
 	}
 
@@ -1637,11 +1616,11 @@ else if ($mode == 'log') {
 
 	$get_string .= ($page_id > 1) ? '&amp;page=' . $page_id : '';
 
-	$output->page_header();
+	$output->header();
 
-	$output->set_filenames(['body' => 'view_logs_body.tpl']);
+	$template = new Template('view_logs_body.tpl');
 
-	$output->assign_vars([
+	$template->assign([
 		'L_EXPLAIN'             => nl2br($lang['Explain']['logs']),
 		'L_TITLE'               => sprintf($lang['Title']['logs'], htmlspecialchars($listdata['liste_name'])),
 		'L_CLASSEMENT'          => $lang['Classement'],
@@ -1652,6 +1631,8 @@ else if ($mode == 'log') {
 		'L_CLASSER_BUTTON'      => $lang['Button']['classer'],
 		'L_SUBJECT'             => $lang['Log_subject'],
 		'L_DATE'                => $lang['Log_date'],
+		'L_NUMDEST'             => $lang['Log_numdest'],
+		'L_NUMDEST_SHORT'       => $lang['Log_numdest_short'],
 
 		'SELECTED_TYPE_SUBJECT' => $output->getBoolAttr('selected', ($sql_type == 'log_subject')),
 		'SELECTED_TYPE_DATE'    => $output->getBoolAttr('selected', ($sql_type == 'log_date')),
@@ -1662,13 +1643,14 @@ else if ($mode == 'log') {
 		'PAGEOF'                => ($total_logs > 0) ? sprintf($lang['Page_of'], $page_id, ceil($total_logs / $log_per_page)) : '',
 		'NUM_LOGS'              => ($total_logs > 0) ? '[ <b>' . $total_logs . '</b> ' . $lang['Module']['log'] . ' ]' : '',
 
-		'PAGING'                => $get_string
+		'PAGING'                => $get_string,
+		'LISTBOX'               => $listbox
 	]);
 
 	if ($num_logs = count($logrow)) {
 		$display_checkbox = false;
-		if ($auth->check_auth(Auth::DEL, $listdata['liste_id'])) {
-			$output->assign_block_vars('delete_option', [
+		if ($auth->check(Auth::DEL, $listdata['liste_id'])) {
+			$template->assignToBlock('delete_option', [
 				'L_DELETE' => $lang['Button']['del_logs']
 			]);
 
@@ -1690,15 +1672,16 @@ else if ($mode == 'log') {
 				$s_clip = '&nbsp;&nbsp;';
 			}
 
-			$output->assign_block_vars('logrow', [
+			$template->assignToBlock('logrow', [
 				'ITEM_CLIP'   => $s_clip,
-				'LOG_SUBJECT' => htmlspecialchars(cut_str($logrow[$i]['log_subject'], 60), ENT_NOQUOTES),
+				'NUM_DEST'    => $logrow[$i]['log_numdest'],
+				'LOG_SUBJECT' => htmlspecialchars($logrow[$i]['log_subject'], ENT_NOQUOTES),
 				'LOG_DATE'    => convert_time($admindata['admin_dateformat'], $logrow[$i]['log_date']),
 				'U_VIEW'      => sprintf('view.php?mode=log&amp;action=view&amp;id=%d%s', $logrow[$i]['log_id'], $get_string)
 			]);
 
 			if ($display_checkbox) {
-				$output->assign_block_vars('logrow.delete', [
+				$template->assignToBlock('logrow.delete', [
 					'LOG_ID' => $logrow[$i]['log_id']
 				]);
 			}
@@ -1707,9 +1690,13 @@ else if ($mode == 'log') {
 		if ($action == 'view' && is_array($logdata)) {
 			$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
-			$output->set_filenames(['iframe_body' => 'iframe_body.tpl']);
+			if (!in_array($format, [FORMAT_TEXT, FORMAT_HTML])) {
+				$format = FORMAT_TEXT;
+			}
 
-			$output->assign_vars([
+			$iframe = new Template('iframe_body.tpl');
+
+			$iframe->assign([
 				'L_SUBJECT'  => $lang['Log_subject'],
 				'L_NUMDEST'  => $lang['Log_numdest'],
 
@@ -1720,15 +1707,13 @@ else if ($mode == 'log') {
 			]);
 
 			if (extension_loaded('zip')) {
-				$output->assign_block_vars('export', [
+				$iframe->assignToBlock('export', [
 					'L_EXPORT_T' => $lang['Export_nl'],
 					'L_EXPORT'   => $lang['Export']
 				]);
 			}
 
 			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-				require WA_ROOTDIR . '/includes/functions.box.php';
-
 				// Par champ caché, car ce formulaire est en méthode GET.
 				$output->addHiddenField('mode', 'log');
 				$output->addHiddenField('action', 'view');
@@ -1738,25 +1723,26 @@ else if ($mode == 'log') {
 					$output->addHiddenField('page', $page_id);
 				}
 
-				$output->assign_block_vars('format_box', [
+				$iframe->assignToBlock('format_box', [
 					'L_FORMAT'        => $lang['Format'],
 					'L_GO_BUTTON'     => $lang['Button']['go'],
 					'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-					'FORMAT_BOX'      => format_box('format', $format, true)
+					'FORMAT_BOX'      => format_box('format', $format)
 				]);
 			}
 
-			$output->files_list($logdata, $format);
-			$output->assign_var_from_handle('IFRAME', 'iframe_body');
+			$iframe->assign([
+				'JOINED_FILES_BOX' => $output->filesList($logdata, $format)
+			]);
+			$template->assign(['IFRAME' => $iframe]);
 		}
 	}
 	else {
-		$output->assign_block_vars('empty', [
+		$template->assignToBlock('empty', [
 			'L_EMPTY' => $lang['No_log_sended']
 		]);
 	}
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

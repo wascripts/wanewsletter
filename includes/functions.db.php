@@ -3,46 +3,49 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
 
-$GLOBALS['supported_db'] = [
-	'mysql' => [
-		'label'     => 'MySQL',
-		'Name'      => 'MySQL &#8805; 5.0.7',
-		'extension' => (extension_loaded('mysql') || extension_loaded('mysqli'))
-	],
-	'postgres' => [
-		'label'     => 'PostgreSQL',
-		'Name'      => 'PostgreSQL &#8805; 8.3',
-		'extension' => extension_loaded('pgsql')
-	],
-	'sqlite' => [
-		'label'     => 'SQLite',
-		'Name'      => 'SQLite 3',
-		'extension' => (class_exists('SQLite3') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite')))
-	]
-];
+/**
+ * Retourne la liste des types de base de données supportées par
+ * Wanewsletter et par cette installation de PHP.
+ *
+ * @return array
+ */
+function get_supported_db()
+{
+	static $supported_db;
 
-//
-// Tables du script
-//
-$tables = [
-	'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
-	'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
-];
+	if (is_null($supported_db)) {
+		$supported_db = [];
 
-foreach ($tables as $table) {
-	$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__, strtoupper($table));
-	$table = $prefixe . $table;
-	define($constant, $table);
-	$GLOBALS['sql_schemas'][$table] = [];
+		if (extension_loaded('mysql') || extension_loaded('mysqli')) {
+			$supported_db['mysql'] = [
+				'label' => 'MySQL',
+				'version' => '5.0.7'
+			];
+		}
+
+		if (extension_loaded('pgsql')) {
+			$supported_db['postgres'] = [
+				'label' => 'PostgreSQL',
+				'version' => '8.3'
+			];
+		}
+
+		if (class_exists('SQLite3') || (extension_loaded('pdo') && extension_loaded('pdo_sqlite'))) {
+			$supported_db['sqlite'] = [
+				'label' => 'SQLite',
+				'version' => '3'
+			];
+		}
+	}
+
+	return $supported_db;
 }
-
-unset($tables, $table);
 
 /**
  * Génère une chaîne DSN
@@ -104,19 +107,16 @@ function createDSN($infos, $options = null)
 }
 
 /**
- * Décompose une chaîne DSN
+ * Décompose une chaîne Data Source Name
  *
  * @param string $dsn
  *
- * @return boolean|array
+ * @return array
  */
 function parseDSN($dsn)
 {
-	global $supported_db;
-
 	if (!($dsn_parts = parse_url($dsn)) || !isset($dsn_parts['scheme'])) {
 		trigger_error("Invalid DSN argument", E_USER_ERROR);
-		return false;
 	}
 
 	$infos = $options = [];
@@ -124,19 +124,14 @@ function parseDSN($dsn)
 	foreach ($dsn_parts as $key => $value) {
 		switch ($key) {
 			case 'scheme':
+				$supported_db = get_supported_db();
 				if (!isset($supported_db[$value])) {
 					trigger_error("Unsupported database", E_USER_ERROR);
-					return false;
 				}
 
 				$infos['label']  = $supported_db[$value]['label'];
 				$infos['engine'] = $value;
-
-				if ($value == 'mysql' && extension_loaded('mysqli')) {
-					$value = 'mysqli';
-				}
-
-				$infos['driver'] = $value;
+				$infos['driver'] = ucfirst($value);
 				break;
 
 			case 'host':
@@ -166,15 +161,18 @@ function parseDSN($dsn)
 		}
 	}
 
-	if ($infos['engine'] == 'sqlite') {
+	if ($infos['engine'] == 'mysql' && extension_loaded('mysqli')) {
+		$infos['driver'] = 'Mysqli';
+	}
+	else if ($infos['engine'] == 'sqlite') {
 		if (class_exists('SQLite3')) {
-			$infos['driver'] = 'sqlite3';
+			$infos['driver'] = 'Sqlite3';
 		}
 		else {
 			if (!extension_loaded('pdo') || !extension_loaded('pdo_sqlite')) {
 				trigger_error("No SQLite3 or PDO/SQLite extension loaded !", E_USER_ERROR);
 			}
-			$infos['driver'] = 'sqlitepdo';
+			$infos['driver'] = 'SqlitePdo';
 		}
 
 		if (is_readable($infos['path']) && filesize($infos['path']) > 0) {
@@ -196,19 +194,20 @@ function parseDSN($dsn)
  *
  * @param string $dsn
  *
- * @return boolean|Dblayer\Wadb
+ * @return Dblayer\Wadb
  */
 function WaDatabase($dsn)
 {
-	if (!($tmp = parseDSN($dsn))) {
-		return false;
-	}
-
-	list($infos, $options) = $tmp;
-	$dbclass = __NAMESPACE__ . '\\Dblayer\\' . ucfirst($infos['driver']);
+	list($infos, $options) = parseDSN($dsn);
+	$dbclass = sprintf('%s\\Dblayer\\%s', __NAMESPACE__, $infos['driver']);
 
 	$infos['username'] = (isset($infos['user'])) ? $infos['user'] : null;
 	$infos['passwd']   = (isset($infos['pass'])) ? $infos['pass'] : null;
+
+	// Timeout de connexion
+	if (empty($options['timeout'])) {
+		$options['timeout'] = 5;
+	}
 
 	$db = new $dbclass();
 	$db->connect($infos, $options);
@@ -220,8 +219,8 @@ function WaDatabase($dsn)
 	//
 	// Charset non précisé dans le DSN. On tente une auto-configuration.
 	//
-	if ($db::ENGINE != 'sqlite' && ($encoding = $db->encoding()) &&
-		!preg_match('#^utf-?8$#i', $encoding)
+	if ($db::ENGINE != 'sqlite' && ($encoding = $db->encoding())
+		&& !preg_match('#^utf-?8$#i', $encoding)
 	) {
 		//
 		// Wanewsletter utilise l'UTF-8 comme codage de caractères.
@@ -245,7 +244,7 @@ et définir le paramètre charset dans la variable \$dsn du fichier de configura
 (consultez le fichier config.sample.inc.php pour voir un exemple de DSN configuré
 de cette manière).
 ERR;
-			$output->displayMessage(str_replace("\n", " ", $message));
+			$output->error($message);
 		}
 	}
 
@@ -255,15 +254,11 @@ ERR;
 /**
  * Exécute une ou plusieurs requètes SQL sur la base de données
  *
- * @param mixed $queries Une ou plusieurs requètes SQL à exécuter
+ * @param array $queries Une ou plusieurs requètes SQL à exécuter
  */
-function exec_queries(&$queries)
+function exec_queries(array &$queries)
 {
 	global $db;
-
-	if (!is_array($queries)) {
-		$queries = [$queries];
-	}
 
 	foreach ($queries as $query) {
 		if (!empty($query)) {
@@ -275,45 +270,85 @@ function exec_queries(&$queries)
 }
 
 /**
- * SQLite a un support très limité de la commande ALTER TABLE
- * Impossible de modifier ou supprimer une colonne donnée
- * On réécrit les tables dont la structure a changé
- * /!\ Ne permet que d'altérer le type des colonnes.
- * Ajouter/Renommer/Supprimer des colonnes ne fonctionnera pas avec $restore_data à true
+ * Analyse un fichier contenant une liste de requètes SQL séparées par un ';'
+ * et retourne un tableau de requètes.
  *
- * @param string  $tablename    Nom de la table à recréer
- * @param boolean $restore_data true pour restaurer les données
+ * @param string $input   Chaîne à analyser
+ * @param string $prefixe Préfixe des tables à mettre à la place du prefixe par défaut
+ *
+ * @return array
  */
-function wa_sqlite_recreate_table($tablename, $restore_data = true)
+function parse_sql($input, $prefixe = null)
 {
-	global $db, $prefixe, $sql_create, $sql_schemas;
+	$tmp            = '';
+	$output         = [];
+	$in_comments    = false;
+	$between_quotes = false;
 
-	$schema = &$sql_schemas[$tablename];
+	$lines       = preg_split("/(\r\n?|\n)/", $input, -1, PREG_SPLIT_DELIM_CAPTURE);
+	$total_lines = count($lines);
 
-	if (!empty($schema['updated'])) {
-		return null;
+	for ($i = 0; $i < $total_lines; $i++) {
+		if (preg_match("/^\r\n?|\n$/", $lines[$i])) {
+			if ($between_quotes) {
+				$tmp .= $lines[$i];
+			}
+			else {
+				$tmp .= ' ';
+			}
+
+			continue;
+		}
+
+		//
+		// Si on est pas dans des simples quotes, on vérifie si on entre ds des commentaires
+		//
+		if (!$between_quotes && !$in_comments && preg_match('/^\/\*/', $lines[$i])) {
+			$in_comments = true;
+		}
+
+		if ($between_quotes
+			|| (
+				!$in_comments
+				&& strlen($lines[$i]) > 0
+				&& $lines[$i][0] != '#'
+				&& !preg_match('/^--(\s|$)/', $lines[$i])
+			)
+		) {
+			//
+			// Nombre de simple quotes non échappés
+			//
+			$unescaped_quotes = preg_match_all("/(?<!\\\\)(\\\\\\\\)*'/", $lines[$i]);
+
+			if ((!$between_quotes && !($unescaped_quotes % 2))
+				|| ($between_quotes && ($unescaped_quotes % 2))
+			) {
+				if (preg_match('/;\s*$/i', $lines[$i])) {
+					$lines[$i] = ($tmp != '') ? rtrim($lines[$i]) : trim($lines[$i]);
+					$output[]  = $tmp . substr($lines[$i], 0, -1);
+
+					$tmp = '';
+				}
+				else {
+					$tmp .= ($tmp != '') ? $lines[$i] : ltrim($lines[$i]);
+				}
+
+				$between_quotes = false;
+			}
+			else {
+				$between_quotes = true;
+				$tmp .= ($tmp != '') ? $lines[$i] : ltrim($lines[$i]);
+			}
+		}
+
+		if (!$between_quotes && $in_comments && preg_match('/\*\/$/', rtrim($lines[$i]))) {
+			$in_comments = false;
+		}
 	}
 
-	$schema['updated'] = true;
-	$columns = [];
-
-	$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
-	while ($row = $result->fetch()) {
-		$columns[] = $row['name'];
+	if ($prefixe) {
+		$output = str_replace('wa_', $prefixe, $output);
 	}
 
-	$sql_update   = [];
-	$sql_update[] = sprintf('ALTER TABLE %1$s RENAME TO %1$s_tmp;', $tablename);
-	$sql_update   = array_merge($sql_update, $sql_create[$tablename]);
-
-	if ($restore_data) {
-		$sql_update[] = sprintf('INSERT INTO %1$s (%2$s) SELECT %2$s FROM %1$s_tmp;',
-			$tablename,
-			implode(',', $columns)
-		);
-	}
-
-	$sql_update[] = sprintf('DROP TABLE %s_tmp;', $tablename);
-
-	exec_queries($sql_update);
+	return $output;
 }

@@ -20,8 +20,8 @@
 			<td><input type="text" id="confirm_email" name="confirm_email" size="30" maxlength="254" autocomplete="off" /></td>
 		</tr>
 		<tr>
-			<td><label for="pseudo">{L_PSEUDO}&nbsp;:</label></td>
-			<td><input type="text" id="pseudo" name="pseudo" value="{PSEUDO}" size="30" maxlength="30" /></td>
+			<td><label for="username">{L_USERNAME}&nbsp;:</label></td>
+			<td><input type="text" id="username" name="username" value="{USERNAME}" size="30" maxlength="30" /></td>
 		</tr>
 		<tr>
 			<td><label for="language">{L_LANG}&nbsp;:</label></td>

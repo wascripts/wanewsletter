@@ -2,7 +2,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -21,7 +21,7 @@ hr    { display: none; }
 a, a:link, a:visited { background-color: transparent; color: #25F !important; text-decoration: none; }
 a:hover              { background-color: transparent; color: #F52 !important; text-decoration: none; }
 
-pre, kbd, code, samp, var {
+pre, kbd, code, samp, var, #wanlog {
 	font-family: "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Lucida Console", "Courier new", monospace;
 	font-size: 1em;
 }
@@ -36,7 +36,8 @@ q::after    { content: close-quote; }
 
 abbr[title] {
 	background-color: transparent;
-	border-bottom: 1px dotted;
+	text-decoration: underline;
+	text-decoration-style: dotted;
 	text-transform: uppercase;
 	cursor: help;
 }
@@ -148,6 +149,18 @@ p#explain {
 #aside-top { margin: 1em 0 -0.8em; }
 #aside-bottom { margin: -0.8em 0 1em; }
 
+#wanlog {
+	font-size: .923em;
+}
+
+#debug-infos {
+	font-size: .923em;
+	margin: 20px;
+	white-space: pre-wrap;
+	line-height: 1.3em;
+}
+#debug-infos i.novalue { color: hsl(0, 0%, 60%); }
+
 div.aside {
 	display: table;
 	width: 100%;
@@ -173,6 +186,9 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 }
 .warning li { list-style-type: disc; }
 
+.unavailable { color: red; }
+.available   { color: hsl(140, 70%, 40%); }
+
 .block {
 	background-color: #FAFAFA;
 	margin: 1.2em 0;
@@ -186,8 +202,10 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	background-image: -webkit-linear-gradient(top, hsl(220, 45%, 35%) 15%, hsl(220, 25%, 60%));
 	background-image: linear-gradient(to bottom, hsl(220, 45%, 35%) 15%, hsl(220, 25%, 60%));
 	margin: 0;
-	padding: 5px;
+	padding: 5px 15px;
 	text-align: center;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	text-shadow: rgba(0, 0, 0, 0.8) 0 0 2px;
 	white-space: nowrap;
 	line-height: 1.31;
@@ -252,8 +270,8 @@ div.bottom {
 ul.links    { margin: 1em 0 -1em; padding: 0; text-align: left; }
 ul.links li { display: inline; font-size: .85em; }
 
-ul.links li:before { content: "["; }
-ul.links li:after  { content: "]"; }
+ul.links li::before { content: "["; }
+ul.links li::after  { content: "]"; }
 
 /* tables */
 
@@ -313,6 +331,7 @@ table#files-box th:first-child { min-width: 1.4em; width: auto; }
 table#files-box td[colspan] { text-align: left; padding: .2em .4em; }
 table#admin_authlist td + td { text-align: center; }
 table#progress-list td { white-space: nowrap; }
+form#logs table.listing td:nth-child(3) { text-align: right; }
 
 ul#home { margin: 0; padding: 0; }
 ul#home li {
@@ -323,9 +342,15 @@ ul#home li {
 	line-height: 1.6;
 }
 
-div#log-details { margin: 1px; padding: .2em .5em; line-height: 1.5; }
-div#log-details { background-color: #E7E5E3; }
-div#log-details span + span:last-child { float: right; margin-top: 2px; }
+div#log-details {
+	background-color: #E7E5E3;
+	margin: 1px;
+	padding: .2em .5em;
+	line-height: 1.5;
+	position: relative;
+}
+
+div#log-details span + span:last-child { position: absolute; right: 8px; margin-top: 2px; }
 
 /* Boîte de visualisation des images jointes */
 div.image-box {
@@ -425,8 +450,15 @@ form#smallbox {
 }
 
 /* Boîte de sélection de liste/utilisateur */
-#liste option[value="0"]:first-child,
-#uid option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
+select#liste option[value="0"]:first-child,
+select#uid option[value="0"]:first-child { background-color:#EDEDED; border-bottom:1px dotted silver; }
+
+select#liste, select#liste_id, select.logList {
+	max-width: 25em;
+	text-overflow: ellipsis;
+}
+
+option.model { color: #25F; }
 
 input, select, button {
 	line-height: normal;/* Sur IE, les <button> héritent du line-height du parent */
@@ -498,9 +530,6 @@ input[type="password"]:focus,
 textarea:focus { background-color: white; }
 
 input[type="number"][size="5"] { width: 5em; }
-input[type="number"][size="8"] { width: 8em; }
-
-select.logList { min-width: 200px; }/* logList utilisé dans le panneau de profil */
 
 /* Lien de restauration des valeurs par défaut */
 a.restore-default {

@@ -3,13 +3,14 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
 
 $return_message = true;
+$message = '';
 
 require './newsletter.php';
 
@@ -22,14 +23,14 @@ $list_box = '<select id="liste" name="liste">';
 
 if ($row = $result->fetch()) {
 	do {
-		if ($row['liste_format'] == FORMAT_TEXTE) {
-			$format = 'txt';
+		if ($row['liste_format'] == FORMAT_TEXT) {
+			$format = $lang['Text'];
 		}
 		else if ($row['liste_format'] == FORMAT_HTML) {
 			$format = 'html';
 		}
 		else {
-			$format = 'txt &amp; html';
+			$format = sprintf('%s/html', $lang['Text']);
 		}
 
 		$list_box .= sprintf('<option value="%d"> %s (%s) </option>',
@@ -46,11 +47,11 @@ else {
 
 $list_box .= '</select>';
 
-$output->send_headers();
+$output->httpHeaders();
 
-$output->set_filenames(['body' => 'subscribe_body.tpl']);
+$template = new Template('subscribe_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'PAGE_TITLE'      => $lang['Title']['form'],
 	'L_INVALID_EMAIL' => str_replace('\'', '\\\'', $lang['Message']['Invalid_email']),
 	'L_PAGE_LOADING'  => str_replace('\'', '\\\'', $lang['Page_loading']),
@@ -62,11 +63,12 @@ $output->assign_vars([
 	'L_UNSUBSCRIBE'   => $lang['Unsubscribe'],
 	'L_VALID_BUTTON'  => $lang['Button']['valid'],
 
-	'LIST_BOX' => $list_box,
-	'MESSAGE'  => $message
+	'FORMAT_BOX'      => format_box('format'),
+	'LIST_BOX'        => $list_box,
+	'MESSAGE'         => $message
 ]);
 
-$output->pparse('body');
+$template->pparse();
 
 //
 // On réactive le gestionnaire d'erreur précédent

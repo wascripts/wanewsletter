@@ -4,7 +4,7 @@ You are receiving this email because you (or someone using your email address) h
 
 Thank you for your interest in our distribution list.
 
-To confirm your subscription, send an email to {EMAIL_NEWSLETTER} with the word "confirm" in the subject line, and the code of your account in the body of the message.
+To confirm your subscription, send an email to {EMAIL_NEWSLETTER} with the word "confirm" in the subject line, and the following code as message: {CODE}
 
 <!-- BEGIN enable_profil_cp -->
 Once your subscription is confirmed, you will be able to manage your account options by clicking on the following link :

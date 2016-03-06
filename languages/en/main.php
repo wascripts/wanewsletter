@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
  * Vous pouvez très facilement traduire Wanewsletter dans une autre langue.
@@ -133,7 +133,7 @@ $lang['Message']['Inactive_format']         = "Impossible to change the format";
 $lang['Message']['Invalid_date']            = "Sorry, the confirm date has exceeded";
 $lang['Message']['Invalid_code']            = "Invalid code!";
 $lang['Message']['Invalid_email2']          = "Invalid email address!";
-$lang['Message']['Failed_sending']          = "The email could not be sent! %s";
+$lang['Message']['Failed_sending']          = "The email could not be sent! (%s)";
 
 $lang['Message']['Success_export']          = "The emails export operation has been successfully carried out. \nYou will find the the backup file in the script's temporary files folder (Do not forget to delete it after saving it!)";
 $lang['Message']['Success_import']          = "The import operation has been successfully carried out.";
@@ -180,7 +180,7 @@ $lang['Message']['Bad_confirm_pass']        = "The new password and confirmed pa
 $lang['Message']['Bad_confirm_email']       = "The confirmation of your new email address is incorrect";
 $lang['Message']['bad_smtp_param']          = "The connexion to the smtp server could not be established, please check your settings \n(%s)";
 $lang['Message']['bad_pop_param']           = "The connexion to the pop server could not be established, please check your settings \n(%s)";
-$lang['Message']['Alphanum_pass']           = "The password must consist of a minimum of 6 ASCII printable characters";
+$lang['Message']['Alphanum_pass']           = "The password must consist of a minimum of 6 printable characters";
 $lang['Message']['Invalid_session']         = "Invalid session!";
 $lang['Message']['fields_empty']            = "Certain required fields are not filled out";
 $lang['Message']['Owner_account']           = "You cannot delete your own account!";
@@ -200,7 +200,6 @@ $lang['Message']['No_data_received']        = "No valid data has been received";
 $lang['Message']['Stats_disabled']          = "The statistics module has been deactivated";
 $lang['Message']['No_gd_lib']               = "This module requires the GD library. Apparently it is not present on the server";
 $lang['Message']['No_subscribers']          = "You cannot send any newsletter to this list because it does not have any subscriber yet.";
-$lang['Message']['Unknown_engine']          = "No send engine specyfied";
 $lang['Message']['No_log_found']            = "No newsletter ready to be sent has been found";
 $lang['Message']['Invalid_url']             = "Given URL is not valid";
 $lang['Message']['Unaccess_host']           = "The host %s seems actually unreachable";
@@ -208,10 +207,11 @@ $lang['Message']['Not_found_at_url']        = "The file does not seems to be at 
 $lang['Message']['Error_load_url']          = "Error while loading url \"%1\$s\" (%2\$s)";
 $lang['Message']['No_form_url']             = "you don't have specified the url of the form into the %sconfig of your list%s.\nYou must correct it before starting to send mail(s).";
 $lang['Message']['File_not_found']          = "This file was not found on server";
+$lang['Message']['Config_loading_url']      = "To load remote URLs, you need either the curl PHP extension or activate the PHP allow_url_fopen option.";
 
 $lang['Message']['Cannot_create_dir']       = "Cannot create %s directory";
 $lang['Message']['Dir_not_writable']        = "The directory <samp>%s</samp> doesn't exist or is not writable";
-$lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading! (includes/dblayer/schemas/)";
+$lang['Message']['sql_file_not_readable']   = "The sql files are not accessible for reading! (includes/Dblayer/schemas/)";
 
 $lang['Message']['Uploaddir_not_writable']  = "The upload dir isn't writable";
 $lang['Message']['Upload_error_1']          = "The file exceeds the size authorized by the upload_max_filesize directive in php.ini";
@@ -242,12 +242,20 @@ $lang['Message']['No_gd_img_support']       = "No image format are available";
 $lang['Message']['Warning_debug_active']    = "<strong>Notice&nbsp;:</strong> The debugging is active&nbsp;!";
 $lang['Message']['Invalid_prefix']          = "The table prefix must start with a letter , optionally followed by other alphanumeric characters, and ends with an underscore.";
 $lang['Message']['DB_connection_lost']      = "The database connection has been lost";
-$lang['Message']['Reset_using_username_ok'] = "if an account matchs the username that you have submitted, an email reset password will be sent to the corresponding email address.";
-$lang['Message']['Reset_using_email_ok']    = "if an account matchs the email address that you have submitted, an email reset password will be sent to this email address.";
+
+$lang['Message']['Reset_password_username'] = "if an account matchs the username that you have submitted, an email reset password will be sent to the corresponding email address.";
+$lang['Message']['Reset_password_email']    = "if an account matchs the email address that you have submitted, an email reset password will be sent to this email address.";
 $lang['Message']['Invalid_token']           = "This token is not valid !";
 $lang['Message']['Expired_token']           = "This token is no more valid ! \nRetry the process to receive a new valid token.";
 $lang['Message']['Password_created']        = "Your password has been successfully created.\n You can now %slog in%s.";
 $lang['Message']['Password_modified']       = "Your password has been successfully modified.\n You can now %slog in%s.";
+
+$lang['Message']['Unreadable_config_file']  = "Cannot read the config file. Please fix this mistake and reload.";
+$lang['Message']['No_microsoft_sqlserver']  = "Support for Microsoft SQL Server has been removed since Wanewsletter 2.3";
+$lang['Message']['Not_installed']           = "Wanewsletter seems not to be installed!\nCall install.php in your web browser.";
+$lang['Message']['Move_to_data_dir']        = "Using %s. You should move this file into data/ directory.";
+$lang['Message']['No_json_extension']       = "JSON extension is needed for reading composer.lock file!";
+$lang['Message']['Composer_lock_unreadable'] = "Cannot read the composer.lock file!";
 
 //
 // Divers
@@ -267,7 +275,6 @@ $lang['Next_page']                  = "Next page";
 $lang['Yes']                        = "yes";
 $lang['No']                         = "no";
 $lang['Login']                      = "User name";
-$lang['Login_or_email']             = "User name ou email address";
 $lang['Password']                   = "Password";
 $lang['Not_available']              = "Not available";
 $lang['Seconds']                    = "seconds";
@@ -288,10 +295,10 @@ $lang['By_desc']                    = "descending";
 $lang['Filename']                   = "Filename";
 $lang['Filesize']                   = "Filesize";
 $lang['No_data']                    = "No data";
-$lang['GO']                         = "GiB";
-$lang['MO']                         = "MiB";
-$lang['KO']                         = "KiB";
-$lang['Octets']                     = "Bytes";
+$lang['GiB']                        = "GiB";
+$lang['MiB']                        = "MiB";
+$lang['KiB']                        = "KiB";
+$lang['Bytes']                      = "Bytes";
 $lang['Show']                       = "Show";
 $lang['View']                       = "View";
 $lang['Edit']                       = "Edit";
@@ -314,6 +321,7 @@ $lang['Account_status']             = "Account status";
 $lang['Active']                     = "Active";
 $lang['Inactive']                   = "Inactive";
 $lang['None']                       = "None";
+$lang['Text']                       = "text";
 $lang['Restore_default']            = "Restore default value";
 $lang['Connection_security']        = "Connection security";
 $lang['Server_password_note']       = "If left empty, the previous password is kept unless no username is provided.";
@@ -327,6 +335,19 @@ $lang['Click_resend_manuel']        = "Click %shere%s to send another packet of 
 
 $lang['Explain']['login']           = "If your account doesn't have a password, you can create one by following this link: %sCreate password%s.";
 $lang['Explain']['Reset_passwd']    = "Enter your username or your email address to receive a mail with instructions on how to create a new password.";
+
+$lang['Third_party_libraries']      = "Third party libraries";
+$lang['Database']                   = "Database";
+$lang['Client_library']             = "Client library";
+$lang['Charset']                    = "Character set";
+$lang['Server_software']            = "HTTP Server/OS";
+$lang['User_agent']                 = "User agent";
+$lang['Secure_connection']          = "Secure connection";
+$lang['Driver']                     = "Driver";
+$lang['Misc']                       = "Miscellaneous";
+$lang['Unreadable']                 = "not readable";
+$lang['Unwritable']                 = "not writable";
+$lang['Not_exists']                 = "not exists";
 
 //
 // Sujets de divers emails envoyés
@@ -394,7 +415,6 @@ $lang['Cookie_path']                = "Cookie path";
 $lang['Session_length']             = "Administration session lenght";
 $lang['Upload_path']                = "Attached files storage directory";
 $lang['Max_filesize']               = "Maximum total size of a newsletter's attached files";
-$lang['Max_filesize_note']          = "(sum of the size of all attached files, in bytes)";
 $lang['Choice_engine_send']         = "Email send method to use";
 $lang['With_engine_bcc']            = "One email with recipients in hidden copy";
 $lang['With_engine_uniq']           = "One email to each subscriber";
@@ -486,6 +506,7 @@ $lang['Click_return_logs']          = "Click %shere%s to return to the newslette
 $lang['Log_subject']                = "Newsletter subject";
 $lang['Log_date']                   = "Date sent";
 $lang['Log_numdest']                = "Number of recipients";
+$lang['Log_numdest_short']          = "Recip.";
 $lang['Delete_logs']                = "Are you sure you want to delete selected newsletters?";
 $lang['Delete_log']                 = "Are you sure you want to delete this newsletter?";
 $lang['No_log_sended']              = "No newsletter was sent to this list";
@@ -570,7 +591,6 @@ $lang['Used_version']               = "You use <strong>Wanewsletter %s</strong>"
 $lang['New_version_available']      = "A new version is available";
 $lang['Download_page']              = "download page";
 $lang['Version_up_to_date']         = "Your version is up to date";
-$lang['Site_unreachable']           = "The website phpcodeur.net is currently unreachable";
 
 
 //
@@ -614,8 +634,6 @@ $lang['Status_writing']             = "Normal newsletter";
 $lang['Status_model']               = "Reusable template";
 $lang['File_on_server']             = "existing file";
 $lang['Cancel_send_log']            = "Are you sure you want to cancel this sending? (Only effective for the remaining sendings)";
-$lang['Receive_copy']               = "Receive a copy";
-$lang['Receive_copy_title']         = "If actived, you will receive a copy of the newsletter which has been sent";
 $lang['Test_send_finish']           = "Test performed. Check your mailboxes.";
 $lang['Test_send']                  = "Do a test mailing";
 $lang['Test_send_note']             = "You can do a test mailing to check the display of your newsletter in real conditions. Enter one or more email address separated by a comma and valid";
@@ -645,7 +663,9 @@ $lang['Start_upgrade']              = "Launch upgrade";
 $lang['No_db_support']              = "Sorry but Wanewsletter %s requires a MySQL, PostgreSQL or SQLite database";
 $lang['Connect_db_error']           = "Unable to connect to database (%s)";
 $lang['sqldir_perms_problem']       = "To use Wanewsletter with a SQLite database, you have to give the right permissions (read and write) to the targeted <samp>%s</samp> directory";
-$lang['DB_type_undefined']          = "The database type isn't defined!";
+$lang['Config_file_found']          = "Configuration file found and loaded.";
+$lang['Config_file_manual']         = "You can manually create the configuration file <samp>data/config.inc.php</samp> by making a copy of the file <samp>data/config.sample.inc.php</samp>.";
+$lang['Install_target']             = "The installation will be processed on %s.";
 
 $lang['Success_install']            = "The installation was succesfully completed.\nYou can now access the %sadministration%s";
 $lang['Success_install2']           = "The installation was succesfully completed, but you should read the entry <q>%sprotect the <samp>data/</samp> repertory%s</q> in the FAQ. \nYou can now access the %sadministration%s.";

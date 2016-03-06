@@ -14,6 +14,14 @@
 
 	<script src="{BASEDIR}/templates/admin/admin.js"></script>
 	{S_SCRIPTS}
+	<script>
+	<!--
+	var lang = [];
+	lang['restore-default'] = '{L_RESTORE_DEFAULT}';
+	// Vite fait mal fait. On fera un truc propre plus tard.
+	var basedir = '{BASEDIR}';
+	//-->
+	</script>
 </head>
 <body id="top">
 

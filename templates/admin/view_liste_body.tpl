@@ -84,7 +84,7 @@
 	</table>
 
 	<!-- BEGIN purge_option -->
-	<div class="bottom">{purge_option.S_HIDDEN_FIELDS}
+	<div class="bottom">
 		<button type="submit" name="purge" class="primary">{purge_option.L_PURGE_BUTTON}</button>
 	</div>
 	<!-- END purge_option -->

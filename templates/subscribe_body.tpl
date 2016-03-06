@@ -69,7 +69,7 @@
 
 	<div class="bloc">
 		<label for="format">{L_FORMAT}&nbsp;:</label>
-		<select id="format" name="format"><option value="1">TXT</option><option value="2">HTML</option></select>
+		{FORMAT_BOX}
 	</div>
 
 	<div class="bloc">
@@ -91,7 +91,7 @@
 
 <address id="footer">
 Powered by <a href="http://phpcodeur.net/" hreflang="fr" title="Site officiel de Wanewsletter">
-phpCodeur</a> &copy; 2002&ndash;2015 | Wanewsletter<br />
+phpCodeur</a> &copy; 2002&ndash;2016 | Wanewsletter<br />
 Ce script est distribué librement sous <a href="http://phpcodeur.net/wascripts/GPL" hreflang="fr">
 licence <abbr title="General Public Licence" lang="en">GPL</abbr></a>
 </address>

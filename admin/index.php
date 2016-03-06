@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -13,9 +13,10 @@ require './start.inc.php';
 
 $num_inscrits = $num_temp = $num_logs = $last_log = $filesize = 0;
 
-$liste_ids = $auth->check_auth(Auth::VIEW);
+$lists = $auth->getLists(Auth::VIEW);
 
-if (count($liste_ids) > 0) {
+if (count($lists) > 0) {
+	$liste_ids = array_column($lists, 'liste_id');
 	$sql_liste_ids = implode(', ', $liste_ids);
 
 	//
@@ -32,7 +33,7 @@ if (count($liste_ids) > 0) {
 	$result = $db->query($sql);
 
 	while ($row = $result->fetch()) {
-		if ($row['abo_status'] == ABO_ACTIF) {
+		if ($row['abo_status'] == ABO_ACTIVE) {
 			$num_inscrits = $row['num_abo'];
 		}
 		else {
@@ -83,8 +84,9 @@ if (count($liste_ids) > 0) {
 		$listid = implode('', array_unique($liste_ids));
 		$browse = dir(WA_ROOTDIR . '/stats');
 		while (($entry = $browse->read()) !== false) {
-			if (is_file(WA_ROOTDIR . '/stats/' . $entry) && $entry != 'index.html' &&
-				preg_match('/list['.$listid.']\.txt$/', $entry)
+			if (is_file(WA_ROOTDIR . '/stats/' . $entry)
+				&& $entry != 'index.html'
+				&& preg_match('/list['.$listid.']\.txt$/', $entry)
 			) {
 				$filesize += filesize(WA_ROOTDIR . '/stats/' . $entry);
 			}
@@ -176,10 +178,9 @@ else {
 	$l_num_temp = $lang['No_tmp_subscriber'];
 }
 
-$output->build_listbox(Auth::VIEW, false, './view.php?mode=liste');
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'index_body.tpl']);
+$template = new Template('index_body.tpl');
 
 if ($num_logs > 0) {
 	if ($num_logs > 1) {
@@ -189,7 +190,7 @@ if ($num_logs > 0) {
 		$l_num_logs = sprintf($lang['Total_newsletter'], wa_number_format($num_logs/$month));
 	}
 
-	$output->assign_block_vars('switch_last_newsletter', [
+	$template->assignToBlock('switch_last_newsletter', [
 		'DATE_LAST_NEWSLETTER' => sprintf($lang['Last_newsletter'], convert_time($admindata['admin_dateformat'], $last_log))
 	]);
 }
@@ -197,7 +198,7 @@ else {
 	$l_num_logs = $lang['No_newsletter_sended'];
 }
 
-$output->assign_vars([
+$template->assign([
 	'TITLE_HOME'             => $lang['Title']['accueil'],
 	'L_EXPLAIN'              => nl2br($lang['Explain']['accueil']),
 	'L_DBSIZE'               => $lang['Dbsize'],
@@ -207,47 +208,41 @@ $output->assign_vars([
 	'TEMP_SUBSCRIBERS'       => $l_num_temp,
 	'NEWSLETTERS_SENDED'     => $l_num_logs,
 	'DBSIZE'                 => (is_numeric($dbsize)) ? formateSize($dbsize) : $dbsize,
-	'FILESIZE'               => formateSize($filesize)
+	'FILESIZE'               => formateSize($filesize),
+	'LISTBOX'                => $output->listbox(Auth::VIEW, false, './view.php?mode=liste')
 ]);
 
-if (wan_is_admin($admindata)) {
+if (Auth::isAdmin($admindata)) {
 	$result = wa_check_update();
 
-	$output->assign_block_vars('version_info', [
+	$template->assign([
+		'L_DOWNLOAD_PAGE' => str_replace('\'', '\\\'', $lang['Download_page']),
+		'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
+	]);
+
+	$template->assignToBlock('version_info', [
 		'VERSION' => sprintf($lang['Used_version'], WANEWSLETTER_VERSION)
 	]);
 
-	if ($result !== false) {
-		if ($result === 1) {
-			$output->assign_block_vars('version_info.update_available', [
-				'L_UPDATE_AVAILABLE' => $lang['New_version_available'],
-				'L_DOWNLOAD_PAGE'    => $lang['Download_page'],
-
-				'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
+	if ($result != -1) {
+		if ($result == 1) {
+			$template->assignToBlock('version_info.update_available', [
+				'L_UPDATE_AVAILABLE' => $lang['New_version_available']
 			]);
 		}
 		else {
-			$output->assign_block_vars('version_info.up_to_date', [
+			$template->assignToBlock('version_info.up_to_date', [
 				'L_UP_TO_DATE' => $lang['Version_up_to_date'],
 			]);
 		}
 	}
 	else {
-		$output->assign_block_vars('check_update_js', [
-			'L_UPDATE_AVAILABLE' => str_replace('\'', '\\\'', $lang['New_version_available']),
-			'L_UP_TO_DATE'       => str_replace('\'', '\\\'', $lang['Version_up_to_date']),
-			'L_SITE_UNREACHABLE' => str_replace('\'', '\\\'', $lang['Site_unreachable']),
-			'L_DOWNLOAD_PAGE'    => str_replace('\'', '\\\'', $lang['Download_page']),
-
-			'U_DOWNLOAD_PAGE' => DOWNLOAD_PAGE
-		]);
-
-		$output->assign_block_vars('version_info.check_update', [
+		$template->assignToBlock('check_update_js');
+		$template->assignToBlock('version_info.check_update', [
 			'L_CHECK_UPDATE' => $lang['Check_update']
 		]);
 	}
 }
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

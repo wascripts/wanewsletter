@@ -3,7 +3,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -11,12 +11,12 @@ namespace Wanewsletter;
 
 require './start.inc.php';
 
-if (!wan_is_admin($admindata)) {
+if (!Auth::isAdmin($admindata)) {
 	http_response_code(401);
 	$output->redirect('./index.php', 6);
 	$output->addLine($lang['Message']['Not_authorized']);
 	$output->addLine($lang['Click_return_index'], './index.php');
-	$output->displayMessage();
+	$output->message();
 }
 
 $old_config = $nl_config;
@@ -25,9 +25,12 @@ $move_files = false;
 if (isset($_POST['submit'])) {
 	$new_config = [];
 	foreach ($old_config as $name => $value) {
-		$new_config[$name] = trim(filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW, [
+		$new_config[$name] = filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW, [
 			'options' => ['default' => $value]
-		]));
+		]);
+		if (is_scalar($new_config[$name])) {
+			$new_config[$name] = trim($new_config[$name]);
+		}
 	}
 
 	if ($new_config['language'] == '' || !validate_lang($new_config['language'])) {
@@ -99,8 +102,10 @@ if (isset($_POST['submit'])) {
 
 	$new_config['max_filesize'] = intval($new_config['max_filesize']);
 	if ($new_config['max_filesize'] <= 0) {
-		$new_config['max_filesize'] = 100000;
+		$new_config['max_filesize'] = 100;
 	}
+
+	$new_config['max_filesize'] *= 1024;// KiB => Bytes
 
 	$new_config['sending_limit'] = intval($new_config['sending_limit']);
 
@@ -113,14 +118,11 @@ if (isset($_POST['submit'])) {
 		$new_config['smtp_pass'] = $old_config['smtp_pass'];
 	}
 
-	if (!check_ssl_support()) {
-		$new_config['smtp_tls'] = SECURITY_NONE;
-	}
-
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
 		$smtp = new \Wamailer\Transport\SmtpClient();
 		$smtp->options([
-			'starttls' => ($new_config['smtp_tls'] == SECURITY_STARTTLS)
+			'starttls' => ($new_config['smtp_tls'] == SECURITY_STARTTLS),
+			'timeout'  => 10
 		]);
 
 		$server = ($new_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
@@ -148,12 +150,10 @@ if (isset($_POST['submit'])) {
 	}
 
 	if (!$new_config['disable_stats'] && extension_loaded('gd')) {
-		require WA_ROOTDIR . '/includes/functions.stats.php';
-
-		if (!is_writable(WA_STATSDIR)) {
+		if (!is_writable($nl_config['stats_dir'])) {
 			$error = true;
 			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-				htmlspecialchars(WA_STATSDIR)
+				htmlspecialchars($nl_config['stats_dir'])
 			);
 		}
 	}
@@ -181,14 +181,12 @@ if (isset($_POST['submit'])) {
 			}
 		}
 
-		$output->displayMessage('Success_modif');
+		$output->message('Success_modif');
 	}
 }
 else {
 	$new_config = $old_config;
 }
-
-require WA_ROOTDIR . '/includes/functions.box.php';
 
 $debug_box  = '<select name="debug_level">';
 foreach ([DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL] as $debug_level) {
@@ -200,11 +198,11 @@ foreach ([DEBUG_LEVEL_QUIET, DEBUG_LEVEL_NORMAL, DEBUG_LEVEL_ALL] as $debug_leve
 }
 $debug_box .= '</select>';
 
-$output->page_header();
+$output->header();
 
-$output->set_filenames(['body' => 'config_body.tpl']);
+$template = new Template('config_body.tpl');
 
-$output->assign_vars([
+$template->assign([
 	'TITLE_CONFIG_LANGUAGE'     => $lang['Title']['config_lang'],
 	'TITLE_CONFIG_PERSO'        => $lang['Title']['config_perso'],
 	'TITLE_CONFIG_COOKIES'      => $lang['Title']['config_cookies'],
@@ -236,8 +234,7 @@ $output->assign_vars([
 	'L_SECONDS'                 => $lang['Seconds'],
 	'L_UPLOAD_PATH'             => $lang['Upload_path'],
 	'L_MAX_FILESIZE'            => $lang['Max_filesize'],
-	'L_MAX_FILESIZE_NOTE'       => nl2br($lang['Max_filesize_note']),
-	'L_OCTETS'                  => $lang['Octets'],
+	'L_KIB'                     => $lang['KiB'],
 	'L_ENGINE_SEND'             => $lang['Choice_engine_send'],
 	'L_ENGINE_BCC'              => $lang['With_engine_bcc'],
 	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],
@@ -255,7 +252,6 @@ $output->assign_vars([
 	'L_VALID_BUTTON'            => $lang['Button']['valid'],
 	'L_RESET_BUTTON'            => $lang['Button']['reset'],
 	'L_DEBUG_LEVEL'             => $lang['Debug_level'],
-	'L_RESTORE_DEFAULT'         => $lang['Restore_default'],
 
 	'LANG_BOX'                  => lang_box($new_config['language']),
 	'SITENAME'                  => htmlspecialchars($new_config['sitename']),
@@ -269,7 +265,7 @@ $output->assign_vars([
 	'COOKIE_PATH'               => $new_config['cookie_path'],
 	'LENGTH_SESSION'            => $new_config['session_length'],
 	'UPLOAD_PATH'               => $new_config['upload_path'],
-	'MAX_FILESIZE'              => $new_config['max_filesize'],
+	'MAX_FILESIZE'              => ($new_config['max_filesize']) ? round($new_config['max_filesize']/1024) : 0,
 	'CHECKED_ENGINE_BCC'        => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_BCC)),
 	'CHECKED_ENGINE_UNIQ'       => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_UNIQ)),
 	'SENDING_LIMIT'             => $new_config['sending_limit'],
@@ -277,15 +273,15 @@ $output->assign_vars([
 	'CHECKED_USE_SMTP_ON'       => $output->getBoolAttr('checked', $new_config['use_smtp']),
 	'CHECKED_USE_SMTP_OFF'      => $output->getBoolAttr('checked', !$new_config['use_smtp']),
 	'DISABLED_SMTP'             => $output->getBoolAttr('disabled', !function_exists('stream_socket_client')),
-	'WARNING_SMTP'              => (!function_exists('stream_socket_client')) ? ' <span style="color: red;">[not available]</span>' : '',
+	'WARNING_SMTP'              => (!function_exists('stream_socket_client')) ? ' <span class="unavailable">[not available]</span>' : '',
 	'SMTP_HOST'                 => $new_config['smtp_host'],
 	'SMTP_PORT'                 => $new_config['smtp_port'],
 	'SMTP_USER'                 => $new_config['smtp_user'],
 	'DEBUG_BOX'                 => $debug_box
 ]);
 
-if (check_ssl_support()) {
-	$output->assign_block_vars('ssl_support', [
+if (in_array('tls', stream_get_transports())) {
+	$template->assignToBlock('tls_support', [
 		'L_SECURITY'        => $lang['Connection_security'],
 		'L_NONE'            => $lang['None'],
 		'STARTTLS_SELECTED' => $output->getBoolAttr('selected', $new_config['smtp_tls'] == SECURITY_STARTTLS),
@@ -294,7 +290,7 @@ if (check_ssl_support()) {
 }
 
 if (extension_loaded('gd')) {
-	$output->assign_block_vars('extension_gd', [
+	$template->assignToBlock('extension_gd', [
 		'TITLE_CONFIG_STATS'        => $lang['Title']['config_stats'],
 		'L_EXPLAIN_STATS'           => nl2br($lang['Explain']['config_stats']),
 		'L_DISABLE_STATS'           => $lang['Disable_stats'],
@@ -307,8 +303,7 @@ else {
 	$output->addHiddenField('disable_stats', '1');
 }
 
-$output->assign_var('S_HIDDEN_FIELDS', $output->getHiddenFields());
+$template->assign(['S_HIDDEN_FIELDS' => $output->getHiddenFields()]);
 
-$output->pparse('body');
-
-$output->page_footer();
+$template->pparse();
+$output->footer();

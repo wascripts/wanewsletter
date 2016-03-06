@@ -4,7 +4,7 @@
  * @package   Wanewsletter
  * @author    Bobe <wascripts@phpcodeur.net>
  * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2015 Aurélien Maille
+ * @copyright 2002-2016 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  *
  * Créé de nouvelles tables à partir des données présentes dans des
@@ -12,7 +12,7 @@
  *
  * TODO : Les champs étrangers (champs personnalisés) ne sont pas pris en compte
  * La correction manuelle consiste à ajouter les descriptions des nouveaux champs dans
- * le fichier de schéma des tables correspondant dans ~/includes/dblayer/schemas
+ * le fichier de schéma des tables correspondant dans ~/includes/Dblayer/schemas
  */
 
 namespace Wanewsletter;
@@ -29,7 +29,7 @@ exit(0);
 //
 define('WA_ROOTDIR', dirname(__DIR__));
 
-$schemas_dir  = WA_ROOTDIR . '/includes/dblayer/schemas';
+$schemas_dir  = WA_ROOTDIR . '/includes/Dblayer/schemas';
 
 //$dsn = "<engine>://<username>:<password>@<host>:<port>/<database>";
 $dsn_from     = 'mysql://username:password@localhost/dbname?charset=utf8';
@@ -42,7 +42,6 @@ $prefixe_to   = 'wa_';
 //
 
 require WA_ROOTDIR . '/includes/common.inc.php';
-require WA_ROOTDIR . '/includes/dblayer/sqlparser.php';
 
 if (!check_cli()) {
 	set_time_limit(0);
@@ -65,7 +64,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 
 // Create table
 $sql_create = file_get_contents(sprintf('%s/%s_tables.sql', $schemas_dir, $db_to::ENGINE));
-$sql_create = Dblayer\parseSQL($sql_create, $prefixe_to);
+$sql_create = parse_sql($sql_create, $prefixe_to);
 
 foreach ($sql_create as $query) {
 	$db_to->query($query);
@@ -155,7 +154,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 	$result = $db_from->query(sprintf("SELECT %s FROM %s", $fields,
 		$db_from->quote(str_replace('wa_', $prefixe_from, $tablename))
 	));
-	$result->setFetchMode(WadbResult::FETCH_ASSOC);
+	$result->setFetchMode($result::FETCH_ASSOC);
 
 	$numrows = 0;
 

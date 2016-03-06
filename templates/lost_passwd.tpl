@@ -10,8 +10,8 @@
 
 	<table class="dataset">
 		<tr>
-			<td><label for="login_or_email">{L_LOGIN_OR_EMAIL}&nbsp;:</label></td>
-			<td><input type="text" id="login_or_email" name="login_or_email"
+			<td><label for="login">{L_LOGIN}&nbsp;:</label></td>
+			<td><input type="text" id="login" name="login" autocomplete="off"
 				maxlength="254" size="25" autofocus />
 			</td>
 		</tr>
