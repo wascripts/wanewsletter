@@ -121,15 +121,9 @@ function load_config()
 	//
 	// Options supplémentaires transmises par commodité sous forme de tableau
 	//
-	if (!empty($dsn_opts)) {
-		$args = http_build_query($dsn_opts, '', '&');
-
-		if (strpos($dsn, '?')) {
-			$dsn .= '&'.$args;
-		}
-		else {
-			$dsn .= '?'.$args;
-		}
+	if (!empty($nl_config['db'])) {
+		$args = http_build_query($nl_config['db'], '', '&');
+		$dsn .= (strpos($dsn, '?') ? '&' : '?') . $args;
 	}
 
 	//
