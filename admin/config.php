@@ -25,9 +25,12 @@ $move_files = false;
 if (isset($_POST['submit'])) {
 	$new_config = [];
 	foreach ($old_config as $name => $value) {
-		$new_config[$name] = trim(filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW, [
+		$new_config[$name] = filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW, [
 			'options' => ['default' => $value]
-		]));
+		]);
+		if (is_scalar($new_config[$name])) {
+			$new_config[$name] = trim($new_config[$name]);
+		}
 	}
 
 	if ($new_config['language'] == '' || !validate_lang($new_config['language'])) {
