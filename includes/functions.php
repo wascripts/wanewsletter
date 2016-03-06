@@ -287,13 +287,23 @@ function wa_update_config($config, $value = null)
 		$config = [$config => $value];
 	}
 
-	foreach ($config as $name => $value) {
-		$db->query(sprintf(
+	$result = $db->query("SELECT config_name FROM " . CONFIG_TABLE);
+	$result->setFetchMode($result::FETCH_ASSOC);
+
+	$config_list = [];
+
+	while ($row = $result->fetch()) {
+		$config_list[] = $row['config_name'];
+	}
+
+	foreach ($config_list as $name) {
+		$sql = sprintf(
 			"UPDATE %s SET config_value = '%s' WHERE config_name = '%s'",
 			CONFIG_TABLE,
-			$db->escape($value),
+			$db->escape($config[$name]),
 			$db->escape($name)
-		));
+		);
+		$db->query($sql);
 	}
 }
 
