@@ -296,11 +296,13 @@ function wa_update_config($config, $value = null)
 		$config_list[] = $row['config_name'];
 	}
 
-	foreach ($config_list as $name) {
+	$config = array_intersect_key($config, array_flip($config_list));
+
+	foreach ($config as $name => $value) {
 		$sql = sprintf(
 			"UPDATE %s SET config_value = '%s' WHERE config_name = '%s'",
 			CONFIG_TABLE,
-			$db->escape($config[$name]),
+			$db->escape($value),
 			$db->escape($name)
 		);
 		$db->query($sql);
