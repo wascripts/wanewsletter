@@ -17,7 +17,7 @@ if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', str_replace('\\', '/', dirname(__DIR__)));
 }
 
-// $default_error_reporting est utilisé ultérieurement dans le gestionnaire d'erreurs
+// Constante utilisée ultérieurement dans le gestionnaire d’erreurs
 define(__NAMESPACE__.'\\DEFAULT_ERROR_REPORTING', (E_ALL & ~(E_STRICT|E_DEPRECATED)));
 error_reporting(DEFAULT_ERROR_REPORTING);
 
