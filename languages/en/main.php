@@ -686,7 +686,7 @@ $lang['dbhost']                     = "Database Server Hostname";
 $lang['dbname']                     = "Database Name";
 $lang['dbuser']                     = "Database Username";
 $lang['dbpwd']                      = "Database Password";
-$lang['prefixe']                    = "Prefix for tables";
+$lang['prefix']                     = "Prefix for tables";
 
 
 //

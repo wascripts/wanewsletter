@@ -174,7 +174,7 @@ $config_file .= "//\n";
 $config_file .= "// Paramètres d'accès à la base de données\n";
 $config_file .= "//\n";
 $config_file .= "\$dsn = '$dsn';\n";
-$config_file .= "\$prefixe = '$prefixe';\n";
+$config_file .= "\$prefix = '".$nl_config['db']['prefix']."';\n";
 $config_file .= "\n";
 
 if ($auth->isLoggedIn() && Auth::isAdmin($admindata) && isset($_POST['sendfile'])) {
@@ -223,8 +223,8 @@ if (isset($_POST['start'])) {
 		//
 		@set_time_limit(3600);
 
-		$sql_create = parse_sql(file_get_contents($sql_create), $prefixe);
-		$sql_data   = parse_sql(file_get_contents($sql_data), $prefixe);
+		$sql_create = parse_sql(file_get_contents($sql_create), $nl_config['db']['prefix']);
+		$sql_data   = parse_sql(file_get_contents($sql_data), $nl_config['db']['prefix']);
 
 		$sql_create_by_table = $sql_data_by_table = [];
 
@@ -580,7 +580,10 @@ if (isset($_POST['start'])) {
 		//
 		if ($nl_config['db_version'] < 16 && $db::ENGINE == 'postgres') {
 			// La séquence pour la table ban_list ne suit pas le nommage {tablename}_id_seq
-			$sql_update[] = sprintf('ALTER SEQUENCE %1$sban_id_seq RENAME TO %2$s_id_seq', $prefixe, BAN_LIST_TABLE);
+			$sql_update[] = sprintf('ALTER SEQUENCE %1$sban_id_seq RENAME TO %2$s_id_seq',
+				$nl_config['db']['prefix'],
+				BAN_LIST_TABLE
+			);
 
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.abo_id', ABONNES_TABLE);
 			$sql_update[] = sprintf('ALTER SEQUENCE %1$s_id_seq OWNED BY %1$s.admin_id', ADMIN_TABLE);

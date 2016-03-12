@@ -19,20 +19,14 @@ if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 
 require './includes/common.inc.php';
 
-function create_config_file($dsn, $prefixe)
+function create_config_file($dsn, $prefix)
 {
-	//
-	// Envoi du fichier au client si demandé
-	//
-	// Attention, $config_file est aussi utilisé à la fin de l'installation pour
-	// pour créer le fichier de configuration.
-	//
 	$config_file  = '<' . "?php\n";
 	$config_file .= "//\n";
 	$config_file .= "// Paramètres d'accès à la base de données\n";
 	$config_file .= "//\n";
 	$config_file .= "\$dsn = '$dsn';\n";
-	$config_file .= "\$prefixe = '$prefixe';\n";
+	$config_file .= "\$prefix = '$prefix';\n";
 	$config_file .= "\n";
 	$config_file .= "// Configuration additionnelle (voir data/config.sample.inc.php)\n";
 	$config_file .= "\$nl_config = [];\n";
@@ -83,12 +77,13 @@ $infos   = [
 if (!empty($dsn)) {
 	$config_file_exists = true;
 	$tmp = parseDSN($dsn);
-	$infos = array_merge($infos, $tmp[0]);
+	$infos  = array_merge($infos, $tmp[0]);
+	$prefix = $nl_config['db']['prefix'];
 }
 else {
 	$config_file_exists = false;
 
-	$prefixe = trim(filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
+	$prefix = trim(filter_input(INPUT_POST, 'prefix', FILTER_DEFAULT, [
 		'options' => ['default' => 'wa_']
 	]));
 
@@ -140,7 +135,7 @@ if (isset($_POST['sendfile'])) {
 		exit;
 	}
 
-	sendfile('config.inc.php', 'text/plain', create_config_file($dsn, $prefixe));
+	sendfile('config.inc.php', 'text/plain', create_config_file($dsn, $prefix));
 }
 
 $vararray = [
@@ -241,7 +236,7 @@ if ($start) {
 		$msg_error[] = $lang['Message']['sql_file_not_readable'];
 	}
 
-	if (!preg_match('#^[a-z][a-z0-9]*_?$#i', $prefixe)) {
+	if (!preg_match('#^[a-z][a-z0-9]*_?$#i', $prefix)) {
 		$error = true;
 		$msg_error[] = $lang['Message']['Invalid_prefix'];
 	}
@@ -275,7 +270,7 @@ if ($start) {
 
 			foreach ($sql_schemas as $tablename => $schema) {
 				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
-					str_replace('wa_', $prefixe, $tablename)
+					str_replace('wa_', $prefix, $tablename)
 				);
 			}
 
@@ -285,13 +280,13 @@ if ($start) {
 		//
 		// Création des tables du script
 		//
-		$sql_create = parse_sql(file_get_contents($sql_create), $prefixe);
+		$sql_create = parse_sql(file_get_contents($sql_create), $prefix);
 		exec_queries($sql_create);
 
 		//
 		// Insertion des données de base
 		//
-		$sql_data = parse_sql(file_get_contents($sql_data), $prefixe);
+		$sql_data = parse_sql(file_get_contents($sql_data), $prefix);
 
 		$urlsite  = (is_secure_connection()) ? 'https' : 'http';
 		$urlsite .= '://' . $_SERVER['HTTP_HOST'];
@@ -346,7 +341,7 @@ if ($start) {
 				$output->addHiddenField('user',    $infos['user']);
 				$output->addHiddenField('pass',    $infos['pass']);
 				$output->addHiddenField('dbname',  $infos['dbname']);
-				$output->addHiddenField('prefixe', $prefixe);
+				$output->addHiddenField('prefix',  $prefix);
 
 				$output->httpHeaders();
 
@@ -367,7 +362,7 @@ if ($start) {
 				exit;
 			}
 
-			fwrite($fp, create_config_file($dsn, $prefixe));
+			fwrite($fp, create_config_file($dsn, $prefix));
 			fclose($fp);
 		}
 
@@ -460,14 +455,14 @@ if (!$reinstall) {
 			'L_DBNAME'       => $lang['dbname'],
 			'L_DBUSER'       => $lang['dbuser'],
 			'L_DBPWD'        => $lang['dbpwd'],
-			'L_PREFIXE'      => $lang['prefixe'],
+			'L_PREFIX'       => $lang['prefix'],
 
 			'DB_BOX'         => $db_box,
 			'DBPATH'         => htmlspecialchars($infos['path']),
 			'DBHOST'         => htmlspecialchars($infos['host']),
 			'DBNAME'         => ($infos['engine'] != 'sqlite') ? htmlspecialchars($infos['dbname']) : '',
 			'DBUSER'         => htmlspecialchars($infos['user']),
-			'PREFIXE'        => htmlspecialchars($prefixe)
+			'PREFIX'         => htmlspecialchars($prefix)
 		]);
 	}
 }

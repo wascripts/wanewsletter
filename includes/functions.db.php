@@ -273,12 +273,12 @@ function exec_queries(array &$queries)
  * Analyse un fichier contenant une liste de requètes SQL séparées par un ';'
  * et retourne un tableau de requètes.
  *
- * @param string $input   Chaîne à analyser
- * @param string $prefixe Préfixe des tables à mettre à la place du prefixe par défaut
+ * @param string $input  Chaîne à analyser
+ * @param string $prefix Préfixe des tables à mettre à la place du prefixe par défaut
  *
  * @return array
  */
-function parse_sql($input, $prefixe = null)
+function parse_sql($input, $prefix = null)
 {
 	$tmp            = '';
 	$output         = [];
@@ -346,8 +346,8 @@ function parse_sql($input, $prefixe = null)
 		}
 	}
 
-	if ($prefixe) {
-		$output = str_replace('wa_', $prefixe, $output);
+	if ($prefix) {
+		$output = str_replace('wa_', $prefix, $output);
 	}
 
 	return $output;

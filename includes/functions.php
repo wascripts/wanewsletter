@@ -23,7 +23,7 @@ function load_config()
 	load_settings();
 
 	$dsn = '';
-	$prefixe = 'wa_';
+	$prefix = 'wa_';
 	$nl_config = [];
 
 	$need_update  = false;
@@ -91,15 +91,20 @@ function load_config()
 		$need_update = true;
 	}
 
+	// $prefixe renommée $prefix
+	if (isset($prefixe)) {
+		$prefix = $prefixe;
+	}
+
 	// Utilisé à la fin d’une mise à jour pour mettre à jour également un
 	// fichier de configuration obsolète.
 	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 
-	// Si on est dans l’installeur, on récupère ici l’entrée 'prefixe' du
+	// Si on est dans l’installeur, on récupère ici l’entrée 'prefix' du
 	// formulaire, car on en a besoin pour créer les constantes *_TABLE.
 	if (defined(__NAMESPACE__.'\\IN_INSTALL')) {
-		$prefixe = filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
-			'options' => ['default' => $prefixe]
+		$prefix = filter_input(INPUT_POST, 'prefix', FILTER_DEFAULT, [
+			'options' => ['default' => $prefix]
 		]);
 	}
 	// Si le script n’est pas installé, on redirige vers l’installeur, ou
@@ -118,10 +123,12 @@ function load_config()
 		}
 	}
 
+	$nl_config['db']['prefix'] = $prefix;
+
 	//
 	// Options supplémentaires transmises par commodité sous forme de tableau
 	//
-	if (!empty($nl_config['db'])) {
+	if ($dsn) {
 		$args = http_build_query($nl_config['db'], '', '&');
 		$dsn .= (strpos($dsn, '?') ? '&' : '?') . $args;
 	}
@@ -136,7 +143,7 @@ function load_config()
 
 	foreach ($tables as $table) {
 		$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__, strtoupper($table));
-		$table = $prefixe . $table;
+		$table = $prefix . $table;
 		define($constant, $table);
 		$GLOBALS['sql_schemas'][$table] = [];
 	}
@@ -186,7 +193,6 @@ function load_config()
 
 	// Injection dans le scope global
 	$GLOBALS['dsn'] = $dsn;
-	$GLOBALS['prefixe'] = $prefixe;
 	$GLOBALS['nl_config'] = $nl_config;
 }
 

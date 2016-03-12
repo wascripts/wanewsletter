@@ -8,7 +8,7 @@
 //$dsn = 'mysql://username:password@localhost/dbname?charset=utf8';
 // exemple de DSN pour SQLite
 //$dsn = 'sqlite:/path/to/db/wanewsletter.sqlite';
-$prefixe = 'wa_';
+$prefix = 'wa_';
 
 //
 // Des paramètres de configuration additionnels peuvent être fournis
