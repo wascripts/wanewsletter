@@ -154,8 +154,9 @@ class Sender
 			//
 			$abo_ids = fread($this->fp, $filesize);
 			$abo_ids = array_unique(array_map('intval', explode("\n", $abo_ids)));
+			$hook_params['ids'] = $abo_ids;
 
-			$update_abo_list($abo_ids);
+			$update_abo_list($hook_params);
 		}
 
 		$this->registerHook('post-send', function ($params) {
