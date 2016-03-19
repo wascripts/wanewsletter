@@ -136,16 +136,11 @@ function load_config()
 	//
 	// Déclaration des constantes de tables
 	//
-	$tables = [
-		'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
-		'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
-	];
-
-	foreach ($tables as $table) {
-		$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__, strtoupper($table));
-		$table = $prefix . $table;
-		define($constant, $table);
-		$GLOBALS['sql_schemas'][$table] = [];
+	foreach (get_db_tables($prefix) as $tablename) {
+		$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__,
+			strtoupper(substr($tablename, strlen($prefix)))
+		);
+		define($constant, $tablename);
 	}
 
 	//

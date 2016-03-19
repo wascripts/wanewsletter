@@ -48,6 +48,33 @@ function get_supported_db()
 }
 
 /**
+ * Retourne la liste des tables du script en les préfixant avec la
+ * chaîne fournie en argument, ou, par défaut, en utilisant le préfixe
+ * indiqué dans la configuration.
+ *
+ * @param string $prefix
+ *
+ * @return array
+ */
+function get_db_tables($prefix = null)
+{
+	if (!is_string($prefix)) {
+		$prefix = $GLOBALS['nl_config']['db']['prefix'];
+	}
+
+	$tables = [
+		'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
+		'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
+	];
+
+	array_walk($tables, function (&$tablename, $key) use ($prefix) {
+		$tablename = $prefix.$tablename;
+	});
+
+	return $tables;
+}
+
+/**
  * Génère une chaîne DSN
  *
  * @param array $infos   Informations sur l'accès à la base de données

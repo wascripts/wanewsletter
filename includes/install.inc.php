@@ -268,10 +268,8 @@ if ($start) {
 		if ($reinstall) {
 			$sql_drop = [];
 
-			foreach ($sql_schemas as $tablename => $schema) {
-				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
-					str_replace('wa_', $prefix, $tablename)
-				);
+			foreach (get_db_tables() as $tablename) {
+				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s", $db->quote($tablename));
 			}
 
 			exec_queries($sql_drop);

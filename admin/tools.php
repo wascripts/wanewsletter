@@ -819,7 +819,7 @@ switch ($mode) {
 			$contents = $backup->header(sprintf(USER_AGENT_SIG, WANEWSLETTER_VERSION));
 
 			foreach ($tables as $tablename) {
-				if (!isset($sql_schemas[$tablename]) && !in_array($tablename, $tables_plus)) {
+				if (!in_array($tablename, get_db_tables()) && !in_array($tablename, $tables_plus)) {
 					continue;
 				}
 
@@ -861,7 +861,7 @@ switch ($mode) {
 		}
 
 		foreach ($tables as $tablename) {
-			if (!isset($sql_schemas[$tablename])) {
+			if (!in_array($tablename, get_db_tables())) {
 				$tables_plus[] = $tablename;
 			}
 		}

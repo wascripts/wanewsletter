@@ -27,15 +27,14 @@ require '../includes/common.inc.php';
  */
 function wa_sqlite_recreate_table($tablename, $restore_data = true)
 {
-	global $db, $sql_create, $sql_schemas;
+	global $db, $sql_create, $sql_tables_recreated;
 
-	$schema = &$sql_schemas[$tablename];
-
-	if (!empty($schema['updated'])) {
+	// Table déjà recréée ?
+	if ($sql_tables_recreated[$tablename]) {
 		return null;
 	}
 
-	$schema['updated'] = true;
+	$sql_tables_recreated[$tablename] = true;
 
 	$get_columns = function ($tablename) use ($db) {
 		$result = $db->query(sprintf("PRAGMA table_info(%s)", $db->quote($tablename)));
@@ -229,38 +228,25 @@ if (isset($_POST['start'])) {
 		$sql_create_by_table = $sql_data_by_table = [];
 
 		foreach ($sql_create as $query) {
-			if (preg_match("/CREATE\s+(TABLE|INDEX)\s+([A-Za-z0-9_$]+?)\s+/", $query, $m)) {
-				foreach ($sql_schemas as $tablename => $schema) {
-					if ($m[1] == 'TABLE') {
-						if ($tablename != $m[2]) {
-							continue;
-						}
-					}
-					else if (!isset($schema[strtolower($m[1])])
-						|| array_search($m[2], $schema[strtolower($m[1])]) === false
-					) {
-						continue;
-					}
-
-					if (!isset($sql_create_by_table[$tablename])) {
-						$sql_create_by_table[$tablename] = [];
-					}
-					$sql_create_by_table[$tablename][] = $query;
-				}
+			if (preg_match("/^CREATE\s+TABLE\s+([A-Za-z0-9_]+)\s+/", $query, $m)) {
+				$sql_create_by_table[$m[1]][] = $query;
+			}
+			else if (preg_match("/^CREATE\s+INDEX\s+(?:[A-Za-z0-9_]+)\s+ON\s+([A-Za-z0-9_]+)/", $query, $m)) {
+				$sql_create_by_table[$m[1]][] = $query;
 			}
 		}
 
 		foreach ($sql_data as $query) {
-			if (preg_match('/INSERT\s+INTO\s+([A-Za-z0-9_$]+)/', $query, $m)) {
-				if (!array_key_exists($m[1], $sql_data_by_table) && array_key_exists($m[1], $sql_schemas)) {
-					$sql_data_by_table[$m[1]] = [];
-				}
+			if (preg_match('/^INSERT\s+INTO\s+([A-Za-z0-9_]+)/', $query, $m)) {
 				$sql_data_by_table[$m[1]][] = $query;
 			}
 		}
 
 		$sql_create = $sql_create_by_table;
 		$sql_data   = $sql_data_by_table;
+
+		// Nécessaire pour marquer les tables recréées.
+		$sql_tables_recreated = array_fill_keys(get_db_tables(), false);
 
 		//
 		// Sur les versions antérieures à la 2.3.0, il n’y avait pas de
@@ -446,7 +432,7 @@ if (isset($_POST['start'])) {
 					MODIFY COLUMN liste_alias VARCHAR(254) NOT NULL DEFAULT ''";
 			}
 
-			$sql_schemas[CONFIG_TABLE]['updated'] = true;
+			$sql_tables_recreated[CONFIG_TABLE] = true;
 			$sql_update[] = "DROP TABLE " . CONFIG_TABLE;
 			$sql_update   = array_merge($sql_update, $sql_create[CONFIG_TABLE]);
 			$sql_update   = array_merge($sql_update, $sql_data[CONFIG_TABLE]);
@@ -569,7 +555,7 @@ if (isset($_POST['start'])) {
 		// si table config n’a pas été entièrement réécrite dans dans le
 		// bloc db_version < 8 plus haut.
 		//
-		if ($nl_config['db_version'] < 15 && empty($sql_schemas[CONFIG_TABLE]['updated'])) {
+		if ($nl_config['db_version'] < 15 && !$sql_tables_recreated[CONFIG_TABLE]) {
 			$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
 				VALUES('debug_level', '1')";
 		}
@@ -602,7 +588,7 @@ if (isset($_POST['start'])) {
 		//
 		if ($nl_config['db_version'] < 17) {
 			if ($db::ENGINE == 'mysql') {
-				foreach ($sql_schemas as $tablename => $schema) {
+				foreach (get_db_tables() as $tablename) {
 					$sql_update[] = sprintf("ALTER TABLE %s CONVERT TO CHARACTER SET utf8", $tablename);
 				}
 			}
@@ -707,13 +693,13 @@ if (isset($_POST['start'])) {
 		//
 		if ($nl_config['db_version'] < 20) {
 			// Seulement si la table config n'a pas été entièrement réécrite plus haut.
-			if (empty($sql_schemas[CONFIG_TABLE]['updated'])) {
+			if (!$sql_tables_recreated[CONFIG_TABLE]) {
 				$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
 					VALUES('smtp_tls', '0')";
 			}
 
 			// Seulement si la table liste n'a pas été entièrement réécrite plus haut.
-			if (empty($sql_schemas[LISTE_TABLE]['updated'])) {
+			if (!$sql_tables_recreated[LISTE_TABLE]) {
 				switch ($db::ENGINE) {
 					case 'mysql':
 						$type = 'TINYINT(1)';
@@ -768,7 +754,7 @@ if (isset($_POST['start'])) {
 		//
 		if ($nl_config['db_version'] < 24) {
 			// Seulement si la table admin n'a pas été entièrement réécrite plus haut.
-			if (empty($sql_schemas[ADMIN_TABLE]['updated'])) {
+			if (!$sql_tables_recreated[ADMIN_TABLE]) {
 				switch ($db::ENGINE) {
 					case 'mysql':
 						$type = 'TINYINT(1)';
