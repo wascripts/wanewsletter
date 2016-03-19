@@ -54,22 +54,15 @@ set_exception_handler(__NAMESPACE__.'\\wan_exception_handler');
 spl_autoload_register(function ($classname) {
 	if (strpos($classname, '\\')) {
 		list($prefix, $classname) = explode('\\', $classname, 2);
-		if ($prefix != 'Wanewsletter') {
-			return null;
+
+		if ($prefix == 'Wanewsletter') {
+			// Chemin includes/(<namespace>/)*<classname>.php
+			$filename = sprintf('%s/includes/%s.php', WA_ROOTDIR, str_replace('\\', '/', $classname));
+
+			if (file_exists($filename)) {
+				require $filename;
+			}
 		}
-	}
-
-	if (strpos($classname, '\\')) {
-		// Chemin includes/<namespace>/<classname>.php
-		$filename = sprintf('%s/includes/%s.php', WA_ROOTDIR, str_replace('\\', '/', $classname));
-	}
-	else {
-		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
-		$filename = sprintf('%s/includes/class.%s.php', WA_ROOTDIR, strtolower($classname));
-	}
-
-	if (is_readable($filename)) {
-		require $filename;
 	}
 });
 
