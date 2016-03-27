@@ -397,6 +397,9 @@ if (!$reinstall) {
 	}
 
 	if ($infos['port'] > 0) {
+		if (filter_var($infos['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+			$infos['host'] = sprintf('[%s]', $infos['host']);
+		}
 		$infos['host'] .= ':'.$infos['port'];
 	}
 
