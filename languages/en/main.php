@@ -667,8 +667,7 @@ $lang['Config_file_found']          = "Configuration file found and loaded.";
 $lang['Config_file_manual']         = "You can manually create the configuration file <samp>data/config.inc.php</samp> by making a copy of the file <samp>data/config.sample.inc.php</samp>.";
 $lang['Install_target']             = "The installation will be processed on %s.";
 
-$lang['Success_install']            = "The installation was succesfully completed.\nYou can now access the %sadministration%s";
-$lang['Success_install2']           = "The installation was succesfully completed, but you should read the entry <q>%sprotect the <samp>data/</samp> repertory%s</q> in the FAQ. \nYou can now access the %sadministration%s.";
+$lang['Success_install']            = "The installation was succesfully completed. \n<strong>Important:</strong> You should read the entry <q>%sprotect the <samp>data/</samp> repertory%s</q> in the FAQ. \nYou can now access the %sadministration%s.";
 $lang['Success_upgrade']            = "The upgrade was succesfully completed.";
 $lang['Success_install_no_config']  = "The installation was succesfully completed, but the configuration file could not be created. \nYou can download the file and upload it in the <samp>data/</samp> directory (See also the entry <q>%sprotect the <samp>data/</samp> repertory%s</q> in the FAQ). \nYou can now access the %sadministration%s.";
 $lang['Success_upgrade_no_config']  = "The upgrade was succesfully completed, but the configuration file is obsolete and needs to be refreshed. \nYou can download the file and upload it in the <samp>data/</samp> directory (the previous place in <samp>includes/</samp> works but is obsolete).";

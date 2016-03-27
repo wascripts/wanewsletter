@@ -364,21 +364,12 @@ if ($start) {
 			fclose($fp);
 		}
 
-		$server = filter_input(INPUT_SERVER, 'SERVER_SOFTWARE');
-		if (stripos($server, 'Apache') !== false) {
-			message(sprintf($lang['Success_install'],
-				'<a href="admin/login.php">',
-				'</a>'
-			));
-		}
-		else {
-			message(sprintf($lang['Success_install2'],
-				'<a href="docs/faq.fr.html#data_access">',
-				'</a>',
-				'<a href="admin/login.php">',
-				'</a>'
-			));
-		}
+		message(sprintf($lang['Success_install'],
+			'<a href="docs/faq.fr.html#data_access">',
+			'</a>',
+			'<a href="admin/login.php">',
+			'</a>'
+		));
 	}
 }
 

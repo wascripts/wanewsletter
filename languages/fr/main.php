@@ -667,8 +667,7 @@ $lang['Config_file_found']          = "Fichier de configuration trouvé et charg
 $lang['Config_file_manual']         = "Vous pouvez également créer manuellement le fichier de configuration <samp>data/config.inc.php</samp> en partant d’une copie du fichier <samp>data/config.sample.inc.php</samp>.";
 $lang['Install_target']             = "L’installation sera effectuée sur %s.";
 
-$lang['Success_install']            = "L’installation s’est bien déroulée.\nVous pouvez maintenant accéder à %sl’administration%s";
-$lang['Success_install2']           = "L’installation s’est bien déroulée, mais vous devriez lire l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ. \nVous pouvez maintenant accéder à %sl’administration%s";
+$lang['Success_install']            = "L’installation s’est bien déroulée. \n<strong>Important :</strong> Vous devriez consulter l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ. \nVous pouvez maintenant accéder à %sl’administration%s";
 $lang['Success_upgrade']            = "La mise à jour s’est bien déroulée.";
 $lang['Success_install_no_config']  = "L’installation s’est bien déroulée, mais le fichier de configuration n’a pu être créé. \nVous pouvez le télécharger, puis le placer par vos propres moyens dans le répertoire <samp>data/</samp> du script (voir aussi l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ). \nVous pouvez ensuite accéder à %sl’administration%s.";
 $lang['Success_upgrade_no_config']  = "La mise à jour s’est bien déroulée, mais votre fichier de configuration est obsolète et doit être actualisé. \nVous pouvez le télécharger puis l’uploader par vos propres moyens sur le serveur dans le répertoire <samp>data/</samp> du script (l’ancien emplacement dans le répertoire <samp>includes/</samp> est obsolète mais fonctionne toujours).";
