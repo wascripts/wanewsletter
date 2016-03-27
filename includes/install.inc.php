@@ -322,11 +322,6 @@ if ($start) {
 			CONFIG_TABLE,
 			time()
 		);
-		$sql_data[] = "UPDATE " . LISTE_TABLE . "
-			SET form_url        = '" . $db->escape($urlsite.$urlscript.'subscribe.php') . "',
-				sender_email    = '" . $db->escape($admin_email) . "',
-				liste_startdate = " . time() . "
-			WHERE liste_id = 1";
 
 		exec_queries($sql_data);
 
