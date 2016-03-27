@@ -400,20 +400,23 @@ if (!$reinstall) {
 		$infos['host'] .= ':'.$infos['port'];
 	}
 
-	if (!$config_file_exists) {
-		$preconfig_message = $lang['Config_file_manual'];
-	}
-	else {
-		$preconfig_message  = sprintf("<strong>%s</strong><br>", $lang['Config_file_found']);
-		$preconfig_message .= sprintf($lang['Install_target'], $supported_db[$infos['engine']]['label']);
-		$preconfig_message .= "<br>";
+	$preconfig_message = $lang['Config_file_manual'];
 
-		if ($infos['engine'] == 'sqlite') {
-			$preconfig_message .= $lang['dbpath'] . ': ' . $infos['path'] . '<br>';
+	if ($config_file_exists) {
+		$preconfig_message = sprintf("<strong>%s</strong><br>", $lang['Config_file_found']);
+
+		if ($infos['engine'] != 'sqlite') {
+			$preconfig_message .= sprintf($lang['Install_target_server'],
+				$supported_db[$infos['engine']]['label'],
+				$infos['host'],
+				$infos['dbname']
+			);
 		}
 		else {
-			$preconfig_message .= $lang['dbhost'] . ': ' . $infos['host'] . '<br>';
-			$preconfig_message .= $lang['dbname'] . ': ' . $infos['dbname'] . '<br>';
+			$preconfig_message .= sprintf($lang['Install_target_file'],
+				$supported_db[$infos['engine']]['label'],
+				$infos['path']
+			);
 		}
 	}
 

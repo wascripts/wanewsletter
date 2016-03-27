@@ -665,7 +665,8 @@ $lang['Connect_db_error']           = "Unable to connect to database (%s)";
 $lang['sqldir_perms_problem']       = "To use Wanewsletter with a SQLite database, you have to give the right permissions (read and write) to the targeted <samp>%s</samp> directory";
 $lang['Config_file_found']          = "Configuration file found and loaded.";
 $lang['Config_file_manual']         = "You can manually create the configuration file <samp>data/config.inc.php</samp> by making a copy of the file <samp>data/config.sample.inc.php</samp>.";
-$lang['Install_target']             = "The installation will be processed on %s.";
+$lang['Install_target_server']      = "The installation will be performed on the %s server <strong>%s</strong>, in the <strong>%s</strong> database.";
+$lang['Install_target_file']        = "The installation will be performed in <strong>%2\$s</strong> %1\$s database.";
 
 $lang['Success_install']            = "The installation was succesfully completed. \n<strong>Important:</strong> You should read the entry <q>%sprotect the <samp>data/</samp> repertory%s</q> in the FAQ. \nYou can now access the %sadministration%s.";
 $lang['Success_upgrade']            = "The upgrade was succesfully completed.";
