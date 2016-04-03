@@ -1194,36 +1194,49 @@ function wan_get_faq_url($chapter)
 }
 
 /**
- * Initialisation du module d’envoi des mails
+ * Initialisation du module d’envoi des mails.
+ *
+ * @param array   $opts  Tableau d’options à transmettre au transport
+ * @param boolean $reset Forcer la création d’un nouvel objet transport
  *
  * @return \Wamailer\Transport\Transport
  */
-function wamailer(array $opts = [])
+function wamailer(array $opts = [], $reset = false)
 {
 	global $nl_config;
+	static $transport;
 
-	$name = 'mail';
+	if (!$transport || $reset) {
+		$name = 'mail';
 
-	if ($nl_config['use_smtp']) {
-		$name  = 'smtp';
-		$proto = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls' : 'tcp';
-		$opts  = array_replace_recursive([
-			'server'   => sprintf('%s://%s:%d', $proto, $nl_config['smtp_host'], $nl_config['smtp_port']),
-			'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
-			'auth' => [
-				'username'  => $nl_config['smtp_user'],
-				'secretkey' => $nl_config['smtp_pass']
-			]
-		], $opts);
+		if ($nl_config['use_smtp']) {
+			$name  = 'smtp';
+			$proto = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls' : 'tcp';
+			$opts  = array_replace_recursive([
+				'server'   => sprintf('%s://%s:%d', $proto, $nl_config['smtp_host'], $nl_config['smtp_port']),
+				'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
+				'auth' => [
+					'username'  => $nl_config['smtp_user'],
+					'secretkey' => $nl_config['smtp_pass']
+				]
+			], $opts);
 
-#		$opts['debug'] = function ($str) {
-#			wanlog(htmlspecialchars($str));
-#		};
+#			$opts['debug'] = function ($str) {
+#				wanlog(htmlspecialchars($str));
+#			};
+		}
+
+		if (!empty($nl_config['dkim'])) {
+			$opts = array_replace_recursive(['dkim' => $nl_config['dkim']], $opts);
+		}
+
+		Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+		$transport = Mailer::setTransport($name);
 	}
 
-	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+	$transport->options($opts);
 
-	return Mailer::setTransport($name, $opts);
+	return $transport;
 }
 
 /**

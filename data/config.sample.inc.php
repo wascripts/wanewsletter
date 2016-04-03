@@ -28,6 +28,15 @@ $nl_config = [];
 #$nl_config['tmp_dir']   = '/path/to/tmp_dir';
 
 //
+// Configuration du module DKIM de wamailer pour la signature des emails
+// $nl_config['dkim'] correspond au tableau d'options acceptable par le
+// module DKIM de wamailer. Voir la doc de celui-ci pour plus d'options.
+//
+#$nl_config['dkim']['domain']   = 'mydomain.tld';
+#$nl_config['dkim']['selector'] = 'selector';
+#$nl_config['dkim']['privkey']  = '/path/to/private.key';
+
+//
 // Configuration d'une connexion SSL/TLS à la base de données
 //
 
