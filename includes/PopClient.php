@@ -322,6 +322,12 @@ class PopClient
 		if (isset($ssl_options['crypto_method'])) {
 			$crypto_method = $ssl_options['crypto_method'];
 		}
+		// With PHP >= 5.6.7, *_TLS_CLIENT means TLS 1.0 only.
+		// More infos: http://php.net/manual/en/function.stream-socket-enable-crypto.php#119122
+		else if (defined('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT')) {
+			$crypto_method |= STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
+			$crypto_method |= STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
+		}
 
 		if (!stream_socket_enable_crypto($this->socket, true, $crypto_method)) {
 			fclose($this->socket);
