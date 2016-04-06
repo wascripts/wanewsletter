@@ -13,15 +13,16 @@ $prefix = 'wa_';
 //
 // Des paramètres de configuration additionnels peuvent être fournis
 // à l'aide du tableau suivant.
+// Les chemins de fichier doivent être absolus.
+// Si un chemin commence par un tilde (~), celui-ci sera remplacé par
+// le chemin vers le répertoire d’installation de wanewsletter
+// (Voir fonction load_config() dans includes/functions.php).
 //
 $nl_config = [];
 
 //
 // Des entrées 'logs_dir', 'stats_dir' ou 'tmp_dir' peuvent être paramètrées
 // afin d’utiliser d’autres répertoires que ceux par défaut dans data/.
-// Si un chemin commence par un tilde (~), celui-ci sera remplacé par
-// le chemin vers le répertoire d’installation de wanewsletter.
-// Voir fonction load_config() dans includes/functions.php
 //
 #$nl_config['logs_dir']  = '/path/to/logs_dir';
 #$nl_config['stats_dir'] = '/path/to/stats_dir';

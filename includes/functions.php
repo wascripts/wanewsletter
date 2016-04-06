@@ -155,9 +155,29 @@ function load_config()
 		return rtrim(str_replace('\\', '/', $path), '/');
 	};
 
-	$nl_config['logs_dir']  = $realpath($nl_config['logs_dir']);
-	$nl_config['stats_dir'] = $realpath($nl_config['stats_dir']);
-	$nl_config['tmp_dir']   = $realpath($nl_config['tmp_dir']);
+	// Liste des entrées de configuration pouvant contenir un chemin de fichier
+	$config_list = ['logs_dir','stats_dir','tmp_dir','db.ssl-ca','db.ssl-cert',
+		'db.ssl-key','db.rootcert','db.sslcert','db.sslkey','dkim.privkey'];
+
+	foreach ($config_list as $name) {
+		$parts = explode('.', $name);
+
+		$value =& $nl_config;
+		foreach ($parts as $part) {
+			if (!isset($value[$part])) {
+				continue 2;
+			}
+			$value =& $value[$part];
+		}
+
+		// Cas particulier. Peut aussi contenir une clé au format PEM
+		if ($name == 'dkim.privkey' && strpos($value, '-----BEGIN') === 0) {
+			continue;
+		}
+
+		$value = $realpath($value);
+		unset($value);// On détruit la référence.
+	}
 
 	if (!is_writable($nl_config['tmp_dir'])) {
 		$output->message(sprintf(
