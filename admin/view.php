@@ -135,55 +135,46 @@ else if ($mode == 'iframe') {
 	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
-	if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
-		$format = $listdata['liste_format'];
-	}
-
 	$body_type = ($format == FORMAT_HTML) ? 'log_body_html' : 'log_body_text';
 
-	$sql = "SELECT $body_type
+	$sql = "SELECT $body_type AS body
 		FROM " . LOG_TABLE . "
 		WHERE log_id = $log_id AND liste_id = " . $listdata['liste_id'];
 	$result = $db->query($sql);
 
-	if ($row  = $result->fetch()) {
-		$body = $row[$body_type];
+	if (($body = $result->column('body')) === false) {
+		$output->basic($lang['Message']['log_not_exists']);
+	}
+	else if (!$body) {
+		$output->basic($lang['Message']['log_format_not_exists']);
+	}
 
-		if (strlen($body)) {
-			if ($format == FORMAT_HTML) {
-				$body = preg_replace(
-					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/si',
-					'<\\1"show.php?file=\\2"\\3>',
-					$body
-				);
+	if ($format == FORMAT_HTML) {
+		$body = preg_replace(
+			'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/si',
+			'<\\1"show.php?file=\\2"\\3>',
+			$body
+		);
 
-				$output->httpHeaders();
+		$output->httpHeaders();
 
-				echo str_replace(
-					'{LINKS}',
-					sprintf('<a href="#" onclick="return false;">%s (lien fictif)</a>', $lang['Label_link']),
-					$body
-				);
-			}
-			else {
-				// on normalise les fins de ligne pour s'assurer du bon
-				// fonctionnement de wordwrap()
-				$body = preg_replace("/\r\n?|\n/", "\r\n", $body);
-				$body = wordwrap(trim($body), 78, "\r\n");
-				$body = active_urls(htmlspecialchars($body, ENT_NOQUOTES));
-				$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
-				$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
-				$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
-				$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
-				$output->basic(sprintf('<pre style="font-size: 13px;">%s</pre>', $body));
-			}
-		}
-		else {
-			$output->basic($lang['Message']['log_not_exists']);
-		}
+		echo str_replace(
+			'{LINKS}',
+			sprintf('<a href="#" onclick="return false;">%s (lien fictif)</a>', $lang['Label_link']),
+			$body
+		);
 	}
 	else {
-		$output->basic($lang['Message']['log_not_exists']);
+		// on normalise les fins de ligne pour s'assurer du bon
+		// fonctionnement de wordwrap()
+		$body = preg_replace("/\r\n?|\n/", "\r\n", $body);
+		$body = wordwrap($body, 78, "\r\n");
+		$body = active_urls(htmlspecialchars($body, ENT_NOQUOTES));
+		$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
+		$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
+		$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
+		$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
+		$output->basic(sprintf('<pre style="font-size: 13px;">%s</pre>', $body));
 	}
 
 	exit;

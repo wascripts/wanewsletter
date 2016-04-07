@@ -190,6 +190,7 @@ $lang['Message']['No_liste_exists']         = "Aucune liste n’est disponible";
 $lang['Message']['No_liste_id']             = "Aucune liste de diffusion n’a été sélectionnée";
 $lang['Message']['No_log_id']               = "Aucune newsletter n’a été sélectionnée";
 $lang['Message']['log_not_exists']          = "Cette newsletter n’existe pas !";
+$lang['Message']['log_format_not_exists']   = "Aucune édition dans ce format pour cette archive.";
 $lang['Message']['No_log_to_send']          = "Il n’y a actuellement aucun envoi à reprendre";
 $lang['Message']['No_abo_id']               = "Aucun abonné n’a été sélectionné";
 $lang['Message']['No_abo_email']            = "Aucune de ces adresses email n’est présente dans cette liste de diffusion";

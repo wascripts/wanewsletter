@@ -190,6 +190,7 @@ $lang['Message']['No_liste_exists']         = "Not an available list";
 $lang['Message']['No_liste_id']             = "No mailing list has been selected";
 $lang['Message']['No_log_id']               = "No newsletter has been selected";
 $lang['Message']['log_not_exists']          = "This newsletter does not exist!";
+$lang['Message']['log_format_not_exists']   = "No edition in this format for this archive.";
 $lang['Message']['No_log_to_send']          = "There is currently no sending to resume";
 $lang['Message']['No_abo_id']               = "No subscriber has been selected";
 $lang['Message']['No_abo_email']            = "None of these addresses email is present in this mailing list";
