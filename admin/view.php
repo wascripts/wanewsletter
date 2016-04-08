@@ -413,6 +413,18 @@ else if ($mode == 'abonnes') {
 				$error = true;
 				$msg_error[] = $lang['Message']['Invalid_email'];
 			}
+			else {
+				$sql = "SELECT COUNT(*) AS email_test
+					FROM %s
+					WHERE abo_email = '%s' AND abo_id <> %d";
+				$sql = sprintf($sql, ABONNES_TABLE, $db->escape($email), $abo_id);
+				$result = $db->query($sql);
+
+				if ($result->column('email_test') > 0) {
+					$error = true;
+					$msg_error[] = $lang['Message']['Allready_reg2'];
+				}
+			}
 
 			if (!$error) {
 				$sql_data = [
