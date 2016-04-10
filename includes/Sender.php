@@ -44,6 +44,13 @@ class Sender
 	private $htmlTemplate;
 
 	/**
+	 * Lien de désinscription placé dans l’en-tête 'List-Unsubscribe'
+	 * @see RFC 2369#3.2
+	 * @var string
+	 */
+	private $unsubscribe_link;
+
+	/**
 	 * Données de la liste concernée par l’envoi.
 	 * @var array
 	 */
@@ -460,6 +467,8 @@ class Sender
 		$this->email->clearRecipients();
 		$this->email->addRecipient($data['email'], $data['name']);
 
+		$unsubscribe_link = $this->unsubscribe_link;
+
 		// Envoi en copie cachée
 		if ($bcc_recipients) {
 			foreach ($bcc_recipients as $address) {
@@ -491,7 +500,17 @@ class Sender
 
 			$this->textTemplate->assign($tags_to_replace);
 			$this->htmlTemplate->assign($tags_to_replace);
+
+			if (!$this->listdata['use_cron']) {
+				$unsubscribe_link = str_replace('{WA_CODE}',
+					$data['register_key'],
+					$unsubscribe_link
+				);
+			}
 		}
+
+		// See RFC 2369#3.2
+		$this->email->headers->set('List-Unsubscribe', sprintf('<%s>', $unsubscribe_link));
 
 		if ($this->listdata['liste_format'] != FORMAT_HTML) {
 			$this->email->setTextBody($this->textTemplate->pparse(true));
@@ -558,6 +577,8 @@ class Sender
 				];
 			}
 		}
+
+		$this->unsubscribe_link = $link[FORMAT_TEXT];
 
 		$message[FORMAT_TEXT] = str_replace('{LINKS}', $link[FORMAT_TEXT], $message[FORMAT_TEXT]);
 		$message[FORMAT_HTML] = str_replace('{LINKS}', $link[FORMAT_HTML],  $message[FORMAT_HTML]);
