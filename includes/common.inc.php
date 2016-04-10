@@ -89,12 +89,6 @@ else {
 }
 
 //
-// Initialisation des variables pour éviter toute injection malveillante de code
-//
-$error     = false;
-$msg_error = [];
-
-//
 // Chargement de la configuration de base
 //
 load_config();

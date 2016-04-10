@@ -38,6 +38,8 @@ if (!$auth->check(Auth::SEND, $_SESSION['liste'])) {
 	$output->message('Not_auth_send');
 }
 
+$error = false;
+
 $listdata = $auth->getLists(Auth::SEND)[$_SESSION['liste']];
 $logdata  = [];
 
@@ -496,27 +498,27 @@ switch ($mode) {
 		if ($mode != 'attach' || empty($logdata['log_id'])) {
 			if ($logdata['log_subject'] == '') {
 				$error = true;
-				$msg_error[] = $lang['Subject_empty'];
+				$output->warn($lang['Subject_empty']);
 			}
 
 			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_text'] == ''
 				&& $listdata['liste_format'] != FORMAT_HTML
 			) {
 				$error = true;
-				$msg_error[] = $lang['Body_empty'];
+				$output->warn($lang['Body_empty']);
 			}
 
 			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_html'] == ''
 				&& $listdata['liste_format'] != FORMAT_TEXT
 			) {
 				$error = true;
-				$msg_error[] = $lang['Body_empty'];
+				$output->warn($lang['Body_empty']);
 			}
 
 			//
 			// Fonction de callback utilisée pour l'appel à preg_replace_callback() plus bas
 			//
-			$replace_include = function ($m) use ($mode, &$lang, &$error, &$msg_error) {
+			$replace_include = function ($m) use ($mode, &$lang, &$error, $output) {
 				preg_match_all('/\\s+([a-z_:][a-z0-9_:.-]*)\\s?=\\s?(["\'])(.+?)(?<!\\\\)(?:\\\\\\\\)*\\2/i',
 					$m[1], $attrs, PREG_SET_ORDER);
 
@@ -543,7 +545,7 @@ switch ($mode) {
 				}
 				catch (Exception $e) {
 					$error = true;
-					$msg_error[] = $e->getMessage();
+					$output->warn($e->getMessage());
 					return $m[0];
 				}
 
@@ -560,13 +562,13 @@ switch ($mode) {
 					&& !strstr($logdata['log_body_text'], '{LINKS}')
 				) {
 					$error = true;
-					$msg_error[] = $lang['No_links_in_body'];
+					$output->warn($lang['No_links_in_body']);
 				}
 
 				if ($listdata['liste_format'] != FORMAT_TEXT) {
 					if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
 						$error = true;
-						$msg_error[] = $lang['No_links_in_body'];
+						$output->warn($lang['No_links_in_body']);
 					}
 
 					$sql = "SELECT jf.file_real_name, l.log_id
@@ -594,7 +596,7 @@ switch ($mode) {
 
 					if (count($files_error) > 0) {
 						$error = true;
-						$msg_error[] = sprintf($lang['Cid_error_in_body'], implode(', ', $files_error));
+						$output->warn($lang['Cid_error_in_body'], implode(', ', $files_error));
 					}
 				}
 
@@ -611,7 +613,7 @@ switch ($mode) {
 
 					if ($result->column('test') > 0) {
 						$error = true;
-						$msg_error[] = $lang['Message']['Twice_sending'];
+						$output->warn('Twice_sending');
 					}
 				}
 			}
@@ -738,7 +740,7 @@ switch ($mode) {
 			}
 			catch (Exception $e) {
 				$error = true;
-				$msg_error[] = $e->getMessage();
+				$output->warn($e->getMessage());
 			}
 		}
 		break;
@@ -827,7 +829,7 @@ if ($mode == 'test' && $supp_address) {
 
 	if (count($supp_address) == 0) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Invalid_email'];
+		$output->warn('Invalid_email');
 	}
 }
 else {

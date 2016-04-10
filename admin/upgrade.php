@@ -188,10 +188,11 @@ if (isset($_POST['start'])) {
 	$schemas_dir = WA_ROOTDIR . '/includes/Dblayer/schemas';
 	$sql_create  = sprintf('%s/%s_tables.sql', $schemas_dir, $db::ENGINE);
 	$sql_data    = sprintf('%s/data.sql', $schemas_dir);
+	$error = false;
 
 	if (!is_readable($sql_create) || !is_readable($sql_data)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['sql_file_not_readable'];
+		$output->warn('sql_file_not_readable');
 	}
 
 	if (!$auth->isLoggedIn()) {
@@ -201,7 +202,7 @@ if (isset($_POST['start'])) {
 
 		if (!$admindata) {
 			$error = true;
-			$msg_error[] = $lang['Message']['Error_login'];
+			$output->warn('Error_login');
 		}
 	}
 

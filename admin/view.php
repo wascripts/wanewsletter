@@ -16,6 +16,7 @@ use ZipArchive;
 
 require './start.inc.php';
 
+$error     = false;
 $mode      = filter_input(INPUT_GET, 'mode');
 $action    = filter_input(INPUT_GET, 'action');
 $sql_type  = filter_input(INPUT_GET, 'type');
@@ -411,7 +412,7 @@ else if ($mode == 'abonnes') {
 
 			if (!Mailer::checkMailSyntax($email)) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Invalid_email'];
+				$output->warn('Invalid_email');
 			}
 			else {
 				$sql = "SELECT COUNT(*) AS email_test
@@ -422,7 +423,7 @@ else if ($mode == 'abonnes') {
 
 				if ($result->column('email_test') > 0) {
 					$error = true;
-					$msg_error[] = $lang['Message']['Allready_reg2'];
+					$output->warn('Allready_reg2');
 				}
 			}
 
@@ -910,27 +911,27 @@ else if ($mode == 'liste') {
 
 			if (mb_strlen($liste_name) < 3 || mb_strlen($liste_name) > 30) {
 				$error = true;
-				$msg_error[] = $lang['Invalid_liste_name'];
+				$output->warn($lang['Invalid_liste_name']);
 			}
 
 			if (!in_array($liste_format, [FORMAT_TEXT, FORMAT_HTML, FORMAT_MULTIPLE])) {
 				$error = true;
-				$msg_error[] = $lang['Unknown_format'];
+				$output->warn($lang['Unknown_format']);
 			}
 
 			if (!Mailer::checkMailSyntax($sender_email)) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Invalid_email'];
+				$output->warn('Invalid_email');
 			}
 
 			if ($return_email != '' && !Mailer::checkMailSyntax($return_email)) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Invalid_email'];
+				$output->warn('Invalid_email');
 			}
 
 			if ($liste_alias != '' && !Mailer::checkMailSyntax($liste_alias)) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Invalid_email'];
+				$output->warn('Invalid_email');
 			}
 
 			if ($pop_pass == '' && $pop_user != '' && $action == 'edit') {
@@ -956,9 +957,7 @@ else if ($mode == 'liste') {
 				}
 				catch (Exception $e) {
 					$error = true;
-					$msg_error[] = sprintf(nl2br($lang['Message']['bad_pop_param']),
-						htmlspecialchars($e->getMessage())
-					);
+					$output->warn('bad_pop_param', $e->getMessage());
 				}
 
 				$pop->quit();

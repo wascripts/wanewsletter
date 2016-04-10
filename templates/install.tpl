@@ -53,7 +53,7 @@
 <div id="global">
 <form method="post" action="install.php" class="{IS_SQLITE}">
 
-	{ERROR_BOX}
+	{WARN_BOX}
 
 	<!-- BEGIN install -->
 	<div class="block"><p>{install.L_EXPLAIN}</p></div>

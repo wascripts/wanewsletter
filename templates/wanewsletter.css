@@ -175,7 +175,7 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 
 /* Classes diverses */
 
-.warning {
+.warn {
 	background-color: #F4D6D6;
 	margin: 1.4em 0;
 	border: 1px solid #C00;
@@ -184,7 +184,7 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 	line-height: 1.45;
 	color: #600;
 }
-.warning li { list-style-type: disc; }
+.warn li { list-style-type: disc; }
 
 .unavailable { color: red; }
 .available   { color: hsl(140, 70%, 40%); }

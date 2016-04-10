@@ -156,6 +156,7 @@ if ($start && $language != $prev_language) {
 
 $nl_config['language'] = $language;
 
+$error = false;
 $reinstall = false;
 
 if (!empty($dsn)) {
@@ -175,11 +176,11 @@ if (!empty($dsn)) {
 	}
 	catch (Dblayer\Exception $e) {
 		$error = true;
-		$msg_error[] = sprintf($lang['Connect_db_error'], $e->getMessage());
+		$output->warn($lang['Connect_db_error'], $e->getMessage());
 	}
 	catch (Exception $e) {
 		$error = true;
-		$msg_error[] = $e->getMessage();
+		$output->warn($e->getMessage());
 	}
 
 	if (!$error) {
@@ -223,7 +224,7 @@ if ($start) {
 		}
 		else {
 			$error = true;
-			$msg_error[] = $lang['Message']['Error_login'];
+			$output->warn('Error_login');
 		}
 	}
 
@@ -233,31 +234,31 @@ if ($start) {
 
 	if (!is_readable($sql_create) || !is_readable($sql_data)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['sql_file_not_readable'];
+		$output->warn('sql_file_not_readable');
 	}
 
 	if (!preg_match('#^[a-z][a-z0-9]*_?$#i', $prefix)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Invalid_prefix'];
+		$output->warn('Invalid_prefix');
 	}
 
 	if (!validate_pseudo($admin_login)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Invalid_login'];
+		$output->warn('Invalid_login');
 	}
 
 	if (!validate_pass($admin_pass)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Alphanum_pass'];
+		$output->warn('Alphanum_pass');
 	}
 	else if ($admin_pass !== $confirm_pass) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Bad_confirm_pass'];
+		$output->warn('Bad_confirm_pass');
 	}
 
 	if (!\Wamailer\Mailer::checkMailSyntax($admin_email)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Invalid_email'];
+		$output->warn('Invalid_email');
 	}
 
 	if (!$error) {
@@ -469,7 +470,7 @@ else {
 
 $template->assign([
 	'S_PREV_LANGUAGE' => $language,
-	'ERROR_BOX'       => $output->errorbox($msg_error)
+	'WARN_BOX'        => $output->msgbox()
 ]);
 
 $template->pparse();

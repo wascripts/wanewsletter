@@ -49,4 +49,4 @@
 
 <div id="global">
 
-{ERROR_BOX}
+{WARN_BOX}
