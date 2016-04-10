@@ -911,12 +911,12 @@ else if ($mode == 'liste') {
 
 			if (mb_strlen($liste_name) < 3 || mb_strlen($liste_name) > 30) {
 				$error = true;
-				$output->warn($lang['Invalid_liste_name']);
+				$output->warn('Invalid_liste_name');
 			}
 
 			if (!in_array($liste_format, [FORMAT_TEXT, FORMAT_HTML, FORMAT_MULTIPLE])) {
 				$error = true;
-				$output->warn($lang['Unknown_format']);
+				$output->warn('Unknown_format');
 			}
 
 			if (!Mailer::checkMailSyntax($sender_email)) {

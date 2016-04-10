@@ -498,21 +498,21 @@ switch ($mode) {
 		if ($mode != 'attach' || empty($logdata['log_id'])) {
 			if ($logdata['log_subject'] == '') {
 				$error = true;
-				$output->warn($lang['Subject_empty']);
+				$output->warn('Subject_empty');
 			}
 
 			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_text'] == ''
 				&& $listdata['liste_format'] != FORMAT_HTML
 			) {
 				$error = true;
-				$output->warn($lang['Body_empty']);
+				$output->warn('Body_empty');
 			}
 
 			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_html'] == ''
 				&& $listdata['liste_format'] != FORMAT_TEXT
 			) {
 				$error = true;
-				$output->warn($lang['Body_empty']);
+				$output->warn('Body_empty');
 			}
 
 			//
@@ -562,13 +562,13 @@ switch ($mode) {
 					&& !strstr($logdata['log_body_text'], '{LINKS}')
 				) {
 					$error = true;
-					$output->warn($lang['No_links_in_body']);
+					$output->warn('No_links_in_body');
 				}
 
 				if ($listdata['liste_format'] != FORMAT_TEXT) {
 					if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
 						$error = true;
-						$output->warn($lang['No_links_in_body']);
+						$output->warn('No_links_in_body');
 					}
 
 					$sql = "SELECT jf.file_real_name, l.log_id
@@ -596,7 +596,7 @@ switch ($mode) {
 
 					if (count($files_error) > 0) {
 						$error = true;
-						$output->warn($lang['Cid_error_in_body'], implode(', ', $files_error));
+						$output->warn('Cid_error_in_body', implode(', ', $files_error));
 					}
 				}
 

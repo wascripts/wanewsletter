@@ -243,6 +243,7 @@ $lang['Message']['No_gd_img_support']       = "No image format are available";
 $lang['Message']['Warning_debug_active']    = "<strong>Notice&nbsp;:</strong> The debugging is active&nbsp;!";
 $lang['Message']['Invalid_prefix']          = "The table prefix must start with a letter , optionally followed by other alphanumeric characters, and ends with an underscore.";
 $lang['Message']['DB_connection_lost']      = "The database connection has been lost";
+$lang['Message']['Connect_db_error']        = "Unable to connect to database (%s)";
 
 $lang['Message']['Reset_password_username'] = "if an account matchs the username that you have submitted, an email reset password will be sent to the corresponding email address.";
 $lang['Message']['Reset_password_email']    = "if an account matchs the email address that you have submitted, an email reset password will be sent to this email address.";
@@ -257,6 +258,14 @@ $lang['Message']['Not_installed']           = "Wanewsletter seems not to be inst
 $lang['Message']['Move_to_data_dir']        = "Using %s. You should move this file into data/ directory.";
 $lang['Message']['No_json_extension']       = "JSON extension is needed for reading composer.lock file!";
 $lang['Message']['Composer_lock_unreadable'] = "Cannot read the composer.lock file!";
+
+$lang['Message']['Subject_empty']           = "You must indicate a subject";
+$lang['Message']['Body_empty']              = "You must fill in the text field(s)";
+$lang['Message']['No_links_in_body']        = "You must insert a unsubscribe link";
+$lang['Message']['Cid_error_in_body']       = "Some files targeted in your <abbr>HTML</abbr> with the scheme <samp>cid:</samp> are missing (%s)";
+
+$lang['Message']['Invalid_liste_name']      = "Your list's name must contain between 3 and 30 characters";
+$lang['Message']['Unknown_format']          = "Unknown format";
 
 //
 // Divers
@@ -485,8 +494,6 @@ $lang['Form_url']                   = "Absolute URL of the page where the form i
 $lang['Create_liste']               = "Create a list";
 $lang['Edit_liste']                 = "Edit this list";
 $lang['Delete_liste']               = "Delete this list";
-$lang['Invalid_liste_name']         = "Your list's name must contain between 3 and 30 characters";
-$lang['Unknown_format']             = "Unknown format";
 $lang['Move_abo_logs']              = "What do you want to do with this list's subscribers and newsletters?";
 $lang['Delete_all']                 = "Are you sure you want to delete this list and its associated subscribers and newsletters?";
 $lang['Move_to_liste']              = "Move subscribers and newsletters to";
@@ -625,10 +632,6 @@ $lang['Format_html']                = "HTML format";
 $lang['Last_modified']              = "Last modified : %s";
 $lang['Total_log_size']             = "Approx. newsletter size";
 $lang['Join_file_to_log']           = "File to attach to this newsletter";
-$lang['Subject_empty']              = "You must indicate a subject";
-$lang['Body_empty']                 = "You must fill in the text field(s)";
-$lang['No_links_in_body']           = "You must insert a unsubscribe link";
-$lang['Cid_error_in_body']          = "Some files targeted in your <abbr>HTML</abbr> with the scheme <samp>cid:</samp> are missing (%s)";
 $lang['Status']                     = "Status";
 $lang['Done']                       = "Done";
 $lang['Status_writing']             = "Normal newsletter";
@@ -662,7 +665,6 @@ $lang['Warning_reinstall']          = "<b>Caution!</b> Wanewsletter seems to be 
 $lang['Start_install']              = "Launch install";
 $lang['Start_upgrade']              = "Launch upgrade";
 $lang['No_db_support']              = "Sorry but Wanewsletter %s requires a MySQL, PostgreSQL or SQLite database";
-$lang['Connect_db_error']           = "Unable to connect to database (%s)";
 $lang['sqldir_perms_problem']       = "To use Wanewsletter with a SQLite database, you have to give the right permissions (read and write) to the targeted <samp>%s</samp> directory";
 $lang['Config_file_found']          = "Configuration file found and loaded.";
 $lang['Config_file_manual']         = "You can manually create the configuration file <samp>data/config.inc.php</samp> by making a copy of the file <samp>data/config.sample.inc.php</samp>.";

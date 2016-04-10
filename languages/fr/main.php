@@ -243,6 +243,7 @@ $lang['Message']['No_gd_img_support']       = "Aucun format d’image valable n�
 $lang['Message']['Warning_debug_active']    = "<strong>Note&nbsp;:</strong> Le débogage est activé&nbsp;!";
 $lang['Message']['Invalid_prefix']          = "Le préfixe de table doit commencer par une lettre, éventuellement suivie d’autres caractères alphanumériques, et se terminer par un tiret bas ou underscore.";
 $lang['Message']['DB_connection_lost']      = "La connexion à la base de données a été perdue";
+$lang['Message']['Connect_db_error']        = "Impossible de se connecter à la base de données (%s)";
 
 $lang['Message']['Reset_password_username'] = "Si un compte correspond au nom d’utilisateur que vous avez fourni, un email de réinitialisation du mot de passe sera envoyé à l’adresse email correspondante.";
 $lang['Message']['Reset_password_email']    = "Si un compte correspond à l’adresse email que vous avez fournie, un email de réinitialisation du mot de passe sera envoyé à cette adresse email.";
@@ -257,6 +258,14 @@ $lang['Message']['Not_installed']           = "Wanewsletter ne semble pas instal
 $lang['Message']['Move_to_data_dir']        = "Utilisation de %s. Vous devriez déplacer ce fichier dans le répertoire data/.";
 $lang['Message']['No_json_extension']       = "L’extension JSON est nécessaire pour lire le contenu du fichier composer.lock !";
 $lang['Message']['Composer_lock_unreadable'] = "Impossible de lire le fichier composer.lock !";
+
+$lang['Message']['Subject_empty']           = "Vous devez donner un sujet à votre newsletter";
+$lang['Message']['Body_empty']              = "Vous devez remplir le(s) champs texte";
+$lang['Message']['No_links_in_body']        = "Vous devez placer le lien de désinscription";
+$lang['Message']['Cid_error_in_body']       = "Certains fichiers ciblés dans votre newsletter <abbr>HTML</abbr> avec le scheme <samp>cid:</samp> sont manquants (%s)";
+
+$lang['Message']['Invalid_liste_name']      = "Le nom de votre liste de diffusion doit faire entre 3 et 30 caractères";
+$lang['Message']['Unknown_format']          = "Format demandé inconnu";
 
 //
 // Divers
@@ -484,8 +493,6 @@ $lang['Form_url']                   = "URL absolue de la page où se trouve le f
 $lang['Create_liste']               = "Créer une liste";
 $lang['Edit_liste']                 = "Modifier cette liste";
 $lang['Delete_liste']               = "Supprimer cette liste";
-$lang['Invalid_liste_name']         = "Le nom de votre liste de diffusion doit faire entre 3 et 30 caractères";
-$lang['Unknown_format']             = "Format demandé inconnu";
 $lang['Move_abo_logs']              = "Que souhaitez-vous faire des abonnés et newsletters rattachés à cette liste ?";
 $lang['Delete_all']                 = "Êtes-vous sûr de vouloir supprimer cette liste, ainsi que les abonnés et newsletters qui y sont rattachés ?";
 $lang['Move_to_liste']              = "Déplacer les abonnés et newsletters vers";
@@ -624,10 +631,6 @@ $lang['Format_html']                = "Format HTML";
 $lang['Last_modified']              = "Dernière modification le %s";
 $lang['Total_log_size']             = "Poids approximatif de la newsletter";
 $lang['Join_file_to_log']           = "Fichier à joindre à cette newsletter";
-$lang['Subject_empty']              = "Vous devez donner un sujet à votre newsletter";
-$lang['Body_empty']                 = "Vous devez remplir le(s) champs texte";
-$lang['No_links_in_body']           = "Vous devez placer le lien de désinscription";
-$lang['Cid_error_in_body']          = "Certains fichiers ciblés dans votre newsletter <abbr>HTML</abbr> avec le scheme <samp>cid:</samp> sont manquants (%s)";
 $lang['Status']                     = "Statut";
 $lang['Done']                       = "Effectué";
 $lang['Status_writing']             = "Newsletter normale";
@@ -662,7 +665,6 @@ $lang['Warning_reinstall']          = "<b>Attention !</b> Wanewsletter semble d�
 $lang['Start_install']              = "Démarrer l’installation";
 $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['No_db_support']              = "Désolé mais Wanewsletter %s requiert une base de données MySQL, PostgreSQL ou SQLite";
-$lang['Connect_db_error']           = "Impossible de se connecter à la base de données (%s)";
 $lang['sqldir_perms_problem']       = "Pour utiliser Wanewsletter avec une base de données SQLite, vous devez rendre accessible en lecture et écriture le répertoire <samp>%s</samp> ciblé";
 $lang['Config_file_found']          = "Fichier de configuration trouvé et chargé.";
 $lang['Config_file_manual']         = "Vous pouvez également créer manuellement le fichier de configuration <samp>data/config.inc.php</samp> en partant d’une copie du fichier <samp>data/config.sample.inc.php</samp>.";

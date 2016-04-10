@@ -169,14 +169,14 @@ if (!empty($dsn)) {
 			}
 		}
 		else if ($infos['dbname'] == '') {
-			throw new Exception(sprintf($lang['Connect_db_error'], 'Invalid DB name'));
+			throw new Exception(sprintf($lang['Message']['Connect_db_error'], 'Invalid DB name'));
 		}
 
 		$db = WaDatabase($dsn);
 	}
 	catch (Dblayer\Exception $e) {
 		$error = true;
-		$output->warn($lang['Connect_db_error'], $e->getMessage());
+		$output->warn('Connect_db_error', $e->getMessage());
 	}
 	catch (Exception $e) {
 		$error = true;
