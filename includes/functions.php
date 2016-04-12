@@ -1908,3 +1908,33 @@ function format_box($name, $default = 0, $multiple = false)
 
 	return $format_box;
 }
+
+/**
+ * Émission d’un cookie.
+ *
+ * @param string  $name
+ * @param string  $value
+ * @param integer $lifetime
+ * @param array   $opts
+ *
+ * @return boolean
+ */
+function send_cookie($name, $value, $lifetime, array $opts = [])
+{
+	$opts = array_replace([
+		'path'     => str_replace('//', '/', dirname($_SERVER['REQUEST_URI']).'/'),
+		'domain'   => null,
+		'secure'   => is_secure_connection(),
+		'httponly' => true
+	], $opts);
+
+	return setcookie(
+		$name,
+		$value,
+		$lifetime,
+		$opts['path'],
+		$opts['domain'],
+		$opts['secure'],
+		$opts['httponly']
+	);
+}
