@@ -88,7 +88,7 @@ const FORMAT_MULTIPLE = 3;
 // Statut des newsletter
 //
 const STATUS_WRITING = 0;
-const STATUS_STANDBY = 1;
+const STATUS_SENDING = 1;
 const STATUS_SENT    = 2;
 const STATUS_MODEL   = 3;
 

@@ -205,7 +205,7 @@ class Sender
 				WHERE liste_id = %d
 					AND log_status = %d
 				LIMIT 1 OFFSET 0";
-			$sql = sprintf($sql, LOG_TABLE, $this->listdata['liste_id'], STATUS_STANDBY);
+			$sql = sprintf($sql, LOG_TABLE, $this->listdata['liste_id'], STATUS_SENDING);
 			$result = $db->query($sql);
 
 			if (!($this->logdata = $result->fetch($result::FETCH_ASSOC))) {
@@ -234,7 +234,7 @@ class Sender
 		//
 		// Récupération des destinataires
 		//
-		if ($this->logdata['log_status'] == STATUS_STANDBY) {
+		if ($this->logdata['log_status'] == STATUS_SENDING) {
 			$sql = "SELECT COUNT(a.abo_id) AS total, al.send
 				FROM %s AS a
 					INNER JOIN %s AS al ON al.abo_id = a.abo_id
@@ -424,7 +424,7 @@ class Sender
 		$hook_params['ids'] = $abo_ids;
 		$this->triggerHooks('end-send', $hook_params);
 
-		if ($this->logdata['log_status'] == STATUS_STANDBY && $total_to_send == 0) {
+		if ($this->logdata['log_status'] == STATUS_SENDING && $total_to_send == 0) {
 			$db->beginTransaction();
 
 			$sql = "UPDATE %s SET log_status = %d, log_numdest = %d WHERE log_id = %d";

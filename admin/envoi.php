@@ -85,7 +85,7 @@ switch ($mode) {
 				WHERE log_id = " . $logdata['log_id'];
 			$result = $db->query($sql);
 
-			if (!($logdata = $result->fetch()) || $logdata['log_status'] != STATUS_STANDBY) {
+			if (!($logdata = $result->fetch()) || $logdata['log_status'] != STATUS_SENDING) {
 				http_redirect('envoi.php');
 			}
 
@@ -164,7 +164,7 @@ switch ($mode) {
 				FROM " . LOG_TABLE . "
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
 					AND log_id = $logdata[log_id]
-					AND log_status = " . STATUS_STANDBY;
+					AND log_status = " . STATUS_SENDING;
 			$result = $db->query($sql);
 
 			if (!($logdata = $result->fetch())) {
@@ -228,7 +228,7 @@ switch ($mode) {
 			$sql = "SELECT log_id, log_subject, log_status, liste_id
 				FROM " . LOG_TABLE . "
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
-					AND log_status = " . STATUS_STANDBY . "
+					AND log_status = " . STATUS_SENDING . "
 				ORDER BY log_subject ASC";
 			$result = $db->query($sql);
 
@@ -608,7 +608,7 @@ switch ($mode) {
 					$sql = "SELECT COUNT(*) AS test
 						FROM " . LOG_TABLE . "
 						WHERE liste_id = $listdata[liste_id]
-							AND log_status = " . STATUS_STANDBY;
+							AND log_status = " . STATUS_SENDING;
 					$result = $db->query($sql);
 
 					if ($result->column('test') > 0) {
@@ -634,7 +634,7 @@ switch ($mode) {
 				//
 				if ($logdata['log_status'] == STATUS_WRITING) {
 					if ($mode == 'send') {
-						$logdata['log_status'] = STATUS_STANDBY;
+						$logdata['log_status'] = STATUS_SENDING;
 					}
 
 					if ($prev_status == STATUS_MODEL) {
@@ -665,7 +665,7 @@ switch ($mode) {
 				//
 				if ($duplicate_log) {
 					$handle_id = $tmp_id;
-					$logdata['log_status'] = STATUS_STANDBY;
+					$logdata['log_status'] = STATUS_SENDING;
 
 					$db->insert(LOG_TABLE, $logdata);
 
