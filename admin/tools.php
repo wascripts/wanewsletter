@@ -84,7 +84,8 @@ function decompress_filedata($tmp_filename, $filename)
 	return file_get_contents($scheme . $tmp_filename);
 }
 
-$mode = filter_input(INPUT_GET, 'mode');
+$error = false;
+$mode  = filter_input(INPUT_GET, 'mode');
 
 switch ($mode) {
 	case 'export':
@@ -137,42 +138,38 @@ else if ($_SESSION['liste']) {
 //
 // Affichage de la boîte de sélection des modules
 //
-if (!isset($_POST['submit'])) {
-	$tools_ary = ['export', 'import', 'ban', 'generator'];
+$tools_ary = ['export', 'import', 'ban', 'generator'];
 
-	if (Auth::isAdmin($admindata)) {
-		array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
-	}
+if (Auth::isAdmin($admindata)) {
+	array_push($tools_ary, 'attach', 'backup', 'restore', 'debug');
+}
 
-	$tools_box = '<select id="mode" name="mode">';
-	foreach ($tools_ary as $tool_name) {
-		$tools_box .= sprintf(
-			"<option value=\"%s\"%s> %s </option>\n\t",
-			$tool_name,
-			$output->getBoolAttr('selected', ($mode == $tool_name)),
-			$lang['Title'][$tool_name]
-		);
-	}
-	$tools_box .= '</select>';
+$tools_box = '<select id="mode" name="mode">';
+foreach ($tools_ary as $tool_name) {
+	$tools_box .= sprintf(
+		"<option value=\"%s\"%s> %s </option>\n\t",
+		$tool_name,
+		$output->getBoolAttr('selected', ($mode == $tool_name)),
+		$lang['Title'][$tool_name]
+	);
+}
+$tools_box .= '</select>';
 
-	$output->header();
+$main = new Template('tools_body.tpl');
 
-	$main = new Template('tools_body.tpl');
+$main->assign([
+	'L_TITLE'        => $lang['Title']['tools'],
+	'L_EXPLAIN'      => nl2br($lang['Explain']['tools']),
+	'L_SELECT_TOOL'  => $lang['Select_tool'],
+	'L_VALID_BUTTON' => $lang['Button']['valid'],
 
+	'S_TOOLS_BOX'    => $tools_box
+]);
+
+if ($mode != 'backup' && $mode != 'restore') {
 	$main->assign([
-		'L_TITLE'        => $lang['Title']['tools'],
-		'L_EXPLAIN'      => nl2br($lang['Explain']['tools']),
-		'L_SELECT_TOOL'  => $lang['Select_tool'],
-		'L_VALID_BUTTON' => $lang['Button']['valid'],
-
-		'S_TOOLS_BOX'    => $tools_box
+		'LISTBOX' => $output->listbox($auth_type, false, $url_page)
 	]);
-
-	if ($mode != 'backup' && $mode != 'restore') {
-		$main->assign([
-			'LISTBOX' => $output->listbox($auth_type, false, $url_page)
-		]);
-	}
 }
 
 //
@@ -194,6 +191,7 @@ $EOL = (stripos($user_agent, 'Win')) ? "\r\n" : "\n";
 
 switch ($mode) {
 	case 'debug':
+		$output->header();
 		print_debug_infos();
 		$output->footer();
 		break;
@@ -325,7 +323,8 @@ switch ($mode) {
 				$upload_file = null;
 			}
 
-			$list_tmp    = '';
+			$list_tmp = '';
+			$emails   = [];
 			$data_is_xml = false;
 
 			//
@@ -339,10 +338,8 @@ switch ($mode) {
 					$filename     = $local_file;
 
 					if (!file_exists($tmp_filename)) {
-						$output->redirect('./tools.php?mode=import', 4);
-						$output->addLine(sprintf($lang['Message']['Error_local'], htmlspecialchars($filename)));
-						$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
-						$output->message();
+						$error = true;
+						$output->warn('Error_local', $filename);
 					}
 				}
 				else {
@@ -361,7 +358,8 @@ switch ($mode) {
 							$upload_error = 'Upload_error_5';
 						}
 
-						$output->message($upload_error);
+						$error = true;
+						$output->warn($upload_error);
 					}
 
 					//
@@ -369,23 +367,26 @@ switch ($mode) {
 					// il doit être déplacé vers le dossier des fichiers
 					// temporaires du script pour être accessible en lecture.
 					//
-					if (!is_readable($tmp_filename)) {
+					else if (!is_readable($tmp_filename)) {
 						$unlink = true;
 						$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa');
 
 						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
-							$output->message('Upload_error_5');
+							$error = true;
+							$output->warn('Upload_error_5');
 						}
 					}
 				}
 
-				$list_tmp = decompress_filedata($tmp_filename, $filename);
+				if (!$error) {
+					$list_tmp = decompress_filedata($tmp_filename, $filename);
 
-				$data_is_xml = (strncmp($list_tmp, '<?xml', 5) == 0 || strncmp($list_tmp, '<Wanliste>', 10) == 0);
+					$data_is_xml = (strncmp($list_tmp, '<?xml', 5) == 0 || strncmp($list_tmp, '<Wanliste>', 10) == 0);
 
-				if ($unlink) {
-					unlink($tmp_filename);
+					if ($unlink) {
+						unlink($tmp_filename);
+					}
 				}
 			}
 			//
@@ -395,9 +396,7 @@ switch ($mode) {
 				$list_tmp = $list_email;
 			}
 
-			if (!empty($list_tmp) && $data_is_xml) {
-				$emails = [];
-
+			if ($data_is_xml) {
 				if (extension_loaded('simplexml')) {
 					$xml = simplexml_load_string($list_tmp);
 					$xml = $xml->xpath('/Wanliste/email');
@@ -430,20 +429,21 @@ switch ($mode) {
 					);
 
 					if (!xml_parse($parser, $list_tmp)) {
-						$output->message(sprintf(
-							$lang['Message']['Invalid_xml_data'],
-							htmlspecialchars(xml_error_string(xml_get_error_code($parser)), ENT_NOQUOTES),
+						$error = true;
+						$output->warn('Invalid_xml_data',
+							xml_error_string(xml_get_error_code($parser)),
 							xml_get_current_line_number($parser)
-						));
+						);
 					}
 
 					xml_parser_free($parser);
 				}
 				else {
-					$output->message('Xml_ext_needed');
+					$error = true;
+					$output->warn('Xml_ext_needed');
 				}
 			}
-			else {
+			else if ($list_tmp) {
 				$glue = trim(filter_input(INPUT_POST, 'glue'));
 				if (!$glue) {
 					$list_tmp = preg_replace("/\r\n?/", "\n", $list_tmp);
@@ -456,11 +456,13 @@ switch ($mode) {
 			//
 			// Aucun fichier d'import valide reçu et textarea vide
 			//
-			if (count($emails) == 0) {
-				$output->redirect('./tools.php?mode=import', 4);
-				$output->addLine($lang['Message']['No_data_received']);
-				$output->addLine($lang['Click_return_back'], './tools.php?mode=import');
-				$output->message();
+			if (!$error && count($emails) == 0) {
+				$error = true;
+				$output->warn('No_data_received');
+			}
+
+			if ($error) {
+				goto import_display;
 			}
 
 			$report = '';
@@ -595,6 +597,8 @@ switch ($mode) {
 
 			$output->message();
 		}
+
+		import_display:
 
 		$max_filesize = get_max_filesize();
 
@@ -952,10 +956,8 @@ switch ($mode) {
 					$filename     = $local_file;
 
 					if (!file_exists($tmp_filename)) {
-						$output->redirect('./tools.php?mode=restore', 4);
-						$output->addLine(sprintf($lang['Message']['Error_local'], htmlspecialchars($filename)));
-						$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
-						$output->message();
+						$error = true;
+						$output->warn('Error_local', $filename);
 					}
 				}
 				else {
@@ -974,7 +976,8 @@ switch ($mode) {
 							$upload_error = 'Upload_error_5';
 						}
 
-						$output->message($upload_error);
+						$error = true;
+						$output->warn($upload_error);
 					}
 
 					//
@@ -982,45 +985,48 @@ switch ($mode) {
 					// il doit être déplacé vers le dossier des fichiers
 					// temporaires du script pour être accessible en lecture.
 					//
-					if (!is_readable($tmp_filename)) {
+					else if (!is_readable($tmp_filename)) {
 						$unlink = true;
 						$tmp_filename = tempnam($nl_config['tmp_dir'], 'wa');
 
 						if (!move_uploaded_file($upload_file['tmp_name'], $tmp_filename)) {
 							unlink($tmp_filename);
-							$output->message('Upload_error_5');
+							$error = true;
+							$output->warn('Upload_error_5');
 						}
 					}
 				}
 
-				$data = decompress_filedata($tmp_filename, $filename);
+				if (!$error) {
+					$data = decompress_filedata($tmp_filename, $filename);
 
-				if ($unlink) {
-					unlink($tmp_filename);
+					if ($unlink) {
+						unlink($tmp_filename);
+					}
 				}
 			}
 			//
 			// Aucun fichier de restauration reçu
 			//
 			else {
-				$output->redirect('./tools.php?mode=restore', 4);
-				$output->addLine($lang['Message']['No_data_received']);
-				$output->addLine($lang['Click_return_back'], './tools.php?mode=restore');
-				$output->message();
+				$error = true;
+				$output->warn('No_data_received');
 			}
 
-			$queries = parse_sql($data);
+			if (!$error) {
+				$queries = parse_sql($data);
 
-			$db->beginTransaction();
+				$db->beginTransaction();
 
-			foreach ($queries as $query) {
-				$db->query($query);
-				fake_header();
+				foreach ($queries as $query) {
+					$db->query($query);
+					fake_header();
+				}
+
+				$db->commit();
+
+				$output->message('Success_restore');
 			}
-
-			$db->commit();
-
-			$output->message('Success_restore');
 		}
 
 		$max_filesize = get_max_filesize();
@@ -1108,5 +1114,6 @@ switch ($mode) {
 		break;
 }
 
+$output->header();
 $main->pparse();
 $output->footer();
