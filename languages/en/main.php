@@ -266,6 +266,7 @@ $lang['Message']['Cid_error_in_body']       = "Some files targeted in your <abbr
 
 $lang['Message']['Invalid_liste_name']      = "Your list's name must contain between 3 and 30 characters";
 $lang['Message']['Unknown_format']          = "Unknown format";
+$lang['Message']['Xml_ext_needed']          = "The XML or SimpleXML PHP extensions are needed to parse XML files";
 
 //
 // Divers

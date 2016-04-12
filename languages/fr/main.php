@@ -266,6 +266,7 @@ $lang['Message']['Cid_error_in_body']       = "Certains fichiers ciblés dans vo
 
 $lang['Message']['Invalid_liste_name']      = "Le nom de votre liste de diffusion doit faire entre 3 et 30 caractères";
 $lang['Message']['Unknown_format']          = "Format demandé inconnu";
+$lang['Message']['Xml_ext_needed']          = "Les extensions XML ou SimpleXML de PHP sont nécessaires pour analyser les fichiers XML";
 
 //
 // Divers
