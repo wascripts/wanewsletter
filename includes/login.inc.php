@@ -200,8 +200,7 @@ else if ($mode == 'logout') {
 		$session->end();
 	}
 
-	$error = true;
-	$output->warn('Success_logout');
+	$output->notice('Success_logout');
 }
 
 //
