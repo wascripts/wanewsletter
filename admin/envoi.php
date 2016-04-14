@@ -726,14 +726,16 @@ switch ($mode) {
 				$file_id = (int) filter_input(INPUT_POST, 'fid', FILTER_VALIDATE_INT);
 				if ($file_id) {
 					// Ajout d’un fichier déjà existant.
-					$attach->useFile($logdata['log_id'], $file_id);
+					$file = $attach->useFile($logdata['log_id'], $file_id);
 				}
 				else {
 					$local_file = trim(filter_input(INPUT_POST, 'local_file'));
 					$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : [];
 
-					$attach->addFile($logdata['log_id'], $local_file ?: $join_file);
+					$file = $attach->addFile($logdata['log_id'], $local_file ?: $join_file);
 				}
+
+				$output->notice('Joined_file_added', $file['name']);
 			}
 			catch (Dblayer\Exception $e) {
 				throw $e;
@@ -763,6 +765,13 @@ switch ($mode) {
 			// Optimisation des tables
 			//
 			$db->vacuum([LOG_FILES_TABLE, JOINED_FILES_TABLE]);
+
+			if (count($file_ids) > 1) {
+				$output->notice('Joined_files_removed');
+			}
+			else {
+				$output->notice('Joined_file_removed');
+			}
 		}
 		break;
 }

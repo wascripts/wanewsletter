@@ -263,6 +263,9 @@ $lang['Message']['Subject_empty']           = "You must indicate a subject";
 $lang['Message']['Body_empty']              = "You must fill in the text field(s)";
 $lang['Message']['No_links_in_body']        = "You must insert a unsubscribe link";
 $lang['Message']['Cid_error_in_body']       = "Some files targeted in your <abbr>HTML</abbr> with the scheme <samp>cid:</samp> are missing (%s)";
+$lang['Message']['Joined_file_added']       = "The file <q>%s</q> was added to the message";
+$lang['Message']['Joined_files_removed']    = "The selected files was removed from the message";
+$lang['Message']['Joined_file_removed']     = "The selected file was removed from the message";
 
 $lang['Message']['Invalid_liste_name']      = "Your list's name must contain between 3 and 30 characters";
 $lang['Message']['Unknown_format']          = "Unknown format";

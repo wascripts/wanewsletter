@@ -263,6 +263,9 @@ $lang['Message']['Subject_empty']           = "Vous devez donner un sujet à vot
 $lang['Message']['Body_empty']              = "Vous devez remplir le(s) champs texte";
 $lang['Message']['No_links_in_body']        = "Vous devez placer le lien de désinscription";
 $lang['Message']['Cid_error_in_body']       = "Certains fichiers ciblés dans votre newsletter <abbr>HTML</abbr> avec le scheme <samp>cid:</samp> sont manquants (%s)";
+$lang['Message']['Joined_file_added']       = "Le fichier <q>%s</q> a été ajouté au message";
+$lang['Message']['Joined_files_removed']    = "Les fichiers sélectionnés ont été retirés du message";
+$lang['Message']['Joined_file_removed']     = "Le fichier sélectionné a été retiré du message";
 
 $lang['Message']['Invalid_liste_name']      = "Le nom de votre liste de diffusion doit faire entre 3 et 30 caractères";
 $lang['Message']['Unknown_format']          = "Format demandé inconnu";

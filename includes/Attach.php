@@ -44,6 +44,7 @@ class Attach
 	 * @param mixed   $file   Nom ou URL du fichier, ou tableau d’un fichier uploadé
 	 *
 	 * @throws Exception
+	 * @return array
 	 */
 	public function addFile($log_id, $file)
 	{
@@ -224,6 +225,14 @@ class Attach
 		$db->insert(LOG_FILES_TABLE, $sql_data);
 
 		$db->commit();
+
+		$file = [];
+		$file['name'] = $filename;
+		$file['path'] = $this->upload_path . $physical_filename;
+		$file['size'] = $filesize;
+		$file['type'] = $filetype;
+
+		return $file;
 	}
 
 	/**
@@ -233,12 +242,13 @@ class Attach
 	 * @param integer $file_id Identifiant du fichier
 	 *
 	 * @throws Exception
+	 * @return array
 	 */
 	public function useFile($log_id, $file_id)
 	{
 		global $db, $nl_config, $lang, $listdata;
 
-		$sql = "SELECT jf.file_physical_name, jf.file_size
+		$sql = "SELECT jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
 			FROM " . JOINED_FILES_TABLE . " AS jf
 				INNER JOIN " . LOG_TABLE . " AS l ON l.liste_id = $listdata[liste_id]
 				INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
@@ -266,6 +276,14 @@ class Attach
 			$file_id
 		);
 		$db->query($sql);
+
+		$file = [];
+		$file['name'] = $row['file_real_name'];
+		$file['path'] = $this->upload_path . $row['file_physical_name'];
+		$file['size'] = $row['file_size'];
+		$file['type'] = $row['file_mimetype'];
+
+		return $file;
 	}
 
 	/**
