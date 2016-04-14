@@ -15,6 +15,237 @@ const IN_ADMIN = true;
 
 require '../includes/common.inc.php';
 
+$files = <<<EOD
+.gitignore
+COPYING
+CREDITS
+README
+admin/admin.php
+admin/config.php
+admin/envoi.php
+admin/index.php
+admin/login.php
+admin/show.php
+admin/start.inc.php
+admin/stats.php
+admin/tools.php
+admin/upgrade.php
+admin/view.php
+composer.json
+composer.lock
+contrib/cleaner.php
+contrib/convertdb.php
+contrib/diff_lang.php
+contrib/index.html
+contrib/testlock.php
+contrib/wanewsletter
+contrib/wanewsletter.bat
+data/.htaccess
+data/config.sample.inc.php
+data/tags.sample.inc.php
+data/db/.gitignore
+data/db/index.html
+data/logs/.gitignore
+data/logs/index.html
+data/stats/.gitignore
+data/stats/index.html
+data/tmp/.gitignore
+data/tmp/index.html
+data/uploads/.gitignore
+data/uploads/index.html
+docs/index.html
+docs/wadoc.css
+images/barre.gif
+images/barre.png
+images/button-wa.gif
+images/button-wa.png
+images/index.html
+images/logo-wa.gif
+images/logo-wa.png
+images/shadow.png
+includes/Attach.php
+includes/Auth.php
+includes/Error.php
+includes/Exception.php
+includes/Subscription.php
+includes/PopClient.php
+includes/Sender.php
+includes/Session.php
+includes/Template.php
+includes/common.inc.php
+includes/compat.inc.php
+includes/constantes.php
+includes/functions.db.php
+includes/functions.php
+includes/functions.stats.php
+includes/functions.wrapper.php
+includes/index.html
+includes/install.inc.php
+includes/login.inc.php
+includes/Dblayer/index.html
+includes/Dblayer/Mysql.php
+includes/Dblayer/Mysqli.php
+includes/Dblayer/Postgres.php
+includes/Dblayer/schemas/data.sql
+includes/Dblayer/schemas/index.html
+includes/Dblayer/schemas/mysql_tables.sql
+includes/Dblayer/schemas/postgres_tables.sql
+includes/Dblayer/schemas/sqlite_tables.sql
+includes/Dblayer/Sqlite3.php
+includes/Dblayer/SqlitePdo.php
+includes/Dblayer/Wadb.php
+includes/Output/CommandLine.php
+includes/Output/Html.php
+includes/Output/Json.php
+includes/Output/MessageInterface.php
+index.html
+install.php
+languages/DejaVuSans.ttf
+languages/en/emails/admin_new_subscribe.txt
+languages/en/emails/admin_unsubscribe.txt
+languages/en/emails/index.html
+languages/en/emails/new_admin.txt
+languages/en/emails/reset_passwd.txt
+languages/en/emails/unsubscribe_cron.txt
+languages/en/emails/unsubscribe_form.txt
+languages/en/emails/welcome_cron1.txt
+languages/en/emails/welcome_cron2.txt
+languages/en/emails/welcome_form1.txt
+languages/en/emails/welcome_form2.txt
+languages/fr/emails/admin_new_subscribe.txt
+languages/fr/emails/admin_unsubscribe.txt
+languages/fr/emails/index.html
+languages/fr/emails/new_admin.txt
+languages/fr/emails/reset_passwd.txt
+languages/fr/emails/unsubscribe_cron.txt
+languages/fr/emails/unsubscribe_form.txt
+languages/fr/emails/welcome_cron1.txt
+languages/fr/emails/welcome_cron2.txt
+languages/fr/emails/welcome_form1.txt
+languages/fr/emails/welcome_form2.txt
+languages/index.html
+languages/en/index.html
+languages/en/main.php
+languages/fr/index.html
+languages/fr/main.php
+languages/fr/tinymce.js
+newsletter.php
+options/cron.php
+options/extra.php
+options/index.html
+profil_cp.php
+subscribe.php
+templates/admin/add_admin_body.tpl
+templates/admin/admin.js
+templates/admin/admin_body.tpl
+templates/admin/backup_body.tpl
+templates/admin/ban_list_body.tpl
+templates/admin/config_body.tpl
+templates/admin/confirm_body.tpl
+templates/admin/edit_abo_profil_body.tpl
+templates/admin/edit_liste_body.tpl
+templates/admin/editor.js
+templates/admin/export_body.tpl
+templates/admin/files_box.tpl
+templates/admin/footer.tpl
+templates/admin/forbidden_ext_body.tpl
+templates/admin/generator_body.tpl
+templates/admin/header.tpl
+templates/admin/iframe_body.tpl
+templates/admin/import_body.tpl
+templates/admin/index.html
+templates/admin/index_body.tpl
+templates/admin/list_box.tpl
+templates/admin/message_body.tpl
+templates/admin/restore_body.tpl
+templates/admin/result_generator_body.tpl
+templates/admin/result_upgrade_body.tpl
+templates/admin/select_liste_body.tpl
+templates/admin/select_log_body.tpl
+templates/admin/send_body.tpl
+templates/admin/send_progress_body.tpl
+templates/admin/simple_header.tpl
+templates/admin/stats_body.tpl
+templates/admin/tools_body.tpl
+templates/admin/upgrade_body.tpl
+templates/admin/view_abo_list_body.tpl
+templates/admin/view_abo_profil_body.tpl
+templates/admin/view_liste_body.tpl
+templates/admin/view_logs_body.tpl
+templates/archives_body.tpl
+templates/editprofile_body.tpl
+templates/footer.tpl
+templates/header.tpl
+templates/images/archive-hover.png
+templates/images/archive.png
+templates/images/icon_clip.png
+templates/images/icon_loupe.png
+templates/images/index.html
+templates/images/loading.gif
+templates/images/puce.png
+templates/images/icon_reset.png
+templates/index.html
+templates/index_body.tpl
+templates/install.tpl
+templates/login.tpl
+templates/lost_passwd.tpl
+templates/message_body.tpl
+templates/reset_passwd.tpl
+templates/simple_header.tpl
+templates/subscribe_body.tpl
+templates/wanewsletter.css
+templates/wanewsletter.custom.css
+
+# Pour les anciennes versions
+includes/config.inc.php
+# Dossiers légitimes à ignorer
+.git
+data
+docs
+vendor
+EOD;
+
+/**
+ * Scanne les dossiers du répertoire de Wanewsletter à la recherche de fichiers
+ * inconnus ou de fichiers d’anciennes versions et désormais obsolètes.
+ * Fonction récursive.
+ *
+ * @param string $dir
+ *
+ * @return string
+ */
+function scan_dir($dir)
+{
+	global $files;
+
+	$output = '';
+	$browse = dir($dir);
+
+	while (($entry = $browse->read()) !== false) {
+		if ($entry == '..' || $entry == '.') {
+			continue;
+		}
+
+		$filename = $dir.'/'.$entry;
+		$relname  = ltrim(str_replace(WA_ROOTDIR, '', $filename), '/');
+
+		$i = array_search($relname, $files);
+
+		if ($i !== false) {
+			continue;
+		}
+		else if (is_dir($filename)) {
+			$output .= scan_dir($filename);
+		}
+		else {
+			$output .= "$relname\n";
+		}
+	}
+	$browse->close();
+
+	return $output;
+}
+
 /**
  * SQLite a un support très limité de la commande ALTER TABLE
  * Impossible de modifier ou supprimer une colonne donnée
@@ -180,8 +411,43 @@ if ($auth->isLoggedIn() && Auth::isAdmin($admindata) && isset($_POST['sendfile']
 	sendfile('config.inc.php', 'text/plain', $config_file);
 }
 
+// Préparation du listing et scan du répertoire
+$files = explode("\n", $files);
+foreach ($files as &$file) {
+	$file = trim($file);
+	if (!$file || $file[0] == '#') {
+		$file = null;
+	}
+}
+
+$files = array_filter($files);
+$unknown_files = scan_dir(WA_ROOTDIR);
+unset($files);
+
 if (check_db_version($nl_config['db_version'])) {
-	$output->message($lang['Upgrade_not_required']);
+	$message = $lang['Upgrade_not_required'];
+
+	if ($unknown_files) {
+		$output->header();
+
+		$template = new Template('result_upgrade_body.tpl');
+
+		$template->assign([
+			'L_TITLE_UPGRADE' => $lang['Title']['upgrade'],
+			'MESSAGE' => nl2br($message)
+		]);
+
+		$template->assignToBlock('unknown_files', [
+			'NOTICE'  => nl2br($lang['Unknown_files_notice']),
+			'LISTING' => $unknown_files
+		]);
+
+		$template->pparse();
+		$output->footer();
+	}
+	else {
+		$output->message($message);
+	}
 }
 
 if (isset($_POST['start'])) {
@@ -838,12 +1104,12 @@ if (isset($_POST['start'])) {
 		//
 		// Affichage message de résultat
 		//
-		if (UPDATE_CONFIG_FILE || $moved_dirs) {
+		$message = $lang['Success_upgrade'];
+
+		if (UPDATE_CONFIG_FILE || $moved_dirs || $unknown_files) {
 			$output->header();
 
 			$template = new Template('result_upgrade_body.tpl');
-
-			$message = $lang['Success_upgrade'];
 
 			if (UPDATE_CONFIG_FILE) {
 				$template->assignToBlock('download_file', [
@@ -863,12 +1129,18 @@ if (isset($_POST['start'])) {
 					'MOVED_DIRS_NOTICE' => nl2br($lang['Moved_dirs_notice'])
 				]);
 			}
+			if ($unknown_files) {
+				$template->assignToBlock('unknown_files', [
+					'NOTICE'  => nl2br($lang['Unknown_files_notice']),
+					'LISTING' => $unknown_files
+				]);
+			}
 
 			$template->pparse();
 			$output->footer();
 		}
 		else {
-			$output->message($lang['Success_upgrade']);
+			$output->message($message);
 		}
 	}
 }

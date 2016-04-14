@@ -679,6 +679,7 @@ $lang['Success_upgrade_no_config']  = "The upgrade was succesfully completed, bu
 $lang['Upgrade_not_required']       = "No upgrade is required for your current version of Wanewsletter";
 $lang['Unsupported_version']        = "This version of Wanewsletter no longer supported by the upgrade script. You should first upgrade your installation to version 2.3.x.";
 $lang['Moved_dirs_notice']          = "<strong>Notice&nbsp;:</strong> The <samp>stats/</samp> and <samp>tmp/</samp> directories are now located into <samp>data/</samp> directory.\n Move the content of <samp>stats/</samp> and <samp>tmp/</samp> to their equivalents in <samp>data/</samp> and delete them.\n Don't forget to give write permissions on these directories.";
+$lang['Unknown_files_notice']       = "Several files that are not part of Wanewsletter were detected. They may be files of older versions of Wanewsletter. In that case, they can be removed safely.";
 
 $lang['Need_upgrade_db']            = "An upgrade needs to be performed.";
 $lang['Need_upgrade_db_link']       = "Click %shere%s to start the upgrade script.";
