@@ -374,7 +374,8 @@ class Html implements MessageInterface
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts(),
 			'SITENAME'     => htmlspecialchars($sitename, ENT_NOQUOTES),
-			'WARN_BOX'     => $this->msgbox()
+			'NOTICE_BOX'   => $this->msgbox('notice'),
+			'WARN_BOX'     => $this->msgbox('warn')
 		]);
 
 		// Si l'utilisateur est connecté, affichage du menu
@@ -470,7 +471,7 @@ class Html implements MessageInterface
 
 		if ($wanlog_box != '') {
 			$template->assign([
-				'WANLOG_BOX' => sprintf('<ul id="wanlog" class="warn">%s</ul>', $wanlog_box)
+				'WANLOG_BOX' => sprintf('<ul id="wanlog" class="logbox warn">%s</ul>', $wanlog_box)
 			]);
 		}
 
@@ -706,7 +707,21 @@ BASIC;
 		exit;
 	}
 
-	public function warn($str)
+	public function notice()
+	{
+		$args = func_get_args();
+		array_unshift($args, 'notice');
+		call_user_func_array([$this,'log'], $args);
+	}
+
+	public function warn()
+	{
+		$args = func_get_args();
+		array_unshift($args, 'warn');
+		call_user_func_array([$this,'log'], $args);
+	}
+
+	public function log($type, $str)
 	{
 		global $lang;
 
@@ -714,31 +729,33 @@ BASIC;
 			$str = $lang['Message'][$str];
 		}
 
-		if (func_num_args() > 1) {
+		if (func_num_args() > 2) {
 			$args = func_get_args();
+			array_shift($args);
 			$args = array_map('htmlspecialchars', $args);
 			$args[0] = $str;
 			$str  = call_user_func_array('sprintf', $args);
 		}
 
-		$this->msg_log[] = $str;
+		$this->msg_log[$type][] = $str;
 	}
 
 	/**
 	 * Génération de la liste des alertes
 	 *
+	 * @param string $type
+	 *
 	 * @return string
 	 */
-	public function msgbox()
+	public function msgbox($type)
 	{
-		$list = $this->msg_log;
-
-		if ($list) {
+		if (!empty($this->msg_log[$type])) {
+			$list = $this->msg_log[$type];
 			array_walk($list, function (&$value, $key) {
 				$value = sprintf("<li>%s</li>\n", nl2br($value));
 			});
 
-			return sprintf('<ul class="warn">%s</ul>', implode('', $list));
+			return sprintf('<ul class="logbox %s">%s</ul>', $type, implode('', $list));
 		}
 
 		return '';

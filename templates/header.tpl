@@ -33,4 +33,5 @@
 
 <div id="global">
 
+{NOTICE_BOX}
 {WARN_BOX}

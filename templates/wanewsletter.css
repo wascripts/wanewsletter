@@ -175,16 +175,27 @@ div.last-modified { font-style: italic; text-align: right; color: #333; }
 
 /* Classes diverses */
 
-.warn {
-	background-color: #F4D6D6;
+.logbox, p.warn {
 	margin: 1.4em 0;
-	border: 1px solid #C00;
-	box-shadow: 1px 1px 1px hsla(0, 100%, 72%, 0.2);
 	padding: .5em 2em;
 	line-height: 1.45;
+	font-size: 1em;
+}
+
+.logbox.notice {
+	background-color: #D0E9D0;
+	border: 1px solid #0A0;
+	box-shadow: 1px 1px 1px hsla(120, 100%, 72%, 0.2);
+	color: #060;
+}
+.logbox li { list-style-type: disc; }
+
+.logbox.warn, p.warn {
+	background-color: #F4D6D6;
+	border: 1px solid #C00;
+	box-shadow: 1px 1px 1px hsla(0, 100%, 72%, 0.2);
 	color: #600;
 }
-.warn li { list-style-type: disc; }
 
 .unavailable { color: red; }
 .available   { color: hsl(140, 70%, 40%); }

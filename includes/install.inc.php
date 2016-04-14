@@ -470,7 +470,7 @@ else {
 
 $template->assign([
 	'S_PREV_LANGUAGE' => $language,
-	'WARN_BOX'        => $output->msgbox()
+	'WARN_BOX'        => $output->msgbox('warn')
 ]);
 
 $template->pparse();
