@@ -538,6 +538,13 @@ class Sender
 			$email->setReturnPath($this->listdata['return_email']);
 		}
 
+		// See RFC 2919
+		$email->headers->set('List-ID', sprintf('%s <list-%d.%s>',
+			\Wamailer\Mime\Header::encode('List-ID', $this->listdata['liste_name'], 'UTF-8', 'phrase'),
+			$this->listdata['liste_id'],
+			parse_url($nl_config['urlsite'], PHP_URL_HOST)
+		));
+
 		$message = [
 			FORMAT_TEXT => $this->logdata['log_body_text'],
 			FORMAT_HTML  => $this->logdata['log_body_html']
