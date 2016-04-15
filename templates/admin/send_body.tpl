@@ -20,6 +20,7 @@ if (typeof(tinyMCE) != 'undefined') {
 
 		entity_encoding: "raw",
 		relative_urls: false,
+		convert_urls: false,
 		setup: function(ed) {
 			ed.on('BeforeSetContent', function(e) {
 				e.content = e.content.replace(/<([^>]+)=\s*("|\')cid:/g,'<$1=$2show.php?file=');
