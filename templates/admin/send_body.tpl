@@ -13,7 +13,7 @@ if (typeof(tinyMCE) != 'undefined') {
 			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 			"searchreplace wordcount visualblocks visualchars code",
 			"insertdatetime media nonbreaking table contextmenu directionality",
-			"paste textcolor colorpicker textpattern"
+			"paste textcolor colorpicker textpattern fullpage"
 		],
 		toolbar1: "bold italic underline strikethrough bullist numlist blockquote hr alignleft aligncenter alignright link unlink image spellchecker",
 		toolbar2: "formatselect forecolor pastetext removeformat charmap outdent indent code undo redo",
