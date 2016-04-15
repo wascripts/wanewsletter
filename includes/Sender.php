@@ -590,6 +590,13 @@ class Sender
 		$message[FORMAT_TEXT] = str_replace('{LINKS}', $link[FORMAT_TEXT], $message[FORMAT_TEXT]);
 		$message[FORMAT_HTML] = str_replace('{LINKS}', $link[FORMAT_HTML],  $message[FORMAT_HTML]);
 
+		// Si le document HTML ne comporte pas de titre, on insère le sujet de l’email.
+		$message[FORMAT_HTML] = preg_replace('#(<head>.*?<title>)\s*(</title>.*?</head>)#si',
+			sprintf('$1%s$2', htmlspecialchars($this->logdata['log_subject'], ENT_NOQUOTES)),
+			$message[FORMAT_HTML],
+			1
+		);
+
 		$text_template = new Template;
 		$text_template->loadFromString($message[FORMAT_TEXT]);
 		$html_template = new Template;
