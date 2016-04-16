@@ -1693,7 +1693,8 @@ else if ($mode == 'log') {
 			$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
 			if (!in_array($format, [FORMAT_TEXT, FORMAT_HTML])) {
-				$format = FORMAT_TEXT;
+				$format = ($listdata['liste_format'] == FORMAT_HTML)
+					? FORMAT_HTML : FORMAT_TEXT;
 			}
 
 			$iframe = new Template('iframe_body.tpl');
