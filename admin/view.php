@@ -136,9 +136,16 @@ else if ($mode == 'iframe') {
 	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
-	$body_type = ($format == FORMAT_HTML) ? 'log_body_html' : 'log_body_text';
+	if ($format == FORMAT_HTML) {
+		$format_name = 'HTML';
+		$body_column = 'log_body_html';
+	}
+	else {
+		$format_name = $lang['Text'];
+		$body_column = 'log_body_text';
+	}
 
-	$sql = "SELECT $body_type AS body
+	$sql = "SELECT $body_column AS body
 		FROM " . LOG_TABLE . "
 		WHERE log_id = $log_id AND liste_id = " . $listdata['liste_id'];
 	$result = $db->query($sql);
@@ -147,7 +154,7 @@ else if ($mode == 'iframe') {
 		$output->basic($lang['Message']['log_not_exists']);
 	}
 	else if (!$body) {
-		$output->basic($lang['Message']['log_format_not_exists']);
+		$output->basic(sprintf($lang['Message']['log_format_not_exists'], $format_name));
 	}
 
 	if ($format == FORMAT_HTML) {
@@ -1697,40 +1704,36 @@ else if ($mode == 'log') {
 					? FORMAT_HTML : FORMAT_TEXT;
 			}
 
+			// Par champ caché, car ce formulaire est en méthode GET.
+			$output->addHiddenField('mode', 'log');
+			$output->addHiddenField('action', 'view');
+			$output->addHiddenField('id', $log_id);
+
+			if ($page_id > 1) {
+				$output->addHiddenField('page', $page_id);
+			}
+
 			$iframe = new Template('iframe_body.tpl');
 
 			$iframe->assign([
-				'L_SUBJECT'  => $lang['Log_subject'],
-				'L_NUMDEST'  => $lang['Log_numdest'],
+				'L_SUBJECT'   => $lang['Log_subject'],
+				'L_NUMDEST'   => $lang['Log_numdest'],
+				'L_FORMAT'    => $lang['Format'],
+				'L_GO_BUTTON' => $lang['Button']['go'],
 
-				'SUBJECT'    => htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
-				'NUMDEST'    => $logdata['log_numdest'],
-				'FORMAT'     => $format,
-				'LOG_ID'     => $log_id
+				'SUBJECT'     => htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
+				'NUMDEST'     => $logdata['log_numdest'],
+				'FORMAT'      => $format,
+				'LOG_ID'      => $log_id,
+				'FORMAT_BOX'  => format_box('format', $format),
+
+				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 			]);
 
 			if (extension_loaded('zip')) {
 				$iframe->assignToBlock('export', [
 					'L_EXPORT_T' => $lang['Export_nl'],
 					'L_EXPORT'   => $lang['Export']
-				]);
-			}
-
-			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-				// Par champ caché, car ce formulaire est en méthode GET.
-				$output->addHiddenField('mode', 'log');
-				$output->addHiddenField('action', 'view');
-				$output->addHiddenField('id', $log_id);
-
-				if ($page_id > 1) {
-					$output->addHiddenField('page', $page_id);
-				}
-
-				$iframe->assignToBlock('format_box', [
-					'L_FORMAT'        => $lang['Format'],
-					'L_GO_BUTTON'     => $lang['Button']['go'],
-					'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-					'FORMAT_BOX'      => format_box('format', $format)
 				]);
 			}
 
