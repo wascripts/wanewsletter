@@ -495,254 +495,241 @@ switch ($mode) {
 	case 'send':
 	case 'save':
 	case 'test':
-		if ($mode != 'attach' || empty($logdata['log_id'])) {
-			if ($logdata['log_subject'] == '') {
-				$error = true;
-				$output->warn('Subject_empty');
-			}
-
-			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_text'] == ''
-				&& $listdata['liste_format'] != FORMAT_HTML
-			) {
-				$error = true;
-				$output->warn('Body_empty');
-			}
-
-			if (($mode == 'test' || $mode == 'send') && $logdata['log_body_html'] == ''
-				&& $listdata['liste_format'] != FORMAT_TEXT
-			) {
-				$error = true;
-				$output->warn('Body_empty');
-			}
-
-			//
-			// Fonction de callback utilisée pour l'appel à preg_replace_callback() plus bas
-			//
-			$replace_include = function ($m) use ($mode, &$lang, &$error, $output) {
-				preg_match_all('/\\s+([a-z_:][a-z0-9_:.-]*)\\s?=\\s?(["\'])(.+?)(?<!\\\\)(?:\\\\\\\\)*\\2/i',
-					$m[1], $attrs, PREG_SET_ORDER);
-
-				$resource = null;
-				$tds = false;
-				foreach ($attrs as $attr) {
-					switch ($attr[1]) {
-						case 'src':
-							$resource = stripslashes($attr[3]);
-							break;
-						case 'tds' && $attr[3] == 'true':
-						case 'now' && $attr[3] == 'true':
-							$tds = true;
-							break;
-					}
-				}
-
-				if (is_null($resource) || (!$tds && $mode != 'send')) {
-					return $m[0];
-				}
-
-				try {
-					$result = wan_get_contents($resource);
-				}
-				catch (Exception $e) {
-					$error = true;
-					$output->warn($e->getMessage());
-					return $m[0];
-				}
-
-				return convert_encoding($result['data'], $result['charset']);
-			};
-
-			$regexp = '/<\\?inclu[dr]e(\\s+[^>]+)\\?>/i';
-			foreach (['log_body_text', 'log_body_html'] as $key) {
-				$logdata[$key] = preg_replace_callback($regexp, $replace_include, $logdata[$key]);
-			}
-
-			if ($mode == 'test' || $mode == 'send') {
-				if (!DISABLE_CHECK_LINKS && $listdata['liste_format'] != FORMAT_HTML
-					&& !strstr($logdata['log_body_text'], '{LINKS}')
-				) {
-					$error = true;
-					$output->warn('No_links_in_body');
-				}
-
-				if ($listdata['liste_format'] != FORMAT_TEXT) {
-					if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
-						$error = true;
-						$output->warn('No_links_in_body');
-					}
-
-					$sql = "SELECT jf.file_real_name, l.log_id
-						FROM " . JOINED_FILES_TABLE . " AS jf
-							INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
-							INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-								AND l.liste_id = $listdata[liste_id]
-						ORDER BY jf.file_real_name ASC";
-					$result = $db->query($sql);
-
-					$files = $files_error = [];
-					while ($row = $result->fetch()) {
-						if ($row['log_id'] == $logdata['log_id']) {
-							$files[] = $row['file_real_name'];
-						}
-					}
-
-					$total_cid = hasCidReferences($logdata['log_body_html'], $refs);
-
-					for ($i = 0; $i < $total_cid; $i++) {
-						if (!in_array($refs[$i], $files)) {
-							$files_error[] = $refs[$i];
-						}
-					}
-
-					if (count($files_error) > 0) {
-						$error = true;
-						$output->warn('Cid_error_in_body', implode(', ', $files_error));
-					}
-				}
-
-				//
-				// Deux newsletters ne peuvent être simultanément en attente d'envoi
-				// pour une même liste.
-				//
-				if ($mode == 'send') {
-					$sql = "SELECT COUNT(*) AS test
-						FROM " . LOG_TABLE . "
-						WHERE liste_id = $listdata[liste_id]
-							AND log_status = " . STATUS_SENDING;
-					$result = $db->query($sql);
-
-					if ($result->column('test') > 0) {
-						$error = true;
-						$output->warn('Twice_sending');
-					}
-				}
-			}
-
-			if (!$error) {
-				$sql_where      = '';
-				$duplicate_log  = false;
-				$duplicate_file = false;
-
-				$tmp_id = $logdata['log_id'];
-				unset($logdata['log_id']);
-
-				//
-				// Au cas où la newsletter a le status WRITING mais que son précédent statut était HANDLE,
-				// nous la dupliquons pour garder intact le modèle
-				// Si la newsletter a un statut HANDLE et qu'on est en mode send, nous dupliquons newsletter
-				// et entrées pour les fichiers joints
-				//
-				if ($logdata['log_status'] == STATUS_WRITING) {
-					if ($mode == 'send') {
-						$logdata['log_status'] = STATUS_SENDING;
-					}
-
-					if ($prev_status == STATUS_MODEL) {
-						$handle_id      = $tmp_id;
-						$tmp_id         = 0;
-						$duplicate_file = true;
-					}
-				}
-				else if ($mode == 'send') {
-					$duplicate_log  = true;
-					$duplicate_file = true;
-				}
-
-				$logdata['log_date'] = time();
-				$logdata['liste_id'] = $listdata['liste_id'];
-
-				if (empty($tmp_id)) {
-					$db->insert(LOG_TABLE, $logdata);
-					$tmp_id = $db->lastInsertId();
-				}
-				else {
-					$sql_where = ['log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']];
-					$db->update(LOG_TABLE, $logdata, $sql_where);
-				}
-
-				//
-				// Duplication de la newsletter
-				//
-				if ($duplicate_log) {
-					$handle_id = $tmp_id;
-					$logdata['log_status'] = STATUS_SENDING;
-
-					$db->insert(LOG_TABLE, $logdata);
-
-					$tmp_id = $db->lastInsertId();
-				}
-
-				//
-				// Duplication des entrées pour les fichiers joints
-				//
-				if ($duplicate_file) {
-					$sql = "SELECT file_id
-						FROM " . LOG_FILES_TABLE . "
-						WHERE log_id = " . $handle_id;
-					$result = $db->query($sql);
-
-					$sql_dataset = [];
-
-					while ($row = $result->fetch()) {
-						$sql_dataset[] = ['log_id' => $tmp_id, 'file_id' => $row['file_id']];
-					}
-
-					if (count($sql_dataset) > 0) {
-						$db->insert(LOG_FILES_TABLE, $sql_dataset);
-					}
-
-					unset($sql_dataset);
-				}
-
-				$logdata['log_id'] = $tmp_id;
-				$prev_status = $logdata['log_status'];
-				unset($tmp_id);
-
-				if ($mode == 'save' || $mode == 'send') {
-					if ($mode == 'save') {
-						$output->redirect('./envoi.php?mode=load&id=' . $logdata['log_id'], 4);
-						$output->addLine($lang['Message']['log_saved']);
-						$output->addLine($lang['Click_return_back'], './envoi.php?mode=load&id=' . $logdata['log_id']);
-					}
-					else {
-						$output->addLine($lang['Message']['log_ready']);
-						$output->addLine($lang['Click_start_send'], './envoi.php?mode=progress&id=' . $logdata['log_id']);
-					}
-
-					$output->message();
-				}
-			}
-		}
-
 		//
-		// Attachement de fichiers
+		// Fonction de callback utilisée pour l'appel à preg_replace_callback() plus bas
 		//
-		if ($mode == 'attach' && $logdata['log_id']
-			&& $auth->check(Auth::ATTACH, $listdata['liste_id'])
-		) {
-			$attach  = new Attach();
+		$replace_include = function ($m) use ($mode, &$lang, &$error, $output) {
+			preg_match_all('/\\s+([a-z_:][a-z0-9_:.-]*)\\s?=\\s?(["\'])(.+?)(?<!\\\\)(?:\\\\\\\\)*\\2/i',
+				$m[1], $attrs, PREG_SET_ORDER);
+
+			$resource = null;
+			$tds = false;
+			foreach ($attrs as $attr) {
+				switch ($attr[1]) {
+					case 'src':
+						$resource = stripslashes($attr[3]);
+						break;
+					case 'tds' && $attr[3] == 'true':
+					case 'now' && $attr[3] == 'true':
+						$tds = true;
+						break;
+				}
+			}
+
+			if (is_null($resource) || (!$tds && $mode != 'send')) {
+				return $m[0];
+			}
 
 			try {
-				$file_id = (int) filter_input(INPUT_POST, 'fid', FILTER_VALIDATE_INT);
-				if ($file_id) {
-					// Ajout d’un fichier déjà existant.
-					$file = $attach->useFile($logdata['log_id'], $file_id);
-				}
-				else {
-					$local_file = trim(filter_input(INPUT_POST, 'local_file'));
-					$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : [];
-
-					$file = $attach->addFile($logdata['log_id'], $local_file ?: $join_file);
-				}
-
-				$output->notice('Joined_file_added', $file['name']);
-			}
-			catch (Dblayer\Exception $e) {
-				throw $e;
+				$result = wan_get_contents($resource);
 			}
 			catch (Exception $e) {
 				$error = true;
 				$output->warn($e->getMessage());
+				return $m[0];
+			}
+
+			return convert_encoding($result['data'], $result['charset']);
+		};
+
+		$regexp = '/<\\?inclu[dr]e(\\s+[^>]+)\\?>/i';
+		foreach (['log_body_text', 'log_body_html'] as $key) {
+			$logdata[$key] = preg_replace_callback($regexp, $replace_include, $logdata[$key]);
+		}
+
+		if ($mode == 'test' || $mode == 'send') {
+			if (!$logdata['log_subject']) {
+				$error = true;
+				$output->warn('Subject_empty');
+			}
+
+			if ($listdata['liste_format'] != FORMAT_HTML) {
+				if (!$logdata['log_body_text']) {
+					$error = true;
+					$output->warn('Body_empty');
+				}
+				else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_text'], '{LINKS}')) {
+					$error = true;
+					$output->warn('No_links_in_body');
+				}
+			}
+
+			if ($listdata['liste_format'] != FORMAT_TEXT) {
+				if (!$logdata['log_body_html']) {
+					$error = true;
+					$output->warn('Body_empty');
+				}
+				else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
+					$error = true;
+					$output->warn('No_links_in_body');
+				}
+
+				$sql = "SELECT jf.file_real_name, l.log_id
+					FROM " . JOINED_FILES_TABLE . " AS jf
+						INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+						INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+							AND l.liste_id = $listdata[liste_id]
+					ORDER BY jf.file_real_name ASC";
+				$result = $db->query($sql);
+
+				$files = $files_error = [];
+				while ($row = $result->fetch()) {
+					if ($row['log_id'] == $logdata['log_id']) {
+						$files[] = $row['file_real_name'];
+					}
+				}
+
+				$total_cid = hasCidReferences($logdata['log_body_html'], $refs);
+
+				for ($i = 0; $i < $total_cid; $i++) {
+					if (!in_array($refs[$i], $files)) {
+						$files_error[] = $refs[$i];
+					}
+				}
+
+				if (count($files_error) > 0) {
+					$error = true;
+					$output->warn('Cid_error_in_body', implode(', ', $files_error));
+				}
+			}
+
+			// Deux newsletters ne peuvent être simultanément en attente
+			// d’envoi pour une même liste.
+			if ($mode == 'send') {
+				$sql = "SELECT COUNT(*) AS test
+					FROM " . LOG_TABLE . "
+					WHERE liste_id = $listdata[liste_id]
+						AND log_status = " . STATUS_SENDING;
+				$result = $db->query($sql);
+
+				if ($result->column('test') > 0) {
+					$error = true;
+					$output->warn('Twice_sending');
+				}
+			}
+		}
+
+		if (!$error) {
+			$sql_where      = '';
+			$duplicate_log  = false;
+			$duplicate_file = false;
+
+			$tmp_id = $logdata['log_id'];
+			unset($logdata['log_id']);
+
+			//
+			// Au cas où la newsletter a le status WRITING mais que son précédent statut était HANDLE,
+			// nous la dupliquons pour garder intact le modèle
+			// Si la newsletter a un statut HANDLE et qu'on est en mode send, nous dupliquons newsletter
+			// et entrées pour les fichiers joints
+			//
+			if ($logdata['log_status'] == STATUS_WRITING) {
+				if ($mode == 'send') {
+					$logdata['log_status'] = STATUS_SENDING;
+				}
+
+				if ($prev_status == STATUS_MODEL) {
+					$handle_id      = $tmp_id;
+					$tmp_id         = 0;
+					$duplicate_file = true;
+				}
+			}
+			else if ($mode == 'send') {
+				$duplicate_log  = true;
+				$duplicate_file = true;
+			}
+
+			$logdata['log_date'] = time();
+			$logdata['liste_id'] = $listdata['liste_id'];
+
+			if (empty($tmp_id)) {
+				$db->insert(LOG_TABLE, $logdata);
+				$tmp_id = $db->lastInsertId();
+			}
+			else {
+				$sql_where = ['log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']];
+				$db->update(LOG_TABLE, $logdata, $sql_where);
+			}
+
+			//
+			// Duplication de la newsletter
+			//
+			if ($duplicate_log) {
+				$handle_id = $tmp_id;
+				$logdata['log_status'] = STATUS_SENDING;
+
+				$db->insert(LOG_TABLE, $logdata);
+
+				$tmp_id = $db->lastInsertId();
+			}
+
+			//
+			// Duplication des entrées pour les fichiers joints
+			//
+			if ($duplicate_file) {
+				$sql = "SELECT file_id
+					FROM " . LOG_FILES_TABLE . "
+					WHERE log_id = " . $handle_id;
+				$result = $db->query($sql);
+
+				$sql_dataset = [];
+
+				while ($row = $result->fetch()) {
+					$sql_dataset[] = ['log_id' => $tmp_id, 'file_id' => $row['file_id']];
+				}
+
+				if (count($sql_dataset) > 0) {
+					$db->insert(LOG_FILES_TABLE, $sql_dataset);
+				}
+
+				unset($sql_dataset);
+			}
+
+			$logdata['log_id'] = $tmp_id;
+			$prev_status = $logdata['log_status'];
+			unset($tmp_id);
+
+			if ($mode == 'save' || $mode == 'send') {
+				if ($mode == 'save') {
+					$output->redirect('./envoi.php?mode=load&id=' . $logdata['log_id'], 4);
+					$output->addLine($lang['Message']['log_saved']);
+					$output->addLine($lang['Click_return_back'], './envoi.php?mode=load&id=' . $logdata['log_id']);
+				}
+				else {
+					$output->addLine($lang['Message']['log_ready']);
+					$output->addLine($lang['Click_start_send'], './envoi.php?mode=progress&id=' . $logdata['log_id']);
+				}
+
+				$output->message();
+			}
+
+			//
+			// Attachement de fichiers
+			//
+			if ($mode == 'attach' && $auth->check(Auth::ATTACH, $listdata['liste_id'])) {
+				$attach  = new Attach();
+
+				try {
+					$file_id = (int) filter_input(INPUT_POST, 'fid', FILTER_VALIDATE_INT);
+					if ($file_id) {
+						// Ajout d’un fichier déjà existant.
+						$file = $attach->useFile($logdata['log_id'], $file_id);
+					}
+					else {
+						$local_file = trim(filter_input(INPUT_POST, 'local_file'));
+						$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : [];
+
+						$file = $attach->addFile($logdata['log_id'], $local_file ?: $join_file);
+					}
+
+					$output->notice('Joined_file_added', $file['name']);
+				}
+				catch (Dblayer\Exception $e) {
+					throw $e;
+				}
+				catch (Exception $e) {
+					$output->warn($e->getMessage());
+				}
 			}
 		}
 		break;
