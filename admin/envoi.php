@@ -379,6 +379,10 @@ switch ($mode) {
 						$class  = '';
 					}
 
+					if (!$row['log_subject']) {
+						$row['log_subject'] = "Untitled";
+					}
+
 					$log_box .= sprintf(
 						'<option value="%d" %s>%s – [%s] %s</option>',
 						$row['log_id'],
