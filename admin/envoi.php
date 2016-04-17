@@ -590,7 +590,7 @@ switch ($mode) {
 
 					for ($i = 0; $i < $total_cid; $i++) {
 						if (!in_array($refs[$i], $files)) {
-							$files_error[] = htmlspecialchars($refs[$i]);
+							$files_error[] = $refs[$i];
 						}
 					}
 
