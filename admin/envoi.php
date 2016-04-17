@@ -827,10 +827,12 @@ if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
 }
 
 //
-// Envoi des emails
+// Adresses supplémentaires (mode test)
 //
-$supp_address = trim(filter_input(INPUT_POST, 'test_address'));
-if ($mode == 'test' && $supp_address) {
+$supp_address = [];
+
+if ($mode == 'test') {
+	$supp_address = trim(filter_input(INPUT_POST, 'test_address'));
 	$supp_address = array_unique(array_map('trim', explode(',', $supp_address)));
 	$supp_address = array_filter($supp_address, function ($email) {
 		return \Wamailer\Mailer::checkMailSyntax($email);
@@ -841,10 +843,10 @@ if ($mode == 'test' && $supp_address) {
 		$output->warn('Invalid_email');
 	}
 }
-else {
-	$supp_address = [];
-}
 
+//
+// Envoi des emails
+//
 if (($mode == 'test' && !$error) || $mode == 'progress') {
 	if (!$auth->check(Auth::SEND, $listdata['liste_id'])) {
 		http_response_code(401);
