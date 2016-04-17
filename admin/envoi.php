@@ -884,12 +884,8 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 	$result = $sender->process($supp_address);
 
 	if ($mode == 'test') {
-		$message  = $lang['Test_send_finish'];
-		$message .= '<br /><br />';
-		$message .= sprintf($lang['Click_return_back'],
-			sprintf('<a href="envoi.php?mode=load&amp;id=%d">', $logdata['log_id']),
-			'</a>'
-		);
+		$output->notice($lang['Test_send_finish']);
+		$logdata['log_subject'] = substr($logdata['log_subject'], 7);// On retire la mention [test]
 	}
 	else if ($result['total_to_send'] > 0) {
 		$message = sprintf($lang['Message']['Success_send'],
@@ -916,12 +912,13 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 			sprintf('<a href="%s">', $progress_url),
 			'</a>'
 		);
+
+		$output->message($message);
 	}
 	else {
 		$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
+		$output->message($message);
 	}
-
-	$output->message($message);
 }
 
 $subject   = htmlspecialchars($logdata['log_subject']);
