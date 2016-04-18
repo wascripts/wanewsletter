@@ -256,13 +256,16 @@ switch ($mode) {
 			do {
 				$percent = 0;
 				if (isset($data[$row['liste_id']])) {
-					$percent = wa_number_format(round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2));
+					$percent = round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2);
+					$percent = wa_number_format($percent);
 				}
 
 				$template->assignToBlock('logrow', [
 					'LOG_ID'       => $row['log_id'],
 					'LOG_SUBJECT'  => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
-					'SEND_PERCENT' => $percent
+					'TOTAL'        => $data[$row['liste_id']]['t'],
+					'TOTAL_SENT'   => $data[$row['liste_id']][1],
+					'SENT_PERCENT' => $percent
 				]);
 			}
 			while ($row = $result->fetch());
