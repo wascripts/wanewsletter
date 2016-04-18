@@ -48,6 +48,8 @@ $error = false;
 
 $listdata = $auth->getLists(Auth::SEND)[$_SESSION['liste']];
 $logdata  = [];
+$logdata['liste_id']      = $_SESSION['liste'];
+$logdata['joined_files']  = null;
 
 $logdata['log_id'] = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 if (!is_int($logdata['log_id'])) {
@@ -166,7 +168,7 @@ switch ($mode) {
 		$liste_ids = array_column($auth->getLists(Auth::SEND), 'liste_id');
 
 		if ($logdata['log_id']) {
-			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
+			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
 				FROM " . LOG_TABLE . "
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
 					AND log_id = $logdata[log_id]
@@ -387,7 +389,7 @@ switch ($mode) {
 				}
 			}
 			else {
-				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, log_date
+				$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, log_date, liste_id
 					FROM " . LOG_TABLE . "
 					WHERE liste_id = $listdata[liste_id]
 						AND log_id = $logdata[log_id]
@@ -669,7 +671,7 @@ switch ($mode) {
 			$duplicate_file = false;
 
 			$tmp_id = $logdata['log_id'];
-			unset($logdata['log_id']);
+			unset($logdata['log_id'], $logdata['joined_files']);
 
 			//
 			// Au cas où la newsletter a le status WRITING mais que son précédent statut était HANDLE,
@@ -818,53 +820,45 @@ switch ($mode) {
 }
 
 $file_box = '';
-$logdata['joined_files'] = [];
 
 //
 // Récupération des fichiers joints de la liste
 //
 if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
+	$sql_where = '';
+	if (!isset($logdata['joined_files'])) {
+		$logdata['joined_files'] = get_joined_files($logdata);
+	}
+
+	if ($logdata['joined_files']) {
+		$file_ids = array_column($logdata['joined_files'], 'file_id');
+		$sql_where = "WHERE jf.file_id NOT IN(".implode(',', $file_ids).")";
+	}
+
 	//
-	// On récupère tous les fichiers joints de la liste pour avoir les fichiers joints de la newsletter
-	// en cours, et construire le select box des fichiers existants
+	// On récupère les fichiers joints de la liste qui ne sont pas déjà liés
+	// au brouillon en cours.
 	//
-	$sql = "SELECT lf.log_id, jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+	$sql = "SELECT jf.file_id, jf.file_real_name
 		FROM " . JOINED_FILES_TABLE . " AS jf
 			INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
 			INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
 				AND l.liste_id = $listdata[liste_id]
+		$sql_where
+		GROUP BY jf.file_id
 		ORDER BY jf.file_real_name ASC";
 	$result = $db->query($sql);
 
-	$other_files = $joined_files_id = [];
-
-	//
-	// On dispatche les données selon que le fichier appartient à la newsletter en cours ou non.
-	//
 	while ($row = $result->fetch()) {
-		if ($row['log_id'] == $logdata['log_id']) {
-			$logdata['joined_files'][] = $row;
-			$joined_files_id[] = $row['file_id'];
-		}
-		else {
-			//
-			// file_id sert d'index dans le tableau, pour éviter les doublons ramenés par la requête
-			//
-			$other_files[$row['file_id']] = $row;
-		}
-	}
-
-	foreach ($other_files as $tmp_id => $row) {
-		if (!in_array($tmp_id, $joined_files_id)) {
-			$file_box .= sprintf("<option value=\"%d\">%s</option>\n\t", $tmp_id, htmlspecialchars($row['file_real_name']));
-		}
+		$file_box .= sprintf("<option value=\"%d\">%s</option>\n\t",
+			$row['file_id'],
+			htmlspecialchars($row['file_real_name'])
+		);
 	}
 
 	if ($file_box != '') {
 		$file_box = '<select name="fid"><option value="0">' . $lang['File_on_server'] . '</option>' . $file_box . '</select>';
 	}
-
-	unset($other_files, $joined_files_id);
 }
 
 //

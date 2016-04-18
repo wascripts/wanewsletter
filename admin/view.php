@@ -1560,7 +1560,7 @@ else if ($mode == 'log') {
 	$num_logs = 0;
 
 	if ($total_logs) {
-		$sql = "SELECT log_id, log_subject, log_date, log_body_text, log_body_html, log_numdest
+		$sql = "SELECT log_id, log_subject, log_date, log_body_text, log_body_html, log_numdest, liste_id
 			FROM " . LOG_TABLE . "
 			WHERE log_status = " . STATUS_SENT . "
 				AND liste_id = $listdata[liste_id]
@@ -1608,16 +1608,7 @@ else if ($mode == 'log') {
 		}
 
 		if (is_array($logdata) && !empty($files_count[$log_id])) {
-			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-				FROM " . JOINED_FILES_TABLE . " AS jf
-					INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
-					INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-						AND l.liste_id = $listdata[liste_id]
-						AND l.log_id   = $log_id
-				ORDER BY jf.file_real_name ASC";
-			$result = $db->query($sql);
-
-			$logdata['joined_files'] = $result->fetchAll();
+			$logdata['joined_files'] = get_joined_files($logdata);
 		}
 	}
 

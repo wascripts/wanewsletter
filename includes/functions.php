@@ -1938,3 +1938,23 @@ function send_cookie($name, $value, $lifetime, array $opts = [])
 		$opts['httponly']
 	);
 }
+
+function get_joined_files($logdata)
+{
+	global $db;
+
+	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+		FROM %s AS jf
+			INNER JOIN %s AS lf ON lf.file_id = jf.file_id
+			INNER JOIN %s AS l ON l.log_id = lf.log_id
+				AND l.liste_id = %d
+				AND l.log_id   = %d
+		ORDER BY jf.file_real_name ASC";
+	$sql = sprintf($sql, JOINED_FILES_TABLE, LOG_FILES_TABLE, LOG_TABLE,
+		$logdata['liste_id'],
+		$logdata['log_id']
+	);
+	$result = $db->query($sql);
+
+	return $result->fetchAll($result::FETCH_ASSOC);
+}

@@ -200,7 +200,7 @@ class Sender
 
 		if (!$this->logdata) {
 			// on récupère la dernière newsletter en cours d’envoi
-			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
+			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
 				FROM %s
 				WHERE liste_id = %d
 					AND log_status = %d
@@ -212,20 +212,7 @@ class Sender
 				$output->message('No_log_to_send');
 			}
 
-			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-				FROM %s AS jf
-					INNER JOIN %s AS lf ON lf.file_id = jf.file_id
-					INNER JOIN %s AS l ON l.log_id = lf.log_id
-						AND l.liste_id = %d
-						AND l.log_id   = %d
-				ORDER BY jf.file_real_name ASC";
-			$sql = sprintf($sql, JOINED_FILES_TABLE, LOG_FILES_TABLE, LOG_TABLE,
-				$this->listdata['liste_id'],
-				$this->logdata['log_id']
-			);
-			$result = $db->query($sql);
-
-			$this->logdata['joined_files'] = $result->fetchAll($result::FETCH_ASSOC);
+			$this->logdata['joined_files'] = get_joined_files($this->logdata);
 		}
 
 		$abodata_list  = [];
