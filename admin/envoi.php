@@ -25,6 +25,12 @@ use Patchwork\Utf8 as u;
 //
 const DISABLE_CHECK_LINKS = false;
 
+//
+// Délai entre deux envois
+// TODO : rendre configurable dans l'interface
+//
+const SENDING_DELAY = 10;
+
 require './start.inc.php';
 
 if (!$_SESSION['liste']) {
@@ -70,7 +76,7 @@ if (isset($_POST['cancel'])) {
 }
 
 $mode = filter_input(INPUT_GET, 'mode');
-foreach (['test', 'send', 'save', 'delete', 'attach', 'unattach'] as $varname) {
+foreach (['test', 'presend', 'save', 'delete', 'attach', 'unattach'] as $varname) {
 	if (isset($_POST[$varname])) {
 		$mode = $varname;
 		break;
@@ -168,9 +174,9 @@ switch ($mode) {
 			$result = $db->query($sql);
 
 			if (!($logdata = $result->fetch())) {
-				$output->redirect('envoi.php?mode=progress', 4);
+				$output->redirect('envoi.php?mode=send', 4);
 				$output->addLine($lang['Message']['No_log_found']);
-				$output->addLine($lang['Click_return_back'], './envoi.php?mode=progress');
+				$output->addLine($lang['Click_return_back'], './envoi.php?mode=send');
 				$output->message();
 			}
 
@@ -179,100 +185,141 @@ switch ($mode) {
 				$output->message();
 			}
 		}
-		else {
-			foreach ($liste_ids as $liste_id) {
-				$lockfile = sprintf('%s/liste-%d.lock', $nl_config['tmp_dir'], $liste_id);
+		break;
 
-				if (file_exists($lockfile) && filesize($lockfile) > 0) {
-					$fp = fopen($lockfile, 'r+');
+	case 'send':
+		$liste_ids = array_column($auth->getLists(Auth::SEND), 'liste_id');
 
-					if (flock($fp, LOCK_EX|LOCK_NB)) {
-						$abo_ids = fread($fp, filesize($lockfile));
-						$abo_ids = array_map('trim', explode("\n", trim($abo_ids)));
-
-						if (count($abo_ids) > 0) {
-							$abo_ids = array_unique(array_map('intval', $abo_ids));
-
-							$sql = "UPDATE " . ABO_LISTE_TABLE . "
-								SET send = 1
-								WHERE abo_id IN(" . implode(', ', $abo_ids) . ")
-									AND liste_id = " . $liste_id;
-							$db->query($sql);
-						}
-
-						ftruncate($fp, 0);
-						flock($fp, LOCK_UN);
-					}
-
-					fclose($fp);
-				}
-			}
-
-			$sql = "SELECT COUNT(send) AS num, send, liste_id
-				FROM %s
-				WHERE liste_id IN(%s)
-					AND confirmed = %d
-				GROUP BY liste_id, send";
-			$sql = sprintf($sql, ABO_LISTE_TABLE, implode(', ', $liste_ids), SUBSCRIBE_CONFIRMED);
-			$result = $db->query($sql);
-
-			$data = [];
-			while ($row = $result->fetch()) {
-				if (!isset($data[$row['liste_id']])) {
-					$data[$row['liste_id']] = [0, 0, 't' => 0];
-				}
-				$data[$row['liste_id']][$row['send']] = $row['num'];
-				$data[$row['liste_id']]['t'] += $row['num'];
-			}
-
-			$sql = "SELECT log_id, log_subject, log_status, liste_id
+		if ($logdata['log_id']) {
+			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
 				FROM " . LOG_TABLE . "
 				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
-					AND log_status = " . STATUS_SENDING . "
-				ORDER BY log_subject ASC";
+					AND log_id = $logdata[log_id]
+					AND log_status = " . STATUS_SENDING;
 			$result = $db->query($sql);
 
-			if (!($row = $result->fetch())) {
-				$output->redirect('envoi.php', 4);
-				$output->addLine($lang['Message']['No_log_to_send']);
-				$output->addLine($lang['Click_return_form'], './envoi.php');
+			if (!($logdata = $result->fetch())) {
+				$output->redirect('envoi.php?mode=send', 4);
+				$output->addLine($lang['Message']['No_log_found']);
+				$output->addLine($lang['Click_return_back'], './envoi.php?mode=send');
 				$output->message();
 			}
 
+			if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
+				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
+				$output->message();
+			}
+
+			$sql = "SELECT COUNT(send) AS num, send
+				FROM %s
+				WHERE liste_id = %d
+					AND confirmed = %d
+				GROUP BY send";
+			$sql = sprintf($sql, ABO_LISTE_TABLE, $logdata['liste_id'], SUBSCRIBE_CONFIRMED);
+			$result = $db->query($sql);
+
+			$total_sent = $total_to_send = 0;
+			while ($row = $result->fetch()) {
+				if ($row['send'] == 1) {
+					$total_sent = $row['num'];
+				}
+				else {
+					$total_to_send = $row['num'];
+				}
+			}
+
+			$percent = wa_number_format(round((($total_sent / ($total_sent + $total_to_send)) * 100), 2));
+
 			$output->header();
 
-			$template = new Template('send_progress_body.tpl');
+			$template = new Template('sending_body.tpl');
 
 			$template->assign([
 				'L_TITLE'       => $lang['List_send'],
-				'L_SUBJECT'     => $lang['Log_subject'],
-				'L_DONE'        => $lang['Done'],
-				'L_DO_SEND'     => $lang['Restart_send'],
-				'L_CANCEL_SEND' => $lang['Cancel_send'],
-				'L_CREATE_LOG'  => $lang['Create_log'],
-				'L_LOAD_LOG'    => $lang['Load_log']
+				'L_PROCESS'     => $lang['Process_sending'],
+				'L_NEXT_SEND'   => sprintf($lang['Next_sending_delay'], SENDING_DELAY),
+				'L_SENDING_NL'  => sprintf($lang['Sending_newsletter'],
+					htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES)
+				),
+
+				'SENDING_DELAY' => SENDING_DELAY,
+				'LOG_ID'        => $logdata['log_id'],
+				'TOTAL'         => ($total_sent + $total_to_send),
+				'TOTAL_SENT'    => $total_sent,
+				'SENT_PERCENT'  => $percent
 			]);
-
-			do {
-				$percent = 0;
-				if (isset($data[$row['liste_id']])) {
-					$percent = round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2);
-					$percent = wa_number_format($percent);
-				}
-
-				$template->assignToBlock('logrow', [
-					'LOG_ID'       => $row['log_id'],
-					'LOG_SUBJECT'  => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
-					'TOTAL'        => $data[$row['liste_id']]['t'],
-					'TOTAL_SENT'   => $data[$row['liste_id']][1],
-					'SENT_PERCENT' => $percent
-				]);
-			}
-			while ($row = $result->fetch());
 
 			$template->pparse();
 			$output->footer();
 		}
+
+		// Pas d'identifiant de lettre fourni, on affiche la liste des
+		// envois en cours.
+
+		$sql = "SELECT COUNT(send) AS num, send, liste_id
+			FROM %s
+			WHERE liste_id IN(%s)
+				AND confirmed = %d
+			GROUP BY liste_id, send";
+		$sql = sprintf($sql, ABO_LISTE_TABLE, implode(', ', $liste_ids), SUBSCRIBE_CONFIRMED);
+		$result = $db->query($sql);
+
+		$data = [];
+		while ($row = $result->fetch()) {
+			if (!isset($data[$row['liste_id']])) {
+				$data[$row['liste_id']] = [0, 0, 't' => 0];
+			}
+			$data[$row['liste_id']][$row['send']] = $row['num'];
+			$data[$row['liste_id']]['t'] += $row['num'];
+		}
+
+		$sql = "SELECT log_id, log_subject, log_status, liste_id
+			FROM " . LOG_TABLE . "
+			WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
+				AND log_status = " . STATUS_SENDING . "
+			ORDER BY log_subject ASC";
+		$result = $db->query($sql);
+
+		if (!($row = $result->fetch())) {
+			$output->redirect('envoi.php', 4);
+			$output->addLine($lang['Message']['No_log_to_send']);
+			$output->addLine($lang['Click_return_form'], './envoi.php');
+			$output->message();
+		}
+
+		$output->header();
+
+		$template = new Template('send_progress_body.tpl');
+
+		$template->assign([
+			'L_TITLE'       => $lang['List_send'],
+			'L_SUBJECT'     => $lang['Log_subject'],
+			'L_DONE'        => $lang['Done'],
+			'L_DO_SEND'     => $lang['Restart_send'],
+			'L_CANCEL_SEND' => $lang['Cancel_send'],
+			'L_CREATE_LOG'  => $lang['Create_log'],
+			'L_LOAD_LOG'    => $lang['Load_log']
+		]);
+
+		do {
+			$percent = 0;
+			if (isset($data[$row['liste_id']])) {
+				$percent = round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2);
+				$percent = wa_number_format($percent);
+			}
+
+			$template->assignToBlock('logrow', [
+				'LOG_ID'       => $row['log_id'],
+				'LOG_SUBJECT'  => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
+				'TOTAL'        => $data[$row['liste_id']]['t'],
+				'TOTAL_SENT'   => $data[$row['liste_id']][1],
+				'SENT_PERCENT' => $percent
+			]);
+		}
+		while ($row = $result->fetch());
+
+		$template->pparse();
+		$output->footer();
 		break;
 
 	//
@@ -499,7 +546,7 @@ switch ($mode) {
 		break;
 
 	case 'attach':
-	case 'send':
+	case 'presend':
 	case 'save':
 	case 'test':
 		//
@@ -523,7 +570,7 @@ switch ($mode) {
 				}
 			}
 
-			if (is_null($resource) || (!$tds && $mode != 'send')) {
+			if (is_null($resource) || (!$tds && $mode != 'presend')) {
 				return $m[0];
 			}
 
@@ -544,7 +591,7 @@ switch ($mode) {
 			$logdata[$key] = preg_replace_callback($regexp, $replace_include, $logdata[$key]);
 		}
 
-		if ($mode == 'test' || $mode == 'send') {
+		if ($mode == 'test' || $mode == 'presend') {
 			if (!$logdata['log_subject']) {
 				$error = true;
 				$output->warn('Subject_empty');
@@ -602,7 +649,7 @@ switch ($mode) {
 
 			// Deux newsletters ne peuvent être simultanément en attente
 			// d’envoi pour une même liste.
-			if ($mode == 'send') {
+			if ($mode == 'presend') {
 				$sql = "SELECT COUNT(*) AS test
 					FROM " . LOG_TABLE . "
 					WHERE liste_id = $listdata[liste_id]
@@ -631,7 +678,7 @@ switch ($mode) {
 			// et entrées pour les fichiers joints
 			//
 			if ($logdata['log_status'] == STATUS_WRITING) {
-				if ($mode == 'send') {
+				if ($mode == 'presend') {
 					$logdata['log_status'] = STATUS_SENDING;
 				}
 
@@ -641,7 +688,7 @@ switch ($mode) {
 					$duplicate_file = true;
 				}
 			}
-			else if ($mode == 'send') {
+			else if ($mode == 'presend') {
 				$duplicate_log  = true;
 				$duplicate_file = true;
 			}
@@ -696,7 +743,7 @@ switch ($mode) {
 			$prev_status = $logdata['log_status'];
 			unset($tmp_id);
 
-			if ($mode == 'save' || $mode == 'send') {
+			if ($mode == 'save' || $mode == 'presend') {
 				if ($mode == 'save') {
 					$output->redirect('./envoi.php?mode=load&id=' . $logdata['log_id'], 4);
 					$output->addLine($lang['Message']['log_saved']);
@@ -704,7 +751,7 @@ switch ($mode) {
 				}
 				else {
 					$output->addLine($lang['Message']['log_ready']);
-					$output->addLine($lang['Click_start_send'], './envoi.php?mode=progress&id=' . $logdata['log_id']);
+					$output->addLine($lang['Click_start_send'], './envoi.php?mode=send&id=' . $logdata['log_id']);
 				}
 
 				$output->message();
@@ -882,34 +929,37 @@ if (($mode == 'test' && !$error) || $mode == 'progress') {
 		$logdata['log_subject'] = substr($logdata['log_subject'], 7);// On retire la mention [test]
 	}
 	else if ($result['total_to_send'] > 0) {
-		$message = sprintf($lang['Message']['Success_send'],
-			$nl_config['sending_limit'],
-			$result['total_sent'],
-			($result['total_sent'] + $result['total_to_send'])
-		);
+		$total = ($result['total_sent'] + $result['total_to_send']);
 
-		$progress_url = sprintf('envoi.php?mode=progress&id=%d', $logdata['log_id']);
-
-		if (filter_input(INPUT_GET, 'step') == 'auto') {
-			http_redirect($progress_url . '&step=auto');
+		if ($output instanceof Output\Json) {
+			$message = sprintf($lang['Next_sending_delay'], SENDING_DELAY);
+			$percent = wa_number_format(round((($result['total_sent'] / $total) * 100), 2));
+			$result['percent'] = $percent;
+			$output->addParams($result);
 		}
+		else {
+			$progress_url = sprintf('envoi.php?mode=progress&amp;id=%d', $logdata['log_id']);
 
-		$progress_url = htmlspecialchars($progress_url);
-
-		$message .= '<br /><br />';
-		$message .= sprintf($lang['Click_resend_auto'],
-			sprintf('<a href="%s&amp;step=auto">', $progress_url),
-			'</a>'
-		);
-		$message .= '<br /><br />';
-		$message .= sprintf($lang['Click_resend_manuel'],
-			sprintf('<a href="%s">', $progress_url),
-			'</a>'
-		);
+			$message = sprintf($lang['Message']['Success_send'],
+				$nl_config['sending_limit'],
+				$result['total_sent'],
+				$total
+			);
+			$message .= '<br /><br />';
+			$message .= sprintf($lang['Click_resend'],
+				sprintf('<a href="%s">', $progress_url),
+				'</a>'
+			);
+		}
 
 		$output->message($message);
 	}
 	else {
+		if ($output instanceof Output\Json) {
+			$result['percent'] = 100;
+			$output->addParams($result);
+		}
+
 		$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
 		$output->message($message);
 	}
@@ -922,7 +972,7 @@ $body_html = htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
 $max_filesize = get_max_filesize();
 
 $output->addLink('subsection', './envoi.php?mode=load', $lang['Load_log']);
-$output->addLink('subsection', './envoi.php?mode=progress', $lang['List_send']);
+$output->addLink('subsection', './envoi.php?mode=send', $lang['List_send']);
 $output->addScript($nl_config['path'] . 'templates/admin/editor.js');
 
 if ($admindata['html_editor'] == HTML_EDITOR_YES) {

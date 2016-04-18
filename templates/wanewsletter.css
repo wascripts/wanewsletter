@@ -556,6 +556,7 @@ a.restore-default:focus { outline: none; }
 /* Barre de progression */
 progress {
 	width: 100%;
+	max-width: 500px;
 	height: 15px;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;

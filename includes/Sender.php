@@ -132,7 +132,7 @@ class Sender
 
 		if (!flock($this->fp, LOCK_EX|LOCK_NB)) {
 			fclose($this->fp);
-			$output->message('List_is_busy');
+			$output->error('List_is_busy');
 		}
 
 		chmod($lockfile, 0600);

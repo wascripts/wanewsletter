@@ -42,7 +42,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 <form id="send-form" method="post" action="./envoi.php" enctype="{S_ENCTYPE}">
 <ul class="links">
 	<li><a href="./envoi.php?mode=load">{L_LOAD_LOG}</a></li>
-	<li><a href="./envoi.php?mode=progress">{L_LIST_SEND}</a></li>
+	<li><a href="./envoi.php?mode=send">{L_LIST_SEND}</a></li>
 </ul>
 
 <div class="block">
@@ -151,7 +151,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 
 <div class="block">
 	<div class="bottom">{S_HIDDEN_FIELDS}
-		<button type="submit" name="send">{L_SEND_BUTTON}</button>
+		<button type="submit" name="presend">{L_SEND_BUTTON}</button>
 		<button type="submit" name="save" class="primary" tabindex="1">{L_SAVE_BUTTON}</button>
 		<button type="submit" name="delete" {S_DELETE_BUTTON_DISABLED}>{L_DELETE_BUTTON}</button>
 	</div>
