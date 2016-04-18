@@ -22,6 +22,10 @@ function sendMail()
 			if (data.total_to_send > 0) {
 				window.setTimeout(sendMail, {SENDING_DELAY} * 1000);
 			}
+			// Tous les emails ont été envoyés. On le notifie à l’utilisateur.
+			else if (window.Notification && Notification.permission === "granted") {
+				var n = new Notification(data.message);
+			}
 		}
 		else {
 			messageBox.style.fontWeight = 'bold';

@@ -206,4 +206,14 @@ document.addEventListener('DOMContentLoaded', function() {
 			initUploadButton(inputList[i]);
 		}
 	}
+
+	// Demande de permission pour utiliser l'API Notifications
+	if (window.Notification && Notification.permission !== "granted") {
+		Notification.requestPermission(function (status) {
+			if (Notification.permission !== status) {
+				// Définition de la propriété pour Safari/Chrome < v32
+				Notification.permission = status;
+			}
+		});
+	}
 }, false);
