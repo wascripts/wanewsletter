@@ -67,6 +67,14 @@ class PopClient
 		'starttls' => false,
 
 		/**
+		 * Alias pour ['stream_opts']['ssl'].
+		 * Plus pratique dans la grande majorité des cas.
+		 *
+		 * @var array
+		 */
+		'ssl' => array(),
+
+		/**
 		 * Utilisés pour la création du contexte de flux avec stream_context_create()
 		 *
 		 * @link http://php.net/stream_context_create
@@ -130,6 +138,7 @@ class PopClient
 	 * Définition des options d’utilisation.
 	 * Les options 'debug' et 'timeout' renvoient aux propriétés de classe
 	 * de même nom.
+	 * Le tableau 'ssl' est un alias pour le sous-tableau 'ssl' de l’option 'stream_opts'.
 	 *
 	 * @param array $opts
 	 *
@@ -143,6 +152,12 @@ class PopClient
 				$this->{$name} = $opts[$name];
 				unset($opts[$name]);
 			}
+		}
+
+		// Alias
+		if (isset($opts['ssl'])) {
+			$opts['stream_opts']['ssl'] = $opts['ssl'];
+			unset($opts['ssl']);
 		}
 
 		$this->opts = array_replace_recursive($this->opts, $opts);
