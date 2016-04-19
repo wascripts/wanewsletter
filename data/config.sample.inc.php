@@ -29,13 +29,20 @@ $nl_config = [];
 #$nl_config['tmp_dir']   = '/path/to/tmp_dir';
 
 //
-// Configuration du module DKIM de wamailer pour la signature des emails
-// $nl_config['dkim'] correspond au tableau d'options acceptable par le
-// module DKIM de wamailer. Voir la doc de celui-ci pour plus d'options.
+// Configuration de Wamailer, le module d’envoi d’emails.
+// Consultez la documentation de Wamailer pour plus de détails sur les
+// options disponibles.
 //
-#$nl_config['dkim']['domain']   = 'mydomain.tld';
-#$nl_config['dkim']['selector'] = 'selector';
-#$nl_config['dkim']['privkey']  = '/path/to/private.key';
+
+// Configuration de DKIM
+#$nl_config['mailer']['dkim']['domain']   = 'mydomain.tld';
+#$nl_config['mailer']['dkim']['selector'] = 'selector';
+#$nl_config['mailer']['dkim']['privkey']  = '/path/to/private.key';
+
+// Le tableau 'ssl' accepte toutes les options de contexte de flux SSL
+// disponibles dans PHP. Voir : http://php.net/manual/en/context.ssl.php
+// Pour accepter le certificat du serveur SMTP même s'il est auto-signé :
+#$nl_config['mailer']['ssl']['allow_self_signed'] = true;
 
 //
 // Configuration d'une connexion SSL/TLS à la base de données

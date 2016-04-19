@@ -1246,8 +1246,8 @@ function wamailer(array $opts = [], $reset = false)
 #			};
 		}
 
-		if (!empty($nl_config['dkim'])) {
-			$opts = array_replace_recursive(['dkim' => $nl_config['dkim']], $opts);
+		if (!empty($nl_config['mailer']) && is_array($nl_config['mailer'])) {
+			$opts = array_replace_recursive($nl_config['mailer'], $opts);
 		}
 
 		Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
