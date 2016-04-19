@@ -787,19 +787,21 @@ switch ($mode) {
 				$output->warn('No_links_in_body');
 			}
 
-			$sql = "SELECT jf.file_real_name, l.log_id
-				FROM " . JOINED_FILES_TABLE . " AS jf
-					INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
-					INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-						AND l.liste_id = $listdata[liste_id]
-				ORDER BY jf.file_real_name ASC";
+			$sql = "SELECT jf.file_real_name
+				FROM %s AS jf
+					INNER JOIN %s AS lf ON lf.file_id = jf.file_id
+					INNER JOIN %s AS l ON l.log_id = lf.log_id
+						AND l.liste_id = %d
+						AND l.log_id = %d";
+			$sql = sprintf($sql, JOINED_FILES_TABLE, LOG_FILES_TABLE, LOG_TABLE,
+				$listdata['liste_id'],
+				$logdata['log_id']
+			);
 			$result = $db->query($sql);
 
 			$files = $files_error = [];
 			while ($row = $result->fetch()) {
-				if ($row['log_id'] == $logdata['log_id']) {
-					$files[] = $row['file_real_name'];
-				}
+				$files[] = $row['file_real_name'];
 			}
 
 			$total_cid = hasCidReferences($logdata['log_body_html'], $refs);
