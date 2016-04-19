@@ -204,6 +204,10 @@ includes/config.inc.php
 data
 docs
 vendor
+# Anciens dossiers des versions < 3.0
+upload
+stats
+tmp
 EOD;
 
 /**
