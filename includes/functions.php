@@ -1939,7 +1939,14 @@ function send_cookie($name, $value, $lifetime, array $opts = [])
 	);
 }
 
-function get_joined_files($logdata)
+/**
+ * Retourne la liste des fichiers joints à cette lettre.
+ *
+ * @param array $logdata
+ *
+ * @return array
+ */
+function get_joined_files(array $logdata)
 {
 	global $db;
 
