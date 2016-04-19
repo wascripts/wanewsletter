@@ -129,7 +129,7 @@ foreach (['log_body_text', 'log_body_html'] as $key) {
 	}
 }
 
-unset($replace_include);
+unset($replace_include, $regexp);
 
 /**
  * Fonction de sauvegarde du brouillon.
@@ -138,7 +138,8 @@ unset($replace_include);
  *
  * @return array
  */
-function save_log($logdata) {
+function save_log(array $logdata)
+{
 	global $db, $mode;
 
 	$sql_where      = '';
@@ -148,10 +149,10 @@ function save_log($logdata) {
 	$tmp_id = $logdata['log_id'];
 
 	//
-	// Au cas où la newsletter a le status WRITING mais que son précédent statut était MODEL,
-	// nous la dupliquons pour garder intact le modèle
-	// Si la newsletter a un statut MODEL et qu'on est en mode send, nous dupliquons newsletter
-	// et entrées pour les fichiers joints
+	// Au cas où la newsletter a le statut WRITING mais que son précédent
+	// statut était MODEL, on la duplique pour garder intact le modèle.
+	// Si la newsletter a le statut MODEL et qu'on est en mode presend,
+	// on la duplique ainsi que ses fichiers joints.
 	//
 	if ($logdata['log_status'] == STATUS_WRITING) {
 		if ($mode == 'presend') {
@@ -215,13 +216,10 @@ function save_log($logdata) {
 		if (count($sql_dataset) > 0) {
 			$db->insert(LOG_FILES_TABLE, $sql_dataset);
 		}
-
-		unset($sql_dataset);
 	}
 
 	$logdata['log_id'] = $tmp_id;
 	$logdata['prev_status'] = $logdata['log_status'];
-	unset($tmp_id);
 
 	return $logdata;
 }
@@ -312,12 +310,14 @@ switch ($mode) {
 		}
 
 		$liste_ids = array_column($auth->getLists(Auth::SEND), 'liste_id');
+		$liste_ids = implode(', ', $liste_ids);
 
 		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
-			FROM " . LOG_TABLE . "
-			WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
-				AND log_id = $logdata[log_id]
-				AND log_status = " . STATUS_SENDING;
+			FROM %s
+			WHERE liste_id IN(%s)
+				AND log_id = %d
+				AND log_status = %d";
+		$sql = sprintf($sql, LOG_TABLE, $liste_ids, $logdata['log_id'], STATUS_SENDING);
 		$result = $db->query($sql);
 
 		if (!($logdata = $result->fetch())) {
@@ -396,14 +396,21 @@ switch ($mode) {
 		break;
 
 	case 'send':
+		if (!$auth->check(Auth::SEND, $listdata['liste_id'])) {
+			http_response_code(401);
+			$output->message('Not_auth_send');
+		}
+
 		$liste_ids = array_column($auth->getLists(Auth::SEND), 'liste_id');
+		$liste_ids = implode(', ', $liste_ids);
 
 		if ($logdata['log_id']) {
 			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
-				FROM " . LOG_TABLE . "
-				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
-					AND log_id = $logdata[log_id]
-					AND log_status = " . STATUS_SENDING;
+				FROM %s
+				WHERE liste_id IN(%s)
+					AND log_id = %d
+					AND log_status = %d";
+			$sql = sprintf($sql, LOG_TABLE, $liste_ids, $logdata['log_id'], STATUS_SENDING);
 			$result = $db->query($sql);
 
 			if (!($logdata = $result->fetch())) {
@@ -469,7 +476,7 @@ switch ($mode) {
 			WHERE liste_id IN(%s)
 				AND confirmed = %d
 			GROUP BY liste_id, send";
-		$sql = sprintf($sql, ABO_LISTE_TABLE, implode(', ', $liste_ids), SUBSCRIBE_CONFIRMED);
+		$sql = sprintf($sql, ABO_LISTE_TABLE, $liste_ids, SUBSCRIBE_CONFIRMED);
 		$result = $db->query($sql);
 
 		$data = [];
@@ -482,10 +489,11 @@ switch ($mode) {
 		}
 
 		$sql = "SELECT log_id, log_subject, log_status, liste_id
-			FROM " . LOG_TABLE . "
-			WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
-				AND log_status = " . STATUS_SENDING . "
+			FROM %s
+			WHERE liste_id IN(%s)
+				AND log_status = %d
 			ORDER BY log_subject ASC";
+		$sql = sprintf($sql, LOG_TABLE, $liste_ids, STATUS_SENDING);
 		$result = $db->query($sql);
 
 		if (!($row = $result->fetch())) {
