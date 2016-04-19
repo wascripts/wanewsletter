@@ -84,6 +84,11 @@ function load_config()
 		$need_update = true;
 	}
 
+	// Configuration initiale pour Wamailer
+	if (!isset($nl_config['mailer']) || !is_array($nl_config['mailer'])) {
+		$nl_config['mailer'] = [];
+	}
+
 	//
 	// Les constantes NL_INSTALLED et WA_VERSION sont obsolètes.
 	//
@@ -1246,7 +1251,7 @@ function wamailer(array $opts = [], $reset = false)
 #			};
 		}
 
-		if (!empty($nl_config['mailer']) && is_array($nl_config['mailer'])) {
+		if (!empty($nl_config['mailer'])) {
 			$opts = array_replace_recursive($nl_config['mailer'], $opts);
 		}
 
