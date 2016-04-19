@@ -162,7 +162,9 @@ function load_config()
 
 	// Liste des entrées de configuration pouvant contenir un chemin de fichier
 	$config_list = ['logs_dir','stats_dir','tmp_dir','db.ssl-ca','db.ssl-cert',
-		'db.ssl-key','db.rootcert','db.sslcert','db.sslkey','dkim.privkey'];
+		'db.ssl-key','db.rootcert','db.sslcert','db.sslkey',
+		'mailer.dkim.privkey','mailer.ssl.cafile','mailer.ssl.capath',
+		'mailer.ssl.local_cert','mailer.ssl.local_pk'];
 
 	foreach ($config_list as $name) {
 		$parts = explode('.', $name);
@@ -176,7 +178,7 @@ function load_config()
 		}
 
 		// Cas particulier. Peut aussi contenir une clé au format PEM
-		if ($name == 'dkim.privkey' && strpos($value, '-----BEGIN') === 0) {
+		if ($name == 'mailer.dkim.privkey' && strpos($value, '-----BEGIN') === 0) {
 			continue;
 		}
 
