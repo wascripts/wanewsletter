@@ -321,7 +321,7 @@ function parse_sql($input, $prefix = null)
 				$tmp .= $lines[$i];
 			}
 			else {
-				$tmp .= ' ';
+				$tmp .= '';
 			}
 
 			continue;
