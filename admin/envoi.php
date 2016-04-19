@@ -68,9 +68,9 @@ if (!is_int($logdata['log_status']) || !in_array($logdata['log_status'], [STATUS
 	$logdata['log_status'] = STATUS_WRITING;
 }
 
-$prev_status = filter_input(INPUT_POST, 'prev_status', FILTER_VALIDATE_INT);
-if (!is_int($prev_status)) {
-	$prev_status = $logdata['log_status'];
+$logdata['prev_status'] = filter_input(INPUT_POST, 'prev_status', FILTER_VALIDATE_INT);
+if (!is_int($logdata['prev_status'])) {
+	$logdata['prev_status'] = $logdata['log_status'];
 }
 
 if (isset($_POST['cancel'])) {
@@ -83,6 +83,147 @@ foreach (['test', 'presend', 'save', 'delete', 'attach', 'unattach'] as $varname
 		$mode = $varname;
 		break;
 	}
+}
+
+//
+// Fonction de callback utilisée pour l'appel à preg_replace_callback() plus bas
+//
+$replace_include = function ($m) use ($mode, &$lang, &$error, $output) {
+	preg_match_all('/\\s+([a-z_:][a-z0-9_:.-]*)\\s?=\\s?(["\'])(.+?)(?<!\\\\)(?:\\\\\\\\)*\\2/i',
+		$m[1], $attrs, PREG_SET_ORDER);
+
+	$resource = null;
+	$tds = false;
+	foreach ($attrs as $attr) {
+		switch ($attr[1]) {
+			case 'src':
+				$resource = stripslashes($attr[3]);
+				break;
+			case 'tds' && $attr[3] == 'true':
+			case 'now' && $attr[3] == 'true':
+				$tds = true;
+				break;
+		}
+	}
+
+	if (is_null($resource) || (!$tds && $mode != 'presend')) {
+		return $m[0];
+	}
+
+	try {
+		$result = wan_get_contents($resource);
+	}
+	catch (Exception $e) {
+		$error = true;
+		$output->warn($e->getMessage());
+		return $m[0];
+	}
+
+	return convert_encoding($result['data'], $result['charset']);
+};
+
+$regexp = '/<\\?inclu[dr]e(\\s+[^>]+)\\?>/i';
+foreach (['log_body_text', 'log_body_html'] as $key) {
+	if (!empty($logdata[$key])) {
+		$logdata[$key] = preg_replace_callback($regexp, $replace_include, $logdata[$key]);
+	}
+}
+
+unset($replace_include);
+
+/**
+ * Fonction de sauvegarde du brouillon.
+ *
+ * @param array $logdata
+ *
+ * @return array
+ */
+function save_log($logdata) {
+	global $db, $mode;
+
+	$sql_where      = '';
+	$duplicate_log  = false;
+	$duplicate_file = false;
+
+	$tmp_id = $logdata['log_id'];
+
+	//
+	// Au cas où la newsletter a le status WRITING mais que son précédent statut était MODEL,
+	// nous la dupliquons pour garder intact le modèle
+	// Si la newsletter a un statut MODEL et qu'on est en mode send, nous dupliquons newsletter
+	// et entrées pour les fichiers joints
+	//
+	if ($logdata['log_status'] == STATUS_WRITING) {
+		if ($mode == 'presend') {
+			$logdata['log_status'] = STATUS_SENDING;
+		}
+
+		if ($logdata['prev_status'] == STATUS_MODEL) {
+			$handle_id      = $tmp_id;
+			$tmp_id         = 0;
+			$duplicate_file = true;
+		}
+	}
+	else if ($mode == 'presend') {
+		$duplicate_log  = true;
+		$duplicate_file = true;
+	}
+
+	$logdata['log_date'] = time();
+
+	$keys = ['liste_id','log_subject','log_body_text','log_body_html','log_date','log_status'];
+	$keys = array_fill_keys($keys, null);
+	$sqldata = array_intersect_key(array_replace($keys, $logdata), $keys);
+
+	if (empty($tmp_id)) {
+		$db->insert(LOG_TABLE, $sqldata);
+		$tmp_id = $db->lastInsertId();
+	}
+	else {
+		$sql_where = ['log_id' => $tmp_id, 'liste_id' => $logdata['liste_id']];
+		$db->update(LOG_TABLE, $sqldata, $sql_where);
+	}
+
+	//
+	// Duplication de la newsletter
+	//
+	if ($duplicate_log) {
+		$handle_id = $tmp_id;
+		$logdata['log_status'] = STATUS_SENDING;
+		$sqldata['log_status'] = STATUS_SENDING;
+
+		$db->insert(LOG_TABLE, $sqldata);
+
+		$tmp_id = $db->lastInsertId();
+	}
+
+	//
+	// Duplication des entrées pour les fichiers joints
+	//
+	if ($duplicate_file) {
+		$sql = "SELECT file_id
+			FROM " . LOG_FILES_TABLE . "
+			WHERE log_id = " . $handle_id;
+		$result = $db->query($sql);
+
+		$sql_dataset = [];
+
+		while ($row = $result->fetch()) {
+			$sql_dataset[] = ['log_id' => $tmp_id, 'file_id' => $row['file_id']];
+		}
+
+		if (count($sql_dataset) > 0) {
+			$db->insert(LOG_FILES_TABLE, $sql_dataset);
+		}
+
+		unset($sql_dataset);
+	}
+
+	$logdata['log_id'] = $tmp_id;
+	$logdata['prev_status'] = $logdata['log_status'];
+	unset($tmp_id);
+
+	return $logdata;
 }
 
 switch ($mode) {
@@ -165,28 +306,93 @@ switch ($mode) {
 		break;
 
 	case 'progress':
+		if (!$auth->check(Auth::SEND, $listdata['liste_id'])) {
+			http_response_code(401);
+			$output->message('Not_auth_send');
+		}
+
 		$liste_ids = array_column($auth->getLists(Auth::SEND), 'liste_id');
 
-		if ($logdata['log_id']) {
-			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
-				FROM " . LOG_TABLE . "
-				WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
-					AND log_id = $logdata[log_id]
-					AND log_status = " . STATUS_SENDING;
-			$result = $db->query($sql);
+		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
+			FROM " . LOG_TABLE . "
+			WHERE liste_id IN(" . implode(', ', $liste_ids) . ")
+				AND log_id = $logdata[log_id]
+				AND log_status = " . STATUS_SENDING;
+		$result = $db->query($sql);
 
-			if (!($logdata = $result->fetch())) {
-				$output->redirect('envoi.php?mode=send', 4);
-				$output->addLine($lang['Message']['No_log_found']);
-				$output->addLine($lang['Click_return_back'], './envoi.php?mode=send');
-				$output->message();
+		if (!($logdata = $result->fetch())) {
+			$output->redirect('envoi.php?mode=send', 4);
+			$output->addLine($lang['Message']['No_log_found']);
+			$output->addLine($lang['Click_return_back'], './envoi.php?mode=send');
+			$output->message();
+		}
+
+		if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
+			$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
+			$output->message();
+		}
+
+		$logdata['joined_files'] = get_joined_files($logdata);
+
+		//
+		// Envoi des emails
+		//
+
+		//
+		// On règle le script pour ignorer une déconnexion du client et
+		// poursuivre l'envoi du flot d'emails jusqu'à son terme.
+		//
+		@ignore_user_abort(true);
+
+		//
+		// On augmente également le temps d'exécution maximal du script.
+		//
+		// Certains hébergeurs désactivent pour des raisons évidentes cette fonction
+		// Si c'est votre cas, vous êtes mal barré
+		//
+		@set_time_limit(3600);
+
+		//
+		// On lance l'envoi
+		//
+		$sender = new Sender($listdata, $logdata);
+		$sender->registerHook('post-send', function () { fake_header(); });
+		$sender->lock();
+		$result = $sender->process();
+
+		if ($result['total_to_send'] > 0) {
+			$total = ($result['total_sent'] + $result['total_to_send']);
+
+			if ($output instanceof Output\Json) {
+				$message = sprintf($lang['Next_sending_delay'], SENDING_DELAY);
+				$result['percent'] = wa_number_format(round((($result['total_sent'] / $total) * 100), 2));
+				$output->addParams($result);
 			}
+			else {
+				$progress_url = sprintf('envoi.php?mode=progress&amp;id=%d', $logdata['log_id']);
 
-			if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
-				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
-				$output->message();
+				$message = sprintf($lang['Message']['Success_send'],
+					$nl_config['sending_limit'],
+					$result['total_sent'],
+					$total
+				);
+				$message .= '<br /><br />';
+				$message .= sprintf($lang['Click_resend'],
+					sprintf('<a href="%s">', $progress_url),
+					'</a>'
+				);
 			}
 		}
+		else {
+			if ($output instanceof Output\Json) {
+				$result['percent'] = 100;
+				$output->addParams($result);
+			}
+
+			$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
+		}
+
+		$output->message($message);
 		break;
 
 	case 'send':
@@ -403,7 +609,7 @@ switch ($mode) {
 					$output->message();
 				}
 
-				$prev_status = $logdata['log_status'];
+				$logdata['prev_status'] = $logdata['log_status'];
 			}
 		}
 		else {
@@ -547,250 +753,150 @@ switch ($mode) {
 		}
 		break;
 
-	case 'attach':
-	case 'presend':
 	case 'save':
+		$logdata = save_log($logdata);
+
+		$output->notice('log_saved');
+		break;
+
 	case 'test':
-		//
-		// Fonction de callback utilisée pour l'appel à preg_replace_callback() plus bas
-		//
-		$replace_include = function ($m) use ($mode, &$lang, &$error, $output) {
-			preg_match_all('/\\s+([a-z_:][a-z0-9_:.-]*)\\s?=\\s?(["\'])(.+?)(?<!\\\\)(?:\\\\\\\\)*\\2/i',
-				$m[1], $attrs, PREG_SET_ORDER);
-
-			$resource = null;
-			$tds = false;
-			foreach ($attrs as $attr) {
-				switch ($attr[1]) {
-					case 'src':
-						$resource = stripslashes($attr[3]);
-						break;
-					case 'tds' && $attr[3] == 'true':
-					case 'now' && $attr[3] == 'true':
-						$tds = true;
-						break;
-				}
-			}
-
-			if (is_null($resource) || (!$tds && $mode != 'presend')) {
-				return $m[0];
-			}
-
-			try {
-				$result = wan_get_contents($resource);
-			}
-			catch (Exception $e) {
-				$error = true;
-				$output->warn($e->getMessage());
-				return $m[0];
-			}
-
-			return convert_encoding($result['data'], $result['charset']);
-		};
-
-		$regexp = '/<\\?inclu[dr]e(\\s+[^>]+)\\?>/i';
-		foreach (['log_body_text', 'log_body_html'] as $key) {
-			$logdata[$key] = preg_replace_callback($regexp, $replace_include, $logdata[$key]);
+	case 'presend':
+		if (!$logdata['log_subject']) {
+			$error = true;
+			$output->warn('Subject_empty');
 		}
 
-		if ($mode == 'test' || $mode == 'presend') {
-			if (!$logdata['log_subject']) {
+		if ($listdata['liste_format'] != FORMAT_HTML) {
+			if (!$logdata['log_body_text']) {
 				$error = true;
-				$output->warn('Subject_empty');
+				$output->warn('Body_empty');
+			}
+			else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_text'], '{LINKS}')) {
+				$error = true;
+				$output->warn('No_links_in_body');
+			}
+		}
+
+		if ($listdata['liste_format'] != FORMAT_TEXT) {
+			if (!$logdata['log_body_html']) {
+				$error = true;
+				$output->warn('Body_empty');
+			}
+			else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
+				$error = true;
+				$output->warn('No_links_in_body');
 			}
 
-			if ($listdata['liste_format'] != FORMAT_HTML) {
-				if (!$logdata['log_body_text']) {
-					$error = true;
-					$output->warn('Body_empty');
-				}
-				else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_text'], '{LINKS}')) {
-					$error = true;
-					$output->warn('No_links_in_body');
-				}
-			}
+			$sql = "SELECT jf.file_real_name, l.log_id
+				FROM " . JOINED_FILES_TABLE . " AS jf
+					INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
+					INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
+						AND l.liste_id = $listdata[liste_id]
+				ORDER BY jf.file_real_name ASC";
+			$result = $db->query($sql);
 
-			if ($listdata['liste_format'] != FORMAT_TEXT) {
-				if (!$logdata['log_body_html']) {
-					$error = true;
-					$output->warn('Body_empty');
-				}
-				else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
-					$error = true;
-					$output->warn('No_links_in_body');
-				}
-
-				$sql = "SELECT jf.file_real_name, l.log_id
-					FROM " . JOINED_FILES_TABLE . " AS jf
-						INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
-						INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-							AND l.liste_id = $listdata[liste_id]
-					ORDER BY jf.file_real_name ASC";
-				$result = $db->query($sql);
-
-				$files = $files_error = [];
-				while ($row = $result->fetch()) {
-					if ($row['log_id'] == $logdata['log_id']) {
-						$files[] = $row['file_real_name'];
-					}
-				}
-
-				$total_cid = hasCidReferences($logdata['log_body_html'], $refs);
-
-				for ($i = 0; $i < $total_cid; $i++) {
-					if (!in_array($refs[$i], $files)) {
-						$files_error[] = $refs[$i];
-					}
-				}
-
-				if (count($files_error) > 0) {
-					$error = true;
-					$output->warn('Cid_error_in_body', implode(', ', $files_error));
+			$files = $files_error = [];
+			while ($row = $result->fetch()) {
+				if ($row['log_id'] == $logdata['log_id']) {
+					$files[] = $row['file_real_name'];
 				}
 			}
 
-			// Deux newsletters ne peuvent être simultanément en attente
-			// d’envoi pour une même liste.
-			if ($mode == 'presend') {
-				$sql = "SELECT COUNT(*) AS test
-					FROM " . LOG_TABLE . "
-					WHERE liste_id = $listdata[liste_id]
-						AND log_status = " . STATUS_SENDING;
-				$result = $db->query($sql);
+			$total_cid = hasCidReferences($logdata['log_body_html'], $refs);
 
-				if ($result->column('test') > 0) {
-					$error = true;
-					$output->warn('Twice_sending');
+			for ($i = 0; $i < $total_cid; $i++) {
+				if (!in_array($refs[$i], $files)) {
+					$files_error[] = $refs[$i];
 				}
+			}
+
+			if (count($files_error) > 0) {
+				$error = true;
+				$output->warn('Cid_error_in_body', implode(', ', $files_error));
+			}
+		}
+
+		// Deux newsletters ne peuvent être simultanément en attente
+		// d’envoi pour une même liste.
+		if ($mode == 'presend') {
+			$sql = "SELECT COUNT(*) AS test
+				FROM " . LOG_TABLE . "
+				WHERE liste_id = $listdata[liste_id]
+					AND log_status = " . STATUS_SENDING;
+			$result = $db->query($sql);
+
+			if ($result->column('test') > 0) {
+				$error = true;
+				$output->warn('Twice_sending');
 			}
 		}
 
 		if (!$error) {
-			$sql_where      = '';
-			$duplicate_log  = false;
-			$duplicate_file = false;
+			$logdata = save_log($logdata);
 
-			$tmp_id = $logdata['log_id'];
-			unset($logdata['log_id'], $logdata['joined_files']);
+			if ($mode == 'test') {
+				$supp_address = trim(filter_input(INPUT_POST, 'test_address'));
+				$supp_address = array_unique(array_map('trim', explode(',', $supp_address)));
+				$supp_address = array_filter($supp_address, function ($email) {
+					return \Wamailer\Mailer::checkMailSyntax($email);
+				});
 
-			//
-			// Au cas où la newsletter a le status WRITING mais que son précédent statut était HANDLE,
-			// nous la dupliquons pour garder intact le modèle
-			// Si la newsletter a un statut HANDLE et qu'on est en mode send, nous dupliquons newsletter
-			// et entrées pour les fichiers joints
-			//
-			if ($logdata['log_status'] == STATUS_WRITING) {
-				if ($mode == 'presend') {
-					$logdata['log_status'] = STATUS_SENDING;
-				}
+				$logdata['joined_files'] = get_joined_files($logdata);
 
-				if ($prev_status == STATUS_MODEL) {
-					$handle_id      = $tmp_id;
-					$tmp_id         = 0;
-					$duplicate_file = true;
-				}
-			}
-			else if ($mode == 'presend') {
-				$duplicate_log  = true;
-				$duplicate_file = true;
-			}
+				if (count($supp_address) > 0) {
+					$logdata['log_subject'] = '[test] '.$logdata['log_subject'];
+					$sender = new Sender($listdata, $logdata);
+					$sender->process($supp_address);
 
-			$logdata['log_date'] = time();
-			$logdata['liste_id'] = $listdata['liste_id'];
-
-			if (empty($tmp_id)) {
-				$db->insert(LOG_TABLE, $logdata);
-				$tmp_id = $db->lastInsertId();
-			}
-			else {
-				$sql_where = ['log_id' => $tmp_id, 'liste_id' => $listdata['liste_id']];
-				$db->update(LOG_TABLE, $logdata, $sql_where);
-			}
-
-			//
-			// Duplication de la newsletter
-			//
-			if ($duplicate_log) {
-				$handle_id = $tmp_id;
-				$logdata['log_status'] = STATUS_SENDING;
-
-				$db->insert(LOG_TABLE, $logdata);
-
-				$tmp_id = $db->lastInsertId();
-			}
-
-			//
-			// Duplication des entrées pour les fichiers joints
-			//
-			if ($duplicate_file) {
-				$sql = "SELECT file_id
-					FROM " . LOG_FILES_TABLE . "
-					WHERE log_id = " . $handle_id;
-				$result = $db->query($sql);
-
-				$sql_dataset = [];
-
-				while ($row = $result->fetch()) {
-					$sql_dataset[] = ['log_id' => $tmp_id, 'file_id' => $row['file_id']];
-				}
-
-				if (count($sql_dataset) > 0) {
-					$db->insert(LOG_FILES_TABLE, $sql_dataset);
-				}
-
-				unset($sql_dataset);
-			}
-
-			$logdata['log_id'] = $tmp_id;
-			$prev_status = $logdata['log_status'];
-			unset($tmp_id);
-
-			if ($mode == 'save' || $mode == 'presend') {
-				if ($mode == 'save') {
-					$output->redirect('./envoi.php?mode=load&id=' . $logdata['log_id'], 4);
-					$output->addLine($lang['Message']['log_saved']);
-					$output->addLine($lang['Click_return_back'], './envoi.php?mode=load&id=' . $logdata['log_id']);
+					$logdata['log_subject'] = substr($logdata['log_subject'], 7);// On retire la mention [test]
+					$output->notice($lang['Test_send_finish']);
 				}
 				else {
-					$output->addLine($lang['Message']['log_ready']);
-					$output->addLine($lang['Click_start_send'], './envoi.php?mode=send&id=' . $logdata['log_id']);
+					$error = true;
+					$output->warn('Invalid_email');
 				}
-
+			}
+			else {
+				$output->addLine($lang['Message']['log_ready']);
+				$output->addLine($lang['Click_start_send'], './envoi.php?mode=send&id=' . $logdata['log_id']);
 				$output->message();
 			}
+		}
+		break;
 
-			//
-			// Attachement de fichiers
-			//
-			if ($mode == 'attach' && $auth->check(Auth::ATTACH, $listdata['liste_id'])) {
-				$attach  = new Attach();
+	case 'attach':
+		$logdata = save_log($logdata);
 
-				try {
-					$file_id = (int) filter_input(INPUT_POST, 'fid', FILTER_VALIDATE_INT);
-					if ($file_id) {
-						// Ajout d’un fichier déjà existant.
-						$file = $attach->useFile($logdata['log_id'], $file_id);
-					}
-					else {
-						$local_file = trim(filter_input(INPUT_POST, 'local_file'));
-						$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : [];
+		if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
+			$attach  = new Attach();
 
-						$file = $attach->addFile($logdata['log_id'], $local_file ?: $join_file);
-					}
-
-					$output->notice('Joined_file_added', $file['name']);
+			try {
+				$file_id = (int) filter_input(INPUT_POST, 'fid', FILTER_VALIDATE_INT);
+				if ($file_id) {
+					// Ajout d’un fichier déjà existant.
+					$file = $attach->useFile($logdata['log_id'], $file_id);
 				}
-				catch (Dblayer\Exception $e) {
-					throw $e;
+				else {
+					$local_file = trim(filter_input(INPUT_POST, 'local_file'));
+					$join_file  = (!empty($_FILES['join_file'])) ? $_FILES['join_file'] : [];
+
+					$file = $attach->addFile($logdata['log_id'], $local_file ?: $join_file);
 				}
-				catch (Exception $e) {
-					$output->warn($e->getMessage());
-				}
+
+				$output->notice('Joined_file_added', $file['name']);
+			}
+			catch (Dblayer\Exception $e) {
+				throw $e;
+			}
+			catch (Exception $e) {
+				$output->warn($e->getMessage());
 			}
 		}
 		break;
 
 	case 'unattach':
+		$logdata = save_log($logdata);
+
 		$file_ids = (array) filter_input(INPUT_POST, 'file_ids',
 			FILTER_VALIDATE_INT,
 			FILTER_REQUIRE_ARRAY
@@ -861,104 +967,6 @@ if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
 	}
 }
 
-//
-// Adresses supplémentaires (mode test)
-//
-$supp_address = [];
-
-if ($mode == 'test') {
-	$supp_address = trim(filter_input(INPUT_POST, 'test_address'));
-	$supp_address = array_unique(array_map('trim', explode(',', $supp_address)));
-	$supp_address = array_filter($supp_address, function ($email) {
-		return \Wamailer\Mailer::checkMailSyntax($email);
-	});
-
-	if (count($supp_address) == 0) {
-		$error = true;
-		$output->warn('Invalid_email');
-	}
-}
-
-//
-// Envoi des emails
-//
-if (($mode == 'test' && !$error) || $mode == 'progress') {
-	if (!$auth->check(Auth::SEND, $listdata['liste_id'])) {
-		http_response_code(401);
-		$output->message('Not_auth_send');
-	}
-
-	//
-	// On règle le script pour ignorer une déconnexion du client et
-	// poursuivre l'envoi du flot d'emails jusqu'à son terme.
-	//
-	@ignore_user_abort(true);
-
-	//
-	// On augmente également le temps d'exécution maximal du script.
-	//
-	// Certains hébergeurs désactivent pour des raisons évidentes cette fonction
-	// Si c'est votre cas, vous êtes mal barré
-	//
-	@set_time_limit(3600);
-
-	//
-	// On lance l'envoi
-	//
-	if ($mode == 'test') {
-		$logdata['log_subject'] = '[test] '.$logdata['log_subject'];
-	}
-
-	$sender = new Sender($listdata, $logdata);
-	$sender->registerHook('post-send', function () { fake_header(); });
-
-	if ($mode == 'progress') {
-		$sender->lock();
-	}
-
-	$result = $sender->process($supp_address);
-
-	if ($mode == 'test') {
-		$output->notice($lang['Test_send_finish']);
-		$logdata['log_subject'] = substr($logdata['log_subject'], 7);// On retire la mention [test]
-	}
-	else if ($result['total_to_send'] > 0) {
-		$total = ($result['total_sent'] + $result['total_to_send']);
-
-		if ($output instanceof Output\Json) {
-			$message = sprintf($lang['Next_sending_delay'], SENDING_DELAY);
-			$percent = wa_number_format(round((($result['total_sent'] / $total) * 100), 2));
-			$result['percent'] = $percent;
-			$output->addParams($result);
-		}
-		else {
-			$progress_url = sprintf('envoi.php?mode=progress&amp;id=%d', $logdata['log_id']);
-
-			$message = sprintf($lang['Message']['Success_send'],
-				$nl_config['sending_limit'],
-				$result['total_sent'],
-				$total
-			);
-			$message .= '<br /><br />';
-			$message .= sprintf($lang['Click_resend'],
-				sprintf('<a href="%s">', $progress_url),
-				'</a>'
-			);
-		}
-
-		$output->message($message);
-	}
-	else {
-		if ($output instanceof Output\Json) {
-			$result['percent'] = 100;
-			$output->addParams($result);
-		}
-
-		$message = sprintf($lang['Message']['Success_send_finish'], $result['total_sent']);
-		$output->message($message);
-	}
-}
-
 $subject   = htmlspecialchars($logdata['log_subject']);
 $body_text = htmlspecialchars($logdata['log_body_text'], ENT_NOQUOTES);
 $body_html = htmlspecialchars($logdata['log_body_html'], ENT_NOQUOTES);
@@ -974,7 +982,7 @@ if ($admindata['html_editor'] == HTML_EDITOR_YES) {
 }
 
 $output->addHiddenField('id',          $logdata['log_id']);
-$output->addHiddenField('prev_status', $prev_status);
+$output->addHiddenField('prev_status', $logdata['prev_status']);
 $output->addHiddenField('log_date',    $logdata['log_date']);
 
 $output->header();
