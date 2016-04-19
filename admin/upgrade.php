@@ -164,6 +164,7 @@ templates/admin/select_liste_body.tpl
 templates/admin/select_log_body.tpl
 templates/admin/send_body.tpl
 templates/admin/send_progress_body.tpl
+templates/admin/sending_body.tpl
 templates/admin/simple_header.tpl
 templates/admin/stats_body.tpl
 templates/admin/tools_body.tpl
