@@ -646,7 +646,7 @@ $lang['File_on_server']             = "existing file";
 $lang['Cancel_send_log']            = "Are you sure you want to cancel this sending? (Only effective for the remaining sendings)";
 $lang['Test_send_finish']           = "Test performed. Check your mailboxes.";
 $lang['Test_send']                  = "Do a test mailing";
-$lang['Test_send_note']             = "You can do a test mailing to check the display of your newsletter in real conditions. Enter one or more email address separated by a comma and valid";
+$lang['Test_send_note']             = "You can do a test mailing to check the display of your newsletter in real conditions (See also the %sFAQ%s). Enter one or more email address separated by a comma and valid";
 
 
 //

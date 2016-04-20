@@ -1067,7 +1067,10 @@ if ($listdata['liste_format'] != FORMAT_TEXT) {
 if ($auth->check(Auth::SEND, $listdata['liste_id'])) {
 	$template->assignToBlock('test_send', [
 		'L_TEST_SEND'      => $lang['Test_send'],
-		'L_TEST_SEND_NOTE' => $lang['Test_send_note'],
+		'L_TEST_SEND_NOTE' => nl2br(sprintf($lang['Test_send_note'],
+			sprintf('<a href="%s">', wan_get_faq_url('mailing_quality')),
+			'</a>'
+		)),
 		'L_SEND_BUTTON'    => $lang['Button']['send']
 	]);
 }

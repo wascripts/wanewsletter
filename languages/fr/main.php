@@ -645,7 +645,7 @@ $lang['File_on_server']             = "fichier existant";
 $lang['Cancel_send_log']            = "Êtes-vous sûr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
 $lang['Test_send_finish']           = "Test effectué. Vérifiez vos boîtes mail.";
 $lang['Test_send']                  = "Faire un test d’envoi";
-$lang['Test_send_note']             = "Vous pouvez faire un test d’envoi pour vérifier l’affichage de votre lettre en condition réelle. Indiquez une ou plusieurs adresses email séparées par une virgule et validez";
+$lang['Test_send_note']             = "Vous pouvez faire un test d’envoi pour vérifier l’affichage de votre lettre en condition réelle (voir aussi la %sFAQ%s). Indiquez une ou plusieurs adresses email séparées par une virgule et validez";
 
 
 //
