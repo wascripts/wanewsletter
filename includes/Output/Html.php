@@ -65,7 +65,14 @@ class Html implements MessageInterface
 	 *
 	 * @var boolean
 	 */
-	private $use_theme        = false;
+	private $use_theme     = false;
+
+	/**
+	 * Pile des messages d'avertissement.
+	 *
+	 * @var array
+	 */
+	private $msg_log       = [];
 
 	/**
 	 * @param boolean $use_theme
@@ -286,7 +293,7 @@ class Html implements MessageInterface
 	 */
 	public function header($page_title = '')
 	{
-		global $nl_config, $lang, $admindata, $auth, $msg_error;
+		global $nl_config, $lang, $admindata, $auth;
 
 		if ($this->header_displayed) {
 			return null;
@@ -367,7 +374,8 @@ class Html implements MessageInterface
 			'S_NAV_LINKS'  => $this->getLinks(),
 			'S_SCRIPTS'    => $this->getScripts(),
 			'SITENAME'     => htmlspecialchars($sitename, ENT_NOQUOTES),
-			'ERROR_BOX'    => $this->errorbox($msg_error)
+			'NOTICE_BOX'   => $this->msgbox('notice'),
+			'WARN_BOX'     => $this->msgbox('warn')
 		]);
 
 		// Si l'utilisateur est connecté, affichage du menu
@@ -463,7 +471,7 @@ class Html implements MessageInterface
 
 		if ($wanlog_box != '') {
 			$template->assign([
-				'WANLOG_BOX' => sprintf('<ul id="wanlog" class="warning">%s</ul>', $wanlog_box)
+				'WANLOG_BOX' => sprintf('<ul id="wanlog" class="logbox warn">%s</ul>', $wanlog_box)
 			]);
 		}
 
@@ -699,25 +707,58 @@ BASIC;
 		exit;
 	}
 
+	public function notice()
+	{
+		$args = func_get_args();
+		array_unshift($args, 'notice');
+		call_user_func_array([$this,'log'], $args);
+	}
+
+	public function warn()
+	{
+		$args = func_get_args();
+		array_unshift($args, 'warn');
+		call_user_func_array([$this,'log'], $args);
+	}
+
+	public function log($type, $str)
+	{
+		global $lang;
+
+		if (!empty($lang['Message'][$str])) {
+			$str = $lang['Message'][$str];
+		}
+
+		if (func_num_args() > 2) {
+			$args = func_get_args();
+			array_shift($args);
+			$args = array_map('htmlspecialchars', $args);
+			$args[0] = $str;
+			$str  = call_user_func_array('sprintf', $args);
+		}
+
+		$this->msg_log[$type][] = $str;
+	}
+
 	/**
-	 * Génération de la liste des erreurs
+	 * Génération de la liste des alertes
 	 *
-	 * @param array $msg_errors
+	 * @param string $type
 	 *
 	 * @return string
 	 */
-	public function errorbox(array $msg_errors)
+	public function msgbox($type)
 	{
-		$error_box = '';
-		foreach ($msg_errors as $msg_error) {
-			$error_box .= sprintf("<li>%s</li>\n", $msg_error);
+		if (!empty($this->msg_log[$type])) {
+			$list = $this->msg_log[$type];
+			array_walk($list, function (&$value, $key) {
+				$value = sprintf("<li>%s</li>\n", nl2br($value));
+			});
+
+			return sprintf('<ul class="logbox %s">%s</ul>', $type, implode('', $list));
 		}
 
-		if ($error_box) {
-			$error_box = sprintf('<ul class="warning">%s</ul>', $error_box);
-		}
-
-		return $error_box;
+		return '';
 	}
 
 	/**

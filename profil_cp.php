@@ -37,7 +37,8 @@ $auth = new Auth();
 // End
 //
 
-$mode = filter_input(INPUT_GET, 'mode');
+$error     = false;
+$mode      = filter_input(INPUT_GET, 'mode');
 // Spécial. la présence du paramètre 'k' signifie qu'on est dans le mode 'reset'
 $reset_key = filter_input(INPUT_GET, 'k');
 
@@ -81,11 +82,11 @@ switch ($mode) {
 			if ($new_email != '') {
 				if (strcmp($new_email, $confirm_email) != 0) {
 					$error = true;
-					$msg_error[] = $lang['Message']['Bad_confirm_email'];
+					$output->warn('Bad_confirm_email');
 				}
 				else if (!Mailer::checkMailSyntax($new_email)) {
 					$error = true;
-					$msg_error[] = $lang['Message']['Invalid_email'];
+					$output->warn('Invalid_email');
 				}
 				else {
 					$sql = "SELECT COUNT(*) AS test
@@ -95,7 +96,7 @@ switch ($mode) {
 
 					if ($result->column('test') != 0) {
 						$error = true;
-						$msg_error[] = $lang['Message']['Allready_reg2'];
+						$output->warn('Allready_reg2');
 					}
 				}
 			}
@@ -106,15 +107,15 @@ switch ($mode) {
 
 				if (!password_verify($current_passwd, $abodata['passwd'])) {
 					$error = true;
-					$msg_error[] = $lang['Message']['Error_login'];
+					$output->warn('Error_login');
 				}
 				else if (!validate_pass($new_passwd)) {
 					$error = true;
-					$msg_error[] = $lang['Message']['Alphanum_pass'];
+					$output->warn('Alphanum_pass');
 				}
 				else if ($new_passwd !== $confirm_passwd) {
 					$error = true;
-					$msg_error[] = $lang['Message']['Bad_confirm_pass'];
+					$output->warn('Bad_confirm_pass');
 				}
 			}
 

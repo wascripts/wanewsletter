@@ -21,4 +21,5 @@
 
 <div id="global">
 
-{ERROR_BOX}
+{NOTICE_BOX}
+{WARN_BOX}

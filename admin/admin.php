@@ -41,10 +41,12 @@ if ($mode == 'adduser') {
 	$new_login = trim(u::filter_input(INPUT_POST, 'new_login'));
 	$new_email = trim(u::filter_input(INPUT_POST, 'new_email'));
 
+	$error = false;
+
 	if (isset($_POST['submit'])) {
 		if (!validate_pseudo($new_login)) {
 			$error = true;
-			$msg_error[] = $lang['Message']['Invalid_login'];
+			$output->warn('Invalid_login');
 		}
 		else {
 			$sql = "SELECT COUNT(*) AS login_test
@@ -54,13 +56,13 @@ if ($mode == 'adduser') {
 
 			if ($result->column('login_test') > 0) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Double_login'];
+				$output->warn('Double_login');
 			}
 		}
 
 		if (!Mailer::checkMailSyntax($new_email)) {
 			$error = true;
-			$msg_error[] = $lang['Message']['Invalid_email'];
+			$output->warn('Invalid_email');
 		}
 
 		if (!$error) {
@@ -179,6 +181,8 @@ if (isset($_POST['submit'])) {
 		$output->message();
 	}
 
+	$error = false;
+
 	$vararray = ['current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'date_format', 'language'];
 	foreach ($vararray as $varname) {
 		${$varname} = trim(u::filter_input(INPUT_POST, $varname));
@@ -203,21 +207,21 @@ if (isset($_POST['submit'])) {
 
 		if ($admin_id == $admindata['admin_id'] && !password_verify($current_passwd, $admindata['admin_pwd'])) {
 			$error = true;
-			$msg_error[] = $lang['Message']['Error_login'];
+			$output->warn('Error_login');
 		}
 		else if (!validate_pass($new_passwd)) {
 			$error = true;
-			$msg_error[] = $lang['Message']['Alphanum_pass'];
+			$output->warn('Alphanum_pass');
 		}
 		else if ($new_passwd !== $confirm_passwd) {
 			$error = true;
-			$msg_error[] = $lang['Message']['Bad_confirm_pass'];
+			$output->warn('Bad_confirm_pass');
 		}
 	}
 
 	if (!Mailer::checkMailSyntax($email)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Invalid_email'];
+		$output->warn('Invalid_email');
 	}
 
 	if (!$error) {

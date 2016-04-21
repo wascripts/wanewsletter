@@ -48,6 +48,33 @@ function get_supported_db()
 }
 
 /**
+ * Retourne la liste des tables du script en les préfixant avec la
+ * chaîne fournie en argument, ou, par défaut, en utilisant le préfixe
+ * indiqué dans la configuration.
+ *
+ * @param string $prefix
+ *
+ * @return array
+ */
+function get_db_tables($prefix = null)
+{
+	if (!is_string($prefix)) {
+		$prefix = $GLOBALS['nl_config']['db']['prefix'];
+	}
+
+	$tables = [
+		'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
+		'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
+	];
+
+	array_walk($tables, function (&$tablename, $key) use ($prefix) {
+		$tablename = $prefix.$tablename;
+	});
+
+	return $tables;
+}
+
+/**
  * Génère une chaîne DSN
  *
  * @param array $infos   Informations sur l'accès à la base de données
@@ -273,12 +300,12 @@ function exec_queries(array &$queries)
  * Analyse un fichier contenant une liste de requètes SQL séparées par un ';'
  * et retourne un tableau de requètes.
  *
- * @param string $input   Chaîne à analyser
- * @param string $prefixe Préfixe des tables à mettre à la place du prefixe par défaut
+ * @param string $input  Chaîne à analyser
+ * @param string $prefix Préfixe des tables à mettre à la place du prefixe par défaut
  *
  * @return array
  */
-function parse_sql($input, $prefixe = null)
+function parse_sql($input, $prefix = null)
 {
 	$tmp            = '';
 	$output         = [];
@@ -294,7 +321,7 @@ function parse_sql($input, $prefixe = null)
 				$tmp .= $lines[$i];
 			}
 			else {
-				$tmp .= ' ';
+				$tmp .= '';
 			}
 
 			continue;
@@ -346,8 +373,8 @@ function parse_sql($input, $prefixe = null)
 		}
 	}
 
-	if ($prefixe) {
-		$output = str_replace('wa_', $prefixe, $output);
+	if ($prefix) {
+		$output = str_replace('wa_', $prefix, $output);
 	}
 
 	return $output;

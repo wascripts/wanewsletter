@@ -13,13 +13,14 @@ if (typeof(tinyMCE) != 'undefined') {
 			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 			"searchreplace wordcount visualblocks visualchars code",
 			"insertdatetime media nonbreaking table contextmenu directionality",
-			"paste textcolor colorpicker textpattern"
+			"paste textcolor colorpicker textpattern fullpage"
 		],
 		toolbar1: "bold italic underline strikethrough bullist numlist blockquote hr alignleft aligncenter alignright link unlink image spellchecker",
 		toolbar2: "formatselect forecolor pastetext removeformat charmap outdent indent code undo redo",
 
 		entity_encoding: "raw",
 		relative_urls: false,
+		convert_urls: false,
 		setup: function(ed) {
 			ed.on('BeforeSetContent', function(e) {
 				e.content = e.content.replace(/<([^>]+)=\s*("|\')cid:/g,'<$1=$2show.php?file=');
@@ -41,7 +42,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 <form id="send-form" method="post" action="./envoi.php" enctype="{S_ENCTYPE}">
 <ul class="links">
 	<li><a href="./envoi.php?mode=load">{L_LOAD_LOG}</a></li>
-	<li><a href="./envoi.php?mode=progress">{L_LIST_SEND}</a></li>
+	<li><a href="./envoi.php?mode=send">{L_LIST_SEND}</a></li>
 </ul>
 
 <div class="block">
@@ -150,7 +151,7 @@ lang["addlink"] = '{L_ADDLINK_BUTTON}';
 
 <div class="block">
 	<div class="bottom">{S_HIDDEN_FIELDS}
-		<button type="submit" name="send">{L_SEND_BUTTON}</button>
+		<button type="submit" name="presend">{L_SEND_BUTTON}</button>
 		<button type="submit" name="save" class="primary" tabindex="1">{L_SAVE_BUTTON}</button>
 		<button type="submit" name="delete" {S_DELETE_BUTTON_DISABLED}>{L_DELETE_BUTTON}</button>
 	</div>

@@ -35,8 +35,8 @@ $schemas_dir  = WA_ROOTDIR . '/includes/Dblayer/schemas';
 $dsn_from     = 'mysql://username:password@localhost/dbname?charset=utf8';
 $dsn_to       = 'sqlite:/path/to/db/wanewsletter.sqlite';
 
-$prefixe_from = 'wa_';
-$prefixe_to   = 'wa_';
+$prefix_from = 'wa_';
+$prefix_to   = 'wa_';
 //
 // End Of Config
 //
@@ -56,15 +56,13 @@ $db_to   = WaDatabase($dsn_to);
 
 // DROP if any
 
-foreach ($sql_schemas as $tablename => $schema) {
-	$db_to->query(sprintf('DROP TABLE IF EXISTS %s',
-		$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))
-	));
+foreach (get_db_tables($prefix_to) as $tablename) {
+	$db_to->query(sprintf('DROP TABLE IF EXISTS %s', $db_to->quote($tablename)));
 }
 
 // Create table
 $sql_create = file_get_contents(sprintf('%s/%s_tables.sql', $schemas_dir, $db_to::ENGINE));
-$sql_create = parse_sql($sql_create, $prefixe_to);
+$sql_create = parse_sql($sql_create, $prefix_to);
 
 foreach ($sql_create as $query) {
 	$db_to->query($query);
@@ -83,8 +81,9 @@ if ($db_to::ENGINE == 'postgres') {
 		WHERE s.relkind = 'S' AND n.nspname = 'public'";
 	$res = $db_to->query($sql);
 
+	$tables_list = get_db_tables($prefix_to);
 	while ($row = $res->fetch()) {
-		if (isset($sql_schemas[$row['tablename']])) {
+		if (in_array($row['tablename'], $tables_list)) {
 			$sequences[$row['tablename']] = [
 				'seqname' => $row['seqname'],
 				'seqval'  => 1,
@@ -145,14 +144,14 @@ function fields_list($tablename)
 }
 
 // Populate table
-foreach ($sql_schemas as $tablename => $schema) {
-	printf("Populate table %s...\n", str_replace('wa_', $prefixe_to, $tablename));
+foreach (get_db_tables($prefix_to) as $tablename) {
+	printf("Populate table %s...\n", $tablename);
 	flush();
 
 	$fields = implode(', ', fields_list($tablename));
 
 	$result = $db_from->query(sprintf("SELECT %s FROM %s", $fields,
-		$db_from->quote(str_replace('wa_', $prefixe_from, $tablename))
+		$db_from->quote(str_replace($prefix_to, $prefix_from, $tablename))
 	));
 	$result->setFetchMode($result::FETCH_ASSOC);
 
@@ -165,7 +164,7 @@ foreach ($sql_schemas as $tablename => $schema) {
 		do {
 			$values = implode(', ', $db_to->prepareData($row));
 			$res = $db_to->query(sprintf("INSERT INTO %s (%s) VALUES(%s)",
-				$db_to->quote(str_replace('wa_', $prefixe_to, $tablename)),
+				$db_to->quote($tablename),
 				$fields,
 				$values
 			));
@@ -200,9 +199,9 @@ foreach ($sql_schemas as $tablename => $schema) {
 if ($db_to::ENGINE == 'sqlite') {
 	$db_to->query(sprintf('ATTACH %s AS dest', $db_to->quote($sqlite_db)));
 
-	foreach ($sql_schemas as $tablename => $schema) {
+	foreach (get_db_tables($prefix_to) as $tablename) {
 		$db_to->query(sprintf('INSERT INTO dest.%1$s SELECT * FROM %1$s',
-			$db_to->quote(str_replace('wa_', $prefixe_to, $tablename))
+			$db_to->quote($tablename)
 		));
 	}
 

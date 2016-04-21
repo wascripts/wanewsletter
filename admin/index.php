@@ -109,8 +109,13 @@ if ($db::ENGINE == 'mysql') {
 		while ($row = $result->fetch()) {
 			$add = false;
 
-			if ($prefixe != '') {
-				if ($row['Name'] != SESSION_TABLE && strncmp($row['Name'], $prefixe, strlen($prefixe)) == 0) {
+			if ($nl_config['db']['prefix'] != '') {
+				if ($row['Name'] != SESSION_TABLE
+					&& strncmp($row['Name'],
+						$nl_config['db']['prefix'],
+						strlen($nl_config['db']['prefix'])
+					) == 0
+				) {
 					$add = true;
 				}
 			}
@@ -131,7 +136,8 @@ if ($db::ENGINE == 'mysql') {
 else if ($db::ENGINE == 'postgres') {
 	$sql = "SELECT sum(pg_total_relation_size(schemaname||'.'||tablename))
 		FROM pg_tables WHERE schemaname = 'public'
-			AND tablename ~ '^$prefixe'";
+			AND tablename ~ '^%s'";
+	$sql = sprintf($sql, $nl_config['db']['prefix']);
 
 	try {
 		$result = $db->query($sql);

@@ -23,7 +23,7 @@ function load_config()
 	load_settings();
 
 	$dsn = '';
-	$prefixe = 'wa_';
+	$prefix = 'wa_';
 	$nl_config = [];
 
 	$need_update  = false;
@@ -84,6 +84,11 @@ function load_config()
 		$need_update = true;
 	}
 
+	// Configuration initiale pour Wamailer
+	if (!isset($nl_config['mailer']) || !is_array($nl_config['mailer'])) {
+		$nl_config['mailer'] = [];
+	}
+
 	//
 	// Les constantes NL_INSTALLED et WA_VERSION sont obsolètes.
 	//
@@ -91,15 +96,20 @@ function load_config()
 		$need_update = true;
 	}
 
+	// $prefixe renommée $prefix
+	if (isset($prefixe)) {
+		$prefix = $prefixe;
+	}
+
 	// Utilisé à la fin d’une mise à jour pour mettre à jour également un
 	// fichier de configuration obsolète.
 	define(__NAMESPACE__.'\\UPDATE_CONFIG_FILE', $need_update);
 
-	// Si on est dans l’installeur, on récupère ici l’entrée 'prefixe' du
+	// Si on est dans l’installeur, on récupère ici l’entrée 'prefix' du
 	// formulaire, car on en a besoin pour créer les constantes *_TABLE.
 	if (defined(__NAMESPACE__.'\\IN_INSTALL')) {
-		$prefixe = filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
-			'options' => ['default' => $prefixe]
+		$prefix = filter_input(INPUT_POST, 'prefix', FILTER_DEFAULT, [
+			'options' => ['default' => $prefix]
 		]);
 	}
 	// Si le script n’est pas installé, on redirige vers l’installeur, ou
@@ -118,10 +128,12 @@ function load_config()
 		}
 	}
 
+	$nl_config['db']['prefix'] = $prefix;
+
 	//
 	// Options supplémentaires transmises par commodité sous forme de tableau
 	//
-	if (!empty($nl_config['db'])) {
+	if ($dsn) {
 		$args = http_build_query($nl_config['db'], '', '&');
 		$dsn .= (strpos($dsn, '?') ? '&' : '?') . $args;
 	}
@@ -129,16 +141,11 @@ function load_config()
 	//
 	// Déclaration des constantes de tables
 	//
-	$tables = [
-		'abo_liste', 'abonnes', 'admin', 'auth_admin', 'ban_list', 'config',
-		'forbidden_ext', 'joined_files', 'liste', 'log', 'log_files', 'session'
-	];
-
-	foreach ($tables as $table) {
-		$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__, strtoupper($table));
-		$table = $prefixe . $table;
-		define($constant, $table);
-		$GLOBALS['sql_schemas'][$table] = [];
+	foreach (get_db_tables($prefix) as $tablename) {
+		$constant = sprintf('%s\\%s_TABLE', __NAMESPACE__,
+			strtoupper(substr($tablename, strlen($prefix)))
+		);
+		define($constant, $tablename);
 	}
 
 	//
@@ -153,9 +160,31 @@ function load_config()
 		return rtrim(str_replace('\\', '/', $path), '/');
 	};
 
-	$nl_config['logs_dir']  = $realpath($nl_config['logs_dir']);
-	$nl_config['stats_dir'] = $realpath($nl_config['stats_dir']);
-	$nl_config['tmp_dir']   = $realpath($nl_config['tmp_dir']);
+	// Liste des entrées de configuration pouvant contenir un chemin de fichier
+	$config_list = ['logs_dir','stats_dir','tmp_dir','db.ssl-ca','db.ssl-cert',
+		'db.ssl-key','db.rootcert','db.sslcert','db.sslkey',
+		'mailer.dkim.privkey','mailer.ssl.cafile','mailer.ssl.capath',
+		'mailer.ssl.local_cert','mailer.ssl.local_pk'];
+
+	foreach ($config_list as $name) {
+		$parts = explode('.', $name);
+
+		$value =& $nl_config;
+		foreach ($parts as $part) {
+			if (!isset($value[$part])) {
+				continue 2;
+			}
+			$value =& $value[$part];
+		}
+
+		// Cas particulier. Peut aussi contenir une clé au format PEM
+		if ($name == 'mailer.dkim.privkey' && strpos($value, '-----BEGIN') === 0) {
+			continue;
+		}
+
+		$value = $realpath($value);
+		unset($value);// On détruit la référence.
+	}
 
 	if (!is_writable($nl_config['tmp_dir'])) {
 		$output->message(sprintf(
@@ -186,7 +215,6 @@ function load_config()
 
 	// Injection dans le scope global
 	$GLOBALS['dsn'] = $dsn;
-	$GLOBALS['prefixe'] = $prefixe;
 	$GLOBALS['nl_config'] = $nl_config;
 }
 
@@ -1193,36 +1221,49 @@ function wan_get_faq_url($chapter)
 }
 
 /**
- * Initialisation du module d’envoi des mails
+ * Initialisation du module d’envoi des mails.
+ *
+ * @param array   $opts  Tableau d’options à transmettre au transport
+ * @param boolean $reset Forcer la création d’un nouvel objet transport
  *
  * @return \Wamailer\Transport\Transport
  */
-function wamailer(array $opts = [])
+function wamailer(array $opts = [], $reset = false)
 {
 	global $nl_config;
+	static $transport;
 
-	$name = 'mail';
+	if (!$transport || $reset) {
+		$name = 'mail';
 
-	if ($nl_config['use_smtp']) {
-		$name  = 'smtp';
-		$proto = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls' : 'tcp';
-		$opts  = array_replace_recursive([
-			'server'   => sprintf('%s://%s:%d', $proto, $nl_config['smtp_host'], $nl_config['smtp_port']),
-			'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
-			'auth' => [
-				'username'  => $nl_config['smtp_user'],
-				'secretkey' => $nl_config['smtp_pass']
-			]
-		], $opts);
+		if ($nl_config['use_smtp']) {
+			$name  = 'smtp';
+			$proto = ($nl_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls' : 'tcp';
+			$opts  = array_replace_recursive([
+				'server'   => sprintf('%s://%s:%d', $proto, $nl_config['smtp_host'], $nl_config['smtp_port']),
+				'starttls' => ($nl_config['smtp_tls'] == SECURITY_STARTTLS),
+				'auth' => [
+					'username'  => $nl_config['smtp_user'],
+					'secretkey' => $nl_config['smtp_pass']
+				]
+			], $opts);
 
-#		$opts['debug'] = function ($str) {
-#			wanlog(htmlspecialchars($str));
-#		};
+#			$opts['debug'] = function ($str) {
+#				wanlog(htmlspecialchars($str));
+#			};
+		}
+
+		if (!empty($nl_config['mailer'])) {
+			$opts = array_replace_recursive($nl_config['mailer'], $opts);
+		}
+
+		Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+		$transport = Mailer::setTransport($name);
 	}
 
-	Mailer::$signature = sprintf(X_MAILER_HEADER, WANEWSLETTER_VERSION);
+	$transport->options($opts);
 
-	return Mailer::setTransport($name, $opts);
+	return $transport;
 }
 
 /**
@@ -1873,4 +1914,61 @@ function format_box($name, $default = 0, $multiple = false)
 	$format_box .= '</select>';
 
 	return $format_box;
+}
+
+/**
+ * Émission d’un cookie.
+ *
+ * @param string  $name
+ * @param string  $value
+ * @param integer $lifetime
+ * @param array   $opts
+ *
+ * @return boolean
+ */
+function send_cookie($name, $value, $lifetime, array $opts = [])
+{
+	$opts = array_replace([
+		'path'     => str_replace('//', '/', dirname($_SERVER['REQUEST_URI']).'/'),
+		'domain'   => null,
+		'secure'   => is_secure_connection(),
+		'httponly' => true
+	], $opts);
+
+	return setcookie(
+		$name,
+		$value,
+		$lifetime,
+		$opts['path'],
+		$opts['domain'],
+		$opts['secure'],
+		$opts['httponly']
+	);
+}
+
+/**
+ * Retourne la liste des fichiers joints à cette lettre.
+ *
+ * @param array $logdata
+ *
+ * @return array
+ */
+function get_joined_files(array $logdata)
+{
+	global $db;
+
+	$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
+		FROM %s AS jf
+			INNER JOIN %s AS lf ON lf.file_id = jf.file_id
+			INNER JOIN %s AS l ON l.log_id = lf.log_id
+				AND l.liste_id = %d
+				AND l.log_id   = %d
+		ORDER BY jf.file_real_name ASC";
+	$sql = sprintf($sql, JOINED_FILES_TABLE, LOG_FILES_TABLE, LOG_TABLE,
+		$logdata['liste_id'],
+		$logdata['log_id']
+	);
+	$result = $db->query($sql);
+
+	return $result->fetchAll($result::FETCH_ASSOC);
 }

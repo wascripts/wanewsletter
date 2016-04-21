@@ -16,6 +16,7 @@ use ZipArchive;
 
 require './start.inc.php';
 
+$error     = false;
 $mode      = filter_input(INPUT_GET, 'mode');
 $action    = filter_input(INPUT_GET, 'action');
 $sql_type  = filter_input(INPUT_GET, 'type');
@@ -135,55 +136,53 @@ else if ($mode == 'iframe') {
 	$log_id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 	$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
-	if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
-		$format = $listdata['liste_format'];
+	if ($format == FORMAT_HTML) {
+		$format_name = 'HTML';
+		$body_column = 'log_body_html';
+	}
+	else {
+		$format_name = $lang['Text'];
+		$body_column = 'log_body_text';
 	}
 
-	$body_type = ($format == FORMAT_HTML) ? 'log_body_html' : 'log_body_text';
-
-	$sql = "SELECT $body_type
+	$sql = "SELECT $body_column AS body
 		FROM " . LOG_TABLE . "
 		WHERE log_id = $log_id AND liste_id = " . $listdata['liste_id'];
 	$result = $db->query($sql);
 
-	if ($row  = $result->fetch()) {
-		$body = $row[$body_type];
+	if (($body = $result->column('body')) === false) {
+		$output->basic($lang['Message']['log_not_exists']);
+	}
+	else if (!$body) {
+		$output->basic(sprintf($lang['Message']['log_format_not_exists'], $format_name));
+	}
 
-		if (strlen($body)) {
-			if ($format == FORMAT_HTML) {
-				$body = preg_replace(
-					'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/si',
-					'<\\1"show.php?file=\\2"\\3>',
-					$body
-				);
+	if ($format == FORMAT_HTML) {
+		$body = preg_replace(
+			'/<(.+?)"cid:([^\\:*\/?<">|]+)"([^>]*)?>/si',
+			'<\\1"show.php?file=\\2"\\3>',
+			$body
+		);
 
-				$output->httpHeaders();
+		$output->httpHeaders();
 
-				echo str_replace(
-					'{LINKS}',
-					sprintf('<a href="#" onclick="return false;">%s (lien fictif)</a>', $lang['Label_link']),
-					$body
-				);
-			}
-			else {
-				// on normalise les fins de ligne pour s'assurer du bon
-				// fonctionnement de wordwrap()
-				$body = preg_replace("/\r\n?|\n/", "\r\n", $body);
-				$body = wordwrap(trim($body), 78, "\r\n");
-				$body = active_urls(htmlspecialchars($body, ENT_NOQUOTES));
-				$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
-				$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
-				$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
-				$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
-				$output->basic(sprintf('<pre style="font-size: 13px;">%s</pre>', $body));
-			}
-		}
-		else {
-			$output->basic($lang['Message']['log_not_exists']);
-		}
+		echo str_replace(
+			'{LINKS}',
+			sprintf('<a href="#" onclick="return false;">%s (lien fictif)</a>', $lang['Label_link']),
+			$body
+		);
 	}
 	else {
-		$output->basic($lang['Message']['log_not_exists']);
+		// on normalise les fins de ligne pour s'assurer du bon
+		// fonctionnement de wordwrap()
+		$body = preg_replace("/\r\n?|\n/", "\r\n", $body);
+		$body = wordwrap($body, 78, "\r\n");
+		$body = active_urls(htmlspecialchars($body, ENT_NOQUOTES));
+		$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
+		$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
+		$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
+		$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
+		$output->basic(sprintf('<pre style="font-size: 13px;">%s</pre>', $body));
 	}
 
 	exit;
@@ -420,7 +419,19 @@ else if ($mode == 'abonnes') {
 
 			if (!Mailer::checkMailSyntax($email)) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Invalid_email'];
+				$output->warn('Invalid_email');
+			}
+			else {
+				$sql = "SELECT COUNT(*) AS email_test
+					FROM %s
+					WHERE abo_email = '%s' AND abo_id <> %d";
+				$sql = sprintf($sql, ABONNES_TABLE, $db->escape($email), $abo_id);
+				$result = $db->query($sql);
+
+				if ($result->column('email_test') > 0) {
+					$error = true;
+					$output->warn('Allready_reg2');
+				}
 			}
 
 			if (!$error) {
@@ -907,27 +918,27 @@ else if ($mode == 'liste') {
 
 			if (mb_strlen($liste_name) < 3 || mb_strlen($liste_name) > 30) {
 				$error = true;
-				$msg_error[] = $lang['Invalid_liste_name'];
+				$output->warn('Invalid_liste_name');
 			}
 
 			if (!in_array($liste_format, [FORMAT_TEXT, FORMAT_HTML, FORMAT_MULTIPLE])) {
 				$error = true;
-				$msg_error[] = $lang['Unknown_format'];
+				$output->warn('Unknown_format');
 			}
 
 			if (!Mailer::checkMailSyntax($sender_email)) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Invalid_email'];
+				$output->warn('Invalid_email');
 			}
 
 			if ($return_email != '' && !Mailer::checkMailSyntax($return_email)) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Invalid_email'];
+				$output->warn('Invalid_email');
 			}
 
 			if ($liste_alias != '' && !Mailer::checkMailSyntax($liste_alias)) {
 				$error = true;
-				$msg_error[] = $lang['Message']['Invalid_email'];
+				$output->warn('Invalid_email');
 			}
 
 			if ($pop_pass == '' && $pop_user != '' && $action == 'edit') {
@@ -953,9 +964,7 @@ else if ($mode == 'liste') {
 				}
 				catch (Exception $e) {
 					$error = true;
-					$msg_error[] = sprintf(nl2br($lang['Message']['bad_pop_param']),
-						htmlspecialchars($e->getMessage())
-					);
+					$output->warn('bad_pop_param', $e->getMessage());
 				}
 
 				$pop->quit();
@@ -1551,7 +1560,7 @@ else if ($mode == 'log') {
 	$num_logs = 0;
 
 	if ($total_logs) {
-		$sql = "SELECT log_id, log_subject, log_date, log_body_text, log_body_html, log_numdest
+		$sql = "SELECT log_id, log_subject, log_date, log_body_text, log_body_html, log_numdest, liste_id
 			FROM " . LOG_TABLE . "
 			WHERE log_status = " . STATUS_SENT . "
 				AND liste_id = $listdata[liste_id]
@@ -1599,16 +1608,7 @@ else if ($mode == 'log') {
 		}
 
 		if (is_array($logdata) && !empty($files_count[$log_id])) {
-			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-				FROM " . JOINED_FILES_TABLE . " AS jf
-					INNER JOIN " . LOG_FILES_TABLE . " AS lf ON lf.file_id = jf.file_id
-					INNER JOIN " . LOG_TABLE . " AS l ON l.log_id = lf.log_id
-						AND l.liste_id = $listdata[liste_id]
-						AND l.log_id   = $log_id
-				ORDER BY jf.file_real_name ASC";
-			$result = $db->query($sql);
-
-			$logdata['joined_files'] = $result->fetchAll();
+			$logdata['joined_files'] = get_joined_files($logdata);
 		}
 	}
 
@@ -1691,43 +1691,40 @@ else if ($mode == 'log') {
 			$format = (int) filter_input(INPUT_GET, 'format', FILTER_VALIDATE_INT);
 
 			if (!in_array($format, [FORMAT_TEXT, FORMAT_HTML])) {
-				$format = FORMAT_TEXT;
+				$format = ($listdata['liste_format'] == FORMAT_HTML)
+					? FORMAT_HTML : FORMAT_TEXT;
+			}
+
+			// Par champ caché, car ce formulaire est en méthode GET.
+			$output->addHiddenField('mode', 'log');
+			$output->addHiddenField('action', 'view');
+			$output->addHiddenField('id', $log_id);
+
+			if ($page_id > 1) {
+				$output->addHiddenField('page', $page_id);
 			}
 
 			$iframe = new Template('iframe_body.tpl');
 
 			$iframe->assign([
-				'L_SUBJECT'  => $lang['Log_subject'],
-				'L_NUMDEST'  => $lang['Log_numdest'],
+				'L_SUBJECT'   => $lang['Log_subject'],
+				'L_NUMDEST'   => $lang['Log_numdest'],
+				'L_FORMAT'    => $lang['Format'],
+				'L_GO_BUTTON' => $lang['Button']['go'],
 
-				'SUBJECT'    => htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
-				'NUMDEST'    => $logdata['log_numdest'],
-				'FORMAT'     => $format,
-				'LOG_ID'     => $log_id
+				'SUBJECT'     => htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES),
+				'NUMDEST'     => $logdata['log_numdest'],
+				'FORMAT'      => $format,
+				'LOG_ID'      => $log_id,
+				'FORMAT_BOX'  => format_box('format', $format),
+
+				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 			]);
 
 			if (extension_loaded('zip')) {
 				$iframe->assignToBlock('export', [
 					'L_EXPORT_T' => $lang['Export_nl'],
 					'L_EXPORT'   => $lang['Export']
-				]);
-			}
-
-			if ($listdata['liste_format'] == FORMAT_MULTIPLE) {
-				// Par champ caché, car ce formulaire est en méthode GET.
-				$output->addHiddenField('mode', 'log');
-				$output->addHiddenField('action', 'view');
-				$output->addHiddenField('id', $log_id);
-
-				if ($page_id > 1) {
-					$output->addHiddenField('page', $page_id);
-				}
-
-				$iframe->assignToBlock('format_box', [
-					'L_FORMAT'        => $lang['Format'],
-					'L_GO_BUTTON'     => $lang['Button']['go'],
-					'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
-					'FORMAT_BOX'      => format_box('format', $format)
 				]);
 			}
 

@@ -105,7 +105,12 @@ if (empty($return_message)) {
 		$message = iconv('UTF-8', $textCharset.'//TRANSLIT', $message);
 	}
 
-	echo nl2br($message);
+	if ($output instanceof Output\Json) {
+		$output->message($message);
+	}
+	else {
+		echo nl2br($message);
+	}
 }
 
 //

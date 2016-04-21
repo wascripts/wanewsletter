@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() { Stats.initialize(); }
 </form>
 
 <!-- BEGIN statsdir_error -->
-<p class="warning"><strong>{statsdir_error.MESSAGE}</strong></p>
+<p class="warn"><strong>{statsdir_error.MESSAGE}</strong></p>
 <!-- END statsdir_error -->
 
 <div class="stats">

@@ -19,20 +19,14 @@ if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 
 require './includes/common.inc.php';
 
-function create_config_file($dsn, $prefixe)
+function create_config_file($dsn, $prefix)
 {
-	//
-	// Envoi du fichier au client si demandé
-	//
-	// Attention, $config_file est aussi utilisé à la fin de l'installation pour
-	// pour créer le fichier de configuration.
-	//
 	$config_file  = '<' . "?php\n";
 	$config_file .= "//\n";
 	$config_file .= "// Paramètres d'accès à la base de données\n";
 	$config_file .= "//\n";
 	$config_file .= "\$dsn = '$dsn';\n";
-	$config_file .= "\$prefixe = '$prefixe';\n";
+	$config_file .= "\$prefix = '$prefix';\n";
 	$config_file .= "\n";
 	$config_file .= "// Configuration additionnelle (voir data/config.sample.inc.php)\n";
 	$config_file .= "\$nl_config = [];\n";
@@ -83,12 +77,13 @@ $infos   = [
 if (!empty($dsn)) {
 	$config_file_exists = true;
 	$tmp = parseDSN($dsn);
-	$infos = array_merge($infos, $tmp[0]);
+	$infos  = array_merge($infos, $tmp[0]);
+	$prefix = $nl_config['db']['prefix'];
 }
 else {
 	$config_file_exists = false;
 
-	$prefixe = trim(filter_input(INPUT_POST, 'prefixe', FILTER_DEFAULT, [
+	$prefix = trim(filter_input(INPUT_POST, 'prefix', FILTER_DEFAULT, [
 		'options' => ['default' => 'wa_']
 	]));
 
@@ -140,7 +135,7 @@ if (isset($_POST['sendfile'])) {
 		exit;
 	}
 
-	sendfile('config.inc.php', 'text/plain', create_config_file($dsn, $prefixe));
+	sendfile('config.inc.php', 'text/plain', create_config_file($dsn, $prefix));
 }
 
 $vararray = [
@@ -161,6 +156,7 @@ if ($start && $language != $prev_language) {
 
 $nl_config['language'] = $language;
 
+$error = false;
 $reinstall = false;
 
 if (!empty($dsn)) {
@@ -173,18 +169,18 @@ if (!empty($dsn)) {
 			}
 		}
 		else if ($infos['dbname'] == '') {
-			throw new Exception(sprintf($lang['Connect_db_error'], 'Invalid DB name'));
+			throw new Exception(sprintf($lang['Message']['Connect_db_error'], 'Invalid DB name'));
 		}
 
 		$db = WaDatabase($dsn);
 	}
 	catch (Dblayer\Exception $e) {
 		$error = true;
-		$msg_error[] = sprintf($lang['Connect_db_error'], $e->getMessage());
+		$output->warn('Connect_db_error', $e->getMessage());
 	}
 	catch (Exception $e) {
 		$error = true;
-		$msg_error[] = $e->getMessage();
+		$output->warn($e->getMessage());
 	}
 
 	if (!$error) {
@@ -228,7 +224,7 @@ if ($start) {
 		}
 		else {
 			$error = true;
-			$msg_error[] = $lang['Message']['Error_login'];
+			$output->warn('Error_login');
 		}
 	}
 
@@ -238,31 +234,31 @@ if ($start) {
 
 	if (!is_readable($sql_create) || !is_readable($sql_data)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['sql_file_not_readable'];
+		$output->warn('sql_file_not_readable');
 	}
 
-	if (!preg_match('#^[a-z][a-z0-9]*_?$#i', $prefixe)) {
+	if (!preg_match('#^[a-z][a-z0-9]*_?$#i', $prefix)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Invalid_prefix'];
+		$output->warn('Invalid_prefix');
 	}
 
 	if (!validate_pseudo($admin_login)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Invalid_login'];
+		$output->warn('Invalid_login');
 	}
 
 	if (!validate_pass($admin_pass)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Alphanum_pass'];
+		$output->warn('Alphanum_pass');
 	}
 	else if ($admin_pass !== $confirm_pass) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Bad_confirm_pass'];
+		$output->warn('Bad_confirm_pass');
 	}
 
 	if (!\Wamailer\Mailer::checkMailSyntax($admin_email)) {
 		$error = true;
-		$msg_error[] = $lang['Message']['Invalid_email'];
+		$output->warn('Invalid_email');
 	}
 
 	if (!$error) {
@@ -273,10 +269,8 @@ if ($start) {
 		if ($reinstall) {
 			$sql_drop = [];
 
-			foreach ($sql_schemas as $tablename => $schema) {
-				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s",
-					str_replace('wa_', $prefixe, $tablename)
-				);
+			foreach (get_db_tables() as $tablename) {
+				$sql_drop[] = sprintf("DROP TABLE IF EXISTS %s", $db->quote($tablename));
 			}
 
 			exec_queries($sql_drop);
@@ -285,13 +279,13 @@ if ($start) {
 		//
 		// Création des tables du script
 		//
-		$sql_create = parse_sql(file_get_contents($sql_create), $prefixe);
+		$sql_create = parse_sql(file_get_contents($sql_create), $prefix);
 		exec_queries($sql_create);
 
 		//
 		// Insertion des données de base
 		//
-		$sql_data = parse_sql(file_get_contents($sql_data), $prefixe);
+		$sql_data = parse_sql(file_get_contents($sql_data), $prefix);
 
 		$urlsite  = (is_secure_connection()) ? 'https' : 'http';
 		$urlsite .= '://' . $_SERVER['HTTP_HOST'];
@@ -329,11 +323,6 @@ if ($start) {
 			CONFIG_TABLE,
 			time()
 		);
-		$sql_data[] = "UPDATE " . LISTE_TABLE . "
-			SET form_url        = '" . $db->escape($urlsite.$urlscript.'subscribe.php') . "',
-				sender_email    = '" . $db->escape($admin_email) . "',
-				liste_startdate = " . time() . "
-			WHERE liste_id = 1";
 
 		exec_queries($sql_data);
 
@@ -346,7 +335,7 @@ if ($start) {
 				$output->addHiddenField('user',    $infos['user']);
 				$output->addHiddenField('pass',    $infos['pass']);
 				$output->addHiddenField('dbname',  $infos['dbname']);
-				$output->addHiddenField('prefixe', $prefixe);
+				$output->addHiddenField('prefix',  $prefix);
 
 				$output->httpHeaders();
 
@@ -367,25 +356,16 @@ if ($start) {
 				exit;
 			}
 
-			fwrite($fp, create_config_file($dsn, $prefixe));
+			fwrite($fp, create_config_file($dsn, $prefix));
 			fclose($fp);
 		}
 
-		$server = filter_input(INPUT_SERVER, 'SERVER_SOFTWARE');
-		if (stripos($server, 'Apache') !== false) {
-			message(sprintf($lang['Success_install'],
-				'<a href="admin/login.php">',
-				'</a>'
-			));
-		}
-		else {
-			message(sprintf($lang['Success_install2'],
-				'<a href="docs/faq.fr.html#data_access">',
-				'</a>',
-				'<a href="admin/login.php">',
-				'</a>'
-			));
-		}
+		message(sprintf($lang['Success_install'],
+			'<a href="docs/faq.fr.html#data_access">',
+			'</a>',
+			'<a href="admin/login.php">',
+			'</a>'
+		));
 	}
 }
 
@@ -413,23 +393,29 @@ if (!$reinstall) {
 	}
 
 	if ($infos['port'] > 0) {
+		if (filter_var($infos['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+			$infos['host'] = sprintf('[%s]', $infos['host']);
+		}
 		$infos['host'] .= ':'.$infos['port'];
 	}
 
-	if (!$config_file_exists) {
-		$preconfig_message = $lang['Config_file_manual'];
-	}
-	else {
-		$preconfig_message  = sprintf("<strong>%s</strong><br>", $lang['Config_file_found']);
-		$preconfig_message .= sprintf($lang['Install_target'], $supported_db[$infos['engine']]['label']);
-		$preconfig_message .= "<br>";
+	$preconfig_message = $lang['Config_file_manual'];
 
-		if ($infos['engine'] == 'sqlite') {
-			$preconfig_message .= $lang['dbpath'] . ': ' . $infos['path'] . '<br>';
+	if ($config_file_exists) {
+		$preconfig_message = sprintf("<strong>%s</strong><br>", $lang['Config_file_found']);
+
+		if ($infos['engine'] != 'sqlite') {
+			$preconfig_message .= sprintf($lang['Install_target_server'],
+				$supported_db[$infos['engine']]['label'],
+				$infos['host'],
+				$infos['dbname']
+			);
 		}
 		else {
-			$preconfig_message .= $lang['dbhost'] . ': ' . $infos['host'] . '<br>';
-			$preconfig_message .= $lang['dbname'] . ': ' . $infos['dbname'] . '<br>';
+			$preconfig_message .= sprintf($lang['Install_target_file'],
+				$supported_db[$infos['engine']]['label'],
+				$infos['path']
+			);
 		}
 	}
 
@@ -460,14 +446,14 @@ if (!$reinstall) {
 			'L_DBNAME'       => $lang['dbname'],
 			'L_DBUSER'       => $lang['dbuser'],
 			'L_DBPWD'        => $lang['dbpwd'],
-			'L_PREFIXE'      => $lang['prefixe'],
+			'L_PREFIX'       => $lang['prefix'],
 
 			'DB_BOX'         => $db_box,
 			'DBPATH'         => htmlspecialchars($infos['path']),
 			'DBHOST'         => htmlspecialchars($infos['host']),
 			'DBNAME'         => ($infos['engine'] != 'sqlite') ? htmlspecialchars($infos['dbname']) : '',
 			'DBUSER'         => htmlspecialchars($infos['user']),
-			'PREFIXE'        => htmlspecialchars($prefixe)
+			'PREFIX'         => htmlspecialchars($prefix)
 		]);
 	}
 }
@@ -484,7 +470,7 @@ else {
 
 $template->assign([
 	'S_PREV_LANGUAGE' => $language,
-	'ERROR_BOX'       => $output->errorbox($msg_error)
+	'WARN_BOX'        => $output->msgbox('warn')
 ]);
 
 $template->pparse();

@@ -44,6 +44,13 @@ class Sender
 	private $htmlTemplate;
 
 	/**
+	 * Lien de désinscription placé dans l’en-tête 'List-Unsubscribe'
+	 * @see RFC 2369#3.2
+	 * @var string
+	 */
+	private $unsubscribe_link;
+
+	/**
 	 * Données de la liste concernée par l’envoi.
 	 * @var array
 	 */
@@ -125,7 +132,7 @@ class Sender
 
 		if (!flock($this->fp, LOCK_EX|LOCK_NB)) {
 			fclose($this->fp);
-			$output->message('List_is_busy');
+			$output->error('List_is_busy');
 		}
 
 		chmod($lockfile, 0600);
@@ -154,8 +161,9 @@ class Sender
 			//
 			$abo_ids = fread($this->fp, $filesize);
 			$abo_ids = array_unique(array_map('intval', explode("\n", $abo_ids)));
+			$hook_params['ids'] = $abo_ids;
 
-			$update_abo_list($abo_ids);
+			$update_abo_list($hook_params);
 		}
 
 		$this->registerHook('post-send', function ($params) {
@@ -192,32 +200,19 @@ class Sender
 
 		if (!$this->logdata) {
 			// on récupère la dernière newsletter en cours d’envoi
-			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status
+			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
 				FROM %s
 				WHERE liste_id = %d
 					AND log_status = %d
 				LIMIT 1 OFFSET 0";
-			$sql = sprintf($sql, LOG_TABLE, $this->listdata['liste_id'], STATUS_STANDBY);
+			$sql = sprintf($sql, LOG_TABLE, $this->listdata['liste_id'], STATUS_SENDING);
 			$result = $db->query($sql);
 
 			if (!($this->logdata = $result->fetch($result::FETCH_ASSOC))) {
 				$output->message('No_log_to_send');
 			}
 
-			$sql = "SELECT jf.file_id, jf.file_real_name, jf.file_physical_name, jf.file_size, jf.file_mimetype
-				FROM %s AS jf
-					INNER JOIN %s AS lf ON lf.file_id = jf.file_id
-					INNER JOIN %s AS l ON l.log_id = lf.log_id
-						AND l.liste_id = %d
-						AND l.log_id   = %d
-				ORDER BY jf.file_real_name ASC";
-			$sql = sprintf($sql, JOINED_FILES_TABLE, LOG_FILES_TABLE, LOG_TABLE,
-				$this->listdata['liste_id'],
-				$this->logdata['log_id']
-			);
-			$result = $db->query($sql);
-
-			$this->logdata['joined_files'] = $result->fetchAll($result::FETCH_ASSOC);
+			$this->logdata['joined_files'] = get_joined_files($this->logdata);
 		}
 
 		$abodata_list  = [];
@@ -226,7 +221,7 @@ class Sender
 		//
 		// Récupération des destinataires
 		//
-		if ($this->logdata['log_status'] == STATUS_STANDBY) {
+		if ($this->logdata['log_status'] == STATUS_SENDING) {
 			$sql = "SELECT COUNT(a.abo_id) AS total, al.send
 				FROM %s AS a
 					INNER JOIN %s AS al ON al.abo_id = a.abo_id
@@ -416,7 +411,7 @@ class Sender
 		$hook_params['ids'] = $abo_ids;
 		$this->triggerHooks('end-send', $hook_params);
 
-		if ($this->logdata['log_status'] == STATUS_STANDBY && $total_to_send == 0) {
+		if ($this->logdata['log_status'] == STATUS_SENDING && $total_to_send == 0) {
 			$db->beginTransaction();
 
 			$sql = "UPDATE %s SET log_status = %d, log_numdest = %d WHERE log_id = %d";
@@ -459,6 +454,8 @@ class Sender
 		$this->email->clearRecipients();
 		$this->email->addRecipient($data['email'], $data['name']);
 
+		$unsubscribe_link = $this->unsubscribe_link;
+
 		// Envoi en copie cachée
 		if ($bcc_recipients) {
 			foreach ($bcc_recipients as $address) {
@@ -490,7 +487,17 @@ class Sender
 
 			$this->textTemplate->assign($tags_to_replace);
 			$this->htmlTemplate->assign($tags_to_replace);
+
+			if (!$this->listdata['use_cron']) {
+				$unsubscribe_link = str_replace('{WA_CODE}',
+					$data['register_key'],
+					$unsubscribe_link
+				);
+			}
 		}
+
+		// See RFC 2369#3.2
+		$this->email->headers->set('List-Unsubscribe', sprintf('<%s>', $unsubscribe_link));
 
 		if ($this->listdata['liste_format'] != FORMAT_HTML) {
 			$this->email->setTextBody($this->textTemplate->pparse(true));
@@ -517,6 +524,13 @@ class Sender
 		if ($this->listdata['return_email']) {
 			$email->setReturnPath($this->listdata['return_email']);
 		}
+
+		// See RFC 2919
+		$email->headers->set('List-ID', sprintf('%s <list-%d.%s>',
+			\Wamailer\Mime\Header::encode('List-ID', $this->listdata['liste_name'], 'UTF-8', 'phrase'),
+			$this->listdata['liste_id'],
+			parse_url($nl_config['urlsite'], PHP_URL_HOST)
+		));
 
 		$message = [
 			FORMAT_TEXT => $this->logdata['log_body_text'],
@@ -558,8 +572,17 @@ class Sender
 			}
 		}
 
+		$this->unsubscribe_link = $link[FORMAT_TEXT];
+
 		$message[FORMAT_TEXT] = str_replace('{LINKS}', $link[FORMAT_TEXT], $message[FORMAT_TEXT]);
 		$message[FORMAT_HTML] = str_replace('{LINKS}', $link[FORMAT_HTML],  $message[FORMAT_HTML]);
+
+		// Si le document HTML ne comporte pas de titre, on insère le sujet de l’email.
+		$message[FORMAT_HTML] = preg_replace('#(<head>.*?<title>)\s*(</title>.*?</head>)#si',
+			sprintf('$1%s$2', htmlspecialchars($this->logdata['log_subject'], ENT_NOQUOTES)),
+			$message[FORMAT_HTML],
+			1
+		);
 
 		$text_template = new Template;
 		$text_template->loadFromString($message[FORMAT_TEXT]);

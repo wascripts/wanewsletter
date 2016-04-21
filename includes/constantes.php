@@ -13,7 +13,7 @@ namespace Wanewsletter;
 // Version correspondant au code source en place sur le serveur.
 // Remplace la constante obsolète WA_VERSION, jadis définie dans le fichier de configuration.
 //
-const WANEWSLETTER_VERSION = '3.0-beta3';
+const WANEWSLETTER_VERSION = '3.0-beta4';
 
 //
 // identifiant de version des tables du script.
@@ -88,7 +88,7 @@ const FORMAT_MULTIPLE = 3;
 // Statut des newsletter
 //
 const STATUS_WRITING = 0;
-const STATUS_STANDBY = 1;
+const STATUS_SENDING = 1;
 const STATUS_SENT    = 2;
 const STATUS_MODEL   = 3;
 

@@ -53,7 +53,7 @@
 <div id="global">
 <form method="post" action="install.php" class="{IS_SQLITE}">
 
-	{ERROR_BOX}
+	{WARN_BOX}
 
 	<!-- BEGIN install -->
 	<div class="block"><p>{install.L_EXPLAIN}</p></div>
@@ -91,8 +91,8 @@
 			<td><input type="password" id="pass" name="pass" size="30" /></td>
 		</tr>
 		<tr>
-			<td><label for="prefixe">{install.db_infos.L_PREFIXE}&nbsp;:</label></td>
-			<td><input type="text" id="prefixe" name="prefixe" size="10" value="{install.db_infos.PREFIXE}" /></td>
+			<td><label for="prefix">{install.db_infos.L_PREFIX}&nbsp;:</label></td>
+			<td><input type="text" id="prefix" name="prefix" size="10" value="{install.db_infos.PREFIX}" /></td>
 		</tr>
 	</table>
 	<!-- END db_infos -->

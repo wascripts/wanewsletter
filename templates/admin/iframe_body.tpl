@@ -22,10 +22,9 @@
 
 	{JOINED_FILES_BOX}
 
-	<!-- BEGIN format_box -->
-	<div class="bottom"> {format_box.S_HIDDEN_FIELDS}
-		<label for="format" class="notice">{format_box.L_FORMAT}&nbsp;:</label> {format_box.FORMAT_BOX}
-		<button type="submit">{format_box.L_GO_BUTTON}</button>
+	<div class="bottom"> {S_HIDDEN_FIELDS}
+		<label for="format" class="notice">{L_FORMAT}&nbsp;:</label> {FORMAT_BOX}
+		<button type="submit">{L_GO_BUTTON}</button>
 	</div>
 	<script>
 	<!--
@@ -36,6 +35,5 @@
 	}, false);
 	//-->
 	</script>
-	<!-- END format_box -->
 </div>
 </form>

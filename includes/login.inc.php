@@ -17,6 +17,7 @@ if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 
 Template::setDir(sprintf('%s/templates/', WA_ROOTDIR));
 
+$error      = false;
 $mode       = filter_input(INPUT_GET, 'mode');
 $reset_key  = filter_input(INPUT_GET, 'k');
 $redirect   = (check_in_admin()) ? 'index.php' : 'profil_cp.php';
@@ -37,11 +38,11 @@ if ($mode == 'reset' || $mode == 'cp') {
 	if (!is_null($reset_key)) {
 		if (!isset($_SESSION['reset_key']) || !hash_equals($_SESSION['reset_key'], $reset_key)) {
 			$error = true;
-			$msg_error[] = $lang['Message']['Invalid_token'];
+			$output->warn('Invalid_token');
 		}
 		else if (time() > $_SESSION['reset_key_expire']) {
 			$error = true;
-			$msg_error[] = $lang['Message']['Expired_token'];
+			$output->warn('Expired_token');
 
 			unset($_SESSION['reset_key']);
 			unset($_SESSION['reset_key_expire']);
@@ -56,11 +57,11 @@ if ($mode == 'reset' || $mode == 'cp') {
 
 				if (!validate_pass($passwd)) {
 					$error = true;
-					$msg_error[] = $lang['Message']['Alphanum_pass'];
+					$output->warn('Alphanum_pass');
 				}
 				else if ($passwd !== $confirm_passwd) {
 					$error = true;
-					$msg_error[] = $lang['Message']['Bad_confirm_pass'];
+					$output->warn('Bad_confirm_pass');
 				}
 
 				if (!$error) {
@@ -110,7 +111,7 @@ if ($mode == 'reset' || $mode == 'cp') {
 	if (!$error && isset($_POST['submit'])) {
 		if (!$login) {
 			$error = true;
-			$msg_error[] = $lang['Message']['fields_empty'];
+			$output->warn('fields_empty');
 		}
 
 		if (!$error) {
@@ -188,7 +189,7 @@ else if (isset($_POST['submit']) && !$auth->isLoggedIn()) {
 	}
 	else {
 		$error = true;
-		$msg_error[] = $lang['Message']['Error_login'];
+		$output->warn('Error_login');
 	}
 }
 //
@@ -199,8 +200,7 @@ else if ($mode == 'logout') {
 		$session->end();
 	}
 
-	$error = true;
-	$msg_error[] = $lang['Message']['Success_logout'];
+	$output->notice('Success_logout');
 }
 
 //

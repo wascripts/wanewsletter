@@ -31,7 +31,7 @@
 </div>
 
 <!-- BEGIN cookie_notice -->
-<p id="cookie-notice" class="warning">{cookie_notice.L_TEXT}</p>
+<p id="cookie-notice" class="warn">{cookie_notice.L_TEXT}</p>
 <script>
 if (navigator.cookieEnabled) {
 	document.getElementById('cookie-notice').style.display = 'none';

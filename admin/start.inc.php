@@ -68,12 +68,22 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 		$_SESSION['liste'] = 0;
 	}
 
-	if (!empty($_REQUEST['liste'])) {
-		$_SESSION['liste'] = intval($_REQUEST['liste']);
+	foreach ([INPUT_COOKIE, INPUT_POST, INPUT_GET] as $method) {
+		$liste = filter_input($method, 'liste', FILTER_VALIDATE_INT);
+
+		if ($liste) {
+			$_SESSION['liste'] = $liste;
+		}
 	}
+
+	unset($liste, $method);
 
 	if (!isset($auth->getLists(Auth::VIEW)[$_SESSION['liste']])) {
 		$_SESSION['liste'] = 0;
+	}
+
+	if (filter_input(INPUT_COOKIE, 'liste') != $_SESSION['liste']) {
+		send_cookie('liste', $_SESSION['liste'], strtotime('+1 year'));
 	}
 
 	if (strtoupper(filter_input(INPUT_SERVER, 'REQUEST_METHOD')) == 'POST' && $session->new_session) {

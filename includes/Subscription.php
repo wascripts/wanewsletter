@@ -250,6 +250,10 @@ class Subscription
 
 		$abodata = $this->getUserData($listdata['liste_id'], $email);
 
+		if (!$abodata || $abodata['confirmed'] != SUBSCRIBE_CONFIRMED) {
+			throw new Exception($lang['Message']['Unknown_email']);
+		}
+
 		if ($listdata['liste_format'] != FORMAT_MULTIPLE) {
 			throw new Exception($lang['Message']['Inactive_format']);
 		}

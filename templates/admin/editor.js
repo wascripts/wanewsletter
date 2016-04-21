@@ -46,14 +46,15 @@ function preview()
 	var top    = 50;
 	var left   = ((window.screen.width - width)/2);
 
-	var subject	 = document.forms['send-form'].elements['subject'].value;
-	var preview	 = window.open('','apercu','width=' + width + ',height=' + height + ',marginleft=2,topmargin=2,left=' + left + ',top=' + top + ',toolbar=0,location=0,directories=0,status=0,scrollbars=1,copyhistory=0,menuBar=0');
+	var subject	= document.forms['send-form'].elements['subject'].value;
+	var message = '';
+	var preview	= window.open('','apercu','width=' + width + ',height=' + height + ',marginleft=2,topmargin=2,left=' + left + ',top=' + top + ',toolbar=0,location=0,directories=0,status=0,scrollbars=1,copyhistory=0,menuBar=0');
 
 	if (this.id == 'preview1') {
 
-		var texte = document.forms['send-form'].elements['body_text'].value;
+		message   = document.forms['send-form'].elements['body_text'].value;
 		var CRLF  = new RegExp("\r?\n", "g");
-		var lines = texte.split(CRLF);
+		var lines = message.split(CRLF);
 
 		//
 		// WordWrap
@@ -87,39 +88,40 @@ function preview()
 			}
 		}
 
-		texte = lines.join("\r\n");
-		texte = texte.replace("{LINKS}", "http://www.example.org");
+		message = lines.join("\r\n");
+		message = message.replace("{LINKS}", "http://www.example.org");
 		subject = subject.replace('&', '&amp;');
 		subject = subject.replace('<', '&lt;');
-		texte   = texte.replace('&', '&amp;');
-		texte   = texte.replace('<', '&lt;');
+		message = message.replace('&', '&amp;');
+		message = message.replace('<', '&lt;');
 
 		var boldSpan = new RegExp("(^|\\s)(\\*[^\\r\\n]+?\\*)(?=\\s|$)", "g");
 		var italicSpan = new RegExp("(^|\\s)(/[^\\r\\n]+?/)(?=\\s|$)", "g");
 		var underlineSpan = new RegExp("(^|\\s)(_[^\\r\\n]+?_)(?=\\s|$)", "g");
-		texte = texte.replace(boldSpan, "$1<strong>$2</strong>");
-		texte = texte.replace(italicSpan, "$1<em>$2</em>");
-		texte = texte.replace(underlineSpan, "$1<u>$2</u>");
+		message = message.replace(boldSpan, "$1<strong>$2</strong>");
+		message = message.replace(italicSpan, "$1<em>$2</em>");
+		message = message.replace(underlineSpan, "$1<u>$2</u>");
 
 		preview.document.writeln('<!DOCTYPE html>');
 		preview.document.writeln('<html><head><title>' + subject + '<\/title><\/head>');
-		preview.document.writeln('<body><pre style="font-size: 13px;">' + texte + '<\/pre><\/body><\/html>');
+		preview.document.writeln('<body><pre style="font-size: 13px;">' + message + '<\/pre><\/body><\/html>');
 	}
 	else {
-		var texte     = document.forms['send-form'].elements['body_html'].value;
-
 		if (typeof(tinyMCE) != 'undefined') {
-			texte = tinyMCE.activeEditor.getContent();
+			message = tinyMCE.activeEditor.getContent();
+		}
+		else {
+			message = document.forms['send-form'].elements['body_html'].value;
 		}
 
 		var rex_img   = new RegExp("<([^<]+)\"cid:([^\\:*/?<\">|]+)\"([^>]*)?>", "gi");
-		var rex_title = new RegExp("<title>.*</title>", "i");
+		var rex_title = new RegExp("<title>\\s*</title>", "gi");
 
-		texte = texte.replace("{LINKS}", '<a href="http://www.example.org/">Example</a>');
-		texte = texte.replace(rex_img, "<$1\"show.php?file=$2\"$3>");
-		texte = texte.replace(rex_title, '<title>' + subject + '</title>');
+		message = message.replace("{LINKS}", '<a href="http://www.example.org/">Example</a>');
+		message = message.replace(rex_img, "<$1\"show.php?file=$2\"$3>");
+		message = message.replace(rex_title, '<title>' + subject + '</title>');
 
-		preview.document.write(texte);
+		preview.document.write(message);
 	}
 
 	preview.document.close();
@@ -128,9 +130,9 @@ function preview()
 
 function addLinks()
 {
-	var texte, scrollTop = 0;
+	var message, scrollTop = 0;
 	if (this.id == 'addLinks1') {
-		texte = document.forms['send-form'].elements['body_text'];
+		message = document.forms['send-form'].elements['body_text'];
 	}
 	else {
 		if (this.id == 'addLinks2' && typeof(tinyMCE) != 'undefined') {
@@ -138,25 +140,25 @@ function addLinks()
 			return true;
 		}
 
-		texte = document.forms['send-form'].elements['body_html'];
+		message = document.forms['send-form'].elements['body_html'];
 	}
 
-	if (typeof(texte.scrollTop) != 'undefined') {
-		scrollTop = texte.scrollTop;
+	if (typeof(message.scrollTop) != 'undefined') {
+		scrollTop = message.scrollTop;
 	}
 
-	var caretPos = (texte.selectionEnd + 7);// 7 = longueur de la chaîne {LINKS}
-	var before   = (texte.value).substring(0, texte.selectionStart);
-	var after    = (texte.value).substring(texte.selectionStart, texte.textLength);
-	texte.value  = before + '{LINKS}' + after;
-	texte.selectionStart = caretPos;
-	texte.selectionEnd   = caretPos;
+	var caretPos = (message.selectionEnd + 7);// 7 = longueur de la chaîne {LINKS}
+	var before   = (message.value).substring(0, message.selectionStart);
+	var after    = (message.value).substring(message.selectionStart, message.textLength);
+	message.value  = before + '{LINKS}' + after;
+	message.selectionStart = caretPos;
+	message.selectionEnd   = caretPos;
 
 	if( scrollTop > 0 ) {
-		texte.scrollTop = scrollTop;
+		message.scrollTop = scrollTop;
 	}
 
-	texte.focus();
+	message.focus();
 }
 
 document.addEventListener('DOMContentLoaded', make_editor, false);

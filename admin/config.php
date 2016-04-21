@@ -23,7 +23,9 @@ $old_config = $nl_config;
 $move_files = false;
 
 if (isset($_POST['submit'])) {
+	$error = false;
 	$new_config = [];
+
 	foreach ($old_config as $name => $value) {
 		$new_config[$name] = filter_input(INPUT_POST, $name, FILTER_UNSAFE_RAW, [
 			'options' => ['default' => $value]
@@ -51,7 +53,7 @@ if (isset($_POST['submit'])) {
 	// Restriction de caractères sur le nom du cookie
 	if (preg_match("/[=,;\s\v]/", $new_config['cookie_name'])) {
 		$error = true;
-		$msg_error[] = nl2br($lang['Message']['Invalid_cookie_name']);
+		$output->warn('Invalid_cookie_name');
 	}
 
 	// Restriction sur le chemin de validité du cookie
@@ -65,9 +67,7 @@ if (isset($_POST['submit'])) {
 	$len = strlen($new_config['cookie_path']);
 	if (strncmp($new_config['cookie_path'], $new_config['path'], $len) != 0) {
 		$error = true;
-		$msg_error[] = nl2br(sprintf($lang['Message']['Invalid_cookie_path'],
-			htmlspecialchars($new_config['path'])
-		));
+		$output->warn('Invalid_cookie_path', $new_config['path']);
 	}
 
 	$new_config['session_length'] = intval($new_config['session_length']);
@@ -87,16 +87,12 @@ if (isset($_POST['submit'])) {
 		if (!file_exists($current_upload_dir)) {
 			if (!mkdir($current_upload_dir, 0755)) {
 				$error = true;
-				$msg_error[] = sprintf($lang['Message']['Cannot_create_dir'],
-					htmlspecialchars($current_upload_dir)
-				);
+				$output->warn('Cannot_create_dir', $current_upload_dir);
 			}
 		}
 		else if (!is_writable($current_upload_dir)) {
 			$error = true;
-			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-				htmlspecialchars($current_upload_dir)
-			);
+			$output->warn('Dir_not_writable', $current_upload_dir);
 		}
 	}
 
@@ -119,11 +115,12 @@ if (isset($_POST['submit'])) {
 	}
 
 	if ($new_config['use_smtp'] && function_exists('stream_socket_client')) {
+		$opts = $nl_config['mailer'];
+		$opts['starttls'] = ($new_config['smtp_tls'] == SECURITY_STARTTLS);
+		$opts['timeout']  = 10;
+
 		$smtp = new \Wamailer\Transport\SmtpClient();
-		$smtp->options([
-			'starttls' => ($new_config['smtp_tls'] == SECURITY_STARTTLS),
-			'timeout'  => 10
-		]);
+		$smtp->options($opts);
 
 		$server = ($new_config['smtp_tls'] == SECURITY_FULL_TLS) ? 'tls://%s:%d' : '%s:%d';
 		$server = sprintf($server, $new_config['smtp_host'], $new_config['smtp_port']);
@@ -138,9 +135,7 @@ if (isset($_POST['submit'])) {
 		}
 		catch (\Exception $e) {
 			$error = true;
-			$msg_error[] = sprintf(nl2br($lang['Message']['bad_smtp_param']),
-				htmlspecialchars($e->getMessage())
-			);
+			$output->warn('bad_smtp_param', $e->getMessage());
 		}
 
 		$smtp->quit();
@@ -152,9 +147,7 @@ if (isset($_POST['submit'])) {
 	if (!$new_config['disable_stats'] && extension_loaded('gd')) {
 		if (!is_writable($nl_config['stats_dir'])) {
 			$error = true;
-			$msg_error[] = sprintf($lang['Message']['Dir_not_writable'],
-				htmlspecialchars($nl_config['stats_dir'])
-			);
+			$output->warn('Dir_not_writable', $nl_config['stats_dir']);
 		}
 	}
 	else {

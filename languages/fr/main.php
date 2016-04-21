@@ -147,7 +147,7 @@ $lang['Message']['Success_restore']         = "La restauration des données a é
 $lang['Message']['Success_logout']          = "Vous avez été déconnecté avec succès";
 $lang['Message']['Success_purge']           = "La purge a été effectuée avec succès (%d abonné(s) supprimé(s))";
 $lang['Message']['Success_send']            = "L’envoi partiel a été effectué avec succès à <b>%d</b> abonnés.\nLa lettre de diffusion a été envoyée jusqu’à présent à <b>%d</b> abonnés sur un total de <b>%d</b>";
-$lang['Message']['Success_send_finish']     = "Envoi terminé avec succès.\nCette lettre de diffusion a été envoyée à un total de <b>%d</b> abonnés";
+$lang['Message']['Success_send_finish']     = "Envoi terminé avec succès.\nCette lettre a été envoyée à un total de <b>%d</b> abonnés";
 $lang['Message']['Success_operation']       = "L’opération a été effectuée avec succès";
 
 $lang['Message']['Profile_updated']         = "Le profil a été mis à jour avec succès";
@@ -190,6 +190,7 @@ $lang['Message']['No_liste_exists']         = "Aucune liste n’est disponible";
 $lang['Message']['No_liste_id']             = "Aucune liste de diffusion n’a été sélectionnée";
 $lang['Message']['No_log_id']               = "Aucune newsletter n’a été sélectionnée";
 $lang['Message']['log_not_exists']          = "Cette newsletter n’existe pas !";
+$lang['Message']['log_format_not_exists']   = "Aucune édition au format %s pour cette archive.";
 $lang['Message']['No_log_to_send']          = "Il n’y a actuellement aucun envoi à reprendre";
 $lang['Message']['No_abo_id']               = "Aucun abonné n’a été sélectionné";
 $lang['Message']['No_abo_email']            = "Aucune de ces adresses email n’est présente dans cette liste de diffusion";
@@ -242,6 +243,7 @@ $lang['Message']['No_gd_img_support']       = "Aucun format d’image valable n�
 $lang['Message']['Warning_debug_active']    = "<strong>Note&nbsp;:</strong> Le débogage est activé&nbsp;!";
 $lang['Message']['Invalid_prefix']          = "Le préfixe de table doit commencer par une lettre, éventuellement suivie d’autres caractères alphanumériques, et se terminer par un tiret bas ou underscore.";
 $lang['Message']['DB_connection_lost']      = "La connexion à la base de données a été perdue";
+$lang['Message']['Connect_db_error']        = "Impossible de se connecter à la base de données (%s)";
 
 $lang['Message']['Reset_password_username'] = "Si un compte correspond au nom d’utilisateur que vous avez fourni, un email de réinitialisation du mot de passe sera envoyé à l’adresse email correspondante.";
 $lang['Message']['Reset_password_email']    = "Si un compte correspond à l’adresse email que vous avez fournie, un email de réinitialisation du mot de passe sera envoyé à cette adresse email.";
@@ -256,6 +258,18 @@ $lang['Message']['Not_installed']           = "Wanewsletter ne semble pas instal
 $lang['Message']['Move_to_data_dir']        = "Utilisation de %s. Vous devriez déplacer ce fichier dans le répertoire data/.";
 $lang['Message']['No_json_extension']       = "L’extension JSON est nécessaire pour lire le contenu du fichier composer.lock !";
 $lang['Message']['Composer_lock_unreadable'] = "Impossible de lire le fichier composer.lock !";
+
+$lang['Message']['Subject_empty']           = "Vous devez donner un sujet à votre newsletter";
+$lang['Message']['Body_empty']              = "Vous devez remplir le(s) champs texte";
+$lang['Message']['No_links_in_body']        = "Vous devez placer le lien de désinscription";
+$lang['Message']['Cid_error_in_body']       = "Certains fichiers ciblés dans votre newsletter <abbr>HTML</abbr> avec le scheme <samp>cid:</samp> sont manquants (%s)";
+$lang['Message']['Joined_file_added']       = "Le fichier <q>%s</q> a été ajouté au message";
+$lang['Message']['Joined_files_removed']    = "Les fichiers sélectionnés ont été retirés du message";
+$lang['Message']['Joined_file_removed']     = "Le fichier sélectionné a été retiré du message";
+
+$lang['Message']['Invalid_liste_name']      = "Le nom de votre liste de diffusion doit faire entre 3 et 30 caractères";
+$lang['Message']['Unknown_format']          = "Format demandé inconnu";
+$lang['Message']['Xml_ext_needed']          = "Les extensions XML ou SimpleXML de PHP sont nécessaires pour analyser les fichiers XML";
 
 //
 // Divers
@@ -330,8 +344,7 @@ $lang['Click_return_index']         = "Cliquez %sici%s pour retourner sur l’ac
 $lang['Click_return_back']          = "Cliquez %sici%s pour retourner sur la page précédente";
 $lang['Click_return_form']          = "Cliquez %sici%s pour retourner au formulaire";
 $lang['Click_start_send']           = "Cliquez %sici%s si vous souhaitez démarrer l’envoi maintenant";
-$lang['Click_resend_auto']          = "Cliquez %sici%s pour continuer l’envoi de façon automatique";
-$lang['Click_resend_manuel']        = "Cliquez %sici%s pour envoyer un autre flot d’emails";
+$lang['Click_resend']               = "Cliquez %sici%s pour envoyer un autre flot d’emails";
 
 $lang['Explain']['login']           = "Si votre compte ne possède pas encore de mot de passe, vous pouvez en créer un en suivant ce lien&nbsp;: %sCréer mon mot de passe%s.";
 $lang['Explain']['Reset_passwd']    = "Entrez votre nom d’utilisateur ou votre adresse email pour recevoir un email contenant les instructions à suivre pour créer un nouveau mot de passe.";
@@ -483,8 +496,6 @@ $lang['Form_url']                   = "URL absolue de la page où se trouve le f
 $lang['Create_liste']               = "Créer une liste";
 $lang['Edit_liste']                 = "Modifier cette liste";
 $lang['Delete_liste']               = "Supprimer cette liste";
-$lang['Invalid_liste_name']         = "Le nom de votre liste de diffusion doit faire entre 3 et 30 caractères";
-$lang['Unknown_format']             = "Format demandé inconnu";
 $lang['Move_abo_logs']              = "Que souhaitez-vous faire des abonnés et newsletters rattachés à cette liste ?";
 $lang['Delete_all']                 = "Êtes-vous sûr de vouloir supprimer cette liste, ainsi que les abonnés et newsletters qui y sont rattachés ?";
 $lang['Move_to_liste']              = "Déplacer les abonnés et newsletters vers";
@@ -612,6 +623,9 @@ $lang['From_an_URL']                = "depuis une URL";
 $lang['Create_log']                 = "Créer une newsletter";
 $lang['Load_log']                   = "Charger une newsletter";
 $lang['List_send']                  = "Liste des envois en cours";
+$lang['Sending_newsletter']         = "Envoi de la lettre <q>%s</q>";
+$lang['Next_sending_delay']         = "Prochain envoi d’emails dans %d secondes";
+$lang['Process_sending']            = "Envoi en cours…";
 $lang['Restart_send']               = "Reprendre cet envoi";
 $lang['Cancel_send']                = "Annuler cet envoi";
 $lang['Model']                      = "Modèle";
@@ -623,10 +637,6 @@ $lang['Format_html']                = "Format HTML";
 $lang['Last_modified']              = "Dernière modification le %s";
 $lang['Total_log_size']             = "Poids approximatif de la newsletter";
 $lang['Join_file_to_log']           = "Fichier à joindre à cette newsletter";
-$lang['Subject_empty']              = "Vous devez donner un sujet à votre newsletter";
-$lang['Body_empty']                 = "Vous devez remplir le(s) champs texte";
-$lang['No_links_in_body']           = "Vous devez placer le lien de désinscription";
-$lang['Cid_error_in_body']          = "Certains fichiers ciblés dans votre newsletter <abbr>HTML</abbr> avec le scheme <samp>cid:</samp> sont manquants (%s)";
 $lang['Status']                     = "Statut";
 $lang['Done']                       = "Effectué";
 $lang['Status_writing']             = "Newsletter normale";
@@ -635,7 +645,7 @@ $lang['File_on_server']             = "fichier existant";
 $lang['Cancel_send_log']            = "Êtes-vous sûr de vouloir annuler cet envoi ? (Cela ne sera effectif que pour les envois restants)";
 $lang['Test_send_finish']           = "Test effectué. Vérifiez vos boîtes mail.";
 $lang['Test_send']                  = "Faire un test d’envoi";
-$lang['Test_send_note']             = "Vous pouvez faire un test d’envoi pour vérifier l’affichage de votre lettre en condition réelle. Indiquez une ou plusieurs adresses email séparées par une virgule et validez";
+$lang['Test_send_note']             = "Vous pouvez faire un test d’envoi pour vérifier l’affichage de votre lettre en condition réelle (voir aussi la %sFAQ%s). Indiquez une ou plusieurs adresses email séparées par une virgule et validez";
 
 
 //
@@ -661,20 +671,20 @@ $lang['Warning_reinstall']          = "<b>Attention !</b> Wanewsletter semble d�
 $lang['Start_install']              = "Démarrer l’installation";
 $lang['Start_upgrade']              = "Démarrer la mise à jour";
 $lang['No_db_support']              = "Désolé mais Wanewsletter %s requiert une base de données MySQL, PostgreSQL ou SQLite";
-$lang['Connect_db_error']           = "Impossible de se connecter à la base de données (%s)";
 $lang['sqldir_perms_problem']       = "Pour utiliser Wanewsletter avec une base de données SQLite, vous devez rendre accessible en lecture et écriture le répertoire <samp>%s</samp> ciblé";
 $lang['Config_file_found']          = "Fichier de configuration trouvé et chargé.";
 $lang['Config_file_manual']         = "Vous pouvez également créer manuellement le fichier de configuration <samp>data/config.inc.php</samp> en partant d’une copie du fichier <samp>data/config.sample.inc.php</samp>.";
-$lang['Install_target']             = "L’installation sera effectuée sur %s.";
+$lang['Install_target_server']      = "L’installation sera effectuée sur le serveur %s <strong>%s</strong>, dans la base de données <strong>%s</strong>.";
+$lang['Install_target_file']        = "L’installation sera effectuée dans la base de données %s <strong>%s</strong>.";
 
-$lang['Success_install']            = "L’installation s’est bien déroulée.\nVous pouvez maintenant accéder à %sl’administration%s";
-$lang['Success_install2']           = "L’installation s’est bien déroulée, mais vous devriez lire l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ. \nVous pouvez maintenant accéder à %sl’administration%s";
+$lang['Success_install']            = "L’installation s’est bien déroulée. \n<strong>Important :</strong> Vous devriez consulter l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ. \nVous pouvez maintenant accéder à %sl’administration%s";
 $lang['Success_upgrade']            = "La mise à jour s’est bien déroulée.";
 $lang['Success_install_no_config']  = "L’installation s’est bien déroulée, mais le fichier de configuration n’a pu être créé. \nVous pouvez le télécharger, puis le placer par vos propres moyens dans le répertoire <samp>data/</samp> du script (voir aussi l’entrée <q>%sprotection du répertoire <samp>data/</samp>%s</q> de la FAQ). \nVous pouvez ensuite accéder à %sl’administration%s.";
 $lang['Success_upgrade_no_config']  = "La mise à jour s’est bien déroulée, mais votre fichier de configuration est obsolète et doit être actualisé. \nVous pouvez le télécharger puis l’uploader par vos propres moyens sur le serveur dans le répertoire <samp>data/</samp> du script (l’ancien emplacement dans le répertoire <samp>includes/</samp> est obsolète mais fonctionne toujours).";
 $lang['Upgrade_not_required']       = "Aucune mise à jour n’est nécessaire pour votre version actuelle de Wanewsletter";
 $lang['Unsupported_version']        = "Cette version de Wanewsletter n’est plus supportée par le script de mise à jour. Vous devriez d’abord faire une mise à jour vers une version 2.3.x.";
 $lang['Moved_dirs_notice']          = "<strong>Note&nbsp;:</strong> Les répertoires <samp>stats/</samp> et <samp>tmp/</samp> se trouvent désormais dans le répertoire <samp>data/</samp>.\n Transférez le contenu des répertoires <samp>stats/</samp> et <samp>tmp/</samp> vers leurs équivalents dans <samp>data/</samp> et supprimez-les.\n N’oubliez pas de donner les droits en écriture sur ces répertoires.";
+$lang['Unknown_files_notice']       = "Plusieurs fichiers ne faisant pas partie de l’installation de Wanewsletter ont été détectés. Ce sont peut-être des fichiers d’anciennes versions de Wanewsletter. Auquel cas, ils peuvent être supprimés sans crainte.";
 
 $lang['Need_upgrade_db']            = "Une mise à jour des tables de données du script est nécessaire.";
 $lang['Need_upgrade_db_link']       = "Cliquez %sici%s pour accéder au script de mise à jour.";
@@ -686,7 +696,7 @@ $lang['dbhost']                     = "Nom du serveur de base de données";
 $lang['dbname']                     = "Nom de votre base de données";
 $lang['dbuser']                     = "Nom d’utilisateur";
 $lang['dbpwd']                      = "Mot de passe";
-$lang['prefixe']                    = "Préfixe des tables";
+$lang['prefix']                     = "Préfixe des tables";
 
 
 //

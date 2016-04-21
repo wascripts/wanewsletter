@@ -17,7 +17,7 @@ if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', str_replace('\\', '/', dirname(__DIR__)));
 }
 
-// $default_error_reporting est utilisé ultérieurement dans le gestionnaire d'erreurs
+// Constante utilisée ultérieurement dans le gestionnaire d’erreurs
 define(__NAMESPACE__.'\\DEFAULT_ERROR_REPORTING', (E_ALL & ~(E_STRICT|E_DEPRECATED)));
 error_reporting(DEFAULT_ERROR_REPORTING);
 
@@ -54,22 +54,15 @@ set_exception_handler(__NAMESPACE__.'\\wan_exception_handler');
 spl_autoload_register(function ($classname) {
 	if (strpos($classname, '\\')) {
 		list($prefix, $classname) = explode('\\', $classname, 2);
-		if ($prefix != 'Wanewsletter') {
-			return null;
+
+		if ($prefix == 'Wanewsletter') {
+			// Chemin includes/(<namespace>/)*<classname>.php
+			$filename = sprintf('%s/includes/%s.php', WA_ROOTDIR, str_replace('\\', '/', $classname));
+
+			if (file_exists($filename)) {
+				require $filename;
+			}
 		}
-	}
-
-	if (strpos($classname, '\\')) {
-		// Chemin includes/<namespace>/<classname>.php
-		$filename = sprintf('%s/includes/%s.php', WA_ROOTDIR, str_replace('\\', '/', $classname));
-	}
-	else {
-		// Ancien nommage de fichiers. Chemin includes/class.<classname>.php
-		$filename = sprintf('%s/includes/class.%s.php', WA_ROOTDIR, strtolower($classname));
-	}
-
-	if (is_readable($filename)) {
-		require $filename;
 	}
 });
 
@@ -94,12 +87,6 @@ else {
 		(check_in_admin() ? 'admin/' : '')
 	));
 }
-
-//
-// Initialisation des variables pour éviter toute injection malveillante de code
-//
-$error     = false;
-$msg_error = [];
 
 //
 // Chargement de la configuration de base
