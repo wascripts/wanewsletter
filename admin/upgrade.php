@@ -1084,6 +1084,17 @@ if (isset($_POST['start'])) {
 			}
 		}
 
+		//
+		// Ajout du paramètre de configuration 'sending_delay'
+		//
+		if ($nl_config['db_version'] < 28) {
+			// Seulement si la table config n'a pas été entièrement réécrite plus haut.
+			if (!$sql_tables_recreated[CONFIG_TABLE]) {
+				$sql_update[] = "INSERT INTO " . CONFIG_TABLE . " (config_name, config_value)
+					VALUES('sending_delay', '10')";
+			}
+		}
+
 		exec_queries($sql_update);
 
 		//
