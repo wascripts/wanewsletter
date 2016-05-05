@@ -414,8 +414,8 @@ class Sender
 		if ($this->logdata['log_status'] == STATUS_SENDING && $total_to_send == 0) {
 			$db->beginTransaction();
 
-			$sql = "UPDATE %s SET log_status = %d, log_numdest = %d WHERE log_id = %d";
-			$sql = sprintf($sql, LOG_TABLE, STATUS_SENT, $total_sent, $this->logdata['log_id']);
+			$sql = "UPDATE %s SET log_date = %d, log_status = %d, log_numdest = %d WHERE log_id = %d";
+			$sql = sprintf($sql, LOG_TABLE, time(), STATUS_SENT, $total_sent, $this->logdata['log_id']);
 			$db->query($sql);
 
 			$sql = "UPDATE %s SET send = 0 WHERE liste_id = %d";
@@ -427,6 +427,11 @@ class Sender
 			$db->query($sql);
 
 			$db->commit();
+		}
+		else {
+			$sql = "UPDATE %s SET log_date = %d WHERE log_id = %d";
+			$sql = sprintf($sql, LOG_TABLE, time(), $this->logdata['log_id']);
+			$db->query($sql);
 		}
 
 		return ['total_to_send' => $total_to_send, 'total_sent' => $total_sent];

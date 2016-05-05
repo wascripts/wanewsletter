@@ -25,12 +25,6 @@ use Patchwork\Utf8 as u;
 //
 const DISABLE_CHECK_LINKS = false;
 
-//
-// Délai entre deux envois
-// TODO : rendre configurable dans l'interface
-//
-const SENDING_DELAY = 10;
-
 require './start.inc.php';
 
 if (!$_SESSION['liste']) {
@@ -192,6 +186,7 @@ function save_log(array $logdata)
 		$handle_id = $tmp_id;
 		$logdata['log_status'] = STATUS_SENDING;
 		$sqldata['log_status'] = STATUS_SENDING;
+		$sqldata['log_date']   = 0;
 
 		$db->insert(LOG_TABLE, $sqldata);
 
@@ -312,7 +307,8 @@ switch ($mode) {
 		$liste_ids = array_column($auth->getLists(Auth::SEND), 'liste_id');
 		$liste_ids = implode(', ', $liste_ids);
 
-		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
+		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html,
+				log_status, log_date, liste_id
 			FROM %s
 			WHERE liste_id IN(%s)
 				AND log_id = %d
@@ -352,20 +348,46 @@ switch ($mode) {
 		//
 		@set_time_limit(3600);
 
-		//
-		// On lance l'envoi
-		//
-		$sender = new Sender($listdata, $logdata);
-		$sender->registerHook('post-send', function () { fake_header(); });
-		$sender->lock();
-		$result = $sender->process();
+		if (time() > ($logdata['log_date'] + $nl_config['sending_delay'])) {
+			//
+			// On lance l'envoi
+			//
+			$sender = new Sender($listdata, $logdata);
+			$sender->registerHook('post-send', function () { fake_header(); });
+			$sender->lock();
+			$result = $sender->process();
+		}
+		else {
+			$sql = "SELECT COUNT(send) AS num, send
+				FROM %s
+				WHERE liste_id = %d
+					AND confirmed = %d
+				GROUP BY send";
+			$sql = sprintf($sql, ABO_LISTE_TABLE, $logdata['liste_id'], SUBSCRIBE_CONFIRMED);
+			$result = $db->query($sql);
+
+			$total_sent = $total_to_send = 0;
+			while ($row = $result->fetch()) {
+				if ($row['send'] == 1) {
+					$total_sent = $row['num'];
+				}
+				else {
+					$total_to_send = $row['num'];
+				}
+			}
+
+			$result = [];
+			$result['total_sent']    = $total_sent;
+			$result['total_to_send'] = $total_to_send;
+		}
 
 		if ($result['total_to_send'] > 0) {
 			$total = ($result['total_sent'] + $result['total_to_send']);
 
 			if ($output instanceof Output\Json) {
-				$message = sprintf($lang['Next_sending_delay'], SENDING_DELAY);
+				$message = sprintf($lang['Next_sending_delay'], $nl_config['sending_delay']);
 				$result['percent'] = wa_number_format(round((($result['total_sent'] / $total) * 100), 2));
+				$result['next_sending_ts'] = (time() + $nl_config['sending_delay']);
 				$output->addParams($result);
 			}
 			else {
@@ -405,7 +427,8 @@ switch ($mode) {
 		$liste_ids = implode(', ', $liste_ids);
 
 		if ($logdata['log_id']) {
-			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
+			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html,
+					log_status, log_date, liste_id
 				FROM %s
 				WHERE liste_id IN(%s)
 					AND log_id = %d
@@ -449,19 +472,28 @@ switch ($mode) {
 
 			$template = new Template('sending_body.tpl');
 
+			if (time() > ($logdata['log_date'] + $nl_config['sending_delay'])) {
+				$next_sending_ts = time();
+				$message = $lang['Process_sending'];
+			}
+			else {
+				$next_sending_ts = ($logdata['log_date'] + $nl_config['sending_delay']);
+				$message = sprintf($lang['Next_sending_delay'], $next_sending_ts - time());
+			}
+
 			$template->assign([
 				'L_TITLE'       => $lang['List_send'],
 				'L_PROCESS'     => $lang['Process_sending'],
-				'L_NEXT_SEND'   => sprintf($lang['Next_sending_delay'], SENDING_DELAY),
 				'L_SENDING_NL'  => sprintf($lang['Sending_newsletter'],
 					htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES)
 				),
 
-				'SENDING_DELAY' => SENDING_DELAY,
-				'LOG_ID'        => $logdata['log_id'],
-				'TOTAL'         => ($total_sent + $total_to_send),
-				'TOTAL_SENT'    => $total_sent,
-				'SENT_PERCENT'  => $percent
+				'MESSAGE'         => $message,
+				'NEXT_SENDING_TS' => $next_sending_ts,
+				'LOG_ID'          => $logdata['log_id'],
+				'TOTAL'           => ($total_sent + $total_to_send),
+				'TOTAL_SENT'      => $total_sent,
+				'SENT_PERCENT'    => $percent
 			]);
 
 			$template->pparse();

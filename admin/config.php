@@ -104,6 +104,7 @@ if (isset($_POST['submit'])) {
 	$new_config['max_filesize'] *= 1024;// KiB => Bytes
 
 	$new_config['sending_limit'] = intval($new_config['sending_limit']);
+	$new_config['sending_delay'] = intval($new_config['sending_delay']);
 
 	$new_config['smtp_port'] = intval($new_config['smtp_port']);
 	if ($new_config['smtp_port'] < 1 || $new_config['smtp_port'] > 65535) {
@@ -233,6 +234,7 @@ $template->assign([
 	'L_ENGINE_UNIQ'             => $lang['With_engine_uniq'],
 	'L_SENDING_LIMIT'           => $lang['Sending_limit'],
 	'L_SENDING_LIMIT_NOTE'      => nl2br($lang['Sending_limit_note']),
+	'L_SENDING_DELAY'           => $lang['Sending_delay'],
 	'L_USE_SMTP'                => $lang['Use_smtp'],
 	'L_USE_SMTP_NOTE'           => nl2br($lang['Use_smtp_note']),
 	'L_YES'                     => $lang['Yes'],
@@ -262,6 +264,7 @@ $template->assign([
 	'CHECKED_ENGINE_BCC'        => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_BCC)),
 	'CHECKED_ENGINE_UNIQ'       => $output->getBoolAttr('checked', ($new_config['engine_send'] == ENGINE_UNIQ)),
 	'SENDING_LIMIT'             => $new_config['sending_limit'],
+	'SENDING_DELAY'             => $new_config['sending_delay'],
 	'SMTP_ROW_CLASS'            => ($new_config['use_smtp']) ? '' : 'inactive',
 	'CHECKED_USE_SMTP_ON'       => $output->getBoolAttr('checked', $new_config['use_smtp']),
 	'CHECKED_USE_SMTP_OFF'      => $output->getBoolAttr('checked', !$new_config['use_smtp']),

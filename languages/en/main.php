@@ -431,8 +431,9 @@ $lang['Max_filesize']               = "Maximum total size of a newsletter's atta
 $lang['Choice_engine_send']         = "Email send method to use";
 $lang['With_engine_bcc']            = "One email with recipients in hidden copy";
 $lang['With_engine_uniq']           = "One email to each subscriber";
-$lang['Sending_limit']              = "Number of mails sent by process";
+$lang['Sending_limit']              = "Number of mails sent by sending process";
 $lang['Sending_limit_note']         = "Leave to 0 to send all mails in one time";
+$lang['Sending_delay']              = "Delay between each sending process";
 $lang['Use_smtp']                   = "Use of a <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">smtp</abbr> server to send emails";
 $lang['Use_smtp_note']              = "Use only if your server does not have an email sending function or if you want to use a specific SMTP server!";
 $lang['Smtp_server']                = "Name or IP of the SMTP server";
