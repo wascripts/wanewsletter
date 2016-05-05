@@ -45,6 +45,7 @@
 	<li><a href="./tools.php">{L_TOOLS}</a></li>
 	<li><a href="./admin.php">{L_USERS}</a></li>
 	<li><a href="./stats.php">{L_STATS}</a></li>
+	<li><a href="../docs/">{L_DOCS}</a></li>
 </ul>
 
 <div id="global">

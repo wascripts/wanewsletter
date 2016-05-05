@@ -83,6 +83,7 @@ $lang['Module']['list']             = "Lists";
 $lang['Module']['log']              = "Old newsletters";
 $lang['Module']['tools']            = "Tools";
 $lang['Module']['stats']            = "Statistics";
+$lang['Module']['docs']             = "Documentation";
 $lang['Module']['editprofile']      = "Edit your profile";
 
 

@@ -395,6 +395,7 @@ class Html implements MessageInterface
 					'L_TOOLS'       => $lang['Module']['tools'],
 					'L_USERS'       => $lang['Module']['users'],
 					'L_STATS'       => $lang['Module']['stats'],
+					'L_DOCS'        => $lang['Module']['docs']
 				]);
 			}
 			else {
