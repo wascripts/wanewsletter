@@ -323,7 +323,7 @@ switch ($mode) {
 			$output->message();
 		}
 
-		if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
+		if (!DISABLE_CHECK_LINKS && $listdata['liste_public'] && !$listdata['form_url']) {
 			$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
 			$output->message();
 		}
@@ -443,7 +443,7 @@ switch ($mode) {
 				$output->message();
 			}
 
-			if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
+			if (!DISABLE_CHECK_LINKS && $listdata['liste_public'] && !$listdata['form_url']) {
 				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
 				$output->message();
 			}
@@ -823,7 +823,9 @@ switch ($mode) {
 				$error = true;
 				$output->warn('Body_empty');
 			}
-			else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_text'], '{LINKS}')) {
+			else if (!DISABLE_CHECK_LINKS && $listdata['liste_public']
+				&& !strstr($logdata['log_body_text'], '{LINKS}')
+			) {
 				$error = true;
 				$output->warn('No_links_in_body');
 			}
@@ -834,7 +836,9 @@ switch ($mode) {
 				$error = true;
 				$output->warn('Body_empty');
 			}
-			else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
+			else if (!DISABLE_CHECK_LINKS && $listdata['liste_public']
+				&& !strstr($logdata['log_body_html'], '{LINKS}')
+			) {
 				$error = true;
 				$output->warn('No_links_in_body');
 			}

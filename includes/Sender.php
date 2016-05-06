@@ -501,8 +501,10 @@ class Sender
 			}
 		}
 
-		// See RFC 2369#3.2
-		$this->email->headers->set('List-Unsubscribe', sprintf('<%s>', $unsubscribe_link));
+		if ($unsubscribe_link) {
+			// See RFC 2369#3.2
+			$this->email->headers->set('List-Unsubscribe', sprintf('<%s>', $unsubscribe_link));
+		}
 
 		if ($this->listdata['liste_format'] != FORMAT_HTML) {
 			$this->email->setTextBody($this->textTemplate->pparse(true));
@@ -566,9 +568,12 @@ class Sender
 				];
 			}
 			else {
-				$tmp_link = $this->listdata['form_url']
-					. (strstr($this->listdata['form_url'], '?') ? '&' : '?')
-					. '{WA_CODE}';
+				$tmp_link = $this->listdata['form_url'];
+
+				if ($tmp_link) {
+					$tmp_link .= (strstr($tmp_link, '?')) ? '&' : '?';
+					$tmp_link .= '{WA_CODE}';
+				}
 
 				$link = [
 					FORMAT_TEXT => $tmp_link,
