@@ -29,7 +29,7 @@ if (!empty($language) && validate_lang($language)) {
 	$nl_config['language'] = $language;
 }
 
-load_settings();
+load_l10n();
 
 $action = trim(filter_input(INPUT_POST, 'action'));
 $email  = trim(u::filter_input(INPUT_POST, 'email'));

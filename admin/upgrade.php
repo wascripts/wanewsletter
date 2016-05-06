@@ -486,7 +486,7 @@ if (isset($_POST['start'])) {
 	}
 
 	if (!$error) {
-		load_settings($admindata);
+		load_l10n($admindata);
 
 		//
 		// Lancement de la mise à jour

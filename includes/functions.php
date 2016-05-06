@@ -20,7 +20,7 @@ function load_config()
 {
 	global $output;
 
-	load_settings();
+	load_l10n();
 
 	$dsn = '';
 	$prefix = 'wa_';
@@ -482,7 +482,7 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
  *
  * @param array $userdata Données utilisateur
  */
-function load_settings(array &$userdata = [])
+function load_l10n(array &$userdata = [])
 {
 	global $nl_config, $output;
 

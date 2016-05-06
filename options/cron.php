@@ -19,7 +19,7 @@ require '../includes/common.inc.php';
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
 
-load_settings();
+load_l10n();
 
 $mode     = filter_input(INPUT_GET, 'mode');
 $liste_id = (int) filter_input(INPUT_GET, 'liste', FILTER_VALIDATE_INT);

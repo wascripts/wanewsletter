@@ -196,7 +196,7 @@ if (!empty($dsn)) {
 	}
 }
 
-load_settings();
+load_l10n();
 
 //
 // Idem qu'au début, mais avec éventuellement un fichier de langue différent chargé
