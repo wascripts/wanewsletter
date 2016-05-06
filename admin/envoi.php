@@ -466,6 +466,10 @@ switch ($mode) {
 				}
 			}
 
+			if (($total_sent + $total_to_send) == 0) {
+				$output->message('No_subscribers');
+			}
+
 			$percent = wa_number_format(round((($total_sent / ($total_sent + $total_to_send)) * 100), 2));
 
 			$output->header();
@@ -543,26 +547,34 @@ switch ($mode) {
 			'L_TITLE'       => $lang['List_send'],
 			'L_SUBJECT'     => $lang['Log_subject'],
 			'L_DONE'        => $lang['Done'],
-			'L_DO_SEND'     => $lang['Restart_send'],
-			'L_CANCEL_SEND' => $lang['Cancel_send'],
 			'L_CREATE_LOG'  => $lang['Create_log'],
 			'L_LOAD_LOG'    => $lang['Load_log']
 		]);
 
 		do {
-			$percent = 0;
 			if (isset($data[$row['liste_id']])) {
 				$percent = round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2);
 				$percent = wa_number_format($percent);
-			}
 
-			$template->assignToBlock('logrow', [
-				'LOG_ID'       => $row['log_id'],
-				'LOG_SUBJECT'  => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
-				'TOTAL'        => $data[$row['liste_id']]['t'],
-				'TOTAL_SENT'   => $data[$row['liste_id']][1],
-				'SENT_PERCENT' => $percent
-			]);
+				$template->assignToBlock('logrow', [
+					'L_DO_SEND'     => $lang['Restart_send'],
+					'L_CANCEL_SEND' => $lang['Cancel_send'],
+					'LOG_ID'        => $row['log_id'],
+					'LOG_SUBJECT'   => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
+					'TOTAL'         => $data[$row['liste_id']]['t'],
+					'TOTAL_SENT'    => $data[$row['liste_id']][1],
+					'SENT_PERCENT'  => $percent
+				]);
+			}
+			else {
+				$template->assignToBlock('logrow2', [
+					'L_DO_SEND'      => $lang['Restart_send'],
+					'L_CANCEL_SEND'  => $lang['Cancel_send'],
+					'LOG_ID'         => $row['log_id'],
+					'LOG_SUBJECT'    => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
+					'NO_SUBSCRIBERS' => $lang['No_registered_subscriber']
+				]);
+			}
 		}
 		while ($row = $result->fetch());
 
