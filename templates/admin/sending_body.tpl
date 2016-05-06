@@ -24,7 +24,13 @@ function sendMail()
 			}
 			// Tous les emails ont été envoyés. On le notifie à l’utilisateur.
 			else if (window.Notification && Notification.permission === "granted") {
-				var n = new Notification(data.message);
+				var opts = {};
+				var message = data.message;
+				if (message.indexOf('\n') != -1) {
+					opts.body = message.substring(message.indexOf('\n')+1);
+					message = message.substring(0, message.indexOf('\n'));
+				}
+				var n = new Notification(message, opts);
 			}
 		}
 		else {
