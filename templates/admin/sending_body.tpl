@@ -15,9 +15,21 @@ function sendMail()
 		var bar  = document.querySelector('progress');
 
 		if (!data.error) {
-			bar.value = data.total_sent;
 			bar.title = data.percent + ' %';
 			bar.textContent = data.percent + ' %';
+
+			var updateBar = window.setInterval(function () {
+				var value = parseFloat(bar.value) + (data.total_sent / 100);
+				if (value > bar.max) {
+					value = bar.max;
+				}
+
+				bar.value = value;
+
+				if (parseInt(bar.value) == data.total_sent) {
+					window.clearInterval(updateBar);
+				}
+			}, 10);
 
 			if (data.total_to_send > 0) {
 				window.setTimeout(sendMail, getDelay(data.next_sending_ts));
