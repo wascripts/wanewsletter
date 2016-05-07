@@ -83,8 +83,10 @@ includes/index.html
 includes/install.inc.php
 includes/login.inc.php
 includes/Dblayer/index.html
+includes/Dblayer/MysqlBackup.php
 includes/Dblayer/Mysql.php
 includes/Dblayer/Mysqli.php
+includes/Dblayer/PostgresBackup.php
 includes/Dblayer/Postgres.php
 includes/Dblayer/schemas/data.sql
 includes/Dblayer/schemas/index.html
@@ -92,6 +94,7 @@ includes/Dblayer/schemas/mysql_tables.sql
 includes/Dblayer/schemas/postgres_tables.sql
 includes/Dblayer/schemas/sqlite_tables.sql
 includes/Dblayer/Sqlite3.php
+includes/Dblayer/SqliteBackup.php
 includes/Dblayer/SqlitePdo.php
 includes/Dblayer/Wadb.php
 includes/Output/CommandLine.php
