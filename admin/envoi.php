@@ -125,43 +125,18 @@ foreach (['log_body_text', 'log_body_html'] as $key) {
 
 unset($replace_include, $regexp);
 
-/**
- * Fonction de sauvegarde du brouillon.
- *
- * @param array $logdata
- *
- * @return array
- */
-function save_log(array $logdata)
-{
-	global $db, $mode;
-
-	$sql_where      = '';
-	$duplicate_log  = false;
-	$duplicate_file = false;
-
-	$tmp_id = $logdata['log_id'];
-
-	//
+//
+// Sauvegarde du brouillon/modèle
+//
+if (in_array($mode, ['save','test','presend','attach','unattach'])) {
 	// Au cas où la newsletter a le statut WRITING mais que son précédent
-	// statut était MODEL, on la duplique pour garder intact le modèle.
-	// Si la newsletter a le statut MODEL et qu'on est en mode presend,
-	// on la duplique ainsi que ses fichiers joints.
-	//
-	if ($logdata['log_status'] == STATUS_WRITING) {
-		if ($mode == 'presend') {
-			$logdata['log_status'] = STATUS_SENDING;
-		}
-
-		if ($logdata['prev_status'] == STATUS_MODEL) {
-			$handle_id      = $tmp_id;
-			$tmp_id         = 0;
-			$duplicate_file = true;
-		}
-	}
-	else if ($mode == 'presend') {
-		$duplicate_log  = true;
-		$duplicate_file = true;
+	// statut était MODEL, on la duplique pour garder intact le modèle,
+	// et on duplique aussi les fichiers joints.
+	$duplicate_file = false;
+	if ($logdata['log_status'] == STATUS_WRITING && $logdata['prev_status'] == STATUS_MODEL) {
+		$duplicate_file    = true;
+		$prev_log_id       = $logdata['log_id'];
+		$logdata['log_id'] = 0;
 	}
 
 	$logdata['log_date'] = time();
@@ -170,53 +145,33 @@ function save_log(array $logdata)
 	$keys = array_fill_keys($keys, null);
 	$sqldata = array_intersect_key(array_replace($keys, $logdata), $keys);
 
-	if (empty($tmp_id)) {
+	if (!$logdata['log_id']) {
 		$db->insert(LOG_TABLE, $sqldata);
-		$tmp_id = $db->lastInsertId();
+		$logdata['log_id'] = $db->lastInsertId();
 	}
 	else {
-		$sql_where = ['log_id' => $tmp_id, 'liste_id' => $logdata['liste_id']];
+		$sql_where = ['log_id' => $logdata['log_id'], 'liste_id' => $logdata['liste_id']];
 		$db->update(LOG_TABLE, $sqldata, $sql_where);
+		unset($sql_where);
 	}
 
-	//
-	// Duplication de la newsletter
-	//
-	if ($duplicate_log) {
-		$handle_id = $tmp_id;
-		$logdata['log_status'] = STATUS_SENDING;
-		$sqldata['log_status'] = STATUS_SENDING;
-		$sqldata['log_date']   = 0;
-
-		$db->insert(LOG_TABLE, $sqldata);
-
-		$tmp_id = $db->lastInsertId();
-	}
-
-	//
 	// Duplication des entrées pour les fichiers joints
-	//
 	if ($duplicate_file) {
-		$sql = "SELECT file_id
-			FROM " . LOG_FILES_TABLE . "
-			WHERE log_id = " . $handle_id;
+		$sql = "INSERT INTO %1\$s (log_id, file_id)
+			SELECT '%2\$d', f2.file_id
+			FROM %1\$s AS f2
+			WHERE f2.log_id = %3\$d";
+		$sql = sprintf($sql, LOG_FILES_TABLE, $logdata['log_id'], $prev_log_id);
 		$result = $db->query($sql);
-
-		$sql_dataset = [];
-
-		while ($row = $result->fetch()) {
-			$sql_dataset[] = ['log_id' => $tmp_id, 'file_id' => $row['file_id']];
-		}
-
-		if (count($sql_dataset) > 0) {
-			$db->insert(LOG_FILES_TABLE, $sql_dataset);
-		}
 	}
 
-	$logdata['log_id'] = $tmp_id;
 	$logdata['prev_status'] = $logdata['log_status'];
 
-	return $logdata;
+	unset($keys, $sqldata);
+
+	if ($mode == 'save') {
+		$output->notice('log_saved');
+	}
 }
 
 switch ($mode) {
@@ -805,12 +760,6 @@ switch ($mode) {
 		}
 		break;
 
-	case 'save':
-		$logdata = save_log($logdata);
-
-		$output->notice('log_saved');
-		break;
-
 	case 'test':
 	case 'presend':
 		if (!$logdata['log_subject']) {
@@ -874,24 +823,36 @@ switch ($mode) {
 			}
 		}
 
-		// Deux newsletters ne peuvent être simultanément en attente
-		// d’envoi pour une même liste.
 		if ($mode == 'presend') {
+			// Deux newsletters ne peuvent être simultanément en attente
+			// d’envoi pour une même liste.
 			$sql = "SELECT COUNT(*) AS test
-				FROM " . LOG_TABLE . "
-				WHERE liste_id = $listdata[liste_id]
-					AND log_status = " . STATUS_SENDING;
+				FROM %s
+				WHERE liste_id = %d
+					AND log_status = %d";
+			$sql = sprintf($sql, LOG_TABLE, $logdata['liste_id'], STATUS_SENDING);
 			$result = $db->query($sql);
 
 			if ($result->column('test') > 0) {
 				$error = true;
 				$output->warn('Twice_sending');
 			}
+
+			// La liste doit comporter des abonnés...
+			$sql = "SELECT COUNT(abo_id) AS test
+				FROM %s
+				WHERE liste_id = %d
+					AND confirmed = %d";
+			$sql = sprintf($sql, ABO_LISTE_TABLE, $logdata['liste_id'], SUBSCRIBE_CONFIRMED);
+			$result = $db->query($sql);
+
+			if ($result->column('test') == 0) {
+				$error = true;
+				$output->warn('No_subscribers');
+			}
 		}
 
 		if (!$error) {
-			$logdata = save_log($logdata);
-
 			if ($mode == 'test') {
 				$supp_address = trim(filter_input(INPUT_POST, 'test_address'));
 				$supp_address = array_unique(array_map('trim', explode(',', $supp_address)));
@@ -915,6 +876,34 @@ switch ($mode) {
 				}
 			}
 			else {
+				if ($logdata['log_status'] == STATUS_MODEL) {
+					// Duplication de la newsletter
+					$keys = ['liste_id','log_subject','log_body_text','log_body_html','log_date','log_status'];
+					$keys = array_fill_keys($keys, null);
+					$sqldata = array_intersect_key(array_replace($keys, $logdata), $keys);
+					$sqldata['log_status'] = STATUS_SENDING;
+					$sqldata['log_date']   = 0;
+
+					$db->insert(LOG_TABLE, $sqldata);
+
+					$prev_log_id = $logdata['log_id'];
+					$logdata['log_id'] = $db->lastInsertId();
+
+					// Duplication des entrées pour les fichiers joints
+					$sql = "INSERT INTO %1\$s (log_id, file_id)
+						SELECT '%2\$d', f2.file_id
+						FROM %1\$s AS f2
+						WHERE f2.log_id = %3\$d";
+					$sql = sprintf($sql, LOG_FILES_TABLE, $logdata['log_id'], $prev_log_id);
+					$result = $db->query($sql);
+				}
+				else {
+					$sqldata = [];
+					$sqldata['log_status'] = STATUS_SENDING;
+					$sqldata['log_date']   = 0;
+					$db->update(LOG_TABLE, $sqldata, ['log_id' => $logdata['log_id']]);
+				}
+
 				$output->addLine($lang['Message']['log_ready']);
 				$output->addLine($lang['Click_start_send'], './envoi.php?mode=send&id=' . $logdata['log_id']);
 				$output->message();
@@ -923,8 +912,6 @@ switch ($mode) {
 		break;
 
 	case 'attach':
-		$logdata = save_log($logdata);
-
 		if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
 			$attach  = new Attach();
 
@@ -953,8 +940,6 @@ switch ($mode) {
 		break;
 
 	case 'unattach':
-		$logdata = save_log($logdata);
-
 		$file_ids = (array) filter_input(INPUT_POST, 'file_ids',
 			FILTER_VALIDATE_INT,
 			FILTER_REQUIRE_ARRAY
