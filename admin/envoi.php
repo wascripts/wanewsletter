@@ -904,7 +904,10 @@ switch ($mode) {
 					$db->update(LOG_TABLE, $sqldata, ['log_id' => $logdata['log_id']]);
 				}
 
-				$output->addLine($lang['Message']['log_ready']);
+				$message = sprintf($lang['Message']['log_ready'],
+					htmlspecialchars($listdata['liste_name'])
+				);
+				$output->addLine($message);
 				$output->addLine($lang['Click_start_send'], './envoi.php?mode=send&id=' . $logdata['log_id']);
 				$output->message();
 			}
