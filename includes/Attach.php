@@ -108,7 +108,7 @@ class Attach
 		//
 		// Vérification de la validité du nom du fichier
 		//
-		if (preg_match('/[\\:*\/?<">|\x00-\x1F\x7F-\x9F]/', $filename)) {
+		if (preg_match('/[\\:*\/?<">|\x00-\x1F]/', $filename)) {
 			throw new Exception($lang['Message']['Invalid_filename']);
 		}
 
