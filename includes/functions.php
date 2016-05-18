@@ -1427,12 +1427,13 @@ function validate_lang($language)
  * Envoi d’un fichier au client.
  * Sert les en-têtes nécessaires au téléchargement.
  *
- * @param string $filename
- * @param string $mime_type
- * @param mixed  $data      Soit directement les données à envoyer, soit une
- *                          ressource de flux.
+ * @param string  $filename
+ * @param string  $mime_type
+ * @param mixed   $data      Soit directement les données à envoyer, soit une
+ *                           ressource de flux.
+ * @param boolean $download  true pour 'forcer' le téléchargement
  */
-function sendfile($filename, $mime_type, $data)
+function sendfile($filename, $mime_type, $data, $download = true)
 {
 	if (is_resource($data)) {
 		$meta = stream_get_meta_data($data);
@@ -1448,9 +1449,18 @@ function sendfile($filename, $mime_type, $data)
 	//
 	@ini_set('zlib.output_compression', 'Off');
 	header(sprintf('Content-Length: %d', $size));
-	header(sprintf('Content-Disposition: attachment; filename="%s"', $filename));
 	header('Content-Transfer-Encoding: binary');
-	header(sprintf('Content-Type: %s; name="%s"', $mime_type, $filename));
+	header(sprintf('Content-Type: %s', $mime_type));
+
+	if (preg_match('#[\x80-\xFF]#', $filename)) {
+		$filenameParam = sprintf("filename*=UTF-8''%s", rawurlencode($filename));
+	}
+	else {
+		$filenameParam = sprintf("filename=\"%s\"", $filename);
+	}
+
+	$disposition = ($download) ? 'attachment' : 'inline';
+	header(sprintf('Content-Disposition: %s; %s', $disposition, $filenameParam));
 
 	// Repris de phpMyAdmin. Évite la double compression (par exemple avec apache + mod_deflate)
 	if (strpos($mime_type, 'gzip') !== false) {
