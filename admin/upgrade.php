@@ -97,6 +97,7 @@ includes/Dblayer/Sqlite3.php
 includes/Dblayer/SqliteBackup.php
 includes/Dblayer/SqlitePdo.php
 includes/Dblayer/Wadb.php
+includes/Dblayer/WadbBackup.php
 includes/Output/CommandLine.php
 includes/Output/Html.php
 includes/Output/Json.php
