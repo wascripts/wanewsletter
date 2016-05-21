@@ -167,7 +167,7 @@ class SqlitePdo extends Wadb
 		}
 
 		// voir parent::insert()
-		if (!is_array($dataset[0])) {
+		if (!isset($dataset[0]) || !is_array($dataset[0])) {
 			$dataset = [$dataset];
 		}
 
