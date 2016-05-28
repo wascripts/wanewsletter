@@ -95,16 +95,16 @@
         },
         {
             "name": "patchwork/utf8",
-            "version": "v1.3.0",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tchwork/utf8.git",
-                "reference": "3bd61bc162ed5c5f4a11e40a0106acc255b451d9"
+                "reference": "30ec6451aec7d2536f0af8fe535f70c764f2c47a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tchwork/utf8/zipball/3bd61bc162ed5c5f4a11e40a0106acc255b451d9",
-                "reference": "3bd61bc162ed5c5f4a11e40a0106acc255b451d9",
+                "url": "https://api.github.com/repos/tchwork/utf8/zipball/30ec6451aec7d2536f0af8fe535f70c764f2c47a",
+                "reference": "30ec6451aec7d2536f0af8fe535f70c764f2c47a",
                 "shasum": ""
             },
             "require": {
@@ -150,20 +150,20 @@
                 "utf-8",
                 "utf8"
             ],
-            "time": "2015-12-15 15:34:15"
+            "time": "2016-05-18 13:57:10"
         },
         {
             "name": "tinymce/tinymce",
-            "version": "4.3.10",
+            "version": "4.3.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tinymce/tinymce-dist.git",
-                "reference": "ee747f1bc97ec8380e7fd8a1ce827be5e735a10b"
+                "reference": "dfa88d1f6868aa80081f35f3bb0b8257181b6fdf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/ee747f1bc97ec8380e7fd8a1ce827be5e735a10b",
-                "reference": "ee747f1bc97ec8380e7fd8a1ce827be5e735a10b",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/dfa88d1f6868aa80081f35f3bb0b8257181b6fdf",
+                "reference": "dfa88d1f6868aa80081f35f3bb0b8257181b6fdf",
                 "shasum": ""
             },
             "type": "component",
@@ -196,7 +196,7 @@
                 "tinymce",
                 "wysiwyg"
             ],
-            "time": "2016-04-12 13:26:22"
+            "time": "2016-05-10 11:15:05"
         },
         {
             "name": "wascripts/wamailer",
@@ -204,16 +204,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wascripts/wamailer.git",
-                "reference": "87c2d84c30e7b91ecd2a60b1b07c1f42495e6180"
+                "reference": "f79a5aa044e0e279c49cb224200b3730aef64fc5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/87c2d84c30e7b91ecd2a60b1b07c1f42495e6180",
-                "reference": "87c2d84c30e7b91ecd2a60b1b07c1f42495e6180",
+                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/f79a5aa044e0e279c49cb224200b3730aef64fc5",
+                "reference": "f79a5aa044e0e279c49cb224200b3730aef64fc5",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.3"
+                "php": ">=5.4.0"
             },
             "type": "library",
             "extra": {
@@ -248,7 +248,7 @@
                 "source": "https://github.com/wascripts/wamailer/tree/master",
                 "issues": "https://github.com/wascripts/wamailer/issues"
             },
-            "time": "2016-04-21 15:36:44"
+            "time": "2016-05-23 13:33:26"
         }
     ],
     "packages-dev": [],
