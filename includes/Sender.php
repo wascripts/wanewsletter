@@ -414,8 +414,8 @@ class Sender
 		if ($this->logdata['log_status'] == STATUS_SENDING && $total_to_send == 0) {
 			$db->beginTransaction();
 
-			$sql = "UPDATE %s SET log_status = %d, log_numdest = %d WHERE log_id = %d";
-			$sql = sprintf($sql, LOG_TABLE, STATUS_SENT, $total_sent, $this->logdata['log_id']);
+			$sql = "UPDATE %s SET log_date = %d, log_status = %d, log_numdest = %d WHERE log_id = %d";
+			$sql = sprintf($sql, LOG_TABLE, time(), STATUS_SENT, $total_sent, $this->logdata['log_id']);
 			$db->query($sql);
 
 			$sql = "UPDATE %s SET send = 0 WHERE liste_id = %d";
@@ -427,6 +427,11 @@ class Sender
 			$db->query($sql);
 
 			$db->commit();
+		}
+		else {
+			$sql = "UPDATE %s SET log_date = %d WHERE log_id = %d";
+			$sql = sprintf($sql, LOG_TABLE, time(), $this->logdata['log_id']);
+			$db->query($sql);
 		}
 
 		return ['total_to_send' => $total_to_send, 'total_sent' => $total_sent];
@@ -496,8 +501,10 @@ class Sender
 			}
 		}
 
-		// See RFC 2369#3.2
-		$this->email->headers->set('List-Unsubscribe', sprintf('<%s>', $unsubscribe_link));
+		if ($unsubscribe_link) {
+			// See RFC 2369#3.2
+			$this->email->headers->set('List-Unsubscribe', sprintf('<%s>', $unsubscribe_link));
+		}
 
 		if ($this->listdata['liste_format'] != FORMAT_HTML) {
 			$this->email->setTextBody($this->textTemplate->pparse(true));
@@ -561,9 +568,12 @@ class Sender
 				];
 			}
 			else {
-				$tmp_link = $this->listdata['form_url']
-					. (strstr($this->listdata['form_url'], '?') ? '&' : '?')
-					. '{WA_CODE}';
+				$tmp_link = $this->listdata['form_url'];
+
+				if ($tmp_link) {
+					$tmp_link .= (strstr($tmp_link, '?')) ? '&' : '?';
+					$tmp_link .= '{WA_CODE}';
+				}
 
 				$link = [
 					FORMAT_TEXT => $tmp_link,

@@ -17,7 +17,7 @@ require '../includes/common.inc.php';
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
 
-load_settings();
+load_l10n();
 
 $liste_ids = trim(filter_input(INPUT_GET, 'liste'));
 $liste_ids = array_unique(array_map('intval', explode(' ', $liste_ids)));

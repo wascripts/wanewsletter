@@ -53,18 +53,9 @@ if ($file) {
 	header('Expires: ' . gmdate(DATE_RFC1123, (time() + $maxAge)));// HTTP 1.0
 	header('Pragma: private');// HTTP 1.0
 	header('Cache-Control: private, must-revalidate, max-age='.$maxAge);
-	header('Content-Disposition: inline; filename="' . $file['name'] . '"');
-	header('Content-Type: ' . $file['type']);
-	header('Content-Length: ' . $file['size']);
 
 	$fp = fopen($file['path'], 'rb');
-
-	while (!feof($fp)) {
-		echo fgets($fp, 1048576);
-	}
-
-	fclose($fp);
-	exit;
+	sendfile($file['name'], $file['type'], $fp, false);
 }
 else {
 	http_response_code(404);

@@ -126,7 +126,6 @@ if (!function_exists('array_column')) {
 }
 
 // PHP 5.6.0
-// Déclaration également présente dans la librairie phpass pour la portabilité de la librairie
 if (!function_exists('hash_equals')) {
 	/**
 	 * Timing attack safe string comparison

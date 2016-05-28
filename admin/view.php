@@ -105,7 +105,7 @@ if ($mode == 'export') {
 	//
 	// Ajout du BOM utf-8 pour l'archive en texte plat
 	//
-	if (preg_match('/[\x80-\x9F]/', $logdata['log_body_text'])) {
+	if (preg_match('/[\x80-\xFF]/', $logdata['log_body_text'])) {
 		$logdata['log_body_text'] = "\xEF\xBB\xBF" . $logdata['log_body_text'];
 	}
 

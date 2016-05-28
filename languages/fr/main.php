@@ -83,6 +83,7 @@ $lang['Module']['list']             = "Listes";
 $lang['Module']['log']              = "Archives";
 $lang['Module']['tools']            = "Outils";
 $lang['Module']['stats']            = "Statistiques";
+$lang['Module']['docs']             = "Documentation";
 $lang['Module']['editprofile']      = "Éditer votre profil";
 
 
@@ -160,7 +161,7 @@ $lang['Message']['Liste_del_move']          = "La liste a été supprimée avec 
 $lang['Message']['logs_deleted']            = "Les newsletters ont été supprimées avec succès";
 $lang['Message']['log_deleted']             = "La newsletter a été supprimée avec succès";
 $lang['Message']['log_saved']               = "La newsletter a été sauvegardée avec succès";
-$lang['Message']['log_ready']               = "La newsletter a été sauvegardée avec succès et est prête à être envoyée";
+$lang['Message']['log_ready']               = "La newsletter a été sauvegardée avec succès et est prête à être envoyée à la liste <q>%s</q>";
 $lang['Message']['abo_deleted']             = "Les abonnés ont été supprimés avec succès";
 $lang['Message']['Send_canceled']           = "Opération effectuée. Tous les envois restants pour cette newsletter ont été annulés";
 $lang['Message']['List_is_busy']            = "Une opération est en cours sur cette liste. Veuillez patienter quelques instants et retenter la manipulation";
@@ -430,8 +431,9 @@ $lang['Max_filesize']               = "Poids total des fichiers joints à une ne
 $lang['Choice_engine_send']         = "Méthode d’envoi à utiliser";
 $lang['With_engine_bcc']            = "Un envoi avec les destinataires en copie cachée";
 $lang['With_engine_uniq']           = "Un envoi pour chaque abonné";
-$lang['Sending_limit']              = "Nombre d’emails par flot d’envoi";
+$lang['Sending_limit']              = "Nombre d’emails par flôt d’envoi";
 $lang['Sending_limit_note']         = "Laissez à 0 pour envoyer tous les emails en une fois";
+$lang['Sending_delay']              = "Délai entre chaque flôt d’envoi";
 $lang['Use_smtp']                   = "Utilisation d’un serveur <abbr title=\"Simple Mail Transfert Protocol\" lang=\"en\">smtp</abbr> pour les envois";
 $lang['Use_smtp_note']              = "Seulement si votre serveur ne dispose d’aucune fonction d’envoi d’emails ou que vous désirez utiliser un serveur SMTP spécifique !";
 $lang['Smtp_server']                = "Nom ou IP du serveur SMTP";

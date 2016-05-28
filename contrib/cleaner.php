@@ -29,7 +29,7 @@ require WA_ROOTDIR . '/includes/common.inc.php';
 
 $db = WaDatabase($dsn);
 
-load_settings();
+load_l10n();
 
 $type = filter_input(INPUT_GET, 'type');
 $action = filter_input(INPUT_GET, 'action');

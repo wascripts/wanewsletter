@@ -39,7 +39,7 @@ else if (!isset($argc)) {
 $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
 
-load_settings();
+load_l10n();
 
 $argv[0]  = basename($argv[0]);
 $version  = WANEWSLETTER_VERSION;

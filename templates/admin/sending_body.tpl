@@ -15,16 +15,34 @@ function sendMail()
 		var bar  = document.querySelector('progress');
 
 		if (!data.error) {
-			bar.value = data.total_sent;
 			bar.title = data.percent + ' %';
 			bar.textContent = data.percent + ' %';
 
+			var updateBar = window.setInterval(function () {
+				var value = parseFloat(bar.value) + (data.total_sent / 100);
+				if (value > bar.max) {
+					value = bar.max;
+				}
+
+				bar.value = value;
+
+				if (parseInt(bar.value) == data.total_sent) {
+					window.clearInterval(updateBar);
+				}
+			}, 10);
+
 			if (data.total_to_send > 0) {
-				window.setTimeout(sendMail, {SENDING_DELAY} * 1000);
+				window.setTimeout(sendMail, getDelay(data.next_sending_ts));
 			}
 			// Tous les emails ont été envoyés. On le notifie à l’utilisateur.
 			else if (window.Notification && Notification.permission === "granted") {
-				var n = new Notification(data.message);
+				var opts = {};
+				var message = data.message;
+				if (message.indexOf('\n') != -1) {
+					opts.body = message.substring(message.indexOf('\n')+1);
+					message = message.substring(0, message.indexOf('\n'));
+				}
+				var n = new Notification(message, opts);
 			}
 		}
 		else {
@@ -38,8 +56,13 @@ function sendMail()
 	xhr.send(null);
 }
 
+function getDelay(ts)
+{
+	return (((ts + 1)*1000) - Date.now());
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-	sendMail();
+	window.setTimeout(sendMail, getDelay({NEXT_SENDING_TS}));
 }, false);
 //-->
 </script>
@@ -53,7 +76,7 @@ p.message * { vertical-align: middle; }
 <div class="block">
 	<h2>{L_SENDING_NL}</h2>
 
-	<p class="message"><span>{L_NEXT_SEND}</span>
+	<p class="message"><span>{MESSAGE}</span>
 	<img id="loading-icon" src="../templates/images/loading.gif" alt=""><br>
 	<progress value="{TOTAL_SENT}" max="{TOTAL}" title="{SENT_PERCENT}&nbsp;%">{SENT_PERCENT}&nbsp;%</progress></p>
 </div>

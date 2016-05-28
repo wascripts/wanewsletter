@@ -395,6 +395,7 @@ class Html implements MessageInterface
 					'L_TOOLS'       => $lang['Module']['tools'],
 					'L_USERS'       => $lang['Module']['users'],
 					'L_STATS'       => $lang['Module']['stats'],
+					'L_DOCS'        => $lang['Module']['docs']
 				]);
 			}
 			else {
@@ -426,13 +427,10 @@ class Html implements MessageInterface
 
 		foreach (\Wanewsletter\wanlog() as $entry) {
 			if ($entry instanceof \Throwable || $entry instanceof \Exception) {
-				// Les exceptions sont affichées via wan_exception_handler().
 				// Les erreurs fatales sont affichées via wan_error_handler().
-				if (!($entry instanceof Error)
-					|| $entry->isFatal()
-					|| $entry->ignore()
-					|| !\Wanewsletter\DELAY_ERROR_DISPLAY
-				) {
+				if (!\Wanewsletter\DELAY_ERROR_DISPLAY || (
+					($entry instanceof Error) && ($entry->isFatal() || $entry->ignore())
+				)) {
 					continue;
 				}
 

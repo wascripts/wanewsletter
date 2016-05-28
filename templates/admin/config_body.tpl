@@ -126,6 +126,12 @@ document.addEventListener('DOMContentLoaded', function() {
 				value="{SENDING_LIMIT}" min="0" size="5"
 			/></td>
 		</tr>
+		<tr>
+			<td><label for="sending_delay">{L_SENDING_DELAY}&nbsp;:</label></td>
+			<td><input type="number" id="sending_delay" name="sending_delay"
+				value="{SENDING_DELAY}" min="0" size="5"
+			/> <span class="notice">{L_SECONDS}</span></td>
+		</tr>
 		<tr id="use_smtp_choice" class="{SMTP_ROW_CLASS}">
 			<td><label>{L_USE_SMTP}&nbsp;:{WARNING_SMTP}</label><br /><span class="notice">{L_USE_SMTP_NOTE}</span></td>
 			<td>

@@ -25,12 +25,6 @@ use Patchwork\Utf8 as u;
 //
 const DISABLE_CHECK_LINKS = false;
 
-//
-// Délai entre deux envois
-// TODO : rendre configurable dans l'interface
-//
-const SENDING_DELAY = 10;
-
 require './start.inc.php';
 
 if (!$_SESSION['liste']) {
@@ -131,43 +125,18 @@ foreach (['log_body_text', 'log_body_html'] as $key) {
 
 unset($replace_include, $regexp);
 
-/**
- * Fonction de sauvegarde du brouillon.
- *
- * @param array $logdata
- *
- * @return array
- */
-function save_log(array $logdata)
-{
-	global $db, $mode;
-
-	$sql_where      = '';
-	$duplicate_log  = false;
-	$duplicate_file = false;
-
-	$tmp_id = $logdata['log_id'];
-
-	//
+//
+// Sauvegarde du brouillon/modèle
+//
+if (in_array($mode, ['save','test','presend','attach','unattach'])) {
 	// Au cas où la newsletter a le statut WRITING mais que son précédent
-	// statut était MODEL, on la duplique pour garder intact le modèle.
-	// Si la newsletter a le statut MODEL et qu'on est en mode presend,
-	// on la duplique ainsi que ses fichiers joints.
-	//
-	if ($logdata['log_status'] == STATUS_WRITING) {
-		if ($mode == 'presend') {
-			$logdata['log_status'] = STATUS_SENDING;
-		}
-
-		if ($logdata['prev_status'] == STATUS_MODEL) {
-			$handle_id      = $tmp_id;
-			$tmp_id         = 0;
-			$duplicate_file = true;
-		}
-	}
-	else if ($mode == 'presend') {
-		$duplicate_log  = true;
-		$duplicate_file = true;
+	// statut était MODEL, on la duplique pour garder intact le modèle,
+	// et on duplique aussi les fichiers joints.
+	$duplicate_file = false;
+	if ($logdata['log_status'] == STATUS_WRITING && $logdata['prev_status'] == STATUS_MODEL) {
+		$duplicate_file    = true;
+		$prev_log_id       = $logdata['log_id'];
+		$logdata['log_id'] = 0;
 	}
 
 	$logdata['log_date'] = time();
@@ -176,52 +145,33 @@ function save_log(array $logdata)
 	$keys = array_fill_keys($keys, null);
 	$sqldata = array_intersect_key(array_replace($keys, $logdata), $keys);
 
-	if (empty($tmp_id)) {
+	if (!$logdata['log_id']) {
 		$db->insert(LOG_TABLE, $sqldata);
-		$tmp_id = $db->lastInsertId();
+		$logdata['log_id'] = $db->lastInsertId();
 	}
 	else {
-		$sql_where = ['log_id' => $tmp_id, 'liste_id' => $logdata['liste_id']];
+		$sql_where = ['log_id' => $logdata['log_id'], 'liste_id' => $logdata['liste_id']];
 		$db->update(LOG_TABLE, $sqldata, $sql_where);
+		unset($sql_where);
 	}
 
-	//
-	// Duplication de la newsletter
-	//
-	if ($duplicate_log) {
-		$handle_id = $tmp_id;
-		$logdata['log_status'] = STATUS_SENDING;
-		$sqldata['log_status'] = STATUS_SENDING;
-
-		$db->insert(LOG_TABLE, $sqldata);
-
-		$tmp_id = $db->lastInsertId();
-	}
-
-	//
 	// Duplication des entrées pour les fichiers joints
-	//
 	if ($duplicate_file) {
-		$sql = "SELECT file_id
-			FROM " . LOG_FILES_TABLE . "
-			WHERE log_id = " . $handle_id;
+		$sql = "INSERT INTO %1\$s (log_id, file_id)
+			SELECT '%2\$d', f2.file_id
+			FROM %1\$s AS f2
+			WHERE f2.log_id = %3\$d";
+		$sql = sprintf($sql, LOG_FILES_TABLE, $logdata['log_id'], $prev_log_id);
 		$result = $db->query($sql);
-
-		$sql_dataset = [];
-
-		while ($row = $result->fetch()) {
-			$sql_dataset[] = ['log_id' => $tmp_id, 'file_id' => $row['file_id']];
-		}
-
-		if (count($sql_dataset) > 0) {
-			$db->insert(LOG_FILES_TABLE, $sql_dataset);
-		}
 	}
 
-	$logdata['log_id'] = $tmp_id;
 	$logdata['prev_status'] = $logdata['log_status'];
 
-	return $logdata;
+	unset($keys, $sqldata);
+
+	if ($mode == 'save') {
+		$output->notice('log_saved');
+	}
 }
 
 switch ($mode) {
@@ -312,7 +262,8 @@ switch ($mode) {
 		$liste_ids = array_column($auth->getLists(Auth::SEND), 'liste_id');
 		$liste_ids = implode(', ', $liste_ids);
 
-		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
+		$sql = "SELECT log_id, log_subject, log_body_text, log_body_html,
+				log_status, log_date, liste_id
 			FROM %s
 			WHERE liste_id IN(%s)
 				AND log_id = %d
@@ -327,7 +278,7 @@ switch ($mode) {
 			$output->message();
 		}
 
-		if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
+		if (!DISABLE_CHECK_LINKS && $listdata['liste_public'] && !$listdata['form_url']) {
 			$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
 			$output->message();
 		}
@@ -352,20 +303,46 @@ switch ($mode) {
 		//
 		@set_time_limit(3600);
 
-		//
-		// On lance l'envoi
-		//
-		$sender = new Sender($listdata, $logdata);
-		$sender->registerHook('post-send', function () { fake_header(); });
-		$sender->lock();
-		$result = $sender->process();
+		if (time() > ($logdata['log_date'] + $nl_config['sending_delay'])) {
+			//
+			// On lance l'envoi
+			//
+			$sender = new Sender($listdata, $logdata);
+			$sender->registerHook('post-send', function () { fake_header(); });
+			$sender->lock();
+			$result = $sender->process();
+		}
+		else {
+			$sql = "SELECT COUNT(send) AS num, send
+				FROM %s
+				WHERE liste_id = %d
+					AND confirmed = %d
+				GROUP BY send";
+			$sql = sprintf($sql, ABO_LISTE_TABLE, $logdata['liste_id'], SUBSCRIBE_CONFIRMED);
+			$result = $db->query($sql);
+
+			$total_sent = $total_to_send = 0;
+			while ($row = $result->fetch()) {
+				if ($row['send'] == 1) {
+					$total_sent = $row['num'];
+				}
+				else {
+					$total_to_send = $row['num'];
+				}
+			}
+
+			$result = [];
+			$result['total_sent']    = $total_sent;
+			$result['total_to_send'] = $total_to_send;
+		}
 
 		if ($result['total_to_send'] > 0) {
 			$total = ($result['total_sent'] + $result['total_to_send']);
 
 			if ($output instanceof Output\Json) {
-				$message = sprintf($lang['Next_sending_delay'], SENDING_DELAY);
+				$message = sprintf($lang['Next_sending_delay'], $nl_config['sending_delay']);
 				$result['percent'] = wa_number_format(round((($result['total_sent'] / $total) * 100), 2));
+				$result['next_sending_ts'] = (time() + $nl_config['sending_delay']);
 				$output->addParams($result);
 			}
 			else {
@@ -405,7 +382,8 @@ switch ($mode) {
 		$liste_ids = implode(', ', $liste_ids);
 
 		if ($logdata['log_id']) {
-			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html, log_status, liste_id
+			$sql = "SELECT log_id, log_subject, log_body_text, log_body_html,
+					log_status, log_date, liste_id
 				FROM %s
 				WHERE liste_id IN(%s)
 					AND log_id = %d
@@ -420,7 +398,7 @@ switch ($mode) {
 				$output->message();
 			}
 
-			if (!DISABLE_CHECK_LINKS && empty($listdata['form_url'])) {
+			if (!DISABLE_CHECK_LINKS && $listdata['liste_public'] && !$listdata['form_url']) {
 				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
 				$output->message();
 			}
@@ -443,25 +421,38 @@ switch ($mode) {
 				}
 			}
 
+			if (($total_sent + $total_to_send) == 0) {
+				$output->message('No_subscribers');
+			}
+
 			$percent = wa_number_format(round((($total_sent / ($total_sent + $total_to_send)) * 100), 2));
 
 			$output->header();
 
 			$template = new Template('sending_body.tpl');
 
+			if (time() > ($logdata['log_date'] + $nl_config['sending_delay'])) {
+				$next_sending_ts = time();
+				$message = $lang['Process_sending'];
+			}
+			else {
+				$next_sending_ts = ($logdata['log_date'] + $nl_config['sending_delay']);
+				$message = sprintf($lang['Next_sending_delay'], $next_sending_ts - time());
+			}
+
 			$template->assign([
 				'L_TITLE'       => $lang['List_send'],
 				'L_PROCESS'     => $lang['Process_sending'],
-				'L_NEXT_SEND'   => sprintf($lang['Next_sending_delay'], SENDING_DELAY),
 				'L_SENDING_NL'  => sprintf($lang['Sending_newsletter'],
 					htmlspecialchars($logdata['log_subject'], ENT_NOQUOTES)
 				),
 
-				'SENDING_DELAY' => SENDING_DELAY,
-				'LOG_ID'        => $logdata['log_id'],
-				'TOTAL'         => ($total_sent + $total_to_send),
-				'TOTAL_SENT'    => $total_sent,
-				'SENT_PERCENT'  => $percent
+				'MESSAGE'         => $message,
+				'NEXT_SENDING_TS' => $next_sending_ts,
+				'LOG_ID'          => $logdata['log_id'],
+				'TOTAL'           => ($total_sent + $total_to_send),
+				'TOTAL_SENT'      => $total_sent,
+				'SENT_PERCENT'    => $percent
 			]);
 
 			$template->pparse();
@@ -511,26 +502,34 @@ switch ($mode) {
 			'L_TITLE'       => $lang['List_send'],
 			'L_SUBJECT'     => $lang['Log_subject'],
 			'L_DONE'        => $lang['Done'],
-			'L_DO_SEND'     => $lang['Restart_send'],
-			'L_CANCEL_SEND' => $lang['Cancel_send'],
 			'L_CREATE_LOG'  => $lang['Create_log'],
 			'L_LOAD_LOG'    => $lang['Load_log']
 		]);
 
 		do {
-			$percent = 0;
 			if (isset($data[$row['liste_id']])) {
 				$percent = round((($data[$row['liste_id']][1] / $data[$row['liste_id']]['t']) * 100), 2);
 				$percent = wa_number_format($percent);
-			}
 
-			$template->assignToBlock('logrow', [
-				'LOG_ID'       => $row['log_id'],
-				'LOG_SUBJECT'  => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
-				'TOTAL'        => $data[$row['liste_id']]['t'],
-				'TOTAL_SENT'   => $data[$row['liste_id']][1],
-				'SENT_PERCENT' => $percent
-			]);
+				$template->assignToBlock('logrow', [
+					'L_DO_SEND'     => $lang['Restart_send'],
+					'L_CANCEL_SEND' => $lang['Cancel_send'],
+					'LOG_ID'        => $row['log_id'],
+					'LOG_SUBJECT'   => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
+					'TOTAL'         => $data[$row['liste_id']]['t'],
+					'TOTAL_SENT'    => $data[$row['liste_id']][1],
+					'SENT_PERCENT'  => $percent
+				]);
+			}
+			else {
+				$template->assignToBlock('logrow2', [
+					'L_DO_SEND'      => $lang['Restart_send'],
+					'L_CANCEL_SEND'  => $lang['Cancel_send'],
+					'LOG_ID'         => $row['log_id'],
+					'LOG_SUBJECT'    => htmlspecialchars($row['log_subject'], ENT_NOQUOTES),
+					'NO_SUBSCRIBERS' => $lang['No_registered_subscriber']
+				]);
+			}
 		}
 		while ($row = $result->fetch());
 
@@ -761,12 +760,6 @@ switch ($mode) {
 		}
 		break;
 
-	case 'save':
-		$logdata = save_log($logdata);
-
-		$output->notice('log_saved');
-		break;
-
 	case 'test':
 	case 'presend':
 		if (!$logdata['log_subject']) {
@@ -779,7 +772,9 @@ switch ($mode) {
 				$error = true;
 				$output->warn('Body_empty');
 			}
-			else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_text'], '{LINKS}')) {
+			else if (!DISABLE_CHECK_LINKS && $listdata['liste_public']
+				&& !strstr($logdata['log_body_text'], '{LINKS}')
+			) {
 				$error = true;
 				$output->warn('No_links_in_body');
 			}
@@ -790,7 +785,9 @@ switch ($mode) {
 				$error = true;
 				$output->warn('Body_empty');
 			}
-			else if (!DISABLE_CHECK_LINKS && !strstr($logdata['log_body_html'], '{LINKS}')) {
+			else if (!DISABLE_CHECK_LINKS && $listdata['liste_public']
+				&& !strstr($logdata['log_body_html'], '{LINKS}')
+			) {
 				$error = true;
 				$output->warn('No_links_in_body');
 			}
@@ -826,24 +823,36 @@ switch ($mode) {
 			}
 		}
 
-		// Deux newsletters ne peuvent être simultanément en attente
-		// d’envoi pour une même liste.
 		if ($mode == 'presend') {
+			// Deux newsletters ne peuvent être simultanément en attente
+			// d’envoi pour une même liste.
 			$sql = "SELECT COUNT(*) AS test
-				FROM " . LOG_TABLE . "
-				WHERE liste_id = $listdata[liste_id]
-					AND log_status = " . STATUS_SENDING;
+				FROM %s
+				WHERE liste_id = %d
+					AND log_status = %d";
+			$sql = sprintf($sql, LOG_TABLE, $logdata['liste_id'], STATUS_SENDING);
 			$result = $db->query($sql);
 
 			if ($result->column('test') > 0) {
 				$error = true;
 				$output->warn('Twice_sending');
 			}
+
+			// La liste doit comporter des abonnés...
+			$sql = "SELECT COUNT(abo_id) AS test
+				FROM %s
+				WHERE liste_id = %d
+					AND confirmed = %d";
+			$sql = sprintf($sql, ABO_LISTE_TABLE, $logdata['liste_id'], SUBSCRIBE_CONFIRMED);
+			$result = $db->query($sql);
+
+			if ($result->column('test') == 0) {
+				$error = true;
+				$output->warn('No_subscribers');
+			}
 		}
 
 		if (!$error) {
-			$logdata = save_log($logdata);
-
 			if ($mode == 'test') {
 				$supp_address = trim(filter_input(INPUT_POST, 'test_address'));
 				$supp_address = array_unique(array_map('trim', explode(',', $supp_address)));
@@ -867,7 +876,38 @@ switch ($mode) {
 				}
 			}
 			else {
-				$output->addLine($lang['Message']['log_ready']);
+				if ($logdata['log_status'] == STATUS_MODEL) {
+					// Duplication de la newsletter
+					$keys = ['liste_id','log_subject','log_body_text','log_body_html','log_date','log_status'];
+					$keys = array_fill_keys($keys, null);
+					$sqldata = array_intersect_key(array_replace($keys, $logdata), $keys);
+					$sqldata['log_status'] = STATUS_SENDING;
+					$sqldata['log_date']   = 0;
+
+					$db->insert(LOG_TABLE, $sqldata);
+
+					$prev_log_id = $logdata['log_id'];
+					$logdata['log_id'] = $db->lastInsertId();
+
+					// Duplication des entrées pour les fichiers joints
+					$sql = "INSERT INTO %1\$s (log_id, file_id)
+						SELECT '%2\$d', f2.file_id
+						FROM %1\$s AS f2
+						WHERE f2.log_id = %3\$d";
+					$sql = sprintf($sql, LOG_FILES_TABLE, $logdata['log_id'], $prev_log_id);
+					$result = $db->query($sql);
+				}
+				else {
+					$sqldata = [];
+					$sqldata['log_status'] = STATUS_SENDING;
+					$sqldata['log_date']   = 0;
+					$db->update(LOG_TABLE, $sqldata, ['log_id' => $logdata['log_id']]);
+				}
+
+				$message = sprintf($lang['Message']['log_ready'],
+					htmlspecialchars($listdata['liste_name'])
+				);
+				$output->addLine($message);
 				$output->addLine($lang['Click_start_send'], './envoi.php?mode=send&id=' . $logdata['log_id']);
 				$output->message();
 			}
@@ -875,8 +915,6 @@ switch ($mode) {
 		break;
 
 	case 'attach':
-		$logdata = save_log($logdata);
-
 		if ($auth->check(Auth::ATTACH, $listdata['liste_id'])) {
 			$attach  = new Attach();
 
@@ -905,8 +943,6 @@ switch ($mode) {
 		break;
 
 	case 'unattach':
-		$logdata = save_log($logdata);
-
 		$file_ids = (array) filter_input(INPUT_POST, 'file_ids',
 			FILTER_VALIDATE_INT,
 			FILTER_REQUIRE_ARRAY

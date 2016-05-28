@@ -58,7 +58,7 @@ if (!defined(__NAMESPACE__.'\\IN_LOGIN')) {
 		http_redirect('login.php');
 	}
 
-	load_settings($admindata);
+	load_l10n($admindata);
 
 	//
 	// Si la liste en session n'existe pas, on met à jour la session.

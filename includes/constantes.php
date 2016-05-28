@@ -13,14 +13,14 @@ namespace Wanewsletter;
 // Version correspondant au code source en place sur le serveur.
 // Remplace la constante obsolète WA_VERSION, jadis définie dans le fichier de configuration.
 //
-const WANEWSLETTER_VERSION = '3.0-beta4';
+const WANEWSLETTER_VERSION = '3.0.0';
 
 //
 // identifiant de version des tables du script.
 // Doit correspondre à l'entrée 'db_version' dans la configuration, sinon,
 // le script invite l'utilisateur à lancer la procédure de mise à jour des tables
 //
-const WANEWSLETTER_DB_VERSION = 27;
+const WANEWSLETTER_DB_VERSION = 28;
 
 //
 // Modes de débogage du script
@@ -39,7 +39,7 @@ const DEBUG_LEVEL_ALL    = 3;
 //
 // Configure le niveau de débogage souhaité
 //
-const DEBUG_MODE = DEBUG_LEVEL_NORMAL;
+const DEBUG_MODE = DEBUG_LEVEL_QUIET;
 
 //
 // Active/Désactive l'affichage des messages d'erreur en pied de page.

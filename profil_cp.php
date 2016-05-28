@@ -24,7 +24,7 @@ $db = WaDatabase($dsn);
 $nl_config = wa_get_config();
 
 if (!$nl_config['enable_profil_cp']) {
-	load_settings();
+	load_l10n();
 	$output->message('Profil_cp_disabled');
 }
 
@@ -61,7 +61,7 @@ if (empty($abodata['abo_lang'])) {
 	$abodata['abo_lang'] = $nl_config['language'];
 }
 
-load_settings($abodata);
+load_l10n($abodata);
 
 $other_tags = wan_get_tags();
 
