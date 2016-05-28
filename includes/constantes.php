@@ -39,7 +39,7 @@ const DEBUG_LEVEL_ALL    = 3;
 //
 // Configure le niveau de débogage souhaité
 //
-const DEBUG_MODE = DEBUG_LEVEL_NORMAL;
+const DEBUG_MODE = DEBUG_LEVEL_QUIET;
 
 //
 // Active/Désactive l'affichage des messages d'erreur en pied de page.
