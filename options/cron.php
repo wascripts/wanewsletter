@@ -9,8 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
-
 require '../includes/common.inc.php';
 
 //
