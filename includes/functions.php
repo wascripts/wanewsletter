@@ -1547,6 +1547,7 @@ function print_debug_infos()
 	$print_row('max_filesize',  $nl_config['max_filesize']);
 	$print_row('engine_send',   $nl_config['engine_send']);
 	$print_row('sending_limit', $nl_config['sending_limit']);
+	$print_row('sending_delay', $nl_config['sending_delay']);
 	$print_row('use_smtp',      (bool) $nl_config['use_smtp']);
 
 	$print_head($lang['Third_party_libraries']);
@@ -1629,6 +1630,7 @@ function print_debug_infos()
 	$print_row('upload_max_filesize', ini_get('upload_max_filesize'));
 	$print_row('post_max_size', ini_get('post_max_size'));
 	$print_row('max_input_time', ini_get('max_input_time'));
+	$print_row('max_input_vars', ini_get('max_input_vars'));
 	$print_row('memory_limit', ini_get('memory_limit'));
 	$print_row('mail.add_x_header', ini_get_flag('mail.add_x_header'));
 	$print_row('mail.force_extra_parameters', ini_get('mail.force_extra_parameters'));
