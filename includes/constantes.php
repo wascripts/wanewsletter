@@ -73,6 +73,13 @@ const X_MAILER_HEADER = USER_AGENT_SIG;
 // Format par défaut des dates
 const DEFAULT_DATE_FORMAT = 'd F Y H:i';
 
+// Longueur max. pour les noms de liste.
+// Attention avec les noms de liste, sachant qu'ils apparaissent dans le sujet
+// de certains emails (inscription, confirmation, désinscription).
+// La longueur NE DOIT PAS dépasser 100 caractères, limite posée à la création
+// de la table wa_liste (VARCHAR(100) sur la colonne liste_name).
+const LISTE_NAME_MAXLEN = 30;
+
 ##################################################################
 ## Il est recommandé de ne rien modifier au-delà de cette ligne ##
 ##################################################################

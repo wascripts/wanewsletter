@@ -916,7 +916,7 @@ else if ($mode == 'liste') {
 			$liste_name = strip_tags($liste_name);
 			$liste_sig  = strip_tags($liste_sig);
 
-			if (mb_strlen($liste_name) < 3 || mb_strlen($liste_name) > 30) {
+			if (mb_strlen($liste_name) < 3 || mb_strlen($liste_name) > LISTE_NAME_MAXLEN) {
 				$error = true;
 				$output->warn('Invalid_liste_name');
 			}
