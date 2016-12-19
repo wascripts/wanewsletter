@@ -173,6 +173,8 @@ else if ($mode == 'iframe') {
 		);
 	}
 	else {
+		$form_url = get_form_url($listdata);
+		$form_url = sprintf('<a href="#" onclick="return false;">%s (lien fictif)</a>', $form_url);
 		// on normalise les fins de ligne pour s'assurer du bon
 		// fonctionnement de wordwrap()
 		$body = preg_replace("/\r\n?|\n/", "\r\n", $body);
@@ -181,7 +183,7 @@ else if ($mode == 'iframe') {
 		$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
 		$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
 		$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
-		$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
+		$body = str_replace('{LINKS}', $form_url, $body);
 		$output->basic(sprintf('<pre style="font-size: 13px;">%s</pre>', $body));
 	}
 
@@ -1035,6 +1037,7 @@ else if ($mode == 'liste') {
 			'L_LIMITEVALIDATE'     => $lang['Limite_validate'],
 			'L_NOTE_VALIDATE'      => nl2br($lang['Note_validate']),
 			'L_FORM_URL'           => $lang['Form_url'],
+			'L_FORM_URL_NOTE'      => $lang['Form_url_note'],
 			'L_SIG_EMAIL'          => $lang['Sig_email'],
 			'L_SIG_EMAIL_NOTE'     => nl2br($lang['Sig_email_note']),
 			'L_DAYS'               => $lang['Days'],

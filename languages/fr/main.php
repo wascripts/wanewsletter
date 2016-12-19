@@ -207,7 +207,6 @@ $lang['Message']['Invalid_url']             = "L’url donnée n’est pas valid
 $lang['Message']['Unaccess_host']           = "L’hôte %s semble inaccessible actuellement";
 $lang['Message']['Not_found_at_url']        = "Le fichier ne semble pas présent à l’url indiquée";
 $lang['Message']['Error_load_url']          = "Erreur dans le chargement de l’url \"%1\$s\" (%2\$s)";
-$lang['Message']['No_form_url']             = "Vous n’avez pas spécifié l’adresse du formulaire dans la %sconfiguration de votre liste%s.\nVous devez corriger cela avant de pouvoir commencer l’envoi.";
 $lang['Message']['File_not_found']          = "Ce fichier est introuvable sur le serveur";
 $lang['Message']['Config_loading_url']      = "Pour charger des URLs distantes, vous avez besoin soit de l'extension curl de PHP, soit d'activer l'option PHP allow_url_fopen.";
 
@@ -495,6 +494,7 @@ $lang['Reg_subscribers_list']       = "Nombre d’inscrits à cette liste";
 $lang['Tmp_subscribers_list']       = "Nombre d’inscriptions non confirmées";
 $lang['Last_newsletter2']           = "Dernière newsletter envoyée le";
 $lang['Form_url']                   = "URL absolue de la page où se trouve le formulaire";
+$lang['Form_url_note']              = "Si laissé vide, une adresse pointant vers subscribe.php sera utilisée";
 $lang['Create_liste']               = "Créer une liste";
 $lang['Edit_liste']                 = "Modifier cette liste";
 $lang['Delete_liste']               = "Supprimer cette liste";

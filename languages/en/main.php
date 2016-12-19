@@ -207,7 +207,6 @@ $lang['Message']['Invalid_url']             = "Given URL is not valid";
 $lang['Message']['Unaccess_host']           = "The host %s seems actually unreachable";
 $lang['Message']['Not_found_at_url']        = "The file does not seems to be at indicated URL";
 $lang['Message']['Error_load_url']          = "Error while loading url \"%1\$s\" (%2\$s)";
-$lang['Message']['No_form_url']             = "you don't have specified the url of the form into the %sconfig of your list%s.\nYou must correct it before starting to send mail(s).";
 $lang['Message']['File_not_found']          = "This file was not found on server";
 $lang['Message']['Config_loading_url']      = "To load remote URLs, you need either the curl PHP extension or activate the PHP allow_url_fopen option.";
 
@@ -496,6 +495,7 @@ $lang['Reg_subscribers_list']       = "Number of subscribers to this list";
 $lang['Tmp_subscribers_list']       = "Number of unconfirmed subscriptions";
 $lang['Last_newsletter2']           = "Last newsletter sent";
 $lang['Form_url']                   = "Absolute URL of the page where the form is located";
+$lang['Form_url_note']              = "If left empty, an address pointing to subscribe.php will be used";
 $lang['Create_liste']               = "Create a list";
 $lang['Edit_liste']                 = "Edit this list";
 $lang['Delete_liste']               = "Delete this list";

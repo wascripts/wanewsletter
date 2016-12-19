@@ -31,7 +31,7 @@
 			<td><input type="text" id="return_email" name="return_email" value="{RETURN_EMAIL}" size="40" maxlength="254" /></td>
 		</tr>
 		<tr>
-			<td><label for="form_url">{L_FORM_URL}&nbsp;:</label></td>
+			<td><label for="form_url">{L_FORM_URL}&nbsp;:</label><br><span class="notice">{L_FORM_URL_NOTE}</span></td>
 			<td><input type="text" id="form_url" name="form_url" value="{FORM_URL}" size="40" maxlength="255" /></td>
 		</tr>
 		<tr>

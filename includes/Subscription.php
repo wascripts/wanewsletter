@@ -412,15 +412,15 @@ class Subscription
 			]);
 		}
 		else {
+			$form_url = get_form_url($listdata);
 			if (!empty($GLOBALS['formURL'])) {
-				$listdata['form_url'] = $GLOBALS['formURL'];
+				$form_url = $GLOBALS['formURL'];
 			}
 
-			$formURL  = $listdata['form_url'];
-			$formURL .= (strstr($formURL, '?') ? '&' : '?');
-			$formURL .= $abodata['register_key'];
+			$form_url .= (strstr($form_url, '?') ? '&' : '?');
+			$form_url .= $abodata['register_key'];
 
-			$template->assign(['LINK' => $formURL]);
+			$template->assign(['LINK' => $form_url]);
 		}
 
 		$tags = [];

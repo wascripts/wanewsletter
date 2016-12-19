@@ -1984,3 +1984,25 @@ function get_joined_files(array $logdata)
 
 	return $result->fetchAll($result::FETCH_ASSOC);
 }
+
+/**
+ * Retourne l'adresse URL du formulaire d’inscription/désinscription
+ *
+ * @param array $listdata
+ *
+ * @return string
+ */
+function get_form_url(array $listdata)
+{
+	global $nl_config;
+
+	$form_url = $listdata['form_url'];
+
+	if (!$form_url) {
+		$form_url  = $nl_config['urlsite'];
+		$form_url .= $nl_config['path'];
+		$form_url .= 'subscribe.php';
+	}
+
+	return $form_url;
+}
