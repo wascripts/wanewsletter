@@ -595,25 +595,14 @@ else if ($mode == 'abonnes') {
 	// Suppression d'un ou plusieurs profils abonnés
 	//
 	else if ($action == 'delete') {
-		$email_list = trim(u::filter_input(INPUT_POST, 'email_list'));
-		$abo_ids    = (array) filter_input(INPUT_POST, 'id',
-			FILTER_VALIDATE_INT,
-			FILTER_REQUIRE_ARRAY
-		);
-		$abo_ids = array_filter($abo_ids);
-
-		// Spécial. Cas où on veut supprimer un  seul compte et l'ID est
-		// fourni seul via le lien "Supprimer ce compte".
-		if (count($abo_ids) == 0 && $abo_id > 0) {
-			$abo_ids = [$abo_id];
-		}
-
-		if ($email_list == '' && count($abo_ids) == 0) {
-			$output->redirect('./view.php?mode=abonnes', 4);
-			$output->message('No_abo_id');
-		}
-
 		if (isset($_POST['confirm'])) {
+			$abo_ids = $_SESSION['abo_ids'];
+
+			if (!$abo_ids) {
+				$output->redirect('./view.php?mode=abonnes', 4);
+				$output->message('No_abo_id');
+			}
+
 			$db->beginTransaction();
 
 			$sql = "DELETE FROM " . ABONNES_TABLE . "
@@ -638,6 +627,8 @@ else if ($mode == 'abonnes') {
 			//
 			$db->vacuum([ABONNES_TABLE, ABO_LISTE_TABLE]);
 
+			unset($_SESSION['abo_ids']);
+
 			$target = './view.php?mode=abonnes';
 			$output->redirect($target, 4);
 			$output->addLine($lang['Message']['abo_deleted']);
@@ -645,6 +636,24 @@ else if ($mode == 'abonnes') {
 			$output->message();
 		}
 		else {
+			$email_list = trim(u::filter_input(INPUT_POST, 'email_list'));
+			$abo_ids    = (array) filter_input(INPUT_POST, 'id',
+				FILTER_VALIDATE_INT,
+				FILTER_REQUIRE_ARRAY
+			);
+			$abo_ids = array_filter($abo_ids);
+
+			// Spécial. Cas où on veut supprimer un  seul compte et l'ID est
+			// fourni seul via le lien "Supprimer ce compte".
+			if (count($abo_ids) == 0 && $abo_id > 0) {
+				$abo_ids = [$abo_id];
+			}
+
+			if ($email_list == '' && count($abo_ids) == 0) {
+				$output->redirect('./view.php?mode=abonnes', 4);
+				$output->message('No_abo_id');
+			}
+
 			if ($email_list != '') {
 				$email_list   = array_map('trim', explode(',', $email_list));
 				$total_emails = count($email_list);
@@ -670,8 +679,9 @@ else if ($mode == 'abonnes') {
 				$result = $db->query($sql);
 
 				if ($abo_id = $result->column('abo_id')) {
+					$abo_ids = [];
 					do {
-						$output->addHiddenField('id[]', $abo_id);
+						$abo_ids[] = $abo_id;
 					}
 					while ($abo_id = $result->column('abo_id'));
 				}
@@ -680,11 +690,8 @@ else if ($mode == 'abonnes') {
 					$output->message('No_abo_email');
 				}
 			}
-			else {
-				foreach ($abo_ids as $abo_id) {
-					$output->addHiddenField('id[]', $abo_id);
-				}
-			}
+
+			$_SESSION['abo_ids'] = $abo_ids;
 
 			$output->header();
 
@@ -697,7 +704,6 @@ else if ($mode == 'abonnes') {
 				'L_YES' => $lang['Yes'],
 				'L_NO'  => $lang['No'],
 
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM' => 'view.php?mode=abonnes&amp;action=delete'
 			]);
 
