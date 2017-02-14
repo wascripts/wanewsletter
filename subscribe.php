@@ -42,7 +42,7 @@ if ($row = $result->fetch()) {
 	while ($row = $result->fetch());
 }
 else {
-	$message = 'No list found';
+	$message = $lang['Message']['No_list_found'];
 }
 
 $list_box .= '</select>';
