@@ -154,16 +154,16 @@
         },
         {
             "name": "tinymce/tinymce",
-            "version": "4.5.1",
+            "version": "4.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tinymce/tinymce-dist.git",
-                "reference": "d9f914960a296b06a47ac0c9f3a027c6c4523f7b"
+                "reference": "2e662f527e6d776627b9b6c6c854d0a557169a70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/d9f914960a296b06a47ac0c9f3a027c6c4523f7b",
-                "reference": "d9f914960a296b06a47ac0c9f3a027c6c4523f7b",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/2e662f527e6d776627b9b6c6c854d0a557169a70",
+                "reference": "2e662f527e6d776627b9b6c6c854d0a557169a70",
                 "shasum": ""
             },
             "type": "component",
@@ -196,7 +196,7 @@
                 "tinymce",
                 "wysiwyg"
             ],
-            "time": "2016-12-07 07:02:09"
+            "time": "2017-02-01 14:27:24"
         },
         {
             "name": "wascripts/wamailer",
