@@ -207,7 +207,6 @@ $lang['Message']['Invalid_url']             = "L’url donnée n’est pas valid
 $lang['Message']['Unaccess_host']           = "L’hôte %s semble inaccessible actuellement";
 $lang['Message']['Not_found_at_url']        = "Le fichier ne semble pas présent à l’url indiquée";
 $lang['Message']['Error_load_url']          = "Erreur dans le chargement de l’url \"%1\$s\" (%2\$s)";
-$lang['Message']['No_form_url']             = "Vous n’avez pas spécifié l’adresse du formulaire dans la %sconfiguration de votre liste%s.\nVous devez corriger cela avant de pouvoir commencer l’envoi.";
 $lang['Message']['File_not_found']          = "Ce fichier est introuvable sur le serveur";
 $lang['Message']['Config_loading_url']      = "Pour charger des URLs distantes, vous avez besoin soit de l'extension curl de PHP, soit d'activer l'option PHP allow_url_fopen.";
 
@@ -271,6 +270,7 @@ $lang['Message']['Joined_file_removed']     = "Le fichier sélectionné a été 
 $lang['Message']['Invalid_liste_name']      = "Le nom de votre liste de diffusion doit faire entre 3 et 30 caractères";
 $lang['Message']['Unknown_format']          = "Format demandé inconnu";
 $lang['Message']['Xml_ext_needed']          = "Les extensions XML ou SimpleXML de PHP sont nécessaires pour analyser les fichiers XML";
+$lang['Message']['No_list_found']           = 'Aucune liste publique disponible';
 
 //
 // Divers
@@ -495,6 +495,7 @@ $lang['Reg_subscribers_list']       = "Nombre d’inscrits à cette liste";
 $lang['Tmp_subscribers_list']       = "Nombre d’inscriptions non confirmées";
 $lang['Last_newsletter2']           = "Dernière newsletter envoyée le";
 $lang['Form_url']                   = "URL absolue de la page où se trouve le formulaire";
+$lang['Form_url_note']              = "Si laissé vide, une adresse pointant vers subscribe.php sera utilisée";
 $lang['Create_liste']               = "Créer une liste";
 $lang['Edit_liste']                 = "Modifier cette liste";
 $lang['Delete_liste']               = "Supprimer cette liste";
@@ -567,7 +568,7 @@ $lang['Explain']['forbid_ext']      = "Pour interdire plusieurs extensions de fi
 $lang['Explain']['reallow_ext']     = "Pour réautoriser une ou plusieurs extensions, utilisez la combinaison clavier/souris appropriée sur votre ordinateur et votre navigateur";
 $lang['Explain']['backup']          = "Ce module vous permet de sauvegarder les tables du script, ainsi que d’éventuelles autres tables spécifiées, s’il y en a.\nVous pouvez décider de sauvegarder tout, uniquement la structure ou les données, et vous pouvez demander à ce que le fichier soit compressé (selon les options disponibles et librairies installées sur le serveur).\nEnfin, vous pouvez soit télécharger directement le fichier, ou demander au script de le stocker sur le serveur, auquel cas, le fichier sera créé dans le répertoire des fichiers temporaires du script.\n\n<strong>Attention :</strong> Cet outil ne convient que pour des tables aux structures relativement simples. Si vos tables utilisent des clés étrangères ou stockent des données binaires, vous devez vous tourner vers d’autres outils plus spécialisés pour obtenir un export utilisable.";
 $lang['Explain']['restore']         = "Ce module vous permet de restaurer les tables du script à l’aide d’une sauvegarde générée par wanewsletter ou un quelconque gestionnaire de bases de données.\nSi l’upload de fichier n’est pas autorisé sur le serveur, vous avez toutefois la possibilité de spécifier un fichier précédemment uploadé via ftp en indiquant son chemin (relatif à la racine du script)";
-$lang['Explain']['generator']       = "Vous devez entrer ici l’adresse absolue ou les données du formulaire seront reçues (en général, l’adresse où se trouvera le formulaire lui même)";
+$lang['Explain']['generator']       = "Vous devez entrer ici l’adresse absolue où les données du formulaire seront reçues (en général, l’adresse où se trouve le formulaire lui même)";
 $lang['Explain']['code_html']       = "Placez ce code à l’adresse que vous avez/allez indiquer dans la configuration de la liste de diffusion";
 $lang['Explain']['code_php']        = "Vous devez placer ce code à l’adresse de destination du formulaire (adresse entrée précédemment), le fichier doit avoir l’extension php !";
 

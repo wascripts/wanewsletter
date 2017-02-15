@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e01e5d6bafe4e77efcc96f6c116ee764",
-    "content-hash": "640d815ec797993b77e1c4bd3eec0ac1",
+    "hash": "9382e08aa01c3c9b61e471e863cd9015",
+    "content-hash": "066c803af37a4843342cc0f35c4c1531",
     "packages": [
         {
             "name": "elkuku/console-progressbar",
@@ -154,16 +154,16 @@
         },
         {
             "name": "tinymce/tinymce",
-            "version": "4.3.12",
+            "version": "4.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tinymce/tinymce-dist.git",
-                "reference": "dfa88d1f6868aa80081f35f3bb0b8257181b6fdf"
+                "reference": "2e662f527e6d776627b9b6c6c854d0a557169a70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/dfa88d1f6868aa80081f35f3bb0b8257181b6fdf",
-                "reference": "dfa88d1f6868aa80081f35f3bb0b8257181b6fdf",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/2e662f527e6d776627b9b6c6c854d0a557169a70",
+                "reference": "2e662f527e6d776627b9b6c6c854d0a557169a70",
                 "shasum": ""
             },
             "type": "component",
@@ -196,7 +196,7 @@
                 "tinymce",
                 "wysiwyg"
             ],
-            "time": "2016-05-10 11:15:05"
+            "time": "2017-02-01 14:27:24"
         },
         {
             "name": "wascripts/wamailer",
@@ -204,12 +204,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wascripts/wamailer.git",
-                "reference": "f79a5aa044e0e279c49cb224200b3730aef64fc5"
+                "reference": "91e444569f36a6c757d9910ec3f5b2326f01cc49"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/f79a5aa044e0e279c49cb224200b3730aef64fc5",
-                "reference": "f79a5aa044e0e279c49cb224200b3730aef64fc5",
+                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/91e444569f36a6c757d9910ec3f5b2326f01cc49",
+                "reference": "91e444569f36a6c757d9910ec3f5b2326f01cc49",
                 "shasum": ""
             },
             "require": {
@@ -248,7 +248,7 @@
                 "source": "https://github.com/wascripts/wamailer/tree/master",
                 "issues": "https://github.com/wascripts/wamailer/issues"
             },
-            "time": "2016-05-23 13:33:26"
+            "time": "2016-06-07 11:56:15"
         }
     ],
     "packages-dev": [],

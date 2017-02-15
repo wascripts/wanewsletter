@@ -278,11 +278,6 @@ switch ($mode) {
 			$output->message();
 		}
 
-		if (!DISABLE_CHECK_LINKS && $listdata['liste_public'] && !$listdata['form_url']) {
-			$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
-			$output->message();
-		}
-
 		$logdata['joined_files'] = get_joined_files($logdata);
 
 		//
@@ -395,11 +390,6 @@ switch ($mode) {
 				$output->redirect('envoi.php?mode=send', 4);
 				$output->addLine($lang['Message']['No_log_found']);
 				$output->addLine($lang['Click_return_back'], './envoi.php?mode=send');
-				$output->message();
-			}
-
-			if (!DISABLE_CHECK_LINKS && $listdata['liste_public'] && !$listdata['form_url']) {
-				$output->addLine($lang['Message']['No_form_url'], './view.php?mode=liste&action=edit');
 				$output->message();
 			}
 

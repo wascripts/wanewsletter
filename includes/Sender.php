@@ -561,14 +561,16 @@ class Sender
 			];
 		}
 		else {
+			$form_url = get_form_url($this->listdata);
+
 			if ($nl_config['engine_send'] == ENGINE_BCC) {
 				$link = [
-					FORMAT_TEXT => $this->listdata['form_url'],
-					FORMAT_HTML => sprintf($link_template, htmlspecialchars($this->listdata['form_url']))
+					FORMAT_TEXT => $form_url,
+					FORMAT_HTML => sprintf($link_template, htmlspecialchars($form_url))
 				];
 			}
 			else {
-				$tmp_link = $this->listdata['form_url'];
+				$tmp_link = $form_url;
 
 				if ($tmp_link) {
 					$tmp_link .= (strstr($tmp_link, '?')) ? '&' : '?';

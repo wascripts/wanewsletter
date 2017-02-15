@@ -173,6 +173,8 @@ else if ($mode == 'iframe') {
 		);
 	}
 	else {
+		$form_url = get_form_url($listdata);
+		$form_url = sprintf('<a href="#" onclick="return false;">%s (lien fictif)</a>', $form_url);
 		// on normalise les fins de ligne pour s'assurer du bon
 		// fonctionnement de wordwrap()
 		$body = preg_replace("/\r\n?|\n/", "\r\n", $body);
@@ -181,7 +183,7 @@ else if ($mode == 'iframe') {
 		$body = preg_replace('/(?<=^|\s)(\*[^\r\n]+?\*)(?=\s|$)/', '<strong>\\1</strong>', $body);
 		$body = preg_replace('/(?<=^|\s)(\/[^\r\n]+?\/)(?=\s|$)/', '<em>\\1</em>', $body);
 		$body = preg_replace('/(?<=^|\s)(_[^\r\n]+?_)(?=\s|$)/', '<u>\\1</u>', $body);
-		$body = str_replace('{LINKS}', '<a href="#" onclick="return false;">' . $listdata['form_url'] . '... (lien fictif)</a>', $body);
+		$body = str_replace('{LINKS}', $form_url, $body);
 		$output->basic(sprintf('<pre style="font-size: 13px;">%s</pre>', $body));
 	}
 
@@ -593,25 +595,14 @@ else if ($mode == 'abonnes') {
 	// Suppression d'un ou plusieurs profils abonnés
 	//
 	else if ($action == 'delete') {
-		$email_list = trim(u::filter_input(INPUT_POST, 'email_list'));
-		$abo_ids    = (array) filter_input(INPUT_POST, 'id',
-			FILTER_VALIDATE_INT,
-			FILTER_REQUIRE_ARRAY
-		);
-		$abo_ids = array_filter($abo_ids);
-
-		// Spécial. Cas où on veut supprimer un  seul compte et l'ID est
-		// fourni seul via le lien "Supprimer ce compte".
-		if (count($abo_ids) == 0 && $abo_id > 0) {
-			$abo_ids = [$abo_id];
-		}
-
-		if ($email_list == '' && count($abo_ids) == 0) {
-			$output->redirect('./view.php?mode=abonnes', 4);
-			$output->message('No_abo_id');
-		}
-
 		if (isset($_POST['confirm'])) {
+			$abo_ids = $_SESSION['abo_ids'];
+
+			if (!$abo_ids) {
+				$output->redirect('./view.php?mode=abonnes', 4);
+				$output->message('No_abo_id');
+			}
+
 			$db->beginTransaction();
 
 			$sql = "DELETE FROM " . ABONNES_TABLE . "
@@ -636,6 +627,8 @@ else if ($mode == 'abonnes') {
 			//
 			$db->vacuum([ABONNES_TABLE, ABO_LISTE_TABLE]);
 
+			unset($_SESSION['abo_ids']);
+
 			$target = './view.php?mode=abonnes';
 			$output->redirect($target, 4);
 			$output->addLine($lang['Message']['abo_deleted']);
@@ -643,6 +636,24 @@ else if ($mode == 'abonnes') {
 			$output->message();
 		}
 		else {
+			$email_list = trim(u::filter_input(INPUT_POST, 'email_list'));
+			$abo_ids    = (array) filter_input(INPUT_POST, 'id',
+				FILTER_VALIDATE_INT,
+				FILTER_REQUIRE_ARRAY
+			);
+			$abo_ids = array_filter($abo_ids);
+
+			// Spécial. Cas où on veut supprimer un  seul compte et l'ID est
+			// fourni seul via le lien "Supprimer ce compte".
+			if (count($abo_ids) == 0 && $abo_id > 0) {
+				$abo_ids = [$abo_id];
+			}
+
+			if ($email_list == '' && count($abo_ids) == 0) {
+				$output->redirect('./view.php?mode=abonnes', 4);
+				$output->message('No_abo_id');
+			}
+
 			if ($email_list != '') {
 				$email_list   = array_map('trim', explode(',', $email_list));
 				$total_emails = count($email_list);
@@ -668,8 +679,9 @@ else if ($mode == 'abonnes') {
 				$result = $db->query($sql);
 
 				if ($abo_id = $result->column('abo_id')) {
+					$abo_ids = [];
 					do {
-						$output->addHiddenField('id[]', $abo_id);
+						$abo_ids[] = $abo_id;
 					}
 					while ($abo_id = $result->column('abo_id'));
 				}
@@ -678,11 +690,8 @@ else if ($mode == 'abonnes') {
 					$output->message('No_abo_email');
 				}
 			}
-			else {
-				foreach ($abo_ids as $abo_id) {
-					$output->addHiddenField('id[]', $abo_id);
-				}
-			}
+
+			$_SESSION['abo_ids'] = $abo_ids;
 
 			$output->header();
 
@@ -695,7 +704,6 @@ else if ($mode == 'abonnes') {
 				'L_YES' => $lang['Yes'],
 				'L_NO'  => $lang['No'],
 
-				'S_HIDDEN_FIELDS' => $output->getHiddenFields(),
 				'U_FORM' => 'view.php?mode=abonnes&amp;action=delete'
 			]);
 
@@ -916,7 +924,7 @@ else if ($mode == 'liste') {
 			$liste_name = strip_tags($liste_name);
 			$liste_sig  = strip_tags($liste_sig);
 
-			if (mb_strlen($liste_name) < 3 || mb_strlen($liste_name) > 30) {
+			if (mb_strlen($liste_name) < 3 || mb_strlen($liste_name) > LISTE_NAME_MAXLEN) {
 				$error = true;
 				$output->warn('Invalid_liste_name');
 			}
@@ -1035,6 +1043,7 @@ else if ($mode == 'liste') {
 			'L_LIMITEVALIDATE'     => $lang['Limite_validate'],
 			'L_NOTE_VALIDATE'      => nl2br($lang['Note_validate']),
 			'L_FORM_URL'           => $lang['Form_url'],
+			'L_FORM_URL_NOTE'      => $lang['Form_url_note'],
 			'L_SIG_EMAIL'          => $lang['Sig_email'],
 			'L_SIG_EMAIL_NOTE'     => nl2br($lang['Sig_email_note']),
 			'L_DAYS'               => $lang['Days'],
