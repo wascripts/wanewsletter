@@ -73,7 +73,6 @@ includes/Sender.php
 includes/Session.php
 includes/Template.php
 includes/common.inc.php
-includes/compat.inc.php
 includes/constantes.php
 includes/functions.db.php
 includes/functions.php

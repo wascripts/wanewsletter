@@ -35,7 +35,6 @@ if (!file_exists(WA_ROOTDIR . '/vendor/autoload.php')) {
 }
 
 require WA_ROOTDIR.'/includes/constantes.php';
-require WA_ROOTDIR.'/includes/compat.inc.php';
 require WA_ROOTDIR.'/includes/functions.php';
 require WA_ROOTDIR.'/includes/functions.db.php';
 require WA_ROOTDIR.'/includes/functions.stats.php';
