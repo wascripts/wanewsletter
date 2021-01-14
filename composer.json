@@ -20,7 +20,7 @@
 		"php": ">=5.4.4",
 		"patchwork/utf8": "~1.2",
 		"wascripts/wamailer": "~4.0@dev",
-		"tinymce/tinymce": "~4.5.0",
+		"tinymce/tinymce": "~5.6.0",
 		"elkuku/console-progressbar": "1.0"
 	},
 	"require-dev": {

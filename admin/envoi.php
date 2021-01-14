@@ -1068,6 +1068,7 @@ if ($logdata['log_date'] != -1) {
 
 if (is_readable(WA_ROOTDIR . '/languages/'.$admindata['admin_lang'].'/tinymce.js')) {
 	$template->assignToBlock('tinymce_lang', [
+		'FULL_CODE' => strpos($admindata['admin_lang'], '_') ? $admindata['admin_lang'] : $admindata['admin_lang'] . '_' . strtoupper($admindata['admin_lang']),
 		'CODE' => $admindata['admin_lang']
 	]);
 }

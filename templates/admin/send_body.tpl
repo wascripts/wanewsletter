@@ -3,17 +3,18 @@
 if (typeof(tinyMCE) != 'undefined') {
 	tinyMCE.init({
 		selector: "textarea[name='body_html']",
-		theme: "modern",
-		skin: "lightgray",
+		theme: "silver",
+		skin: "oxide",
 		menubar: false,
 		<!-- BEGIN tinymce_lang -->
+		language: "{tinymce_lang.FULL_CODE}",
 		language_url: basedir + "/languages/{tinymce_lang.CODE}/tinymce.js",
 		<!-- END tinymce_lang -->
 		plugins: [
 			"advlist autolink lists link image charmap print preview hr anchor pagebreak",
 			"searchreplace wordcount visualblocks visualchars code",
-			"insertdatetime media nonbreaking table contextmenu directionality",
-			"paste textcolor colorpicker textpattern fullpage"
+			"insertdatetime media nonbreaking table directionality",
+			"paste textpattern fullpage"
 		],
 		toolbar1: "bold italic underline strikethrough bullist numlist blockquote hr alignleft aligncenter alignright link unlink image spellchecker",
 		toolbar2: "formatselect forecolor pastetext removeformat charmap outdent indent code undo redo",
