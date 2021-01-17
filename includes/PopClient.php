@@ -4,7 +4,7 @@
  * @author    Bobe <wascripts@webnaute.net>
  * @link      http://dev.webnaute.net/wanewsletter/
  * @copyright 2002-2021 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  *
  * @see RFC 1939 - Post Office Protocol - Version 3
  * @see RFC 2449 - POP3 Extension Mechanism

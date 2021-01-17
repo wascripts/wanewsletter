@@ -4,7 +4,7 @@
  * @author    Bobe <wascripts@webnaute.net>
  * @link      http://dev.webnaute.net/wanewsletter/
  * @copyright 2002-2021 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  *
  * Vous pouvez très facilement traduire Wanewsletter dans une autre langue.
  * Il vous suffit pour cela de traduire ce qui se trouve entre
@@ -668,7 +668,7 @@ $lang['Next_month']                 = "Mois suivant";
 //
 // Installation du script
 //
-$lang['Welcome_in_install']         = "Bienvenue dans le script d’installation de Wanewsletter.\nAvant de continuer l’installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l’installation.\nAssurez-vous également d’avoir pris connaissance de la %slicence d’utilisation de Wanewsletter%s avant de continuer. Une traduction française <strong>non officielle</strong> est disponible à l’adresse %sdev.webnaute.net/wanewsletter/GPL%s";
+$lang['Welcome_in_install']         = "Bienvenue dans le script d’installation de Wanewsletter.\nAvant de continuer l’installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l’installation.\nAssurez-vous également d’avoir pris connaissance de la %slicence d’utilisation de Wanewsletter%s avant de continuer.";
 $lang['Welcome_in_upgrade']         = "Bienvenue dans le script de mise à jour vers Wanewsletter <strong>%s</strong>.\n Par mesure de sécurité, il est <strong>fortement conseillé</strong> de faire une sauvegarde des tables de données du script avant de procéder à la mise à jour.\nUne fois que vous êtes prêt, lancez la mise à jour avec le bouton ci-dessous.";
 $lang['Warning_reinstall']          = "<b>Attention !</b> Wanewsletter semble déjà installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d’administrateur. \nAttention, toutes les données de l’installation précédente seront définitivement perdues.\n Si vous souhaitez plutôt effectuer une mise à jour d’une installation existante, utilisez le script upgrade.php";
 $lang['Start_install']              = "Démarrer l’installation";

@@ -4,7 +4,7 @@
  * @author    Bobe <wascripts@webnaute.net>
  * @link      http://dev.webnaute.net/wanewsletter/
  * @copyright 2002-2021 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter\Output;
@@ -314,7 +314,7 @@ class Html implements MessageInterface
 			$this->addLink('home', './', $lang['Title']['accueil']);
 			$this->addLink('help', sprintf('../docs/faq.%s.html', $lang['CONTENT_LANG']), $lang['Faq']);
 			$this->addLink('author', sprintf('../docs/readme.%s.html', $lang['CONTENT_LANG']), $lang['Author_note']);
-			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
+			$this->addLink('copyright', 'https://www.gnu.org/licenses/gpl.html', 'Licence GPL');
 
 			$sections[] = [$lang['Module']['config'],      './config.php'];
 			$sections[] = [$lang['Title']['send'],         './envoi.php'];

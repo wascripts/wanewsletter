@@ -4,7 +4,7 @@
  * @author    Bobe <wascripts@webnaute.net>
  * @link      http://dev.webnaute.net/wanewsletter/
  * @copyright 2002-2021 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  *
  * Vous pouvez très facilement traduire Wanewsletter dans une autre langue.
  * Il vous suffit pour cela de traduire ce qui se trouve entre
@@ -668,7 +668,7 @@ $lang['Next_month']                 = "Next month";
 //
 // Installation du script
 //
-$lang['Welcome_in_install']         = "Welcome to Wanewsletter's install script.\nBefore continuing the installation, please read the %sreadme%s file, it contains important instructions to make the installation work properly.\nPlease read the %slicense agreement of Wanewsletter%s before continuing. A copy of this license is readable at %sdev.webnaute.net/wanewsletter/GPL%s";
+$lang['Welcome_in_install']         = "Welcome to Wanewsletter's install script.\nBefore continuing the installation, please read the %sreadme%s file, it contains important instructions to make the installation work properly.\nPlease read the %slicense agreement of Wanewsletter%s before continuing.";
 $lang['Welcome_in_upgrade']         = "Welcome to Wanewsletter's upgrade script to version <strong>%s</strong>.\n For security reasons, it is <strong>strongly advisable</strong> to make a backup of the script's tables before proceeding with the upgrade.\nOnce you are ready, launch the upgrade with the button below.";
 $lang['Warning_reinstall']          = "<b>Caution!</b> Wanewsletter seems to be already installed. \nIf you wish to reinstall the script, enter your admin login and password. \nAttention, all of your data will be lost if you make a reinstallation of the script. \n if you wish to do an upgrade, use the script upgrade.php";
 $lang['Start_install']              = "Launch install";

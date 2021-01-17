@@ -5,7 +5,7 @@
  * @author    Bobe <wascripts@webnaute.net>
  * @link      http://dev.webnaute.net/wanewsletter/
  * @copyright 2002-2021 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  *
  * Créé de nouvelles tables à partir des données présentes dans des
  * tables Wanewsletter d'une autre base de données (de type SQLite, MySQL ou PostgreSQL)

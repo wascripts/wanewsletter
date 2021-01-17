@@ -4,7 +4,7 @@
  * @author    Bobe <wascripts@webnaute.net>
  * @link      http://dev.webnaute.net/wanewsletter/
  * @copyright 2002-2021 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
@@ -384,8 +384,7 @@ if (!$reinstall) {
 	$l_explain = nl2br(sprintf(
 		$lang['Welcome_in_install'],
 		'<a href="docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
-		'<a href="COPYING">', '</a>',
-		'<a href="http://dev.webnaute.net/wanewsletter/GPL">', '</a>'
+		'<a href="COPYING">', '</a>'
 	));
 
 	if ($infos['host'] == '') {

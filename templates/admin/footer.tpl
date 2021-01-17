@@ -7,7 +7,7 @@
 <address id="footer">
 Powered by <a href="http://dev.webnaute.net/" hreflang="fr" title="Site officiel de Wanewsletter">
 Wanewsletter</a> &copy; 2002&ndash;2021 | Wanewsletter {VERSION} {TRANSLATE}<br />
-Ce script est distribué librement sous <a href="http://dev.webnaute.net/wanewsletter/GPL" hreflang="fr">
+Ce script est distribué librement sous <a href="https://www.gnu.org/licenses/gpl.html" hreflang="en">
 licence <abbr title="General Public Licence" lang="en">GPL</abbr></a>
 </address>
 
