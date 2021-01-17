@@ -188,12 +188,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wascripts/wamailer.git",
-                "reference": "91e444569f36a6c757d9910ec3f5b2326f01cc49"
+                "reference": "d7f5472d561e8bf65d22abbccf54a3409ca097d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/91e444569f36a6c757d9910ec3f5b2326f01cc49",
-                "reference": "91e444569f36a6c757d9910ec3f5b2326f01cc49",
+                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/d7f5472d561e8bf65d22abbccf54a3409ca097d7",
+                "reference": "d7f5472d561e8bf65d22abbccf54a3409ca097d7",
                 "shasum": ""
             },
             "require": {
@@ -217,12 +217,12 @@
             "authors": [
                 {
                     "name": "Aurélien Maille",
-                    "email": "wascripts@phpcodeur.net",
+                    "email": "wascripts@webnaute.net",
                     "role": "lead developer"
                 }
             ],
             "description": "Classe d'envoi d'emails",
-            "homepage": "http://phpcodeur.net/wascripts/wamailer/",
+            "homepage": "http://dev.webnaute.net/wamailer/",
             "keywords": [
                 "email",
                 "library",
@@ -233,7 +233,7 @@
                 "source": "https://github.com/wascripts/wamailer/tree/master",
                 "issues": "https://github.com/wascripts/wamailer/issues"
             },
-            "time": "2016-06-07T11:56:15+00:00"
+            "time": "2021-01-17T17:40:09+00:00"
         }
     ],
     "packages-dev": [],
