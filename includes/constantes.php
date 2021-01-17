@@ -1,9 +1,9 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
  * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
  */
 
@@ -136,13 +136,13 @@ const CONFIRM_NONE   = 0;
 //
 // Utilisées dans le cadre de la classe de vérification de mise à jour
 //
-const DOWNLOAD_PAGE      = 'https://phpcodeur.net/wascripts/wanewsletter/telecharger';
+const DOWNLOAD_PAGE      = 'https://dev.webnaute.net/wanewsletter/telecharger';
 // Le serveur renvoie le tag de la dernière version stable si WANEWSLETTER_VERSION
 // contient un numéro en x.y.z, ou le tag de la dernière version non stable, si
 // WANEWSLETTER_VERSION contient -dev, -alpha, -beta ou -rc.
 // Vous pouvez forcer l’une ou l’autre réponse en ajoutant le paramètre d’url
 // 'channel' avec la valeur 'stable' ou 'unstable' dans l’url suivante.
-const CHECK_UPDATE_URL   = 'https://phpcodeur.net/wascripts/wanewsletter/releases/latest/version';
+const CHECK_UPDATE_URL   = 'https://dev.webnaute.net/wanewsletter/releases/latest/version';
 const CHECK_UPDATE_CACHE = 'wa-check-update.cache';
 const CHECK_UPDATE_CACHE_TTL = 3600;
 

@@ -2,18 +2,18 @@
 	"name": "wascripts/wanewsletter",
 	"description": "Wanewsletter est un script complet et puissant d’envoi d’emails et de gestion de listes d’envoi",
 	"keywords": ["mailing", "manager", "email"],
-	"homepage": "http://phpcodeur.net/wascripts/wanewsletter/",
+	"homepage": "http://dev.webnaute.net/wanewsletter/",
 	"type": "project",
 	"license": "GPL-2.0+",
 	"authors": [
 		{
 			"name": "Aurélien Maille",
-			"email": "bobe@webnaute.net",
+			"email": "wascripts@webnaute.net",
 			"role": "lead developer"
 		}
 	],
 	"support": {
-		"forum": "https://forum.phpcodeur.net/",
+		"forum": "https://forum.webnaute.net/",
 		"source": "https://github.com/wascripts/wanewsletter"
 	},
 	"require": {
