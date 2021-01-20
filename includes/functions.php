@@ -58,32 +58,6 @@ function load_config()
 
 	$nl_config = array_merge($base_config, $nl_config);
 
-	//
-	// Compatibilité avec Wanewsletter < 2.3-beta2
-	//
-	if (!$dsn && !empty($dbtype)) {
-		$infos = [];
-		$infos['engine'] = $dbtype;
-		$infos['host']   = $dbhost;
-		$infos['user']   = $dbuser;
-		$infos['pass']   = $dbpassword;
-		$infos['dbname'] = $dbname;
-
-		if ($infos['engine'] == 'mssql') {
-			$output->message('No_microsoft_sqlserver');
-		}
-		else if ($infos['engine'] == 'postgre') {
-			$infos['engine'] = 'postgres';
-		}
-		else if ($infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli') {
-			$infos['engine'] = 'mysql';
-		}
-
-		$dsn = createDSN($infos);
-
-		$need_update = true;
-	}
-
 	// Configuration initiale pour Wamailer
 	if (!isset($nl_config['mailer']) || !is_array($nl_config['mailer'])) {
 		$nl_config['mailer'] = [];
