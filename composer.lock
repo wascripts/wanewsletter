@@ -188,12 +188,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wascripts/wamailer.git",
-                "reference": "d7f5472d561e8bf65d22abbccf54a3409ca097d7"
+                "reference": "2de751b5a79b6071c59995de264002119563c0a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/d7f5472d561e8bf65d22abbccf54a3409ca097d7",
-                "reference": "d7f5472d561e8bf65d22abbccf54a3409ca097d7",
+                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/2de751b5a79b6071c59995de264002119563c0a5",
+                "reference": "2de751b5a79b6071c59995de264002119563c0a5",
                 "shasum": ""
             },
             "require": {
@@ -233,7 +233,7 @@
                 "source": "https://github.com/wascripts/wamailer/tree/master",
                 "issues": "https://github.com/wascripts/wamailer/issues"
             },
-            "time": "2021-01-17T17:40:09+00:00"
+            "time": "2021-01-20T21:00:39+00:00"
         }
     ],
     "packages-dev": [],
