@@ -83,7 +83,6 @@ includes/install.inc.php
 includes/login.inc.php
 includes/Dblayer/index.html
 includes/Dblayer/MysqlBackup.php
-includes/Dblayer/Mysql.php
 includes/Dblayer/Mysqli.php
 includes/Dblayer/PostgresBackup.php
 includes/Dblayer/Postgres.php
