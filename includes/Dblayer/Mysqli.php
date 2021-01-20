@@ -77,7 +77,8 @@ class Mysqli extends Wadb
 			$args = ['ssl-key', 'ssl-cert', 'ssl-ca', 'ssl-capath', 'ssl-cipher'];
 			$args = array_fill_keys($args, null);
 			$args = array_intersect_key(array_replace($args, $this->options), $args);
-			call_user_func_array(array($this->link, 'ssl_set'), $args);
+			$args = array_values($args);
+			call_user_func_array([$this->link, 'ssl_set'], $args);
 		}
 
 		if (!mysqli_real_connect($this->link, $host, $username, $passwd, $dbname, $port, null, $flags)) {
