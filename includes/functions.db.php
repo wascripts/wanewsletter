@@ -22,7 +22,7 @@ function get_supported_db()
 	if (is_null($supported_db)) {
 		$supported_db = [];
 
-		if (extension_loaded('mysql') || extension_loaded('mysqli')) {
+		if (extension_loaded('mysqli')) {
 			$supported_db['mysql'] = [
 				'label' => 'MySQL',
 				'version' => '5.0.7'
@@ -188,7 +188,7 @@ function parseDSN($dsn)
 		}
 	}
 
-	if ($infos['engine'] == 'mysql' && extension_loaded('mysqli')) {
+	if ($infos['engine'] == 'mysql') {
 		$infos['driver'] = 'Mysqli';
 	}
 	else if ($infos['engine'] == 'sqlite') {
