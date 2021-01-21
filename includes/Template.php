@@ -239,7 +239,7 @@ class Template {
 	 */
 	private function handleVarref(array $varrefs)
 	{
-		list(, $namespace, $varname) = $varrefs;
+		[, $namespace, $varname] = $varrefs;
 
 		if( !empty($namespace) ) {
 			// Strip the trailing period.

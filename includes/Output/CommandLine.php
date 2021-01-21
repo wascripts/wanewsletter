@@ -9,8 +9,7 @@
 
 namespace Wanewsletter\Output;
 
-use Wanewsletter\Error;
-use Wanewsletter\Dblayer;
+use Wanewsletter\{Error, Dblayer};
 
 class CommandLine implements MessageInterface
 {

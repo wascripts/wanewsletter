@@ -17,7 +17,7 @@ class SqlitePdo extends Wadb
 	/**
 	 * Type de base de données
 	 */
-	const ENGINE = 'sqlite';
+	public const ENGINE = 'sqlite';
 
 	/**
 	 * Version de la librairie SQLite
@@ -45,8 +45,8 @@ class SqlitePdo extends Wadb
 
 	public function connect($infos = null, $options = null)
 	{
-		$infos   = (is_null($infos)) ? $this->infos : $infos;
-		$options = (is_null($options)) ? $this->options : $options;
+		$infos   = $infos ?? $this->infos;
+		$options = $options ?? $this->options;
 
 		$sqlite_db = ($infos['path'] != '') ? $infos['path'] : null;
 

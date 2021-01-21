@@ -434,7 +434,7 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 	}
 
 	if ($session && defined('SID') && SID != '') {
-		list($name, $value) = explode('=', SID);
+		[$name, $value] = explode('=', SID);
 		$params[$name] = $value;
 	}
 
@@ -1777,7 +1777,7 @@ function parse_headers($headers_str)
 	$lines   = explode("\r\n", $headers_str);
 
 	foreach ($lines as $line) {
-		list($header_name, $header_value) = explode(': ', $line, 2);
+		[$header_name, $header_value] = explode(': ', $line, 2);
 
 		$atoms = explode(' ', $header_value);
 

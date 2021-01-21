@@ -219,7 +219,7 @@ if ($img == 'graph') {
 		$color = ($t == 0 || $t == 6) ? $gray : $black;// Gris pour les samedi et dimanche
 		imagestring($im, $text_font, (34 + $int), 240, sprintf('%02d', $day), $color);
 
-		$num_per_day[$day] = (isset($stats[$i])) ? $stats[$i] : 0;
+		$num_per_day[$day] = $stats[$i] ?? 0;
 
 		if ($stats[$i] > $max_value) {
 			$max_value = $stats[$i];
@@ -425,14 +425,14 @@ if ($img == 'camembert') {
 
 			imagearc($im, $startX, $startY, 100, 100, $deb_arc, $end_arc, $color_arc);
 
-			list($arcX, $arcY) = $get_xy_arc($deb_arc, 100);
+			[$arcX, $arcY] = $get_xy_arc($deb_arc, 100);
 			imageline($im, $startX, $startY, floor($startX + $arcX), floor($startY + $arcY), $color_arc);
 
-			list($arcX, $arcY) = $get_xy_arc($end_arc, 100);
+			[$arcX, $arcY] = $get_xy_arc($end_arc, 100);
 			imageline($im, $startX, $startY, ceil($startX + $arcX), ceil($startY + $arcY), $color_arc);
 
 			$mid_arc = round((($end_arc - $deb_arc) / 2) + $deb_arc);
-			list($arcX, $arcY) = $get_xy_arc($mid_arc, 50);
+			[$arcX, $arcY] = $get_xy_arc($mid_arc, 50);
 			imagefilltoborder($im, floor($startX + $arcX), floor($startY + $arcY), $color_arc, $color_arc);
 		}
 

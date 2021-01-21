@@ -9,8 +9,7 @@
 
 namespace Wanewsletter;
 
-use Wamailer\Mailer;
-use Wamailer\Mime;
+use Wamailer\{Mailer, Mime};
 use ZipArchive;
 
 require './start.inc.php';

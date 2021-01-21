@@ -19,7 +19,7 @@ abstract class Wadb
 	/**
 	 * Type de base de données
 	 */
-	const ENGINE = '';
+	public const ENGINE = '';
 
 	/**
 	 * Connexion à la base de données
@@ -365,9 +365,9 @@ abstract class Wadb
 
 abstract class WadbResult
 {
-	const FETCH_NUM    = 1;
-	const FETCH_ASSOC  = 2;
-	const FETCH_BOTH   = 3;
+	public const FETCH_NUM    = 1;
+	public const FETCH_ASSOC  = 2;
+	public const FETCH_BOTH   = 3;
 
 	/**
 	 * Ressource de résultat de requète

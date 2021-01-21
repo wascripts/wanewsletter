@@ -14,7 +14,7 @@ class Mysqli extends Wadb
 	/**
 	 * Type de base de données
 	 */
-	const ENGINE = 'mysql';
+	public const ENGINE = 'mysql';
 
 	/**
 	 * Version du serveur
@@ -32,12 +32,12 @@ class Mysqli extends Wadb
 
 	public function connect($infos = null, $options = null)
 	{
-		$infos   = (is_null($infos)) ? $this->infos : $infos;
-		$options = (is_null($options)) ? $this->options : $options;
+		$infos   = $infos ?? $this->infos;
+		$options = $options ?? $this->options;
 
 		if (is_array($infos)) {
 			foreach (['host', 'username', 'passwd', 'port', 'dbname'] as $info) {
-				$$info = (isset($infos[$info])) ? $infos[$info] : null;
+				$$info = $infos[$info] ?? null;
 			}
 
 			$this->infos = $infos;
@@ -78,7 +78,7 @@ class Mysqli extends Wadb
 			$args = array_fill_keys($args, null);
 			$args = array_intersect_key(array_replace($args, $this->options), $args);
 			$args = array_values($args);
-			call_user_func_array([$this->link, 'ssl_set'], $args);
+			mysqli_ssl_set($this->link, ...$args);
 		}
 
 		if (!mysqli_real_connect($this->link, $host, $username, $passwd, $dbname, $port, null, $flags)) {

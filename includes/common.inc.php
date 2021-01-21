@@ -52,7 +52,7 @@ set_exception_handler(__NAMESPACE__.'\\wan_exception_handler');
 //
 spl_autoload_register(function ($classname) {
 	if (strpos($classname, '\\')) {
-		list($prefix, $classname) = explode('\\', $classname, 2);
+		[$prefix, $classname] = explode('\\', $classname, 2);
 
 		if ($prefix == 'Wanewsletter') {
 			// Chemin includes/(<namespace>/)*<classname>.php

@@ -9,8 +9,7 @@
 
 namespace Wanewsletter;
 
-use Wamailer\Mailer;
-use Wamailer\Email;
+use Wamailer\{Mailer, Email};
 
 class Subscription
 {

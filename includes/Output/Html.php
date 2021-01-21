@@ -9,10 +9,7 @@
 
 namespace Wanewsletter\Output;
 
-use Wanewsletter\Auth;
-use Wanewsletter\Error;
-use Wanewsletter\Dblayer;
-use Wanewsletter\Template;
+use Wanewsletter\{Auth, Error, Dblayer, Template};
 
 class Html implements MessageInterface
 {
@@ -705,21 +702,17 @@ BASIC;
 		exit;
 	}
 
-	public function notice()
+	public function notice(...$args)
 	{
-		$args = func_get_args();
-		array_unshift($args, 'notice');
-		call_user_func_array([$this,'log'], $args);
+		$this->log('notice', ...$args);
 	}
 
-	public function warn()
+	public function warn(...$args)
 	{
-		$args = func_get_args();
-		array_unshift($args, 'warn');
-		call_user_func_array([$this,'log'], $args);
+		$this->log('warn', ...$args);
 	}
 
-	public function log($type, $str)
+	public function log($type, $str, ...$args)
 	{
 		global $lang;
 
@@ -727,12 +720,9 @@ BASIC;
 			$str = $lang['Message'][$str];
 		}
 
-		if (func_num_args() > 2) {
-			$args = func_get_args();
-			array_shift($args);
+		if (count($args) > 0) {
 			$args = array_map('htmlspecialchars', $args);
-			$args[0] = $str;
-			$str  = call_user_func_array('sprintf', $args);
+			$str = sprintf($str, ...$args);
 		}
 
 		$this->msg_log[$type][] = $str;

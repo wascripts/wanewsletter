@@ -14,7 +14,7 @@ class Postgres extends Wadb
 	/**
 	 * Type de base de données
 	 */
-	const ENGINE = 'postgres';
+	public const ENGINE = 'postgres';
 
 	/**
 	 * Version du serveur
@@ -46,8 +46,8 @@ class Postgres extends Wadb
 
 	public function connect($infos = null, $options = null)
 	{
-		$infos   = (is_null($infos)) ? $this->infos : $infos;
-		$options = (is_null($options)) ? $this->options : $options;
+		$infos   = $infos ?? $this->infos;
+		$options = $options ?? $this->options;
 
 		$connectString = '';
 
