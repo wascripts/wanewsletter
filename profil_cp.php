@@ -9,7 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wamailer\Email;
 
@@ -72,7 +71,7 @@ switch ($mode) {
 				'current_passwd', 'new_passwd', 'confirm_passwd'
 			];
 			foreach ($vararray as $varname) {
-				${$varname} = trim(u::filter_input(INPUT_POST, $varname));
+				${$varname} = utf8_normalize(trim(filter_input(INPUT_POST, $varname)));
 			}
 
 			if ($language == '' || !validate_lang($language)) {
@@ -138,10 +137,10 @@ switch ($mode) {
 
 				foreach ($other_tags as $tag) {
 					$input_name = (!empty($tag['field_name'])) ? $tag['field_name'] : $tag['column_name'];
-					$data = u::filter_input(INPUT_POST, $input_name);
+					$data = filter_input(INPUT_POST, $input_name);
 
 					if (!is_null($data)) {
-						$sql_data[$tag['column_name']] = trim($data);
+						$sql_data[$tag['column_name']] = utf8_normalize(trim($data));
 					}
 				}
 

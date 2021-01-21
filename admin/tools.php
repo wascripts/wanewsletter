@@ -9,7 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
 use ZipArchive;
 
 require './start.inc.php';
@@ -644,7 +643,7 @@ switch ($mode) {
 
 	case 'ban':
 		if (isset($_POST['submit'])) {
-			$pattern   = trim(u::filter_input(INPUT_POST, 'pattern'));
+			$pattern   = utf8_normalize(trim(filter_input(INPUT_POST, 'pattern')));
 			$unban_ids = (array) filter_input(INPUT_POST, 'unban_ids',
 				FILTER_VALIDATE_INT,
 				FILTER_REQUIRE_ARRAY
@@ -723,7 +722,7 @@ switch ($mode) {
 
 	case 'attach':
 		if (isset($_POST['submit'])) {
-			$ext_list = trim(u::filter_input(INPUT_POST, 'ext_list'));
+			$ext_list = trim(filter_input(INPUT_POST, 'ext_list'));
 			$ext_ids  = (array) filter_input(INPUT_POST, 'ext_ids',
 				FILTER_VALIDATE_INT,
 				FILTER_REQUIRE_ARRAY

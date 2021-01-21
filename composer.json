@@ -17,8 +17,9 @@
 		"source": "https://github.com/wascripts/wanewsletter"
 	},
 	"require": {
-		"php": ">=5.4.4",
-		"patchwork/utf8": "~1.2",
+		"php": ">=7.1",
+		"symfony/polyfill-mbstring": "~1.22.0",
+		"symfony/polyfill-intl-normalizer": "~1.22.0",
 		"wascripts/wamailer": "~4.0@dev",
 		"tinymce/tinymce": "~5.6.0",
 		"elkuku/console-progressbar": "1.0"

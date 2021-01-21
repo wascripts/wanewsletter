@@ -9,7 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 
 /**
@@ -917,7 +916,7 @@ function convert_encoding($data, $charset = null, $check_bom = true)
 			$charset = 'UTF-8';
 			$data = substr($data, 3);
 		}
-		else if (u::isUtf8($data)) {
+		else if (!empty($data) && preg_match('//u', $data)) {
 			$charset = 'UTF-8';
 		}
 	}
@@ -928,7 +927,7 @@ function convert_encoding($data, $charset = null, $check_bom = true)
 	}
 
 	if (strtoupper($charset) != 'UTF-8') {
-		$data = iconv($charset, 'UTF-8', $data);
+		$data = mb_convert_encoding($data, 'UTF-8', $charset);
 	}
 
 	return $data;
@@ -1487,7 +1486,13 @@ function print_debug_infos()
 
 	$print_row  = function ($name, $value = null) use (&$lang) {
 		echo '  ';// 2x NBSP
-		echo htmlspecialchars(u::str_pad($name, 30));
+		echo htmlspecialchars($name);
+		$l = 34 - mb_strlen($name);
+		$i = 0;
+		while ($i < $l) {
+			echo ' ';
+			$i++;
+		}
 
 		if (!is_null($value)) {
 			echo ' : ';
@@ -1687,8 +1692,8 @@ function process_mail_action(array $listdata)
 			continue;
 		}
 
-		$pseudo = (isset($m[1])) ? trim(strip_tags(u::filter($m[1]))) : '';
-		$email  = trim($m[2]);
+		$pseudo = (isset($m[1])) ? strip_tags(utf8_normalize(trim($m[1]))) : '';
+		$email  = utf8_normalize(trim($m[2]));
 
 		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
 			continue;
@@ -1698,7 +1703,7 @@ function process_mail_action(array $listdata)
 			continue;
 		}
 
-		$action = mb_strtolower(trim(u::filter($headers['subject'])));
+		$action = mb_strtolower(utf8_normalize(trim($headers['subject'])));
 
 		switch ($action) {
 			case 'désinscription':
@@ -1979,4 +1984,20 @@ function get_form_url(array $listdata)
 	}
 
 	return $form_url;
+}
+
+/**
+ * Normalise le codage des chaînes UTF-8 au format NFC.
+ *
+ * @param string $str
+ *
+ * @return string
+ */
+function utf8_normalize($str)
+{
+	if (preg_match('/[\x80-\xFF]/', $str)) {
+		$str = (string)\Normalizer::normalize($str, \Normalizer::FORM_C);
+	}
+
+	return $str;
 }

@@ -9,7 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wamailer\Mime;
 use ZipArchive;
@@ -208,7 +207,7 @@ else if ($mode == 'abonnes') {
 	$abo_confirmed   = SUBSCRIBE_CONFIRMED;
 	$sql_search      = '';
 	$sql_search_date = '';
-	$search_keyword  = trim(u::filter_input(INPUT_GET, 'keyword'));
+	$search_keyword  = utf8_normalize(trim(filter_input(INPUT_GET, 'keyword')));
 	$search_date     = (int) filter_input(INPUT_GET, 'days');
 
 	if ($search_keyword || $search_date) {
@@ -417,7 +416,7 @@ else if ($mode == 'abonnes') {
 		unset($tmp_ids);
 
 		if (isset($_POST['submit'])) {
-			$email = trim(u::filter_input(INPUT_POST, 'email'));
+			$email = utf8_normalize(trim(filter_input(INPUT_POST, 'email')));
 
 			if (!Mailer::checkMailSyntax($email)) {
 				$error = true;
@@ -439,7 +438,7 @@ else if ($mode == 'abonnes') {
 			if (!$error) {
 				$sql_data = [
 					'abo_email'  => $email,
-					'abo_pseudo' => strip_tags(trim(u::filter_input(INPUT_POST, 'pseudo'))),
+					'abo_pseudo' => utf8_normalize(strip_tags(trim(filter_input(INPUT_POST, 'pseudo')))),
 					'abo_status' => (filter_input(INPUT_POST, 'status') == ABO_ACTIVE) ? ABO_ACTIVE : ABO_INACTIVE
 				];
 
@@ -447,10 +446,10 @@ else if ($mode == 'abonnes') {
 				// Récupération des champs des tags personnalisés
 				//
 				if (count($other_tags) > 0) {
-					$tags_data = (array) u::filter_input(INPUT_POST, 'tags',
-						FILTER_DEFAULT,
-						FILTER_REQUIRE_ARRAY
-					);
+					$tags_data = (array) filter_input(INPUT_POST, 'tags', FILTER_CALLBACK, [
+						'flags' => FILTER_REQUIRE_ARRAY,
+						'options' => __NAMESPACE__.'\\utf8_normalize'
+					]);
 
 					foreach ($other_tags as $tag) {
 						if (isset($tags_data[$tag['column_name']])) {
@@ -636,7 +635,7 @@ else if ($mode == 'abonnes') {
 			$output->message();
 		}
 		else {
-			$email_list = trim(u::filter_input(INPUT_POST, 'email_list'));
+			$email_list = utf8_normalize(trim(filter_input(INPUT_POST, 'email_list')));
 			$abo_ids    = (array) filter_input(INPUT_POST, 'id',
 				FILTER_VALIDATE_INT,
 				FILTER_REQUIRE_ARRAY
@@ -896,7 +895,7 @@ else if ($mode == 'liste') {
 			'pop_host', 'pop_user', 'pop_pass', 'liste_alias'
 		];
 		foreach ($vararray as $varname) {
-			${$varname} = trim(u::filter_input(INPUT_POST, $varname));
+			${$varname} = utf8_normalize(trim(filter_input(INPUT_POST, $varname)));
 		}
 
 		$default_values = [

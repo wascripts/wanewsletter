@@ -9,8 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
-
 //
 // Vous pouvez, grâce à cette constante, désactiver la vérification de
 // l'existence du tag {LINKS} dans les lettres au moment de l'envoi.
@@ -50,9 +48,9 @@ if (!is_int($logdata['log_id'])) {
 	$logdata['log_id'] = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 }
 
-$logdata['log_subject']   = trim(u::filter_input(INPUT_POST, 'subject'));
-$logdata['log_body_text'] = trim(u::filter_input(INPUT_POST, 'body_text'));
-$logdata['log_body_html'] = trim(u::filter_input(INPUT_POST, 'body_html'));
+$logdata['log_subject']   = trim(filter_input(INPUT_POST, 'subject'));
+$logdata['log_body_text'] = trim(filter_input(INPUT_POST, 'body_text'));
+$logdata['log_body_html'] = trim(filter_input(INPUT_POST, 'body_html'));
 $logdata['log_status']    = filter_input(INPUT_POST, 'log_status', FILTER_VALIDATE_INT);
 $logdata['log_date']      = filter_input(INPUT_POST, 'log_date', FILTER_VALIDATE_INT, [
 	'options' => ['default' => -1]

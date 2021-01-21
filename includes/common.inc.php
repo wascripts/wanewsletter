@@ -91,9 +91,3 @@ else {
 // Chargement de la configuration de base
 //
 load_config();
-
-//
-// Initialisation de patchwork/utf8
-//
-\Patchwork\Utf8\Bootup::initAll();
-

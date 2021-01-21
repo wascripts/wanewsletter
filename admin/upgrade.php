@@ -9,8 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
-
 const IN_ADMIN = true;
 
 require '../includes/common.inc.php';
@@ -451,6 +449,12 @@ if (check_db_version($nl_config['db_version'])) {
 	}
 }
 
+if ($nl_config['db_version'] < 17 && $db::ENGINE == 'sqlite') {
+	if( !function_exists('utf8_encode')) {
+		$output->message("We need utf8_encode() function in order to upgrade sqlite database");
+	}
+}
+
 if (isset($_POST['start'])) {
 	$schemas_dir = WA_ROOTDIR . '/includes/Dblayer/schemas';
 	$sql_create  = sprintf('%s/%s_tables.sql', $schemas_dir, $db::ENGINE);
@@ -463,8 +467,8 @@ if (isset($_POST['start'])) {
 	}
 
 	if (!$auth->isLoggedIn()) {
-		$login  = trim(u::filter_input(INPUT_POST, 'login'));
-		$passwd = trim(u::filter_input(INPUT_POST, 'passwd'));
+		$login  = utf8_normalize(trim(filter_input(INPUT_POST, 'login')));
+		$passwd = utf8_normalize(trim(filter_input(INPUT_POST, 'passwd')));
 		$admindata = $auth->checkCredentials($login, $passwd);
 
 		if (!$admindata) {
@@ -719,7 +723,7 @@ if (isset($_POST['start'])) {
 				}
 			}
 			else if ($db::ENGINE == 'sqlite') {
-				$db->createFunction('utf8_encode', ['\Patchwork\Utf8', 'utf8_encode']);
+				$db->createFunction('utf8_encode', 'utf8_encode');
 
 				$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_pseudo = utf8_encode(abo_pseudo)";
 				$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_login = utf8_encode(admin_login)";

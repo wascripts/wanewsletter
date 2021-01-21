@@ -9,8 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
-
 if (substr($_SERVER['SCRIPT_FILENAME'], -8) == '.inc.php') {
 	exit('<b>No hacking</b>');
 }
@@ -52,8 +50,8 @@ if ($mode == 'reset' || $mode == 'cp') {
 			$userdata = $auth->getUserData($_SESSION['uid']);
 
 			if (isset($_POST['submit'])) {
-				$passwd = trim(u::filter_input(INPUT_POST, 'new_passwd'));
-				$confirm_passwd = trim(u::filter_input(INPUT_POST, 'confirm_passwd'));
+				$passwd = utf8_normalize(trim(filter_input(INPUT_POST, 'new_passwd')));
+				$confirm_passwd = utf8_normalize(trim(filter_input(INPUT_POST, 'confirm_passwd')));
 
 				if (!validate_pass($passwd)) {
 					$error = true;
@@ -106,7 +104,7 @@ if ($mode == 'reset' || $mode == 'cp') {
 		}
 	}
 
-	$login = trim(u::filter_input(INPUT_POST, 'login'));
+	$login = utf8_normalize(trim(filter_input(INPUT_POST, 'login')));
 
 	if (!$error && isset($_POST['submit'])) {
 		if (!$login) {
@@ -179,8 +177,8 @@ if ($mode == 'reset' || $mode == 'cp') {
 // Si l'utilisateur n'est pas connecté, on récupère les données et on démarre une nouvelle session
 //
 else if (isset($_POST['submit']) && !$auth->isLoggedIn()) {
-	$login  = trim(u::filter_input(INPUT_POST, 'login'));
-	$passwd = trim(u::filter_input(INPUT_POST, 'passwd'));
+	$login  = utf8_normalize(trim(filter_input(INPUT_POST, 'login')));
+	$passwd = utf8_normalize(trim(filter_input(INPUT_POST, 'passwd')));
 
 	if ($userdata = $auth->checkCredentials($login, $passwd)) {
 		$session->reset();

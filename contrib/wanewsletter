@@ -18,7 +18,6 @@
 namespace Wanewsletter;
 
 use Elkuku\Console\Helper\ConsoleProgressBar;
-use Patchwork\Utf8 as u;
 
 define('WA_ROOTDIR', dirname(__DIR__));
 

@@ -31,7 +31,7 @@ if (isset($_POST['submit'])) {
 			'options' => ['default' => $value]
 		]);
 		if (is_scalar($new_config[$name])) {
-			$new_config[$name] = trim($new_config[$name]);
+			$new_config[$name] = utf8_normalize(trim($new_config[$name]));
 		}
 	}
 

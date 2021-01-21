@@ -9,7 +9,6 @@
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 use Wamailer\Email;
 
@@ -38,8 +37,8 @@ if (($mode == 'adduser' || $mode == 'deluser') && !Auth::isAdmin($admindata)) {
 }
 
 if ($mode == 'adduser') {
-	$new_login = trim(u::filter_input(INPUT_POST, 'new_login'));
-	$new_email = trim(u::filter_input(INPUT_POST, 'new_email'));
+	$new_login = utf8_normalize(trim(filter_input(INPUT_POST, 'new_login')));
+	$new_email = utf8_normalize(trim(filter_input(INPUT_POST, 'new_email')));
 
 	$error = false;
 
@@ -185,7 +184,7 @@ if (isset($_POST['submit'])) {
 
 	$vararray = ['current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'date_format', 'language'];
 	foreach ($vararray as $varname) {
-		${$varname} = trim(u::filter_input(INPUT_POST, $varname));
+		${$varname} = utf8_normalize(trim(filter_input(INPUT_POST, $varname)));
 	}
 
 	if ($date_format == '') {
