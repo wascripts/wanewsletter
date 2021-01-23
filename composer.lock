@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "093c650f2d5981d60f27238256dd2e28",
+    "content-hash": "42a2646478215b40546818c1b6a4570d",
     "packages": [
         {
             "name": "macroman/terminal-progress-bar",
@@ -264,7 +264,7 @@
         },
         {
             "name": "wascripts/wamailer",
-            "version": "dev-master",
+            "version": "v4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wascripts/wamailer.git",
@@ -279,7 +279,6 @@
             "require": {
                 "php": ">=5.4.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -291,6 +290,7 @@
                     "Wamailer\\": "lib/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "LGPL-2.1+"
             ],
@@ -310,8 +310,8 @@
                 "smtp"
             ],
             "support": {
-                "source": "https://github.com/wascripts/wamailer/tree/master",
-                "issues": "https://github.com/wascripts/wamailer/issues"
+                "issues": "https://github.com/wascripts/wamailer/issues",
+                "source": "https://github.com/wascripts/wamailer/tree/v4.0"
             },
             "time": "2021-01-20T21:00:39+00:00"
         }
@@ -319,9 +319,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "wascripts/wamailer": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
