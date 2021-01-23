@@ -157,13 +157,7 @@ class Sqlite3 extends Wadb
 
 	public function vacuum($tables)
 	{
-		if (!is_array($tables)) {
-			$tables = [$tables];
-		}
-
-		foreach ($tables as $tablename) {
-			$this->link->exec('VACUUM ' . $this->quote($tablename));
-		}
+		$this->link->exec('VACUUM');
 	}
 
 	public function beginTransaction()

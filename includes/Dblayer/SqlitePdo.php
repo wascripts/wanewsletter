@@ -196,13 +196,7 @@ class SqlitePdo extends Wadb
 
 	public function vacuum($tables)
 	{
-		if (!is_array($tables)) {
-			$tables = [$tables];
-		}
-
-		foreach ($tables as $tablename) {
-			$this->pdo->query('VACUUM ' . $this->quote($tablename));
-		}
+		$this->pdo->query('VACUUM');
 	}
 
 	public function beginTransaction()
