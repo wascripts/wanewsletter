@@ -1,10 +1,10 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  *
  * Vous pouvez très facilement traduire Wanewsletter dans une autre langue.
  * Il vous suffit pour cela de traduire ce qui se trouve entre
@@ -567,7 +567,7 @@ $lang['Explain']['unban']           = "Pour débannir un email ou fragment d’e
 $lang['Explain']['forbid_ext']      = "Pour interdire plusieurs extensions de fichiers en même temps, séparez-les par une virgule";
 $lang['Explain']['reallow_ext']     = "Pour réautoriser une ou plusieurs extensions, utilisez la combinaison clavier/souris appropriée sur votre ordinateur et votre navigateur";
 $lang['Explain']['backup']          = "Ce module vous permet de sauvegarder les tables du script, ainsi que d’éventuelles autres tables spécifiées, s’il y en a.\nVous pouvez décider de sauvegarder tout, uniquement la structure ou les données, et vous pouvez demander à ce que le fichier soit compressé (selon les options disponibles et librairies installées sur le serveur).\nEnfin, vous pouvez soit télécharger directement le fichier, ou demander au script de le stocker sur le serveur, auquel cas, le fichier sera créé dans le répertoire des fichiers temporaires du script.\n\n<strong>Attention :</strong> Cet outil ne convient que pour des tables aux structures relativement simples. Si vos tables utilisent des clés étrangères ou stockent des données binaires, vous devez vous tourner vers d’autres outils plus spécialisés pour obtenir un export utilisable.";
-$lang['Explain']['restore']         = "Ce module vous permet de restaurer les tables du script à l’aide d’une sauvegarde générée par wanewsletter ou un quelconque gestionnaire de bases de données.\nSi l’upload de fichier n’est pas autorisé sur le serveur, vous avez toutefois la possibilité de spécifier un fichier précédemment uploadé via ftp en indiquant son chemin (relatif à la racine du script)";
+$lang['Explain']['restore']         = "Ce module vous permet de restaurer les tables du script à l’aide d’une sauvegarde SQL générée par wanewsletter.\n N’utilisez que les fichiers SQL générés par Wanewsletter ! (le parseur est minimaliste) \nSi l’upload de fichier n’est pas autorisé sur le serveur, vous avez toutefois la possibilité de spécifier un fichier précédemment uploadé via ftp en indiquant son chemin (relatif à la racine du script)";
 $lang['Explain']['generator']       = "Vous devez entrer ici l’adresse absolue où les données du formulaire seront reçues (en général, l’adresse où se trouve le formulaire lui même)";
 $lang['Explain']['code_html']       = "Placez ce code à l’adresse que vous avez/allez indiquer dans la configuration de la liste de diffusion";
 $lang['Explain']['code_php']        = "Vous devez placer ce code à l’adresse de destination du formulaire (adresse entrée précédemment), le fichier doit avoir l’extension php !";
@@ -668,7 +668,7 @@ $lang['Next_month']                 = "Mois suivant";
 //
 // Installation du script
 //
-$lang['Welcome_in_install']         = "Bienvenue dans le script d’installation de Wanewsletter.\nAvant de continuer l’installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l’installation.\nAssurez-vous également d’avoir pris connaissance de la %slicence d’utilisation de Wanewsletter%s avant de continuer. Une traduction française <strong>non officielle</strong> est disponible à l’adresse %sphpcodeur.net/wascripts/gpl%s";
+$lang['Welcome_in_install']         = "Bienvenue dans le script d’installation de Wanewsletter.\nAvant de continuer l’installation, prenez le temps de lire le fichier %slisez-moi%s, il contient des directives importantes pour la réussite de l’installation.\nAssurez-vous également d’avoir pris connaissance de la %slicence d’utilisation de Wanewsletter%s avant de continuer.";
 $lang['Welcome_in_upgrade']         = "Bienvenue dans le script de mise à jour vers Wanewsletter <strong>%s</strong>.\n Par mesure de sécurité, il est <strong>fortement conseillé</strong> de faire une sauvegarde des tables de données du script avant de procéder à la mise à jour.\nUne fois que vous êtes prêt, lancez la mise à jour avec le bouton ci-dessous.";
 $lang['Warning_reinstall']          = "<b>Attention !</b> Wanewsletter semble déjà installé. \nSi vous souhaitez réinstaller le script, entrez votre login et mot de passe d’administrateur. \nAttention, toutes les données de l’installation précédente seront définitivement perdues.\n Si vous souhaitez plutôt effectuer une mise à jour d’une installation existante, utilisez le script upgrade.php";
 $lang['Start_install']              = "Démarrer l’installation";

@@ -1,18 +1,15 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter\Output;
 
-use Wanewsletter\Auth;
-use Wanewsletter\Error;
-use Wanewsletter\Dblayer;
-use Wanewsletter\Template;
+use Wanewsletter\{Auth, Error, Dblayer, Template};
 
 class Html implements MessageInterface
 {
@@ -314,7 +311,7 @@ class Html implements MessageInterface
 			$this->addLink('home', './', $lang['Title']['accueil']);
 			$this->addLink('help', sprintf('../docs/faq.%s.html', $lang['CONTENT_LANG']), $lang['Faq']);
 			$this->addLink('author', sprintf('../docs/readme.%s.html', $lang['CONTENT_LANG']), $lang['Author_note']);
-			$this->addLink('copyright', 'http://www.gnu.org/copyleft/gpl.html', 'Licence GPL 2');
+			$this->addLink('copyright', 'https://www.gnu.org/licenses/gpl.html', 'Licence GPL');
 
 			$sections[] = [$lang['Module']['config'],      './config.php'];
 			$sections[] = [$lang['Title']['send'],         './envoi.php'];
@@ -705,21 +702,17 @@ BASIC;
 		exit;
 	}
 
-	public function notice()
+	public function notice(...$args)
 	{
-		$args = func_get_args();
-		array_unshift($args, 'notice');
-		call_user_func_array([$this,'log'], $args);
+		$this->log('notice', ...$args);
 	}
 
-	public function warn()
+	public function warn(...$args)
 	{
-		$args = func_get_args();
-		array_unshift($args, 'warn');
-		call_user_func_array([$this,'log'], $args);
+		$this->log('warn', ...$args);
 	}
 
-	public function log($type, $str)
+	public function log($type, $str, ...$args)
 	{
 		global $lang;
 
@@ -727,12 +720,9 @@ BASIC;
 			$str = $lang['Message'][$str];
 		}
 
-		if (func_num_args() > 2) {
-			$args = func_get_args();
-			array_shift($args);
+		if (count($args) > 0) {
 			$args = array_map('htmlspecialchars', $args);
-			$args[0] = $str;
-			$str  = call_user_func_array('sprintf', $args);
+			$str = sprintf($str, ...$args);
 		}
 
 		$this->msg_log[$type][] = $str;

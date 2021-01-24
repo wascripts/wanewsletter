@@ -1,10 +1,10 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter\Dblayer;
@@ -19,7 +19,7 @@ abstract class Wadb
 	/**
 	 * Type de base de données
 	 */
-	const ENGINE = '';
+	public const ENGINE = '';
 
 	/**
 	 * Connexion à la base de données
@@ -365,9 +365,9 @@ abstract class Wadb
 
 abstract class WadbResult
 {
-	const FETCH_NUM    = 1;
-	const FETCH_ASSOC  = 2;
-	const FETCH_BOTH   = 3;
+	public const FETCH_NUM    = 1;
+	public const FETCH_ASSOC  = 2;
+	public const FETCH_BOTH   = 3;
 
 	/**
 	 * Ressource de résultat de requète

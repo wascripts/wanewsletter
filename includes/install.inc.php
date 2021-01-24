@@ -1,15 +1,13 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
-
-use Patchwork\Utf8 as u;
 
 const IN_INSTALL = true;
 
@@ -88,9 +86,9 @@ else {
 	]));
 
 	foreach (['engine', 'host', 'user', 'pass', 'dbname', 'path'] as $varname) {
-		$infos[$varname] = trim(u::filter_input(INPUT_POST, $varname, FILTER_DEFAULT, [
+		$infos[$varname] = utf8_normalize(trim(filter_input(INPUT_POST, $varname, FILTER_DEFAULT, [
 			'options' => ['default' => $infos[$varname]]
-		]));
+		])));
 	}
 
 	// Récupération du port, si associé avec le nom d’hôte ou l’IP.
@@ -143,7 +141,7 @@ $vararray = [
 	'confirm_pass', 'urlsite', 'urlscript'
 ];
 foreach ($vararray as $varname) {
-	${$varname} = trim(u::filter_input(INPUT_POST, $varname));
+	${$varname} = utf8_normalize(trim(filter_input(INPUT_POST, $varname)));
 }
 
 $language = ($language != '') ? $language : $lang['CONTENT_LANG'];
@@ -384,8 +382,7 @@ if (!$reinstall) {
 	$l_explain = nl2br(sprintf(
 		$lang['Welcome_in_install'],
 		'<a href="docs/readme.' . $lang['CONTENT_LANG'] . '.html">', '</a>',
-		'<a href="COPYING">', '</a>',
-		'<a href="http://phpcodeur.net/wascripts/GPL">', '</a>'
+		'<a href="COPYING">', '</a>'
 	));
 
 	if ($infos['host'] == '') {

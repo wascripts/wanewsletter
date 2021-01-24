@@ -1,15 +1,13 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
-
-use Patchwork\Utf8 as u;
 
 if (!defined('WA_ROOTDIR')) {
 	define('WA_ROOTDIR', str_replace('\\', '/', __DIR__));
@@ -32,8 +30,8 @@ if (!empty($language) && validate_lang($language)) {
 load_l10n();
 
 $action = trim(filter_input(INPUT_POST, 'action'));
-$email  = trim(u::filter_input(INPUT_POST, 'email'));
-$pseudo = trim(u::filter_input(INPUT_POST, 'pseudo'));
+$email  = utf8_normalize(trim(filter_input(INPUT_POST, 'email')));
+$pseudo = utf8_normalize(trim(filter_input(INPUT_POST, 'pseudo')));
 $format = (int) filter_input(INPUT_POST, 'format', FILTER_VALIDATE_INT);
 $liste  = (int) filter_input(INPUT_POST, 'liste', FILTER_VALIDATE_INT);
 $code   = '';

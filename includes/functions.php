@@ -1,15 +1,14 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
 use Wamailer\Mailer;
 
 /**
@@ -57,32 +56,6 @@ function load_config()
 	$base_config['tmp_dir']   = '~/data/tmp';
 
 	$nl_config = array_merge($base_config, $nl_config);
-
-	//
-	// Compatibilité avec Wanewsletter < 2.3-beta2
-	//
-	if (!$dsn && !empty($dbtype)) {
-		$infos = [];
-		$infos['engine'] = $dbtype;
-		$infos['host']   = $dbhost;
-		$infos['user']   = $dbuser;
-		$infos['pass']   = $dbpassword;
-		$infos['dbname'] = $dbname;
-
-		if ($infos['engine'] == 'mssql') {
-			$output->message('No_microsoft_sqlserver');
-		}
-		else if ($infos['engine'] == 'postgre') {
-			$infos['engine'] = 'postgres';
-		}
-		else if ($infos['engine'] == 'mysql4' || $infos['engine'] == 'mysqli') {
-			$infos['engine'] = 'mysql';
-		}
-
-		$dsn = createDSN($infos);
-
-		$need_update = true;
-	}
 
 	// Configuration initiale pour Wamailer
 	if (!isset($nl_config['mailer']) || !is_array($nl_config['mailer'])) {
@@ -461,7 +434,7 @@ function http_redirect($url, array $params = [], $session = false, $status = 0)
 	}
 
 	if ($session && defined('SID') && SID != '') {
-		list($name, $value) = explode('=', SID);
+		[$name, $value] = explode('=', SID);
 		$params[$name] = $value;
 	}
 
@@ -943,7 +916,7 @@ function convert_encoding($data, $charset = null, $check_bom = true)
 			$charset = 'UTF-8';
 			$data = substr($data, 3);
 		}
-		else if (u::isUtf8($data)) {
+		else if (!empty($data) && preg_match('//u', $data)) {
 			$charset = 'UTF-8';
 		}
 	}
@@ -954,7 +927,7 @@ function convert_encoding($data, $charset = null, $check_bom = true)
 	}
 
 	if (strtoupper($charset) != 'UTF-8') {
-		$data = iconv($charset, 'UTF-8', $data);
+		$data = mb_convert_encoding($data, 'UTF-8', $charset);
 	}
 
 	return $data;
@@ -1513,7 +1486,13 @@ function print_debug_infos()
 
 	$print_row  = function ($name, $value = null) use (&$lang) {
 		echo '  ';// 2x NBSP
-		echo htmlspecialchars(u::str_pad($name, 30));
+		echo htmlspecialchars($name);
+		$l = 34 - mb_strlen($name);
+		$i = 0;
+		while ($i < $l) {
+			echo ' ';
+			$i++;
+		}
 
 		if (!is_null($value)) {
 			echo ' : ';
@@ -1713,8 +1692,8 @@ function process_mail_action(array $listdata)
 			continue;
 		}
 
-		$pseudo = (isset($m[1])) ? trim(strip_tags(u::filter($m[1]))) : '';
-		$email  = trim($m[2]);
+		$pseudo = (isset($m[1])) ? strip_tags(utf8_normalize(trim($m[1]))) : '';
+		$email  = utf8_normalize(trim($m[2]));
 
 		if (!isset($headers['to']) || !stristr($headers['to'], $sub->liste_email)) {
 			continue;
@@ -1724,7 +1703,7 @@ function process_mail_action(array $listdata)
 			continue;
 		}
 
-		$action = mb_strtolower(trim(u::filter($headers['subject'])));
+		$action = mb_strtolower(utf8_normalize(trim($headers['subject'])));
 
 		switch ($action) {
 			case 'désinscription':
@@ -1798,7 +1777,7 @@ function parse_headers($headers_str)
 	$lines   = explode("\r\n", $headers_str);
 
 	foreach ($lines as $line) {
-		list($header_name, $header_value) = explode(': ', $line, 2);
+		[$header_name, $header_value] = explode(': ', $line, 2);
 
 		$atoms = explode(' ', $header_value);
 
@@ -2005,4 +1984,20 @@ function get_form_url(array $listdata)
 	}
 
 	return $form_url;
+}
+
+/**
+ * Normalise le codage des chaînes UTF-8 au format NFC.
+ *
+ * @param string $str
+ *
+ * @return string
+ */
+function utf8_normalize($str)
+{
+	if (preg_match('/[\x80-\xFF]/', $str)) {
+		$str = (string)\Normalizer::normalize($str, \Normalizer::FORM_C);
+	}
+
+	return $str;
 }

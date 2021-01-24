@@ -1,10 +1,10 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
@@ -16,14 +16,14 @@ namespace Wanewsletter;
  */
 class Auth
 {
-	const VIEW   = 'auth_view';
-	const EDIT   = 'auth_edit';
-	const DEL    = 'auth_del';
-	const SEND   = 'auth_send';
-	const IMPORT = 'auth_import';
-	const EXPORT = 'auth_export';
-	const BAN    = 'auth_ban';
-	const ATTACH = 'auth_attach';
+	public const VIEW   = 'auth_view';
+	public const EDIT   = 'auth_edit';
+	public const DEL    = 'auth_del';
+	public const SEND   = 'auth_send';
+	public const IMPORT = 'auth_import';
+	public const EXPORT = 'auth_export';
+	public const BAN    = 'auth_ban';
+	public const ATTACH = 'auth_attach';
 
 	/**
 	 * Vérifie si l'utilisateur s'est authentifié
@@ -86,7 +86,7 @@ class Auth
 	{
 		global $db;
 
-		list($tablename, $columns) = $this->getUserTableInfos();
+		[$tablename, $columns] = $this->getUserTableInfos();
 
 		if (!($passwd_hash = password_hash($passwd, PASSWORD_DEFAULT))) {
 			trigger_error("Unexpected error returned by password API", E_USER_ERROR);
@@ -112,7 +112,7 @@ class Auth
 			return $admindata;
 		}
 
-		list($tablename, $columns) = $this->getUserTableInfos();
+		[$tablename, $columns] = $this->getUserTableInfos();
 
 		if (!is_int($id) && $id != '') {
 			$sql_where = sprintf("%s = '%s'", $columns['login'], $db->escape($id));

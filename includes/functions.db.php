@@ -1,10 +1,10 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
@@ -22,7 +22,7 @@ function get_supported_db()
 	if (is_null($supported_db)) {
 		$supported_db = [];
 
-		if (extension_loaded('mysql') || extension_loaded('mysqli')) {
+		if (extension_loaded('mysqli')) {
 			$supported_db['mysql'] = [
 				'label' => 'MySQL',
 				'version' => '5.0.7'
@@ -188,7 +188,7 @@ function parseDSN($dsn)
 		}
 	}
 
-	if ($infos['engine'] == 'mysql' && extension_loaded('mysqli')) {
+	if ($infos['engine'] == 'mysql') {
 		$infos['driver'] = 'Mysqli';
 	}
 	else if ($infos['engine'] == 'sqlite') {
@@ -225,11 +225,11 @@ function parseDSN($dsn)
  */
 function WaDatabase($dsn)
 {
-	list($infos, $options) = parseDSN($dsn);
+	[$infos, $options] = parseDSN($dsn);
 	$dbclass = sprintf('%s\\Dblayer\\%s', __NAMESPACE__, $infos['driver']);
 
-	$infos['username'] = (isset($infos['user'])) ? $infos['user'] : null;
-	$infos['passwd']   = (isset($infos['pass'])) ? $infos['pass'] : null;
+	$infos['username'] = $infos['user'] ?? null;
+	$infos['passwd']   = $infos['pass'] ?? null;
 
 	// Timeout de connexion
 	if (empty($options['timeout'])) {

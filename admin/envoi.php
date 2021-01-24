@@ -1,15 +1,13 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
-
-use Patchwork\Utf8 as u;
 
 //
 // Vous pouvez, grâce à cette constante, désactiver la vérification de
@@ -50,9 +48,9 @@ if (!is_int($logdata['log_id'])) {
 	$logdata['log_id'] = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 }
 
-$logdata['log_subject']   = trim(u::filter_input(INPUT_POST, 'subject'));
-$logdata['log_body_text'] = trim(u::filter_input(INPUT_POST, 'body_text'));
-$logdata['log_body_html'] = trim(u::filter_input(INPUT_POST, 'body_html'));
+$logdata['log_subject']   = trim(filter_input(INPUT_POST, 'subject'));
+$logdata['log_body_text'] = trim(filter_input(INPUT_POST, 'body_text'));
+$logdata['log_body_html'] = trim(filter_input(INPUT_POST, 'body_html'));
 $logdata['log_status']    = filter_input(INPUT_POST, 'log_status', FILTER_VALIDATE_INT);
 $logdata['log_date']      = filter_input(INPUT_POST, 'log_date', FILTER_VALIDATE_INT, [
 	'options' => ['default' => -1]
@@ -1068,6 +1066,7 @@ if ($logdata['log_date'] != -1) {
 
 if (is_readable(WA_ROOTDIR . '/languages/'.$admindata['admin_lang'].'/tinymce.js')) {
 	$template->assignToBlock('tinymce_lang', [
+		'FULL_CODE' => strpos($admindata['admin_lang'], '_') ? $admindata['admin_lang'] : $admindata['admin_lang'] . '_' . strtoupper($admindata['admin_lang']),
 		'CODE' => $admindata['admin_lang']
 	]);
 }

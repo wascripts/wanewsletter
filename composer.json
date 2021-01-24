@@ -2,34 +2,26 @@
 	"name": "wascripts/wanewsletter",
 	"description": "Wanewsletter est un script complet et puissant d’envoi d’emails et de gestion de listes d’envoi",
 	"keywords": ["mailing", "manager", "email"],
-	"homepage": "http://phpcodeur.net/wascripts/wanewsletter/",
+	"homepage": "http://dev.webnaute.net/wanewsletter/",
 	"type": "project",
 	"license": "GPL-2.0+",
 	"authors": [
 		{
 			"name": "Aurélien Maille",
-			"email": "bobe@webnaute.net",
+			"email": "wascripts@webnaute.net",
 			"role": "lead developer"
 		}
 	],
 	"support": {
-		"forum": "https://forum.phpcodeur.net/",
+		"forum": "https://forum.webnaute.net/",
 		"source": "https://github.com/wascripts/wanewsletter"
 	},
 	"require": {
-		"php": ">=5.4.4",
-		"patchwork/utf8": "~1.2",
-		"ircmaxell/password-compat": "1.0.*",
-		"wascripts/wamailer": "~4.0@dev",
-		"tinymce/tinymce": "~4.5.0",
-		"elkuku/console-progressbar": "1.0"
-	},
-	"require-dev": {
-	},
-	"repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/wascripts/wamailer"
-        }
-    ]
+		"php": ">=7.1",
+		"symfony/polyfill-mbstring": "~1.22.0",
+		"symfony/polyfill-intl-normalizer": "~1.22.0",
+		"wascripts/wamailer": "4.0",
+		"tinymce/tinymce": "~5.6.0",
+		"macroman/terminal-progress-bar": "0.1.3"
+	}
 }

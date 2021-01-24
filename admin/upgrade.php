@@ -1,15 +1,13 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
-
-use Patchwork\Utf8 as u;
 
 const IN_ADMIN = true;
 
@@ -73,7 +71,6 @@ includes/Sender.php
 includes/Session.php
 includes/Template.php
 includes/common.inc.php
-includes/compat.inc.php
 includes/constantes.php
 includes/functions.db.php
 includes/functions.php
@@ -84,7 +81,6 @@ includes/install.inc.php
 includes/login.inc.php
 includes/Dblayer/index.html
 includes/Dblayer/MysqlBackup.php
-includes/Dblayer/Mysql.php
 includes/Dblayer/Mysqli.php
 includes/Dblayer/PostgresBackup.php
 includes/Dblayer/Postgres.php
@@ -327,8 +323,8 @@ if (!isset($nl_config['db_version'])) {
 		$currentVersion = WA_VERSION;
 	}
 
-	// Les versions des branches 2.0 et 2.1 ne sont plus prises en charge
-	if (!version_compare($currentVersion, '2.2.0', '>=' )) {
+	// Les versions des branches 2.0, 2.1 et 2.2 ne sont plus prises en charge
+	if (!version_compare($currentVersion, '2.3.0', '>=' )) {
 		$output->message($lang['Unsupported_version']);
 	}
 
@@ -337,16 +333,10 @@ if (!isset($nl_config['db_version'])) {
 	// version ayant apporté des changements dans les tables de données
 	// du script.
 	// Le numérotage de db_version prenait en compte des versions
-	// antérieures à 2.2.0 qui apportaient des modifications, d'où
-	// le db_version commençant à 5.
+	// antérieures à 2.3.0 qui apportaient des modifications, d'où
+	// le db_version commençant à 7.
 	//
-	$nl_config['db_version'] = 5;
-
-	foreach (['2.2.12','2.2.13'] as $version) {
-		if (version_compare($currentVersion, $version, '>')) {
-			$nl_config['db_version']++;
-		}
-	}
+	$nl_config['db_version'] = 7;
 }
 
 $auth = new Auth();
@@ -459,6 +449,12 @@ if (check_db_version($nl_config['db_version'])) {
 	}
 }
 
+if ($nl_config['db_version'] < 17 && $db::ENGINE == 'sqlite') {
+	if( !function_exists('utf8_encode')) {
+		$output->message("We need utf8_encode() function in order to upgrade sqlite database");
+	}
+}
+
 if (isset($_POST['start'])) {
 	$schemas_dir = WA_ROOTDIR . '/includes/Dblayer/schemas';
 	$sql_create  = sprintf('%s/%s_tables.sql', $schemas_dir, $db::ENGINE);
@@ -471,8 +467,8 @@ if (isset($_POST['start'])) {
 	}
 
 	if (!$auth->isLoggedIn()) {
-		$login  = trim(u::filter_input(INPUT_POST, 'login'));
-		$passwd = trim(u::filter_input(INPUT_POST, 'passwd'));
+		$login  = utf8_normalize(trim(filter_input(INPUT_POST, 'login')));
+		$passwd = utf8_normalize(trim(filter_input(INPUT_POST, 'passwd')));
 		$admindata = $auth->checkCredentials($login, $passwd);
 
 		if (!$admindata) {
@@ -525,151 +521,9 @@ if (isset($_POST['start'])) {
 		$sql_tables_recreated = array_fill_keys(get_db_tables(), false);
 
 		//
-		// Sur les versions antérieures à la 2.3.0, il n’y avait pas de
-		// contrainte d’unicité sur abo_email. Avant de commencer la mise
-		// à jour, il faut vérifier l’absence de doublons dans la table
-		// des abonnés.
-		//
-		if ($nl_config['db_version'] < 7) {
-			$sql = "SELECT abo_email
-				FROM " . ABONNES_TABLE . "
-				GROUP BY abo_email
-				HAVING COUNT(abo_email) > 1";
-			$result = $db->query($sql);
-
-			if ($row = $result->fetch()) {
-				$emails = [];
-
-				do {
-					$emails[] = $row['abo_email'];
-				}
-				while ($row = $result->fetch());
-
-				$output->message(sprintf("Des adresses email sont présentes en plusieurs
-					exemplaires dans la table %s, la mise à jour ne peut donc continuer.
-					Supprimez les doublons en cause puis relancez la mise à jour.
-					Adresses email présentes en plusieurs exemplaires : %s",
-					ABONNES_TABLE,
-					implode(', ', $emails)
-				));
-			}
-		}
-
-		//
 		// Début de la mise à jour
 		//
 		$sql_update = [];
-
-		if ($nl_config['db_version'] < 6) {
-			unset($nl_config['hebergeur']);
-			unset($nl_config['version']);
-
-			if ($db::ENGINE == 'postgres') {
-				$sql_update[] = "DROP INDEX abo_status_wa_abonnes_index";
-				$sql_update[] = "DROP INDEX admin_id_wa_auth_admin_index";
-				$sql_update[] = "DROP INDEX liste_id_wa_log_index";
-				$sql_update[] = "DROP INDEX log_status_wa_log_index";
-				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
-					RENAME COLUMN email_new_inscrit email_new_subscribe";
-				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
-					ADD COLUMN email_unsubscribe SMALLINT NOT NULL DEFAULT 0";
-				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
-					ADD COLUMN cc_admin SMALLINT NOT NULL DEFAULT 0";
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN liste_public SMALLINT NOT NULL DEFAULT 1";
-			}
-			else {
-				$sql_update[] = "DROP INDEX abo_status ON " . ABONNES_TABLE;
-				$sql_update[] = "DROP INDEX admin_id ON " . AUTH_ADMIN_TABLE;
-				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
-					DROP INDEX liste_id,
-					DROP INDEX log_status";
-				$sql_update[] = "ALTER TABLE " . ADMIN_TABLE . "
-					CHANGE email_new_inscrit email_new_subscribe TINYINT(1) NOT NULL DEFAULT 0,
-					ADD COLUMN email_unsubscribe TINYINT(1) NOT NULL DEFAULT 0";
-				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
-					ADD COLUMN cc_admin TINYINT(1) NOT NULL DEFAULT 0";
-				$sql_update[] = "ALTER TABLE " . LISTE_TABLE . "
-					ADD COLUMN liste_public TINYINT(1) NOT NULL DEFAULT 1 AFTER liste_name";
-			}
-
-			$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
-				ADD COLUMN register_key CHAR(20) DEFAULT NULL,
-				ADD COLUMN register_date INTEGER NOT NULL DEFAULT 0,
-				ADD COLUMN confirmed SMALLINT NOT NULL DEFAULT 0";
-
-			exec_queries($sql_update);
-
-			$sql = "SELECT abo_id, abo_register_key, abo_pwd, abo_register_date, abo_status
-				FROM " . ABONNES_TABLE;
-			$result = $db->query($sql);
-
-			while ($row = $result->fetch()) {
-				$sql = "UPDATE " . ABO_LISTE_TABLE . "
-					SET register_date = $row[abo_register_date],
-						confirmed     = $row[abo_status]";
-				if ($row['abo_status'] == ABO_INACTIVE) {
-					$sql .= ", register_key = '" . substr($row['abo_register_key'], 0, 20) . "'";
-				}
-				$db->query($sql . " WHERE abo_id = " . $row['abo_id']);
-
-				if (empty($row['abo_pwd'])) {
-					$db->query("UPDATE " . ABONNES_TABLE . "
-						SET abo_pwd = '" . md5($row['abo_register_key']) . "'
-						WHERE abo_id = $row[abo_id]");
-				}
-			}
-			$result->free();
-
-			$sql = "SELECT abo_id, liste_id
-				FROM " . ABO_LISTE_TABLE . "
-				WHERE register_key IS NULL";
-			$result = $db->query($sql);
-
-			while ($row = $result->fetch()) {
-				$sql = "UPDATE " . ABO_LISTE_TABLE . "
-					SET register_key = '" . generate_key(20, false) . "'
-					WHERE liste_id = $row[liste_id]
-						AND abo_id = " . $row['abo_id'];
-				$db->query($sql);
-			}
-			$result->free();
-
-			$sql_update = [];
-			$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
-				DROP COLUMN abo_register_key,
-				DROP COLUMN abo_register_date";
-
-			if ($db::ENGINE == 'postgres') {
-				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
-					ADD CONSTRAINT register_key_idx UNIQUE (register_key)";
-				$sql_update[] = "CREATE INDEX abo_status_idx ON " . ABONNES_TABLE . " (abo_status)";
-				$sql_update[] = "CREATE INDEX admin_id_idx ON " . AUTH_ADMIN_TABLE . " (admin_id)";
-				$sql_update[] = "CREATE INDEX liste_id_idx ON " . LOG_TABLE . " (liste_id)";
-				$sql_update[] = "CREATE INDEX log_status_idx ON " . LOG_TABLE . " (log_status)";
-			}
-			else {
-				$sql_update[] = "ALTER TABLE " . ABO_LISTE_TABLE . "
-					ADD UNIQUE register_key_idx (register_key)";
-				$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
-					ADD INDEX abo_status_idx (abo_status)";
-				$sql_update[] = "ALTER TABLE " . AUTH_ADMIN_TABLE . "
-					ADD INDEX admin_id_idx (admin_id)";
-				$sql_update[] = "ALTER TABLE " . LOG_TABLE . "
-					ADD INDEX liste_id_idx (liste_id),
-					ADD INDEX log_status_idx (log_status)";
-			}
-		}
-
-		//
-		// Ajout contrainte d’unicité sur abo_email
-		//
-		if ($nl_config['db_version'] < 7) {
-			$sql_update[] = "ALTER TABLE " . ABONNES_TABLE . "
-				ADD CONSTRAINT abo_email_idx UNIQUE (abo_email)";
-
-			exec_queries($sql_update);
-		}
 
 		//
 		// Passage de toutes les colonnes stockant une adresse email en VARCHAR(254)
@@ -869,7 +723,7 @@ if (isset($_POST['start'])) {
 				}
 			}
 			else if ($db::ENGINE == 'sqlite') {
-				$db->createFunction('utf8_encode', ['\Patchwork\Utf8', 'utf8_encode']);
+				$db->createFunction('utf8_encode', 'utf8_encode');
 
 				$sql_update[] = "UPDATE " . ABONNES_TABLE . " SET abo_pseudo = utf8_encode(abo_pseudo)";
 				$sql_update[] = "UPDATE " . ADMIN_TABLE . " SET admin_login = utf8_encode(admin_login)";

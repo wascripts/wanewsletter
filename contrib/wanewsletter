@@ -2,10 +2,10 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  *
  * @status experimental
  *
@@ -17,8 +17,7 @@
 
 namespace Wanewsletter;
 
-use Elkuku\Console\Helper\ConsoleProgressBar;
-use Patchwork\Utf8 as u;
+use TerminalProgress\Bar;
 
 define('WA_ROOTDIR', dirname(__DIR__));
 
@@ -256,23 +255,27 @@ if ($process_send) {
 		$progressbar = null;
 		$counter = 0;
 
-		$sender->registerHook('start-send', function ($params) use (&$progressbar) {
-			$progressbar = new ConsoleProgressBar(
-				'Sending emails [%bar%] %current%/%max% %percent%',
-				'=>',
-				' ',
-				76,
-				count($params['list']),
-				['ansi_terminal' => (function_exists('posix_isatty') && posix_isatty(STDOUT))]
-			);
-		});
+		if (function_exists('stream_isatty') && stream_isatty(STDOUT)) {
+			$sender->registerHook('start-send', function ($params) use (&$progressbar) {
+				$progressbar = new Bar(
+					count($params['list']),
+					'Sending emails [:bar] :current/:total :percent%'
+				);
+				$progressbar->throttle = 0;
+			});
+		}
+
 		$sender->registerHook('pre-send', function () use (&$counter, $packet, $delay) {
 			if ($counter > 0 && $delay > 0 && ($counter % $packet) == 0) {
 				sleep($delay);
 			}
 		});
 		$sender->registerHook('post-send', function () use (&$progressbar, &$counter) {
-			$progressbar->update(++$counter);
+			$counter++;
+
+			if ($progressbar) {
+				$progressbar->update($counter);
+			}
 		});
 	}
 

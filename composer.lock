@@ -1,169 +1,228 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "hash": "9382e08aa01c3c9b61e471e863cd9015",
-    "content-hash": "066c803af37a4843342cc0f35c4c1531",
+    "content-hash": "42a2646478215b40546818c1b6a4570d",
     "packages": [
         {
-            "name": "elkuku/console-progressbar",
-            "version": "1.0",
+            "name": "macroman/terminal-progress-bar",
+            "version": "0.1.3",
             "source": {
                 "type": "git",
-                "url": "https://github.com/elkuku/ConsoleProgressBar.git",
-                "reference": "cd97a2556c0be25f37215a8937af834681b9b8fb"
+                "url": "https://github.com/MacroMan/PHPTerminalProgressBar.git",
+                "reference": "2c3970361013b47ad990a90d9f17ca55914bd561"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/elkuku/ConsoleProgressBar/zipball/cd97a2556c0be25f37215a8937af834681b9b8fb",
-                "reference": "cd97a2556c0be25f37215a8937af834681b9b8fb",
+                "url": "https://api.github.com/repos/MacroMan/PHPTerminalProgressBar/zipball/2c3970361013b47ad990a90d9f17ca55914bd561",
+                "reference": "2c3970361013b47ad990a90d9f17ca55914bd561",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": ">=5.6.0"
             },
             "type": "library",
             "autoload": {
                 "psr-0": {
-                    "Elkuku": "src/"
+                    "TerminalProgress": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "MIT"
+                "GNU GPLv3"
             ],
             "authors": [
                 {
-                    "name": "Stefan Walk",
-                    "email": "et@php.net"
-                },
-                {
-                    "name": "Nikolai Plath",
-                    "email": "der.elkuku@gmail.com",
-                    "homepage": "https://github.com/elkuku"
+                    "name": "David Wakelin",
+                    "email": "hello@davidwakelin.co.uk"
                 }
             ],
-            "description": "This class provides you with an easy-to-use interface to progress bars.",
-            "keywords": [
-                "console"
-            ],
-            "time": "2013-04-22 19:52:37"
+            "description": "Flexible ascii progress bar.",
+            "homepage": "https://github.com/MacroMan/PHPTerminalProgressBar",
+            "support": {
+                "issues": "https://github.com/MacroMan/PHPTerminalProgressBar/issues",
+                "source": "https://github.com/MacroMan/PHPTerminalProgressBar/tree/0.1.3"
+            },
+            "time": "2020-12-07T11:49:53+00:00"
         },
         {
-            "name": "ircmaxell/password-compat",
-            "version": "v1.0.4",
+            "name": "symfony/polyfill-intl-normalizer",
+            "version": "v1.22.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/ircmaxell/password_compat.git",
-                "reference": "5c5cde8822a69545767f7c7f3058cb15ff84614c"
+                "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
+                "reference": "6e971c891537eb617a00bb07a43d182a6915faba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ircmaxell/password_compat/zipball/5c5cde8822a69545767f7c7f3058cb15ff84614c",
-                "reference": "5c5cde8822a69545767f7c7f3058cb15ff84614c",
-                "shasum": ""
-            },
-            "require-dev": {
-                "phpunit/phpunit": "4.*"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "lib/password.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Anthony Ferrara",
-                    "email": "ircmaxell@php.net",
-                    "homepage": "http://blog.ircmaxell.com"
-                }
-            ],
-            "description": "A compatibility library for the proposed simplified password hashing algorithm: https://wiki.php.net/rfc/password_hash",
-            "homepage": "https://github.com/ircmaxell/password_compat",
-            "keywords": [
-                "hashing",
-                "password"
-            ],
-            "time": "2014-11-20 16:49:30"
-        },
-        {
-            "name": "patchwork/utf8",
-            "version": "v1.3.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/tchwork/utf8.git",
-                "reference": "30ec6451aec7d2536f0af8fe535f70c764f2c47a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/tchwork/utf8/zipball/30ec6451aec7d2536f0af8fe535f70c764f2c47a",
-                "reference": "30ec6451aec7d2536f0af8fe535f70c764f2c47a",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/6e971c891537eb617a00bb07a43d182a6915faba",
+                "reference": "6e971c891537eb617a00bb07a43d182a6915faba",
                 "shasum": ""
             },
             "require": {
-                "lib-pcre": ">=7.3",
-                "php": ">=5.3.0"
+                "php": ">=7.1"
             },
             "suggest": {
-                "ext-iconv": "Use iconv for best performance",
-                "ext-intl": "Use Intl for best performance",
-                "ext-mbstring": "Use Mbstring for best performance",
-                "ext-wfio": "Use WFIO for UTF-8 filesystem access on Windows"
+                "ext-intl": "For best performance"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.3-dev"
+                    "dev-main": "1.22-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Patchwork\\": "src/Patchwork/"
+                    "Symfony\\Polyfill\\Intl\\Normalizer\\": ""
                 },
+                "files": [
+                    "bootstrap.php"
+                ],
                 "classmap": [
-                    "src/Normalizer.php"
+                    "Resources/stubs"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "(Apache-2.0 or GPL-2.0)"
+                "MIT"
             ],
             "authors": [
                 {
                     "name": "Nicolas Grekas",
                     "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "Portable and performant UTF-8, Unicode and Grapheme Clusters for PHP",
-            "homepage": "https://github.com/tchwork/utf8",
+            "description": "Symfony polyfill for intl's Normalizer class and related functions",
+            "homepage": "https://symfony.com",
             "keywords": [
-                "grapheme",
-                "i18n",
-                "unicode",
-                "utf-8",
-                "utf8"
+                "compatibility",
+                "intl",
+                "normalizer",
+                "polyfill",
+                "portable",
+                "shim"
             ],
-            "time": "2016-05-18 13:57:10"
+            "support": {
+                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.22.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2021-01-07T17:09:11+00:00"
         },
         {
-            "name": "tinymce/tinymce",
-            "version": "4.5.3",
+            "name": "symfony/polyfill-mbstring",
+            "version": "v1.22.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/tinymce/tinymce-dist.git",
-                "reference": "2e662f527e6d776627b9b6c6c854d0a557169a70"
+                "url": "https://github.com/symfony/polyfill-mbstring.git",
+                "reference": "f377a3dd1fde44d37b9831d68dc8dea3ffd28e13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/2e662f527e6d776627b9b6c6c854d0a557169a70",
-                "reference": "2e662f527e6d776627b9b6c6c854d0a557169a70",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/f377a3dd1fde44d37b9831d68dc8dea3ffd28e13",
+                "reference": "f377a3dd1fde44d37b9831d68dc8dea3ffd28e13",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "suggest": {
+                "ext-mbstring": "For best performance"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.22-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Polyfill\\Mbstring\\": ""
+                },
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill for the Mbstring extension",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "mbstring",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.22.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2021-01-07T16:49:33+00:00"
+        },
+        {
+            "name": "tinymce/tinymce",
+            "version": "5.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tinymce/tinymce-dist.git",
+                "reference": "310051defb85fec8581ace8b739ab7b18023db8a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/310051defb85fec8581ace8b739ab7b18023db8a",
+                "reference": "310051defb85fec8581ace8b739ab7b18023db8a",
                 "shasum": ""
             },
             "type": "component",
@@ -172,19 +231,21 @@
                     "scripts": [
                         "tinymce.js",
                         "plugins/*/plugin.js",
-                        "themes/*/theme.js"
+                        "themes/*/theme.js",
+                        "themes/*/icons.js"
                     ],
                     "files": [
                         "tinymce.min.js",
                         "plugins/*/plugin.min.js",
                         "themes/*/theme.min.js",
-                        "skins/**"
+                        "skins/**",
+                        "icons/*/icons.min.js"
                     ]
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "LGPL-2.1"
+                "LGPL-2.1-only"
             ],
             "description": "Web based JavaScript HTML WYSIWYG editor control.",
             "homepage": "http://www.tinymce.com",
@@ -196,20 +257,23 @@
                 "tinymce",
                 "wysiwyg"
             ],
-            "time": "2017-02-01 14:27:24"
+            "support": {
+                "source": "https://github.com/tinymce/tinymce-dist/tree/5.6.2"
+            },
+            "time": "2020-12-08T07:23:49+00:00"
         },
         {
             "name": "wascripts/wamailer",
-            "version": "dev-master",
+            "version": "v4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wascripts/wamailer.git",
-                "reference": "91e444569f36a6c757d9910ec3f5b2326f01cc49"
+                "reference": "2de751b5a79b6071c59995de264002119563c0a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/91e444569f36a6c757d9910ec3f5b2326f01cc49",
-                "reference": "91e444569f36a6c757d9910ec3f5b2326f01cc49",
+                "url": "https://api.github.com/repos/wascripts/wamailer/zipball/2de751b5a79b6071c59995de264002119563c0a5",
+                "reference": "2de751b5a79b6071c59995de264002119563c0a5",
                 "shasum": ""
             },
             "require": {
@@ -226,18 +290,19 @@
                     "Wamailer\\": "lib/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "LGPL-2.1+"
             ],
             "authors": [
                 {
                     "name": "Aurélien Maille",
-                    "email": "wascripts@phpcodeur.net",
+                    "email": "wascripts@webnaute.net",
                     "role": "lead developer"
                 }
             ],
             "description": "Classe d'envoi d'emails",
-            "homepage": "http://phpcodeur.net/wascripts/wamailer/",
+            "homepage": "http://dev.webnaute.net/wamailer/",
             "keywords": [
                 "email",
                 "library",
@@ -245,22 +310,21 @@
                 "smtp"
             ],
             "support": {
-                "source": "https://github.com/wascripts/wamailer/tree/master",
-                "issues": "https://github.com/wascripts/wamailer/issues"
+                "issues": "https://github.com/wascripts/wamailer/issues",
+                "source": "https://github.com/wascripts/wamailer/tree/v4.0"
             },
-            "time": "2016-06-07 11:56:15"
+            "time": "2021-01-20T21:00:39+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "wascripts/wamailer": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.4.4"
+        "php": ">=7.1"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
 }

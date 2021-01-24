@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	selectLogBox.addEventListener('change', function () {
 		var displayVal = null;
 
-		if (this.value == -1) {
+		if (this.value == 0) {
 			displayVal = 'block';
 		}
 		else {
@@ -20,14 +20,14 @@ document.addEventListener('DOMContentLoaded', function () {
 	}, false);
 
 	document.forms[0].addEventListener('submit', function (evt) {
-		if (selectLogBox.value != -1) {
+		if (selectLogBox.value != 0) {
 			evt.preventDefault();
 			window.location.assign(this.action + '&id=' + selectLogBox.value);
 		}
 	}, false);
 
 	var newOption = document.createElement('option');
-	newOption.value = -1;
+	newOption.value = 0;
 	newOption.appendChild(document.createTextNode('\u2013 {script_load_by_url.L_FROM_AN_URL}\u2026'));
 	selectLogBox.appendChild(newOption);
 }, false);

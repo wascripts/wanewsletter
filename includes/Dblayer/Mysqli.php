@@ -1,10 +1,10 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter\Dblayer;
@@ -14,7 +14,7 @@ class Mysqli extends Wadb
 	/**
 	 * Type de base de données
 	 */
-	const ENGINE = 'mysql';
+	public const ENGINE = 'mysql';
 
 	/**
 	 * Version du serveur
@@ -32,12 +32,12 @@ class Mysqli extends Wadb
 
 	public function connect($infos = null, $options = null)
 	{
-		$infos   = (is_null($infos)) ? $this->infos : $infos;
-		$options = (is_null($options)) ? $this->options : $options;
+		$infos   = $infos ?? $this->infos;
+		$options = $options ?? $this->options;
 
 		if (is_array($infos)) {
 			foreach (['host', 'username', 'passwd', 'port', 'dbname'] as $info) {
-				$$info = (isset($infos[$info])) ? $infos[$info] : null;
+				$$info = $infos[$info] ?? null;
 			}
 
 			$this->infos = $infos;
@@ -77,7 +77,8 @@ class Mysqli extends Wadb
 			$args = ['ssl-key', 'ssl-cert', 'ssl-ca', 'ssl-capath', 'ssl-cipher'];
 			$args = array_fill_keys($args, null);
 			$args = array_intersect_key(array_replace($args, $this->options), $args);
-			call_user_func_array(array($this->link, 'ssl_set'), $args);
+			$args = array_values($args);
+			mysqli_ssl_set($this->link, ...$args);
 		}
 
 		if (!mysqli_real_connect($this->link, $host, $username, $passwd, $dbname, $port, null, $flags)) {

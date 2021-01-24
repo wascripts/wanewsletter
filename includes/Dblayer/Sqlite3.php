@@ -1,10 +1,10 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter\Dblayer;
@@ -14,7 +14,7 @@ class Sqlite3 extends Wadb
 	/**
 	 * Type de base de données
 	 */
-	const ENGINE = 'sqlite';
+	public const ENGINE = 'sqlite';
 
 	/**
 	 * Version de la librairie SQLite
@@ -25,8 +25,8 @@ class Sqlite3 extends Wadb
 
 	public function connect($infos = null, $options = null)
 	{
-		$infos   = (is_null($infos)) ? $this->infos : $infos;
-		$options = (is_null($options)) ? $this->options : $options;
+		$infos   = $infos ?? $this->infos;
+		$options = $options ?? $this->options;
 
 		$sqlite_db = ($infos['path'] != '') ? $infos['path'] : null;
 
@@ -157,13 +157,7 @@ class Sqlite3 extends Wadb
 
 	public function vacuum($tables)
 	{
-		if (!is_array($tables)) {
-			$tables = [$tables];
-		}
-
-		foreach ($tables as $tablename) {
-			$this->link->exec('VACUUM ' . $this->quote($tablename));
-		}
+		$this->link->exec('VACUUM');
 	}
 
 	public function beginTransaction()

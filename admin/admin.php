@@ -1,17 +1,15 @@
 <?php
 /**
  * @package   Wanewsletter
- * @author    Bobe <wascripts@phpcodeur.net>
- * @link      http://phpcodeur.net/wascripts/wanewsletter/
- * @copyright 2002-2016 Aurélien Maille
- * @license   http://www.gnu.org/copyleft/gpl.html  GNU General Public License
+ * @author    Bobe <wascripts@webnaute.net>
+ * @link      http://dev.webnaute.net/wanewsletter/
+ * @copyright 2002-2021 Aurélien Maille
+ * @license   https://www.gnu.org/licenses/gpl.html  GNU General Public License
  */
 
 namespace Wanewsletter;
 
-use Patchwork\Utf8 as u;
-use Wamailer\Mailer;
-use Wamailer\Email;
+use Wamailer\{Mailer, Email};
 
 require './start.inc.php';
 
@@ -38,8 +36,8 @@ if (($mode == 'adduser' || $mode == 'deluser') && !Auth::isAdmin($admindata)) {
 }
 
 if ($mode == 'adduser') {
-	$new_login = trim(u::filter_input(INPUT_POST, 'new_login'));
-	$new_email = trim(u::filter_input(INPUT_POST, 'new_email'));
+	$new_login = utf8_normalize(trim(filter_input(INPUT_POST, 'new_login')));
+	$new_email = utf8_normalize(trim(filter_input(INPUT_POST, 'new_email')));
 
 	$error = false;
 
@@ -185,7 +183,7 @@ if (isset($_POST['submit'])) {
 
 	$vararray = ['current_passwd', 'new_passwd', 'confirm_passwd', 'email', 'date_format', 'language'];
 	foreach ($vararray as $varname) {
-		${$varname} = trim(u::filter_input(INPUT_POST, $varname));
+		${$varname} = utf8_normalize(trim(filter_input(INPUT_POST, $varname)));
 	}
 
 	if ($date_format == '') {
