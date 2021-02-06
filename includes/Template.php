@@ -17,13 +17,13 @@ class Template {
 	 * Répertoire par défaut des templates.
 	 * @var string
 	 */
-	private static $tpldir   = 'templates';
+	protected static $tpldir = 'templates';
 
 	/**
 	 * Répertoire des fichiers mis en cache.
 	 * @var string
 	 */
-	private static $cachedir = 'cache';
+	protected static $cachedir = 'cache';
 
 	/**
 	 * Utilisation du cache.
@@ -85,7 +85,7 @@ class Template {
 	 *
 	 * @throws Exception
 	 */
-	public static function setCache($dir)
+	public static function setCacheDir($dir)
 	{
 		static::$useCache = false;
 
@@ -241,12 +241,12 @@ class Template {
 	{
 		[, $namespace, $varname] = $varrefs;
 
-		if( !empty($namespace) ) {
+		if (!empty($namespace)) {
 			// Strip the trailing period.
 			$namespace = substr($namespace, 0, -1);
 
 			// get last level name
-			if( strrpos($namespace, '.') ) {
+			if (strrpos($namespace, '.')) {
 				$namespace = substr($namespace, strrpos($namespace, '.') + 1);
 			}
 
@@ -256,7 +256,7 @@ class Template {
 			$varref = "\$this->tpldata['.']['$varname']";
 		}
 
-		$varref = "', (isset($varref) ? \$this->display($varref) : ''), '";
+		$varref = "', \$this->display($varref ?? ''), '";
 
 		return $varref;
 	}
@@ -270,7 +270,7 @@ class Template {
 	 */
 	private function display($varref)
 	{
-		if ($varref instanceof $this) {
+		if (is_object($varref) && is_a($varref, __CLASS__)) {
 			return $varref->pparse(true);
 		}
 		else {
