@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "42a2646478215b40546818c1b6a4570d",
+    "content-hash": "46d2a09199f1f9cbf258a58af8f97617",
     "packages": [
         {
             "name": "macroman/terminal-progress-bar",
@@ -213,16 +213,16 @@
         },
         {
             "name": "tinymce/tinymce",
-            "version": "5.6.2",
+            "version": "5.10.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tinymce/tinymce-dist.git",
-                "reference": "310051defb85fec8581ace8b739ab7b18023db8a"
+                "reference": "f078d8eb7de81f20d34b2ae4326870d20e22d4ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/310051defb85fec8581ace8b739ab7b18023db8a",
-                "reference": "310051defb85fec8581ace8b739ab7b18023db8a",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/f078d8eb7de81f20d34b2ae4326870d20e22d4ff",
+                "reference": "f078d8eb7de81f20d34b2ae4326870d20e22d4ff",
                 "shasum": ""
             },
             "type": "component",
@@ -248,19 +248,25 @@
                 "LGPL-2.1-only"
             ],
             "description": "Web based JavaScript HTML WYSIWYG editor control.",
-            "homepage": "http://www.tinymce.com",
+            "homepage": "https://www.tiny.cloud/",
             "keywords": [
-                "editor",
+                "contenteditable",
+                "editing",
                 "html",
                 "javascript",
+                "rich editor",
+                "rich text",
+                "rich text editor",
                 "richtext",
+                "rte",
+                "text",
                 "tinymce",
                 "wysiwyg"
             ],
             "support": {
-                "source": "https://github.com/tinymce/tinymce-dist/tree/5.6.2"
+                "source": "https://github.com/tinymce/tinymce-dist/tree/5.10.7"
             },
-            "time": "2020-12-08T07:23:49+00:00"
+            "time": "2022-12-07T03:50:54+00:00"
         },
         {
             "name": "wascripts/wamailer",
@@ -326,5 +332,5 @@
         "php": ">=7.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }
